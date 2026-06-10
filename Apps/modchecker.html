@@ -1,0 +1,830 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Mods Matrix Pro Explorer</title>
+  <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700&display=swap" rel="stylesheet" />
+  <script src="https://unpkg.com/lucide@latest"></script>
+  <style>
+    :root {
+      --bg: #050505;
+      --surface: #111111;
+      --surface-hover: #161616;
+      --border: rgba(255, 255, 255, 0.08);
+      --text: #ffffff;
+      --text-muted: #888888;
+      
+      /* Acentos Cyber Neon puros */
+      --accent-cyan: #00e5ff;
+      --accent-purple: #d500f9;
+      --accent-green: #00ff88;
+      --accent-red: #ff4444;
+      
+      --bezier: cubic-bezier(0.19, 1, 0.22, 1);
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      -webkit-tap-highlight-color: transparent;
+    }
+
+    body {
+      background-color: var(--bg);
+      color: var(--text);
+      font-family: 'Outfit', sans-serif;
+      height: 100dvh;
+      overflow: hidden;
+      user-select: none;
+    }
+
+    /* --- ARQUITECTURA DE PANTALLAS (SPA) --- */
+    .screen {
+      position: fixed;
+      inset: 0;
+      width: 100%;
+      height: 100%;
+      display: flex;
+      flex-direction: column;
+      background: var(--bg);
+      transition: transform 0.6s var(--bezier), opacity 0.6s var(--bezier);
+      z-index: 1;
+    }
+
+    #home-view {
+      transform: translateX(0);
+      opacity: 1;
+    }
+
+    #add-view {
+      transform: translateX(100%);
+      opacity: 0;
+      z-index: 2;
+      border-left: 1px solid var(--border);
+    }
+
+    /* Estados de Navegación Activos */
+    body.searching #home-view {
+      transform: translateX(-30%);
+      opacity: 0.5;
+    }
+
+    body.searching #add-view {
+      transform: translateX(0);
+      opacity: 1;
+    }
+
+    /* --- CABECERAS Y LAYOUT --- */
+    header {
+      padding: 30px 24px 20px;
+      background: radial-gradient(circle at top, #111 0%, #050505 100%);
+      border-bottom: 1px solid var(--border);
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      flex-shrink: 0;
+    }
+
+    .header-center {
+      text-align: left;
+    }
+
+    h1 {
+      font-weight: 700;
+      font-size: 1.6rem;
+      letter-spacing: -0.04em;
+      text-transform: uppercase;
+      background: linear-gradient(180deg, #fff 30%, var(--text-muted) 100%);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+    }
+
+    .subtitle {
+      color: var(--text-muted);
+      margin-top: 4px;
+      font-size: 0.85rem;
+      font-weight: 300;
+    }
+
+    .main-content {
+      flex: 1;
+      overflow-y: auto;
+      padding: 30px 24px;
+    }
+
+    /* --- COMPONENTE INTERRACTIVO: MOD CARD CON EXPANSOR --- */
+    .added-mods-container {
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+      max-width: 800px;
+      margin: 0 auto;
+    }
+
+    .mod-card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      padding: 20px;
+      border-radius: 20px;
+      position: relative;
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+      animation: appear 0.5s var(--bezier) both;
+    }
+
+    .mod-card-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+      padding-right: 40px;
+    }
+
+    .mod-card strong {
+      font-size: 1.1rem;
+      font-weight: 600;
+      letter-spacing: -0.01em;
+    }
+
+    /* Contenedor colapsable inteligente para evitar monstruosidades de texto */
+    .versions-clamp {
+      font-size: 0.85rem;
+      color: var(--text-muted);
+      line-height: 1.5;
+      display: -webkit-box;
+      -webkit-line-clamp: 2;
+      -webkit-box-orient: vertical;
+      overflow: hidden;
+      transition: all 0.3s var(--bezier);
+    }
+
+    .mod-card.expanded .versions-clamp {
+      display: block;
+      overflow: visible;
+      -webkit-line-clamp: unset;
+    }
+
+    .btn-toggle-expand {
+      background: transparent;
+      border: none;
+      color: var(--accent-cyan);
+      font-size: 0.75rem;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
+      padding: 4px 0;
+      width: fit-content;
+    }
+
+    .btn-toggle-expand:hover {
+      color: white;
+    }
+
+    /* --- BOTONES CIRCULARES --- */
+    .icon-btn-round {
+      background: transparent;
+      color: var(--text-muted);
+      border: none;
+      cursor: pointer;
+      width: 32px;
+      height: 32px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      border-radius: 50%;
+      transition: all 0.3s var(--bezier);
+    }
+
+    .icon-btn-round:hover {
+      background: rgba(255,68,68,0.1);
+      color: var(--accent-red);
+      transform: scale(1.1);
+    }
+
+    .mod-card .remove-btn {
+      position: absolute;
+      top: 18px;
+      right: 20px;
+    }
+
+    /* --- BOTÓN DE ACCIÓN FIJO INFERIOR (ESTILO JUEGO) --- */
+    .dock-action-area {
+      padding: 20px 24px;
+      background: linear-gradient(to top, #050505 80%, transparent);
+      display: flex;
+      justify-content: center;
+      flex-shrink: 0;
+    }
+
+    .btn-dock {
+      background: var(--text);
+      color: var(--bg);
+      font-weight: 600;
+      font-size: 0.95rem;
+      padding: 16px 32px;
+      border-radius: 50px;
+      border: none;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      box-shadow: 0 10px 30px rgba(255,255,255,0.1);
+      transition: all 0.4s var(--bezier);
+    }
+
+    .btn-dock:hover {
+      transform: translateY(-4px);
+      box-shadow: 0 15px 35px rgba(255,255,255,0.2);
+    }
+
+    .btn-dock:active {
+      transform: translateY(-1px) scale(0.97);
+    }
+
+    /* --- DIAGNÓSTICO DE COMPATIBILIDAD --- */
+    .compatibility-sticky {
+      max-width: 800px;
+      margin: 0 auto 20px;
+      background: linear-gradient(135deg, #090909 0%, #111111 100%);
+      border: 1px solid var(--border);
+      padding: 16px 20px;
+      border-radius: 18px;
+      text-align: center;
+      font-weight: 500;
+      font-size: 0.9rem;
+    }
+
+    .common { color: var(--accent-green); text-shadow: 0 0 20px rgba(0,255,136,0.15); }
+    .no-common { color: var(--accent-red); text-shadow: 0 0 20px rgba(255,68,68,0.15); }
+
+    /* --- VISTA DE ADICIÓN Y SELECTORES DE MODO --- */
+    .mode-selector-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 12px;
+      max-width: 600px;
+      margin: 0 auto 30px;
+    }
+
+    .mode-card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      padding: 20px;
+      border-radius: 20px;
+      cursor: pointer;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 10px;
+      transition: all 0.4s var(--bezier);
+    }
+
+    .mode-card i {
+      color: var(--text-muted);
+      transition: color 0.3s;
+    }
+
+    .mode-card span {
+      font-size: 0.9rem;
+      font-weight: 500;
+    }
+
+    .mode-card:hover {
+      border-color: rgba(255,255,255,0.2);
+      background: var(--surface-hover);
+    }
+
+    .mode-card:hover i {
+      color: white;
+    }
+
+    .mode-card.active {
+      border-color: var(--accent-purple);
+      background: rgba(213, 0, 249, 0.04);
+    }
+
+    .mode-card.active i {
+      color: var(--accent-purple);
+    }
+
+    /* Sub-paneles dinámicos */
+    .sub-panel {
+      display: none;
+      max-width: 600px;
+      margin: 0 auto;
+      animation: appear 0.4s var(--bezier);
+    }
+
+    .sub-panel.active {
+      display: block;
+    }
+
+    /* --- INPUTS FORMULARIOS INTERNOS --- */
+    input[type="text"], select {
+      width: 100%;
+      padding: 14px 18px;
+      background: rgba(255,255,255,0.02);
+      border: 1px solid var(--border);
+      border-radius: 14px;
+      color: white;
+      font-family: inherit;
+      font-size: 0.95rem;
+      outline: none;
+      transition: all 0.4s var(--bezier);
+      margin-bottom: 12px;
+    }
+
+    input[type="text"]:focus, select:focus {
+      background: rgba(255,255,255,0.04);
+      border-color: rgba(255,255,255,0.25);
+    }
+
+    .search-row {
+      display: grid;
+      grid-template-columns: 1fr 120px;
+      gap: 10px;
+    }
+
+    .btn-submit {
+      background: var(--accent-cyan);
+      color: var(--bg);
+      font-weight: 600;
+      width: 100%;
+      padding: 14px;
+      border: none;
+      border-radius: 14px;
+      cursor: pointer;
+      font-family: inherit;
+      transition: all 0.3s var(--bezier);
+    }
+
+    .btn-submit:hover {
+      box-shadow: 0 0 25px rgba(0,229,255,0.2);
+    }
+
+    /* Selector horizontal de versiones (Manual) */
+    .version-wrapper {
+      margin: 8px 0 20px;
+    }
+
+    .version-list {
+      display: flex;
+      gap: 8px;
+      overflow-x: auto;
+      padding-bottom: 8px;
+    }
+
+    label.version-checkbox {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      padding: 8px 16px;
+      border-radius: 50px;
+      cursor: pointer;
+      user-select: none;
+      white-space: nowrap;
+      font-size: 0.85rem;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      transition: all 0.3s var(--bezier);
+    }
+
+    label.version-checkbox input {
+      accent-color: var(--accent-cyan);
+    }
+
+    label.version-checkbox:has(input:checked) {
+      border-color: var(--accent-cyan);
+      background: rgba(0, 229, 255, 0.05);
+      color: var(--accent-cyan);
+    }
+
+    /* --- MOTOR MODRINTH RESULTS (Scroll integrado) --- */
+    #modrinthResults {
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+      margin-top: 15px;
+    }
+
+    .modrinth-result {
+      display: flex;
+      align-items: center;
+      gap: 16px;
+      padding: 14px;
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 16px;
+      cursor: pointer;
+      transition: all 0.4s var(--bezier);
+    }
+
+    .modrinth-result:hover {
+      background: var(--surface-hover);
+      border-color: var(--accent-purple);
+      transform: translateY(-2px);
+    }
+
+    .modrinth-result img {
+      width: 44px;
+      height: 44px;
+      object-fit: cover;
+      border-radius: 10px;
+      background: #000;
+    }
+
+    .modrinth-details h4 {
+      font-size: 0.95rem;
+      font-weight: 500;
+    }
+
+    .modrinth-details p {
+      font-size: 0.8rem;
+      color: var(--text-muted);
+      display: -webkit-box;
+      -webkit-line-clamp: 1;
+      -webkit-box-orient: vertical;
+      overflow: hidden;
+    }
+
+    .status-msg {
+      text-align: center;
+      padding: 20px 0;
+      color: var(--text-muted);
+      font-size: 0.85rem;
+    }
+
+    .toolbox {
+      display: flex;
+      gap: 8px;
+    }
+
+    .toolbox button {
+      background: transparent;
+      border: none;
+      color: var(--text-muted);
+      cursor: pointer;
+    }
+
+    .toolbox button:hover {
+      color: white;
+    }
+
+    /* Personalización del Scrollbar */
+    .main-content::-webkit-scrollbar, .version-list::-webkit-scrollbar { height: 4px; width: 4px; }
+    .main-content::-webkit-scrollbar-track, .version-list::-webkit-scrollbar-track { background: transparent; }
+    .main-content::-webkit-scrollbar-thumb, .version-list::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.1); border-radius: 10px; }
+
+    @keyframes appear {
+      from { opacity: 0; transform: translateY(10px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+  </style>
+</head>
+<body>
+
+  <div class="screen" id="home-view">
+    <header>
+      <div class="header-center">
+        <h1>Mods Matrix</h1>
+        <p class="subtitle" id="globalCounter">0 mods cargados en la base</p>
+      </div>
+      <div class="toolbox">
+        <button onclick="exportMods()" title="Exportar JSON"><i data-lucide="download"></i></button>
+        <button onclick="importMods()" title="Importar JSON"><i data-lucide="upload"></i></button>
+        <button onclick="clearAll()" title="Limpiar matriz" style="color:var(--accent-red)"><i data-lucide="trash-2"></i></button>
+      </div>
+    </header>
+
+    <div class="main-content">
+      <div class="compatibility-sticky" id="compatibilityBox">
+        Ningún espécimen añadido en el entorno activo.
+      </div>
+      <div class="added-mods-container" id="modList"></div>
+    </div>
+
+    <div class="dock-action-area">
+      <button class="btn-dock" onclick="openAddScreen()">
+        <i data-lucide="plus"></i> Añadir Mod a la Matriz
+      </button>
+    </div>
+  </div>
+
+  <div class="screen" id="add-view">
+    <header>
+      <div class="header-center">
+        <h1>Buscador de Entorno</h1>
+        <p class="subtitle">Selecciona el método de indexación</p>
+      </div>
+      <button class="icon-btn-round" onclick="closeAddScreen()" style="color:white"><i data-lucide="arrow-left"></i></button>
+    </header>
+
+    <div class="main-content">
+      <div class="mode-selector-grid">
+        <div class="mode-card active" id="mode-tab-modrinth" onclick="switchAddTab('modrinth')">
+          <i data-lucide="search" class="lucide-icon"></i>
+          <span>Modrinth API</span>
+        </div>
+        <div class="mode-card" id="mode-tab-manual" onclick="switchAddTab('manual')">
+          <i data-lucide="keyboard" class="lucide-icon"></i>
+          <span>Manual Form</span>
+        </div>
+      </div>
+
+      <div class="sub-panel active" id="panel-modrinth">
+        <div class="search-row">
+          <input type="text" id="modrinthQuery" placeholder="Escribe el nombre del mod oficial..." onkeydown="if(event.key === 'Enter') buscarModrinth()"/>
+          <select id="modrinthLoader">
+            <option value="fabric">Fabric</option>
+            <option value="forge">Forge</option>
+          </select>
+        </div>
+        <button class="btn-submit" style="background:var(--accent-purple); color:white;" onclick="buscarModrinth()">
+          Interrogar Repositorio
+        </button>
+        <div id="modrinthResults"></div>
+      </div>
+
+      <div class="sub-panel" id="panel-manual">
+        <input type="text" id="modName" placeholder="Nombre del mod personalizado..." autocomplete="off"/>
+        <input type="text" id="versionSearch" placeholder="Filtrar versiones de Minecraft..." oninput="filterVersions()" />
+        <div class="version-wrapper">
+          <div class="version-list" id="versionCheckboxes"></div>
+        </div>
+        <button class="btn-submit" onclick="addModManual()">Vincular e Inyectar Mod</button>
+      </div>
+    </div>
+  </div>
+
+  <input type="file" id="importFile" accept=".json" style="display:none" />
+
+  <script>
+    let versionList = [];
+    let mods = JSON.parse(localStorage.getItem('mods')) || [];
+
+    const versionCheckboxes = document.getElementById('versionCheckboxes');
+    const modList = document.getElementById('modList');
+    const compatibilityBox = document.getElementById('compatibilityBox');
+    const globalCounter = document.getElementById('globalCounter');
+
+    // NAVEGACIÓN DE VISTAS (SPA)
+    function openAddScreen() {
+      document.body.classList.add('searching');
+    }
+
+    function closeAddScreen() {
+      document.body.classList.remove('searching');
+      // Limpiar estados de búsqueda al regresar
+      document.getElementById('modrinthResults').innerHTML = '';
+      document.getElementById('modrinthQuery').value = '';
+    }
+
+    function switchAddTab(tab) {
+      document.querySelectorAll('.mode-card').forEach(c => c.classList.remove('active'));
+      document.querySelectorAll('.sub-panel').forEach(p => p.classList.remove('active'));
+      
+      document.getElementById(`mode-tab-${tab}`).classList.add('active');
+      document.getElementById(`panel-${tab}`).classList.add('active');
+    }
+
+    // LOGICA CENTRAL DE CONTROLADORES
+    async function fetchMinecraftVersions() {
+      const cached = localStorage.getItem("versionCache");
+      if (cached) {
+        versionList = JSON.parse(cached);
+        renderVersionCheckboxes();
+        return;
+      }
+      try {
+        const res = await fetch("https://piston-meta.mojang.com/mc/game/version_manifest_v2.json");
+        const data = await res.json();
+        versionList = data.versions.filter(v => v.type === "release").map(v => v.id);
+        localStorage.setItem("versionCache", JSON.stringify(versionList));
+        renderVersionCheckboxes();
+      } catch (err) {
+        versionList = ["1.21", "1.20.4", "1.20.1", "1.19.4"];
+        renderVersionCheckboxes();
+      }
+    }
+
+    function renderVersionCheckboxes() {
+      const selectedVersions = getSelectedVersions();
+      versionCheckboxes.innerHTML = versionList.map(v => {
+        const checked = selectedVersions.includes(v) ? 'checked' : '';
+        return `
+          <label class="version-checkbox" data-version="${v.toLowerCase()}">
+            <input type="checkbox" value="${v}" ${checked}/> ${v}
+          </label>
+        `;
+      }).join('');
+    }
+
+    function filterVersions() {
+      const search = document.getElementById('versionSearch').value.toLowerCase();
+      document.querySelectorAll('#versionCheckboxes label').forEach(label => {
+        const version = label.getAttribute('data-version');
+        label.style.display = version.includes(search) ? '' : 'none';
+      });
+    }
+
+    function getSelectedVersions() {
+      return Array.from(document.querySelectorAll('#versionCheckboxes input:checked')).map(input => input.value);
+    }
+
+    function addModManual() {
+      const name = document.getElementById('modName').value.trim();
+      const versions = getSelectedVersions();
+      if (!name || versions.length === 0) return;
+
+      mods.push({ name, versions });
+      saveAndRefresh();
+      
+      // Reset campos formulario manual
+      document.getElementById('modName').value = '';
+      document.getElementById('versionSearch').value = '';
+      renderVersionCheckboxes();
+      closeAddScreen();
+    }
+
+    function removeMod(index) {
+      mods.splice(index, 1);
+      saveAndRefresh();
+    }
+
+    function toggleExpandCard(btn, index) {
+      const card = btn.closest('.mod-card');
+      const isExpanded = card.classList.toggle('expanded');
+      btn.innerHTML = isExpanded 
+        ? `<i data-lucide="chevron-up" style="width:12px"></i> Contraer lista` 
+        : `<i data-lucide="chevron-down" style="width:12px"></i> Expandir versiones (${mods[index].versions.length})`;
+      lucide.createIcons();
+    }
+
+    function saveAndRefresh() {
+      localStorage.setItem('mods', JSON.stringify(mods));
+      renderMods();
+      updateCompatibility();
+    }
+
+    function updateCompatibility() {
+      if (mods.length === 0) {
+        compatibilityBox.innerHTML = 'Ningún espécimen añadido en el entorno activo.';
+        globalCounter.innerText = '0 mods cargados en la base';
+        return;
+      }
+
+      globalCounter.innerText = `${mods.length} mod${mods.length === 1 ? '' : 's'} cargado${mods.length === 1 ? '' : 's'} en la base`;
+      let common = mods[0].versions;
+      for (let i = 1; i < mods.length; i++) {
+        common = common.filter(v => mods[i].versions.includes(v));
+      }
+
+      compatibilityBox.innerHTML =
+        common.length === 0
+          ? `<span class="no-common">⚠️ Bloqueo de Entorno: No existen versiones comunes estables.</span>`
+          : `<span class="common">✅ Entorno de Ejecución Compatible: ${common.join(', ')}</span>`;
+    }
+
+    function renderMods() {
+      modList.innerHTML = '';
+      mods.forEach((mod, index) => {
+        const card = document.createElement('div');
+        card.className = 'mod-card';
+        
+        // Decidir si requiere botón expansor por volumen de versiones
+        const showExpandOption = mod.versions.length > 12;
+        
+        card.innerHTML = `
+          <div class="mod-card-header">
+            <strong>${mod.name}</strong>
+          </div>
+          <div class="versions-clamp">${mod.versions.join(', ')}</div>
+          ${showExpandOption ? `
+            <button class="btn-toggle-expand" onclick="toggleExpandCard(this, ${index})">
+              <i data-lucide="chevron-down" style="width:12px"></i> Expandir versiones (${mod.versions.length})
+            </button>
+          ` : ''}
+          <button class="icon-btn-round remove-btn" onclick="removeMod(${index})" title="Expulsar mod"><i data-lucide="x" style="width:14px"></i></button>
+        `;
+        modList.appendChild(card);
+      });
+      lucide.createIcons();
+    }
+
+    // BUSCADOR INTELIGENTE MODRINTH (LÍMITE EXTENDIDO A 20)
+    async function buscarModrinth() {
+      const query = document.getElementById('modrinthQuery').value.trim();
+      const loader = document.getElementById('modrinthLoader').value;
+      const resultados = document.getElementById('modrinthResults');
+
+      if (!query) {
+        resultados.innerHTML = '<div class="status-msg">Escribe el término de la query...</div>';
+        return;
+      }
+      resultados.innerHTML = '<div class="status-msg">Consultando Modrinth Core...</div>';
+
+      try {
+        const facets = encodeURIComponent(JSON.stringify([["project_type:mod"], [`categories:${loader}`]]));
+        const res = await fetch(`https://api.modrinth.com/v2/search?query=${query}&facets=${facets}&limit=20`);
+        if (!res.ok) throw new Error();
+        const data = await res.json();
+
+        if (!data.hits || data.hits.length === 0) {
+          resultados.innerHTML = '<div class="status-msg">Sin correspondencias en el índice central.</div>';
+          return;
+        }
+
+        resultados.innerHTML = '';
+        data.hits.forEach(mod => {
+          const div = document.createElement('div');
+          div.className = 'modrinth-result';
+          const icon = mod.icon_url || 'https://modrinth.com/default-icon.svg';
+          
+          div.innerHTML = `
+            <img src="${icon}" alt="Icon" />
+            <div class="modrinth-details">
+              <h4>${mod.title}</h4>
+              <p>${mod.description || 'Sin descripción de compilación.'}</p>
+            </div>
+          `;
+
+          div.onclick = async () => {
+            try {
+              resultados.innerHTML = '<div class="status-msg">Indexando mapeo de versiones...</div>';
+              const versionRes = await fetch(`https://api.modrinth.com/v2/project/${mod.project_id}/version`);
+              const versionData = await versionRes.json();
+              const filteredVersions = versionData.filter(v => v.loaders.includes(loader));
+              const gameVersions = [...new Set(filteredVersions.flatMap(v => v.game_versions))];
+
+              if (gameVersions.length) {
+                mods.push({ name: mod.title, versions: gameVersions });
+                saveAndRefresh();
+                closeAddScreen();
+              } else {
+                alert('No hay entornos válidos para este loader.');
+                resultados.innerHTML = '';
+              }
+            } catch (err) {
+              alert('Error al parsear el árbol de versiones.');
+            }
+          };
+          resultados.appendChild(div);
+        });
+      } catch (err) {
+        resultados.innerHTML = '<div class="status-msg" style="color:var(--accent-red)">Fallo crítico de enlace de datos.</div>';
+      }
+    }
+
+    // OPERACIONES JSON
+    function exportMods() {
+      const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(mods, null, 2));
+      const a = document.createElement('a');
+      a.setAttribute("href", dataStr);
+      a.setAttribute("download", "matrix_mods.json");
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+    }
+
+    function importMods() {
+      const input = document.getElementById('importFile');
+      input.click();
+      input.onchange = () => {
+        const file = input.files[0];
+        const reader = new FileReader();
+        reader.onload = (e) => {
+          try {
+            const imported = JSON.parse(e.target.result);
+            if (Array.isArray(imported)) {
+              mods = imported;
+              saveAndRefresh();
+            }
+          } catch {
+            alert("Sintaxis de manifiesto JSON rota.");
+          }
+        };
+        reader.readAsText(file);
+      };
+    }
+
+    function clearAll() {
+      if (confirm("¿Vaciar por completo el modset de la memoria activa?")) {
+        mods = [];
+        saveAndRefresh();
+      }
+    }
+
+    // Inicialización de ciclo de vida
+    fetchMinecraftVersions();
+    renderMods();
+    updateCompatibility();
+    lucide.createIcons();
+  </script>
+</body>
+</html>

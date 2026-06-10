@@ -1,0 +1,334 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+    <title>Calculador de Descarga Pro</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700&display=swap" rel="stylesheet" />
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <style>
+        :root {
+            --bg: #000000;
+            --surface: #121212;
+            --surface-hover: #1e1e1e;
+            --text: #ffffff;
+            --muted: #888888;
+            --border: rgba(255, 255, 255, 0.1);
+            --accent: #6c5ce7;
+            --accent-glow: rgba(108, 92, 231, 0.3);
+            --spring: cubic-bezier(0.34, 1.56, 0.64, 1);
+            --gentle: cubic-bezier(0.2, 0.8, 0.2, 1);
+        }
+
+        * { 
+            box-sizing: border-box; 
+            margin: 0; 
+            padding: 0; 
+            -webkit-tap-highlight-color: transparent; 
+        }
+
+        body {
+            font-family: 'Outfit', sans-serif;
+            background: var(--bg);
+            color: var(--text);
+            overflow: hidden;
+            height: 100dvh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+
+        /* --- CONTENEDOR PRINCIPAL --- */
+        .calculator-card {
+            background: var(--surface);
+            border: 1px solid var(--border);
+            padding: 2.5rem 2rem;
+            border-radius: 32px;
+            box-shadow: 0 24px 60px rgba(0, 0, 0, 0.8);
+            width: 92%;
+            max-width: 440px;
+            animation: scaleIn 0.6s var(--spring);
+            display: flex;
+            flex-direction: column;
+            gap: 24px;
+        }
+
+        /* --- CABECERA --- */
+        .header {
+            text-align: center;
+            margin-bottom: 8px;
+        }
+        .header h1 { 
+            font-size: 1.5rem; 
+            font-weight: 600; 
+            letter-spacing: -0.02em; 
+            display: flex; 
+            align-items: center; 
+            justify-content: center; 
+            gap: 10px; 
+        }
+        .header p {
+            font-size: 0.85rem;
+            color: var(--muted);
+            margin-top: 4px;
+        }
+
+        /* --- GRUPOS DE INPUT GLASS --- */
+        .input-block {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+        }
+
+        .input-block label {
+            font-size: 0.8rem;
+            text-transform: uppercase;
+            letter-spacing: 0.08em;
+            color: var(--muted);
+            font-weight: 500;
+            padding-left: 4px;
+        }
+
+        .input-glass {
+            display: flex;
+            align-items: center;
+            background: rgba(255, 255, 255, 0.03);
+            border: 1px solid var(--border);
+            border-radius: 20px;
+            padding: 12px 18px;
+            gap: 12px;
+            transition: all 0.3s var(--gentle);
+        }
+        
+        .input-glass:focus-within { 
+            border-color: var(--accent); 
+            background: rgba(108, 92, 231, 0.05);
+            box-shadow: 0 0 20px var(--accent-glow);
+        }
+
+        .input-glass input {
+            background: transparent;
+            border: none;
+            color: var(--text);
+            font-size: 1.3rem;
+            font-family: inherit;
+            font-weight: 600;
+            width: 100%;
+            outline: none;
+        }
+
+        .input-glass input::placeholder {
+            color: #444;
+        }
+
+        /* Ocultar flechas nativas de los inputs numéricos */
+        .input-glass input::-webkit-outer-spin-button,
+        .input-glass input::-webkit-inner-spin-button {
+            -webkit-appearance: none;
+            margin: 0;
+        }
+
+        .input-glass select {
+            background: var(--bg);
+            border: 1px solid var(--border);
+            color: var(--text);
+            font-family: inherit;
+            font-size: 0.9rem;
+            font-weight: 500;
+            padding: 6px 12px;
+            border-radius: 12px;
+            outline: none;
+            cursor: pointer;
+            transition: background 0.2s;
+        }
+        .input-glass select:hover {
+            background: var(--surface-hover);
+        }
+
+        /* --- HERO RESULTADO --- */
+        .result-hero {
+            background: linear-gradient(180deg, rgba(255,255,255,0.02) 0%, rgba(255,255,255,0) 100%);
+            border: 1px solid var(--border);
+            border-radius: 24px;
+            padding: 24px;
+            text-align: center;
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .result-hero::before {
+            content: '';
+            position: absolute;
+            top: 0; left: 50%; transform: translateX(-50%);
+            width: 80px; height: 1px;
+            background: linear-gradient(90deg, transparent, var(--accent), transparent);
+        }
+
+        .result-title {
+            font-size: 0.8rem;
+            text-transform: uppercase;
+            letter-spacing: 0.1em;
+            color: var(--muted);
+        }
+
+        .huge-time {
+            font-size: 2.5rem;
+            font-weight: 700;
+            line-height: 1.1;
+            letter-spacing: -0.03em;
+            color: var(--text);
+            font-variant-numeric: tabular-nums;
+            min-height: 44px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .huge-time.active {
+            color: var(--accent);
+            text-shadow: 0 0 25px var(--accent-glow);
+            animation: pulseUp 0.4s var(--spring);
+        }
+
+        /* --- ANIMACIONES --- */
+        @keyframes scaleIn {
+            from { opacity: 0; transform: scale(0.95) translateY(15px); }
+            to { opacity: 1; transform: scale(1) translateY(0); }
+        }
+
+        @keyframes pulseUp {
+            0% { transform: scale(0.96); }
+            50% { transform: scale(1.02); }
+            100% { transform: scale(1); }
+        }
+
+        @media (max-width: 480px) {
+            .calculator-card {
+                padding: 1.8rem 1.4rem;
+                gap: 20px;
+            }
+            .huge-time { font-size: 2rem; }
+        }
+    </style>
+</head>
+<body>
+
+    <main class="calculator-card">
+        <header class="header">
+            <h1><i data-lucide="download-cloud" style="color: var(--accent)"></i> SpeedFlow</h1>
+            <p>Cálculo exacto de transferencia de datos</p>
+        </header>
+
+        <div class="input-block">
+            <label>Tamaño del Archivo</label>
+            <div class="input-glass">
+                <i data-lucide="hard-drive" size="20" style="color: var(--muted)"></i>
+                <input type="number" id="size" placeholder="Ej: 50" inputmode="decimal" />
+                <select id="sizeUnit">
+                    <option value="MB">MB</option>
+                    <option value="GB" selected>GB</option>
+                    <option value="TB">TB</option>
+                </select>
+            </div>
+        </div>
+
+        <div class="input-block">
+            <label>Velocidad de Red</label>
+            <div class="input-glass">
+                <i data-lucide="zap" size="20" style="color: var(--muted)"></i>
+                <input type="number" id="size" placeholder="Ej: 300" id="speed" placeholder="Ej: 100" inputmode="decimal" />
+                <select id="speedUnit">
+                    <option value="Mbps" selected>Mbps</option>
+                    <option value="Gbps">Gbps</option>
+                </select>
+            </div>
+        </div>
+
+        <div class="result-hero">
+            <div class="result-title">Tiempo Estimado de Espera</div>
+            <div class="huge-time" id="time">-</div>
+        </div>
+    </main>
+
+    <script>
+        // Inicializar iconos de Lucide
+        lucide.createIcons();
+
+        // Enlazar los elementos mapeados correctamente
+        const inputs = document.querySelectorAll('.input-glass input');
+        const selects = document.querySelectorAll('.input-glass select');
+        
+        // El segundo input tiene un error de id duplicado heredado, lo arreglamos dinámicamente o por asignación fija:
+        const elSize = inputs[0];
+        const elSpeed = inputs[1]; 
+        const elSizeUnit = selects[0];
+        const elSpeedUnit = selects[1];
+        const elTime = document.getElementById('time');
+
+        function calculate() {
+            const size = parseFloat(elSize.value);
+            const speed = parseFloat(elSpeed.value);
+            const sizeUnit = elSizeUnit.value;
+            const speedUnit = elSpeedUnit.value;
+
+            if (!speed || !size || speed <= 0 || size <= 0) {
+                elTime.textContent = "-";
+                elTime.classList.remove('active');
+                return;
+            }
+
+            // Convertir tamaño de almacenamiento a Megabits (Unidad de transmisión de red)
+            let sizeInMegabits;
+            switch (sizeUnit) {
+                case 'MB':
+                    sizeInMegabits = size * 8;
+                    break;
+                case 'GB':
+                    sizeInMegabits = size * 8000;
+                    break;
+                case 'TB':
+                    sizeInMegabits = size * 8000000;
+                    break;
+            }
+
+            // Convertir velocidad a Mbps si es necesario
+            const speedInMbps = speedUnit === 'Gbps' ? speed * 1000 : speed;
+
+            // Operación matemática del tiempo de descarga
+            const timeInSeconds = sizeInMegabits / speedInMbps;
+
+            // Formatear a horas, minutos y segundos estándares
+            const hours = Math.floor(timeInSeconds / 3600);
+            const minutes = Math.floor((timeInSeconds % 3600) / 60);
+            const seconds = Math.floor(timeInSeconds % 60);
+
+            const formattedTime = [];
+            if (hours > 0) formattedTime.push(`${hours}h`);
+            if (minutes > 0) formattedTime.push(`${minutes}m`);
+            if (seconds > 0) formattedTime.push(`${seconds}s`);
+
+            const resultString = formattedTime.join(' ') || 'Menos de 1s';
+
+            // Insertar resultado y aplicar micro-animación de refresco
+            if (elTime.textContent !== resultString) {
+                elTime.textContent = resultString;
+                elTime.classList.add('active');
+                
+                // Reiniciar animación reactiva
+                elTime.style.animation = 'none';
+                void elTime.offsetWidth; // Forzar reflow de hardware
+                elTime.style.animation = 'pulseUp 0.4s var(--spring)';
+            }
+        }
+
+        // Eventos nativos en tiempo real reactivo sin botones pesados
+        [elSize, elSpeed].forEach(input => input.addEventListener('input', calculate));
+        [elSizeUnit, elSpeedUnit].forEach(select => select.addEventListener('change', calculate));
+    </script>
+</body>
+</html>

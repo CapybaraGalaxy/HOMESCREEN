@@ -1,0 +1,319 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Minimalist Pro Hub v3 - Full Edition</title>
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@200;400;500&display=swap" rel="stylesheet">
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <style>
+        :root {
+            --bg: #ffffff00;
+            --text-main: #ffffff;
+            --text-muted: #888888;
+            --glass: rgba(15, 15, 15, 0.281);
+            --glass-border: rgba(255, 255, 255, 0.1);
+            --bezier: cubic-bezier(0.16, 1, 0.3, 1);
+            --blur-val: 30px;
+        }
+
+        body.no-blur { --blur-val: 0px; }
+        body.no-blur .overlay, body.no-blur .search-panel, body.no-blur .settings-panel, body.no-blur .tool-card { 
+            backdrop-filter: none !important; background: #111 !important; 
+        }
+
+        * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+
+        body {
+            margin: 0;
+            background-color: var(--bg);
+            font-family: 'Outfit', sans-serif;
+            color: var(--text-main);
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            overflow: hidden;
+        }
+
+        #bgCanvas {
+            position: fixed;
+            top: 0; left: 0;
+            width: 100%; height: 100%;
+            z-index: 0;
+            pointer-events: none;
+            opacity: 0;
+            transition: opacity 1s var(--bezier);
+        }
+        body.bg-active #bgCanvas { opacity: 0.6; }
+
+        .ui-layer {
+            position: relative;
+            z-index: 10;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            width: 100%;
+        }
+
+        .header {
+            margin-top: 10vh;
+            margin-bottom: 5vh;
+            text-align: center;
+            animation: slideUp 0.8s var(--bezier);
+        }
+        .clock { font-size: 6rem; font-weight: 200; letter-spacing: -3px; line-height: 1; animation: clockScale 1.2s var(--bezier); }
+        .date { font-size: 0.9rem; text-transform: uppercase; letter-spacing: 4px; color: var(--text-muted); margin-top: 10px; }
+
+        .tools-container {
+            width: 100%;
+            max-width: 800px;
+            padding: 20px;
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: center;
+            gap: 12px;
+            transition: transform 0.5s var(--bezier);
+        }
+        .tools-container.list-mode { flex-direction: column; align-items: center; }
+        .tools-container.list-mode .tool-card { width: 100%; max-width: 500px; justify-content: flex-start; }
+
+        .tool-card {
+            display: flex;
+            align-items: center;
+            padding: 12px 24px;
+            background: var(--glass);
+            backdrop-filter: blur(var(--blur-val));
+            border: 1px solid var(--glass-border);
+            border-radius: 50px;
+            text-decoration: none;
+            color: var(--text-main);
+            transition: all 0.4s var(--bezier);
+            animation: fadeInItem 0.6s var(--bezier) both;
+        }
+        .tool-card:hover { background: #fff; color: #000; transform: translateY(-4px); }
+        .tool-card:active { transform: scale(0.96); }
+        .tool-card i { margin-right: 12px; width: 18px; }
+
+        .search-wrapper {
+            position: fixed;
+            bottom: 40px;
+            left: 50%;
+            transform: translateX(-50%);
+            z-index: 100;
+            width: 100%;
+            display: flex;
+            justify-content: center;
+        }
+
+        .search-panel {
+            width: 160px; height: 48px;
+            background: var(--glass);
+            backdrop-filter: blur(var(--blur-val));
+            border: 1px solid var(--glass-border);
+            border-radius: 24px;
+            transition: all 0.5s var(--bezier);
+            overflow: hidden;
+            display: flex; flex-direction: column;
+            box-shadow: 0 20px 50px rgba(0,0,0,0.5);
+        }
+
+        .search-panel.expanded {
+            width: 90%; max-width: 500px; height: 400px;
+            border-radius: 28px; transform: translateY(-15vh);
+        }
+
+        .search-header { display: flex; align-items: center; justify-content: center; padding: 0 20px; min-height: 48px; cursor: pointer; }
+        .search-input { flex: 1; background: transparent; border: none; outline: none; color: #fff; font-family: 'Outfit'; font-size: 1.1rem; display: none; padding: 10px 0; }
+        .search-panel.expanded .search-input { display: block; }
+        .search-panel.expanded .search-header { justify-content: flex-start; }
+        .search-panel.expanded .chip-placeholder { display: none; }
+
+        .chip-placeholder { display: flex; align-items: center; gap: 8px; color: var(--text-muted); font-size: 0.9rem; }
+        .results-area { padding: 10px; overflow-y: auto; opacity: 0; flex: 1; transition: opacity 0.3s; }
+        .search-panel.expanded .results-area { opacity: 1; transition-delay: 0.2s; }
+
+        .result-item { display: flex; align-items: center; padding: 14px 18px; border-radius: 20px; text-decoration: none; color: var(--text-main); margin-bottom: 5px; transition: 0.3s; }
+        .result-item:hover { background: rgba(255,255,255,0.08); transform: translateX(8px); }
+
+        .settings-btn { position: fixed; bottom: 25px; right: 25px; background: var(--glass); border: 1px solid var(--glass-border); width: 45px; height: 45px; border-radius: 50%; display: flex; align-items: center; justify-content: center; cursor: pointer; z-index: 110; transition: 0.3s; }
+        .settings-panel { position: fixed; bottom: 85px; right: 25px; width: 280px; background: var(--glass); backdrop-filter: blur(var(--blur-val)); border: 1px solid var(--glass-border); border-radius: 24px; padding: 25px; transform: scale(0.9) translateY(20px); opacity: 0; pointer-events: none; transition: all 0.4s var(--bezier); z-index: 110; }
+        .settings-panel.active { transform: scale(1) translateY(0); opacity: 1; pointer-events: auto; }
+        .setting-item { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; }
+        .switch { width: 40px; height: 22px; background: #333; border-radius: 20px; position: relative; cursor: pointer; transition: 0.3s; }
+        .switch::after { content:''; position:absolute; width:18px; height:18px; background:#fff; border-radius:50%; top:2px; left:2px; transition:0.3s var(--bezier); }
+        .switch.on { background: #34C759; }
+        .switch.on::after { transform: translateX(18px); }
+
+        .overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.6); backdrop-filter: blur(15px); opacity: 0; pointer-events: none; transition: 0.5s; z-index: 90; }
+        .overlay.active { opacity: 1; pointer-events: auto; }
+
+        @keyframes fadeInItem { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+        @keyframes slideUp { from { opacity: 0; transform: translateY(30px); } to { opacity: 1; transform: translateY(0); } }
+        @keyframes clockScale { from { transform: scale(1.15); opacity: 0; filter: blur(10px); } to { transform: scale(1); opacity: 1; filter: blur(0); } }
+    </style>
+</head>
+<body id="mainBody">
+
+    <canvas id="bgCanvas"></canvas>
+    <div class="overlay" id="overlay"></div>
+
+    <div class="ui-layer">
+        <header class="header">
+            <div class="clock" id="clock">00:00</div>
+            <div class="date" id="date">--</div>
+        </header>
+        <div class="tools-container" id="toolsGrid"></div>
+    </div>
+
+    <div class="search-wrapper">
+        <div class="search-panel" id="searchPanel">
+            <div class="search-header" id="trigger">
+                <div class="chip-placeholder">
+                    <i data-lucide="search" style="width: 16px;"></i>
+                    <span>Buscar <small style="opacity:0.5; margin-left:5px;">Ctrl+K</small></span>
+                </div>
+                <input type="text" class="search-input" id="searchInput" placeholder="¿Qué buscas?" autocomplete="off">
+            </div>
+            <div class="results-area" id="resultsArea"></div>
+        </div>
+    </div>
+
+    <div class="settings-btn" id="setBtn"><i data-lucide="settings" style="width: 20px;"></i></div>
+    <div class="settings-panel" id="setPanel">
+        <h3 style="margin: 0 0 20px 0; font-weight: 500;">Ajustes</h3>
+        <div class="setting-item"><span>Fondo Animado</span><div class="switch" id="toggleBg"></div></div>
+        <div class="setting-item"><span>Modo Lista</span><div class="switch" id="toggleList"></div></div>
+        <div class="setting-item"><span>Desactivar Blur</span><div class="switch" id="toggleBlur"></div></div>
+    </div>
+
+    <script>
+        const tools = [
+            { name: 'Calculadora', icon: 'calculator', url: 'https://www.google.es' },
+            { name: 'Terminal', icon: 'terminal', url: '#' },
+            { name: 'Colores', icon: 'palette', url: '#' },
+            { name: 'Convertidor', icon: 'refresh-cw', url: '#' },
+            { name: 'Notas', icon: 'edit-3', url: '#' },
+            { name: 'Github', icon: 'cat', url: '#' }
+        ];
+
+        const body = document.getElementById('mainBody');
+        const grid = document.getElementById('toolsGrid');
+        const searchInput = document.getElementById('searchInput');
+        const searchPanel = document.getElementById('searchPanel');
+        const overlay = document.getElementById('overlay');
+        const setPanel = document.getElementById('setPanel');
+
+        // --- LÓGICA DE BÚSQUEDA Y NAVEGACIÓN (ANDROID BACK) ---
+        function toggleSearch(open) {
+            if(open) {
+                searchPanel.classList.add('expanded');
+                overlay.classList.add('active');
+                // Empujar estado para el botón atrás
+                history.pushState({ searchOpen: true }, "");
+                setTimeout(() => searchInput.focus(), 200);
+                renderResults("");
+            } else {
+                searchPanel.classList.remove('expanded');
+                overlay.classList.remove('active');
+                searchInput.value = "";
+                // Si el estado está en el historial, volver atrás
+                if (history.state && history.state.searchOpen) {
+                    history.back();
+                }
+            }
+        }
+
+        // Escuchar el botón atrás de Android
+        window.addEventListener('popstate', () => {
+            searchPanel.classList.remove('expanded');
+            overlay.classList.remove('active');
+            setPanel.classList.remove('active');
+        });
+
+        // --- EVENTOS ---
+        document.getElementById('trigger').onclick = () => toggleSearch(true);
+        overlay.onclick = () => toggleSearch(false);
+        searchInput.oninput = (e) => renderResults(e.target.value);
+
+        function renderResults(val) {
+            const filtered = tools.filter(t => t.name.toLowerCase().includes(val.toLowerCase()));
+            document.getElementById('resultsArea').innerHTML = filtered.map((t, i) => `
+                <a href="${t.url}" class="result-item" style="animation: fadeInItem 0.4s var(--bezier) both ${i * 0.03}s">
+                    <i data-lucide="${t.icon}" style="margin-right:15px; width:18px; opacity:0.6;"></i>
+                    <span>${t.name}</span>
+                </a>
+            `).join('');
+            lucide.createIcons();
+        }
+
+        window.onkeydown = (e) => {
+            if((e.ctrlKey || e.metaKey) && e.key === 'k') { e.preventDefault(); toggleSearch(true); }
+            if(e.key === 'Escape') toggleSearch(false);
+        };
+
+        // --- FONDO DE PARTÍCULAS ---
+        let particles = [], animationId, canvas = document.getElementById('bgCanvas'), ctx = canvas.getContext('2d');
+        function initParticles() {
+            window.addEventListener('resize', () => { canvas.width = window.innerWidth; canvas.height = window.innerHeight; createParticles(); });
+            canvas.width = window.innerWidth; canvas.height = window.innerHeight;
+            createParticles(); animate();
+        }
+        class Particle {
+            constructor() { this.x = Math.random() * canvas.width; this.y = Math.random() * canvas.height; this.size = Math.random() * 2; this.speedX = Math.random() * 0.4 - 0.2; this.speedY = Math.random() * 0.4 - 0.2; }
+            update() { this.x += this.speedX; this.y += this.speedY; if (this.x > canvas.width) this.x = 0; if (this.y > canvas.height) this.y = 0; }
+            draw() { ctx.fillStyle = 'rgba(255, 255, 255, 0.4)'; ctx.beginPath(); ctx.arc(this.x, this.y, this.size, 0, Math.PI * 2); ctx.fill(); }
+        }
+        function createParticles() { particles = []; for (let i = 0; i < 80; i++) particles.push(new Particle()); }
+        function animate() {
+            if(!body.classList.contains('bg-active')) return;
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+            particles.forEach(p => { p.update(); p.draw(); });
+            connect();
+            animationId = requestAnimationFrame(animate);
+        }
+        function connect() {
+            for (let a = 0; a < particles.length; a++) {
+                for (let b = a; b < particles.length; b++) {
+                    let dist = Math.sqrt((particles[a].x - particles[b].x)**2 + (particles[a].y - particles[b].y)**2);
+                    if (dist < 150) {
+                        ctx.strokeStyle = `rgba(255,255,255,${(1 - dist/150) * 0.1})`;
+                        ctx.beginPath(); ctx.moveTo(particles[a].x, particles[a].y); ctx.lineTo(particles[b].x, particles[b].y); ctx.stroke();
+                    }
+                }
+            }
+        }
+
+        // --- RELOJ Y AJUSTES ---
+        function updateClock() {
+            const n = new Date();
+            document.getElementById('clock').innerText = n.toLocaleTimeString('es-ES', {hour:'2-digit', minute:'2-digit'});
+            document.getElementById('date').innerText = n.toLocaleDateString('es-ES', {weekday:'long', day:'numeric', month:'long'});
+        }
+        setInterval(updateClock, 1000);
+
+        function init() {
+            grid.innerHTML = tools.map((t, i) => `<a href="${t.url}" class="tool-card" style="animation-delay: ${i * 0.05}s"><i data-lucide="${t.icon}"></i><span>${t.name}</span></a>`).join('');
+            lucide.createIcons(); updateClock();
+            
+            const sList = document.getElementById('toggleList'), sBlur = document.getElementById('toggleBlur'), sBg = document.getElementById('toggleBg');
+            if(localStorage.getItem('list') === 'true') { grid.classList.add('list-mode'); sList.classList.add('on'); }
+            if(localStorage.getItem('noblur') === 'true') { body.classList.add('no-blur'); sBlur.classList.add('on'); }
+            if(localStorage.getItem('bg') !== 'false') { body.classList.add('bg-active'); sBg.classList.add('on'); initParticles(); }
+
+            document.getElementById('setBtn').onclick = (e) => { e.stopPropagation(); setPanel.classList.toggle('active'); };
+            document.addEventListener('click', (e) => { if(!setPanel.contains(e.target)) setPanel.classList.remove('active'); });
+
+            sList.onclick = () => { localStorage.setItem('list', grid.classList.toggle('list-mode')); sList.classList.toggle('on'); };
+            sBlur.onclick = () => { localStorage.setItem('noblur', body.classList.toggle('no-blur')); sBlur.classList.toggle('on'); };
+            sBg.onclick = () => { 
+                const act = body.classList.toggle('bg-active'); 
+                sBg.classList.toggle('on'); localStorage.setItem('bg', act);
+                if(act) initParticles();
+            };
+        }
+
+        window.onload = init;
+    </script>
+</body>
+</html>
