@@ -1,0 +1,928 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+    <title>DimensionBox // Ultra-Fluid v4</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght=200;300;400;500;600;700&display=swap" rel="stylesheet">
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <style>
+        :root {
+            /* Colores de Capas Estrictas */
+            --bg: #000000;
+            --surface: #121212;
+            --surface-hover: #1c1c1e;
+            --border: rgba(255, 255, 255, 0.08);
+
+            /* Efecto Cyber-Glass */
+            --glass: rgba(18, 18, 18, 0.8);
+            --glass-border: rgba(255, 255, 255, 0.12);
+
+            /* Textos */
+            --text-main: #FFFFFF;
+            --text-muted: #8E8E93;
+
+            /* Acentos */
+            --accent: #6c5ce7;
+            --accent-cyan: #00e5ff;
+            --accent-success: #34C759;
+            --accent-danger: #FF453A;
+
+            /* Curvas de aceleración nativas de iOS/Android para máxima fluidez */
+            --spring: cubic-bezier(0.25, 1, 0.2, 1);
+            --ios-interact: cubic-bezier(0.16, 1, 0.3, 1);
+        }
+
+        /* Reset Estricto */
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: 'Outfit', sans-serif;
+            -webkit-tap-highlight-color: transparent;
+            user-select: none;
+        }
+
+        body {
+            background-color: var(--bg);
+            color: var(--text-main);
+            height: 100dvh;
+            overflow: hidden;
+            position: relative;
+        }
+
+        /* Contenedor Base Dashboard */
+        .app-container {
+            height: 100%;
+            display: flex;
+            flex-direction: column;
+            padding: env(safe-area-inset-top) 20px calc(env(safe-area-inset-bottom) + 10px) 20px;
+            max-width: 480px;
+            margin: 0 auto;
+            will-change: transform, opacity;
+            transition: transform 0.4s var(--ios-interact), opacity 0.4s var(--ios-interact);
+        }
+
+        /* Cuando un modal se abre, el fondo se desplaza levemente hacia atrás de forma fluida */
+        .app-container.backgrounded {
+            transform: scale(0.96);
+            opacity: 0.4;
+            pointer-events: none;
+        }
+
+        header {
+            padding: 20px 0;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        header h1 {
+            font-size: 1.5rem;
+            font-weight: 700;
+            letter-spacing: -1px;
+            background: linear-gradient(90deg, var(--text-main), var(--text-muted));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .header-actions {
+            display: flex;
+            gap: 10px;
+            align-items: center;
+        }
+
+        .main-content {
+            flex: 1;
+            overflow-y: auto;
+            padding-bottom: 110px;
+            scrollbar-width: none;
+        }
+        .main-content::-webkit-scrollbar { display: none; }
+
+        /* Tarjeta de Métricas Centrales */
+        .app-hero-card {
+            background: var(--surface);
+            border: 1px solid var(--border);
+            padding: 2rem 1.5rem;
+            border-radius: 28px;
+            text-align: center;
+            margin-bottom: 24px;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .card-category-tag {
+            color: var(--text-muted);
+            font-size: 0.75rem;
+            letter-spacing: 3px;
+            font-weight: 600;
+            text-transform: uppercase;
+        }
+
+        .card-main-title {
+            font-size: 4rem;
+            font-weight: 200;
+            margin: 4px 0;
+            letter-spacing: -2px;
+            color: var(--text-main);
+            will-change: transform;
+        }
+
+        .card-subtitle-text {
+            font-size: 0.85rem;
+            color: var(--text-muted);
+        }
+
+        /* Encabezados de Segmentos */
+        .section-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin: 16px 4px 12px 4px;
+        }
+
+        .section-title {
+            font-size: 0.8rem;
+            text-transform: uppercase;
+            letter-spacing: 0.1em;
+            color: var(--text-muted);
+            font-weight: 600;
+        }
+
+        .section-action {
+            color: var(--accent-cyan);
+            font-size: 0.8rem;
+            cursor: pointer;
+            font-weight: 500;
+        }
+
+        .grid-container {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 12px;
+            margin-bottom: 24px;
+        }
+
+        /* Tarjetas de Carpetas */
+        .folder-card {
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: 20px;
+            padding: 16px;
+            cursor: pointer;
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+            position: relative;
+            transition: background 0.25s ease, border-color 0.25s ease, transform 0.25s ease;
+        }
+
+        .folder-card:active { transform: scale(0.97); }
+
+        .folder-icon-wrapper {
+            width: 40px;
+            height: 40px;
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .folder-info h3 {
+            font-size: 0.95rem;
+            font-weight: 600;
+            color: var(--text-main);
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+
+        .folder-info p {
+            font-size: 0.75rem;
+            color: var(--text-muted);
+        }
+
+        /* Filas de Medidas */
+        .item-list {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+
+        .item-row {
+            background: rgba(255,255,255,0.01);
+            border: 1px solid var(--border);
+            border-radius: 16px;
+            padding: 14px 18px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            cursor: pointer;
+            transition: background 0.2s ease, transform 0.2s ease;
+        }
+
+        .item-row:hover { background: var(--surface-hover); }
+        .item-row:active { transform: scale(0.99); }
+
+        .item-details h4 { font-size: 0.95rem; font-weight: 500; }
+        .item-details p { font-size: 0.75rem; color: var(--text-muted); }
+
+        .item-spec {
+            font-family: monospace;
+            font-size: 0.95rem;
+            font-weight: 600;
+            color: var(--accent-cyan);
+            background: rgba(0, 229, 255, 0.05);
+            padding: 6px 12px;
+            border-radius: 10px;
+            border: 1px solid rgba(0, 229, 255, 0.1);
+        }
+
+        /* Arquitectura de Modales Optimizada por GPU */
+        .view-modal {
+            position: absolute;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            background: var(--bg);
+            z-index: 20;
+            display: flex;
+            flex-direction: column;
+            padding: env(safe-area-inset-top) 20px calc(env(safe-area-inset-bottom) + 10px) 20px;
+            max-width: 480px;
+            left: 50%;
+            transform: translate3d(100%, 0, 0);
+            margin-left: -240px;
+            opacity: 0;
+            visibility: hidden;
+            transition: transform 0.4s var(--ios-interact), opacity 0.3s ease, visibility 0.4s;
+            will-change: transform, opacity;
+        }
+
+        @media (max-width: 480px) {
+            .view-modal { left: 0; margin-left: 0; transform: translate3d(100%, 0, 0); }
+        }
+
+        .view-modal.active {
+            transform: translate3d(0, 0, 0);
+            opacity: 1;
+            visibility: visible;
+        }
+
+        .modal-header {
+            padding: 20px 0;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 16px;
+        }
+
+        .modal-body {
+            flex: 1;
+            overflow-y: auto;
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+            padding-bottom: 120px;
+            scrollbar-width: none;
+        }
+        .modal-body::-webkit-scrollbar { display: none; }
+
+        /* Contenedores Inputs Fluid */
+        .input-block-wrapper { display: flex; flex-direction: column; gap: 8px; width: 100%; }
+        .input-native-label { font-size: 0.8rem; text-transform: uppercase; letter-spacing: 0.08em; color: var(--text-muted); font-weight: 500; padding-left: 4px; }
+
+        .input-glass-container {
+            display: flex;
+            align-items: center;
+            background: rgba(255, 255, 255, 0.02);
+            border: 1px solid var(--border);
+            border-radius: 16px;
+            padding: 14px 18px;
+            gap: 12px;
+            transition: border-color 0.2s, background-color 0.2s;
+        }
+
+        .input-glass-container:focus-within {
+            border-color: var(--accent);
+            background: rgba(108, 92, 231, 0.04);
+        }
+
+        .input-native-field { background: transparent; border: none; color: var(--text-main); font-size: 1.05rem; font-weight: 500; width: 100%; outline: none; }
+        .input-native-select { background: var(--surface); border: 1px solid var(--border); color: var(--text-main); font-size: 0.95rem; padding: 8px 12px; border-radius: 12px; outline: none; }
+
+        /* Control Deslizante */
+        .slider-segmented-control { display: flex; position: relative; width: 100%; background: rgba(255,255,255,0.03); border: 1px solid var(--border); border-radius: 100px; padding: 4px; }
+        .slider-segment-btn { flex: 1; padding: 12px; border: none; background: none; color: var(--text-muted); font-size: 0.9rem; font-weight: 600; cursor: pointer; z-index: 1; transition: color 0.25s; display: flex; align-items: center; justify-content: center; gap: 6px; }
+        .slider-segment-btn.segment-active { color: white; }
+        .slider-sliding-indicator { position: absolute; top: 4px; bottom: 4px; left: 4px; width: calc(50% - 4px); background: var(--accent); border-radius: 100px; transition: transform 0.3s var(--ios-interact); z-index: 0; will-change: transform; }
+
+        /* Ficha Técnica Inspector */
+        .detail-badge-box { background: var(--surface); border: 1px solid var(--border); border-radius: 24px; padding: 30px 20px; text-align: center; }
+        .detail-dimension-display { font-size: 2.2rem; font-weight: 200; color: var(--accent-cyan); margin: 14px 0; letter-spacing: -1px; }
+
+        /* Botones de acción fijos */
+        .dock-action-area { position: absolute; bottom: 0; left: 0; padding: 20px 24px calc(env(safe-area-inset-bottom) + 10px); background: linear-gradient(to top, #000000 85%, transparent); display: flex; justify-content: center; width: 100%; z-index: 5; gap: 10px; }
+        .btn-dock-action { background: var(--text-main); color: var(--bg); font-weight: 600; font-size: 0.95rem; padding: 16px 32px; border-radius: 50px; border: none; cursor: pointer; display: flex; align-items: center; gap: 10px; width: 100%; justify-content: center; transition: transform 0.15s ease; }
+        .btn-dock-action:active { transform: scale(0.97); }
+        .btn-dock-action.danger-zone { background: rgba(255, 69, 58, 0.1); border: 1px solid var(--accent-danger); color: var(--accent-danger); }
+
+        .btn-icon-circular-round { background: var(--surface); border: 1px solid var(--border); color: var(--text-muted); width: 44px; height: 44px; border-radius: 50%; display: flex; align-items: center; justify-content: center; cursor: pointer; flex-shrink: 0; transition: transform 0.15s ease; }
+        .btn-icon-circular-round:active { transform: scale(0.92); }
+
+        /* FAB EXPANSIBLE DE BÚSQUEDA INTELIGENTE */
+        .fab-search-container {
+            position: absolute;
+            bottom: 30px;
+            right: 20px;
+            z-index: 15;
+            display: flex;
+            align-items: center;
+            justify-content: flex-end;
+            width: calc(100% - 40px);
+            max-width: 440px;
+            pointer-events: none;
+            will-change: transform, opacity;
+            transition: transform 0.35s var(--ios-interact), opacity 0.3s ease, visibility 0.3s;
+        }
+
+        /* Ocultación total en flujos donde no corresponde */
+        .fab-search-container.hidden-state {
+            transform: translate3d(0, 15px, 0) scale(0.85);
+            opacity: 0;
+            visibility: hidden;
+        }
+
+        .search-expand-bar {
+            background: rgba(20, 20, 22, 0.95);
+            border: 1px solid var(--glass-border);
+            backdrop-filter: blur(30px);
+            border-radius: 100px;
+            height: 56px;
+            width: 56px;
+            display: flex;
+            align-items: center;
+            padding: 0 6px;
+            pointer-events: auto;
+            box-shadow: 0 16px 40px rgba(0,0,0,0.7);
+            transition: width 0.35s var(--ios-interact), border-color 0.25s;
+            overflow: hidden;
+            will-change: width;
+        }
+
+        .search-expand-bar.expanded { width: 100%; border-color: var(--accent); }
+
+        .search-input-field {
+            width: 0;
+            background: transparent;
+            border: none;
+            outline: none;
+            color: var(--text-main);
+            font-size: 1rem;
+            padding-left: 0;
+            transition: width 0.35s var(--ios-interact);
+        }
+
+        .search-expand-bar.expanded .search-input-field { width: 100%; padding-left: 14px; }
+
+        .fab-trigger-btn {
+            background: var(--accent);
+            color: white;
+            width: 44px;
+            height: 44px;
+            border-radius: 50%;
+            border: none;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            flex-shrink: 0;
+            transition: background-color 0.25s;
+        }
+        .search-expand-bar.expanded .fab-trigger-btn { background: rgba(255,255,255,0.06); color: var(--text-muted); }
+
+        /* Hardware Pulsing Micro-interaction */
+        @keyframes pulseUp {
+            50% { transform: scale(1.04); }
+        }
+        
+        .error-shake { animation: shake 0.3s var(--ios-interact); }
+        @keyframes shake {
+            25% { transform: translate3d(-4px, 0, 0); }
+            75% { transform: translate3d(4px, 0, 0); }
+        }
+
+        /* Preview del Icono Dinámico */
+        .live-icon-preview {
+            width: 44px;
+            height: 44px;
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: rgba(255,255,255,0.04);
+            border: 1px solid var(--border);
+            color: var(--text-main);
+            transition: background 0.3s, color 0.3s;
+        }
+    </style>
+</head>
+<body>
+
+    <div class="app-container" id="main-view">
+        <header>
+            <h1>DimensionBox //</h1>
+            <div class="header-actions">
+                <button class="btn-icon-circular-round" onclick="openModal('trash-modal')" id="trash-bin-btn">
+                    <i data-lucide="trash-2"></i>
+                </button>
+                <button class="btn-icon-circular-round" onclick="openAddModal()" style="border-color: var(--accent); background: rgba(108,92,231,0.03)">
+                    <i data-lucide="plus" style="color: var(--accent);"></i>
+                </button>
+            </div>
+        </header>
+
+        <main class="main-content">
+            <div class="app-hero-card">
+                <span class="card-category-tag">Total Registros</span>
+                <h1 class="card-main-title" id="total-counter">0</h1>
+                <p class="card-subtitle-text">Unidades métricas cargadas en memoria.</p>
+            </div>
+
+            <div class="section-header">
+                <div class="section-title">Carpetas / Contextos</div>
+                <div class="section-action" id="clear-filter-btn" style="display: none;" onclick="clearFolderFilter()">Ver todos</div>
+            </div>
+            <div class="grid-container" id="folders-grid"></div>
+
+            <div class="section-header">
+                <div class="section-title" id="items-section-title">Todos los Objetos</div>
+            </div>
+            <div class="item-list" id="items-container"></div>
+        </main>
+    </div>
+
+    <div class="fab-search-container" id="global-search-fab">
+        <div class="search-expand-bar" id="search-wrapper">
+            <input type="text" id="search-input" placeholder="Buscar por nombre..." class="search-input-field" oninput="handleSearch(this.value)">
+            <button class="fab-trigger-btn" onclick="toggleSearchFAB()">
+                <i data-lucide="search" id="search-icon"></i>
+            </button>
+        </div>
+    </div>
+
+    <div class="view-modal" id="add-modal">
+        <div class="modal-header">
+            <button class="btn-icon-circular-round" onclick="closeActiveModal('add-modal')">
+                <i data-lucide="arrow-left"></i>
+            </button>
+            <h2 style="font-weight: 600; font-size: 1.2rem;">Crear Registro</h2>
+            <div style="width: 44px;"></div>
+        </div>
+
+        <div class="modal-body">
+            <div class="slider-segmented-control" id="form-slider">
+                <div class="slider-sliding-indicator" id="slider-indicator"></div>
+                <button class="slider-segment-btn" onclick="toggleFormMode(0)">
+                    <i data-lucide="folder-plus" style="width: 16px;"></i> Carpeta
+                </button>
+                <button class="slider-segment-btn segment-active" onclick="toggleFormMode(1)">
+                    <i data-lucide="box" style="width: 16px;"></i> Medida
+                </button>
+            </div>
+            <div id="form-fields-container" style="display: flex; flex-direction: column; gap: 16px;"></div>
+        </div>
+
+        <div class="dock-action-area">
+            <button class="btn-dock-action" onclick="handleSubmitForm()">
+                <i data-lucide="database"></i> Confirmar Inserción
+            </button>
+        </div>
+    </div>
+
+    <div class="view-modal" id="detail-modal">
+        <div class="modal-header">
+            <button class="btn-icon-circular-round" onclick="closeActiveModal('detail-modal')">
+                <i data-lucide="arrow-left"></i>
+            </button>
+            <h2 style="font-weight: 600; font-size: 1.2rem;" id="detail-modal-title">Ficha Técnica</h2>
+            <div style="width: 44px;"></div>
+        </div>
+        <div class="modal-body" id="detail-modal-body"></div>
+        <div class="dock-action-area" id="detail-modal-actions"></div>
+    </div>
+
+    <div class="view-modal" id="trash-modal">
+        <div class="modal-header">
+            <button class="btn-icon-circular-round" onclick="closeActiveModal('trash-modal')">
+                <i data-lucide="arrow-left"></i>
+            </button>
+            <h2 style="font-weight: 600; font-size: 1.2rem;">Papelera</h2>
+            <button class="section-action" style="color: var(--accent-danger);" onclick="purgeTrash()">Vaciar</button>
+        </div>
+        <div class="modal-body" id="trash-modal-body"></div>
+    </div>
+
+    <div class="view-modal" id="edit-folder-modal">
+        <div class="modal-header">
+            <button class="btn-icon-circular-round" onclick="closeActiveModal('edit-folder-modal')">
+                <i data-lucide="arrow-left"></i>
+            </button>
+            <h2 style="font-weight: 600; font-size: 1.2rem;">Editar Carpeta</h2>
+            <div style="width: 44px;"></div>
+        </div>
+        <div class="modal-body">
+            <input type="hidden" id="edit-folder-id">
+            <div class="input-block-wrapper" id="w-edit-fname">
+                <label class="input-native-label">Nombre de Carpeta</label>
+                <div class="input-glass-container">
+                    <i data-lucide="folder" style="color:var(--text-muted);width:20px;"></i>
+                    <input type="text" id="edit-folder-name" placeholder="Ej. Web Blueprints" class="input-native-field" />
+                </div>
+            </div>
+            <div style="display:grid; grid-template-columns: 1fr auto 1fr; gap:12px; align-items: end;">
+                <div class="input-block-wrapper">
+                    <label class="input-native-label">Icono Lucide</label>
+                    <div class="input-glass-container">
+                        <input type="text" id="edit-folder-icon" placeholder="monitor, tv, box" class="input-native-field" oninput="updateLiveIconPreview('edit-folder-icon', 'edit-folder-color', 'edit-preview-box')" />
+                    </div>
+                </div>
+                <div class="live-icon-preview" id="edit-preview-box">
+                    <i data-lucide="folder"></i>
+                </div>
+                <div class="input-block-wrapper">
+                    <label class="input-native-label">Color clave</label>
+                    <div class="input-glass-container">
+                        <input type="color" id="edit-folder-color" style="background:transparent; border:none; width:100%; height:24px; cursor:pointer;" oninput="updateLiveIconPreview('edit-folder-icon', 'edit-folder-color', 'edit-preview-box')" />
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="dock-action-area">
+            <button class="btn-dock-action" onclick="handleUpdateFolder()">
+                <i data-lucide="save"></i> Guardar Cambios
+            </button>
+        </div>
+    </div>
+
+    <script>
+        // --- DATA ENGINE ---
+        const DEFAULT_DATA = {
+            folders: [
+                { id: "f-1", name: "Dispositivos Apple", color: "#6c5ce7", icon: "smartphone" },
+                { id: "f-2", name: "Gaming Canvas", color: "#00e5ff", icon: "gamepad-2" }
+            ],
+            items: [
+                { id: "i-1", name: "iPhone 15 Pro Max", width: 1290, height: 2796, unit: "px", description: "Medidas estandarizadas de viewport lógico.", folderId: "f-1" },
+                { id: "i-2", name: "Escenario Scratch", width: 480, height: 360, unit: "px", description: "Límites del canvas base.", folderId: "f-2" }
+            ],
+            trash: []
+        };
+
+        let appData = { folders: [], items: [], trash: [] };
+        let activeFolderFilter = null; 
+        let currentFormMode = 1; 
+        let searchQuery = "";
+        let activeModalsStack = []; // Pila para controlar la navegación por gestos en Android
+
+        window.onload = () => {
+            const stored = localStorage.getItem('dimensionbox_ultra_v4');
+            appData = stored ? JSON.parse(stored) : DEFAULT_DATA;
+            if(!appData.trash) appData.trash = [];
+            renderApp();
+            toggleFormMode(1); 
+        };
+
+        // --- NAVEGACIÓN CON GESTOS (SOPORTE BOTÓN ATRÁS ANDROID) ---
+        window.addEventListener('popstate', (event) => {
+            if (activeModalsStack.length > 0) {
+                // Al ir atrás en el historial, cerramos el último modal abierto de forma fluida
+                const topModalId = activeModalsStack.pop();
+                executeModalCloseAnimation(topModalId);
+            }
+        });
+
+        function saveData() {
+            localStorage.setItem('dimensionbox_ultra_v4', JSON.stringify(appData));
+        }
+
+        // --- SISTEMA DE ANIMACIÓN FLUIDA & ENFOQUE DE CAPAS ---
+        function openModal(modalId) {
+            document.getElementById('main-view').classList.add('backgrounded');
+            document.getElementById('global-search-fab').classList.add('hidden-state'); 
+            document.getElementById(modalId).classList.add('active');
+            
+            // Registramos el modal en la pila y añadimos un estado ficticio al historial de Android
+            activeModalsStack.push(modalId);
+            window.history.pushState({ modalId: modalId }, "");
+
+            if(modalId === 'trash-modal') renderTrash();
+        }
+
+        function closeActiveModal(modalId) {
+            // Si el usuario cierra el modal manualmente con botones de la interfaz, hacemos un back() en el historial
+            if (activeModalsStack.includes(modalId)) {
+                window.history.back();
+            }
+        }
+
+        function executeModalCloseAnimation(modalId) {
+            document.getElementById(modalId).classList.remove('active');
+            
+            // Si ya no quedan modales activos, restauramos el Viewport principal
+            if (activeModalsStack.length === 0) {
+                document.getElementById('main-view').classList.remove('backgrounded');
+                document.getElementById('global-search-fab').classList.remove('hidden-state'); 
+            }
+        }
+
+        function updateDisplayCounter(element, val) {
+            if (element && element.textContent !== String(val)) {
+                element.textContent = val;
+                element.style.animation = 'none';
+                void element.offsetWidth; 
+                element.style.animation = 'pulseUp 0.25s ease';
+            }
+        }
+
+        // --- MOTOR DE RENDERS ---
+        function renderApp() {
+            const counter = document.getElementById('total-counter');
+            updateDisplayCounter(counter, appData.items.length);
+
+            const trashBtn = document.getElementById('trash-bin-btn');
+            trashBtn.style.color = appData.trash.length > 0 ? 'var(--accent-danger)' : 'var(--text-muted)';
+            trashBtn.style.borderColor = appData.trash.length > 0 ? 'var(--accent-danger)' : 'var(--border)';
+
+            // Renderizar Grid Carpetas
+            const grid = document.getElementById('folders-grid');
+            grid.innerHTML = appData.folders.map(f => {
+                const count = appData.items.filter(i => i.folderId === f.id).length;
+                const isSelected = activeFolderFilter === f.id ? 'style="border-color:'+f.color+'"' : '';
+                return `
+                    <div class="folder-card" ${isSelected} onclick="setFolderFilter('${f.id}')">
+                        <div class="folder-icon-wrapper" style="background: ${f.color}12; color: ${f.color};">
+                            <i data-lucide="${f.icon || 'folder'}"></i>
+                        </div>
+                        <div class="folder-info">
+                            <h3>${f.name}</h3>
+                            <p>${count} celdas</p>
+                        </div>
+                        <i data-lucide="sliders" style="position:absolute; top:14px; right:14px; width:13px; color:var(--text-muted);" onclick="event.stopPropagation(); openEditFolderModal('${f.id}');"></i>
+                    </div>
+                `;
+            }).join('');
+
+            document.getElementById('clear-filter-btn').style.display = activeFolderFilter ? 'block' : 'none';
+            
+            // Renderizar Objetos
+            const itemsContainer = document.getElementById('items-container');
+            let matched = appData.items;
+
+            if (activeFolderFilter) matched = matched.filter(i => i.folderId === activeFolderFilter);
+            if (searchQuery.trim() !== "") matched = matched.filter(i => i.name.toLowerCase().includes(searchQuery.toLowerCase()));
+
+            if(matched.length === 0) {
+                itemsContainer.innerHTML = `<p style="color: var(--text-muted); font-size:0.9rem; text-align:center; padding: 25px;">No hay especificaciones.</p>`;
+            } else {
+                itemsContainer.innerHTML = matched.map(item => {
+                    const fObj = appData.folders.find(f => f.id === item.folderId);
+                    return `
+                        <div class="item-row" onclick="openDetailItem('${item.id}')">
+                            <div class="item-details">
+                                <h4>${item.name}</h4>
+                                <p style="color: ${fObj ? fObj.color : 'var(--text-muted)'}">${fObj ? fObj.name : 'General'}</p>
+                            </div>
+                            <div class="item-spec" style="color: ${fObj ? fObj.color : 'var(--accent-cyan)'}; border-color: ${fObj ? fObj.color : 'var(--accent-cyan)'}25">${item.width}x${item.height} ${item.unit}</div>
+                        </div>
+                    `;
+                }).join('');
+            }
+            lucide.createIcons();
+        }
+
+        function setFolderFilter(id) { activeFolderFilter = id; renderApp(); }
+        function clearFolderFilter() { activeFolderFilter = null; renderApp(); }
+
+        // --- INTERRUPTOR FAB INTERACTIVO ---
+        function toggleSearchFAB() {
+            const wrapper = document.getElementById('search-wrapper');
+            const input = document.getElementById('search-input');
+            const icon = document.getElementById('search-icon');
+
+            if(wrapper.classList.contains('expanded')) {
+                if(!input.value.trim()) {
+                    wrapper.classList.remove('expanded');
+                    icon.setAttribute('data-lucide', 'search');
+                } else {
+                    input.value = "";
+                    handleSearch("");
+                }
+            } else {
+                wrapper.classList.add('expanded');
+                input.focus();
+                icon.setAttribute('data-lucide', 'x');
+            }
+            lucide.createIcons();
+        }
+
+        function handleSearch(val) { searchQuery = val; renderApp(); }
+
+        // --- MODAL CREACIÓN INTERNA ---
+        function openAddModal() { openModal('add-modal'); }
+
+        function toggleFormMode(mode) {
+            currentFormMode = mode;
+            const indicator = document.getElementById('slider-indicator');
+            const container = document.getElementById('form-fields-container');
+            const buttons = document.querySelectorAll('#form-slider .slider-segment-btn');
+
+            buttons.forEach((btn, idx) => btn.classList.toggle('segment-active', idx === mode));
+            indicator.style.transform = `translate3d(${mode === 1 ? '100%' : '0'}, 0, 0)`;
+
+            if (mode === 1) {
+                container.innerHTML = `
+                    <div class="input-block-wrapper" id="w-name"><label class="input-native-label">Nombre del elemento</label><div class="input-glass-container"><i data-lucide="box" style="color:var(--text-muted);width:20px;"></i><input type="text" id="obj-name" placeholder="Ej. Layout Mobile HD" class="input-native-field" /></div></div>
+                    <div style="display:grid; grid-template-columns:1fr 1fr; gap:12px;">
+                        <div class="input-block-wrapper" id="w-w"><label class="input-native-label">Ancho</label><div class="input-glass-container"><input type="number" id="obj-w" placeholder="1920" class="input-native-field" /></div></div>
+                        <div class="input-block-wrapper" id="w-h"><label class="input-native-label">Alto</label><div class="input-glass-container"><input type="number" id="obj-h" placeholder="1080" class="input-native-field" /></div></div>
+                    </div>
+                    <div class="input-block-wrapper"><label class="input-native-label">Notas rápidas</label><div class="input-glass-container"><i data-lucide="align-left" style="color:var(--text-muted);width:20px;"></i><input type="text" id="obj-desc" placeholder="Añadir descripción..." class="input-native-field" /></div></div>
+                    <div class="input-block-wrapper"><label class="input-native-label">Vincular Carpeta</label><div class="input-glass-container"><select id="obj-folder" class="input-native-select" style="width:100%; border:none; background:transparent;">${appData.folders.map(f => `<option value="${f.id}">${f.name}</option>`).join('')}</select></div></div>
+                    <div class="input-block-wrapper"><label class="input-native-label">Unidad métrica</label><div class="input-glass-container"><select id="obj-unit" class="input-native-select" style="width:100%; border:none; background:transparent;"><option value="px">Píxeles (px)</option><option value="mm">Milímetros (mm)</option><option value="rem">REM (rem)</option></select></div></div>
+                `;
+            } else {
+                container.innerHTML = `
+                    <div class="input-block-wrapper" id="w-fname"><label class="input-native-label">Nombre de Carpeta</label><div class="input-glass-container"><i data-lucide="folder-plus" style="color:var(--text-muted);width:20px;"></i><input type="text" id="folder-name" placeholder="Ej. Web Blueprints" class="input-native-field" /></div></div>
+                    <div style="display:grid; grid-template-columns: 1fr auto 1fr; gap:12px; align-items: end;">
+                        <div class="input-block-wrapper"><label class="input-native-label">Icono Lucide</label><div class="input-glass-container"><input type="text" id="folder-icon" placeholder="monitor, tv, box" class="input-native-field" oninput="updateLiveIconPreview('folder-icon', 'folder-color', 'create-preview-box')" /></div></div>
+                        <div class="live-icon-preview" id="create-preview-box"><i data-lucide="folder"></i></div>
+                        <div class="input-block-wrapper"><label class="input-native-label">Color clave</label><div class="input-glass-container"><input type="color" id="folder-color" value="#6c5ce7" style="background:transparent; border:none; width:100%; height:24px; cursor:pointer;" oninput="updateLiveIconPreview('folder-icon', 'folder-color', 'create-preview-box')" /></div></div>
+                    </div>
+                `;
+            }
+            lucide.createIcons();
+        }
+
+        // --- VISUALIZACIÓN EN VIVO DEL ICONO ---
+        function updateLiveIconPreview(inputId, colorId, previewBoxId) {
+            const iconName = document.getElementById(inputId).value.trim() || 'folder';
+            const color = document.getElementById(colorId).value;
+            const previewBox = document.getElementById(previewBoxId);
+            
+            previewBox.innerHTML = `<i data-lucide="${iconName}"></i>`;
+            previewBox.style.color = color;
+            previewBox.style.background = `${color}15`;
+            previewBox.style.borderColor = `${color}40`;
+            
+            // Forzar renderizado del nuevo nodo por Lucide, si el tag no existe vuelve por defecto a "folder"
+            try {
+                lucide.createIcons();
+            } catch(e) {
+                previewBox.innerHTML = `<i data-lucide="folder"></i>`;
+                lucide.createIcons();
+            }
+        }
+
+        // --- SISTEMA DE EDICIÓN DE CARPETAS ---
+        function openEditFolderModal(id) {
+            const folder = appData.folders.find(f => f.id === id);
+            if (!folder) return;
+
+            document.getElementById('edit-folder-id').value = folder.id;
+            document.getElementById('edit-folder-name').value = folder.name;
+            document.getElementById('edit-folder-icon').value = folder.icon || 'folder';
+            document.getElementById('edit-folder-color').value = folder.color || '#6c5ce7';
+
+            openModal('edit-folder-modal');
+            updateLiveIconPreview('edit-folder-icon', 'edit-folder-color', 'edit-preview-box');
+        }
+
+        function handleUpdateFolder() {
+            const id = document.getElementById('edit-folder-id').value;
+            const nameInput = document.getElementById('edit-folder-name');
+            const iconInput = document.getElementById('edit-folder-icon');
+            const colorInput = document.getElementById('edit-folder-color');
+
+            if (!nameInput.value.trim()) { 
+                triggerError(document.getElementById('w-edit-fname')); 
+                return; 
+            }
+
+            const folder = appData.folders.find(f => f.id === id);
+            if (folder) {
+                folder.name = nameInput.value.trim();
+                folder.icon = iconInput.value.trim() || 'folder';
+                folder.color = colorInput.value;
+                
+                saveData();
+                renderApp();
+                closeActiveModal('edit-folder-modal');
+            }
+        }
+
+        // --- SUBMIT CONTROLLER ---
+        function handleSubmitForm() {
+            if(currentFormMode === 0) {
+                const name = document.getElementById('folder-name');
+                if(!name.value.trim()) { triggerError(document.getElementById('w-fname')); return; }
+                appData.folders.push({ id: 'f-'+Date.now(), name: name.value.trim(), color: document.getElementById('folder-color').value, icon: document.getElementById('folder-icon').value.trim() || 'folder' });
+            } else {
+                const name = document.getElementById('obj-name');
+                const w = document.getElementById('obj-w');
+                const h = document.getElementById('obj-h');
+                const folder = document.getElementById('obj-folder').value;
+
+                let err = false;
+                if(!name.value.trim()) { triggerError(document.getElementById('w-name')); err = true; }
+                if(!w.value) { triggerError(document.getElementById('w-w')); err = true; }
+                if(!h.value) { triggerError(document.getElementById('w-h')); err = true; }
+                if(!folder) { alert('Crea un contenedor válido primero.'); return; }
+                if(err) return;
+
+                appData.items.push({ id: 'i-'+Date.now(), name: name.value.trim(), width: parseInt(w.value), height: parseInt(h.value), unit: document.getElementById('obj-unit').value, description: document.getElementById('obj-desc').value.trim(), folderId: folder });
+            }
+            saveData(); renderApp(); closeActiveModal('add-modal');
+        }
+
+        // --- DETALLE & GESTIÓN DE PURGAS ---
+        function openDetailItem(id) {
+            const item = appData.items.find(i => i.id === id);
+            if(!item) return;
+            const fObj = appData.folders.find(f => f.id === item.folderId);
+
+            document.getElementById('detail-modal-title').textContent = "Especificación";
+            document.getElementById('detail-modal-body').innerHTML = `
+                <div class="detail-badge-box" style="border-color:${fObj?.color}60">
+                    <span class="card-category-tag" style="color:${fObj?.color}">${fObj?.name || 'General'}</span>
+                    <div class="detail-dimension-display">${item.width} <span style="font-size:1.2rem;color:var(--text-muted)">x</span> ${item.height} <span style="font-size:1rem;color:var(--text-muted)">${item.unit}</span></div>
+                    <h3 style="font-weight:600; font-size:1.2rem;">${item.name}</h3>
+                </div>
+                <div class="input-block-wrapper"><label class="input-native-label">Anotación de uso</label><div class="input-glass-container"><p style="font-size:0.95rem;line-height:1.4;">${item.description || 'Sin comentarios registrados.'}</p></div></div>
+            `;
+            document.getElementById('detail-modal-actions').innerHTML = `
+                <button class="btn-dock-action danger-zone" onclick="trashAction('${item.id}', 'item')"><i data-lucide="trash"></i> Mover a Papelera</button>
+            `;
+            openModal('detail-modal');
+            lucide.createIcons();
+        }
+
+        function trashAction(id, type) {
+            if(type === 'item') {
+                const idx = appData.items.findIndex(i => i.id === id);
+                if(idx !== -1) appData.trash.push({ ...appData.items.splice(idx, 1)[0], schema: 'item' });
+            } else {
+                const idx = appData.folders.findIndex(f => f.id === id);
+                if(idx !== -1) {
+                    appData.trash.push({ ...appData.folders.splice(idx, 1)[0], schema: 'folder' });
+                    const linked = appData.items.filter(i => i.folderId === id);
+                    linked.forEach(i => appData.trash.push({ ...i, schema: 'item' }));
+                    appData.items = appData.items.filter(i => i.folderId !== id);
+                }
+                if(activeFolderFilter === id) activeFolderFilter = null;
+            }
+            saveData(); renderApp(); closeActiveModal('detail-modal');
+        }
+
+        // Se ha conservado la función pero delegando la mutación a un panel nativo de edición limpia.
+        function openFolderPanel(id) { openEditFolderModal(id); }
+
+        function renderTrash() {
+            const tbody = document.getElementById('trash-modal-body');
+            if(appData.trash.length === 0) {
+                tbody.innerHTML = `<p style="color:var(--text-muted); text-align:center; padding:40px;">Sin elementos eliminados.</p>`;
+            } else {
+                tbody.innerHTML = appData.trash.map(t => `
+                    <div class="item-row" style="cursor:default;">
+                        <div class="item-details"><h4>${t.name}</h4><p>${t.schema === 'folder' ? 'Contenedor Completo' : 'Layout Técnico'}</p></div>
+                        <button class="btn-icon-circular-round" style="color:var(--accent-success);border-color:var(--accent-success);" onclick="restoreTrash('${t.id}')"><i data-lucide="rotate-ccw" style="width:16px;"></i></button>
+                    </div>
+                `).join('');
+            }
+            lucide.createIcons();
+        }
+
+        function restoreTrash(id) {
+            const idx = appData.trash.findIndex(t => t.id === id);
+            if(idx === -1) return;
+            const target = appData.trash.splice(idx, 1)[0];
+            
+            if(target.schema === 'folder') { delete target.schema; appData.folders.push(target); }
+            else { delete target.schema; appData.items.push(target); }
+            
+            saveData(); renderApp(); renderTrash();
+        }
+
+        function purgeTrash() { appData.trash = []; saveData(); renderApp(); closeActiveModal('trash-modal'); }
+
+        function triggerError(wrap) {
+            const el = wrap.querySelector('.input-glass-container');
+            el.classList.add('error-shake'); el.style.borderColor = 'var(--accent-danger)';
+            setTimeout(() => { el.classList.remove('error-shake'); el.style.borderColor = 'var(--border)'; }, 300);
+        }
+    </script>
+</body>
+</html>

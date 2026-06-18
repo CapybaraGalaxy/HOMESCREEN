@@ -1,0 +1,1001 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <title>NEON BLAST // Cyber-Minimal Block Puzzle</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;700&display=swap" rel="stylesheet">
+  <script src="https://unpkg.com/lucide@latest"></script>
+  
+  <style>
+    :root {
+      --bg: #000000;
+      --surface: #121212;
+      --surface-hover: #1e1e1e;
+      --text: #ffffff;
+      --muted: #888888;
+      --border: rgba(255, 255, 255, 0.1);
+      --accent: #00e5ff;
+      --spring: cubic-bezier(0.34, 1.56, 0.64, 1);
+      --gentle: cubic-bezier(0.2, 0.8, 0.2, 1);
+      
+      /* Tamaños dinámicos responsivos */
+      --board-size: min(88vw, 380px);
+      --cell-size: calc(var(--board-size) / 8);
+    }
+
+    * { 
+      box-sizing: border-box; 
+      margin: 0; 
+      padding: 0; 
+      -webkit-tap-highlight-color: transparent; 
+    }
+
+    body {
+      font-family: 'Outfit', sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      overflow: hidden;
+      height: 100dvh;
+      user-select: none;
+    }
+
+    /* Sistema de Pantallas SPA */
+    .screen {
+      position: fixed;
+      inset: 0;
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+      padding: 24px;
+      transition: transform 0.5s var(--gentle), opacity 0.5s var(--gentle);
+      background: var(--bg);
+      z-index: 1;
+    }
+
+    .screen.hidden {
+      transform: translateX(100%);
+      opacity: 0;
+      pointer-events: none;
+    }
+
+    #home-screen {
+      transform: translateX(0);
+      opacity: 1;
+      justify-content: center;
+      gap: 40px;
+    }
+
+    #home-screen.hidden {
+      transform: translateX(-100%);
+      opacity: 0;
+    }
+
+    /* Tipografía Dinámica */
+    .brand-area {
+      text-align: center;
+      animation: fadeInDown 0.6s var(--gentle);
+    }
+
+    .title-main {
+      font-size: clamp(3rem, 10vw, 4.5rem);
+      font-weight: 700;
+      line-height: 0.9;
+      letter-spacing: -0.05em;
+      text-transform: uppercase;
+      background: linear-gradient(135deg, #ffffff 50%, var(--accent));
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+    }
+
+    .status-label {
+      font-size: 0.8rem;
+      color: var(--muted);
+      text-transform: uppercase;
+      letter-spacing: 0.2em;
+      margin-top: 8px;
+      display: block;
+    }
+
+    /* Componentes de Interfaz */
+    .menu-options {
+      display: flex;
+      flex-direction: column;
+      gap: 16px;
+      width: 100%;
+      max-width: 360px;
+      margin: 0 auto;
+    }
+
+    .mode-card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 24px;
+      padding: 24px;
+      text-align: left;
+      cursor: pointer;
+      transition: transform 0.2s var(--gentle), border-color 0.2s;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .mode-card:active {
+      transform: scale(0.96);
+    }
+
+    .mode-card:hover {
+      border-color: var(--accent);
+      background: var(--surface-hover);
+    }
+
+    .mode-card h3 {
+      font-size: 1.25rem;
+      font-weight: 600;
+      margin-bottom: 4px;
+    }
+
+    .mode-card p {
+      font-size: 0.85rem;
+      color: var(--muted);
+    }
+
+    .mode-card .icon-wrapper {
+      position: absolute;
+      right: 24px;
+      top: 50%;
+      transform: translateY(-50%);
+      color: var(--accent);
+      opacity: 0.8;
+    }
+
+    /* Cabecera del Juego */
+    .header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      width: 100%;
+      max-width: 380px;
+      margin: 0 auto;
+    }
+
+    .score-container {
+      display: flex;
+      flex-direction: column;
+    }
+
+    .score-now {
+      font-size: 2rem;
+      font-weight: 700;
+      line-height: 1;
+    }
+
+    .icon-btn {
+      width: 40px;
+      height: 40px;
+      border-radius: 50%;
+      background: var(--surface);
+      border: 1px solid var(--border);
+      color: var(--text);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      transition: transform 0.1s var(--gentle);
+    }
+
+    .icon-btn:active {
+      transform: scale(0.9);
+    }
+
+    /* Contenedor del Tablero */
+    .view-container {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+      gap: 24px;
+    }
+
+    .board-wrapper {
+      position: relative;
+      width: var(--board-size);
+      height: var(--board-size);
+    }
+
+    .board {
+      width: 100%;
+      height: 100%;
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 16px;
+      display: grid;
+      grid-template-columns: repeat(8, 1fr);
+      grid-template-rows: repeat(8, 1fr);
+      padding: 4px;
+      gap: 4px;
+    }
+
+    .cell-bg {
+      background: rgba(255, 255, 255, 0.02);
+      border-radius: 4px;
+      box-shadow: inset 0 0 0 1px var(--border);
+    }
+
+    /* Capa de Bloques Activos en Tablero */
+    #tiles-container {
+      position: absolute;
+      inset: 4px;
+      pointer-events: none;
+    }
+
+    .placed-tile {
+      position: absolute;
+      width: calc(var(--cell-size) - 4px);
+      height: calc(var(--cell-size) - 4px);
+      border-radius: 4px;
+      transition: transform 0.2s var(--gentle), opacity 0.2s;
+      animation: popIn 0.3s var(--spring);
+    }
+
+    /* Zona de Espera de Piezas */
+    .rack {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      width: 100%;
+      max-width: 380px;
+      height: 120px;
+      background: rgba(255, 255, 255, 0.02);
+      border-radius: 20px;
+      padding: 10px;
+      border: 1px dashed var(--border);
+    }
+
+    .rack-slot {
+      flex: 1;
+      height: 100%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      position: relative;
+    }
+
+    /* Estructura de las Piezas Arrastrables */
+    .piece {
+      position: absolute;
+      cursor: grab;
+      touch-action: none;
+      display: grid;
+      gap: 2px;
+      transform-origin: center center;
+      transition: transform 0.2s var(--gentle);
+    }
+
+    .piece:active {
+      cursor: grabbing;
+    }
+
+    .piece-block {
+      width: 20px; /* Tamaño minificado en el rack */
+      height: 20px;
+      border-radius: 3px;
+    }
+
+    /* Cuando se arrastra se escala al tamaño real del tablero */
+    .piece.dragging {
+      z-index: 100;
+      opacity: 0.9;
+    }
+
+    /* Modales y Efecto Blur */
+    .modal {
+      position: fixed;
+      inset: 0;
+      background: rgba(0, 0, 0, 0.85);
+      backdrop-filter: blur(8px);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      z-index: 200;
+      opacity: 0;
+      pointer-events: none;
+      transition: opacity 0.4s var(--gentle);
+    }
+
+    .modal.active {
+      opacity: 1;
+      pointer-events: all;
+    }
+
+    .modal-box {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 28px;
+      padding: 40px;
+      text-align: center;
+      max-width: 320px;
+      width: 90%;
+      transform: translateY(50px);
+      transition: transform 0.4s var(--spring);
+    }
+
+    .modal.active .modal-box {
+      transform: translateY(0);
+    }
+
+    /* Canvas de Efectos */
+    #particles-canvas {
+      position: absolute;
+      inset: 0;
+      pointer-events: none;
+      z-index: 5;
+    }
+
+    /* Sistema de combos flotantes */
+    .combo-badge {
+      position: absolute;
+      color: #fff;
+      font-weight: 700;
+      font-size: 1.5rem;
+      text-shadow: 0 0 10px var(--accent);
+      pointer-events: none;
+      animation: comboFloat 0.8s var(--gentle) forwards;
+      z-index: 50;
+    }
+
+    /* Animaciones Keyframes */
+    @keyframes fadeInDown {
+      from { opacity: 0; transform: translateY(-20px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    @keyframes popIn {
+      0% { transform: scale(0); }
+      100% { transform: scale(1); }
+    }
+
+    @keyframes comboFloat {
+      0% { opacity: 1; transform: translateY(0) scale(0.8); }
+      100% { opacity: 0; transform: translateY(-40px) scale(1.2); }
+    }
+
+    .vanish {
+      animation: vanishOut 0.25s ease-out forwards;
+    }
+
+    @keyframes vanishOut {
+      to { transform: scale(0); opacity: 0; }
+    }
+  </style>
+</head>
+<body>
+
+  <div id="home-screen" class="screen">
+    <div class="brand-area">
+      <h1 class="title-main">Neon<br>Blast</h1>
+      <span class="status-label">Cyber-Minimal Puzzle</span>
+    </div>
+
+    <div class="menu-options">
+      <div class="mode-card" onclick="game.start('classic')">
+        <h3>Modo Clásico</h3>
+        <p>Rompe récords sin límite de tiempo.</p>
+        <div class="icon-wrapper"><i data-lucide="play-circle"></i></div>
+      </div>
+      <div class="mode-card" onclick="game.start('adventure')">
+        <h3>Modo Rápido</h3>
+        <p>Tablero con obstáculos aleatorios.</p>
+        <div class="icon-wrapper"><i data-lucide="zap"></i></div>
+      </div>
+    </div>
+    
+    <div style="text-align: center;">
+      <span class="status-label" id="menu-highscore">HI-SCORE: 0000</span>
+    </div>
+  </div>
+
+  <div id="game-view" class="screen hidden">
+    <div class="header">
+      <button class="icon-btn" onclick="game.goToMenu()"><i data-lucide="arrow-left"></i></button>
+      <div class="score-container">
+        <span class="status-label" style="text-align: center;">SCORE</span>
+        <div class="score-now" id="current-score">0000</div>
+      </div>
+      <button class="icon-btn" onclick="game.restart()"><i data-lucide="rotate-ccw"></i></button>
+    </div>
+
+    <div class="view-container">
+      <div class="board-wrapper">
+        <canvas id="particles-canvas"></canvas>
+        <div class="board" id="grid-bg"></div>
+        <div id="tiles-container"></div>
+      </div>
+
+      <div style="text-align: center; margin-top: -10px;">
+        <span class="status-label" style="font-size:0.7rem;">Tip: Toca una pieza para rotarla antes de arrastrar</span>
+      </div>
+
+      <div class="rack" id="pieces-rack">
+        <div class="rack-slot" id="slot-0"></div>
+        <div class="rack-slot" id="slot-1"></div>
+        <div class="rack-slot" id="slot-2"></div>
+      </div>
+    </div>
+  </div>
+
+  <div class="modal" id="gameover-modal">
+    <div class="modal-box">
+      <h2 class="title-main" style="font-size: 2.5rem; margin-bottom: 10px;">Fin Juego</h2>
+      <p class="status-label" style="margin-bottom: 24px;">Te has quedado sin movimientos</p>
+      <div style="margin-bottom: 30px;">
+        <span class="status-label">Puntuación Final</span>
+        <div class="score-now" id="final-score" style="font-size: 3rem; color: var(--accent);">0</div>
+      </div>
+      <div class="menu-options">
+        <div class="mode-card" onclick="game.restart()" style="text-align: center; padding: 16px;">
+          <h3 style="margin: 0; color: #fff;">Intentar de Nuevo</h3>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    // Inicializar Iconos Lucide
+    lucide.createIcons();
+
+    // --- SINTETIZADOR DE EFECTOS DE SONIDO (WEB AUDIO API) ---
+    class SoundFX {
+      constructor() {
+        this.ctx = null;
+      }
+
+      init() {
+        if (!this.ctx) {
+          this.ctx = new (window.AudioContext || window.webkitAudioContext)();
+        }
+      }
+
+      play(type, comboLevel = 1) {
+        this.init();
+        if (this.ctx.state === 'suspended') this.ctx.resume();
+
+        const now = this.ctx.currentTime;
+
+        if (type === 'drop') {
+          const osc = this.ctx.createOscillator();
+          const gain = this.ctx.createGain();
+          osc.type = 'triangle';
+          osc.frequency.setValueAtTime(300, now);
+          osc.frequency.exponentialRampToValueAtTime(100, now + 0.12);
+          
+          gain.gain.setValueAtTime(0.3, now);
+          gain.gain.linearRampToValueAtTime(0.01, now + 0.12);
+          
+          osc.connect(gain);
+          gain.connect(this.ctx.destination);
+          osc.start(now);
+          osc.stop(now + 0.13);
+        } 
+        else if (type === 'clear') {
+          const notes = [261.63, 329.63, 392.00, 523.25];
+          notes.forEach((freq, index) => {
+            const osc = this.ctx.createOscillator();
+            const gain = this.ctx.createGain();
+            osc.type = 'sine';
+            osc.frequency.setValueAtTime(freq, now + index * 0.05);
+            
+            gain.gain.setValueAtTime(0.2, now + index * 0.05);
+            gain.gain.linearRampToValueAtTime(0.01, now + index * 0.05 + 0.2);
+            
+            osc.connect(gain);
+            gain.connect(this.ctx.destination);
+            osc.start(now + index * 0.05);
+            osc.stop(now + index * 0.05 + 0.2);
+          });
+        } 
+        else if (type === 'combo') {
+          const osc = this.ctx.createOscillator();
+          const gain = this.ctx.createGain();
+          osc.type = 'sawtooth';
+          
+          const baseFreq = 400 + (comboLevel * 80);
+          osc.frequency.setValueAtTime(baseFreq, now);
+          osc.frequency.linearRampToValueAtTime(baseFreq * 1.5, now + 0.2);
+          
+          gain.gain.setValueAtTime(0.15, now);
+          gain.gain.linearRampToValueAtTime(0.01, now + 0.2);
+          
+          osc.connect(gain);
+          gain.connect(this.ctx.destination);
+          osc.start(now);
+          osc.stop(now + 0.21);
+        }
+        else if (type === 'gameover') {
+          const osc = this.ctx.createOscillator();
+          const gain = this.ctx.createGain();
+          osc.type = 'triangle';
+          osc.frequency.setValueAtTime(200, now);
+          osc.frequency.linearRampToValueAtTime(60, now + 0.6);
+          
+          gain.gain.setValueAtTime(0.4, now);
+          gain.gain.linearRampToValueAtTime(0.01, now + 0.6);
+          
+          osc.connect(gain);
+          gain.connect(this.ctx.destination);
+          osc.start(now);
+          osc.stop(now + 0.61);
+        }
+      }
+    }
+
+    const sfx = new SoundFX();
+
+    // DEFINICIÓN DE PIEZAS (Estructuras matriciales de Block Blast)
+    const PIECE_TYPES = [
+      { matrix: [[1]], color: '#00ff88' }, // 1x1
+      { matrix: [[1, 1]], color: '#00e5ff' }, // 1x2
+      { matrix: [[1, 1, 1]], color: '#00e5ff' }, // 1x3
+      { matrix: [[1, 1], [1, 1]], color: '#ffaa00' }, // Cuadrado 2x2
+      { matrix: [[1, 0], [1, 1]], color: '#d500f9' }, // L pequeña
+      { matrix: [[1, 1, 1], [0, 1, 0]], color: '#ff4444' }, // T
+      { matrix: [[1, 1, 1], [1, 0, 0]], color: '#d500f9' }  // L grande
+    ];
+
+    // CONFIGURACIÓN DEL CANVAS DE PARTÍCULAS
+    const canvas = document.getElementById('particles-canvas');
+    const ctx = canvas.getContext('2d');
+    let particles = [];
+
+    function resizeCanvas() {
+      const rect = canvas.parentElement.getBoundingClientRect();
+      canvas.width = rect.width;
+      canvas.height = rect.height;
+    }
+    window.addEventListener('resize', resizeCanvas);
+
+    class Particle {
+      constructor(x, y, color) {
+        this.x = x;
+        this.y = y;
+        this.color = color;
+        this.radius = Math.random() * 3 + 2;
+        this.vx = (Math.random() - 0.5) * 8;
+        this.vy = (Math.random() - 0.5) * 8;
+        this.alpha = 1;
+      }
+      update() {
+        this.x += this.vx;
+        this.y += this.vy;
+        this.vx *= 0.95; // Fricción
+        this.vy *= 0.95;
+        this.alpha -= 0.03;
+      }
+      draw() {
+        ctx.save();
+        ctx.globalAlpha = this.alpha;
+        ctx.beginPath();
+        ctx.arc(this.x, this.y, this.radius, 0, Math.PI * 2);
+        ctx.fillStyle = this.color;
+        ctx.shadowBlur = 10;
+        ctx.shadowColor = this.color;
+        ctx.fill();
+        ctx.restore();
+      }
+    }
+
+    function spawnExplosion(row, col, color) {
+      const rect = canvas.getBoundingClientRect();
+      const cellSize = rect.width / 8;
+      const x = col * cellSize + cellSize / 2;
+      const y = row * cellSize + cellSize / 2;
+      
+      for (let i = 0; i < 8; i++) {
+        particles.push(new Particle(x, y, color));
+      }
+    }
+
+    function animateParticles() {
+      ctx.clearRect(0, 0, canvas.width, canvas.height);
+      particles = particles.filter(p => p.alpha > 0);
+      particles.forEach(p => {
+        p.update();
+        p.draw();
+      });
+      requestAnimationFrame(animateParticles);
+    }
+    animateParticles();
+
+
+    // LÓGICA CORE DEL JUEGO
+    class BlockBlast {
+      constructor() {
+        this.board = Array(8).fill().map(() => Array(8).fill(null));
+        this.score = 0;
+        this.highScore = localStorage.getItem('neon_blast_hi') || 0;
+        this.combo = 0;
+        this.currentMode = 'classic';
+        
+        document.getElementById('menu-highscore').innerText = `HI-SCORE: ${String(this.highScore).padStart(4, '0')}`;
+        this.buildGridBackground();
+      }
+
+      buildGridBackground() {
+        const gridBg = document.getElementById('grid-bg');
+        gridBg.innerHTML = '';
+        for (let i = 0; i < 64; i++) {
+          const cell = document.createElement('div');
+          cell.className = 'cell-bg';
+          gridBg.appendChild(cell);
+        }
+      }
+
+      start(mode) {
+        sfx.init(); // Inicializar audio al interactuar
+        this.currentMode = mode;
+        this.score = 0;
+        this.combo = 0;
+        this.board = Array(8).fill().map(() => Array(8).fill(null));
+        this.updateScoreDisplay();
+        
+        document.getElementById('home-screen').classList.add('hidden');
+        document.getElementById('game-view').classList.remove('hidden');
+        setTimeout(resizeCanvas, 100);
+
+        if (mode === 'adventure') {
+          // Genera bloques grises obstáculo aleatorios
+          for (let i = 0; i < 5; i++) {
+            let r = Math.floor(Math.random() * 4) + 2;
+            let c = Math.floor(Math.random() * 4) + 2;
+            this.board[r][c] = { color: '#333333' };
+          }
+        }
+
+        this.renderBoard();
+        this.spawnRackPieces();
+      }
+
+      goToMenu() {
+        document.getElementById('game-view').classList.add('hidden');
+        document.getElementById('home-screen').classList.remove('hidden');
+        document.getElementById('gameover-modal').classList.remove('active');
+        document.getElementById('menu-highscore').innerText = `HI-SCORE: ${String(this.highScore).padStart(4, '0')}`;
+      }
+
+      restart() {
+        document.getElementById('gameover-modal').classList.remove('active');
+        this.start(this.currentMode);
+      }
+
+      renderBoard() {
+        const container = document.getElementById('tiles-container');
+        container.innerHTML = '';
+        
+        for (let r = 0; r < 8; r++) {
+          for (let c = 0; c < 8; c++) {
+            if (this.board[r][c]) {
+              const tile = document.createElement('div');
+              tile.className = 'placed-tile';
+              tile.style.backgroundColor = this.board[r][c].color;
+              tile.style.filter = `drop-shadow(0 0 4px ${this.board[r][c].color})`;
+              
+              // Posicionamiento calculado dinámico absoluto
+              tile.style.left = `calc(${c} * var(--cell-size))`;
+              tile.style.top = `calc(${r} * var(--cell-size))`;
+              container.appendChild(tile);
+            }
+          }
+        }
+      }
+
+      spawnRackPieces() {
+        for (let i = 0; i < 3; i++) {
+          const slot = document.getElementById(`slot-${i}`);
+          slot.innerHTML = '';
+          
+          const randomType = PIECE_TYPES[Math.floor(Math.random() * PIECE_TYPES.length)];
+          // Clonar matriz profunda
+          let matrix = randomType.matrix.map(row => [...row]);
+          
+          const pieceEl = document.createElement('div');
+          pieceEl.className = 'piece';
+          pieceEl.dataset.color = randomType.color;
+          pieceEl.dataset.slot = i;
+          
+          this.renderPieceStructure(pieceEl, matrix, randomType.color);
+          this.attachDragEvents(pieceEl);
+          
+          slot.appendChild(pieceEl);
+        }
+      }
+
+      renderPieceStructure(el, matrix, color) {
+        el.style.gridTemplateRows = `repeat(${matrix.length}, 1fr)`;
+        el.style.gridTemplateColumns = `repeat(${matrix[0].length}, 1fr)`;
+        el.innerHTML = '';
+        
+        // Guardar la matriz actual codificada en string para recuperarla en el drag
+        el.dataset.matrix = JSON.stringify(matrix);
+
+        matrix.forEach(row => {
+          row.forEach(val => {
+            const block = document.createElement('div');
+            block.className = 'piece-block';
+            if (val === 1) {
+              block.style.backgroundColor = color;
+              block.style.boxShadow = `0 0 8px ${color}`;
+            } else {
+              block.style.opacity = '0';
+            }
+            el.appendChild(block);
+          });
+        });
+      }
+
+      // Rotación de pieza al hacer Tap rápido sin arrastrar
+      rotatePiece(pieceEl) {
+        let matrix = JSON.parse(pieceEl.dataset.matrix);
+        let color = pieceEl.dataset.color;
+        
+        // 1. Lógica: Trasponer y revertir matriz para rotar 90º
+        let rotated = matrix[0].map((val, index) => matrix.map(row => row[index]).reverse());
+        
+        // 2. DOM: Recrear la estructura instantáneamente (la caja cambia de tamaño)
+        this.renderPieceStructure(pieceEl, rotated, color);
+        
+        // 3. Magia visual: Animamos desde -90º (que visualmente equivale a la forma anterior) hacia 0º
+        pieceEl.animate([
+          { transform: 'scale(0.7) rotate(-90deg)' },
+          { transform: 'scale(1) rotate(0deg)' }
+        ], {
+          duration: 350,
+          easing: 'cubic-bezier(0.34, 1.56, 0.64, 1)' // Efecto spring idéntico a tu CSS
+        });
+        
+        sfx.play('drop'); // Sonido al rotar
+        
+        // Re-verificar si el juego se bloqueó tras rotar
+        this.checkGameOver();
+      }
+
+      attachDragEvents(el) {
+        let startX, startY, currentX, currentY;
+        let isDragging = false;
+        let hasMoved = false;
+
+        const onStart = (e) => {
+          isDragging = true;
+          hasMoved = false;
+          
+          const touch = e.touches ? e.touches[0] : e;
+          startX = touch.clientX;
+          startY = touch.clientY;
+          
+          // Ya no agrandamos la pieza aquí. Esperamos a ver si de verdad se mueve.
+        };
+
+        const onMove = (e) => {
+          if (!isDragging) return;
+          
+          const touch = e.touches ? e.touches[0] : e;
+          currentX = touch.clientX - startX;
+          currentY = touch.clientY - startY;
+
+          // Histeresis: Solo activamos el "Modo Arrastre" si se ha movido más de 5 píxeles
+          if (!hasMoved && (Math.abs(currentX) > 5 || Math.abs(currentY) > 5)) {
+            hasMoved = true;
+            el.classList.add('dragging');
+            
+            // Agrandamos los bloques a tamaño real del tablero SOLO cuando se confirma el arrastre
+            el.querySelectorAll('.piece-block').forEach(b => {
+              b.style.width = 'calc(var(--cell-size) - 4px)';
+              b.style.height = 'calc(var(--cell-size) - 4px)';
+            });
+          }
+
+          // Si ya está confirmado el arrastre, movemos la pieza
+          if (hasMoved) {
+            el.style.transform = `translate(${currentX}px, ${currentY}px) scale(1.4) translateY(-40px)`;
+          }
+        };
+
+        const onEnd = (e) => {
+          if (!isDragging) return;
+          isDragging = false;
+          el.classList.remove('dragging');
+          
+          if (!hasMoved) {
+            // Fue un Tap limpio: rotar pieza (ahora mantiene su tamaño de rack original hasta el giro)
+            this.rotatePiece(el);
+            return;
+          }
+
+          // Calcular posición de soltado respecto al tablero
+          const boardRect = document.getElementById('grid-bg').getBoundingClientRect();
+          const pieceRect = el.getBoundingClientRect();
+          const cellSize = boardRect.width / 8;
+          
+          const targetCol = Math.round((pieceRect.left - boardRect.left) / cellSize);
+          const targetRow = Math.round((pieceRect.top - boardRect.top) / cellSize);
+          
+          const matrix = JSON.parse(el.dataset.matrix);
+          const color = el.dataset.color;
+
+          if (this.canPlacePiece(matrix, targetRow, targetCol)) {
+            this.placePiece(matrix, targetRow, targetCol, color);
+            el.remove(); // Quitar del rack
+            
+            this.checkLines();
+            this.checkRackEmpty();
+          } else {
+            // Retorno fluido si es inválido
+            el.style.transform = '';
+            el.querySelectorAll('.piece-block').forEach(b => {
+              b.style.width = '20px';
+              b.style.height = '20px';
+            });
+          }
+        };
+
+        el.addEventListener('mousedown', onStart);
+        window.addEventListener('mousemove', onMove);
+        window.addEventListener('mouseup', onEnd);
+
+        el.addEventListener('touchstart', onStart, { passive: true });
+        window.addEventListener('touchmove', onMove, { passive: false });
+        window.addEventListener('touchend', onEnd);
+      }
+
+      canPlacePiece(matrix, startRow, startCol) {
+        for (let r = 0; r < matrix.length; r++) {
+          for (let c = 0; c < matrix[r].length; c++) {
+            if (matrix[r][c] === 1) {
+              let boardRow = startRow + r;
+              let boardCol = startCol + c;
+              
+              if (boardRow < 0 || boardRow >= 8 || boardCol < 0 || boardCol >= 8) return false;
+              if (this.board[boardRow][boardCol] !== null) return false;
+            }
+          }
+        }
+        return true;
+      }
+
+      placePiece(matrix, startRow, startCol, color) {
+        for (let r = 0; r < matrix.length; r++) {
+          for (let c = 0; c < matrix[r].length; c++) {
+            if (matrix[r][c] === 1) {
+              this.board[startRow + r][startCol + c] = { color: color };
+            }
+          }
+        }
+        this.score += 10;
+        this.updateScoreDisplay();
+        this.renderBoard();
+        sfx.play('drop'); // Sonido al soltar pieza
+      }
+
+      checkLines() {
+        let rowsToClear = [];
+        let colsToClear = [];
+
+        // Comprobar filas completas
+        for (let r = 0; r < 8; r++) {
+          if (this.board[r].every(cell => cell !== null)) rowsToClear.push(r);
+        }
+
+        // Comprobar columnas completas
+        for (let c = 0; c < 8; c++) {
+          let colFull = true;
+          for (let r = 0; r < 8; r++) {
+            if (this.board[r][c] === null) { colFull = false; break; }
+          }
+          if (colFull) colsToClear.push(c);
+        }
+
+        const totalLines = rowsToClear.length + colsToClear.length;
+
+        if (totalLines > 0) {
+          this.combo++;
+          // Multiplicador de combo agresivo estilo arcade
+          this.score += totalLines * 100 * this.combo;
+          this.showComboBadge(totalLines);
+
+          // Sonido de línea o combo
+          if (this.combo > 1) {
+            sfx.play('combo', this.combo);
+          } else {
+            sfx.play('clear');
+          }
+
+          // Lanzar partículas antes de limpiar datos de matriz
+          rowsToClear.forEach(r => {
+            for(let c=0; c<8; c++) spawnExplosion(r, c, this.board[r][c].color);
+          });
+          colsToClear.forEach(c => {
+            for(let r=0; r<8; r++) {
+              if (this.board[r][c]) spawnExplosion(r, c, this.board[r][c].color);
+            }
+          });
+
+          // Limpieza efectiva de datos
+          rowsToClear.forEach(r => this.board[r] = Array(8).fill(null));
+          colsToClear.forEach(c => {
+            for (let r = 0; r < 8; r++) this.board[r][c] = null;
+          });
+
+          setTimeout(() => {
+            this.renderBoard();
+            this.updateScoreDisplay();
+            this.checkGameOver();
+          }, 150);
+
+        } else {
+          this.combo = 0; // Se rompe la racha de combo
+          this.checkGameOver();
+        }
+      }
+
+      showComboBadge(lines) {
+        if(this.combo < 2) return;
+        const container = document.querySelector('.board-wrapper');
+        const badge = document.createElement('div');
+        badge.className = 'combo-badge';
+        badge.innerText = `COMBO X${this.combo}!`;
+        badge.style.left = '30%';
+        badge.style.top = '40%';
+        container.appendChild(badge);
+        setTimeout(() => badge.remove(), 800);
+      }
+
+      checkRackEmpty() {
+        const rackSlots = document.querySelectorAll('.piece');
+        if (rackSlots.length === 0) {
+          this.spawnRackPieces();
+        }
+      }
+
+      checkGameOver() {
+        const remainingPieces = document.querySelectorAll('.piece');
+        if (remainingPieces.length === 0) return;
+
+        let anyMovePossible = false;
+
+        remainingPieces.forEach(pieceEl => {
+          const matrix = JSON.parse(pieceEl.dataset.matrix);
+          
+          // Buscar un solo espacio válido en el tablero completo
+          for (let r = 0; r < 8; r++) {
+            for (let c = 0; c < 8; c++) {
+              if (this.canPlacePiece(matrix, r, c)) {
+                anyMovePossible = true;
+              }
+            }
+          }
+        });
+
+        if (!anyMovePossible) {
+          sfx.play('gameover'); // Sonido de fin de juego
+          setTimeout(() => {
+            if (this.score > this.highScore) {
+              this.highScore = this.score;
+              localStorage.setItem('neon_blast_hi', this.highScore);
+            }
+            document.getElementById('final-score').innerText = this.score;
+            document.getElementById('gameover-modal').classList.add('active');
+          }, 500);
+        }
+      }
+
+      updateScoreDisplay() {
+        document.getElementById('current-score').innerText = String(this.score).padStart(4, '0');
+      }
+    }
+
+    // Instanciar juego globalmente
+    const game = new BlockBlast();
+  </script>
+</body>
+</html>

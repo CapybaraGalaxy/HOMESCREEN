@@ -1,0 +1,798 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+  <title>CYBER SORT // Neon Flux</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;700&display=swap" rel="stylesheet">
+  <script src="https://unpkg.com/lucide@latest"></script>
+  
+  <style>
+    :root {
+      --bg: #000000;
+      --surface: #121212;
+      --surface-hover: #1e1e1e;
+      --text: #ffffff;
+      --muted: #888888;
+      --border: rgba(255, 255, 255, 0.1);
+      --accent: #00ff88;
+      --spring: cubic-bezier(0.34, 1.56, 0.64, 1);
+      --gentle: cubic-bezier(0.2, 0.8, 0.2, 1);
+      
+      /* Fluido de Colores Cyber-Neon */
+      --color-0: #00ff88; /* Verde */
+      --color-1: #ff4444; /* Rojo */
+      --color-2: #ffaa00; /* Naranja/Amarillo */
+      --color-3: #00e5ff; /* Cian */
+      --color-4: #d500f9; /* Violeta */
+      --color-5: #ff0055; /* Neón Pink */
+    }
+
+    * { 
+      box-sizing: border-box; 
+      margin: 0; 
+      padding: 0; 
+      -webkit-tap-highlight-color: transparent; 
+    }
+
+    body {
+      font-family: 'Outfit', sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      overflow: hidden;
+      height: 100dvh;
+      user-select: none;
+    }
+
+    /* Sistema de Pantallas SPA con transiciones fluidas */
+    .screen {
+      position: fixed;
+      inset: 0;
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+      padding: 24px;
+      transition: transform 0.5s var(--gentle), opacity 0.5s var(--gentle);
+      background: var(--bg);
+      z-index: 10;
+    }
+
+    .screen.hidden {
+      transform: translateX(100%);
+      opacity: 0;
+      pointer-events: none;
+    }
+
+    #home-screen {
+      transform: translateX(0);
+      opacity: 1;
+      justify-content: center;
+      gap: 40px;
+    }
+
+    #home-screen.hidden {
+      transform: translateX(-100%);
+      opacity: 0;
+    }
+
+    /* Branding y Títulos Modernos */
+    .brand-area {
+      text-align: center;
+      animation: fadeInDown 0.6s var(--gentle);
+    }
+
+    .title-main {
+      font-size: clamp(3rem, 10vw, 4.5rem);
+      font-weight: 700;
+      line-height: 0.9;
+      letter-spacing: -0.05em;
+      text-transform: uppercase;
+      background: linear-gradient(135deg, #ffffff 50%, var(--accent));
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+    }
+
+    .status-label {
+      font-size: 0.8rem;
+      color: var(--muted);
+      text-transform: uppercase;
+      letter-spacing: 0.2em;
+      margin-top: 8px;
+      display: block;
+    }
+
+    /* Selector de Modos / Niveles */
+    .menu-options {
+      display: flex;
+      flex-direction: column;
+      gap: 16px;
+      width: 100%;
+      max-width: 360px;
+      margin: 0 auto;
+    }
+
+    .mode-card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 24px;
+      padding: 24px;
+      text-align: left;
+      cursor: pointer;
+      transition: transform 0.2s var(--gentle), border-color 0.2s, background 0.2s;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .mode-card:active {
+      transform: scale(0.96);
+    }
+
+    .mode-card:hover {
+      border-color: var(--accent);
+      background: var(--surface-hover);
+    }
+
+    .mode-card h3 {
+      font-size: 1.25rem;
+      font-weight: 600;
+      margin-bottom: 4px;
+    }
+
+    .mode-card p {
+      font-size: 0.85rem;
+      color: var(--muted);
+      padding-right: 40px;
+    }
+
+    .mode-card .icon-wrapper {
+      position: absolute;
+      right: 24px;
+      top: 50%;
+      transform: translateY(-50%);
+      color: var(--accent);
+      opacity: 0.8;
+    }
+
+    /* Cabecera del Gameplay */
+    .header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      width: 100%;
+      max-width: 400px;
+      margin: 0 auto;
+    }
+
+    .header-title-container {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+    }
+
+    .header-title {
+      font-size: 1.5rem;
+      font-weight: 700;
+      letter-spacing: -0.02em;
+    }
+
+    .icon-btn {
+      width: 40px;
+      height: 40px;
+      border-radius: 50%;
+      background: var(--surface);
+      border: 1px solid var(--border);
+      color: var(--text);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      transition: transform 0.1s var(--gentle), background 0.2s;
+    }
+
+    .icon-btn:active {
+      transform: scale(0.9);
+      background: var(--surface-hover);
+    }
+
+    /* Contenedor del Área de Juego Dinámica */
+    .view-container {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+      width: 100%;
+    }
+
+    .board-wrapper {
+      position: relative;
+      width: 100%;
+      max-width: 400px;
+      padding: 16px;
+    }
+
+    /* Rejilla de Tubos Pro */
+    .board {
+      width: 100%;
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 24px;
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(55px, 1fr));
+      gap: 20px 14px;
+      padding: 28px 20px;
+      justify-items: center;
+      align-items: center;
+    }
+
+    /* Diseño Avanzado de los Tubos Químicos */
+    .tube-container {
+      position: relative;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      cursor: pointer;
+      width: 100%;
+      max-width: 60px;
+    }
+
+    .tube {
+      width: 100%;
+      aspect-ratio: 1 / 3.4;
+      border: 2px solid rgba(255, 255, 255, 0.15);
+      border-bottom-left-radius: 30px;
+      border-bottom-right-radius: 30px;
+      background: rgba(255, 255, 255, 0.02);
+      box-shadow: inset 0 0 15px rgba(255, 255, 255, 0.01);
+      position: relative;
+      overflow: hidden;
+      display: flex;
+      flex-direction: column-reverse; /* El fluido se apila desde abajo */
+      transition: transform 0.3s var(--spring), border-color 0.3s, box-shadow 0.3s;
+    }
+
+    /* Estado Seleccionado del Tubo (Levitación y Brillo) */
+    .tube-container.selected .tube {
+      transform: translateY(-16px);
+      border-color: #ffffff;
+      box-shadow: 0 10px 25px rgba(255, 255, 255, 0.1), inset 0 0 10px rgba(255, 255, 255, 0.05);
+    }
+
+    /* Capas de Fluido Líquido */
+    .liquid-segment {
+      width: 100%;
+      height: 25%; /* Basado en capacidad máxima fija de 4 bloques */
+      transition: height 0.3s var(--gentle), background-color 0.3s;
+      border-top: 1px solid rgba(255, 255, 255, 0.1);
+      position: relative;
+    }
+
+    .liquid-segment::after {
+      content: '';
+      position: absolute;
+      top: 0; left: 0; right: 0; bottom: 0;
+      background: linear-gradient(90deg, rgba(255,255,255,0.15) 0%, rgba(255,255,255,0) 40%, rgba(0,0,0,0.2) 100%);
+    }
+
+    /* Inyección de Estilos de Color con Filtro Drop-Shadow de Alta Fidelidad */
+    .c-0 { background-color: var(--color-0); filter: drop-shadow(0 0 8px var(--color-0)); }
+    .c-1 { background-color: var(--color-1); filter: drop-shadow(0 0 8px var(--color-1)); }
+    .c-2 { background-color: var(--color-2); filter: drop-shadow(0 0 8px var(--color-2)); }
+    .c-3 { background-color: var(--color-3); filter: drop-shadow(0 0 8px var(--color-3)); }
+    .c-4 { background-color: var(--color-4); filter: drop-shadow(0 0 8px var(--color-4)); }
+    .c-5 { background-color: var(--color-5); filter: drop-shadow(0 0 8px var(--color-5)); }
+
+    /* Indicador de Líquido Completado de Forma Unánime */
+    .tube-container.completed .tube {
+      animation: tubeGlowPulse 1.5s infinite alternate;
+      border-color: var(--accent);
+    }
+
+    /* Menú Inferior de Control */
+    .bottom-controls {
+      display: flex;
+      justify-content: center;
+      gap: 16px;
+      width: 100%;
+      max-width: 400px;
+      margin: 0 auto;
+    }
+
+    .control-card-btn {
+      flex: 1;
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 20px;
+      padding: 14px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 10px;
+      cursor: pointer;
+      transition: transform 0.2s var(--gentle), background 0.2s, border-color 0.2s;
+    }
+
+    .control-card-btn:active { transform: scale(0.95); }
+    .control-card-btn:hover { border-color: rgba(255,255,255,0.2); background: var(--surface-hover); }
+    .control-card-btn span { font-size: 0.9rem; font-weight: 600; text-transform: uppercase; letter-spacing: 0.05em; }
+
+    /* Modales de Victoria Estilo Emergente Deslizante */
+    .modal-overlay {
+      position: fixed;
+      inset: 0;
+      background: rgba(0, 0, 0, 0.85);
+      backdrop-filter: blur(8px);
+      z-index: 100;
+      display: flex;
+      align-items: flex-end;
+      justify-content: center;
+      opacity: 0;
+      pointer-events: none;
+      transition: opacity 0.3s ease;
+    }
+
+    .modal-overlay.active {
+      opacity: 1;
+      pointer-events: auto;
+    }
+
+    .modal-box {
+      width: 100%;
+      max-width: 450px;
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-top-left-radius: 32px;
+      border-top-right-radius: 32px;
+      padding: 40px 24px;
+      text-align: center;
+      transform: translateY(100%);
+      transition: transform var(--spring) 0.5s;
+    }
+
+    .modal-overlay.active .modal-box {
+      transform: translateY(0);
+    }
+
+    .modal-title {
+      font-size: 2.5rem;
+      font-weight: 700;
+      letter-spacing: -0.03em;
+      margin-bottom: 8px;
+      text-transform: uppercase;
+    }
+
+    /* Canvas Absoluto para Partículas */
+    #particles-canvas {
+      position: absolute;
+      inset: 0;
+      width: 100%;
+      height: 100%;
+      z-index: 5;
+      pointer-events: none;
+    }
+
+    /* Keyframes y Animaciones Coreografiadas */
+    @keyframes fadeInDown {
+      from { opacity: 0; transform: translateY(-20px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    @keyframes tubeGlowPulse {
+      0% { box-shadow: 0 0 5px rgba(0, 255, 136, 0.2); }
+      100% { box-shadow: 0 0 20px rgba(0, 255, 136, 0.6); }
+    }
+  </style>
+</head>
+<body>
+
+  <canvas id="particles-canvas"></canvas>
+
+  <div id="home-screen" class="screen">
+    <div class="brand-area">
+      <span class="status-label">SYSTEM ENGINE V2.0 // FLUX</span>
+      <h1 class="title-main">CYBER<br>SORT</h1>
+    </div>
+
+    <div class="menu-options">
+      <div class="mode-card" onclick="game.start('easy')">
+        <h3>Modo Neutro</h3>
+        <p>Alineación molecular simple. 6 Inyectores.</p>
+        <div class="icon-wrapper"><i data-lucide="shield"></i></div>
+      </div>
+      <div class="mode-card" onclick="game.start('medium')">
+        <h3>Modo Centrifugado</h3>
+        <p>Complejidad de espectro cuántico. 8 Inyectores.</p>
+        <div class="icon-wrapper"><i data-lucide="zap"></i></div>
+      </div>
+      <div class="mode-card" onclick="game.start('hard')">
+        <h3>Modo Sobrecarga</h3>
+        <p>Inestabilidad cromática extrema. 11 Inyectores.</p>
+        <div class="icon-wrapper"><i data-lucide="activity"></i></div>
+      </div>
+    </div>
+
+    <div style="text-align: center;">
+      <span class="status-label">Desarrollado en Arquitectura Minimalista</span>
+    </div>
+  </div>
+
+  <div id="game-screen" class="screen hidden">
+    <div class="header">
+      <button class="icon-btn" onclick="game.exit()"><i data-lucide="arrow-left"></i></button>
+      <div class="header-title-container">
+        <span class="status-label" style="margin: 0;">ESTADO</span>
+        <div class="header-title" id="game-status-title">REORDENANDO</div>
+      </div>
+      <button class="icon-btn" onclick="game.restart()"><i data-lucide="rotate-ccw"></i></button>
+    </div>
+
+    <div class="view-container">
+      <div class="board-wrapper">
+        <div class="board" id="tubes-grid">
+          </div>
+      </div>
+    </div>
+
+    <div class="bottom-controls">
+      <div class="control-card-btn" onclick="game.restart()">
+        <i data-lucide="refresh-cw" style="width: 18px; color: var(--accent);"></i>
+        <span>Reiniciar Matriz</span>
+      </div>
+    </div>
+  </div>
+
+  <div id="victory-modal" class="modal-overlay">
+    <div class="modal-box">
+      <h2 class="modal-title" style="color: var(--accent);">MATRIZ PURIFICADA</h2>
+      <p class="status-label" style="margin-bottom: 32px;">Todos los fluidos han estabilizado su vector molecular</p>
+      
+      <div class="mode-card" onclick="game.exit()" style="border-color: var(--accent); background: rgba(0, 255, 136, 0.02);">
+        <div class="mode-info" style="text-align: center; width: 100%;">
+          <span class="mode-title" style="color: #fff; display: block;">VOLVER AL NÚCLEO</span>
+          <span class="mode-desc" style="font-size: 0.8rem;">Cargar nuevos patrones estables</span>
+        </div>
+        <div class="icon-btn" style="background: rgba(0,255,136,0.1); border: 1px solid var(--accent);"><i data-lucide="check" style="color: var(--accent);"></i></div>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    // Inicialización Instantánea de Iconografía Global
+    lucide.createIcons();
+
+    // --- SINTETIZADOR DE AUDIO FX INTEGRADO (WEB AUDIO API) ---
+    class AudioManager {
+      constructor() {
+        this.ctx = null;
+      }
+      init() {
+        if (!this.ctx) {
+          this.ctx = new (window.AudioContext || window.webkitAudioContext)();
+        }
+      }
+      play(type) {
+        this.init();
+        if (this.ctx.state === 'suspended') this.ctx.resume();
+        const now = this.ctx.currentTime;
+
+        if (type === 'select') {
+          const osc = this.ctx.createOscillator();
+          const gain = this.ctx.createGain();
+          osc.type = 'sine';
+          osc.frequency.setValueAtTime(440, now);
+          osc.frequency.exponentialRampToValueAtTime(880, now + 0.08);
+          gain.gain.setValueAtTime(0.15, now);
+          gain.gain.linearRampToValueAtTime(0.01, now + 0.08);
+          osc.connect(gain); gain.connect(this.ctx.destination);
+          osc.start(now); osc.stop(now + 0.09);
+        }
+        else if (type === 'pour') {
+          const osc = this.ctx.createOscillator();
+          const gain = this.ctx.createGain();
+          osc.type = 'triangle';
+          osc.frequency.setValueAtTime(587.33, now);
+          osc.frequency.exponentialRampToValueAtTime(293.66, now + 0.25);
+          gain.gain.setValueAtTime(0.25, now);
+          gain.gain.linearRampToValueAtTime(0.01, now + 0.25);
+          osc.connect(gain); gain.connect(this.ctx.destination);
+          osc.start(now); osc.stop(now + 0.26);
+        }
+        else if (type === 'win') {
+          const notes = [523.25, 659.25, 783.99, 1046.50];
+          notes.forEach((freq, idx) => {
+            const osc = this.ctx.createOscillator();
+            const gain = this.ctx.createGain();
+            osc.type = 'sine';
+            osc.frequency.setValueAtTime(freq, now + idx * 0.06);
+            gain.gain.setValueAtTime(0.2, now + idx * 0.06);
+            gain.gain.linearRampToValueAtTime(0.01, now + idx * 0.06 + 0.3);
+            osc.connect(gain); gain.connect(this.ctx.destination);
+            osc.start(now + idx * 0.06); osc.stop(now + idx * 0.06 + 0.3);
+          });
+        }
+      }
+    }
+    const audio = new AudioManager();
+
+    // --- MOTOR DE PARTÍCULAS CANVAS (VICTORIA) ---
+    const canvas = document.getElementById('particles-canvas');
+    const ctx = canvas.getContext('2d');
+    let particles = [];
+
+    function resizeCanvas() {
+      canvas.width = window.innerWidth;
+      canvas.height = window.innerHeight;
+    }
+    window.addEventListener('resize', resizeCanvas);
+    resizeCanvas();
+
+    class Particle {
+      constructor(x, y, color) {
+        this.x = x;
+        this.y = y;
+        this.color = color;
+        this.radius = Math.random() * 3 + 2;
+        this.vx = (Math.random() - 0.5) * 10;
+        this.vy = (Math.random() - 0.5) * 10 - 3;
+        this.alpha = 1;
+        this.gravity = 0.15;
+      }
+      update() {
+        this.vy += this.gravity;
+        this.x += this.vx;
+        this.y += this.vy;
+        this.alpha -= 0.02;
+      }
+      draw() {
+        ctx.save();
+        ctx.globalAlpha = this.alpha;
+        ctx.beginPath();
+        ctx.arc(this.x, this.y, this.radius, 0, Math.PI * 2);
+        ctx.fillStyle = this.color;
+        ctx.shadowBlur = 12;
+        ctx.shadowColor = this.color;
+        ctx.fill();
+        ctx.restore();
+      }
+    }
+
+    function triggerTubeExplosion(tubeElement, colorCode) {
+      const rect = tubeElement.getBoundingClientRect();
+      const x = rect.left + rect.width / 2;
+      const y = rect.top;
+      const colorHex = getComputedStyle(document.documentElement).getPropertyValue(`--color-${colorCode}`).trim();
+      
+      for(let i=0; i<15; i++) {
+        particles.push(new Particle(x, y, colorHex));
+      }
+    }
+
+    function animateParticles() {
+      ctx.clearRect(0, 0, canvas.width, canvas.height);
+      particles = particles.filter(p => p.alpha > 0);
+      particles.forEach(p => { p.update(); p.draw(); });
+      requestAnimationFrame(animateParticles);
+    }
+    animateParticles();
+
+
+    // --- LÓGICA CORE DE WATER SORT (CYBER SORT) ---
+    class CyberSort {
+      constructor() {
+        this.tubesData = []; // Estado lógico indexado de la matriz química
+        this.selectedIdx = null;
+        this.mode = 'easy';
+        this.tubeCapacity = 4; // Capacidad invariable por diseño mecánico de celdas
+        this.isLocked = false; // Bloqueo de hilos en animación interactiva
+        
+        // Configuraciones de nivel encapsuladas
+        this.presets = {
+          easy:   { total: 6, empty: 2, colors: 4 },
+          medium: { total: 8, empty: 2, colors: 6 },
+          hard:   { total: 11, empty: 2, colors: 6 } // Balance óptimo de rejilla
+        };
+      }
+
+      start(mode) {
+        audio.init();
+        this.mode = mode;
+        this.selectedIdx = null;
+        this.isLocked = false;
+        
+        document.getElementById('home-screen').classList.add('hidden');
+        document.getElementById('game-screen').classList.remove('hidden');
+        document.getElementById('victory-modal').classList.remove('active');
+
+        this.generateLevelData();
+        this.renderBoardGrid();
+      }
+
+      exit() {
+        document.getElementById('game-screen').classList.add('hidden');
+        document.getElementById('home-screen').classList.remove('hidden');
+        document.getElementById('victory-modal').classList.remove('active');
+        this.tubesData = [];
+        this.selectedIdx = null;
+      }
+
+      restart() {
+        this.start(this.mode);
+      }
+
+      generateLevelData() {
+        const config = this.presets[this.mode];
+        this.tubesData = Array.from({ length: config.total }, () => []);
+        
+        // Pool ordenado de componentes químicos
+        let colorPool = [];
+        for (let c = 0; c < config.colors; c++) {
+          for (let b = 0; b < this.tubeCapacity; b++) {
+            colorPool.push(c);
+          }
+        }
+
+        // Algoritmo de desordenación simétrica aleatoria (Fisher-Yates)
+        for (let i = colorPool.length - 1; i > 0; i--) {
+          const j = Math.floor(Math.random() * (i + 1));
+          [colorPool[i], colorPool[j]] = [colorPool[j], colorPool[i]];
+        }
+
+        // Llenado ordenado de inyectores activos
+        const filledTubes = config.total - config.empty;
+        for (let t = 0; t < filledTubes; t++) {
+          this.tubesData[t] = colorPool.splice(0, this.tubeCapacity);
+        }
+      }
+
+      renderBoardGrid() {
+        const grid = document.getElementById('tubes-grid');
+        grid.innerHTML = '';
+
+        this.tubesData.forEach((tube, idx) => {
+          const container = document.createElement('div');
+          container.className = 'tube-container';
+          container.id = `tube-wrapper-${idx}`;
+          
+          // Validación de estado completo unánime
+          if (this.isTubeComplete(tube)) {
+            container.classList.add('completed');
+          }
+
+          if (this.selectedIdx === idx) {
+            container.classList.add('selected');
+          }
+
+          container.onclick = () => this.handleTubeInteraction(idx);
+
+          const tubeElement = document.createElement('div');
+          tubeElement.className = 'tube';
+
+          // Renderizar los segmentos de fluido lógico existentes
+          tube.forEach(colorId => {
+            const segment = document.createElement('div');
+            segment.className = `liquid-segment c-${colorId}`;
+            tubeElement.appendChild(segment);
+          });
+
+          container.appendChild(tubeElement);
+          grid.appendChild(container);
+        });
+      }
+
+      handleTubeInteraction(idx) {
+        if (this.isLocked) return;
+
+        if (this.selectedIdx === null) {
+          // Primer toque: Selección de origen químico
+          if (this.tubesData[idx].length > 0) {
+            this.selectedIdx = idx;
+            audio.play('select');
+            this.renderBoardGrid();
+          }
+        } else {
+          // Segundo toque: Destino de vertido procesado
+          if (this.selectedIdx === idx) {
+            // Deselección amortiguada
+            this.selectedIdx = null;
+            audio.play('select');
+            this.renderBoardGrid();
+          } else {
+            this.executeChemicalPour(this.selectedIdx, idx);
+          }
+        }
+      }
+
+      executeChemicalPour(fromIdx, toIdx) {
+        const source = this.tubesData[fromIdx];
+        const dest = this.tubesData[toIdx];
+
+        // Regla de Validación 1: El origen no puede estar vacío
+        if (source.length === 0) {
+          this.selectedIdx = null;
+          this.renderBoardGrid();
+          return;
+        }
+
+        // Regla de Validación 2: El destino no puede estar saturado
+        if (dest.length >= this.tubeCapacity) {
+          this.selectedIdx = null;
+          this.renderBoardGrid();
+          return;
+        }
+
+        const colorToMove = source[source.length - 1];
+
+        // Regla de Validación 3: Concordancia de espectro cromático
+        if (dest.length > 0 && dest[dest.length - 1] !== colorToMove) {
+          this.selectedIdx = null;
+          this.renderBoardGrid();
+          return;
+        }
+
+        // Calcular bloques contiguos del mismo color idéntico en el origen
+        let matchingBlocks = 0;
+        for (let i = source.length - 1; i >= 0; i--) {
+          if (source[i] === colorToMove) matchingBlocks++;
+          else break;
+        }
+
+        // Espacio disponible receptor
+        const availableSpace = this.tubeCapacity - dest.length;
+        const blocksToTransfer = Math.min(matchingBlocks, availableSpace);
+
+        // Bloqueo estricto de hilos de entrada durante la transferencia
+        this.isLocked = true;
+        this.selectedIdx = null;
+
+        audio.play('pour');
+
+        // Modificación estructural del modelo de datos
+        for (let b = 0; b < blocksToTransfer; b++) {
+          dest.push(source.pop());
+        }
+
+        // Retraso controlado para asimilar la transición CSS (.liquid-segment)
+        setTimeout(() => {
+          this.isLocked = false;
+          this.renderBoardGrid();
+          this.checkWinState();
+        }, 250);
+      }
+
+      isTubeComplete(tube) {
+        if (tube.length === 0) return false;
+        if (tube.length !== this.tubeCapacity) return false;
+        return tube.every(val => val === tube[0]);
+      }
+
+      checkWinState() {
+        const gameWon = this.tubesData.every(tube => {
+          return tube.length === 0 || this.isTubeComplete(tube);
+        });
+
+        if (gameWon) {
+          this.isLocked = true;
+          audio.play('win');
+
+          // Detonar partículas en cadena por cada tubo estabilizado
+          this.tubesData.forEach((tube, idx) => {
+            if(tube.length === this.tubeCapacity) {
+              const el = document.getElementById(`tube-wrapper-${idx}`);
+              if(el) triggerTubeExplosion(el, tube[0]);
+            }
+          });
+
+          setTimeout(() => {
+            document.getElementById('victory-modal').classList.add('active');
+          }, 600);
+        }
+      }
+    }
+
+    // Instanciación Global Única del Motor de Juego
+    const game = new CyberSort();
+  </script>
+</body>
+</html>

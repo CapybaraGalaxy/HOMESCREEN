@@ -1,0 +1,669 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+<title>Zero Sum - Minimal Puzzle</title>
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700&display=swap" rel="stylesheet" />
+<script src="https://unpkg.com/lucide@latest"></script>
+<style>
+  :root {
+    --bg: #000000;
+    --surface: #121212;
+    --surface-hover: #1e1e1e;
+    --text: #ffffff;
+    --muted: #888888;
+    --border: rgba(255, 255, 255, 0.1);
+    --pos: #00ff88;
+    --neg: #ff4444;
+    --spring: cubic-bezier(0.34, 1.56, 0.64, 1);
+    --gentle: cubic-bezier(0.2, 0.8, 0.2, 1);
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
+
+  body {
+    font-family: 'Outfit', sans-serif;
+    background: var(--bg);
+    color: var(--text);
+    overflow: hidden;
+    height: 100dvh;
+    user-select: none;
+  }
+
+  /* --- PANTALLAS --- */
+  .screen {
+    position: fixed; inset: 0; background: var(--bg);
+    display: flex; flex-direction: column;
+    transition: transform 0.5s var(--gentle), opacity 0.5s var(--gentle);
+  }
+  #home { transform: translateX(0); z-index: 1; }
+  #home.hidden { transform: translateX(-20%); opacity: 0; pointer-events: none; }
+  #game-view { transform: translateX(100%); z-index: 2; box-shadow: -10px 0 30px rgba(0,0,0,0.5); }
+  #game-view.active { transform: translateX(0); }
+
+  /* --- CABECERAS --- */
+  .header { display: flex; align-items: center; justify-content: space-between; padding: 24px 24px 12px; }
+  .header h1 { font-size: 1.25rem; font-weight: 500; display: flex; align-items: center; gap: 8px; }
+  .header-actions { display: flex; gap: 8px; }
+  .icon-btn {
+    background: var(--surface); border: 1px solid var(--border); color: var(--text);
+    width: 40px; height: 40px; border-radius: 50%; display: flex; align-items: center; justify-content: center;
+    transition: transform 0.2s; cursor: pointer;
+  }
+  .icon-btn:active { transform: scale(0.9); }
+
+  /* --- HOME --- */
+  .dashboard { flex: 1; overflow-y: auto; padding: 0 24px 40px; display: flex; flex-direction: column; gap: 40px; }
+  .hero { display: flex; flex-direction: column; align-items: center; gap: 10px; margin-top: 40px; animation: fadeInDown 0.8s var(--spring); }
+  .title-main { font-size: 4rem; font-weight: 700; line-height: 1; letter-spacing: -0.05em; text-align: center; }
+  .subtitle { color: var(--muted); font-size: 1.1rem; }
+
+  .mode-grid { display: grid; grid-template-columns: 1fr; gap: 14px; }
+  .mode-card {
+    background: var(--surface); border: 1px solid var(--border); border-radius: 24px; padding: 24px;
+    color: var(--text); cursor: pointer; display: flex; align-items: center; justify-content: space-between;
+    animation: slideUp 0.6s var(--spring) both; text-align: left; width: 100%;
+  }
+  .mode-card:active { transform: scale(0.96); background: var(--surface-hover); }
+
+  /* --- MODALES --- */
+  .modal {
+    position: fixed; inset: 0; background: rgba(0,0,0,0.8); backdrop-filter: blur(5px);
+    display: flex; align-items: center; justify-content: center;
+    opacity: 0; pointer-events: none; transition: opacity 0.3s; z-index: 50;
+  }
+  .modal.active { opacity: 1; pointer-events: all; }
+  .modal-box {
+    background: var(--surface); padding: 30px; border-radius: 20px; border: 1px solid var(--border);
+    width: 90%; max-width: 340px; transform: translateY(20px); transition: transform 0.3s var(--spring);
+  }
+  .modal.active .modal-box { transform: translateY(0); }
+
+  /* Toggles en Ajustes */
+  .setting-row { display: flex; justify-content: space-between; align-items: center; margin-top: 15px; }
+  .switch {
+    position: relative; display: inline-block; width: 50px; height: 26px;
+  }
+  .switch input { opacity: 0; width: 0; height: 0; }
+  .slider {
+    position: absolute; cursor: pointer; inset: 0; background-color: #333;
+    transition: .3s; border-radius: 34px;
+  }
+  .slider:before {
+    position: absolute; content: ""; height: 20px; width: 20px; left: 3px; bottom: 3px;
+    background-color: white; transition: .3s; border-radius: 50%;
+  }
+  input:checked + .slider { background-color: var(--pos); }
+  input:checked + .slider:before { transform: translateX(24px); }
+
+  /* --- JUEGO --- */
+  .view-container { flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 20px; }
+
+  .status-bar { width: 100%; max-width: 360px; display: flex; justify-content: space-between; margin-bottom: 30px; }
+  .status-box { text-align: center; }
+  .status-label { font-size: 0.8rem; color: var(--muted); text-transform: uppercase; letter-spacing: 0.1em; }
+  .status-value { font-size: 2rem; font-weight: 700; transition: color 0.3s; }
+
+  /* TABLERO */
+  .board {
+    position: relative; background: var(--surface); padding: 12px;
+    border-radius: 16px; border: 1px solid var(--border);
+    width: 100%; max-width: 360px; aspect-ratio: 1;
+  }
+
+  /* Fondo Estático */
+  #grid-bg {
+    display: grid; grid-template-columns: repeat(4, 1fr); grid-template-rows: repeat(4, 1fr);
+    gap: 12px; width: 100%; height: 100%;
+  }
+  .cell-bg { background: var(--bg); border-radius: 10px; box-shadow: inset 0 0 0 1px var(--border); width: 100%; height: 100%; transition: background-color 0.2s; }
+  .cell-bg.flash { background-color: rgba(255,255,255,0.8); }
+
+  /* Capa de Fichas Movibles */
+  #tiles-container { position: absolute; inset: 12px; pointer-events: none; z-index: 2; }
+
+  /* Canvas de Partículas */
+  #particles-canvas {
+    position: absolute; inset: 0; pointer-events: none; z-index: 3; border-radius: 16px;
+  }
+
+  .tile-wrap {
+    position: absolute; width: calc((100% - 36px) / 4); height: calc((100% - 36px) / 4);
+    transition: transform 0.15s ease-in-out;
+    transform: translate(calc(var(--c) * (100% + 12px)), calc(var(--r) * (100% + 12px)));
+  }
+  .tile-inner {
+    width: 100%; height: 100%; border-radius: 10px; display: flex; align-items: center; justify-content: center;
+    font-size: 2rem; font-weight: 600; font-variant-numeric: tabular-nums;
+    background: var(--bg); box-shadow: inset 0 0 0 1px var(--border);
+  }
+  
+  .tile-inner.pos { color: var(--pos); text-shadow: 0 0 15px rgba(0,255,136,0.4); }
+  .tile-inner.neg { color: var(--neg); text-shadow: 0 0 15px rgba(255,68,68,0.4); }
+  
+  .tile-wrap.new .tile-inner { animation: popIn 0.3s var(--spring) both; }
+  .tile-wrap.merge .tile-inner { animation: popMerge 0.3s var(--spring) both; }
+
+  @keyframes fadeInDown { from { opacity: 0; transform: translateY(-20px); } to { opacity: 1; transform: translateY(0); } }
+  @keyframes slideUp { from { opacity: 0; transform: translateY(30px); } to { opacity: 1; transform: translateY(0); } }
+  @keyframes popIn { 0% { transform: scale(0); } 100% { transform: scale(1); } }
+  @keyframes popMerge { 0% { transform: scale(1); } 50% { transform: scale(1.15); } 100% { transform: scale(1); } }
+
+  /* Game Over */
+  #game-over {
+    position: absolute; inset: 0; background: rgba(0,0,0,0.9); backdrop-filter: blur(5px);
+    display: flex; flex-direction: column; align-items: center; justify-content: center;
+    opacity: 0; pointer-events: none; transition: opacity 0.4s; z-index: 10; border-radius: 16px;
+  }
+  #game-over.active { opacity: 1; pointer-events: all; }
+
+</style>
+</head>
+<body>
+
+<div id="app">
+  <section id="home" class="screen">
+    <div class="header">
+      <h1><i data-lucide="infinity"></i> Minimal Games</h1>
+      <div class="header-actions">
+        <div class="icon-btn" id="btn-settings"><i data-lucide="settings" size="18"></i></div>
+        <div class="icon-btn" id="btn-info"><i data-lucide="info" size="18"></i></div>
+      </div>
+    </div>
+
+    <div class="dashboard">
+      <div class="hero">
+        <div class="title-main">ZERO<br>SUM</div>
+        <div class="subtitle">Equilibrio o Destrucción</div>
+      </div>
+
+      <div>
+        <h2 style="font-size: 0.8rem; text-transform: uppercase; letter-spacing: 0.1em; color: var(--muted); margin-bottom: 16px;">Menú</h2>
+        <div class="mode-grid">
+          <button class="mode-card" id="btn-start" style="animation-delay: 0.05s">
+            <div style="display: flex; gap: 16px; align-items: center;">
+              <i data-lucide="play-circle" size="28" color="#fff"></i>
+              <div><h3 style="font-size: 1.2rem;">Nueva Partida</h3><p style="font-size: 0.85rem; color: var(--muted);" id="lbl-limit-desc">Límite de masa: ±100</p></div>
+            </div>
+            <i data-lucide="chevron-right" color="#444"></i>
+          </button>
+
+          <button class="mode-card" id="btn-difficulty" style="animation-delay: 0.1s">
+            <div style="display: flex; gap: 16px; align-items: center;">
+              <i data-lucide="gauge" size="28" color="#ffaa00"></i>
+              <div><h3 style="font-size: 1.2rem;">Dificultad</h3><p style="font-size: 0.85rem; color: var(--pos); font-weight:600;" id="lbl-difficulty">FÁCIL (±100)</p></div>
+            </div>
+            <i data-lucide="refresh-cw" size="16" color="#888"></i>
+          </button>
+          
+          <div class="mode-card" style="animation-delay: 0.15s; cursor: default;">
+            <div style="display: flex; gap: 16px; align-items: center;">
+              <i data-lucide="trophy" size="28" color="#00ff88"></i>
+              <div><h3 style="font-size: 1.2rem;">Mejor Puntuación</h3><p style="font-size: 0.85rem; color: var(--muted);" id="high-score">0</p></div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section id="game-view" class="screen">
+    <div class="header">
+      <button class="icon-btn" id="btn-back"><i data-lucide="chevron-left"></i></button>
+      <h1><i data-lucide="crosshair" size="18"></i> JUGANDO</h1>
+      <button class="icon-btn" id="btn-restart"><i data-lucide="rotate-ccw"></i></button>
+    </div>
+    
+    <div class="view-container">
+        <div class="status-bar">
+            <div class="status-box">
+                <div class="status-label">Puntos</div>
+                <div class="status-value" id="ui-score">0</div>
+            </div>
+            <div class="status-box">
+                <div class="status-label">Balance (<span id="ui-max-limit">±100</span>)</div>
+                <div class="status-value" id="ui-balance">0</div>
+            </div>
+        </div>
+
+        <div class="board">
+            <div id="grid-bg"></div>
+            <div id="tiles-container"></div>
+            <canvas id="particles-canvas"></canvas>
+            <div id="game-over">
+                <h2 style="font-size: 2.5rem; margin-bottom: 10px;">Masa Crítica</h2>
+                <p style="color: var(--muted); margin-bottom: 30px;">El tablero se ha desestabilizado.</p>
+                <button class="mode-card" onclick="initGame()" style="width: 200px; justify-content: center; border-color: var(--text);">
+                    Reintentar
+                </button>
+            </div>
+        </div>
+    </div>
+  </section>
+
+  <div id="modal-info" class="modal">
+      <div class="modal-box">
+          <h2 style="margin-bottom: 15px; font-size: 1.5rem;">Cómo jugar</h2>
+          <ul style="color: var(--muted); font-size: 0.95rem; line-height: 1.5; display: flex; flex-direction: column; gap: 12px; margin-left: 20px;">
+              <li>Desliza para mover todas las fichas.</li>
+              <li>Si dos fichas chocan, <strong>se suman</strong>.</li>
+              <li><strong style="color:var(--text)">El Cero Absoluto:</strong> Si una ficha positiva y una negativa suman 0, se aniquilan dando puntos extra.</li>
+              <li>Sobrevive manteniendo el <strong style="color:var(--pos)">Balance Global</strong> dentro del límite de dificultad actual. Si te pasas, colapsas.</li>
+          </ul>
+          <button class="mode-card" id="btn-close-info" style="margin-top: 25px; width: 100%; justify-content: center;">
+              Entendido
+          </button>
+      </div>
+  </div>
+
+  <div id="modal-settings" class="modal">
+      <div class="modal-box">
+          <h2 style="margin-bottom: 20px; font-size: 1.5rem;">Ajustes visuales</h2>
+          <div class="setting-row">
+              <div>
+                  <h3 style="font-size: 1.1rem; font-weight:500;">Partículas</h3>
+                  <p style="font-size: 0.85rem; color: var(--muted);">Efectos al fusionar y destruir</p>
+              </div>
+              <label class="switch">
+                  <input type="checkbox" id="chk-particles" checked>
+                  <span class="slider"></span>
+              </label>
+          </div>
+          <button class="mode-card" id="btn-close-settings" style="margin-top: 35px; width: 100%; justify-content: center;">
+              Guardar
+          </button>
+      </div>
+  </div>
+</div>
+
+<script>
+  lucide.createIcons();
+
+  // --- CONFIGURACIÓN Y ESTADOS GLOBALES ---
+  const difficulties = [
+      { name: 'FÁCIL (±100)', limit: 100, color: '#00ff88' },
+      { name: 'MEDIO (±75)', limit: 75, color: '#ffaa00' },
+      { name: 'DIFÍCIL (±50)', limit: 50, color: '#ff6600' },
+      { name: 'EXPERTO (±25)', limit: 25, color: '#ff4444' }
+  ];
+  let currentDiffIdx = 0;
+  let LIMIT = difficulties[currentDiffIdx].limit;
+  let particlesEnabled = true;
+
+  // --- NAVEGACIÓN Y MENÚS ---
+  const homeScreen = document.getElementById('home');
+  const gameScreen = document.getElementById('game-view');
+  const infoModal = document.getElementById('modal-info');
+  const settingsModal = document.getElementById('modal-settings');
+
+  document.getElementById('btn-start').addEventListener('click', () => {
+    initGame();
+    homeScreen.classList.add('hidden');
+    gameScreen.classList.add('active');
+  });
+
+  document.getElementById('btn-back').addEventListener('click', () => {
+    homeScreen.classList.remove('hidden');
+    gameScreen.classList.remove('active');
+  });
+
+  document.getElementById('btn-info').addEventListener('click', () => infoModal.classList.add('active'));
+  document.getElementById('btn-close-info').addEventListener('click', () => infoModal.classList.remove('active'));
+  
+  document.getElementById('btn-settings').addEventListener('click', () => {
+      document.getElementById('chk-particles').checked = particlesEnabled;
+      settingsModal.classList.add('active');
+  });
+  document.getElementById('btn-close-settings').addEventListener('click', () => {
+      particlesEnabled = document.getElementById('chk-particles').checked;
+      settingsModal.classList.remove('active');
+  });
+
+  // Alternar dificultad de forma cíclica
+  const btnDiff = document.getElementById('btn-difficulty');
+  const lblDiff = document.getElementById('lbl-difficulty');
+  const lblLimitDesc = document.getElementById('lbl-limit-desc');
+
+  btnDiff.addEventListener('click', () => {
+      currentDiffIdx = (currentDiffIdx + 1) % difficulties.length;
+      const diff = difficulties[currentDiffIdx];
+      LIMIT = diff.limit;
+      lblDiff.innerText = diff.name;
+      lblDiff.style.color = diff.color;
+      lblLimitDesc.innerText = `Límite de masa: ±${LIMIT}`;
+  });
+
+  document.getElementById('btn-restart').addEventListener('click', initGame);
+
+  // --- MOTOR DEL JUEGO CON ANIMACIONES ---
+  const size = 4;
+  let board = [];
+  let score = 0;
+  let isMoving = false;
+  let highScore = localStorage.getItem('zerosum_highscore') || 0;
+  document.getElementById('high-score').innerText = highScore;
+
+  const scoreEl = document.getElementById('ui-score');
+  const balanceEl = document.getElementById('ui-balance');
+  const maxLimitEl = document.getElementById('ui-max-limit');
+  const gameOverEl = document.getElementById('game-over');
+  const tilesContainer = document.getElementById('tiles-container');
+  const gridBg = document.getElementById('grid-bg');
+
+  // --- MOTOR DE PARTÍCULAS (CANVAS) ---
+  const canvas = document.getElementById('particles-canvas');
+  const ctx = canvas.getContext('2d');
+  let particles = [];
+
+  function resizeCanvas() {
+      const rect = canvas.parentElement.getBoundingClientRect();
+      canvas.width = rect.width;
+      canvas.height = rect.height;
+  }
+  window.addEventListener('resize', resizeCanvas);
+
+  class Particle {
+      constructor(x, y, color, size, speedX, speedY, maxLife) {
+          this.x = x; this.y = y; this.color = color; this.size = size;
+          this.speedX = speedX; this.speedY = speedY; this.life = 0;
+          this.maxLife = maxLife;
+      }
+      update() {
+          this.x += this.speedX; this.y += this.speedY;
+          this.speedX *= 0.96; this.speedY *= 0.96; // Fricción suave
+          this.life++;
+      }
+      draw() {
+          let alpha = 1 - (this.life / this.maxLife);
+          ctx.save();
+          ctx.globalAlpha = alpha;
+          ctx.fillStyle = this.color;
+          ctx.beginPath();
+          ctx.arc(this.x, this.y, this.size, 0, Math.PI * 2);
+          ctx.fill();
+          ctx.restore();
+      }
+  }
+
+  function emitParticles(r, c, type, isPositive) {
+      if (!particlesEnabled) return;
+      const rect = canvas.getBoundingClientRect();
+      const cellSize = (rect.width - 36) / 4;
+      const pad = 12;
+      
+      // Coordenadas centrales exactas de la celda en el Canvas
+      const x = pad + c * (cellSize + pad) + cellSize / 2;
+      const y = pad + r * (cellSize + pad) + cellSize / 2;
+      
+      const color = isPositive ? '#00ff88' : '#ff4444';
+      const count = type === 'annihilation' ? 35 : 12;
+
+      for (let i = 0; i < count; i++) {
+          const angle = Math.random() * Math.PI * 2;
+          const speed = type === 'annihilation' ? (Math.random() * 5 + 3) : (Math.random() * 2 + 1);
+          particles.push(new Particle(
+              x, y,
+              type === 'annihilation' ? '#ffffff' : color,
+              Math.random() * 3 + 1,
+              Math.cos(angle) * speed,
+              Math.sin(angle) * speed,
+              Math.random() * 20 + 20
+          ));
+      }
+  }
+
+  function updateParticlesLoop() {
+      ctx.clearRect(0, 0, canvas.width, canvas.height);
+      for (let i = particles.length - 1; i >= 0; i--) {
+          particles[i].update();
+          particles[i].draw();
+          if (particles[i].life >= particles[i].maxLife) particles.splice(i, 1);
+      }
+      requestAnimationFrame(updateParticlesLoop);
+  }
+  requestAnimationFrame(updateParticlesLoop);
+
+
+  // Clase Tile para manejar el DOM de forma individual
+  class Tile {
+      constructor(r, c, val) {
+          this.r = r; this.c = c; this.val = val;
+          
+          this.wrap = document.createElement('div');
+          this.wrap.className = 'tile-wrap new';
+          this.wrap.style.setProperty('--r', this.r);
+          this.wrap.style.setProperty('--c', this.c);
+          
+          this.inner = document.createElement('div');
+          this.updateDom();
+          
+          this.wrap.appendChild(this.inner);
+          tilesContainer.appendChild(this.wrap);
+          
+          setTimeout(() => this.wrap.classList.remove('new'), 300);
+      }
+      
+      updateDom() {
+          this.inner.className = `tile-inner ${this.val > 0 ? 'pos' : 'neg'}`;
+          this.inner.innerText = this.val > 0 ? `+${this.val}` : this.val;
+      }
+      
+      moveTo(r, c) {
+          this.r = r; this.c = c;
+          this.wrap.style.setProperty('--r', this.r);
+          this.wrap.style.setProperty('--c', this.c);
+      }
+      
+      remove() {
+          setTimeout(() => this.wrap.remove(), 150);
+      }
+  }
+
+  function initGame() {
+    resizeCanvas();
+    tilesContainer.innerHTML = '';
+    board = Array(size).fill().map(() => Array(size).fill(null));
+    score = 0;
+    gameOverEl.classList.remove('active');
+    maxLimitEl.innerText = `±${LIMIT}`;
+    
+    if(gridBg.children.length === 0) {
+        for(let r=0; r<size; r++) {
+            for(let c=0; c<size; c++) {
+                let cell = document.createElement('div');
+                cell.className = 'cell-bg';
+                cell.id = `bg-${r}-${c}`;
+                gridBg.appendChild(cell);
+            }
+        }
+    }
+
+    addRandomTile();
+    addRandomTile();
+    updateUI();
+  }
+
+  function getBalance() {
+    return board.flat().reduce((acc, t) => acc + (t ? t.val : 0), 0);
+  }
+
+  function addRandomTile() {
+    let empty = [];
+    for(let r=0; r<size; r++) {
+        for(let c=0; c<size; c++) {
+            if(board[r][c] === null) empty.push({r, c});
+        }
+    }
+    if(empty.length === 0) return;
+
+    let {r, c} = empty[Math.floor(Math.random() * empty.length)];
+    let posProbability = 0.5 - (getBalance() / (LIMIT * 2)); 
+    let isPos = Math.random() < posProbability;
+    let val = (Math.random() < 0.7 ? 2 : 4) * (isPos ? 1 : -1);
+    
+    board[r][c] = new Tile(r, c, val);
+  }
+
+  function updateUI() {
+    let balance = getBalance();
+    scoreEl.innerText = score;
+    balanceEl.innerText = balance > 0 ? `+${balance}` : balance;
+    
+    if(balance > LIMIT * 0.7) balanceEl.style.color = 'var(--pos)';
+    else if(balance < -LIMIT * 0.7) balanceEl.style.color = 'var(--neg)';
+    else balanceEl.style.color = 'var(--text)';
+
+    if(Math.abs(balance) > LIMIT) setTimeout(gameOver, 300);
+  }
+
+  function gameOver() {
+    gameOverEl.classList.add('active');
+    if(score > highScore) {
+        highScore = score;
+        localStorage.setItem('zerosum_highscore', highScore);
+        document.getElementById('high-score').innerText = highScore;
+    }
+  }
+
+  function flashCell(r, c) {
+      setTimeout(() => {
+          let bg = document.getElementById(`bg-${r}-${c}`);
+          if(bg) { bg.classList.add('flash'); setTimeout(() => bg.classList.remove('flash'), 300); }
+      }, 150);
+  }
+
+  function updateTileValue(tile, newVal) {
+      setTimeout(() => {
+          tile.val = newVal;
+          tile.updateDom();
+          tile.wrap.classList.add('merge');
+          setTimeout(() => tile.wrap.classList.remove('merge'), 300);
+      }, 150);
+  }
+
+  // --- LÓGICA DE COLISIÓN ---
+  function slideLineObjects(line) {
+      let filtered = line.filter(t => t !== null);
+      let result = [];
+      
+      for (let i = 0; i < filtered.length; i++) {
+          let t = filtered[i];
+          if (i < filtered.length - 1) {
+              let next = filtered[i+1];
+              let sum = t.val + next.val;
+              
+              if (sum === 0) { // Aniquilación
+                  score += Math.abs(t.val) * 2;
+                  t.targetIndex = result.length; next.targetIndex = result.length;
+                  t.willDelete = true; next.willDelete = true; t.isAnnihilation = true;
+                  i++; continue;
+              } else { // Fusión
+                  t.targetIndex = result.length; next.targetIndex = result.length;
+                  t.willDelete = false; next.willDelete = true; t.newVal = sum;
+                  result.push(t); score += Math.abs(sum);
+                  i++; continue;
+              }
+          }
+          t.targetIndex = result.length; t.willDelete = false;
+          result.push(t);
+      }
+      while(result.length < size) result.push(null);
+      return { newArray: result, movedTiles: filtered };
+  }
+
+  function move(dir) {
+      if(isMoving || gameOverEl.classList.contains('active')) return;
+      isMoving = true;
+      let anyMoved = false;
+
+      for(let i=0; i<size; i++) {
+          let line = [];
+          for(let j=0; j<size; j++) {
+              if(dir === 'L') line.push(board[i][j]);
+              if(dir === 'R') line.push(board[i][size-1-j]);
+              if(dir === 'U') line.push(board[j][i]);
+              if(dir === 'D') line.push(board[size-1-j][i]);
+          }
+
+          let { newArray, movedTiles } = slideLineObjects(line);
+          
+          movedTiles.forEach(t => {
+              let newR, newC;
+              if(dir === 'L') { newR = i; newC = t.targetIndex; }
+              if(dir === 'R') { newR = i; newC = size - 1 - t.targetIndex; }
+              if(dir === 'U') { newR = t.targetIndex; newC = i; }
+              if(dir === 'D') { newR = size - 1 - t.targetIndex; newC = i; }
+              
+              if (t.r !== newR || t.c !== newC || t.willDelete || t.newVal !== undefined) anyMoved = true;
+              
+              t.moveTo(newR, newC);
+              
+              if (t.willDelete) {
+                  if (t.isAnnihilation) {
+                      flashCell(newR, newC);
+                      emitParticles(newR, newC, 'annihilation', t.val > 0);
+                  } else {
+                      emitParticles(newR, newC, 'merge', t.val > 0);
+                  }
+                  t.remove();
+              } else if (t.newVal !== undefined) {
+                  updateTileValue(t, t.newVal);
+                  emitParticles(newR, newC, 'merge', t.newVal > 0);
+                  t.newVal = undefined;
+              }
+          });
+
+          // Actualizar Matriz Lógica
+          for(let j=0; j<size; j++) {
+              let t = newArray[j];
+              if(dir === 'L') board[i][j] = t;
+              if(dir === 'R') board[i][size-1-j] = t;
+              if(dir === 'U') board[j][i] = t;
+              if(dir === 'D') board[size-1-j][i] = t;
+          }
+      }
+
+      if(anyMoved) {
+          setTimeout(() => {
+              addRandomTile(); updateUI(); isMoving = false;
+          }, 160);
+      } else {
+          isMoving = false;
+      }
+  }
+
+  // --- CONTROLES ---
+  document.addEventListener('keydown', (e) => {
+    if(e.key === 'ArrowLeft') move('L');
+    if(e.key === 'ArrowRight') move('R');
+    if(e.key === 'ArrowUp') move('U');
+    if(e.key === 'ArrowDown') move('D');
+  });
+
+  let touchStartX = 0; let touchStartY = 0;
+  const boardEl = document.querySelector('.board');
+  
+  boardEl.addEventListener('touchstart', e => {
+      touchStartX = e.changedTouches[0].screenX;
+      touchStartY = e.changedTouches[0].screenY;
+  }, {passive: true});
+
+  boardEl.addEventListener('touchend', e => {
+      let touchEndX = e.changedTouches[0].screenX;
+      let touchEndY = e.changedTouches[0].screenY;
+      let diffX = touchEndX - touchStartX;
+      let diffY = touchEndY - touchStartY;
+      
+      if(Math.abs(diffX) > Math.abs(diffY)) {
+          if(Math.abs(diffX) > 30) diffX > 0 ? move('R') : move('L');
+      } else {
+          if(Math.abs(diffY) > 30) diffY > 0 ? move('D') : move('U');
+      }
+  }, {passive: true});
+
+</script>
+</body>
+</html>

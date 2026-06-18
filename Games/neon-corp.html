@@ -1,0 +1,987 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+<title>NEON CORP // FINAL</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
+<script src="https://unpkg.com/lucide@latest"></script>
+<style>
+:root{
+  --bg:#050507;
+  --surface:#111114;
+  --surface-2:#17171c;
+  --surface-3:#1f2027;
+  --text:#ffffff;
+  --muted:#9a9aa7;
+  --border:rgba(255,255,255,.08);
+  --accent:#d500f9;
+  --accent-2:#00e5ff;
+  --success:#00ff88;
+  --danger:#ff4d4d;
+  --warning:#ffb300;
+  --accent-glow:rgba(213,0,249,.35);
+  --success-glow:rgba(0,255,136,.25);
+  --warning-glow:rgba(255,179,0,.25);
+  --spring:cubic-bezier(.34,1.56,.64,1);
+  --gentle:cubic-bezier(.2,.8,.2,1);
+  --r-xl:28px;
+  --r-lg:22px;
+  --r-md:16px;
+  --r-sm:12px;
+}
+*{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
+html,body{height:100%}
+body{
+  background:var(--bg);
+  color:var(--text);
+  font-family:'Outfit',sans-serif;
+  overflow:hidden;
+  height:100dvh;
+  user-select:none;
+}
+button,input{font:inherit}
+.screen{
+  position:fixed;inset:0;display:flex;flex-direction:column;
+  background:
+    radial-gradient(circle at top right, rgba(213,0,249,.15), transparent 28%),
+    radial-gradient(circle at bottom left, rgba(0,229,255,.08), transparent 25%),
+    var(--bg);
+  transition:transform .55s var(--gentle);
+}
+#home{z-index:5;justify-content:center;align-items:center;padding:24px;gap:24px}
+#game-view{z-index:1;transform:translateX(100%)}
+body.in-game #home{transform:translateX(-100%)}
+body.in-game #game-view{transform:translateX(0)}
+.home-bg-grid{position:absolute;inset:0;background-image:linear-gradient(rgba(255,255,255,.04) 1px, transparent 1px),linear-gradient(90deg, rgba(255,255,255,.04) 1px, transparent 1px);background-size:30px 30px;mask-image:radial-gradient(circle at center, black, transparent 75%);pointer-events:none}
+.title-main{font-size:clamp(3.6rem,9vw,5.6rem);line-height:.85;letter-spacing:-.08em;font-weight:900;text-transform:uppercase;text-align:center;background:linear-gradient(180deg,#fff 0%, var(--accent) 100%);-webkit-background-clip:text;-webkit-text-fill-color:transparent;filter:drop-shadow(0 0 20px var(--accent-glow))}
+.subtitle{color:var(--muted);text-align:center;margin-top:12px;letter-spacing:.16em;text-transform:uppercase;font-size:.8rem}
+.mode-card{width:100%;max-width:380px;background:rgba(18,18,18,.86);backdrop-filter:blur(14px);border:1px solid rgba(255,255,255,.08);border-radius:32px;padding:28px;cursor:pointer;transition:transform .12s var(--spring), border-color .2s, background .2s;box-shadow:0 20px 60px rgba(0,0,0,.55)}
+.mode-card:hover{border-color:rgba(213,0,249,.4)}
+.mode-card:active{transform:scale(.98)}
+.start-row{display:flex;align-items:center;justify-content:space-between;gap:16px}
+.start-chip{padding:10px 14px;border-radius:999px;background:rgba(213,0,249,.15);color:var(--accent);font-size:.75rem;font-weight:800;letter-spacing:.08em;white-space:nowrap}
+.header{display:flex;align-items:center;justify-content:space-between;padding:18px 20px;background:rgba(10,10,10,.84);backdrop-filter:blur(12px);border-bottom:1px solid var(--border)}
+.header-left{display:flex;align-items:center;gap:14px;min-width:0}
+.header-title{display:flex;flex-direction:column;min-width:0}
+.header-title h2{font-size:1.05rem;letter-spacing:.08em;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.header-title span{color:var(--muted);font-size:.7rem;letter-spacing:.12em;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.header-actions{display:flex;gap:10px}
+.icon-btn{width:42px;height:42px;border-radius:50%;border:1px solid var(--border);background:var(--surface);color:var(--text);display:flex;align-items:center;justify-content:center;cursor:pointer;transition:transform .15s var(--spring), border-color .2s, background .2s}
+.icon-btn:hover{border-color:rgba(213,0,249,.4);background:var(--surface-2)}
+.icon-btn:active{transform:scale(.92)}
+.news-wrapper{height:42px;border-bottom:1px solid var(--border);display:flex;align-items:center;overflow:hidden;background:rgba(255,255,255,.02)}
+.news-inner{display:flex;align-items:center;gap:16px;white-space:nowrap;animation:ticker 24s linear infinite;padding-left:100%;color:var(--success);font-weight:700}
+@keyframes ticker{from{transform:translateX(0)}to{transform:translateX(-100%)}}
+.tab-content{flex:1;overflow-y:auto;overflow-x:hidden}
+.tab-pane{display:none;flex-direction:column;padding:20px;min-height:100%;animation:fadeIn .25s var(--gentle)}
+.tab-pane.active{display:flex}
+@keyframes fadeIn{from{opacity:0;transform:translateY(12px)}to{opacity:1;transform:translateY(0)}}
+.bottom-nav{display:grid;grid-template-columns:repeat(5,1fr);background:rgba(10,10,10,.94);backdrop-filter:blur(20px);border-top:1px solid var(--border);padding-bottom:env(safe-area-inset-bottom)}
+.nav-btn{min-height:72px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:6px;color:var(--muted);transition:.2s;cursor:pointer}
+.nav-btn span{font-size:.68rem;font-weight:800;letter-spacing:.08em}
+.nav-btn.active{color:var(--accent);background:rgba(255,255,255,.03);box-shadow:inset 0 2px 0 var(--accent)}
+.dashboard{text-align:center;padding-top:12px}
+.status-label{color:var(--muted);text-transform:uppercase;letter-spacing:.14em;font-size:.74rem}
+.money-display{font-size:clamp(2.7rem, 8vw, 4.4rem);line-height:1;font-weight:900;letter-spacing:-.08em;margin-top:10px;text-shadow:0 0 20px var(--accent-glow);transition:transform .1s}
+.money-display.pop{transform:scale(1.03)}
+.cps-display{color:var(--success);font-weight:700;margin-top:10px}
+.stats-strip{margin-top:20px;display:grid;grid-template-columns:repeat(3,1fr);gap:12px}
+.stat-box{background:rgba(255,255,255,.03);border:1px solid var(--border);border-radius:18px;padding:16px}
+.stat-box h4{font-size:.7rem;letter-spacing:.12em;color:var(--muted);text-transform:uppercase}
+.stat-box strong{display:block;margin-top:10px;font-size:1.15rem}
+.view-container{flex:1;display:flex;align-items:center;justify-content:center;position:relative;min-height:340px}
+#particles-canvas{position:absolute;inset:0;width:100%;height:100%;pointer-events:none}
+.corp-logo{width:220px;height:220px;border-radius:48px;background:radial-gradient(circle at top, rgba(255,255,255,.08), transparent 60%), linear-gradient(180deg,#171717,#0f0f0f);border:2px solid rgba(213,0,249,.5);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:10px;position:relative;overflow:hidden;box-shadow:inset 0 0 40px rgba(213,0,249,.18), 0 0 60px rgba(213,0,249,.22);transition:transform .06s, filter .1s}
+.corp-logo::before{content:"";position:absolute;inset:-50%;background:linear-gradient(90deg, transparent, rgba(255,255,255,.12), transparent);animation:shine 6s linear infinite}
+@keyframes shine{from{transform:translateX(-100%) rotate(20deg)}to{transform:translateX(100%) rotate(20deg)}}
+.corp-logo:active{transform:scale(.92);filter:brightness(1.15)}
+.corp-logo h2{font-size:2.6rem;font-weight:900;letter-spacing:-.12em}
+.energy-ring{position:absolute;width:270px;height:270px;border-radius:50%;border:2px dashed rgba(255,255,255,.08);animation:rotateRing 18s linear infinite}
+@keyframes rotateRing{from{transform:rotate(0deg)}to{transform:rotate(360deg)}}
+.floating-text{position:absolute;font-weight:900;pointer-events:none;animation:floatUp .9s var(--gentle) forwards;text-shadow:0 0 12px currentColor;will-change:transform,opacity}
+@keyframes floatUp{0%{opacity:1;transform:translateY(0) scale(1)}100%{opacity:0;transform:translateY(-90px) scale(.7)}}
+.section-title{margin-bottom:18px}
+.section-title h3{font-size:1.6rem;letter-spacing:-.04em}
+.section-title p{color:var(--muted);margin-top:6px;font-size:.9rem;line-height:1.45}
+.products-grid{display:flex;flex-direction:column;gap:12px;padding-bottom:120px}
+.product-card{position:relative;overflow:hidden;background:rgba(18,18,18,.92);border:1px solid var(--border);border-radius:20px;padding:18px;display:flex;align-items:center;justify-content:space-between;gap:12px;transition:transform .12s var(--spring), border-color .2s, background .2s}
+.product-card::after{content:"";position:absolute;inset:0;background:linear-gradient(90deg, transparent, rgba(255,255,255,.03), transparent);transform:translateX(-100%)}
+.product-card:hover::after{animation:sweep 1s linear}
+@keyframes sweep{to{transform:translateX(100%)}}
+.product-card:active{transform:scale(.985)}
+.product-card.locked{opacity:.52;filter:grayscale(1)}
+.product-card.affordable{border-color:rgba(0,255,136,.24)}
+.product-card.focused{border-color:rgba(213,0,249,.38);box-shadow:0 0 0 1px rgba(213,0,249,.06)}
+.product-left{display:flex;gap:16px;align-items:center;min-width:0}
+.product-icon{width:56px;height:56px;border-radius:18px;background:rgba(255,255,255,.04);display:flex;align-items:center;justify-content:center;flex:0 0 auto}
+.product-info{min-width:0}
+.product-info h4{font-size:1rem;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.product-info p{color:var(--muted);font-size:.8rem;margin-top:4px}
+.product-right{text-align:right;flex:0 0 auto}
+.product-price{color:var(--accent);font-weight:800}
+.product-income{margin-top:4px;color:var(--success);font-size:.8rem}
+.product-tags{margin-top:5px;color:var(--muted);font-size:.72rem}
+.product-count{position:absolute;right:18px;top:50%;transform:translateY(-50%);font-size:3rem;font-weight:900;color:rgba(255,255,255,.03);pointer-events:none}
+.hq-grid{display:flex;flex-direction:column;gap:18px;padding-bottom:120px}
+.hq-card{background:rgba(18,18,18,.92);border:1px solid var(--border);border-radius:24px;padding:22px}
+.hq-head{display:flex;align-items:center;gap:12px}
+.hq-icon{width:52px;height:52px;border-radius:18px;background:rgba(255,255,255,.04);display:flex;align-items:center;justify-content:center;flex:0 0 auto}
+.hq-card p{margin-top:14px;color:var(--muted);line-height:1.5;font-size:.92rem}
+.action-btn{width:100%;border-radius:16px;padding:18px;margin-top:18px;border:1px solid var(--accent);background:rgba(213,0,249,.08);color:var(--accent);font-weight:900;font-family:inherit;cursor:pointer;position:relative;overflow:hidden}
+.action-btn:active{transform:scale(.985)}
+.action-btn:disabled{cursor:not-allowed;opacity:.6}
+.progress-bg{position:absolute;left:0;bottom:0;height:4px;width:0%;background:var(--accent)}
+.market-black{border-color:rgba(255,77,77,.3)}
+.market-black .action-btn{border-color:var(--danger);color:var(--danger);background:rgba(255,77,77,.06)}
+.stats-list{display:grid;grid-template-columns:1fr;gap:14px;padding-bottom:120px}
+.stat-line{background:rgba(255,255,255,.03);border:1px solid var(--border);border-radius:18px;padding:18px;display:flex;align-items:center;justify-content:space-between;gap:14px}
+.stat-line .sub{color:var(--muted);font-size:.8rem}
+.achievement-grid{display:grid;grid-template-columns:1fr;gap:12px;padding-bottom:120px}
+.achievement{background:rgba(255,255,255,.03);border:1px solid var(--border);border-radius:20px;padding:18px;display:flex;gap:16px;align-items:center}
+.achievement.locked{opacity:.45;filter:grayscale(1)}
+.achievement-icon{width:52px;height:52px;border-radius:16px;background:rgba(255,255,255,.04);display:flex;align-items:center;justify-content:center;flex:0 0 auto}
+.toast-container{position:fixed;top:90px;left:50%;transform:translateX(-50%);z-index:1000;display:flex;flex-direction:column;gap:10px;pointer-events:none;padding:0 16px;width:min(520px,100%)}
+.toast{background:rgba(18,18,18,.95);border:1px solid rgba(255,255,255,.08);border-radius:16px;padding:14px 18px;animation:toastIn .35s var(--spring);backdrop-filter:blur(10px);box-shadow:0 12px 30px rgba(0,0,0,.35)}
+@keyframes toastIn{from{opacity:0;transform:translateY(-16px) scale(.92)}to{opacity:1;transform:translateY(0) scale(1)}}
+.modal{position:fixed;inset:0;background:rgba(0,0,0,.75);backdrop-filter:blur(6px);display:flex;align-items:center;justify-content:center;padding:24px;opacity:0;pointer-events:none;transition:opacity .25s;z-index:100}
+.modal.active{opacity:1;pointer-events:auto}
+.modal-box{width:100%;max-width:360px;border-radius:28px;padding:28px;background:#121212;border:1px solid rgba(213,0,249,.3);box-shadow:0 0 40px rgba(213,0,249,.2);transform:translateY(40px);transition:transform .4s var(--spring)}
+.modal.active .modal-box{transform:translateY(0)}
+.modal-btn{width:100%;margin-top:22px;border:none;border-radius:16px;padding:18px;background:var(--accent);color:white;font-weight:900;font-family:inherit}
+.help-card{margin-top:16px;background:rgba(255,255,255,.03);border:1px solid var(--border);border-radius:18px;padding:16px;color:var(--muted);line-height:1.5;font-size:.9rem}
+.inline-chip{display:inline-flex;align-items:center;gap:6px;padding:8px 10px;border-radius:999px;background:rgba(255,255,255,.05);border:1px solid var(--border);font-size:.74rem;color:var(--muted);margin-right:6px;margin-bottom:6px}
+.search-row{display:flex;gap:10px;margin-bottom:14px}
+.search-row input{flex:1;border-radius:16px;border:1px solid var(--border);background:rgba(255,255,255,.04);padding:14px 16px;color:var(--text);outline:none}
+.search-row input:focus{border-color:rgba(213,0,249,.4)}
+.search-row .pill{border-radius:16px;border:1px solid var(--border);background:rgba(255,255,255,.03);padding:14px 14px;color:var(--muted);font-weight:800}
+@media (max-width:420px){
+  .title-main{font-size:4rem}
+  .money-display{font-size:3rem}
+  .corp-logo{width:190px;height:190px}
+  .stats-strip{grid-template-columns:1fr}
+  .nav-btn{min-height:68px}
+}
+</style>
+</head>
+<body>
+
+<div id="home" class="screen">
+  <div class="home-bg-grid"></div>
+  <div>
+    <div class="subtitle">Simulador Corporativo Distópico</div>
+    <h1 class="title-main">NEON<br>CORP</h1>
+  </div>
+
+  <div class="mode-card" onclick="startGame()">
+    <div class="start-row">
+      <div>
+        <h3>INICIAR SISTEMA</h3>
+        <p style="color:var(--muted); margin-top:8px; line-height:1.45;">Conecta el núcleo financiero, expande tu monopolio y domina mercados enteros.</p>
+      </div>
+      <div class="start-chip">v4.0 FINAL</div>
+    </div>
+
+    <div style="margin-top:24px; display:flex; align-items:center; justify-content:center; gap:12px; color:var(--accent); font-weight:800;">
+      <i data-lucide="power"></i>
+      <span>ENTRAR</span>
+    </div>
+  </div>
+</div>
+
+<div id="game-view" class="screen">
+  <div class="header">
+    <div class="header-left">
+      <div class="icon-btn" aria-hidden="true"><i data-lucide="hexagon"></i></div>
+      <div class="header-title">
+        <h2>OS_NEON v4.0</h2>
+        <span>MEGACORP NETWORK</span>
+      </div>
+    </div>
+    <div class="header-actions">
+      <button class="icon-btn" onclick="saveGame()" title="Guardar"><i data-lucide="save"></i></button>
+      <button class="icon-btn" onclick="resetGame()" title="Reiniciar"><i data-lucide="refresh-cw"></i></button>
+    </div>
+  </div>
+
+  <div class="news-wrapper">
+    <div class="news-inner" id="news-feed">Inicializando mercados financieros orbitales...</div>
+  </div>
+
+  <div class="toast-container" id="toast-container"></div>
+
+  <div class="tab-content">
+    <div class="tab-pane active" id="tab-core">
+      <div class="dashboard">
+        <div class="status-label">Capital Líquido</div>
+        <div class="money-display" id="money-display">$0</div>
+        <div class="cps-display" id="cps-display">+$0/s</div>
+
+        <div class="stats-strip">
+          <div class="stat-box">
+            <h4>CLICK</h4>
+            <strong id="click-power-display">1</strong>
+          </div>
+          <div class="stat-box">
+            <h4>CRÍTICO</h4>
+            <strong id="crit-display">5%</strong>
+          </div>
+          <div class="stat-box">
+            <h4>PRESTIGIO</h4>
+            <strong id="prestige-display">0</strong>
+          </div>
+        </div>
+
+        <div class="help-card">
+          <div><span class="inline-chip"><i data-lucide="mouse-pointer-2" width="14" height="14"></i> Toca el núcleo para ganar dinero</span><span class="inline-chip"><i data-lucide="trending-up" width="14" height="14"></i> Compra activos para generar CPS</span><span class="inline-chip"><i data-lucide="sparkles" width="14" height="14"></i> El prestigio reinicia pero mejora el futuro</span></div>
+        </div>
+      </div>
+
+      <div class="view-container" id="click-area">
+        <canvas id="particles-canvas"></canvas>
+        <div class="energy-ring"></div>
+        <div class="corp-logo" id="main-clicker" role="button" aria-label="Generar dinero">
+          <i data-lucide="hexagon" size="70" color="var(--accent)"></i>
+          <h2>NEON</h2>
+        </div>
+      </div>
+    </div>
+
+    <div class="tab-pane" id="tab-market">
+      <div class="section-title">
+        <h3>I+D CORPORATIVO</h3>
+        <p>Menos relleno, más decisiones. Cada producto pertenece a una era y aporta un rol distinto.</p>
+      </div>
+      <div class="search-row">
+        <input id="product-search" type="search" placeholder="Buscar producto, era o rol..." oninput="renderProducts()" />
+        <button class="pill" onclick="toggleAffordableFilter()" id="affordable-pill">Solo asequibles</button>
+      </div>
+      <div id="product-meta" style="margin-bottom:12px;color:var(--muted);font-size:.85rem;"></div>
+      <div class="products-grid" id="products-grid"></div>
+    </div>
+
+    <div class="tab-pane" id="tab-hq">
+      <div class="section-title">
+        <h3>SEDE CENTRAL</h3>
+        <p>Operaciones temporales, boosts y control del ritmo de partida.</p>
+      </div>
+      <div class="hq-grid">
+        <div class="hq-card">
+          <div class="hq-head">
+            <div class="hq-icon"><i data-lucide="megaphone" color="var(--accent)"></i></div>
+            <div>
+              <h3>Campaña Viral</h3>
+              <span style="color:var(--muted); font-size:.8rem;">x2 CPS · 30s</span>
+            </div>
+          </div>
+          <p>Inunda la red con una ola de propaganda algorítmica. Aumenta temporalmente la producción total.</p>
+          <button class="action-btn" id="btn-marketing" onclick="activateMarketing()">LANZAR CAMPAÑA ($5K)<div class="progress-bg" id="prog-marketing"></div></button>
+        </div>
+
+        <div class="hq-card">
+          <div class="hq-head">
+            <div class="hq-icon"><i data-lucide="cpu" color="var(--warning)"></i></div>
+            <div>
+              <h3>Overclock Nuclear</h3>
+              <span style="color:var(--muted); font-size:.8rem;">x5 Click · 15s</span>
+            </div>
+          </div>
+          <p>Comprimes el núcleo para exprimir cada pulsación. Riesgo térmico asumido.</p>
+          <button class="action-btn" id="btn-overclock" onclick="activateOverclock()" style="border-color:var(--warning); color:var(--warning); background:rgba(255,179,0,.08)">SOBRECARGAR ($12K)<div class="progress-bg" id="prog-overclock" style="background:var(--warning)"></div></button>
+        </div>
+
+        <div class="hq-card market-black">
+          <div class="hq-head">
+            <div class="hq-icon"><i data-lucide="skull" color="var(--danger)"></i></div>
+            <div>
+              <h3>Mercado Negro</h3>
+              <span style="color:var(--muted); font-size:.8rem;">x4 CPS · 10s</span>
+            </div>
+          </div>
+          <p>Canal ilegal de expansión. Subes la producción muy fuerte, pero solo por un instante.</p>
+          <button class="action-btn" onclick="activateBlackMarket()">COMPRAR DATOS ROBADOS ($50K)</button>
+        </div>
+
+        <div class="hq-card">
+          <div class="hq-head">
+            <div class="hq-icon"><i data-lucide="sparkles" color="var(--success)"></i></div>
+            <div>
+              <h3>Prestigio</h3>
+              <span style="color:var(--muted); font-size:.8rem;">Reset parcial · bonus permanente</span>
+            </div>
+          </div>
+          <p>Reinicia el progreso comercial y conserva Núcleos de Prestigio para acelerar la siguiente partida.</p>
+          <button class="action-btn" onclick="prestige()" style="border-color:var(--success); color:var(--success); background:rgba(0,255,136,.06)">ASCENDER CORPORACIÓN</button>
+        </div>
+      </div>
+    </div>
+
+    <div class="tab-pane" id="tab-stats">
+      <div class="section-title">
+        <h3>ESTADÍSTICAS</h3>
+        <p>Métrica real útil para decidir qué comprar y cuándo hacer prestigio.</p>
+      </div>
+      <div class="stats-list" id="stats-list"></div>
+    </div>
+
+    <div class="tab-pane" id="tab-achievements">
+      <div class="section-title">
+        <h3>LOGROS</h3>
+        <p>Objetivos de progreso y rarezas absurdas para dar hitos claros.</p>
+      </div>
+      <div class="achievement-grid" id="achievement-grid"></div>
+    </div>
+  </div>
+
+  <div class="bottom-nav">
+    <div class="nav-btn active" onclick="switchTab('core', this)"><i data-lucide="crosshair"></i><span>NÚCLEO</span></div>
+    <div class="nav-btn" onclick="switchTab('market', this)"><i data-lucide="shopping-cart"></i><span>MERCADO</span></div>
+    <div class="nav-btn" onclick="switchTab('hq', this)"><i data-lucide="building-2"></i><span>HQ</span></div>
+    <div class="nav-btn" onclick="switchTab('stats', this)"><i data-lucide="bar-chart-3"></i><span>DATOS</span></div>
+    <div class="nav-btn" onclick="switchTab('achievements', this)"><i data-lucide="trophy"></i><span>LOGROS</span></div>
+  </div>
+</div>
+
+<div class="modal" id="offline-modal">
+  <div class="modal-box">
+    <div style="display:flex; justify-content:center; margin-bottom:16px;">
+      <div class="hq-icon"><i data-lucide="wallet" color="var(--success)"></i></div>
+    </div>
+    <h2 style="font-size:2rem; letter-spacing:-.06em;">INGRESOS OFFLINE</h2>
+    <p style="margin-top:10px; color:var(--muted); line-height:1.5" id="offline-text">Tus divisiones siguieron generando dinero mientras estabas fuera.</p>
+    <h1 id="offline-earnings" style="margin-top:22px; color:var(--success); font-size:3rem; letter-spacing:-.08em;">+$0</h1>
+    <button class="modal-btn" onclick="closeOfflineModal()">RECOLECTAR</button>
+  </div>
+</div>
+
+<script>
+lucide.createIcons();
+
+/* ===============================
+   DATA: eras y productos únicos
+   =============================== */
+const PRODUCT_TIERS = [
+  { name: 'Gadgets', color: 'var(--accent)', description: 'Inicio rápido y barato.' },
+  { name: 'Infraestructura', color: 'var(--accent-2)', description: 'Escala estable de CPS.' },
+  { name: 'IA & Automatización', color: 'var(--success)', description: 'Multiplicadores y sinergias.' },
+  { name: 'Orbital', color: 'var(--warning)', description: 'Saltos de poder más grandes.' },
+  { name: 'Planetario', color: 'var(--danger)', description: 'Mecánicas de control global.' },
+  { name: 'Cosmos', color: '#a855f7', description: 'Final game y escalado extremo.' }
+];
+
+const PRODUCT_DEFS = [
+  { name:'Smart-Ring', icon:'watch', tier:0, role:'click', desc:'Aumenta el poder de clic.', baseCost:15, baseProd:1, growth:1.16, unique:'+clicks' },
+  { name:'Bio-Auriculares', icon:'headphones', tier:0, role:'cps', desc:'Genera CPS constante.', baseCost:40, baseProd:2, growth:1.16, unique:'cps' },
+  { name:'Lentes AR', icon:'glasses', tier:0, role:'crit', desc:'Mejora críticos y dinero por clic.', baseCost:110, baseProd:4, growth:1.17, unique:'crit' },
+  { name:'Holo-Watch', icon:'watch', tier:0, role:'cps', desc:'Automatización ligera.', baseCost:260, baseProd:8, growth:1.17, unique:'cps' },
+  { name:'Dron Asistente', icon:'drone', tier:1, role:'cps', desc:'Escala mejor que los gadgets.', baseCost:650, baseProd:18, growth:1.18, unique:'cps' },
+  { name:'Router Cuántico', icon:'router', tier:1, role:'boost', desc:'Pequeño bonus global al CPS.', baseCost:1500, baseProd:40, growth:1.18, unique:'multCps' },
+  { name:'Servidor Líquido', icon:'server', tier:1, role:'cps', desc:'Infraestructura estable de media partida.', baseCost:3500, baseProd:95, growth:1.18, unique:'cps' },
+  { name:'IA Personal', icon:'bot', tier:2, role:'boost', desc:'Incrementa click y CPS.', baseCost:9000, baseProd:180, growth:1.19, unique:'multBoth' },
+  { name:'Fábrica Autónoma', icon:'factory', tier:2, role:'cps', desc:'Pivote de producción fuerte.', baseCost:22000, baseProd:480, growth:1.19, unique:'cps' },
+  { name:'Red 6G', icon:'radio-tower', tier:2, role:'boost', desc:'Multiplica el mercado completo.', baseCost:55000, baseProd:1200, growth:1.19, unique:'multCps' },
+  { name:'Copia Digital', icon:'copy', tier:2, role:'click', desc:'Refuerza tus clics de forma permanente.', baseCost:130000, baseProd:2500, growth:1.20, unique:'click' },
+  { name:'Estación Orbital', icon:'orbit', tier:3, role:'cps', desc:'Primer salto al espacio.', baseCost:300000, baseProd:6200, growth:1.20, unique:'cps' },
+  { name:'Satélite Privado', icon:'satellite', tier:3, role:'boost', desc:'Multiplica CPS de base.', baseCost:850000, baseProd:15000, growth:1.20, unique:'multCps' },
+  { name:'Manipulador Climático', icon:'cloud-lightning', tier:3, role:'boost', desc:'Impacta toda la economía.', baseCost:2_400_000, baseProd:38000, growth:1.21, unique:'multBoth' },
+  { name:'Ciudad Flotante', icon:'building-2', tier:3, role:'cps', desc:'Producción urbana gigantesca.', baseCost:6_500_000, baseProd:90000, growth:1.21, unique:'cps' },
+  { name:'Monopolio del Agua', icon:'droplets', tier:4, role:'boost', desc:'Restaura margen y potencia CPS.', baseCost:18_000_000, baseProd:220000, growth:1.22, unique:'multCps' },
+  { name:'Banco Planetario', icon:'banknote', tier:4, role:'cps', desc:'Generación financiera masiva.', baseCost:52_000_000, baseProd:580000, growth:1.22, unique:'cps' },
+  { name:'Mente Colmena', icon:'network', tier:4, role:'boost', desc:'Sinergia real con todos los activos.', baseCost:150_000_000, baseProd:1_400_000, growth:1.22, unique:'multBoth' },
+  { name:'Esfera Dyson', icon:'sun', tier:5, role:'cps', desc:'Escala cósmica.', baseCost:420_000_000, baseProd:3_800_000, growth:1.23, unique:'cps' },
+  { name:'Máquina Temporal', icon:'clock-3', tier:5, role:'boost', desc:'Acelera toda la economía.', baseCost:1_200_000_000, baseProd:9_500_000, growth:1.23, unique:'multCps' },
+  { name:'Universo Simulado', icon:'monitor-smartphone', tier:5, role:'boost', desc:'Duplica el valor de todo.', baseCost:3_400_000_000, baseProd:24_000_000, growth:1.23, unique:'multBoth' },
+  { name:'Singularidad', icon:'sparkles', tier:5, role:'final', desc:'Cierra el arco y dispara el fin de juego.', baseCost:9_500_000_000, baseProd:75_000_000, growth:1.24, unique:'prestige' }
+];
+
+const NEWS = [
+  'NEON CORP compra una montaña para usarla como refrigeración líquida.',
+  'La IA legal de NEON gana 43000 juicios consecutivos.',
+  'Se descubre un paraíso fiscal dentro de un MMO.',
+  'Los bots publicitarios aprenden sarcasmo espontáneamente.',
+  'La compañía patenta el concepto de nostalgia.',
+  'La luna entra oficialmente en fase beta.',
+  'El algoritmo bursátil gana un torneo de ajedrez.',
+  'Los accionistas aprueban reemplazar árboles por routers decorativos.',
+  'NEON asegura que el monopolio total mejora la UX.',
+  'Nueva política: respirar sigue siendo gratuito por ahora.'
+];
+
+const ACHIEVEMENTS = [
+  { id: 1, title: 'Primer Crédito', desc: 'Consigue $100', goal: 100 },
+  { id: 2, title: 'Pequeño Monopolio', desc: 'Consigue $10K', goal: 10_000 },
+  { id: 3, title: 'Megacorp', desc: 'Consigue $1M', goal: 1_000_000 },
+  { id: 4, title: 'Señor Orbital', desc: 'Consigue $1B', goal: 1_000_000_000 },
+  { id: 5, title: 'Click Frenético', desc: 'Haz 500 clics', clicks: 500 },
+  { id: 6, title: 'CEO Digital', desc: 'Compra 12 productos', owned: 12 },
+  { id: 7, title: 'Capitalista Extremo', desc: 'Consigue 1 prestigio', prestige: 1 },
+  { id: 8, title: 'Imperio Cuántico', desc: 'Genera $1T', goal: 1_000_000_000_000 },
+  { id: 9, title: 'Comprador Compulsivo', desc: 'Compra 50 unidades', units: 50 },
+  { id: 10, title: 'Núcleo Vivo', desc: 'Haz 1000 clics', clicks: 1000 },
+  { id: 11, title: 'Mente Colmena', desc: 'Alcanza $10B', goal: 10_000_000_000 },
+  { id: 12, title: 'Fin de la Linealidad', desc: 'Compra Singularidad', special: 'Singularidad' }
+];
+
+const game = {
+  money: 0,
+  baseClick: 1,
+  prestige: 0,
+  clicks: 0,
+  critChance: 0.05,
+  critMulti: 5,
+  lastSave: Date.now(),
+  allTimeMoney: 0,
+  productsOwned: 0,
+  unitsOwned: 0,
+  marketingActive: false,
+  blackMarketActive: false,
+  overclockActive: false,
+  achievements: [],
+  affordableOnly: false,
+  selectedProduct: null,
+  tutorialSeen: false,
+  boosts: {
+    click: 1,
+    cps: 1,
+    total: 1
+  }
+};
+
+const products = PRODUCT_DEFS.map((def, i) => ({
+  id: i,
+  name: def.name,
+  icon: def.icon,
+  tier: def.tier,
+  role: def.role,
+  desc: def.desc,
+  unique: def.unique,
+  count: 0,
+  baseCost: def.baseCost,
+  cost: def.baseCost,
+  baseProd: def.baseProd,
+  growth: def.growth
+}));
+
+/* ===============================
+   DOM
+   =============================== */
+const moneyDisplay = document.getElementById('money-display');
+const cpsDisplay = document.getElementById('cps-display');
+const clickPowerDisplay = document.getElementById('click-power-display');
+const critDisplay = document.getElementById('crit-display');
+const prestigeDisplay = document.getElementById('prestige-display');
+const productsGrid = document.getElementById('products-grid');
+const achievementGrid = document.getElementById('achievement-grid');
+const statsList = document.getElementById('stats-list');
+const toastContainer = document.getElementById('toast-container');
+const clickArea = document.getElementById('click-area');
+const newsFeed = document.getElementById('news-feed');
+const canvas = document.getElementById('particles-canvas');
+const ctx = canvas.getContext('2d');
+const productSearch = document.getElementById('product-search');
+const productMeta = document.getElementById('product-meta');
+const affordablePill = document.getElementById('affordable-pill');
+
+/* ===============================
+   UTILS
+   =============================== */
+function formatMoney(num) {
+  if (!isFinite(num)) return '$∞';
+  if (num < 1000) return '$' + Math.floor(num);
+  const units = ['', 'K', 'M', 'B', 'T', 'Qa', 'Qi', 'Sx', 'Sp', 'Oc', 'No', 'Dc'];
+  const order = Math.floor(Math.log10(num) / 3);
+  const unit = units[order] || '∞';
+  const scaled = num / Math.pow(1000, order);
+  return '$' + scaled.toFixed(scaled >= 100 ? 0 : scaled >= 10 ? 1 : 2) + unit;
+}
+function random(min, max){ return Math.random() * (max - min) + min; }
+function clamp(n, min, max){ return Math.max(min, Math.min(max, n)); }
+function showToast(text) {
+  const toast = document.createElement('div');
+  toast.className = 'toast';
+  toast.innerHTML = `<strong>${text}</strong>`;
+  toastContainer.appendChild(toast);
+  setTimeout(() => toast.remove(), 2800);
+}
+function saveProgress(){
+  const payload = {
+    game: {
+      ...game,
+      boosts: { ...game.boosts }
+    },
+    products,
+    lastOnline: Date.now()
+  };
+  localStorage.setItem('neonCorpUltraSave', JSON.stringify(payload));
+}
+function hasProductByName(name){ return products.some(p => p.name === name && p.count > 0); }
+
+/* ===============================
+   TABS
+   =============================== */
+function switchTab(id, btn) {
+  document.querySelectorAll('.tab-pane').forEach(el => el.classList.remove('active'));
+  const tab = document.getElementById(`tab-${id}`);
+  if (tab) tab.classList.add('active');
+  document.querySelectorAll('.nav-btn').forEach(el => el.classList.remove('active'));
+  btn.classList.add('active');
+  if (id === 'market') renderProducts();
+  if (id === 'stats') renderStats();
+  if (id === 'achievements') renderAchievements();
+}
+
+/* ===============================
+   START / INIT
+   =============================== */
+function startGame() {
+  document.body.classList.add('in-game');
+  resizeCanvas();
+  loadGame();
+  if (!game.tutorialSeen) {
+    showToast('Tip: compra el siguiente activo con mejor coste/beneficio, no solo el más caro.');
+    game.tutorialSeen = true;
+  }
+  renderProducts();
+  renderAchievements();
+  renderStats();
+  updateUI();
+  saveProgress();
+}
+
+/* ===============================
+   CORE ECONOMY
+   =============================== */
+function getTierPrestigeBonus() {
+  return 1 + game.prestige * 0.05;
+}
+function getTotalCPS() {
+  const base = products.reduce((sum, p) => sum + p.count * p.baseProd, 0);
+  return base * game.boosts.cps * getTierPrestigeBonus() * game.boosts.total;
+}
+function getClickPower() {
+  return game.baseClick * game.boosts.click * (1 + game.prestige * 0.1) * game.boosts.total;
+}
+function getROI(product) {
+  const cpsGain = product.baseProd * game.boosts.cps * getTierPrestigeBonus() * game.boosts.total;
+  return cpsGain > 0 ? product.cost / cpsGain : Infinity;
+}
+function applyProductEffect(product) {
+  switch (product.unique) {
+    case 'click':
+      game.baseClick += Math.max(1, Math.floor(product.baseProd / 2));
+      showToast('Tu poder de clic ha mejorado.');
+      break;
+    case 'crit':
+      game.critChance = clamp(game.critChance + 0.01, 0.05, 0.30);
+      game.critMulti = Math.min(8, game.critMulti + 1);
+      showToast('Tus críticos se han vuelto más fiables.');
+      break;
+    case 'multCps':
+      game.boosts.cps *= 1.02;
+      showToast('Bonus global de CPS aplicado.');
+      break;
+    case 'multBoth':
+      game.boosts.cps *= 1.01;
+      game.boosts.click *= 1.01;
+      showToast('Sinergia global activada.');
+      break;
+    case 'prestige':
+      showToast('Has alcanzado el umbral final de este arco.');
+      break;
+    default:
+      break;
+  }
+}
+function addMoney(amount) {
+  if (!isFinite(amount) || amount <= 0) return;
+  game.money += amount;
+  game.allTimeMoney += amount;
+  updateUI();
+  checkAchievements();
+}
+function clickCore(x, y) {
+  game.clicks++;
+  let amount = getClickPower();
+  let critical = false;
+  if (Math.random() < game.critChance) {
+    amount *= game.critMulti;
+    critical = true;
+  }
+  addMoney(amount);
+  spawnFloatingText(x, y, amount, critical);
+  spawnParticles(x, y, critical ? 18 : 8);
+  moneyDisplay.classList.add('pop');
+  setTimeout(() => moneyDisplay.classList.remove('pop'), 110);
+}
+
+/* ===============================
+   CLICK EVENTS
+   =============================== */
+const clicker = document.getElementById('main-clicker');
+clicker.addEventListener('click', e => {
+  const rect = clickArea.getBoundingClientRect();
+  clickCore(e.clientX - rect.left, e.clientY - rect.top);
+});
+
+/* ===============================
+   FLOATING TEXT + PARTICLES
+   =============================== */
+function spawnFloatingText(x, y, amount, critical) {
+  const el = document.createElement('div');
+  el.className = 'floating-text';
+  el.style.left = x + 'px';
+  el.style.top = y + 'px';
+  el.style.color = critical ? 'var(--warning)' : 'var(--accent)';
+  el.style.fontSize = critical ? '1.8rem' : '1.2rem';
+  el.textContent = `${critical ? 'CRIT ' : '+'}${formatMoney(amount)}`;
+  clickArea.appendChild(el);
+  setTimeout(() => el.remove(), 900);
+}
+let particles = [];
+function resizeCanvas(){ canvas.width = canvas.offsetWidth; canvas.height = canvas.offsetHeight; }
+window.addEventListener('resize', resizeCanvas);
+function spawnParticles(x, y, amount) {
+  for (let i = 0; i < amount; i++) {
+    particles.push({ x, y, vx: random(-3,3), vy: random(-4,-1), size: random(2,6), life: 1 });
+  }
+}
+function updateParticles() {
+  ctx.clearRect(0,0,canvas.width,canvas.height);
+  for (let i = particles.length - 1; i >= 0; i--) {
+    const p = particles[i];
+    p.x += p.vx; p.y += p.vy; p.life -= 0.02; p.vy += 0.04;
+    ctx.globalAlpha = p.life;
+    ctx.fillStyle = '#d500f9';
+    ctx.beginPath();
+    ctx.arc(p.x, p.y, p.size, 0, Math.PI * 2);
+    ctx.fill();
+    if (p.life <= 0) particles.splice(i, 1);
+  }
+  requestAnimationFrame(updateParticles);
+}
+updateParticles();
+
+/* ===============================
+   PRODUCTS
+   =============================== */
+function getSearchTerm() { return (productSearch?.value || '').trim().toLowerCase(); }
+function toggleAffordableFilter(){
+  game.affordableOnly = !game.affordableOnly;
+  affordablePill.textContent = game.affordableOnly ? 'Asequibles: ON' : 'Solo asequibles';
+  renderProducts();
+}
+function renderProducts() {
+  const search = getSearchTerm();
+  const affordableCount = products.filter(p => game.money >= p.cost).length;
+  const visible = products.filter(product => {
+    const matchesSearch = !search || [product.name, product.desc, PRODUCT_TIERS[product.tier].name, product.role].join(' ').toLowerCase().includes(search);
+    const matchesAffordable = !game.affordableOnly || game.money >= product.cost;
+    return matchesSearch && matchesAffordable;
+  });
+
+  productMeta.textContent = `${visible.length} visibles · ${affordableCount} asequibles · ${products.length} productos totales`;
+  productsGrid.innerHTML = '';
+
+  visible.forEach(product => {
+    const affordable = game.money >= product.cost;
+    const unlocked = product.id < 3 || game.money >= product.baseCost * 0.35 || product.count > 0;
+    const roi = getROI(product);
+    const tier = PRODUCT_TIERS[product.tier];
+    const card = document.createElement('div');
+    card.className = `product-card ${!unlocked ? 'locked' : ''} ${affordable ? 'affordable' : ''} ${game.selectedProduct === product.id ? 'focused' : ''}`;
+    card.innerHTML = `
+      <div class="product-left">
+        <div class="product-icon"><i data-lucide="${product.icon}"></i></div>
+        <div class="product-info">
+          <h4>${product.name}</h4>
+          <p>${product.desc}</p>
+          <p style="margin-top:6px; font-size:.72rem; color:${tier.color}; text-transform:uppercase; letter-spacing:.08em; font-weight:800;">${tier.name} · ${product.role}</p>
+        </div>
+      </div>
+      <div class="product-right">
+        <div class="product-price">${formatMoney(product.cost)}</div>
+        <div class="product-income">+${formatMoney(product.baseProd)}/s</div>
+        <div class="product-tags">ROI: ${roi < 999999 ? formatMoney(roi) + ' s' : 'largo'}</div>
+      </div>
+      <div class="product-count">${product.count}</div>
+    `;
+    card.addEventListener('click', () => buyProduct(product.id));
+    card.addEventListener('mouseenter', () => { game.selectedProduct = product.id; });
+    productsGrid.appendChild(card);
+  });
+
+  lucide.createIcons();
+}
+function buyProduct(id) {
+  const product = products[id];
+  if (game.money < product.cost) {
+    showToast('Fondos insuficientes');
+    return;
+  }
+  game.money -= product.cost;
+  product.count++;
+  game.productsOwned++;
+  game.unitsOwned++;
+  product.cost = Math.floor(product.baseCost * Math.pow(product.growth, product.count));
+  applyProductEffect(product);
+  if (product.count === 1) showToast(`Nuevo activo: ${product.name}`);
+  if (product.unique === 'prestige') showToast('Singularidad adquirida. El mundo ya no escala de forma normal.');
+  updateUI();
+  renderProducts();
+  renderStats();
+  checkAchievements();
+  saveProgress();
+}
+
+/* ===============================
+   HQ ACTIONS
+   =============================== */
+function startCooldown(button, progress, duration, onEnd) {
+  button.disabled = true;
+  const start = Date.now();
+  const interval = setInterval(() => {
+    const ratio = clamp((Date.now() - start) / duration, 0, 1);
+    progress.style.width = (ratio * 100) + '%';
+    if (ratio >= 1) {
+      clearInterval(interval);
+      button.disabled = false;
+      progress.style.width = '0%';
+      onEnd?.();
+    }
+  }, 16);
+}
+function activateMarketing() {
+  if (game.money < 5000 || game.marketingActive) return;
+  game.money -= 5000;
+  game.marketingActive = true;
+  game.boosts.cps *= 2;
+  showToast('Campaña viral iniciada');
+  startCooldown(document.getElementById('btn-marketing'), document.getElementById('prog-marketing'), 30000, () => {
+    game.marketingActive = false;
+    game.boosts.cps /= 2;
+  });
+  updateUI();
+}
+function activateOverclock() {
+  if (game.money < 12000 || game.overclockActive) return;
+  game.money -= 12000;
+  game.overclockActive = true;
+  game.boosts.click *= 5;
+  showToast('Núcleo sobrecargado');
+  startCooldown(document.getElementById('btn-overclock'), document.getElementById('prog-overclock'), 15000, () => {
+    game.overclockActive = false;
+    game.boosts.click /= 5;
+  });
+  updateUI();
+}
+function activateBlackMarket() {
+  if (game.money < 50000 || game.blackMarketActive) return;
+  game.money -= 50000;
+  game.blackMarketActive = true;
+  game.boosts.cps *= 4;
+  game.boosts.click *= 1.5;
+  showToast('Mercado negro activado');
+  setTimeout(() => {
+    game.blackMarketActive = false;
+    game.boosts.cps /= 4;
+    game.boosts.click /= 1.5;
+  }, 10000);
+  updateUI();
+}
+
+/* ===============================
+   PRESTIGE
+   =============================== */
+function prestige() {
+  if (game.money < 1_000_000) {
+    showToast('Necesitas al menos $1M');
+    return;
+  }
+  const gain = Math.max(1, Math.floor(Math.sqrt(game.money / 1_000_000)));
+  game.prestige += gain;
+  products.forEach(p => { p.count = 0; p.cost = p.baseCost; });
+  game.money = 0;
+  game.baseClick = 1;
+  game.boosts.click = 1;
+  game.boosts.cps = 1;
+  showToast(`+${gain} Núcleo(s) de Prestigio`);
+  updateUI();
+  renderProducts();
+  renderStats();
+  checkAchievements();
+  saveProgress();
+}
+
+/* ===============================
+   STATS / ACHIEVEMENTS
+   =============================== */
+function renderStats() {
+  const topProducts = [...products].sort((a,b) => (b.count*b.baseProd) - (a.count*a.baseProd)).slice(0,5);
+  const best = topProducts[0];
+  const stats = [
+    ['Capital total generado', formatMoney(game.allTimeMoney), 'Histórico acumulado'],
+    ['Clics realizados', game.clicks.toLocaleString(), 'Interacciones totales'],
+    ['Productos comprados', game.productsOwned.toLocaleString(), 'Compras únicas'],
+    ['Unidades activas', game.unitsOwned.toLocaleString(), 'Activos en producción'],
+    ['Prestigio', game.prestige.toLocaleString(), 'Bonus permanente'],
+    ['Ingresos por segundo', formatMoney(getTotalCPS()), 'Producción actual'],
+    ['Poder de clic', formatMoney(getClickPower()), 'Valor por toque'],
+    ['Probabilidad crítica', Math.floor(game.critChance * 100) + '%', 'Crítico actual'],
+    ['Multiplicador crítico', 'x' + game.critMulti, 'Daño financiero'],
+    ['Mejor activo', best ? best.name : '—', best ? `${best.count} unidades` : 'Sin activos']
+  ];
+
+  statsList.innerHTML = '';
+  stats.forEach(item => {
+    const line = document.createElement('div');
+    line.className = 'stat-line';
+    line.innerHTML = `
+      <div>
+        <div>${item[0]}</div>
+        <div class="sub">${item[2]}</div>
+      </div>
+      <strong>${item[1]}</strong>
+    `;
+    statsList.appendChild(line);
+  });
+}
+function renderAchievements() {
+  achievementGrid.innerHTML = '';
+  ACHIEVEMENTS.forEach(achievement => {
+    const unlocked = game.achievements.includes(achievement.id);
+    const el = document.createElement('div');
+    el.className = `achievement ${unlocked ? '' : 'locked'}`;
+    el.innerHTML = `
+      <div class="achievement-icon"><i data-lucide="trophy"></i></div>
+      <div>
+        <h4>${achievement.title}</h4>
+        <p style="color:var(--muted); margin-top:4px; line-height:1.45;">${achievement.desc}</p>
+      </div>
+    `;
+    achievementGrid.appendChild(el);
+  });
+  lucide.createIcons();
+}
+function checkAchievements() {
+  ACHIEVEMENTS.forEach(a => {
+    if (game.achievements.includes(a.id)) return;
+    let unlocked = false;
+    if (a.goal && game.allTimeMoney >= a.goal) unlocked = true;
+    if (a.clicks && game.clicks >= a.clicks) unlocked = true;
+    if (a.owned && game.productsOwned >= a.owned) unlocked = true;
+    if (a.prestige && game.prestige >= a.prestige) unlocked = true;
+    if (a.units && game.unitsOwned >= a.units) unlocked = true;
+    if (a.special && hasProductByName(a.special)) unlocked = true;
+    if (unlocked) {
+      game.achievements.push(a.id);
+      showToast('Logro desbloqueado: ' + a.title);
+      renderAchievements();
+    }
+  });
+}
+
+/* ===============================
+   UI
+   =============================== */
+function updateUI() {
+  moneyDisplay.textContent = formatMoney(game.money);
+  cpsDisplay.textContent = '+' + formatMoney(getTotalCPS()) + '/s';
+  clickPowerDisplay.textContent = formatMoney(getClickPower());
+  critDisplay.textContent = Math.floor(game.critChance * 100) + '%';
+  prestigeDisplay.textContent = game.prestige;
+}
+
+/* ===============================
+   NEWS
+   =============================== */
+let currentNewsIndex = 0;
+function rotateNews() {
+  newsFeed.textContent = NEWS[currentNewsIndex];
+  currentNewsIndex = (currentNewsIndex + 1) % NEWS.length;
+}
+setInterval(rotateNews, 7000);
+rotateNews();
+
+/* ===============================
+   PASSIVE INCOME
+   =============================== */
+setInterval(() => {
+  addMoney(getTotalCPS() / 10);
+}, 100);
+
+/* ===============================
+   RANDOM EVENTS
+   =============================== */
+const RANDOM_EVENTS = [
+  { text: 'Influencer sintético promociona la marca', reward: () => addMoney(getTotalCPS() * 20) },
+  { text: 'El mercado colapsa favorablemente', reward: () => { game.boosts.cps *= 1.5; setTimeout(() => { game.boosts.cps /= 1.5; }, 15000); } },
+  { text: 'Hackeo exitoso a competidores', reward: () => addMoney(game.money * 0.05) },
+  { text: 'Apoyo institucional inesperado', reward: () => { game.boosts.total *= 1.1; setTimeout(() => { game.boosts.total /= 1.1; }, 12000); } }
+];
+setInterval(() => {
+  if (Math.random() < 0.15) {
+    const event = RANDOM_EVENTS[Math.floor(Math.random() * RANDOM_EVENTS.length)];
+    showToast(event.text);
+    event.reward();
+    updateUI();
+  }
+}, 45000);
+
+/* ===============================
+   SAVE / LOAD / RESET
+   =============================== */
+function saveGame(){
+  saveProgress();
+  showToast('Partida guardada');
+}
+function loadGame() {
+  const raw = localStorage.getItem('neonCorpUltraSave');
+  if (!raw) return;
+  try {
+    const save = JSON.parse(raw);
+    Object.assign(game, save.game || {});
+    game.boosts = { click: 1, cps: 1, total: 1, ...(save.game?.boosts || {}) };
+    (save.products || []).forEach((savedProduct, index) => {
+      if (products[index]) Object.assign(products[index], savedProduct);
+    });
+    const diff = Date.now() - (save.lastOnline || Date.now());
+    const seconds = Math.min(diff / 1000, 3600 * 4);
+    const earnings = getTotalCPS() * seconds;
+    if (earnings > 0) {
+      game.money += earnings;
+      game.allTimeMoney += earnings;
+      const modal = document.getElementById('offline-modal');
+      document.getElementById('offline-earnings').textContent = '+' + formatMoney(earnings);
+      modal.classList.add('active');
+    }
+    checkAchievements();
+  } catch (e) {
+    console.warn('Save corrupto:', e);
+  }
+}
+function closeOfflineModal(){ document.getElementById('offline-modal').classList.remove('active'); }
+function resetGame(){
+  if (!confirm('¿Resetear progreso completo?')) return;
+  localStorage.removeItem('neonCorpUltraSave');
+  location.reload();
+}
+setInterval(saveProgress, 20000);
+window.addEventListener('beforeunload', saveProgress);
+
+/* ===============================
+   LOOP
+   =============================== */
+setInterval(() => updateUI(), 120);
+
+/* ===============================
+   INIT
+   =============================== */
+renderProducts();
+renderAchievements();
+renderStats();
+updateUI();
+</script>
+</body>
+</html>
