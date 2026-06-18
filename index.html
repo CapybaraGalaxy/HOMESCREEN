@@ -18,7 +18,7 @@
         }
 
         body.no-blur { --blur-val: 0px; }
-        body.no-blur .overlay, body.no-blur .search-panel, body.no-blur .settings-panel, body.no-blur .tool-card, body.no-blur .local-chip { 
+        body.no-blur .overlay, body.no-blur .search-panel, body.no-blur .settings-panel, body.no-blur .tool-card, body.no-blur .local-chip, body.no-blur .custom-modal { 
             backdrop-filter: none !important; background: #111 !important; 
         }
 
@@ -76,7 +76,7 @@
         .local-chip strong { font-weight: 500; }
         .local-chip span { color: var(--text-muted); }
 
-        /* --- NUEVO: ESTILO DE LA VERSIÓN --- */
+        /* --- ESTILO DE LA VERSIÓN --- */
         .version-tag {
             position: fixed;
             bottom: 15px;
@@ -85,8 +85,11 @@
             color: var(--text-muted);
             opacity: 0.4;
             z-index: 50;
-            pointer-events: none;
+            cursor: pointer;
+            user-select: none;
+            transition: opacity 0.3s;
         }
+        .version-tag:hover { opacity: 0.8; }
 
         .ui-layer {
             position: relative;
@@ -156,6 +159,7 @@
             transition: all 0.4s var(--bezier);
             animation: fadeInItem 0.6s var(--bezier) both;
             flex-shrink: 0; 
+            cursor: pointer;
         }
         .tool-card:hover { background: #fff; color: #000; transform: translateY(-4px); }
         .tool-card:active { transform: scale(0.96); }
@@ -234,7 +238,6 @@
         .settings-panel.active { transform: scale(1) translateY(0); opacity: 1; pointer-events: auto; }
         .setting-item { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; }
         
-        /* Ocultamos el ajuste del chip por defecto, se activa en JS si es local */
         #settingLocalChip { display: none; }
 
         .switch { width: 40px; height: 22px; background: #333; border-radius: 20px; position: relative; cursor: pointer; transition: 0.3s; }
@@ -244,6 +247,47 @@
 
         .overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.6); backdrop-filter: blur(15px); opacity: 0; pointer-events: none; transition: 0.5s; z-index: 90; }
         .overlay.active { opacity: 1; pointer-events: auto; }
+
+        /* --- ESTILOS NUEVOS: MODALES PERSONALIZADOS --- */
+        .custom-modal {
+            position: fixed;
+            top: 50%; left: 50%;
+            transform: translate(-50%, -50%) scale(0.9);
+            width: 90%; max-width: 450px;
+            background: rgba(20, 20, 20, 0.75);
+            backdrop-filter: blur(var(--blur-val));
+            border: 1px solid var(--glass-border);
+            border-radius: 28px;
+            padding: 30px;
+            z-index: 200;
+            opacity: 0;
+            pointer-events: none;
+            transition: all 0.4s var(--bezier);
+            box-shadow: 0 30px 60px rgba(0,0,0,0.6);
+            text-align: center;
+        }
+        .custom-modal.active {
+            transform: translate(-50%, -50%) scale(1);
+            opacity: 1;
+            pointer-events: auto;
+        }
+        .modal-title { font-size: 1.4rem; font-weight: 500; margin-bottom: 12px; display: flex; align-items: center; justify-content: center; gap: 10px; }
+        .modal-text { font-size: 0.95rem; color: var(--text-muted); line-height: 1.5; margin-bottom: 25px; }
+        
+        .modal-buttons { display: flex; gap: 12px; justify-content: center; }
+        .modal-btn {
+            padding: 12px 24px;
+            border-radius: 50px;
+            font-family: 'Outfit';
+            font-size: 0.95rem;
+            cursor: pointer;
+            border: none;
+            transition: all 0.3s;
+        }
+        .modal-btn.primary { background: #fff; color: #000; font-weight: 500; }
+        .modal-btn.primary:disabled { background: #333; color: #666; cursor: not-allowed; }
+        .modal-btn.secondary { background: rgba(255,255,255,0.1); color: #fff; border: 1px solid var(--glass-border); }
+        .modal-btn.secondary:hover { background: rgba(255,255,255,0.2); }
 
         @keyframes fadeInItem { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
         @keyframes slideUp { from { opacity: 0; transform: translateY(30px); } to { opacity: 1; transform: translateY(0); } }
@@ -284,7 +328,7 @@
         <div><strong>VERSIÓN LOCAL</strong> <span>· Ir a web</span></div>
     </a>
 
-    <div class="version-tag">v0.5</div>
+    <div class="version-tag" id="versionTag">v0.5</div>
 
     <div class="ui-layer">
         <header class="header">
@@ -296,7 +340,28 @@
         </div>
     </div>
 
+    <div class="custom-modal" id="hiddenFolderModal">
+        <div class="modal-title"><i data-lucide="folder-lock" style="color: #FFD60A;"></i> Carpeta Oculta</div>
+        <p class="modal-text">Estás a punto de acceder a una carpeta oculta del sistema.</p>
+        <div style="margin-bottom: 25px; display: flex; justify-content: center;" id="hiddenAppArea"></div>
+        <div class="modal-buttons">
+            <button class="modal-btn secondary" onclick="closeModal('hiddenFolderModal')">Cerrar</button>
+        </div>
+    </div>
+
+    <div class="custom-modal" id="warningModal">
+        <div class="modal-title" style="color: #FF453A;"><i data-lucide="shield-alert"></i> Advertencia de uso</div>
+        <p class="modal-text">
+            Este catálogo de juegos es para su uso personal fuera del aula. El creador no apoya jugar videojuegos en clase o el trabajo. Si te encuentras ahí, deberías centrarte y hacer tus tareas.
+        </p>
+        <div class="modal-buttons">
+            <button class="modal-btn secondary" onclick="goBackFromWarning()">Volver</button>
+            <button class="modal-btn primary" id="continueBtn" disabled>Continuar (10s)</button>
+        </div>
+    </div>
+
     <script>
+        // Removido "Neo GameCenter" de este catálogo principal
         const tools = [
             { name: 'Progreso', icon: 'Loader2', url: 'Apps/progreso.html' },
             { name: 'Galería de iconos', icon: 'GalleryHorizontal', url: 'Apps/icontest.html' },
@@ -305,8 +370,10 @@
             { name: 'CraftPalette', icon: 'Command', url: 'Apps/craftpalette.html' },
             { name: 'Calculadora tiempo de descarga', icon: 'Download', url: 'Apps/calculadora-descarga.html' },
             { name: 'Medidas', icon: 'RulerDimensionLine', url: 'Apps/medidas.html' },
-            { name: 'Neo GameCenter', icon: 'Gamepad2', url: 'games.html' },
         ];
+
+        // Definición de la app oculta por separado
+        const hiddenApp = { name: 'Neo GameCenter', icon: 'Gamepad2', url: 'games.html' };
     </script>
 
     <div class="search-wrapper">
@@ -341,6 +408,73 @@
         const overlay = document.getElementById('overlay');
         const setPanel = document.getElementById('setPanel');
 
+        // LÓGICA DE CLICS EN VERSIÓN Y MODALES
+        let versionClicks = 0;
+        let warningTimer = null;
+
+        document.getElementById('versionTag').onclick = (e) => {
+            versionClicks++;
+            if(versionClicks === 5) {
+                versionClicks = 0; // Resetear contador
+                openModal('hiddenFolderModal');
+            }
+        };
+
+        function openModal(id) {
+            if(id === 'hiddenFolderModal') {
+                // Inyectar dinámicamente la app oculta dentro de la carpeta
+                document.getElementById('hiddenAppArea').innerHTML = `
+                    <div class="tool-card" onclick="triggerGameWarning()">
+                        <i data-lucide="${hiddenApp.icon}"></i><span>${hiddenApp.name}</span>
+                    </div>
+                `;
+                lucide.createIcons();
+            }
+            overlay.classList.add('active');
+            document.getElementById(id).classList.add('active');
+        }
+
+        function closeModal(id) {
+            document.getElementById(id).classList.remove('active');
+            if(!document.querySelector('.custom-modal.active') && !searchPanel.classList.contains('expanded')) {
+                overlay.classList.remove('active');
+            }
+            if(warningTimer) clearInterval(warningTimer);
+        }
+
+        function triggerGameWarning() {
+            // Cerrar carpeta oculta y abrir advertencia
+            document.getElementById('hiddenFolderModal').classList.remove('active');
+            openModal('warningModal');
+            
+            const continueBtn = document.getElementById('continueBtn');
+            continueBtn.disabled = true;
+            
+            let secondsLeft = 10;
+            continueBtn.innerText = `Continuar (${secondsLeft}s)`;
+
+            if(warningTimer) clearInterval(warningTimer);
+            
+            warningTimer = setInterval(() => {
+                secondsLeft--;
+                if(secondsLeft <= 0) {
+                    clearInterval(warningTimer);
+                    continueBtn.disabled = false;
+                    continueBtn.innerText = "Continuar";
+                    continueBtn.onclick = () => {
+                        window.location.href = hiddenApp.url;
+                    };
+                } else {
+                    continueBtn.innerText = `Continuar (${secondsLeft}s)`;
+                }
+            }, 1000);
+        }
+
+        function goBackFromWarning() {
+            closeModal('warningModal');
+            openModal('hiddenFolderModal');
+        }
+
         function toggleSearch(open) {
             if(window.hasHubError) return;
             if(open) {
@@ -351,7 +485,10 @@
                 renderResults("");
             } else {
                 searchPanel.classList.remove('expanded');
-                overlay.classList.remove('active');
+                // Solo remover el overlay si no hay modales activos
+                if(!document.querySelector('.custom-modal.active')) {
+                    overlay.classList.remove('active');
+                }
                 searchInput.value = "";
                 if (history.state && history.state.searchOpen) {
                     history.back();
@@ -363,12 +500,23 @@
             searchPanel.classList.remove('expanded');
             overlay.classList.remove('active');
             if(setPanel) setPanel.classList.remove('active');
+            document.querySelectorAll('.custom-modal').forEach(m => m.classList.remove('active'));
+            if(warningTimer) clearInterval(warningTimer);
         });
 
         document.getElementById('trigger').onclick = () => toggleSearch(true);
-        overlay.onclick = () => toggleSearch(false);
+        
+        overlay.onclick = () => { 
+            toggleSearch(false); 
+            document.querySelectorAll('.custom-modal').forEach(m => {
+                if(m.classList.contains('active')) closeModal(m.id);
+            });
+        };
+        
         searchInput.oninput = (e) => renderResults(e.target.value);
 
+        // Permitir buscar el Neo GameCenter únicamente si se busca desde la barra global (opcional)
+        // Por seguridad y consistencia con tu petición "esté escondido", se mantiene fuera de los resultados.
         function renderResults(val) {
             if(window.hasHubError) return;
             const filtered = tools.filter(t => t.name.toLowerCase().includes(val.toLowerCase()));
@@ -383,7 +531,12 @@
 
         window.onkeydown = (e) => {
             if((e.ctrlKey || e.metaKey) && e.key === 'k') { e.preventDefault(); toggleSearch(true); }
-            if(e.key === 'Escape') toggleSearch(false);
+            if(e.key === 'Escape') {
+                toggleSearch(false);
+                document.querySelectorAll('.custom-modal').forEach(m => {
+                    if(m.classList.contains('active')) closeModal(m.id);
+                });
+            }
         };
 
         let particles = [], animationId, canvas = document.getElementById('bgCanvas'), ctx = canvas.getContext('2d');
@@ -444,7 +597,6 @@
             const sBg = document.getElementById('toggleBg');
             const sDarkBg = document.getElementById('toggleDarkBg');
             
-            // Lógica de detección de entorno Local / Web
             const esLocal = window.location.protocol === 'file:' || window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1';
             const localChip = document.getElementById('localChip');
             const settingLocalChip = document.getElementById('settingLocalChip');
