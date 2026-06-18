@@ -8,7 +8,7 @@
     <script src="https://unpkg.com/lucide@latest"></script>
     <style>
         :root {
-            --bg: #ffffff00;
+            --bg: #121212; /* Negro claro por defecto */
             --text-main: #ffffff;
             --text-muted: #888888;
             --glass: rgba(15, 15, 15, 0.281);
@@ -34,6 +34,7 @@
             flex-direction: column;
             align-items: center;
             overflow: hidden;
+            transition: background-color 0.4s var(--bezier);
         }
 
         #bgCanvas {
@@ -103,6 +104,8 @@
         .tool-card {
             display: flex;
             align-items: center;
+            justify-content: center;
+            gap: 12px;
             padding: 12px 24px;
             background: var(--glass);
             backdrop-filter: blur(var(--blur-val));
@@ -116,9 +119,16 @@
         }
         .tool-card:hover { background: #fff; color: #000; transform: translateY(-4px); }
         .tool-card:active { transform: scale(0.96); }
-        .tool-card i { margin-right: 12px; width: 18px; }
+        
+        .tool-card i, .tool-card svg { 
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            width: 18px; 
+            height: 18px;
+            flex-shrink: 0;
+        }
 
-        /* Cartel de advertencia de errores */
         .error-card {
             display: flex;
             flex-direction: column;
@@ -197,7 +207,6 @@
     </style>
     
     <script>
-        // Sistema de captura temprana para que un error de sintaxis abajo no congele la carga inicial
         window.hasHubError = false;
         function showHtmlError(message) {
             window.hasHubError = true;
@@ -263,6 +272,7 @@
     <div class="settings-panel" id="setPanel">
         <h3 style="margin: 0 0 20px 0; font-weight: 500;">Ajustes</h3>
         <div class="setting-item"><span>Fondo Animado</span><div class="switch" id="toggleBg"></div></div>
+        <div class="setting-item"><span>Fondo Negro</span><div class="switch" id="toggleDarkBg"></div></div>
         <div class="setting-item"><span>Modo Lista</span><div class="switch" id="toggleList"></div></div>
         <div class="setting-item"><span>Desactivar Blur</span><div class="switch" id="toggleBlur"></div></div>
     </div>
@@ -296,7 +306,7 @@
         window.addEventListener('popstate', () => {
             searchPanel.classList.remove('expanded');
             overlay.classList.remove('active');
-            setPanel.classList.remove('active');
+            if(setPanel) setPanel.classList.remove('active');
         });
 
         document.getElementById('trigger').onclick = () => toggleSearch(true);
@@ -358,6 +368,14 @@
         }
         setInterval(updateClock, 1000);
 
+        function setBgColor(isDark) {
+            if (isDark) {
+                document.documentElement.style.setProperty('--bg', '#121212');
+            } else {
+                document.documentElement.style.setProperty('--bg', '#ffffff00');
+            }
+        }
+
         function init() {
             updateClock();
             if(window.hasHubError) return;
@@ -365,20 +383,56 @@
             grid.innerHTML = tools.map((t, i) => `<a href="${t.url}" class="tool-card" style="animation-delay: ${i * 0.05}s"><i data-lucide="${t.icon}"></i><span>${t.name}</span></a>`).join('');
             lucide.createIcons();
             
-            const sList = document.getElementById('toggleList'), sBlur = document.getElementById('toggleBlur'), sBg = document.getElementById('toggleBg');
-            if(localStorage.getItem('list') === 'true') { grid.classList.add('list-mode'); sList.classList.add('on'); }
-            if(localStorage.getItem('noblur') === 'true') { body.classList.add('no-blur'); sBlur.classList.add('on'); }
-            if(localStorage.getItem('bg') !== 'false') { body.classList.add('bg-active'); sBg.classList.add('on'); initParticles(); }
+            const sList = document.getElementById('toggleList');
+            const sBlur = document.getElementById('toggleBlur');
+            const sBg = document.getElementById('toggleBg');
+            const sDarkBg = document.getElementById('toggleDarkBg');
+            
+            if(localStorage.getItem('list') === 'true') { grid.classList.add('list-mode'); if(sList) sList.classList.add('on'); }
+            if(localStorage.getItem('noblur') === 'true') { body.classList.add('no-blur'); if(sBlur) sBlur.classList.add('on'); }
+            
+            // CAMBIO: Ahora el Fondo Negro es 'true' por defecto si no hay registro guardado en el navegador.
+            const isDarkActive = localStorage.getItem('darkbg') !== 'false';
+            const isBgActive = localStorage.getItem('bg') === 'true';
 
-            document.getElementById('setBtn').onclick = (e) => { e.stopPropagation(); setPanel.classList.toggle('active'); };
-            document.addEventListener('click', (e) => { if(!setPanel.contains(e.target)) setPanel.classList.remove('active'); });
+            // Configuración del color de fondo base
+            setBgColor(isDarkActive);
+            if(isDarkActive && sDarkBg) sDarkBg.classList.add('on');
 
-            sList.onclick = () => { localStorage.setItem('list', grid.classList.toggle('list-mode')); sList.classList.toggle('on'); };
-            sBlur.onclick = () => { localStorage.setItem('noblur', body.classList.toggle('no-blur')); sBlur.classList.toggle('on'); };
-            sBg.onclick = () => { 
+            // Configuración del fondo animado (Ahora conviven perfectamente)
+            if(isBgActive) { 
+                body.classList.add('bg-active'); 
+                if(sBg) sBg.classList.add('on'); 
+                initParticles(); 
+            }
+
+            const setBtn = document.getElementById('setBtn');
+            if(setBtn) {
+                setBtn.onclick = (e) => { e.stopPropagation(); setPanel.classList.toggle('active'); };
+            }
+            
+            document.addEventListener('click', (e) => { if(setPanel && !setPanel.contains(e.target)) setPanel.classList.remove('active'); });
+
+            if(sList) sList.onclick = () => { localStorage.setItem('list', grid.classList.toggle('list-mode')); sList.classList.toggle('on'); };
+            if(sBlur) sBlur.onclick = () => { localStorage.setItem('noblur', body.classList.toggle('no-blur')); sBlur.classList.toggle('on'); };
+            
+            if(sBg) sBg.onclick = () => { 
                 const act = body.classList.toggle('bg-active'); 
-                sBg.classList.toggle('on'); localStorage.setItem('bg', act);
-                if(act) initParticles();
+                sBg.classList.toggle('on'); 
+                localStorage.setItem('bg', act);
+                
+                if(act) {
+                    initParticles();
+                } else {
+                    cancelAnimationFrame(animationId);
+                    ctx.clearRect(0, 0, canvas.width, canvas.height);
+                }
+            };
+
+            if(sDarkBg) sDarkBg.onclick = () => {
+                const act = sDarkBg.classList.toggle('on');
+                localStorage.setItem('darkbg', act);
+                setBgColor(act);
             };
         }
 
