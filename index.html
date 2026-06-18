@@ -18,7 +18,7 @@
         }
 
         body.no-blur { --blur-val: 0px; }
-        body.no-blur .overlay, body.no-blur .search-panel, body.no-blur .settings-panel, body.no-blur .tool-card { 
+        body.no-blur .overlay, body.no-blur .search-panel, body.no-blur .settings-panel, body.no-blur .tool-card, body.no-blur .local-chip { 
             backdrop-filter: none !important; background: #111 !important; 
         }
 
@@ -47,6 +47,34 @@
             transition: opacity 1s var(--bezier);
         }
         body.bg-active #bgCanvas { opacity: 0.6; }
+
+        /* --- NUEVO: ESTILOS DEL CHIP LOCAL --- */
+        .local-chip {
+            position: fixed;
+            top: 25px;
+            left: 25px;
+            background: var(--glass);
+            backdrop-filter: blur(var(--blur-val));
+            border: 1px solid var(--glass-border);
+            border-radius: 20px;
+            padding: 10px 16px;
+            color: var(--text-main);
+            text-decoration: none;
+            font-size: 0.85rem;
+            display: none; /* Oculto por defecto */
+            align-items: center;
+            gap: 10px;
+            z-index: 100;
+            transition: all 0.3s var(--bezier);
+            animation: fadeInItem 0.6s var(--bezier);
+        }
+        .local-chip:hover {
+            background: rgba(255,255,255,0.1);
+            transform: translateY(-2px);
+        }
+        .local-chip i { opacity: 0.7; }
+        .local-chip strong { font-weight: 500; }
+        .local-chip span { color: var(--text-muted); }
 
         .ui-layer {
             position: relative;
@@ -193,6 +221,10 @@
         .settings-panel { position: fixed; bottom: 85px; right: 25px; width: 280px; background: var(--glass); backdrop-filter: blur(var(--blur-val)); border: 1px solid var(--glass-border); border-radius: 24px; padding: 25px; transform: scale(0.9) translateY(20px); opacity: 0; pointer-events: none; transition: all 0.4s var(--bezier); z-index: 110; }
         .settings-panel.active { transform: scale(1) translateY(0); opacity: 1; pointer-events: auto; }
         .setting-item { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; }
+        
+        /* Ocultamos el ajuste del chip por defecto, se activa en JS si es local */
+        #settingLocalChip { display: none; }
+
         .switch { width: 40px; height: 22px; background: #333; border-radius: 20px; position: relative; cursor: pointer; transition: 0.3s; }
         .switch::after { content:''; position:absolute; width:18px; height:18px; background:#fff; border-radius:50%; top:2px; left:2px; transition:0.3s var(--bezier); }
         .switch.on { background: #34C759; }
@@ -235,6 +267,11 @@
     <canvas id="bgCanvas"></canvas>
     <div class="overlay" id="overlay"></div>
 
+    <a href="https://capybaragalaxy.github.io/HOMESCREEN/" class="local-chip" id="localChip">
+        <i data-lucide="monitor-smartphone" style="width: 16px;"></i>
+        <div><strong>VERSIÓN LOCAL</strong> <span>· Ir a web</span></div>
+    </a>
+
     <div class="ui-layer">
         <header class="header">
             <div class="clock" id="clock">00:00</div>
@@ -247,7 +284,7 @@
 
     <script>
         const tools = [
-            { name: 'Progreso', icon: 'Loader2', url: 'https://www.google.es' },
+            { name: 'Progreso', icon: 'Loader2', url: 'Apps/progreso.html' },
             { name: 'Galería de iconos', icon: 'GalleryHorizontal', url: 'https://www.google.es' },
             { name: 'Calculadora de dinero', icon: 'Coins', url: 'https://www.google.es' },
             { name: 'Mod compatibility checker', icon: 'ListCheck', url: 'https://www.google.es' },
@@ -275,6 +312,8 @@
         <div class="setting-item"><span>Fondo Negro</span><div class="switch" id="toggleDarkBg"></div></div>
         <div class="setting-item"><span>Modo Lista</span><div class="switch" id="toggleList"></div></div>
         <div class="setting-item"><span>Desactivar Blur</span><div class="switch" id="toggleBlur"></div></div>
+        
+        <div class="setting-item" id="settingLocalChip"><span>Ocultar Aviso Local</span><div class="switch" id="toggleLocalChip"></div></div>
     </div>
 
     <script>
@@ -388,18 +427,50 @@
             const sBg = document.getElementById('toggleBg');
             const sDarkBg = document.getElementById('toggleDarkBg');
             
+            // Lógica de detección de entorno Local / Web
+            const esLocal = window.location.protocol === 'file:' || window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1';
+            const localChip = document.getElementById('localChip');
+            const settingLocalChip = document.getElementById('settingLocalChip');
+            const sLocalChip = document.getElementById('toggleLocalChip');
+
+            if (esLocal) {
+                // Habilitamos el item de ajuste porque estamos en local
+                if(settingLocalChip) settingLocalChip.style.display = 'flex';
+                
+                // Comprobamos si el usuario prefirió ocultarlo
+                const hideChip = localStorage.getItem('hideLocalChip') === 'true';
+                if (hideChip) {
+                    if(sLocalChip) sLocalChip.classList.add('on');
+                } else {
+                    if(localChip) localChip.style.display = 'flex';
+                }
+
+                if(sLocalChip) {
+                    sLocalChip.onclick = () => {
+                        const act = sLocalChip.classList.toggle('on');
+                        localStorage.setItem('hideLocalChip', act);
+                        if(act) {
+                            localChip.style.display = 'none';
+                        } else {
+                            localChip.style.display = 'flex';
+                        }
+                    };
+                }
+            } else {
+                // Asegurarnos de que no se muestre nada en la versión hosteada
+                if(localChip) localChip.style.display = 'none';
+                if(settingLocalChip) settingLocalChip.style.display = 'none';
+            }
+            
             if(localStorage.getItem('list') === 'true') { grid.classList.add('list-mode'); if(sList) sList.classList.add('on'); }
             if(localStorage.getItem('noblur') === 'true') { body.classList.add('no-blur'); if(sBlur) sBlur.classList.add('on'); }
             
-            // CAMBIO: Ahora el Fondo Negro es 'true' por defecto si no hay registro guardado en el navegador.
             const isDarkActive = localStorage.getItem('darkbg') !== 'false';
             const isBgActive = localStorage.getItem('bg') === 'true';
 
-            // Configuración del color de fondo base
             setBgColor(isDarkActive);
             if(isDarkActive && sDarkBg) sDarkBg.classList.add('on');
 
-            // Configuración del fondo animado (Ahora conviven perfectamente)
             if(isBgActive) { 
                 body.classList.add('bg-active'); 
                 if(sBg) sBg.classList.add('on'); 
