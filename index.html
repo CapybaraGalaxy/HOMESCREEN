@@ -48,7 +48,7 @@
         }
         body.bg-active #bgCanvas { opacity: 0.6; }
 
-        /* --- NUEVO: ESTILOS DEL CHIP LOCAL --- */
+        /* --- ESTILOS DEL CHIP LOCAL --- */
         .local-chip {
             position: fixed;
             top: 25px;
@@ -75,6 +75,18 @@
         .local-chip i { opacity: 0.7; }
         .local-chip strong { font-weight: 500; }
         .local-chip span { color: var(--text-muted); }
+
+        /* --- NUEVO: ESTILO DE LA VERSIÓN --- */
+        .version-tag {
+            position: fixed;
+            bottom: 15px;
+            left: 20px;
+            font-size: 0.75rem;
+            color: var(--text-muted);
+            opacity: 0.4;
+            z-index: 50;
+            pointer-events: none;
+        }
 
         .ui-layer {
             position: relative;
@@ -272,6 +284,8 @@
         <div><strong>VERSIÓN LOCAL</strong> <span>· Ir a web</span></div>
     </a>
 
+    <div class="version-tag">v0.5</div>
+
     <div class="ui-layer">
         <header class="header">
             <div class="clock" id="clock">00:00</div>
@@ -285,10 +299,10 @@
     <script>
         const tools = [
             { name: 'Progreso', icon: 'Loader2', url: 'Apps/progreso.html' },
-            { name: 'Galería de iconos', icon: 'GalleryHorizontal', url: 'https://www.google.es' },
-            { name: 'Calculadora de dinero', icon: 'Coins', url: 'https://www.google.es' },
-            { name: 'Mod compatibility checker', icon: 'ListCheck', url: 'https://www.google.es' },
-            { name: 'Calculadora tiempo de descarga', icon: 'Download', url: 'https://www.google.es' }
+            { name: 'Galería de iconos', icon: 'GalleryHorizontal', url: 'Apps/icontest.html' },
+            { name: 'Calculadora de dinero', icon: 'Coins', url: 'Apps/dinero.html' },
+            { name: 'Mod compatibility checker', icon: 'ListCheck', url: 'Apps/modchecker.html' },
+            { name: 'Calculadora tiempo de descarga', icon: 'Download', url: 'Apps/calculadora-descarga.html' },
         ];
     </script>
 
@@ -434,10 +448,8 @@
             const sLocalChip = document.getElementById('toggleLocalChip');
 
             if (esLocal) {
-                // Habilitamos el item de ajuste porque estamos en local
                 if(settingLocalChip) settingLocalChip.style.display = 'flex';
                 
-                // Comprobamos si el usuario prefirió ocultarlo
                 const hideChip = localStorage.getItem('hideLocalChip') === 'true';
                 if (hideChip) {
                     if(sLocalChip) sLocalChip.classList.add('on');
@@ -457,7 +469,6 @@
                     };
                 }
             } else {
-                // Asegurarnos de que no se muestre nada en la versión hosteada
                 if(localChip) localChip.style.display = 'none';
                 if(settingLocalChip) settingLocalChip.style.display = 'none';
             }
