@@ -108,9 +108,28 @@
             margin-bottom: 5vh;
             text-align: center;
             animation: slideUp 0.8s var(--bezier);
+            transition: transform 0.6s var(--bezier);
+            will-change: transform;
         }
-        .clock { font-size: 6rem; font-weight: 200; letter-spacing: -3px; line-height: 1; animation: clockScale 1.2s var(--bezier); }
-        .date { font-size: 0.9rem; text-transform: uppercase; letter-spacing: 4px; color: var(--text-muted); margin-top: 10px; }
+        .clock { 
+            font-size: 6rem; 
+            font-weight: 200; 
+            letter-spacing: -3px; 
+            line-height: 1; 
+            animation: clockScale 1.2s var(--bezier); 
+            cursor: pointer; 
+            user-select: none; 
+            transition: font-size 0.6s var(--bezier), letter-spacing 0.6s var(--bezier);
+            will-change: font-size;
+        }
+        .date { 
+            font-size: 0.9rem; 
+            text-transform: uppercase; 
+            letter-spacing: 4px; 
+            color: var(--text-muted); 
+            margin-top: 10px; 
+            transition: font-size 0.6s var(--bezier), letter-spacing 0.6s var(--bezier), color 0.6s var(--bezier);
+        }
 
         .scroll-wrapper {
             width: 100%;
@@ -120,6 +139,7 @@
             justify-content: center;
             scrollbar-width: none; 
             -ms-overflow-style: none;  
+            transition: opacity 0.4s var(--bezier), transform 0.4s var(--bezier);
         }
         .scroll-wrapper::-webkit-scrollbar {
             display: none; 
@@ -204,6 +224,7 @@
             width: 100%;
             display: flex;
             justify-content: center;
+            transition: bottom 0.5s var(--bezier);
         }
 
         .search-panel {
@@ -223,20 +244,20 @@
             border-radius: 28px; transform: translateY(-15vh);
         }
 
-        .search-header { display: flex; align-items: center; justify-content: center; padding: 0 20px; min-height: 48px; cursor: pointer; }
+        .search-header { display: flex; align-items: center; justify-content: center; padding: 0 20px; min-height: 48px; cursor: pointer; transition: min-height 0.5s var(--bezier); }
         .search-input { flex: 1; background: transparent; border: none; outline: none; color: #fff; font-family: 'Outfit'; font-size: 1.1rem; display: none; padding: 10px 0; }
         .search-panel.expanded .search-input { display: block; }
-        .search-panel.expanded .search-header { justify-content: flex-start; }
+        .search-panel.expanded .search-header { justify-content: flex-start; min-height: 48px; }
         .search-panel.expanded .chip-placeholder { display: none; }
 
-        .chip-placeholder { display: flex; align-items: center; gap: 8px; color: var(--text-muted); font-size: 0.9rem; }
+        .chip-placeholder { display: flex; align-items: center; gap: 8px; color: var(--text-muted); font-size: 0.9rem; white-space: nowrap; }
         .results-area { padding: 10px; overflow-y: auto; opacity: 0; flex: 1; transition: opacity 0.3s; }
         .search-panel.expanded .results-area { opacity: 1; transition-delay: 0.2s; }
 
         .result-item { display: flex; align-items: center; padding: 14px 18px; border-radius: 20px; text-decoration: none; color: var(--text-main); margin-bottom: 5px; transition: 0.3s; }
         .result-item:hover { background: rgba(255,255,255,0.08); transform: translateX(8px); }
 
-        .settings-btn { position: fixed; bottom: 25px; right: 25px; background: var(--glass); border: 1px solid var(--glass-border); width: 45px; height: 45px; border-radius: 50%; display: flex; align-items: center; justify-content: center; cursor: pointer; z-index: 110; transition: 0.3s; }
+        .settings-btn { position: fixed; bottom: 25px; right: 25px; background: var(--glass); border: 1px solid var(--glass-border); width: 45px; height: 45px; border-radius: 50%; display: flex; align-items: center; justify-content: center; cursor: pointer; z-index: 110; transition: all 0.4s var(--bezier); }
         .settings-panel { position: fixed; bottom: 85px; right: 25px; width: 280px; background: var(--glass); backdrop-filter: blur(var(--blur-val)); border: 1px solid var(--glass-border); border-radius: 24px; padding: 25px; transform: scale(0.9) translateY(20px); opacity: 0; pointer-events: none; transition: all 0.4s var(--bezier); z-index: 110; }
         .settings-panel.active { transform: scale(1) translateY(0); opacity: 1; pointer-events: auto; }
         .setting-item { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; }
@@ -251,7 +272,89 @@
         .overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.6); backdrop-filter: blur(15px); opacity: 0; pointer-events: none; transition: 0.5s; z-index: 90; }
         .overlay.active { opacity: 1; pointer-events: auto; }
 
-        /* --- ESTILOS NUEVOS: MODALES PERSONALIZADOS --- */
+        /* --- BOTÓN DE SALIDA MODO ZEN --- */
+        .exit-zen-btn {
+            position: fixed;
+            bottom: 25px;
+            right: 25px;
+            background: var(--glass);
+            border: 1px solid var(--glass-border);
+            width: 45px;
+            height: 45px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            z-index: 115;
+            opacity: 0;
+            pointer-events: none;
+            transform: scale(0.8);
+            transition: all 0.4s var(--bezier);
+        }
+        .exit-zen-btn:hover { background: #fff; color: #000; transform: scale(1.05); }
+
+        /* --- ESTILOS EXCLUSIVOS MODO ZEN --- */
+        body.zen-mode .scroll-wrapper,
+        body.zen-mode .settings-btn,
+        body.zen-mode .settings-panel,
+        body.zen-mode .version-tag,
+        body.zen-mode .local-chip {
+            opacity: 0 !important;
+            pointer-events: none !important;
+        }
+        
+        body.zen-mode .scroll-wrapper {
+            transform: translateY(20px);
+        }
+
+        /* Ampliación y desplazamiento del reloj al centro de la pantalla */
+        body.zen-mode .header {
+            transform: translateY(18vh); 
+        }
+        body.zen-mode .clock {
+            font-size: 8.5rem;
+            letter-spacing: -4px;
+        }
+        body.zen-mode .date {
+            font-size: 1rem;
+            letter-spacing: 6px;
+            color: rgba(255, 255, 255, 0.7);
+        }
+
+        body.zen-mode .search-panel {
+            width: 110px; /* Versión más pequeña en ancho */
+            height: 38px; /* Versión más fina en alto */
+            border-radius: 19px;
+        }
+
+        body.zen-mode .search-header {
+            min-height: 38px;
+            padding: 0 12px;
+        }
+
+        body.zen-mode .chip-placeholder span {
+            font-size: 0.8rem;
+        }
+        body.zen-mode .chip-placeholder small {
+            display: none; /* Escondemos el Ctrl+K en modo compacto */
+        }
+
+        body.zen-mode .exit-zen-btn {
+            opacity: 1;
+            pointer-events: auto;
+            transform: scale(1);
+        }
+
+        body.zen-mode .search-panel.expanded {
+            width: 90%; max-width: 500px; height: 400px;
+            border-radius: 28px; transform: translateY(-15vh);
+        }
+        body.zen-mode .search-panel.expanded .search-header {
+            min-height: 48px;
+        }
+
+        /* --- ESTILOS MODALES --- */
         .custom-modal {
             position: fixed;
             top: 50%; left: 50%;
@@ -363,8 +466,9 @@
         </div>
     </div>
 
+    <div class="exit-zen-btn" id="exitZenBtn" title="Salir de Modo Zen"><i data-lucide="eye"></i></div>
+
     <script>
-        // Removido "Neo GameCenter" de este catálogo principal
         const tools = [
             { name: 'Progreso', icon: 'Loader2', url: 'Apps/progreso.html' },
             { name: 'Galería de iconos', icon: 'GalleryHorizontal', url: 'Apps/icontest.html' },
@@ -373,9 +477,9 @@
             { name: 'CraftPalette', icon: 'Command', url: 'Apps/craftpalette.html' },
             { name: 'Calculadora tiempo de descarga', icon: 'Download', url: 'Apps/calculadora-descarga.html' },
             { name: 'Medidas', icon: 'RulerDimensionLine', url: 'Apps/medidas.html' },
+             { name: 'Calendario [BETA] ', icon: 'Calendar', url: 'Apps/calendario.html' },
         ];
 
-        // Definición de la app oculta por separado
         const hiddenApp = { name: 'Neo GameCenter', icon: 'Gamepad2', url: 'games.html' };
     </script>
 
@@ -410,6 +514,8 @@
         const searchPanel = document.getElementById('searchPanel');
         const overlay = document.getElementById('overlay');
         const setPanel = document.getElementById('setPanel');
+        const clock = document.getElementById('clock');
+        const exitZenBtn = document.getElementById('exitZenBtn');
 
         // LÓGICA DE CLICS EN VERSIÓN Y MODALES
         let versionClicks = 0;
@@ -418,14 +524,23 @@
         document.getElementById('versionTag').onclick = (e) => {
             versionClicks++;
             if(versionClicks === 5) {
-                versionClicks = 0; // Resetear contador
+                versionClicks = 0; 
                 openModal('hiddenFolderModal');
             }
         };
 
+        // LÓGICA ACTIVACIÓN/DESACTIVACIÓN MODO ZEN
+        clock.ondblclick = () => {
+            body.classList.add('zen-mode');
+            setPanel.classList.remove('active'); // Cerrar ajustes si estaban abiertos
+        };
+
+        exitZenBtn.onclick = () => {
+            body.classList.remove('zen-mode');
+        };
+
         function openModal(id) {
             if(id === 'hiddenFolderModal') {
-                // Inyectar dinámicamente la app oculta dentro de la carpeta
                 document.getElementById('hiddenAppArea').innerHTML = `
                     <div class="tool-card" onclick="triggerGameWarning()">
                         <i data-lucide="${hiddenApp.icon}"></i><span>${hiddenApp.name}</span>
@@ -446,7 +561,6 @@
         }
 
         function triggerGameWarning() {
-            // Cerrar carpeta oculta y abrir advertencia
             document.getElementById('hiddenFolderModal').classList.remove('active');
             openModal('warningModal');
             
@@ -488,7 +602,6 @@
                 renderResults("");
             } else {
                 searchPanel.classList.remove('expanded');
-                // Solo remover el overlay si no hay modales activos
                 if(!document.querySelector('.custom-modal.active')) {
                     overlay.classList.remove('active');
                 }
@@ -518,8 +631,6 @@
         
         searchInput.oninput = (e) => renderResults(e.target.value);
 
-        // Permitir buscar el Neo GameCenter únicamente si se busca desde la barra global (opcional)
-        // Por seguridad y consistencia con tu petición "esté escondido", se mantiene fuera de los resultados.
         function renderResults(val) {
             if(window.hasHubError) return;
             const filtered = tools.filter(t => t.name.toLowerCase().includes(val.toLowerCase()));

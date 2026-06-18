@@ -1,0 +1,905 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+    <title>CHRONOS v3.2 — Centro Temporal Inteligente</title>
+    
+    <meta name="apple-mobile-web-app-capable" content="yes" />
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+    <meta name="theme-color" content="#050508" />
+
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700&display=swap" rel="stylesheet" />
+    <script src="https://unpkg.com/lucide@latest"></script>
+    
+    <style>
+        :root {
+            --text-main: #ffffff;
+            --text-muted: rgba(255, 255, 255, 0.45);
+            --bg: #050508;
+            --surface: rgba(15, 15, 24, 0.75);
+            --glass: rgba(255, 255, 255, 0.03);
+            --glass-active: rgba(255, 255, 255, 0.09);
+            --glass-border: rgba(255, 255, 255, 0.07);
+            --accent: #ffffff;
+            --bezier: cubic-bezier(0.16, 1, 0.3, 1);
+            
+            /* Categorías Semánticas */
+            --cat-personal: #ff4a70;
+            --cat-estudios: #3b9eff;
+            --cat-trabajo: #00e5ff;
+            --cat-salud: #2ce162;
+            --cat-viajes: #f95782;
+            --cat-otros: #f4d03f;
+        }
+
+        * { 
+            box-sizing: border-box; 
+            margin: 0; 
+            padding: 0; 
+            -webkit-tap-highlight-color: transparent;
+            user-select: none;
+        }
+
+        body {
+            font-family: 'Outfit', sans-serif;
+            background: var(--bg);
+            color: var(--text-main);
+            overflow: hidden;
+            height: 100dvh;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .bg-blur {
+            position: fixed;
+            inset: 0;
+            z-index: -1;
+            background-image: url('https://images.unsplash.com/photo-1451187580459-43490279c0fa?q=80&w=1000&auto=format&fit=crop');
+            background-size: cover;
+            background-position: center;
+            filter: blur(80px) brightness(0.1);
+            transform: scale(1.15);
+        }
+
+        /* --- CABECERA --- */
+        .header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 24px 24px 12px;
+            max-width: 600px;
+            width: 100%;
+            margin: 0 auto;
+        }
+        .header h1 { font-size: 1.15rem; font-weight: 700; letter-spacing: 5px; opacity: 0.95; }
+        
+        .month-switcher {
+            display: flex;
+            align-items: center;
+            gap: 14px;
+            background: var(--surface);
+            border: 1px solid var(--glass-border);
+            padding: 6px 16px;
+            border-radius: 30px;
+            backdrop-filter: blur(30px);
+            -webkit-backdrop-filter: blur(30px);
+        }
+        .month-title { font-size: 0.88rem; font-weight: 600; min-width: 120px; text-align: center; letter-spacing: 0.5px; }
+        .nav-btn { background: transparent; border: none; color: #fff; cursor: pointer; display: flex; align-items: center; transition: opacity 0.2s, transform 0.1s; }
+        .nav-btn:active { transform: scale(0.9); }
+        .nav-btn:hover { opacity: 0.7; }
+
+        /* --- CONTENEDOR DE PÁGINAS --- */
+        .view-page {
+            flex: 1;
+            display: none;
+            overflow-y: auto;
+            padding: 8px 24px 120px;
+        }
+        .view-page.active { 
+            display: flex; 
+            flex-direction: column; 
+            animation: pageIn 0.4s var(--bezier) both;
+        }
+        @keyframes pageIn {
+            from { opacity: 0; transform: translateY(12px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        /* --- INTERFAZ DEL CALENDARIO --- */
+        .calendar-container { width: 100%; max-width: 500px; margin: 0 auto 20px; }
+        .weekdays-grid {
+            display: grid;
+            grid-template-columns: repeat(7, 1fr);
+            text-align: center;
+            margin-bottom: 12px;
+            opacity: 0.35;
+            font-size: 0.68rem;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+        }
+        .days-grid { display: grid; grid-template-columns: repeat(7, 1fr); gap: 6px; }
+        
+        .calendar-day {
+            aspect-ratio: 1;
+            background: var(--glass);
+            border: 1px solid var(--glass-border);
+            border-radius: 14px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            font-size: 0.95rem;
+            position: relative;
+            cursor: pointer;
+            transition: background 0.25s var(--bezier), border-color 0.25s var(--bezier), transform 0.15s var(--bezier);
+        }
+        .calendar-day:hover { background: var(--glass-active); border-color: rgba(255,255,255,0.18); }
+        .calendar-day:active { transform: scale(0.93); }
+        .calendar-day.empty { background: transparent; border: none; pointer-events: none; }
+        .calendar-day.today { background: #ffffff; color: #000000; font-weight: 700; box-shadow: 0 8px 24px rgba(255,255,255,0.25); border-color: #fff; }
+        .calendar-day.selected { border: 2px solid #ffffff; background: rgba(255, 255, 255, 0.05); }
+
+        /* Puntos indicadores internos */
+        .day-dots { position: absolute; bottom: 6px; display: flex; gap: 3px; justify-content: center; width: 100%; height: 4px; }
+        .dot { width: 4px; height: 4px; border-radius: 50%; }
+        .dot.hito { background: var(--cat-personal); }
+        .dot.match { background: var(--cat-salud); }
+
+        /* --- SECCIONES DE CONTENIDO --- */
+        .agenda-preview-box { width: 100%; max-width: 500px; margin: 0 auto; }
+        .section-header-flex { display: flex; align-items: center; justify-content: space-between; margin-bottom: 12px; }
+        .section-title { font-size: 0.72rem; text-transform: uppercase; letter-spacing: 2.5px; color: var(--text-muted); font-weight: 700; }
+
+        /* Elementos e hileras interactivas */
+        .item-list { display: flex; flex-direction: column; gap: 8px; }
+        .interactive-row {
+            background: var(--surface); border: 1px solid var(--glass-border); border-radius: 16px; padding: 14px 18px;
+            display: flex; align-items: center; justify-content: space-between; backdrop-filter: blur(30px);
+            -webkit-backdrop-filter: blur(30px);
+            animation: rowFadeIn 0.3s var(--bezier) both;
+        }
+        @keyframes rowFadeIn {
+            from { opacity: 0; transform: translateY(6px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        .row-left { display: flex; align-items: center; gap: 14px; }
+        .row-actions { display: flex; gap: 4px; }
+        
+        .icon-btn { background: transparent; border: none; color: var(--text-muted); cursor: pointer; padding: 6px; border-radius: 8px; display: flex; align-items: center; transition: color 0.2s, background 0.2s; }
+        .icon-btn:hover { color: #ffffff; background: rgba(255,255,255,0.06); }
+
+        .cat-indicator { width: 8px; height: 8px; border-radius: 50%; }
+
+        /* --- CUADRÍCULA DE OPERACIONES --- */
+        .tools-grid { display: grid; grid-template-columns: 1fr; gap: 10px; max-width: 500px; width: 100%; margin: 0 auto; }
+        .tool-card {
+            background: var(--surface); border: 1px solid var(--glass-border); border-radius: 18px; padding: 16px;
+            cursor: pointer; display: flex; align-items: center; gap: 16px; backdrop-filter: blur(30px);
+            -webkit-backdrop-filter: blur(30px); transition: all 0.25s var(--bezier);
+        }
+        .tool-card:hover { background: var(--glass-active); transform: translateY(-1px); border-color: rgba(255,255,255,0.15); }
+        .tool-card .icon-shape { background: rgba(255,255,255,0.03); padding: 12px; border-radius: 14px; display: flex; align-items: center; justify-content: center; border: 1px solid var(--glass-border); }
+        .tool-card-info h3 { font-size: 0.95rem; font-weight: 600; letter-spacing: 0.3px; }
+        .tool-card-info p { font-size: 0.78rem; color: var(--text-muted); margin-top: 2px; }
+
+        /* Subvistas internas */
+        .subview-header { display: flex; align-items: center; gap: 14px; max-width: 500px; margin: 0 auto 20px; width: 100%; }
+        .subview-header h2 { font-size: 0.95rem; font-weight: 700; text-transform: uppercase; letter-spacing: 2px; }
+
+        .segmented-control { display: flex; background: rgba(0, 0, 0, 0.4); border: 1px solid var(--glass-border); padding: 3px; border-radius: 14px; margin-bottom: 18px; }
+        .segment-btn { flex: 1; background: transparent; border: none; color: var(--text-muted); padding: 9px; font-family: inherit; font-size: 0.78rem; font-weight: 600; border-radius: 11px; cursor: pointer; transition: all 0.2s; }
+        .segment-btn.active { background: #ffffff; color: #000000; }
+
+        /* Métricas */
+        .metric-container { text-align: center; margin-bottom: 20px; background: var(--surface); border: 1px solid var(--glass-border); padding: 20px; border-radius: 20px; }
+        .metric-big-num { font-size: 3.5rem; font-weight: 700; letter-spacing: -1px; margin-bottom: 12px; }
+        .grid-matrix { display: grid; grid-template-columns: repeat(10, 1fr); gap: 6px; width: 100%; max-width: 260px; margin: 0 auto; }
+        .grid-block { aspect-ratio: 1; background: rgba(255,255,255,0.02); border: 1px solid rgba(255,255,255,0.04); border-radius: 4px; transition: background 0.4s; }
+        .grid-block.active { background: #ffffff; box-shadow: 0 0 8px rgba(255,255,255,0.3); border-color: #fff; }
+
+        /* Inputs Modernos */
+        .glass-panel { background: var(--surface); border: 1px solid var(--glass-border); border-radius: 18px; padding: 16px; backdrop-filter: blur(30px); -webkit-backdrop-filter: blur(30px); margin-bottom: 14px; }
+        .input-group { display: flex; gap: 8px; margin-bottom: 12px; }
+        .glass-input, .glass-select { flex: 1; background: rgba(0,0,0,0.5); border: 1px solid var(--glass-border); color: #fff; padding: 12px 16px; border-radius: 12px; font-family: inherit; font-size: 0.88rem; outline: none; transition: border-color 0.2s; }
+        .glass-input:focus, .glass-select:focus { border-color: rgba(255,255,255,0.3); }
+        .glass-select option { background: #0c0c12; color: #fff; }
+
+        /* --- INTERFAZ DE MODALES DE HOJA INFERIOR --- */
+        .modal { position: fixed; inset: 0; background: rgba(3,3,5,0.6); backdrop-filter: blur(16px); -webkit-backdrop-filter: blur(16px); z-index: 200; display: none; align-items: flex-end; justify-content: center; opacity: 0; transition: opacity 0.25s ease; }
+        .modal.active { display: flex; opacity: 1; }
+        .modal-content {
+            background: #08080c; border: 1px solid var(--glass-border); border-top-left-radius: 24px; border-top-right-radius: 24px;
+            width: 100%; max-width: 500px; padding: 24px 24px 40px; transform: translateY(100%); transition: transform 0.3s var(--bezier);
+        }
+        .modal.active .modal-content { transform: translateY(0); }
+        .modal-title { font-size: 0.75rem; font-weight: 700; margin-bottom: 16px; text-transform: uppercase; letter-spacing: 2.5px; color: var(--text-muted); }
+        
+        /* Modal de Alerta Central (Para el Aviso Beta Permanente) */
+        .modal.center-modal { align-items: center; padding: 20px; }
+        .modal.center-modal .modal-content { border-radius: 24px; transform: scale(0.9) translateY(0); opacity: 0; transition: all 0.3s var(--bezier); }
+        .modal.active.center-modal .modal-content { transform: scale(1) translateY(0); opacity: 1; }
+
+        /* Botonera */
+        .action-btn-main { background: #ffffff; color: #000000; border: none; font-weight: 600; padding: 14px; border-radius: 12px; width: 100%; font-family: inherit; font-size: 0.9rem; cursor: pointer; transition: opacity 0.2s; display: flex; align-items: center; justify-content: center; gap: 8px; }
+        .action-btn-main:hover { opacity: 0.9; }
+        .action-btn-secondary { background: var(--glass); color: #ffffff; border: 1px solid var(--glass-border); padding: 14px; border-radius: 12px; width: 100%; font-family: inherit; font-size: 0.9rem; cursor: pointer; transition: background 0.2s; display: flex; align-items: center; justify-content: center; gap: 8px; }
+        .action-btn-secondary:hover { background: var(--glass-active); }
+
+        /* --- BARRA DE NAVEGACIÓN DE PESTAÑAS (INFERIOR) --- */
+        .bottom-tabs {
+            position: fixed; bottom: 24px; left: 50%; transform: translateX(-50%);
+            display: flex; background: rgba(8, 8, 12, 0.8); backdrop-filter: blur(30px);
+            -webkit-backdrop-filter: blur(30px); border: 1px solid var(--glass-border);
+            padding: 5px; border-radius: 32px; z-index: 100; gap: 4px;
+            width: calc(100% - 48px); max-width: 420px; box-shadow: 0 16px 40px rgba(0,0,0,0.6);
+            animation: tabsLoad 0.5s var(--bezier) both;
+        }
+        @keyframes tabsLoad { from { transform: translate(-50(), 20px); opacity: 0; } to { transform: translate(-50%, 0); opacity: 1; } }
+        .tab-btn {
+            flex: 1; background: transparent; border: none; color: var(--text-muted); padding: 12px 0; border-radius: 26px;
+            font-family: inherit; font-size: 0.8rem; font-weight: 600; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 8px; transition: all 0.25s var(--bezier);
+        }
+        .tab-btn.active { background: #ffffff; color: #000000; font-weight: 700; }
+    </style>
+</head>
+<body>
+
+    <div class="bg-blur" aria-hidden="true"></div>
+
+    <header class="header">
+        <h1 id="appMainTitle">CHRONOS</h1>
+        <div class="month-switcher" id="monthZone">
+            <button class="nav-btn" onclick="changeMonth(-1)" aria-label="Mes anterior"><i data-lucide="chevron-left" size="18"></i></button>
+            <div class="month-title" id="monthLabel" role="status" aria-live="polite">Junio 2026</div>
+            <button class="nav-btn" onclick="changeMonth(1)" aria-label="Mes siguiente"><i data-lucide="chevron-right" size="18"></i></button>
+        </div>
+    </header>
+
+    <main id="page-month" class="view-page active" role="tabpanel" aria-labelledby="tab-month">
+        <div class="calendar-container">
+            <div class="weekdays-grid" aria-hidden="true">
+                <div>Lu</div><div>Ma</div><div>Mi</div><div>Ju</div><div>Vi</div><div>Sá</div><div>Do</div>
+            </div>
+            <div class="days-grid" id="daysGrid" role="grid"></div>
+        </div>
+
+        <div class="agenda-preview-box">
+            <div class="section-header-flex">
+                <div class="section-title" id="agendaBoxTitle">Agenda del Día</div>
+            </div>
+            <div class="item-list" id="dayAgendaRender"></div>
+        </div>
+    </main>
+
+    <main id="page-tools" class="view-page" role="tabpanel" aria-labelledby="tab-tools">
+        <div class="tools-grid" id="toolsMainMenu">
+            <div class="tool-card" onclick="openSubTool('progress')" role="button" tabindex="0">
+                <div class="icon-shape"><i data-lucide="hourglass" size="20"></i></div>
+                <div class="tool-card-info">
+                    <h3>Métricas de la Era</h3>
+                    <p>Cómputo en tiempo real de la línea temporal</p>
+                </div>
+            </div>
+            <div class="tool-card" onclick="openSubTool('sync')" role="button" tabindex="0">
+                <div class="icon-shape"><i data-lucide="users" size="20"></i></div>
+                <div class="tool-card-info">
+                    <h3>Match de Amigos</h3>
+                    <p>Sincronización instantánea de agendas libres</p>
+                </div>
+            </div>
+            <div class="tool-card" onclick="openSubTool('countdown')" role="button" tabindex="0">
+                <div class="icon-shape"><i data-lucide="orbit" size="20"></i></div>
+                <div class="tool-card-info">
+                    <h3>Hitos y Línea Temporal</h3>
+                    <p>Gestión completa, buscador y cuenta atrás</p>
+                </div>
+            </div>
+            <div class="tool-card" onclick="openSubTool('settings')" role="button" tabindex="0">
+                <div class="icon-shape"><i data-lucide="sliders" size="20"></i></div>
+                <div class="tool-card-info">
+                    <h3>Configuración Avanzada</h3>
+                    <p>Importación, exportación estructural y purga</p>
+                </div>
+            </div>
+        </div>
+
+        <div id="subToolContainer" style="display: none; width: 100%;">
+            <div class="subview-header">
+                <button class="nav-btn" onclick="backToToolsMenu()" aria-label="Volver al panel principal"><i data-lucide="arrow-left" size="20"></i></button>
+                <h2 id="subToolTitle">Herramienta</h2>
+            </div>
+            <div class="subview-body" id="subToolBody"></div>
+        </div>
+    </main>
+
+    <nav class="bottom-tabs" role="tablist">
+        <button class="tab-btn active" id="tab-month" onclick="switchTab('month')" role="tab" aria-selected="true"><i data-lucide="calendar" size="18"></i> Mes</button>
+        <button class="tab-btn" id="tab-tools" onclick="switchTab('tools')" role="tab" aria-selected="false"><i data-lucide="grid" size="18"></i> Operaciones</button>
+    </nav>
+
+    <div class="modal center-modal" id="betaAlertModal" role="dialog" aria-modal="true">
+        <div class="modal-content" style="max-width: 380px; text-align: center; padding: 32px 24px;">
+            <div style="background: rgba(255,255,255,0.03); border: 1px solid var(--glass-border); width: 56px; height: 56px; border-radius: 18px; display: flex; align-items: center; justify-content: center; margin: 0 auto 20px;">
+                <i data-lucide="rocket" size="26" style="color: var(--cat-trabajo);"></i>
+            </div>
+            <div class="modal-title" style="margin-bottom: 8px; font-size: 0.85rem; letter-spacing: 3px;">Fase Beta Temprana</div>
+            <p style="font-size: 0.88rem; line-height: 1.5; color: var(--text-muted); margin-bottom: 24px;">
+               La app  <strong>Chronos v3.2</strong> se encuentra en fase de desarrollo y puede presentar errores o inconsistencias. <br><br>
+            </p>
+            <button class="action-btn-main" onclick="closeModal('betaAlertModal')">Entendido, Acceder</button>
+        </div>
+    </div>
+
+    <div class="modal" id="dateModal" onclick="closeModal('dateModal')" role="dialog" aria-modal="true">
+        <div class="modal-content" onclick="event.stopPropagation()">
+            <div class="modal-title" id="modalDateTitle">Opciones del Día</div>
+            <div style="display:flex; flex-direction:column; gap:8px;">
+                <button class="action-btn-main" onclick="triggerCreateHito()"><i data-lucide="plus-circle" size="18"></i> Crear Hito en Fecha</button>
+                <button class="action-btn-secondary" onclick="triggerAddFriendFreeDay()"><i data-lucide="user-plus" size="18"></i> Añadir Libre a un Amigo</button>
+                <button class="action-btn-secondary" style="border:none; opacity:0.5;" onclick="closeModal('dateModal')">Cerrar</button>
+            </div>
+        </div>
+    </div>
+
+    <div class="modal" id="hitoModal" onclick="closeModal('hitoModal')" role="dialog" aria-modal="true">
+        <div class="modal-content" onclick="event.stopPropagation()">
+            <div class="modal-title" id="hitoModalTitle">Gestionar Hito</div>
+            <input type="hidden" id="formHitoId">
+            <div class="input-group" style="flex-direction:column; gap:10px; margin-bottom:16px;">
+                <input type="text" class="glass-input" id="formHitoTitulo" placeholder="¿Qué ocurrirá?">
+                <input type="date" class="glass-input" id="formHitoFecha">
+                <select class="glass-select" id="formHitoCategoria">
+                    <option value="personal">Personal</option>
+                    <option value="estudios">Estudios</option>
+                    <option value="trabajo">Trabajo</option>
+                    <option value="salud">Salud</option>
+                    <option value="viajes">Viajes</option>
+                    <option value="otros">Otros</option>
+                </select>
+            </div>
+            <button class="action-btn-main" onclick="saveHitoForm()"><i data-lucide="check" size="18"></i> Guardar Cambios</button>
+        </div>
+    </div>
+
+    <div class="modal" id="friendFreeDayModal" onclick="closeModal('friendFreeDayModal')" role="dialog" aria-modal="true">
+        <div class="modal-content" onclick="event.stopPropagation()">
+            <div class="modal-title">Asignar Disponibilidad</div>
+            <div class="input-group" style="flex-direction:column; gap:10px; margin-bottom:16px;">
+                <select class="glass-select" id="formFriendSelect"></select>
+                <input type="date" class="glass-input" id="formFriendDate">
+            </div>
+            <button class="action-btn-main" onclick="saveFriendFreeDayForm()"><i data-lucide="calendar-plus" size="18"></i> Confirmar Disponibilidad</button>
+        </div>
+    </div>
+
+    <div class="modal" id="friendModal" onclick="closeModal('friendModal')" role="dialog" aria-modal="true">
+        <div class="modal-content" onclick="event.stopPropagation()">
+            <div class="modal-title" id="friendModalTitle">Perfil de Amigo</div>
+            <input type="hidden" id="formFriendId">
+            <div class="input-group" style="margin-bottom:16px;">
+                <input type="text" class="glass-input" id="formFriendNombre" placeholder="Nombre o alias">
+            </div>
+            <button class="action-btn-main" onclick="saveFriendForm()"><i data-lucide="user-check" size="18"></i> Registrar Perfil</button>
+        </div>
+    </div>
+
+<script>
+    // --- ESTADO ARQUITECTÓNICO ---
+    let currentDate = new Date(2026, 5, 1); // Junio 2026 por defecto
+    let selectedDateISO = "2026-06-18"; 
+
+    let amigos = JSON.parse(localStorage.getItem('chronos_amigos_v3')) || [
+        { id: 1, nombre: "Hugo", disponibilidad: ["2026-06-05", "2026-06-06", "2026-06-12", "2026-06-18", "2026-06-20"] },
+        { id: 2, nombre: "Paula", disponibilidad: ["2026-06-06", "2026-06-12", "2026-06-18", "2026-06-20", "2026-06-24"] }
+    ];
+    let amigosSeleccionados = amigos.map(a => a.id);
+
+    let hitos = JSON.parse(localStorage.getItem('chronos_hitos_v3')) || [
+        { id: 1, titulo: "Examen de Inglés", fecha: "2026-06-18", categoria: "estudios" },
+        { id: 2, titulo: "Dentista", fecha: "2026-06-25", categoria: "salud" },
+        { id: 3, titulo: "Viaje Madrid", fecha: "2026-06-30", categoria: "viajes" },
+        { id: 4, titulo: "Cumpleaños Hugo", fecha: "2026-07-15", categoria: "personal" }
+    ];
+
+    function saveData() {
+        localStorage.setItem('chronos_amigos_v3', JSON.stringify(amigos));
+        localStorage.setItem('chronos_hitos_v3', JSON.stringify(hitos));
+    }
+
+    // --- MANEJO DEL AVISO BETA (SALTA CADA VEZ) ---
+    function triggerBetaStatusAlways() {
+        openModal('betaAlertModal');
+    }
+
+    // --- ENRUTADOR DE PESTAÑAS ---
+    function switchTab(tab) {
+        document.querySelectorAll('.view-page').forEach(p => p.classList.remove('active'));
+        document.querySelectorAll('.tab-btn').forEach(b => {
+            b.classList.remove('active');
+            b.setAttribute('aria-selected', 'false');
+        });
+        
+        if(tab === 'month') {
+            document.getElementById('page-month').classList.add('active');
+            document.getElementById('tab-month').classList.add('active');
+            document.getElementById('tab-month').setAttribute('aria-selected', 'true');
+            document.getElementById('monthZone').style.visibility = 'visible';
+            renderCalendar();
+        } else {
+            document.getElementById('page-tools').classList.add('active');
+            document.getElementById('tab-tools').classList.add('active');
+            document.getElementById('tab-tools').setAttribute('aria-selected', 'true');
+            document.getElementById('monthZone').style.visibility = 'hidden';
+            backToToolsMenu();
+        }
+    }
+
+    // --- RENDERIZADO DEL CALENDARIO ---
+    const monthsNames = ["Enero", "Febrero", "Marzo", "Abril", "Mayo", "Junio", "Julio", "Agosto", "Septiembre", "Octubre", "Noviembre", "Diciembre"];
+    
+    function renderCalendar() {
+        const year = currentDate.getFullYear();
+        const month = currentDate.getMonth();
+        document.getElementById('monthLabel').innerText = `${monthsNames[month]} ${year}`;
+        
+        const firstDayIndex = new Date(year, month, 1).getDay();
+        const startOffset = firstDayIndex === 0 ? 6 : firstDayIndex - 1;
+        const totalDays = new Date(year, month + 1, 0).getDate();
+        
+        const grid = document.getElementById('daysGrid');
+        grid.innerHTML = '';
+
+        for (let i = 0; i < startOffset; i++) {
+            grid.innerHTML += `<div class="calendar-day empty"></div>`;
+        }
+
+        const realToday = new Date();
+        const todayISO = `${realToday.getFullYear()}-${String(realToday.getMonth()+1).padStart(2,'0')}-${String(realToday.getDate()).padStart(2,'0')}`;
+
+        for (let day = 1; day <= totalDays; day++) {
+            const currentISO = `${year}-${String(month + 1).padStart(2, '0')}-${String(day).padStart(2, '0')}`;
+            
+            let classes = ['calendar-day'];
+            if (currentISO === todayISO) classes.push('today');
+            if (currentISO === selectedDateISO) classes.push('selected');
+
+            let dotsHtml = '<div class="day-dots">';
+            const tieneHitos = hitos.some(h => h.fecha === currentISO);
+            const tieneMatch = getCommonMatches().includes(currentISO);
+            
+            if (tieneHitos) dotsHtml += '<span class="dot hito"></span>';
+            if (tieneMatch) dotsHtml += '<span class="dot match"></span>';
+            dotsHtml += '</div>';
+
+            grid.innerHTML += `
+                <div class="${classes.join(' ')}" onclick="handleDayClick('${currentISO}')" role="gridcell" aria-label="${day} de ${monthsNames[month]}">
+                    ${day}
+                    ${dotsHtml}
+                </div>
+            `;
+        }
+        renderAgendaDay();
+    }
+
+    function handleDayClick(isoStr) {
+        if (selectedDateISO === isoStr) {
+            const parts = isoStr.split('-');
+            document.getElementById('modalDateTitle').innerText = `${parts[2]} de ${monthsNames[parseInt(parts[1])-1]}`;
+            openModal('dateModal');
+        } else {
+            selectedDateISO = isoStr;
+            renderCalendar();
+        }
+    }
+
+    function changeMonth(dir) {
+        currentDate.setMonth(currentDate.getMonth() + dir);
+        renderCalendar();
+    }
+
+    // --- AGENDA DIARIA ---
+    function renderAgendaDay() {
+        const parts = selectedDateISO.split('-');
+        document.getElementById('agendaBoxTitle').innerText = `Agenda: ${parts[2]}/${parts[1]}/${parts[0]}`;
+        const container = document.getElementById('dayAgendaRender');
+        container.innerHTML = '';
+
+        const hitosDelDia = hitos.filter(h => h.fecha === selectedDateISO);
+        const amigosDisponibles = amigos.filter(a => a.disponibilidad.includes(selectedDateISO));
+
+        if(!hitosDelDia.length && !amigosDisponibles.length) {
+            container.innerHTML = `<div style="font-size:0.85rem; color:var(--text-muted); text-align:center; padding:20px; border:1px dashed var(--glass-border); border-radius:16px;">Sin compromisos agendados hoy. Pulsa otra vez el día para añadir uno.</div>`;
+            return;
+        }
+
+        hitosDelDia.forEach(h => {
+            container.innerHTML += `
+                <div class="interactive-row" style="border-left: 4px solid var(--cat-${h.categoria || 'todos'})">
+                    <div class="row-left">
+                        <span class="cat-indicator" style="background: var(--cat-${h.categoria || 'todos'})"></span>
+                        <div>
+                            <div style="font-weight:600; font-size:0.92rem; letter-spacing:0.2px;">${h.titulo}</div>
+                            <div style="font-size:0.75rem; color:var(--text-muted); text-transform:uppercase; font-weight:500; margin-top:2px;">Hito • ${h.categoria}</div>
+                        </div>
+                    </div>
+                    <div class="row-actions">
+                        <button class="icon-btn" onclick="event.stopPropagation(); triggerEditHito(${h.id})" aria-label="Editar"><i data-lucide="edit-3" size="14"></i></button>
+                        <button class="icon-btn" onclick="event.stopPropagation(); deleteHito(${h.id})" aria-label="Eliminar"><i data-lucide="trash-2" size="14"></i></button>
+                    </div>
+                </div>
+            `;
+        });
+
+        if(amigosDisponibles.length) {
+            const nombres = amigosDisponibles.map(a => a.nombre).join(', ');
+            container.innerHTML += `
+                <div class="interactive-row" style="border-left: 4px solid var(--cat-salud)">
+                    <div class="row-left">
+                        <i data-lucide="smile" size="16" style="color:var(--cat-salud)"></i>
+                        <div>
+                            <div style="font-weight:600; font-size:0.92rem;">Amigos Libres</div>
+                            <div style="font-size:0.78rem; color:var(--text-muted); margin-top:1px;">${nombres}</div>
+                        </div>
+                    </div>
+                </div>
+            `;
+        }
+        lucide.createIcons();
+    }
+
+    // --- CAPA DE MODALES ---
+    function openModal(id) { 
+        const el = document.getElementById(id);
+        el.style.display = 'flex';
+        setTimeout(() => el.classList.add('active'), 10);
+    }
+    function closeModal(id) { 
+        const el = document.getElementById(id);
+        el.classList.remove('active');
+        setTimeout(() => el.style.display = 'none', 250);
+    }
+
+    // --- SUB-HERRAMIENTAS ---
+    function openSubTool(type) {
+        document.getElementById('toolsMainMenu').style.display = 'none';
+        const container = document.getElementById('subToolContainer');
+        const title = document.getElementById('subToolTitle');
+        const body = document.getElementById('subToolBody');
+        container.style.display = 'block';
+
+        if (type === 'progress') {
+            title.innerText = "Métricas Temporales";
+            body.innerHTML = `
+                <div class="segmented-control">
+                    <button class="segment-btn" id="m-day" onclick="runProgress('day')">Día</button>
+                    <button class="segment-btn" id="m-month" onclick="runProgress('month')">Mes</button>
+                    <button class="segment-btn active" id="m-year" onclick="runProgress('year')">Año 2026</button>
+                    <button class="segment-btn" id="m-life" onclick="runProgress('life')">Vida</button>
+                </div>
+                <div class="metric-container">
+                    <div class="metric-big-num" id="pTxt">0%</div>
+                    <div class="grid-matrix" id="pMatrix"></div>
+                </div>
+            `;
+            runProgress('year');
+        } 
+        else if (type === 'sync') {
+            title.innerText = "Match Amigos";
+            body.innerHTML = `
+                <div class="glass-panel" style="text-align:center; background: rgba(44, 225, 98, 0.04); border-color: rgba(44, 225, 98, 0.15)">
+                    <div style="font-size:0.7rem; text-transform:uppercase; letter-spacing:1.5px; opacity:0.6; margin-bottom:4px;">Intersecciones Coincidentes</div>
+                    <div style="font-size:1.05rem; font-weight:700; color:var(--cat-salud);" id="matchResult">Calculando...</div>
+                </div>
+                <div class="glass-panel" style="background:transparent; border:none; padding:0; margin-bottom:12px; display:flex; justify-content:space-between; align-items:center;">
+                    <div class="section-title">Lista de Contactos</div>
+                    <button onclick="triggerCreateFriend()" class="action-btn-main" style="width:auto; padding:6px 14px; font-size:0.78rem; border-radius:20px;">+ Añadir Perfil</button>
+                </div>
+                <div class="item-list" id="friendListRender"></div>
+            `;
+            renderFriendsList();
+        } 
+        else if (type === 'countdown') {
+            title.innerText = "Línea Temporal de Hitos";
+            body.innerHTML = `
+                <div class="input-group" style="margin-bottom:16px;">
+                    <input type="text" class="glass-input" id="searchHitoInput" placeholder="🔍 Filtrar hitos..." oninput="renderHitosList()">
+                </div>
+                <div class="item-list" id="hitoListRender"></div>
+            `;
+            renderHitosList();
+        }
+        else if (type === 'settings') {
+            title.innerText = "Consola de Datos";
+            body.innerHTML = `
+                <div class="glass-panel">
+                    <p style="font-size:0.82rem; line-height:1.4; color:var(--text-muted); margin-bottom:16px;">Exporta o importa el estado lógico de la aplicación usando ficheros estructurados JSON.</p>
+                    <div style="display:flex; flex-direction:column; gap:8px;">
+                        <button class="action-btn-secondary" onclick="exportDataJSON()"><i data-lucide="download" size="16"></i> Exportar Backup JSON</button>
+                        <div style="position:relative; width:100%;">
+                            <button class="action-btn-secondary" style="width:100%;"><i data-lucide="upload" size="16"></i> Importar Backup JSON</button>
+                            <input type="file" id="importFileOpts" onchange="importDataJSON(event)" style="position:absolute; inset:0; opacity:0; cursor:pointer;">
+                        </div>
+                        <button class="action-btn-main" style="background:#ff4a70; color:#fff; margin-top:20px;" onclick="resetAppConfigData()"><i data-lucide="trash" size="16"></i> Purgar Datos Locales</button>
+                    </div>
+                </div>
+            `;
+        }
+        lucide.createIcons();
+    }
+
+    function backToToolsMenu() {
+        document.getElementById('toolsMainMenu').style.display = 'grid';
+        document.getElementById('subToolContainer').style.display = 'none';
+    }
+
+    // --- ALGORITMOS DE PROCESAMIENTO MÓDULOS ---
+    function runProgress(mode) {
+        document.querySelectorAll('.segment-btn').forEach(b => b.classList.remove('active'));
+        document.getElementById(`m-${mode}`).classList.add('active');
+        const now = new Date();
+        let pct = 0;
+        
+        if(mode === 'day') {
+            pct = ((now.getHours()*3600 + now.getMinutes()*60 + now.getSeconds()) / 86400) * 100;
+        } else if(mode === 'month') {
+            pct = (now.getDate() / new Date(2026, now.getMonth()+1, 0).getDate()) * 100;
+        } else if(mode === 'year') {
+            pct = ((now - new Date(2026, 0, 1)) / (1000*60*60*24*365)) * 100;
+        } else if(mode === 'life') {
+            pct = 21.3;
+        }
+        
+        pct = Math.min(100, Math.max(0, Math.round(pct)));
+        document.getElementById('pTxt').innerText = pct + '%';
+        const mx = document.getElementById('pMatrix'); 
+        mx.innerHTML = '';
+        for(let i=0; i<100; i++) {
+            mx.innerHTML += `<div class="grid-block ${i < pct ? 'active' : ''}"></div>`;
+        }
+    }
+
+    function getCommonMatches() {
+        const activos = amigos.filter(a => amigosSeleccionados.includes(a.id));
+        if(!activos.length) return [];
+        let coincidencia = [...activos[0].disponibilidad];
+        for(let i = 1; i < activos.length; i++) {
+            coincidencia = coincidencia.filter(d => activos[i].disponibilidad.includes(d));
+        }
+        return coincidencia;
+    }
+
+    // --- CRUD: AMIGOS ---
+    function renderFriendsList() {
+        const container = document.getElementById('friendListRender');
+        if(!container) return;
+        container.innerHTML = '';
+        
+        amigos.forEach(a => {
+            const isSel = amigosSeleccionados.includes(a.id);
+            container.innerHTML += `
+                <div class="interactive-row">
+                    <div class="row-left" onclick="toggleFriendSelection(${a.id})" style="cursor:pointer; flex:1;">
+                        <i data-lucide="${isSel ? 'check-circle' : 'circle'}" size="16" style="${isSel ? 'color:var(--cat-salud);' : 'opacity:0.3;'}"></i>
+                        <div>
+                            <div style="font-weight:600; font-size:0.9rem;">${a.nombre}</div>
+                            <div style="font-size:0.72rem; color:var(--text-muted); margin-top:2px;">Días Libres: ${a.disponibilidad.length}</div>
+                        </div>
+                    </div>
+                    <div class="row-actions">
+                        <button class="icon-btn" onclick="triggerEditFriend(${a.id})" aria-label="Editar"><i data-lucide="edit-2" size="14"></i></button>
+                        <button class="icon-btn" onclick="deleteFriend(${a.id})" aria-label="Eliminar"><i data-lucide="trash-2" size="14"></i></button>
+                    </div>
+                </div>
+            `;
+        });
+
+        const comunes = getCommonMatches();
+        document.getElementById('matchResult').innerText = comunes.length ? `${comunes.length} Días Coincidentes` : "Ningún día en común";
+        lucide.createIcons();
+    }
+
+    function toggleFriendSelection(id) {
+        if(amigosSeleccionados.includes(id)) amigosSeleccionados = amigosSeleccionados.filter(i => i !== id);
+        else amigosSeleccionados.push(id);
+        renderFriendsList();
+        renderCalendar();
+    }
+
+    function triggerCreateFriend() {
+        document.getElementById('friendModalTitle').innerText = "Nuevo Amigo";
+        document.getElementById('formFriendId').value = "";
+        document.getElementById('formFriendNombre').value = "";
+        openModal('friendModal');
+    }
+
+    function triggerEditFriend(id) {
+        const f = amigos.find(a => a.id === id);
+        document.getElementById('friendModalTitle').innerText = "Editar Amigo";
+        document.getElementById('formFriendId').value = f.id;
+        document.getElementById('formFriendNombre').value = f.nombre;
+        openModal('friendModal');
+    }
+
+    function saveFriendForm() {
+        const id = document.getElementById('formFriendId').value;
+        const nombre = document.getElementById('formFriendNombre').value.trim();
+        if(!nombre) return;
+
+        if(id) {
+            const f = amigos.find(a => a.id == id);
+            if(f) f.nombre = nombre;
+        } else {
+            const newF = { id: Date.now(), nombre: nombre, disponibilidad: [] };
+            amigos.push(newF);
+            amigosSeleccionados.push(newF.id);
+        }
+        saveData(); closeModal('friendModal'); renderFriendsList(); renderCalendar();
+    }
+
+    function deleteFriend(id) {
+        amigos = amigos.filter(a => a.id !== id);
+        amigosSeleccionados = amigosSeleccionados.filter(i => i !== id);
+        saveData(); renderFriendsList(); renderCalendar();
+    }
+
+    function triggerAddFriendFreeDay() {
+        closeModal('dateModal');
+        const select = document.getElementById('formFriendSelect');
+        if(!amigos.length) { alert("Registra un amigo primero en Operaciones."); return; }
+        select.innerHTML = amigos.map(a => `<option value="${a.id}">${a.nombre}</option>`).join('');
+        document.getElementById('formFriendDate').value = selectedDateISO;
+        openModal('friendFreeDayModal');
+    }
+
+    function saveFriendFreeDayForm() {
+        const friendId = parseInt(document.getElementById('formFriendSelect').value);
+        const dateStr = document.getElementById('formFriendDate').value;
+        if(!friendId || !dateStr) return;
+
+        const f = amigos.find(a => a.id === friendId);
+        if(f && !f.disponibilidad.includes(dateStr)) {
+            f.disponibilidad.push(dateStr);
+            saveData();
+        }
+        closeModal('friendFreeDayModal');
+        renderCalendar();
+    }
+
+    // --- CRUD: HITOS ---
+    function renderHitosList() {
+        const container = document.getElementById('hitoListRender');
+        if(!container) return;
+        container.innerHTML = '';
+
+        const filterText = document.getElementById('searchHitoInput')?.value.toLowerCase() || '';
+        const hitosFiltrados = hitos
+            .filter(h => h.titulo.toLowerCase().includes(filterText))
+            .sort((a,b) => new Date(a.fecha) - new Date(b.fecha));
+
+        if(!hitosFiltrados.length) {
+            container.innerHTML = `<div style="font-size:0.85rem; color:var(--text-muted); text-align:center; padding:30px;">Ningún hito coincide.</div>`;
+            return;
+        }
+
+        hitosFiltrados.forEach(h => {
+            const diff = Math.ceil((new Date(h.fecha) - new Date()) / (1000 * 60 * 60 * 24));
+            const txtCountdown = diff > 0 ? `Faltan ${diff} días` : (diff === 0 ? "¡Es Hoy!" : `Pasó hace ${Math.abs(diff)} días`);
+            
+            container.innerHTML += `
+                <div class="interactive-row" style="border-left: 4px solid var(--cat-${h.categoria || 'otros'})">
+                    <div class="row-left">
+                        <span class="cat-indicator" style="background: var(--cat-${h.categoria || 'otros'})"></span>
+                        <div>
+                            <div style="font-weight:600; font-size:0.9rem;">${h.titulo}</div>
+                            <div style="font-size:0.72rem; color:var(--text-muted); margin-top:2px;">${h.fecha} • <strong style="color:#ffffff; font-weight:500;">${txtCountdown}</strong></div>
+                        </div>
+                    </div>
+                    <div class="row-actions">
+                        <button class="icon-btn" onclick="triggerEditHito(${h.id})" aria-label="Editar"><i data-lucide="edit-3" size="14"></i></button>
+                        <button class="icon-btn" onclick="deleteHito(${h.id})" aria-label="Eliminar"><i data-lucide="trash-2" size="14"></i></button>
+                    </div>
+                </div>
+            `;
+        });
+        lucide.createIcons();
+    }
+
+    function triggerCreateHito() {
+        closeModal('dateModal');
+        document.getElementById('hitoModalTitle').innerText = "Nuevo Hito Temporal";
+        document.getElementById('formHitoId').value = "";
+        document.getElementById('formHitoTitulo').value = "";
+        document.getElementById('formHitoFecha').value = selectedDateISO;
+        openModal('hitoModal');
+    }
+
+    function triggerEditHito(id) {
+        closeModal('dateModal');
+        const h = hitos.find(item => item.id === id);
+        document.getElementById('hitoModalTitle').innerText = "Editar Hito";
+        document.getElementById('formHitoId').value = h.id;
+        document.getElementById('formHitoTitulo').value = h.titulo;
+        document.getElementById('formHitoFecha').value = h.fecha;
+        document.getElementById('formHitoCategoria').value = h.categoria || "personal";
+        openModal('hitoModal');
+    }
+
+    function saveHitoForm() {
+        const id = document.getElementById('formHitoId').value;
+        const titulo = document.getElementById('formHitoTitulo').value.trim();
+        const fecha = document.getElementById('formHitoFecha').value;
+        const categoria = document.getElementById('formHitoCategoria').value;
+
+        if(!titulo || !fecha) return;
+
+        if(id) {
+            const h = hitos.find(item => item.id == id);
+            if(h) { h.titulo = titulo; h.fecha = fecha; h.categoria = categoria; }
+        } else {
+            hitos.push({ id: Date.now(), titulo: titulo, fecha: fecha, categoria: categoria });
+        }
+        
+        saveData();
+        closeModal('hitoModal');
+        renderCalendar();
+        if(document.getElementById('subToolContainer').style.display === 'block') renderHitosList();
+    }
+
+    function deleteHito(id) {
+        hitos = hitos.filter(h => h.id !== id);
+        saveData();
+        renderCalendar();
+        renderHitosList();
+    }
+
+    // --- RESPALDOS JSON ---
+    function exportDataJSON() {
+        const dataExport = { amigos: amigos, hitos: hitos };
+        const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(dataExport));
+        const downloadAnchor = document.createElement('a');
+        downloadAnchor.setAttribute("href", dataStr);
+        downloadAnchor.setAttribute("download", `chronos_v3.2_backup.json`);
+        document.body.appendChild(downloadAnchor);
+        downloadAnchor.click();
+        downloadAnchor.remove();
+    }
+
+    function importDataJSON(event) {
+        const reader = new FileReader();
+        reader.onload = function(e) {
+            try {
+                const parsed = JSON.parse(e.target.result);
+                if(parsed.amigos || parsed.hitos) {
+                    if(parsed.amigos) amigos = parsed.amigos;
+                    if(parsed.hitos) hitos = parsed.hitos;
+                    amigosSeleccionados = amigos.map(a => a.id);
+                    saveData();
+                    window.location.reload();
+                }
+            } catch(err) {
+                alert("JSON no válido.");
+            }
+        };
+        reader.readAsText(event.target.files[0]);
+    }
+
+    function resetAppConfigData() {
+        if(confirm("¿Purgar por completo la base de datos de Chronos?")) {
+            localStorage.clear();
+            window.location.reload();
+        }
+    }
+
+    window.onload = () => {
+        renderCalendar();
+        triggerBetaStatusAlways(); // Ejecución incondicional al arrancar
+        lucide.createIcons();
+    };
+</script>
+</body>
+</html>
