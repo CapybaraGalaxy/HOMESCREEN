@@ -119,7 +119,7 @@
             animation: clockScale 1.2s var(--bezier); 
             cursor: pointer; 
             user-select: none; 
-            transition: font-size 0.6s var(--bezier), letter-spacing 0.6s var(--bezier);
+            transition: font-size 0.6s var(--bezier), letter-spacing 0.6s var(--bezier), color 0.3s ease, opacity 0.3s ease;
             will-change: font-size;
         }
         .date { 
@@ -128,7 +128,7 @@
             letter-spacing: 4px; 
             color: var(--text-muted); 
             margin-top: 10px; 
-            transition: font-size 0.6s var(--bezier), letter-spacing 0.6s var(--bezier), color 0.6s var(--bezier);
+            transition: font-size 0.6s var(--bezier), letter-spacing 0.6s var(--bezier), color 0.6s var(--bezier), opacity 0.3s ease;
         }
 
         .scroll-wrapper {
@@ -477,7 +477,7 @@
             { name: 'CraftPalette', icon: 'Command', url: 'Apps/craftpalette.html' },
             { name: 'Calculadora tiempo de descarga', icon: 'Download', url: 'Apps/calculadora-descarga.html' },
             { name: 'Medidas', icon: 'RulerDimensionLine', url: 'Apps/medidas.html' },
-             { name: 'Calendario [BETA] ', icon: 'Calendar', url: 'Apps/calendario.html' },
+            { name: 'Calendario [BETA] ', icon: 'Calendar', url: 'Apps/calendario.html' },
         ];
 
         const hiddenApp = { name: 'Neo GameCenter', icon: 'Gamepad2', url: 'games.html' };
@@ -529,11 +529,91 @@
             }
         };
 
-        // LÓGICA ACTIVACIÓN/DESACTIVACIÓN MODO ZEN
-        clock.ondblclick = () => {
-            body.classList.add('zen-mode');
-            setPanel.classList.remove('active'); // Cerrar ajustes si estaban abiertos
+        // --- LÓGICA DE CONTROL DEL RELOJ (ZEN, CRONÓMETRO Y LONG PRESS) ---
+        let clockPressTimer = null;
+        let isChronometerMode = false;
+        let chronoInterval = null;
+        let chronoTime = 0; // Décimas de segundo
+
+        function formatChrono(time) {
+            const minutes = Math.floor(time / 600);
+            const seconds = Math.floor((time % 600) / 10);
+            const tenths = time % 10;
+            return `${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}.${tenths}`;
+        }
+
+        // Clic normal sobre el reloj
+        clock.onclick = () => {
+            if (!isChronometerMode) return; // Si es la hora normal, ignorar clic simple
+            
+            if (chronoInterval) {
+                // Pausar
+                clearInterval(chronoInterval);
+                chronoInterval = null;
+            } else {
+                // Si ya tiene tiempo guardado y estaba en pausa, reinicia a cero
+                if (chronoTime > 0) {
+                    chronoTime = 0;
+                    clock.innerText = formatChrono(chronoTime);
+                } else {
+                    // Arrancar
+                    chronoInterval = setInterval(() => {
+                        chronoTime++;
+                        clock.innerText = formatChrono(chronoTime);
+                    }, 100);
+                }
+            }
         };
+
+        // Doble clic para Modo Zen
+        clock.ondblclick = () => {
+            if (isChronometerMode) return; // Bloquear si está en cronómetro
+            body.classList.add('zen-mode');
+            setPanel.classList.remove('active'); 
+        };
+
+        // Lógica de detección del Long Press (1.2 segundos)
+        const startPress = (e) => {
+            if (clockPressTimer) clearTimeout(clockPressTimer);
+            clockPressTimer = setTimeout(toggleClockMode, 1200);
+        };
+
+        const cancelPress = () => {
+            if (clockPressTimer) {
+                clearTimeout(clockPressTimer);
+                clockPressTimer = null;
+            }
+        };
+
+        function toggleClockMode() {
+            isChronometerMode = !isChronometerMode;
+            cancelPress();
+
+            if (isChronometerMode) {
+                clock.style.color = '#FFD60A'; // Tono amarillo sutil informativo
+                chronoTime = 0;
+                clock.innerText = formatChrono(chronoTime);
+                document.getElementById('date').style.opacity = '0';
+                document.getElementById('date').style.pointerEvents = 'none';
+            } else {
+                clock.style.color = '';
+                if (chronoInterval) {
+                    clearInterval(chronoInterval);
+                    chronoInterval = null;
+                }
+                document.getElementById('date').style.opacity = '';
+                document.getElementById('date').style.pointerEvents = '';
+                updateClock();
+            }
+        }
+
+        // Listeners del Reloj (Soporte PC y Mobile)
+        clock.addEventListener('mousedown', startPress);
+        clock.addEventListener('mouseup', cancelPress);
+        clock.addEventListener('mouseleave', cancelPress);
+        clock.addEventListener('touchstart', startPress, { passive: true });
+        clock.addEventListener('touchend', cancelPress);
+        clock.addEventListener('touchmove', cancelPress);
 
         exitZenBtn.onclick = () => {
             body.classList.remove('zen-mode');
@@ -685,6 +765,7 @@
         }
 
         function updateClock() {
+            if (isChronometerMode) return; // No sobreescribir si el cronómetro está activo
             const n = new Date();
             document.getElementById('clock').innerText = n.toLocaleTimeString('es-ES', {hour:'2-digit', minute:'2-digit'});
             document.getElementById('date').innerText = n.toLocaleDateString('es-ES', {weekday:'long', day:'numeric', month:'long'});
