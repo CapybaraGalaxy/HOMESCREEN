@@ -1,0 +1,1629 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+    <title>Neo AppManager & Orchestrator</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@200;300;400;500;600;700&display=swap" rel="stylesheet">
+    <script src="https://unpkg.com/lucide@latest"></script>
+<style>
+        :root {
+            --bg: #000000;
+            --surface: #121212;
+            --surface-hover: #1c1c1e;
+            --glass: rgba(15, 15, 15, 0.4);
+            --glass-border: rgba(255, 255, 255, 0.08);
+            --blur-val: 30px;
+            --text-main: #FFFFFF;
+            --text-muted: #8E8E93;
+            --accent-danger: #FF453A;
+            --accent-success: #34C759;
+            --accent-blue: #0A84FF;
+            --bezier: cubic-bezier(0.16, 1, 0.3, 1);
+            --spring: cubic-bezier(0.34, 1.56, 0.64, 1);
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: 'Outfit', sans-serif;
+            -webkit-tap-highlight-color: transparent;
+        }
+
+        body {
+            background-color: var(--bg);
+            color: var(--text-main);
+            overflow: hidden;
+            height: 100vh;
+        }
+
+        .app-container {
+            height: 100dvh;
+            padding: env(safe-area-inset-top) 24px calc(env(safe-area-inset-bottom) + 16px) 24px;
+            max-width: 900px;
+            margin: 0 auto;
+            display: flex;
+            flex-direction: column;
+            transition: transform 0.5s var(--bezier), filter 0.5s var(--bezier);
+            position: relative;
+            z-index: 1;
+        }
+
+        .app-container.backgrounded {
+            transform: scale(0.96);
+            filter: blur(10px);
+            pointer-events: none;
+        }
+
+        header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 20px 0 12px 0;
+        }
+
+        .header-meta {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .app-icon-badge {
+            width: 42px;
+            height: 42px;
+            border-radius: 12px;
+            background: radial-gradient(circle at center, rgba(255,255,255,0.03) 0%, rgba(0,0,0,0) 100%);
+            border: 1px solid var(--glass-border);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.5);
+        }
+
+        .title-group h1 {
+            font-size: 18px;
+            font-weight: 600;
+            letter-spacing: -0.5px;
+            line-height: 1.2;
+        }
+
+        .title-group .counter {
+            font-size: 12px;
+            color: var(--text-muted);
+            font-variant-numeric: tabular-nums;
+            transition: transform 0.2s var(--spring);
+        }
+
+        .pulse-counter {
+            transform: scale(1.15);
+            color: var(--text-main) !important;
+        }
+
+        .header-actions {
+            display: flex;
+            gap: 8px;
+        }
+
+        .btn-icon {
+            width: 38px;
+            height: 38px;
+            border-radius: 50%;
+            border: 1px solid var(--glass-border);
+            background: var(--glass);
+            backdrop-filter: blur(var(--blur-val));
+            color: var(--text-main);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            transition: background 0.2s var(--bezier), transform 0.2s var(--spring);
+        }
+
+        .btn-icon:hover {
+            background: var(--surface-hover);
+        }
+
+        .btn-icon:active {
+            transform: scale(0.92);
+        }
+
+        .folders-scroll-area {
+            display: flex;
+            gap: 8px;
+            overflow-x: auto;
+            padding: 12px 0;
+            scrollbar-width: none;
+            -webkit-overflow-scrolling: touch;
+            flex-shrink: 0;
+        }
+
+        .folders-scroll-area::-webkit-scrollbar {
+            display: none;
+        }
+
+        .pill {
+            padding: 8px 16px;
+            border-radius: 20px;
+            background: var(--glass);
+            border: 1px solid var(--glass-border);
+            color: var(--text-muted);
+            font-size: 13px;
+            font-weight: 500;
+            white-space: nowrap;
+            cursor: pointer;
+            transition: all 0.3s var(--bezier);
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .pill i {
+            width: 14px;
+            height: 14px;
+        }
+
+        .pill.active {
+            background: var(--text-main);
+            color: var(--bg);
+            border-color: var(--text-main);
+        }
+
+        .main-content {
+            flex: 1;
+            overflow-y: auto;
+            padding-bottom: 90px;
+            scrollbar-width: none;
+        }
+
+        .main-content::-webkit-scrollbar {
+            display: none;
+        }
+
+        .section-block {
+            margin-bottom: 24px;
+            animation: fadeIn 0.4s var(--bezier) both;
+            transition: transform 0.2s var(--bezier), box-shadow 0.2s var(--bezier);
+        }
+
+        .section-block.dragging {
+            opacity: 0.5;
+            transform: scale(0.98);
+        }
+
+        .section-block.drag-over {
+            box-shadow: inset 0 0 0 2px rgba(255,255,255,0.3);
+        }
+
+        .section-title {
+            font-size: 12px;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            color: var(--text-muted);
+            margin-bottom: 12px;
+            padding-left: 4px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+
+        .app-item-card.dragging {
+            opacity: 0.5;
+        }
+
+        .app-item-card.drag-over {
+            box-shadow: inset 0 0 0 2px rgba(255,255,255,0.3);
+            background: rgba(255,255,255,0.08);
+        }
+
+        .grid-layout {
+            display: grid;
+            grid-template-columns: 1fr;
+            gap: 8px;
+        }
+
+        @media (min-width: 600px) {
+            .grid-layout {
+                grid-template-columns: repeat(2, 1fr);
+            }
+        }
+
+        .app-item-card {
+            background: var(--glass);
+            border: 1px solid var(--glass-border);
+            border-radius: 14px;
+            padding: 14px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            backdrop-filter: blur(var(--blur-val));
+            transition: background 0.2s var(--bezier), border-color 0.2s var(--bezier);
+        }
+
+        .app-item-card:hover {
+            background: var(--surface-hover);
+            border-color: rgba(255,255,255,0.15);
+        }
+
+        .app-item-info {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            min-width: 0;
+        }
+
+        .app-item-icon-box {
+            width: 38px;
+            height: 38px;
+            border-radius: 10px;
+            background: rgba(255,255,255,0.04);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            flex-shrink: 0;
+            border: 1px solid rgba(255,255,255,0.02);
+        }
+
+        .app-item-details {
+            min-width: 0;
+        }
+
+        .app-item-name {
+            font-size: 14px;
+            font-weight: 500;
+            color: var(--text-main);
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+
+        .app-item-url {
+            font-size: 11px;
+            color: var(--text-muted);
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            margin-top: 2px;
+        }
+
+        .app-item-actions {
+            display: flex;
+            gap: 4px;
+            opacity: 0.8;
+        }
+
+        .btn-action-sm {
+            width: 28px;
+            height: 28px;
+            border-radius: 6px;
+            border: none;
+            background: transparent;
+            color: var(--text-muted);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            transition: all 0.2s var(--bezier);
+        }
+
+        .btn-action-sm:hover {
+            color: var(--text-main);
+            background: rgba(255,255,255,0.06);
+        }
+
+        .btn-action-sm.delete-trigger:hover {
+            color: var(--accent-danger);
+            background: rgba(255, 69, 58, 0.1);
+        }
+
+        /* FAB Search Bar Container */
+        .fab-search-container {
+            position: fixed;
+            bottom: calc(env(safe-area-inset-bottom) + 24px);
+            right: 24px;
+            z-index: 10;
+            display: flex;
+            justify-content: flex-end;
+            transition: all 0.3s var(--bezier);
+        }
+
+        .fab-search-bar {
+            width: 54px;
+            height: 54px;
+            background: rgba(20, 20, 20, 0.9);
+            border: 1px solid var(--glass-border);
+            border-radius: 100px;
+            backdrop-filter: blur(50px);
+            box-shadow: 0 8px 32px rgba(0,0,0,0.6);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 0 12px;
+            overflow: hidden;
+            transition: width 0.35s var(--spring), background 0.2s var(--bezier), box-shadow 0.3s var(--bezier), padding 0.35s var(--spring);
+            cursor: pointer;
+            font-feature-settings: "tnum";
+        }
+
+        .fab-search-bar:hover {
+            background: rgba(25, 25, 25, 0.95);
+            box-shadow: 0 12px 40px rgba(0,0,0,0.7);
+        }
+
+        .fab-search-bar.expanded {
+            width: 320px;
+            cursor: default;
+            background: rgba(18, 18, 20, 0.98);
+            border-color: rgba(255,255,255,0.2);
+            box-shadow: 0 12px 48px rgba(0,0,0,0.8);
+            padding: 0 16px;
+            justify-content: flex-start;
+        }
+
+        .search-icon-trigger {
+            color: var(--text-main);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            flex-shrink: 0;
+            transition: color 0.25s var(--bezier);
+            width: 20px;
+            height: 20px;
+        }
+
+        .fab-search-bar.expanded .search-icon-trigger {
+            color: var(--accent-blue);
+        }
+
+        .fab-search-input {
+            flex: 1;
+            background: transparent;
+            border: none;
+            outline: none;
+            color: var(--text-main);
+            font-size: 14px;
+            margin-left: 14px;
+            opacity: 0;
+            pointer-events: none;
+            transition: opacity 0.25s var(--bezier), margin 0.25s var(--bezier);
+            font-weight: 400;
+        }
+
+        .fab-search-bar.expanded .fab-search-input {
+            opacity: 1;
+            pointer-events: auto;
+        }
+
+        .search-clear-btn {
+            background: transparent;
+            border: none;
+            color: var(--text-muted);
+            cursor: pointer;
+            display: none;
+            align-items: center;
+            justify-content: center;
+            flex-shrink: 0;
+            transition: color 0.2s var(--bezier), transform 0.2s var(--spring);
+            padding: 0 8px;
+            margin-right: -8px;
+        }
+
+        .search-clear-btn:hover {
+            color: var(--text-main);
+            transform: scale(1.1);
+        }
+
+        .fab-search-bar.expanded .search-clear-btn {
+            display: flex;
+        }
+
+        /* Modales */
+        .modal-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: 100;
+            pointer-events: none;
+        }
+
+        .modal-window {
+            position: fixed;
+            top: 0;
+            right: -100%;
+            width: 100%;
+            max-width: 460px;
+            height: 100%;
+            background: rgba(10, 10, 10, 0.85);
+            backdrop-filter: blur(40px);
+            border-left: 1px solid var(--glass-border);
+            box-shadow: -20px 0 60px rgba(0,0,0,0.8);
+            display: flex;
+            flex-direction: column;
+            transition: right 0.4s var(--bezier);
+            pointer-events: auto;
+            padding: calc(env(safe-area-inset-top) + 24px) 24px calc(env(safe-area-inset-bottom) + 24px) 24px;
+        }
+
+        .modal-window.active {
+            right: 0;
+        }
+
+        .modal-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 28px;
+        }
+
+        .modal-header h2 {
+            font-size: 18px;
+            font-weight: 600;
+            letter-spacing: -0.5px;
+        }
+
+        .modal-body {
+            flex: 1;
+            overflow-y: auto;
+            scrollbar-width: none;
+        }
+        .modal-body::-webkit-scrollbar { display: none; }
+
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        .form-label {
+            display: block;
+            font-size: 11px;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            color: var(--text-muted);
+            margin-bottom: 8px;
+        }
+
+        /* FIX CRÍTICO: Estilos añadidos para corregir las cajas de texto (inputs) */
+        .form-group input[type="text"],
+        .form-control {
+            width: 100%;
+            background-color: #1c1c1e;
+            border: 1px solid var(--glass-border);
+            border-radius: 10px;
+            padding: 12px 14px;
+            color: var(--text-main);
+            font-size: 14px;
+            outline: none;
+            transition: all 0.2s var(--bezier);
+        }
+
+        .form-group input[type="text"]:focus,
+        .form-control:focus {
+            border-color: rgba(255,255,255,0.25);
+            background-color: #2c2c2e;
+        }
+
+        .form-select {
+            width: 100%;
+            background-color: #1c1c1e;
+            background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' viewBox='0 0 24 24' fill='none' stroke='%238E8E93' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpolyline points='6 9 12 15 18 9'%3E%3C/polyline%3E%3C/svg%3E");
+            background-repeat: no-repeat;
+            background-position: right 14px center;
+            background-size: 16px;
+            border: 1px solid var(--glass-border);
+            border-radius: 10px;
+            padding: 12px 40px 12px 14px;
+            color: var(--text-main);
+            font-size: 14px;
+            outline: none;
+            cursor: pointer;
+            appearance: none;
+            -webkit-appearance: none;
+            -moz-appearance: none;
+            transition: all 0.2s var(--bezier);
+        }
+
+        .form-select:focus {
+            border-color: rgba(255,255,255,0.25);
+            background-color: #2c2c2e;
+        }
+
+        .form-select option {
+            background-color: #121212 !important;
+            color: #FFFFFF !important;
+            padding: 10px;
+        }
+
+        /* Toggle switch */
+        .toggle-container {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            background: rgba(255,255,255,0.03);
+            border: 1px solid var(--glass-border);
+            padding: 12px 14px;
+            border-radius: 10px;
+            cursor: pointer;
+        }
+
+        .switch {
+            position: relative;
+            display: inline-block;
+            width: 42px;
+            height: 24px;
+        }
+
+        .switch input { opacity: 0; width: 0; height: 0; }
+
+        .slider {
+            position: absolute;
+            cursor: pointer;
+            top: 0; left: 0; right: 0; bottom: 0;
+            background-color: rgba(255,255,255,0.15);
+            transition: .3s;
+            border-radius: 24px;
+        }
+
+        .slider:before {
+            position: absolute;
+            content: "";
+            height: 18px;
+            width: 18px;
+            left: 3px;
+            bottom: 3px;
+            background-color: white;
+            transition: .3s var(--spring);
+            border-radius: 50%;
+        }
+
+        input:checked + .slider {
+            background-color: var(--accent-success);
+        }
+
+        input:checked + .slider:before {
+            transform: translateX(18px);
+        }
+
+        /* Live Preview Component */
+        .preview-box {
+            background: rgba(255,255,255,0.02);
+            border: 1px dotted var(--glass-border);
+            border-radius: 12px;
+            padding: 16px;
+            margin-bottom: 24px;
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+
+        .modal-footer {
+            padding-top: 16px;
+            display: flex;
+            gap: 12px;
+        }
+
+        .btn-prime {
+            flex: 1;
+            background: var(--text-main);
+            color: var(--bg);
+            border: none;
+            padding: 14px;
+            border-radius: 10px;
+            font-size: 14px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: opacity 0.2s var(--bezier), transform 0.2s var(--spring);
+        }
+
+        .btn-prime:active { transform: scale(0.97); }
+
+        .btn-secondary {
+            background: rgba(255,255,255,0.08);
+            color: var(--text-main);
+            border: none;
+            padding: 14px 20px;
+            border-radius: 10px;
+            font-size: 14px;
+            font-weight: 500;
+            cursor: pointer;
+            transition: background 0.2s var(--bezier);
+        }
+
+        .btn-secondary:hover { background: rgba(255,255,255,0.12); }
+
+        /* JSON Export modal design */
+        .json-pre {
+            background: rgba(0,0,0,0.5);
+            border: 1px solid var(--glass-border);
+            border-radius: 10px;
+            padding: 14px;
+            font-family: monospace;
+            font-size: 12px;
+            color: #34C759;
+            overflow: auto;
+            max-height: 300px;
+            white-space: pre-wrap;
+        }
+
+        /* Shake & Error validation style */
+        .error-shake {
+            animation: shake 0.3s ease-in-out;
+            border-color: var(--accent-danger) !important;
+            box-shadow: 0 0 10px rgba(255,69,58,0.1);
+        }
+
+        @keyframes shake {
+            0%, 100% { transform: translateX(0); }
+            20%, 60% { transform: translateX(-6px); }
+            40%, 80% { transform: translateX(6px); }
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(8px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+    </style>
+</head>
+<body>
+
+    <div class="app-container" id="main-view">
+        <header>
+            <div class="header-meta">
+                <div class="app-icon-badge">
+                    <i data-lucide="layers" size="20" style="color: var(--text-main);"></i>
+                </div>
+                <div class="title-group">
+                    <h1>AppManager</h1>
+                    <div class="counter" id="meta-counter">0 carpetas • 0 aplicaciones</div>
+                </div>
+            </div>
+            <div class="header-actions">
+                <button class="btn-icon" onclick="openModal('folderModal')" title="Nueva Carpeta">
+                    <i data-lucide="folder-plus" size="18"></i>
+                </button>
+                <button class="btn-icon" onclick="openModal('appModal')" title="Nueva App">
+                    <i data-lucide="plus" size="18"></i>
+                </button>
+                <button class="btn-icon" onclick="openImportModal()" title="Importar Datos">
+                    <i data-lucide="upload" size="18"></i>
+                </button>
+                <button class="btn-icon" onclick="openExportModal()" title="Exportar Herramientas">
+                    <i data-lucide="code" size="18"></i>
+                </button>
+            </div>
+        </header>
+
+        <div class="folders-scroll-area" id="category-pills">
+            </div>
+
+        <main class="main-content" id="list-render-zone">
+            </main>
+    </div>
+
+    <div class="fab-search-container" id="search-wrapper">
+        <div class="fab-search-bar" id="search-bar" onclick="activateSearch(event)">
+            <div class="search-icon-trigger">
+                <i data-lucide="search" size="18" id="search-icon-node"></i>
+            </div>
+            <input type="text" class="fab-search-input" id="search-input" placeholder="Buscar aplicaciones..." oninput="handleSearch(this.value)">
+            <button class="search-clear-btn" id="search-clear" onclick="clearSearch(event)">
+                <i data-lucide="x" size="16"></i>
+            </button>
+        </div>
+    </div>
+
+    <div class="modal-overlay" id="modal-layer-mount" style="display:none;"></div>
+
+    <div class="modal-window" id="folderModal">
+        <div class="modal-header">
+            <h2 id="folder-modal-title">Crear Carpeta</h2>
+            <button class="btn-icon" onclick="closeActiveModal('folderModal')">
+                <i data-lucide="x" size="16"></i>
+            </button>
+        </div>
+        <div class="modal-body">
+            <input type="hidden" id="edit-folder-index">
+            <div class="form-group">
+                <label class="form-label">Nombre de la carpeta</label>
+                <input type="text" class="form-input" id="folder-name" placeholder="Ej. Diseño, Utilidades" oninput="updateFolderPreview()">
+            </div>
+            <div class="form-group">
+                <label class="form-label">Icono de la librería Lucide</label>
+                <input type="text" class="form-input" id="folder-icon" placeholder="Ej. Folder, Box, Archive, Briefcase" value="Folder" oninput="updateFolderPreview()">
+            </div>
+            <label class="form-label">Previsualización en tiempo real</label>
+            <div class="preview-box">
+                <div class="pill active" style="width:fit-content;" id="folder-preview-pill">
+                    <i data-lucide="folder"></i> <span id="folder-preview-text">Carpeta</span>
+                </div>
+            </div>
+        </div>
+        <div class="modal-footer">
+            <button class="btn-secondary" onclick="closeActiveModal('folderModal')">Cancelar</button>
+            <button class="btn-prime" onclick="saveFolder()">Guardar Carpeta</button>
+        </div>
+    </div>
+
+    <div class="modal-window" id="appModal">
+        <div class="modal-header">
+            <h2 id="app-modal-title">Agregar Aplicación</h2>
+            <button class="btn-icon" onclick="closeActiveModal('appModal')">
+                <i data-lucide="x" size="16"></i>
+            </button>
+        </div>
+        <div class="modal-body">
+            <input type="hidden" id="edit-app-folder-idx">
+            <input type="hidden" id="edit-app-idx">
+            
+            <div class="form-group">
+                <label class="form-label">Nombre del módulo</label>
+                <input type="text" class="form-input" id="app-name" placeholder="Ej. Medidas Pro" oninput="updateAppPreview()">
+            </div>
+            <div class="form-group">
+                <label class="form-label">Icono (Nombre Singular Lucide)</label>
+                <input type="text" class="form-input" id="app-icon" placeholder="Ej. Ruler, Coins, Download, Gamepad2" oninput="updateAppPreview()">
+            </div>
+            <div class="form-group">
+                <label class="form-label">Ruta / Ubicación URL</label>
+                <input type="text" class="form-input" id="app-url" placeholder="Ej. Apps/medidas.html o https://..." oninput="updateAppPreview()">
+            </div>
+            <div class="form-group">
+                <label class="form-label">Asignación de Carpeta Destino</label>
+                <select class="form-select" id="app-folder-select">
+                    </select>
+            </div>
+            <div class="form-group">
+                <div class="toggle-container" onclick="toggleHiddenState(event)">
+                    <div>
+                        <span class="form-label" style="margin-bottom:2px; color:var(--text-main);">Aplicación Oculta</span>
+                        <span style="font-size:11px; color:var(--text-muted);">Mover fuera de carpetas (HiddenApp)</span>
+                    </div>
+                    <label class="switch">
+                        <input type="checkbox" id="app-hidden-flag" onchange="toggleHiddenFormState()">
+                        <span class="slider"></span>
+                    </label>
+                </div>
+            </div>
+            <label class="form-label">Previsualización de tarjeta activa</label>
+            <div class="preview-box" id="app-preview-box">
+                </div>
+        </div>
+        <div class="modal-footer">
+            <button class="btn-secondary" onclick="closeActiveModal('appModal')">Cancelar</button>
+            <button class="btn-prime" onclick="saveApp()">Guardar Aplicación</button>
+        </div>
+    </div>
+
+    <div class="modal-window" id="exportModal">
+        <div class="modal-header">
+            <h2>Estructura de Datos Generada</h2>
+            <button class="btn-icon" onclick="closeActiveModal('exportModal')">
+                <i data-lucide="x" size="16"></i>
+            </button>
+        </div>
+        <div class="modal-body">
+            <div class="form-group">
+                <label class="form-label">Código JS de salida en formato solicitado</label>
+                <pre class="json-pre" id="json-output-area"></pre>
+            </div>
+        </div>
+        <div class="modal-footer">
+            <button class="btn-prime" onclick="copyJsonOutput()">Copiar al portapapeles</button>
+        </div>
+    </div>
+
+    <div class="modal-window" id="importModal">
+        <div class="modal-header">
+            <h2>Importar Datos</h2>
+            <button class="btn-icon" onclick="closeActiveModal('importModal')">
+                <i data-lucide="x" size="16"></i>
+            </button>
+        </div>
+        <div class="modal-body">
+            <div class="form-group">
+                <label class="form-label">Pega aquí tu código JavaScript</label>
+                <textarea class="form-control" id="import-json-input" placeholder="const tools = [...]; const hiddenApps = [...];" style="min-height: 250px; font-family: monospace; font-size: 12px; resize: vertical;"></textarea>
+            </div>
+            <div class="preview-box" style="margin-top: 16px;">
+                <span style="font-size: 12px; color: var(--text-muted);">Se reemplazarán todos tus datos actuales con los importados.</span>
+            </div>
+        </div>
+        <div class="modal-footer">
+            <button class="btn-secondary" onclick="closeActiveModal('importModal')">Cancelar</button>
+            <button class="btn-prime" onclick="importJsonData()">Importar Datos</button>
+        </div>
+    </div>
+
+    <script>
+        // CORE RUNTIME STATE SYSTEM MANAGER 
+        let appData = {
+            tools: [],
+            hiddenApps: []
+        };
+
+        let activeModalsStack = [];
+        let currentFilterFolder = 'ALL';
+        let globalSearchQuery = '';
+
+        window.onload = function() {
+            initDataStructure();
+            setupOutsideClickDetects();
+            setupDragAndDrop();
+            renderApp();
+        };
+
+        function initDataStructure() {
+            const preservedData = localStorage.getItem('NEO_APPMANAGER_STATE');
+            if (preservedData) {
+                try {
+                    appData = JSON.parse(preservedData);
+                } catch(e) {
+                    injectSampleSchema();
+                }
+            } else {
+                injectSampleSchema();
+            }
+        }
+
+        function injectSampleSchema() {
+            appData.tools = [
+                {
+                    name: 'Utilidades',
+                    icon: 'Folder',
+                    folder: true,
+                    apps: [
+                        { name: 'Progreso', icon: 'Loader2', url: 'Apps/progreso.html' },
+                        { name: 'Galería de iconos', icon: 'GalleryHorizontal', url: 'Apps/icontest.html' },
+                        { name: 'Calculadora de dinero', icon: 'Coins', url: 'Apps/dinero.html' },
+                        { name: 'Calculadora tiempo de descarga', icon: 'Download', url: 'Apps/calculadora-descarga.html' },
+                        { name: 'Medidas', icon: 'Ruler', url: 'Apps/medidas.html' }
+                    ]
+                },
+                {
+                    name: 'Herramientas',
+                    icon: 'Folder',
+                    folder: true,
+                    apps: [
+                        { name: 'Mod compatibility checker', icon: 'ListCheck', url: 'Apps/modchecker.html' }
+                    ]
+                },
+                {
+                    name: 'Minecraft',
+                    icon: 'Folder',
+                    folder: true,
+                    apps: [
+                        { name: 'CraftPalette', icon: 'Command', url: 'Apps/craftpalette.html' }
+                    ]
+                },
+                {
+                    name: 'Productividad',
+                    icon: 'Folder',
+                    folder: true,
+                    apps: [
+                        { name: 'Calendario [BETA]', icon: 'Calendar', url: 'Apps/calendario.html' }
+                    ]
+                }
+            ];
+            appData.hiddenApps = [
+                { name: 'Neo GameCenter', icon: 'Gamepad2', url: 'games.html' }
+            ];
+            saveData();
+        }
+
+        function saveData() {
+            localStorage.setItem('NEO_APPMANAGER_STATE', JSON.stringify(appData));
+        }
+
+        // HISTORY API MODAL NAV STACK CORE
+        function openModal(modalId) {
+            document.getElementById('main-view').classList.add('backgrounded');
+            document.getElementById('modal-layer-mount').style.display = 'block';
+            document.getElementById(modalId).classList.add('active');
+            
+            activeModalsStack.push(modalId);
+            window.history.pushState({ modalId: modalId }, "");
+
+            if (modalId === 'folderModal' && document.getElementById('edit-folder-index').value === '') {
+                document.getElementById('folder-modal-title').innerText = "Crear Carpeta";
+                document.getElementById('folder-name').value = "";
+                document.getElementById('folder-icon').value = "Folder";
+                updateFolderPreview();
+            } else if (modalId === 'appModal' && document.getElementById('edit-app-idx').value === '') {
+                document.getElementById('app-modal-title').innerText = "Agregar Aplicación";
+                document.getElementById('app-name').value = "";
+                document.getElementById('app-icon').value = "";
+                document.getElementById('app-url').value = "";
+                document.getElementById('app-hidden-flag').checked = false;
+                toggleHiddenFormState();
+                updateAppPreview();
+            }
+            populateFolderSelectOptions();
+        }
+
+        function closeActiveModal(modalId) {
+            if (activeModalsStack.includes(modalId)) {
+                window.history.back();
+            }
+        }
+
+        window.addEventListener('popstate', () => {
+            if (activeModalsStack.length > 0) {
+                const topModalId = activeModalsStack.pop();
+                document.getElementById(topModalId).classList.remove('active');
+                if (activeModalsStack.length === 0) {
+                    document.getElementById('main-view').classList.remove('backgrounded');
+                    document.getElementById('modal-layer-mount').style.display = 'none';
+                    clearModalInputsFields();
+                }
+            }
+        });
+
+        function clearModalInputsFields() {
+            document.getElementById('edit-folder-index').value = '';
+            document.getElementById('edit-app-folder-idx').value = '';
+            document.getElementById('edit-app-idx').value = '';
+        }
+
+        function setupOutsideClickDetects() {
+            document.getElementById('modal-layer-mount').addEventListener('click', () => {
+                if(activeModalsStack.length > 0) {
+                    closeActiveModal(activeModalsStack[activeModalsStack.length - 1]);
+                }
+            });
+            document.addEventListener('click', (e) => {
+                const searchBar = document.getElementById('search-bar');
+                const searchInput = document.getElementById('search-input');
+                if (!searchBar.contains(e.target) && searchBar.classList.contains('expanded') && searchInput.value === '') {
+                    deactivateSearch();
+                }
+            });
+        }
+
+        // FLOATING SEARCH PATTERN CONTROLS
+        function activateSearch(event) {
+            const bar = document.getElementById('search-bar');
+            if(!bar.classList.contains('expanded')) {
+                bar.classList.add('expanded');
+                const input = document.getElementById('search-input');
+                setTimeout(() => input.focus(), 50);
+                event.stopPropagation();
+            }
+        }
+
+        function deactivateSearch() {
+            const bar = document.getElementById('search-bar');
+            bar.classList.remove('expanded');
+            const input = document.getElementById('search-input');
+            input.blur();
+            document.getElementById('search-icon-node').setAttribute('data-lucide', 'search');
+            lucide.createIcons();
+        }
+
+        function handleSearch(val) {
+            globalSearchQuery = val.trim().toLowerCase();
+            const clearBtn = document.getElementById('search-clear');
+            const iconNode = document.getElementById('search-icon-node');
+            
+            if(globalSearchQuery.length > 0) {
+                iconNode.setAttribute('data-lucide', 'filter');
+                clearBtn.style.display = 'flex';
+            } else {
+                iconNode.setAttribute('data-lucide', 'search');
+                clearBtn.style.display = 'none';
+            }
+            lucide.createIcons();
+            renderAppListsOnly();
+        }
+
+        function clearSearch(event) {
+            event.stopPropagation();
+            const input = document.getElementById('search-input');
+            input.value = '';
+            handleSearch('');
+            input.focus();
+        }
+
+        // PREVIEW SYNCHRONIZATIONS FORM ENGINE
+ function updateFolderPreview() {
+    const name = document.getElementById('folder-name').value.trim() || 'Carpeta';
+    let icon = document.getElementById('folder-icon').value.trim() || 'folder';
+    
+    const previewPill = document.getElementById('folder-preview-pill');
+    if (previewPill) {
+        // Forzamos la creación del nodo i con el atributo correcto antes de pasarle el text
+        previewPill.innerHTML = `<i data-lucide="${sanitizeIconName(icon)}"></i> <span id="folder-preview-text">${name}</span>`;
+        // Ejecución inmediata de Lucide dirigida únicamente al contenedor de preview
+        lucide.createIcons({
+            attrs: {
+                class: 'lucide-icon'
+            },
+            nameAttr: 'data-lucide',
+            root: previewPill
+        });
+    }
+}
+
+function updateAppPreview() {
+    const name = document.getElementById('app-name').value.trim() || 'Nombre de la App';
+    const icon = document.getElementById('app-icon').value.trim() || 'box';
+    const url = document.getElementById('app-url').value.trim() || 'Apps/ruta-ejemplo.html';
+    
+    const box = document.getElementById('app-preview-box');
+    if (box) {
+        box.innerHTML = `
+            <div class="app-item-card" style="backdrop-filter:none; background:rgba(255,255,255,0.05)">
+                <div class="app-item-info">
+                    <div class="app-item-icon-box" id="app-preview-icon-container">
+                        <i data-lucide="${sanitizeIconName(icon)}" size="16"></i>
+                    </div>
+                    <div class="app-item-details">
+                        <div class="app-item-name">${name}</div>
+                        <div class="app-item-url">${url}</div>
+                    </div>
+                </div>
+            </div>
+        `;
+        // Ejecución dirigida al contenedor de la app
+        lucide.createIcons({
+            root: box
+        });
+    }
+}
+
+        function toggleHiddenState(e) {
+            if(e.target.tagName !== 'INPUT') {
+                const cb = document.getElementById('app-hidden-flag');
+                cb.checked = !cb.checked;
+                toggleHiddenFormState();
+            }
+        }
+
+        function toggleHiddenFormState() {
+            const isHidden = document.getElementById('app-hidden-flag').checked;
+            const selectGroup = document.getElementById('app-folder-select').closest('.form-group');
+            if(isHidden) {
+                selectGroup.style.opacity = '0.3';
+                document.getElementById('app-folder-select').disabled = true;
+            } else {
+                selectGroup.style.opacity = '1';
+                document.getElementById('app-folder-select').disabled = false;
+            }
+        }
+
+        function populateFolderSelectOptions() {
+            const select = document.getElementById('app-folder-select');
+            select.innerHTML = appData.tools.map((folder, idx) => `
+                <option value="${idx}">${folder.name}</option>
+            `).join('');
+        }
+
+        function sanitizeIconName(str) {
+            let res = str.trim().toLowerCase();
+            if (res === 'rulers') return 'ruler';
+            return res || 'box';
+        }
+
+        // VALIDATION ERROR FORM CONTROL SHAKE EFFECT
+        function triggerFormGroupError(inputId) {
+            const element = document.getElementById(inputId);
+            element.classList.add('error-shake');
+            setTimeout(() => {
+                element.classList.remove('error-shake');
+            }, 300);
+        }
+
+        // DATA ACTIONS SAVE HANDLERS
+        function saveFolder() {
+            const nameInput = document.getElementById('folder-name');
+            const iconInput = document.getElementById('folder-icon');
+            const editIdxVal = document.getElementById('edit-folder-index').value;
+
+            if(!nameInput.value.trim()) { triggerFormGroupError('folder-name'); return; }
+            if(!iconInput.value.trim()) { triggerFormGroupError('folder-icon'); return; }
+
+            if(editIdxVal !== '') {
+                // Edit mode operation
+                const idx = parseInt(editIdxVal);
+                appData.tools[idx].name = nameInput.value.trim();
+                appData.tools[idx].icon = iconInput.value.trim();
+            } else {
+                // Create Mode Operation
+                appData.tools.push({
+                    name: nameInput.value.trim(),
+                    icon: iconInput.value.trim(),
+                    folder: true,
+                    apps: []
+                });
+            }
+            saveData();
+            closeActiveModal('folderModal');
+            triggerPulseCounterAnimate();
+            renderApp();
+        }
+
+        function saveApp() {
+            const nameInput = document.getElementById('app-name');
+            const iconInput = document.getElementById('app-icon');
+            const urlInput = document.getElementById('app-url');
+            const isHidden = document.getElementById('app-hidden-flag').checked;
+            const targetFolderIdx = parseInt(document.getElementById('app-folder-select').value);
+            
+            const editAppIdxVal = document.getElementById('edit-app-idx').value;
+            const editAppFolderIdxVal = document.getElementById('edit-app-folder-idx').value;
+
+            if(!nameInput.value.trim()) { triggerFormGroupError('app-name'); return; }
+            if(!iconInput.value.trim()) { triggerFormGroupError('app-icon'); return; }
+            if(!urlInput.value.trim()) { triggerFormGroupError('app-url'); return; }
+
+            const payloadInstance = {
+                name: nameInput.value.trim(),
+                icon: iconInput.value.trim(),
+                url: urlInput.value.trim()
+            };
+
+            // Remove previous version entity trace if dynamic updating
+            if(editAppIdxVal !== '') {
+                const oldIdx = parseInt(editAppIdxVal);
+                if(editAppFolderIdxVal === 'hidden') {
+                    appData.hiddenApps.splice(oldIdx, 1);
+                } else {
+                    const oldFIdx = parseInt(editAppFolderIdxVal);
+                    appData.tools[oldFIdx].apps.splice(oldIdx, 1);
+                }
+            }
+
+            // Route execution drop in destination arrays
+            if(isHidden) {
+                appData.hiddenApps.push(payloadInstance);
+            } else {
+                if (!isNaN(targetFolderIdx) && appData.tools[targetFolderIdx]) {
+                    appData.tools[targetFolderIdx].apps.push(payloadInstance);
+                } else {
+                    // Fallback create folder context safely if empty
+                    if(appData.tools.length === 0) {
+                        appData.tools.push({ name: 'General', icon: 'Folder', folder: true, apps: [] });
+                    }
+                    appData.tools[0].apps.push(payloadInstance);
+                }
+            }
+
+            saveData();
+            closeActiveModal('appModal');
+            triggerPulseCounterAnimate();
+            renderApp();
+        }
+
+        // MANAGE ENTITIES REMOVAL OPERATIONS
+        function deleteFolder(idx, event) {
+            event.stopPropagation();
+            if(confirm(`¿Estás seguro de que deseas eliminar la carpeta "${appData.tools[idx].name}" y todas sus apps internas?`)) {
+                appData.tools.splice(idx, 1);
+                currentFilterFolder = 'ALL';
+                saveData();
+                triggerPulseCounterAnimate();
+                renderApp();
+            }
+        }
+
+        function deleteApp(folderIndex, appIndex, event) {
+            event.stopPropagation();
+            let name = (folderIndex === 'hidden') ? appData.hiddenApps[appIndex].name : appData.tools[folderIndex].apps[appIndex].name;
+            if(confirm(`¿Eliminar la aplicación "${name}"?`)) {
+                if(folderIndex === 'hidden') {
+                    appData.hiddenApps.splice(appIndex, 1);
+                } else {
+                    appData.tools[folderIndex].apps.splice(appIndex, 1);
+                }
+                saveData();
+                triggerPulseCounterAnimate();
+                renderApp();
+            }
+        }
+
+        // TRIGGER INLINE EDIT MODES FILLERS
+        function openEditFolder(idx, event) {
+            event.stopPropagation();
+            const folder = appData.tools[idx];
+            document.getElementById('edit-folder-index').value = idx;
+            document.getElementById('folder-modal-title').innerText = "Editar Carpeta";
+            document.getElementById('folder-name').value = folder.name;
+            document.getElementById('folder-icon').value = folder.icon;
+            
+            openModal('folderModal');
+            updateFolderPreview();
+        }
+
+        function openEditApp(folderIndex, appIndex, event) {
+            event.stopPropagation();
+            const app = (folderIndex === 'hidden') ? appData.hiddenApps[appIndex] : appData.tools[folderIndex].apps[appIndex];
+            
+            document.getElementById('edit-app-idx').value = appIndex;
+            document.getElementById('edit-app-folder-idx').value = folderIndex;
+            document.getElementById('app-modal-title').innerText = "Editar Aplicación";
+            
+            document.getElementById('app-name').value = app.name;
+            document.getElementById('app-icon').value = app.icon;
+            document.getElementById('app-url').value = app.url;
+            
+            const isHidden = (folderIndex === 'hidden');
+            document.getElementById('app-hidden-flag').checked = isHidden;
+            
+            openModal('appModal');
+            if(!isHidden) {
+                document.getElementById('app-folder-select').value = folderIndex;
+            }
+            toggleHiddenFormState();
+            updateAppPreview();
+        }
+
+        // RE-RENDER INTEGRATED LAYOUT ROUTINE CONTROL SYSTEM
+        function renderApp() {
+            renderMetadataCounter();
+            renderPillCategoryContainer();
+            renderAppListsOnly();
+        }
+
+        function triggerPulseCounterAnimate() {
+            const counterNode = document.getElementById('meta-counter');
+            counterNode.classList.add('pulse-counter');
+            setTimeout(() => counterNode.classList.remove('pulse-counter'), 250);
+        }
+
+        function renderMetadataCounter() {
+            let totalFolders = appData.tools.length;
+            let totalApps = appData.hiddenApps.length;
+            appData.tools.forEach(f => totalApps += f.apps.length);
+            document.getElementById('meta-counter').innerText = `${totalFolders} carpetas • ${totalApps} aplicaciones`;
+        }
+
+        function renderPillCategoryContainer() {
+            const targetContainer = document.getElementById('category-pills');
+            let outputHtml = `
+                <div class="pill ${currentFilterFolder === 'ALL' ? 'active' : ''}" onclick="setFilterCategory('ALL')">
+                    <i data-lucide="layout-grid"></i> Todas
+                </div>
+            `;
+
+            appData.tools.forEach((folder, idx) => {
+                outputHtml += `
+                    <div class="pill ${currentFilterFolder === idx ? 'active' : ''}" onclick="setFilterCategory(${idx})">
+                        <i data-lucide="${sanitizeIconName(folder.icon)}"></i> ${folder.name}
+                    </div>
+                `;
+            });
+
+            if(appData.hiddenApps.length > 0) {
+                outputHtml += `
+                    <div class="pill ${currentFilterFolder === 'HIDDEN_LAYER' ? 'active' : ''}" onclick="setFilterCategory('HIDDEN_LAYER')">
+                        <i data-lucide="eye-off"></i> Ocultas (System)
+                    </div>
+                `;
+            }
+
+            targetContainer.innerHTML = outputHtml;
+            lucide.createIcons();
+        }
+
+        function setFilterCategory(val) {
+            currentFilterFolder = val;
+            renderPillCategoryContainer();
+            renderAppListsOnly();
+        }
+
+        function renderAppListsOnly() {
+            const targetContent = document.getElementById('list-render-zone');
+            let contentAccumulator = '';
+
+            // Folder and apps filtering engine pipeline match
+            if (currentFilterFolder === 'ALL' || typeof currentFilterFolder === 'number') {
+                appData.tools.forEach((folder, fIdx) => {
+                    if (currentFilterFolder !== 'ALL' && currentFilterFolder !== fIdx) return;
+
+                    // Search condition verification pipeline map filter
+                    let matchApps = folder.apps.filter(a => a.name.toLowerCase().includes(globalSearchQuery) || a.url.toLowerCase().includes(globalSearchQuery));
+                    
+                    if (globalSearchQuery && matchApps.length === 0 && !folder.name.toLowerCase().includes(globalSearchQuery)) return;
+                    if (!globalSearchQuery && folder.apps.length === 0) {
+                        // Display empty structural block representation maps
+                        contentAccumulator += buildFolderSectionWrapper(folder, fIdx, `<div style="grid-column: 1/-1; font-size:13px; color:var(--text-muted); padding:10px 4px;">Carpeta vacía</div>`);
+                        return;
+                    }
+
+                    let gridItemsCardsHtml = '';
+                    const collectionToUse = globalSearchQuery ? matchApps : folder.apps;
+
+                    collectionToUse.forEach((app, aIdx) => {
+                        let dynamicTrueIndex = folder.apps.indexOf(app);
+                        gridItemsCardsHtml += buildAppItemCardMarkup(app, fIdx, dynamicTrueIndex);
+                    });
+
+                    if(collectionToUse.length > 0 || !globalSearchQuery) {
+                        contentAccumulator += buildFolderSectionWrapper(folder, fIdx, gridItemsCardsHtml);
+                    }
+                });
+            }
+
+            // Hidden individual array components system map layer filter context
+            if (currentFilterFolder === 'ALL' || currentFilterFolder === 'HIDDEN_LAYER') {
+                let matchedHidden = appData.hiddenApps.filter(a => a.name.toLowerCase().includes(globalSearchQuery) || a.url.toLowerCase().includes(globalSearchQuery));
+                
+                if (appData.hiddenApps.length > 0 && (matchedHidden.length > 0 || (!globalSearchQuery && currentFilterFolder === 'HIDDEN_LAYER'))) {
+                    let hFolderMock = { name: 'Aplicaciones Ocultas (HiddenApps)', icon: 'EyeOff' };
+                    let gridItemsCardsHtml = '';
+                    const collectionToUse = globalSearchQuery ? matchedHidden : appData.hiddenApps;
+
+                    collectionToUse.forEach((app, aIdx) => {
+                        let dynamicTrueIndex = appData.hiddenApps.indexOf(app);
+                        gridItemsCardsHtml += buildAppItemCardMarkup(app, 'hidden', dynamicTrueIndex);
+                    });
+                    
+                    contentAccumulator += buildFolderSectionWrapper(hFolderMock, 'hidden', gridItemsCardsHtml);
+                }
+            }
+
+            targetContent.innerHTML = contentAccumulator || `<div style="text-align:center; padding:40px; color:var(--text-muted); font-size:14px;">Ningún elemento coincide con los filtros.</div>`;
+            lucide.createIcons();
+        }
+
+        function setupDragAndDrop() {
+            const listZone = document.getElementById('list-render-zone');
+            listZone.addEventListener('dragstart', handleDragStart);
+            listZone.addEventListener('dragover', handleDragOver);
+            listZone.addEventListener('drop', handleDrop);
+            listZone.addEventListener('dragleave', handleDragLeave);
+            listZone.addEventListener('dragend', handleDragEnd);
+        }
+
+        const dragState = {
+            type: null,
+            sourceFolderIdx: null,
+            sourceAppIdx: null,
+            sourceElement: null
+        };
+
+        function handleDragStart(event) {
+            const section = event.target.closest('.section-block');
+            const card = event.target.closest('.app-item-card');
+            if (card) {
+                dragState.type = 'app';
+                dragState.sourceFolderIdx = card.dataset.folderIndex;
+                dragState.sourceAppIdx = Number(card.dataset.appIndex);
+                dragState.sourceElement = card;
+                card.classList.add('dragging');
+                event.dataTransfer.effectAllowed = 'move';
+                event.dataTransfer.setData('text/plain', '');
+            } else if (section && section.dataset.folderIndex !== 'hidden') {
+                dragState.type = 'folder';
+                dragState.sourceFolderIdx = Number(section.dataset.folderIndex);
+                dragState.sourceElement = section;
+                section.classList.add('dragging');
+                event.dataTransfer.effectAllowed = 'move';
+                event.dataTransfer.setData('text/plain', '');
+            } else {
+                event.preventDefault();
+            }
+        }
+
+        function handleDragOver(event) {
+            const card = event.target.closest('.app-item-card');
+            const section = event.target.closest('.section-block');
+            if (dragState.type === 'folder' && section && section.dataset.folderIndex !== 'hidden') {
+                event.preventDefault();
+                section.classList.add('drag-over');
+            } else if (dragState.type === 'app' && (card || section)) {
+                event.preventDefault();
+                if (card) {
+                    card.classList.add('drag-over');
+                } else {
+                    section.classList.add('drag-over');
+                }
+            }
+        }
+
+        function handleDrop(event) {
+            event.preventDefault();
+            const card = event.target.closest('.app-item-card');
+            const section = event.target.closest('.section-block');
+            if (dragState.type === 'folder' && section && section.dataset.folderIndex !== 'hidden') {
+                const targetIndex = Number(section.dataset.folderIndex);
+                if (dragState.sourceFolderIdx !== targetIndex) {
+                    moveArrayItem(appData.tools, dragState.sourceFolderIdx, targetIndex);
+                    saveData();
+                    renderApp();
+                }
+            } else if (dragState.type === 'app' && section) {
+                const targetFolderIdx = section.dataset.folderIndex;
+                const targetAppIdx = card ? Number(card.dataset.appIndex) : null;
+                moveAppItem(dragState.sourceFolderIdx, dragState.sourceAppIdx, targetFolderIdx, targetAppIdx);
+            }
+            clearDragClasses();
+        }
+
+        function handleDragLeave(event) {
+            const card = event.target.closest('.app-item-card');
+            const section = event.target.closest('.section-block');
+            if (card) {
+                card.classList.remove('drag-over');
+            }
+            if (section) {
+                section.classList.remove('drag-over');
+            }
+        }
+
+        function handleDragEnd() {
+            if (dragState.sourceElement) {
+                dragState.sourceElement.classList.remove('dragging');
+            }
+            clearDragClasses();
+            dragState.type = null;
+            dragState.sourceFolderIdx = null;
+            dragState.sourceAppIdx = null;
+            dragState.sourceElement = null;
+        }
+
+        function clearDragClasses() {
+            document.querySelectorAll('.drag-over').forEach(el => el.classList.remove('drag-over'));
+        }
+
+        function moveArrayItem(array, fromIndex, toIndex) {
+            const item = array.splice(fromIndex, 1)[0];
+            array.splice(toIndex, 0, item);
+        }
+
+        function getAppList(folderIndex) {
+            return folderIndex === 'hidden' ? appData.hiddenApps : appData.tools[Number(folderIndex)]?.apps || [];
+        }
+
+        function moveAppItem(sourceFolderIdx, sourceAppIdx, targetFolderIdx, targetAppIdx) {
+            const sourceList = getAppList(sourceFolderIdx);
+            const targetList = getAppList(targetFolderIdx);
+            if (!sourceList || !targetList) return;
+            const item = sourceList[sourceAppIdx];
+            if (!item) return;
+            sourceList.splice(sourceAppIdx, 1);
+            if (targetFolderIdx === sourceFolderIdx) {
+                const insertIndex = targetAppIdx === null ? sourceList.length : (targetAppIdx > sourceAppIdx ? targetAppIdx - 1 : targetAppIdx);
+                sourceList.splice(insertIndex, 0, item);
+            } else {
+                const insertIndex = targetAppIdx !== null ? targetAppIdx : targetList.length;
+                targetList.splice(insertIndex, 0, item);
+            }
+            saveData();
+            renderApp();
+        }
+
+        function buildFolderSectionWrapper(folder, fIdx, interiorCardsHtml) {
+            let operationsActionButtons = '';
+            let draggableAttr = '';
+            if(fIdx !== 'hidden') {
+                draggableAttr = 'draggable="true"';
+                operationsActionButtons = `
+                    <div style="display:flex; gap:2px;">
+                        <button class="btn-action-sm" onclick="openEditFolder(${fIdx}, event)"><i data-lucide="edit-2" size="12"></i></button>
+                        <button class="btn-action-sm delete-trigger" onclick="deleteFolder(${fIdx}, event)"><i data-lucide="trash-2" size="12"></i></button>
+                    </div>
+                `;
+            }
+            return `
+                <section class="section-block" ${draggableAttr} data-folder-index="${fIdx}">
+                    <div class="section-title">
+                        <span style="display:flex; align-items:center; gap:6px;">
+                            <i data-lucide="${sanitizeIconName(folder.icon)}" size="14"></i> ${folder.name}
+                        </span>
+                        ${operationsActionButtons}
+                    </div>
+                    <div class="grid-layout" data-folder-index="${fIdx}">
+                        ${interiorCardsHtml}
+                    </div>
+                </section>
+            `;
+        }
+
+        function buildAppItemCardMarkup(app, fIdx, aIdx) {
+            return `
+                <div class="app-item-card" draggable="true" data-folder-index="${fIdx}" data-app-index="${aIdx}">
+                    <div class="app-item-info">
+                        <div class="app-item-icon-box">
+                            <i data-lucide="${sanitizeIconName(app.icon)}" size="16"></i>
+                        </div>
+                        <div class="app-item-details">
+                            <div class="app-item-name">${app.name}</div>
+                            <div class="app-item-url">${app.url}</div>
+                        </div>
+                    </div>
+                    <div class="app-item-actions">
+                        <button class="btn-action-sm" onclick="openEditApp('${fIdx}', ${aIdx}, event)" title="Editar App"><i data-lucide="edit-3" size="13"></i></button>
+                        <button class="btn-action-sm delete-trigger" onclick="deleteApp('${fIdx}', ${aIdx}, event)" title="Eliminar App"><i data-lucide="trash-2" size="13"></i></button>
+                    </div>
+                </div>
+            `;
+        }
+
+        // COMPILING DATA EXPORT GENERATOR MODULE 
+        function openExportModal() {
+            // Reconstruct the requested exact native layout specification rules array representation 
+            let codeStringifiedOutput = `const tools = [\n`;
+            
+            appData.tools.forEach((folder, idx) => {
+                codeStringifiedOutput += `    {\n`;
+                codeStringifiedOutput += `        name: '${folder.name}',\n`;
+                codeStringifiedOutput += `        icon: '${folder.icon}',\n`;
+                codeStringifiedOutput += `        folder: true,\n`;
+                codeStringifiedOutput += `        apps: [\n`;
+                
+                folder.apps.forEach((app, aIdx) => {
+                    codeStringifiedOutput += `            { name: '${app.name}', icon: '${app.icon}', url: '${app.url}' }${aIdx === folder.apps.length - 1 ? '' : ','}\n`;
+                });
+                
+                codeStringifiedOutput += `        ]\n`;
+                codeStringifiedOutput += `    }${idx === appData.tools.length - 1 ? '' : ','}\n`;
+            });
+            codeStringifiedOutput += `];\n\n`;
+
+            if(appData.hiddenApps.length > 0) {
+                if(appData.hiddenApps.length === 1) {
+                    let h = appData.hiddenApps[0];
+                    codeStringifiedOutput += `const hiddenApp = { name: '${h.name}', icon: '${h.icon}', url: '${h.url}' };`;
+                } else {
+                    codeStringifiedOutput += `const hiddenApps = [\n`;
+                    appData.hiddenApps.forEach((h, hIdx) => {
+                        codeStringifiedOutput += `    { name: '${h.name}', icon: '${h.icon}', url: '${h.url}' }${hIdx === appData.hiddenApps.length - 1 ? '' : ','}\n`;
+                    });
+                    codeStringifiedOutput += `];`;
+                }
+            } else {
+                codeStringifiedOutput += `const hiddenApp = null;`;
+            }
+
+            document.getElementById('json-output-area').innerText = codeStringifiedOutput;
+            openModal('exportModal');
+        }
+
+        function copyJsonOutput() {
+            const textToCopy = document.getElementById('json-output-area').innerText;
+            navigator.clipboard.writeText(textToCopy).then(() => {
+                alert('Estructura copiada correctamente al portapapeles.');
+            }).catch(() => {
+                alert('Error al copiar. Por favor, selecciónalo manualmente.');
+            });
+        }
+
+        function openImportModal() {
+            document.getElementById('import-json-input').value = '';
+            openModal('importModal');
+        }
+
+        function importJsonData() {
+            const input = document.getElementById('import-json-input').value.trim();
+            if (!input) {
+                alert('Por favor, pega el código para importar.');
+                return;
+            }
+            try {
+                let tools = [];
+                let hiddenApps = [];
+                eval(input);
+                if (Array.isArray(tools) && tools.length > 0) {
+                    appData.tools = tools;
+                }
+                if (Array.isArray(hiddenApps) && hiddenApps.length > 0) {
+                    appData.hiddenApps = hiddenApps;
+                }
+                if (appData.tools.length === 0 && appData.hiddenApps.length === 0) {
+                    alert('Error: No se encontraron datos válidos para importar.');
+                    return;
+                }
+                saveData();
+                closeActiveModal('importModal');
+                triggerPulseCounterAnimate();
+                renderApp();
+                alert('✓ Datos importados correctamente.');
+            } catch (e) {
+                alert('Error al procesar el código: ' + e.message);
+            }
+        }
+    </script>
+</body>
+</html>

@@ -434,7 +434,7 @@
         <div><strong>VERSIÓN LOCAL</strong> <span>· Ir a web</span></div>
     </a>
 
-    <div class="version-tag" id="versionTag">v0.9</div>
+    <div class="version-tag" id="versionTag">v0.8.2</div>
 
     <div class="ui-layer">
         <header class="header">
@@ -466,77 +466,21 @@
         </div>
     </div>
 
-    <div class="custom-modal" id="folderModal">
-        <div class="modal-title">
-            <i data-lucide="folder-open"></i>
-            <span id="folderTitle">Carpeta</span>
-        </div>
-
-        <div
-            id="folderApps"
-            style="
-                display:flex;
-                flex-wrap:wrap;
-                gap:12px;
-                justify-content:center;
-                margin-bottom:20px;
-            "
-        ></div>
-
-        <div class="modal-buttons">
-            <button
-                class="modal-btn secondary"
-                onclick="closeModal('folderModal')"
-            >
-                Cerrar
-            </button>
-        </div>
-    </div>
-
     <div class="exit-zen-btn" id="exitZenBtn" title="Salir de Modo Zen"><i data-lucide="eye"></i></div>
 
     <script>
-const tools = [
-    {
-        name: 'Utilidades',
-        icon: 'Toolbox',
-        folder: true,
-        apps: [
+        const tools = [
             { name: 'Progreso', icon: 'Loader2', url: 'Apps/progreso.html' },
+            { name: 'Galería de iconos', icon: 'GalleryHorizontal', url: 'Apps/icontest.html' },
             { name: 'Calculadora de dinero', icon: 'Coins', url: 'Apps/dinero.html' },
-            { name: 'Calculadora tiempo de descarga', icon: 'Download', url: 'Apps/calculadora-descarga.html' },
-            { name: 'Medidas', icon: 'Ruler', url: 'Apps/medidas.html' }
-        ]
-    },
-    {
-        name: 'Productividad',
-        icon: 'Focus',
-        folder: true,
-        apps: [
-            { name: 'Calendario [BETA]', icon: 'Calendar', url: 'Apps/calendario.html' }
-        ]
-    },
-    {
-        name: 'MC',
-        icon: 'Cuboid',
-        folder: true,
-        apps: [
+            { name: 'Mod compatibility checker', icon: 'ListCheck', url: 'Apps/modchecker.html' },
             { name: 'CraftPalette', icon: 'Command', url: 'Apps/craftpalette.html' },
-            { name: 'Mod compatibility checker', icon: 'ListCheck', url: 'Apps/modchecker.html' }
-        ]
-    },
-    {
-        name: 'Sistema',
-        icon: 'Settings2',
-        folder: true,
-        apps: [
-            { name: 'App maker', icon: 'ColumnsSettings', url: 'Apps/appmaker.html' },
-            { name: 'Galería de iconos', icon: 'LayoutList', url: 'Apps/icontest.html' }
-        ]
-    }
-];
+            { name: 'Calculadora tiempo de descarga', icon: 'Download', url: 'Apps/calculadora-descarga.html' },
+            { name: 'Medidas', icon: 'RulerDimensionLine', url: 'Apps/medidas.html' },
+            { name: 'Calendario [BETA] ', icon: 'Calendar', url: 'Apps/calendario.html' },
+        ];
 
-const hiddenApp = { name: 'Neo GameCenter', icon: 'Gamepad2', url: 'games.html' };
+        const hiddenApp = { name: 'Neo GameCenter', icon: 'Gamepad2', url: 'games.html' };
     </script>
 
     <div class="search-wrapper">
@@ -688,21 +632,6 @@ const hiddenApp = { name: 'Neo GameCenter', icon: 'Gamepad2', url: 'games.html' 
             document.getElementById(id).classList.add('active');
         }
 
-        function openFolder(folder) {
-            document.getElementById('folderTitle').innerText = folder.name;
-
-            document.getElementById('folderApps').innerHTML = folder.apps.map(app => `
-                <a href="${app.url}" class="tool-card">
-                    <i data-lucide="${app.icon}"></i>
-                    <span>${app.name}</span>
-                </a>
-            `).join('');
-
-            lucide.createIcons();
-
-            openModal('folderModal');
-        }
-
         function closeModal(id) {
             document.getElementById(id).classList.remove('active');
             if(!document.querySelector('.custom-modal.active') && !searchPanel.classList.contains('expanded')) {
@@ -784,32 +713,13 @@ const hiddenApp = { name: 'Neo GameCenter', icon: 'Gamepad2', url: 'games.html' 
 
         function renderResults(val) {
             if(window.hasHubError) return;
-
-            const allApps = [];
-
-            tools.forEach(folder => {
-                folder.apps.forEach(app => {
-                    allApps.push({
-                        ...app,
-                        folderName: folder.name
-                    });
-                });
-            });
-
-            const filtered = allApps.filter(app =>
-                app.name.toLowerCase().includes(val.toLowerCase())
-            );
-
+            const filtered = tools.filter(t => t.name.toLowerCase().includes(val.toLowerCase()));
             document.getElementById('resultsArea').innerHTML = filtered.map((t, i) => `
-                <a href="${t.url}" class="result-item" style="animation: fadeInItem .4s var(--bezier) both ${i * .03}s">
-                    <i data-lucide="${t.icon}" style="margin-right:15px; width:18px; opacity:.6;"></i>
-                    <div>
-                        <div>${t.name}</div>
-                        <small style="opacity:.5">${t.folderName}</small>
-                    </div>
+                <a href="${t.url}" class="result-item" style="animation: fadeInItem 0.4s var(--bezier) both ${i * 0.03}s">
+                    <i data-lucide="${t.icon}" style="margin-right:15px; width:18px; opacity:0.6;"></i>
+                    <span>${t.name}</span>
                 </a>
             `).join('');
-
             lucide.createIcons();
         }
 
@@ -874,12 +784,7 @@ const hiddenApp = { name: 'Neo GameCenter', icon: 'Gamepad2', url: 'games.html' 
             updateClock();
             if(window.hasHubError) return;
 
-            grid.innerHTML = tools.map((t, i) => `
-                <div class="tool-card" onclick="openFolder(tools[${i}])" style="animation-delay:${i * 0.05}s">
-                    <i data-lucide="${t.icon}"></i>
-                    <span>${t.name}</span>
-                </div>
-            `).join('');
+            grid.innerHTML = tools.map((t, i) => `<a href="${t.url}" class="tool-card" style="animation-delay: ${i * 0.05}s"><i data-lucide="${t.icon}"></i><span>${t.name}</span></a>`).join('');
             lucide.createIcons();
             
             const sList = document.getElementById('toggleList');

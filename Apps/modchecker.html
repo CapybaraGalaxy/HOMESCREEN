@@ -2,26 +2,37 @@
 <html lang="es">
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>Mods Matrix Pro Explorer</title>
-  <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700&display=swap" rel="stylesheet" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
+  <title>Mod Checker</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@200;300;400;500;600;700&display=swap" rel="stylesheet" />
   <script src="https://unpkg.com/lucide@latest"></script>
   <style>
     :root {
-      --bg: #050505;
-      --surface: #111111;
-      --surface-hover: #161616;
-      --border: rgba(255, 255, 255, 0.08);
-      --text: #ffffff;
-      --text-muted: #888888;
+      /* Paleta Cromática Orgánica y Oscura */
+      --bg: #000000;
+      --surface: #121212;
+      --surface-hover: #1c1c1e;
       
-      /* Acentos Cyber Neon puros */
-      --accent-cyan: #00e5ff;
-      --accent-purple: #d500f9;
-      --accent-green: #00ff88;
-      --accent-red: #ff4444;
+      /* Configuración Neo-Glass Pure */
+      --glass: rgba(15, 15, 15, 0.6);
+      --glass-border: rgba(255, 255, 255, 0.08);
+      --blur-val: 30px;
+
+      /* Jerarquía Textual */
+      --text-main: #FFFFFF;
+      --text-muted: #8E8E93;
+
+      /* Estados y Acentos de Sistema */
+      --accent-danger: #FF453A;
+      --accent-success: #34C759;
+      --accent-purple: #BF5AF2;
+      --accent-cyan: #64D2FF;
       
-      --bezier: cubic-bezier(0.19, 1, 0.22, 1);
+      /* Físicas de Animación Progresivas */
+      --bezier: cubic-bezier(0.16, 1, 0.3, 1);
+      --spring: cubic-bezier(0.34, 1.56, 0.64, 1);
     }
 
     * {
@@ -33,122 +44,171 @@
 
     body {
       background-color: var(--bg);
-      color: var(--text);
+      color: var(--text-main);
       font-family: 'Outfit', sans-serif;
       height: 100dvh;
       overflow: hidden;
       user-select: none;
     }
 
-    /* --- ARQUITECTURA DE PANTALLAS (SPA) --- */
-    .screen {
-      position: fixed;
-      inset: 0;
-      width: 100%;
-      height: 100%;
+    .app-container {
+      height: 100dvh;
       display: flex;
       flex-direction: column;
-      background: var(--bg);
-      transition: transform 0.6s var(--bezier), opacity 0.6s var(--bezier);
-      z-index: 1;
+      padding: env(safe-area-inset-top) 24px calc(env(safe-area-inset-bottom) + 16px) 24px;
+      transition: transform 0.5s var(--bezier), filter 0.5s var(--bezier);
+      max-width: 900px;
+      margin: 0 auto;
+      width: 100%;
     }
 
-    #home-view {
-      transform: translateX(0);
-      opacity: 1;
+    .app-container.backgrounded {
+      transform: scale(0.96);
+      filter: blur(5px);
+      pointer-events: none;
     }
 
-    #add-view {
-      transform: translateX(100%);
-      opacity: 0;
-      z-index: 2;
-      border-left: 1px solid var(--border);
-    }
-
-    /* Estados de Navegación Activos */
-    body.searching #home-view {
-      transform: translateX(-30%);
-      opacity: 0.5;
-    }
-
-    body.searching #add-view {
-      transform: translateX(0);
-      opacity: 1;
-    }
-
-    /* --- CABECERAS Y LAYOUT --- */
     header {
-      padding: 30px 24px 20px;
-      background: radial-gradient(circle at top, #111 0%, #050505 100%);
-      border-bottom: 1px solid var(--border);
       display: flex;
       justify-content: space-between;
       align-items: center;
-      flex-shrink: 0;
+      padding: 24px 0 16px 0;
+      border-bottom: 1px solid var(--glass-border);
     }
 
-    .header-center {
-      text-align: left;
+    .header-left {
+      display: flex;
+      align-items: center;
+      gap: 16px;
+    }
+
+    .app-icon-badge {
+      width: 44px;
+      height: 44px;
+      border-radius: 14px;
+      background: radial-gradient(circle at center, rgba(255,255,255,0.1) 0%, rgba(0,0,0,0) 100%);
+      border: 1px solid var(--glass-border);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      box-shadow: 0 4px 20px rgba(0,0,0,0.5);
     }
 
     h1 {
-      font-weight: 700;
-      font-size: 1.6rem;
-      letter-spacing: -0.04em;
-      text-transform: uppercase;
-      background: linear-gradient(180deg, #fff 30%, var(--text-muted) 100%);
-      -webkit-background-clip: text;
-      -webkit-text-fill-color: transparent;
+      font-size: 1.4rem;
+      font-weight: 600;
+      letter-spacing: -0.02em;
+      line-height: 1.2;
     }
 
     .subtitle {
-      color: var(--text-muted);
-      margin-top: 4px;
       font-size: 0.85rem;
-      font-weight: 300;
+      color: var(--text-muted);
+      font-variant-numeric: tabular-nums;
+      transition: transform 0.3s var(--spring);
+    }
+
+    .toolbox {
+      display: flex;
+      gap: 8px;
+    }
+
+    .btn-icon {
+      background: transparent;
+      border: none;
+      color: var(--text-muted);
+      cursor: pointer;
+      width: 38px;
+      height: 38px;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: background 0.3s var(--bezier), color 0.3s var(--bezier);
+    }
+
+    .btn-icon:hover {
+      background: var(--surface-hover);
+      color: var(--text-main);
+    }
+
+    .btn-icon.danger:hover {
+      background: rgba(255, 69, 58, 0.1);
+      color: var(--accent-danger);
+    }
+
+    .compatibility-banner {
+      margin: 16px 0;
+      padding: 16px;
+      border-radius: 16px;
+      background: var(--surface);
+      border: 1px solid var(--glass-border);
+      font-size: 0.9rem;
+      font-weight: 500;
+      text-align: center;
+      transition: all 0.3s var(--bezier);
+    }
+
+    .compatibility-banner.clickable {
+      cursor: pointer;
+    }
+
+    .compatibility-banner.clickable:hover {
+      border-color: rgba(255, 255, 255, 0.15);
+      background: var(--surface-hover);
     }
 
     .main-content {
       flex: 1;
       overflow-y: auto;
-      padding: 30px 24px;
+      padding-bottom: 100px;
+      scrollbar-width: none;
+    }
+    .main-content::-webkit-scrollbar { display: none; }
+
+    .added-mods-grid {
+      display: grid;
+      grid-template-columns: 1fr;
+      gap: 12px;
     }
 
-    /* --- COMPONENTE INTERRACTIVO: MOD CARD CON EXPANSOR --- */
-    .added-mods-container {
-      display: flex;
-      flex-direction: column;
-      gap: 12px;
-      max-width: 800px;
-      margin: 0 auto;
+    @media (min-width: 600px) {
+      .added-mods-grid {
+        grid-template-columns: repeat(2, 1fr);
+      }
     }
 
     .mod-card {
       background: var(--surface);
-      border: 1px solid var(--border);
-      padding: 20px;
+      border: 1px solid var(--glass-border);
       border-radius: 20px;
+      padding: 20px;
       position: relative;
       display: flex;
       flex-direction: column;
-      gap: 8px;
-      animation: appear 0.5s var(--bezier) both;
+      gap: 12px;
+      animation: cardAppear 0.4s var(--bezier) both;
+      transition: border-color 0.3s var(--bezier), background 0.3s var(--bezier);
+    }
+
+    .mod-card:hover {
+      border-color: rgba(255,255,255,0.15);
+      background: var(--surface-hover);
     }
 
     .mod-card-header {
       display: flex;
       justify-content: space-between;
       align-items: flex-start;
-      padding-right: 40px;
+      padding-right: 28px;
     }
 
-    .mod-card strong {
-      font-size: 1.1rem;
+    .mod-card-title {
       font-weight: 600;
+      font-size: 1.05rem;
       letter-spacing: -0.01em;
     }
 
-    /* Contenedor colapsable inteligente para evitar monstruosidades de texto */
     .versions-clamp {
       font-size: 0.85rem;
       color: var(--text-muted);
@@ -172,280 +232,336 @@
       color: var(--accent-cyan);
       font-size: 0.75rem;
       font-weight: 600;
-      text-transform: uppercase;
-      letter-spacing: 0.05em;
       cursor: pointer;
       display: inline-flex;
       align-items: center;
       gap: 4px;
-      padding: 4px 0;
       width: fit-content;
+      margin-top: auto;
     }
 
-    .btn-toggle-expand:hover {
-      color: white;
-    }
-
-    /* --- BOTONES CIRCULARES --- */
-    .icon-btn-round {
-      background: transparent;
-      color: var(--text-muted);
-      border: none;
-      cursor: pointer;
-      width: 32px;
-      height: 32px;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      border-radius: 50%;
-      transition: all 0.3s var(--bezier);
-    }
-
-    .icon-btn-round:hover {
-      background: rgba(255,68,68,0.1);
-      color: var(--accent-red);
-      transform: scale(1.1);
-    }
-
-    .mod-card .remove-btn {
+    .card-remove-btn {
       position: absolute;
-      top: 18px;
-      right: 20px;
+      top: 14px;
+      right: 14px;
     }
 
-    /* --- BOTÓN DE ACCIÓN FIJO INFERIOR (ESTILO JUEGO) --- */
-    .dock-action-area {
-      padding: 20px 24px;
-      background: linear-gradient(to top, #050505 80%, transparent);
-      display: flex;
-      justify-content: center;
-      flex-shrink: 0;
-    }
-
-    .btn-dock {
-      background: var(--text);
+    /* BOTÓN DE ACCIÓN FIJO EN LA ESQUINA INFERIOR DERECHA (FAB ESTABLE) */
+    .fab-fixed-btn {
+      position: fixed;
+      bottom: calc(env(safe-area-inset-bottom) + 24px);
+      right: 24px;
+      z-index: 90;
+      width: 56px;
+      height: 56px;
+      border-radius: 50%;
+      background: var(--text-main);
       color: var(--bg);
-      font-weight: 600;
-      font-size: 0.95rem;
-      padding: 16px 32px;
-      border-radius: 50px;
-      border: none;
-      cursor: pointer;
       display: flex;
       align-items: center;
-      gap: 10px;
-      box-shadow: 0 10px 30px rgba(255,255,255,0.1);
-      transition: all 0.4s var(--bezier);
-    }
-
-    .btn-dock:hover {
-      transform: translateY(-4px);
-      box-shadow: 0 15px 35px rgba(255,255,255,0.2);
-    }
-
-    .btn-dock:active {
-      transform: translateY(-1px) scale(0.97);
-    }
-
-    /* --- DIAGNÓSTICO DE COMPATIBILIDAD --- */
-    .compatibility-sticky {
-      max-width: 800px;
-      margin: 0 auto 20px;
-      background: linear-gradient(135deg, #090909 0%, #111111 100%);
-      border: 1px solid var(--border);
-      padding: 16px 20px;
-      border-radius: 18px;
-      text-align: center;
-      font-weight: 500;
-      font-size: 0.9rem;
-    }
-
-    .common { color: var(--accent-green); text-shadow: 0 0 20px rgba(0,255,136,0.15); }
-    .no-common { color: var(--accent-red); text-shadow: 0 0 20px rgba(255,68,68,0.15); }
-
-    /* --- VISTA DE ADICIÓN Y SELECTORES DE MODO --- */
-    .mode-selector-grid {
-      display: grid;
-      grid-template-columns: 1fr 1fr;
-      gap: 12px;
-      max-width: 600px;
-      margin: 0 auto 30px;
-    }
-
-    .mode-card {
-      background: var(--surface);
-      border: 1px solid var(--border);
-      padding: 20px;
-      border-radius: 20px;
+      justify-content: center;
+      border: none;
       cursor: pointer;
+      box-shadow: 0 8px 32px rgba(0,0,0,0.5), 0 0 0 1px rgba(255,255,255,0.1);
+      transition: transform 0.3s var(--spring), background-color 0.3s var(--bezier);
+    }
+
+    .fab-fixed-btn:hover {
+      transform: scale(1.06);
+      background: #f0f0f0;
+    }
+
+    .fab-fixed-btn:active {
+      transform: scale(0.95);
+    }
+
+    /* MODALES MÓVILES / DESKTOP */
+    .modal-overlay {
+      position: fixed;
+      inset: 0;
+      background: rgba(0,0,0,0.4);
+      z-index: 100;
+      display: flex;
+      align-items: flex-end;
+      opacity: 0;
+      pointer-events: none;
+      transition: opacity 0.4s var(--bezier);
+    }
+
+    @media (min-width: 600px) {
+      .modal-overlay {
+        align-items: center;
+        justify-content: center;
+      }
+    }
+
+    .modal-overlay.active {
+      opacity: 1;
+      pointer-events: auto;
+    }
+
+    .modal-sheet {
+      width: 100%;
+      background: var(--surface);
+      border-top: 1px solid var(--glass-border);
+      border-radius: 24px 24px 0 0;
+      max-height: 85dvh;
       display: flex;
       flex-direction: column;
+      transform: translateY(100%);
+      transition: transform 0.4s var(--bezier);
+    }
+
+    @media (min-width: 600px) {
+      .modal-sheet {
+        width: 550px;
+        border: 1px solid var(--glass-border);
+        border-radius: 24px;
+        max-height: 75dvh;
+        transform: translateY(30px);
+        box-shadow: 0 20px 50px rgba(0,0,0,0.8);
+      }
+    }
+
+    .modal-overlay.active .modal-sheet {
+      transform: translateY(0);
+    }
+
+    .modal-header {
+      padding: 24px;
+      display: flex;
+      justify-content: space-between;
       align-items: center;
-      gap: 10px;
-      transition: all 0.4s var(--bezier);
+      border-bottom: 1px solid var(--glass-border);
     }
 
-    .mode-card i {
+    .modal-title {
+      font-size: 1.2rem;
+      font-weight: 600;
+      letter-spacing: -0.01em;
+    }
+
+    .modal-body {
+      padding: 24px;
+      overflow-y: auto;
+      flex: 1;
+      scrollbar-width: none;
+    }
+    .modal-body::-webkit-scrollbar { display: none; }
+
+    /* SEGMENTED CONTROL */
+    .segmented-control {
+      display: flex;
+      background: var(--bg);
+      border: 1px solid var(--glass-border);
+      padding: 4px;
+      border-radius: 12px;
+      margin-bottom: 20px;
+    }
+
+    .segment-btn {
+      flex: 1;
+      background: transparent;
+      border: none;
       color: var(--text-muted);
-      transition: color 0.3s;
-    }
-
-    .mode-card span {
-      font-size: 0.9rem;
+      padding: 10px;
+      font-size: 0.85rem;
       font-weight: 500;
+      border-radius: 8px;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      font-family: inherit;
+      transition: all 0.2s var(--bezier);
     }
 
-    .mode-card:hover {
-      border-color: rgba(255,255,255,0.2);
+    .segment-btn.active {
       background: var(--surface-hover);
+      color: var(--text-main);
     }
 
-    .mode-card:hover i {
-      color: white;
-    }
-
-    .mode-card.active {
-      border-color: var(--accent-purple);
-      background: rgba(213, 0, 249, 0.04);
-    }
-
-    .mode-card.active i {
-      color: var(--accent-purple);
-    }
-
-    /* Sub-paneles dinámicos */
-    .sub-panel {
+    .tab-panel {
       display: none;
-      max-width: 600px;
-      margin: 0 auto;
-      animation: appear 0.4s var(--bezier);
     }
 
-    .sub-panel.active {
+    .tab-panel.active {
       display: block;
+      animation: cardAppear 0.3s var(--bezier);
     }
 
-    /* --- INPUTS FORMULARIOS INTERNOS --- */
-    input[type="text"], select {
+    /* CAMPOS DE FORMULARIO */
+    .input-wrapper {
+      margin-bottom: 16px;
+      position: relative;
+    }
+
+    .input-field {
       width: 100%;
-      padding: 14px 18px;
-      background: rgba(255,255,255,0.02);
-      border: 1px solid var(--border);
+      background: var(--bg);
+      border: 1px solid var(--glass-border);
       border-radius: 14px;
-      color: white;
+      padding: 14px 16px;
+      color: var(--text-main);
       font-family: inherit;
       font-size: 0.95rem;
       outline: none;
-      transition: all 0.4s var(--bezier);
-      margin-bottom: 12px;
+      transition: border-color 0.3s var(--bezier), box-shadow 0.3s var(--bezier);
     }
 
-    input[type="text"]:focus, select:focus {
-      background: rgba(255,255,255,0.04);
+    .input-field:focus {
       border-color: rgba(255,255,255,0.25);
     }
 
     .search-row {
       display: grid;
-      grid-template-columns: 1fr 120px;
+      grid-template-columns: 1fr 110px;
       gap: 10px;
+      margin-bottom: 16px;
     }
 
-    .btn-submit {
-      background: var(--accent-cyan);
-      color: var(--bg);
-      font-weight: 600;
-      width: 100%;
-      padding: 14px;
-      border: none;
-      border-radius: 14px;
-      cursor: pointer;
-      font-family: inherit;
-      transition: all 0.3s var(--bezier);
-    }
-
-    .btn-submit:hover {
-      box-shadow: 0 0 25px rgba(0,229,255,0.2);
-    }
-
-    /* Selector horizontal de versiones (Manual) */
-    .version-wrapper {
-      margin: 8px 0 20px;
-    }
-
-    .version-list {
+    /* CONTENEDOR DE PÍLDORAS */
+    .folders-scroll-area {
       display: flex;
       gap: 8px;
       overflow-x: auto;
-      padding-bottom: 8px;
+      padding: 4px 0 16px 0;
+      scrollbar-width: none;
+      -webkit-overflow-scrolling: touch;
     }
+    .folders-scroll-area::-webkit-scrollbar { display: none; }
 
-    label.version-checkbox {
-      background: var(--surface);
-      border: 1px solid var(--border);
+    .version-pill {
+      background: var(--bg);
+      border: 1px solid var(--glass-border);
       padding: 8px 16px;
-      border-radius: 50px;
+      border-radius: 100px;
       cursor: pointer;
-      user-select: none;
       white-space: nowrap;
       font-size: 0.85rem;
       display: flex;
       align-items: center;
       gap: 6px;
-      transition: all 0.3s var(--bezier);
+      transition: all 0.2s var(--bezier);
     }
 
-    label.version-checkbox input {
-      accent-color: var(--accent-cyan);
+    .version-pill input {
+      display: none;
     }
 
-    label.version-checkbox:has(input:checked) {
+    .version-pill.checked {
       border-color: var(--accent-cyan);
-      background: rgba(0, 229, 255, 0.05);
+      background: rgba(100, 210, 255, 0.05);
       color: var(--accent-cyan);
     }
 
-    /* --- MOTOR MODRINTH RESULTS (Scroll integrado) --- */
+    .btn-action {
+      width: 100%;
+      background: var(--text-main);
+      color: var(--bg);
+      font-weight: 600;
+      padding: 16px;
+      border-radius: 14px;
+      border: none;
+      cursor: pointer;
+      font-family: inherit;
+      font-size: 0.95rem;
+      transition: transform 0.2s var(--bezier), opacity 0.2s var(--bezier);
+    }
+
+    .btn-action:active {
+      transform: scale(0.98);
+    }
+
+    /* LISTA DE VERSIONES EN POPUP COMPLETO */
+    .popup-versions-list {
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+      padding: 4px 0;
+    }
+
+    .popup-version-group {
+      background: var(--bg);
+      border: 1px solid var(--glass-border);
+      border-radius: 14px;
+      padding: 16px;
+    }
+
+    .popup-group-title {
+      font-size: 1rem;
+      font-weight: 600;
+      color: var(--text-main);
+      margin-bottom: 8px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .popup-version-sublist {
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+      padding-left: 16px;
+      border-left: 1px solid var(--glass-border);
+    }
+
+    .popup-version-item {
+      font-size: 0.9rem;
+      color: var(--text-muted);
+    }
+
+    .popup-independent-item {
+      background: var(--bg);
+      border: 1px solid var(--glass-border);
+      border-radius: 14px;
+      padding: 14px 16px;
+      font-size: 0.95rem;
+      font-weight: 500;
+      color: var(--text-main);
+    }
+
+    /* RESULTADOS DE API */
     #modrinthResults {
       display: flex;
       flex-direction: column;
       gap: 8px;
-      margin-top: 15px;
+      margin-top: 12px;
     }
 
-    .modrinth-result {
+    .api-result-item {
       display: flex;
       align-items: center;
-      gap: 16px;
-      padding: 14px;
-      background: var(--surface);
-      border: 1px solid var(--border);
-      border-radius: 16px;
+      gap: 14px;
+      padding: 12px;
+      background: var(--bg);
+      border: 1px solid var(--glass-border);
+      border-radius: 14px;
       cursor: pointer;
-      transition: all 0.4s var(--bezier);
+      transition: all 0.2s var(--bezier);
     }
 
-    .modrinth-result:hover {
+    .api-result-item:hover {
       background: var(--surface-hover);
       border-color: var(--accent-purple);
-      transform: translateY(-2px);
     }
 
-    .modrinth-result img {
-      width: 44px;
-      height: 44px;
+    .api-result-item img {
+      width: 40px;
+      height: 40px;
+      border-radius: 8px;
       object-fit: cover;
-      border-radius: 10px;
       background: #000;
     }
 
-    .modrinth-details h4 {
-      font-size: 0.95rem;
+    .api-result-info h4 {
+      font-size: 0.9rem;
       font-weight: 500;
     }
 
-    .modrinth-details p {
-      font-size: 0.8rem;
+    .api-result-info p {
+      font-size: 0.78rem;
       color: var(--text-muted);
       display: -webkit-box;
       -webkit-line-clamp: 1;
@@ -453,378 +569,511 @@
       overflow: hidden;
     }
 
-    .status-msg {
+    .status-info {
       text-align: center;
-      padding: 20px 0;
+      padding: 24px 0;
       color: var(--text-muted);
       font-size: 0.85rem;
     }
 
-    .toolbox {
-      display: flex;
-      gap: 8px;
-    }
-
-    .toolbox button {
-      background: transparent;
-      border: none;
-      color: var(--text-muted);
-      cursor: pointer;
-    }
-
-    .toolbox button:hover {
-      color: white;
-    }
-
-    /* Personalización del Scrollbar */
-    .main-content::-webkit-scrollbar, .version-list::-webkit-scrollbar { height: 4px; width: 4px; }
-    .main-content::-webkit-scrollbar-track, .version-list::-webkit-scrollbar-track { background: transparent; }
-    .main-content::-webkit-scrollbar-thumb, .version-list::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.1); border-radius: 10px; }
-
-    @keyframes appear {
-      from { opacity: 0; transform: translateY(10px); }
+    /* ANIMACIONES */
+    @keyframes cardAppear {
+      from { opacity: 0; transform: translateY(8px); }
       to { opacity: 1; transform: translateY(0); }
+    }
+
+    .error-shake {
+      animation: shake 0.3s linear;
+      border-color: var(--accent-danger) !important;
+    }
+
+    @keyframes shake {
+      0%, 100% { transform: translateX(0); }
+      20%, 60% { transform: translateX(-4px); }
+      40%, 80% { transform: translateX(4px); }
     }
   </style>
 </head>
 <body>
 
-  <div class="screen" id="home-view">
+  <div class="app-container" id="main-view">
     <header>
-      <div class="header-center">
-        <h1>Mods Matrix</h1>
-        <p class="subtitle" id="globalCounter">0 mods cargados en la base</p>
+      <div class="header-left">
+        <div class="app-icon-badge">
+          <i data-lucide="layers" size="20" style="color: var(--text-main);"></i>
+        </div>
+        <div>
+          <h1>Mod Checker</h1>
+          <p class="subtitle" id="globalCounter">0 mods guardados</p>
+        </div>
       </div>
       <div class="toolbox">
-        <button onclick="exportMods()" title="Exportar JSON"><i data-lucide="download"></i></button>
-        <button onclick="importMods()" title="Importar JSON"><i data-lucide="upload"></i></button>
-        <button onclick="clearAll()" title="Limpiar matriz" style="color:var(--accent-red)"><i data-lucide="trash-2"></i></button>
+        <button class="btn-icon" onclick="exportData()" title="Exportar Copia"><i data-lucide="download" size="18"></i></button>
+        <button class="btn-icon" onclick="triggerImport()" title="Importar Copia"><i data-lucide="upload" size="18"></i></button>
+        <button class="btn-icon danger" onclick="clearMatrix()" title="Eliminar Todo"><i data-lucide="trash-2" size="18"></i></button>
       </div>
     </header>
 
-    <div class="main-content">
-      <div class="compatibility-sticky" id="compatibilityBox">
-        Ningún espécimen añadido en el entorno activo.
-      </div>
-      <div class="added-mods-container" id="modList"></div>
+    <div class="compatibility-banner" id="compatibilityBox">
+      Actualizando lista...
     </div>
 
-    <div class="dock-action-area">
-      <button class="btn-dock" onclick="openAddScreen()">
-        <i data-lucide="plus"></i> Añadir Mod a la Matriz
-      </button>
+    <main class="main-content">
+      <div class="added-mods-grid" id="modList"></div>
+    </main>
+  </div>
+
+  <button class="fab-fixed-btn" onclick="openModal('add-modal')" title="Añadir Mod">
+    <i data-lucide="plus" size="24"></i>
+  </button>
+
+  <div class="modal-overlay" id="add-modal" onclick="closeActiveModalOnOverlay(event)">
+    <div class="modal-sheet">
+      <div class="modal-header">
+        <span class="modal-title">Añadir Mod</span>
+        <button class="btn-icon" onclick="closeActiveModal('add-modal')"><i data-lucide="x" size="18"></i></button>
+      </div>
+      <div class="modal-body">
+        <div class="segmented-control">
+          <button class="segment-btn active" id="tab-btn-modrinth" onclick="switchTab('modrinth')">
+            <i data-lucide="search" size="14"></i> Buscar en Modrinth
+          </button>
+          <button class="segment-btn" id="tab-btn-manual" onclick="switchTab('manual')">
+            <i data-lucide="edit-3" size="14"></i> Crear Manualmente
+          </button>
+        </div>
+
+        <div class="tab-panel active" id="panel-modrinth">
+          <div class="search-row">
+            <input type="text" id="modrinthQuery" class="input-field" placeholder="Escribe el nombre del mod..." onkeydown="if(event.key === 'Enter') queryModrinth()"/>
+            <select id="modrinthLoader" class="input-field">
+              <option value="fabric">Fabric</option>
+              <option value="forge">Forge</option>
+            </select>
+          </div>
+          <button class="btn-action" style="background: var(--accent-purple); color: #fff;" onclick="queryModrinth()">
+            Buscar en el repositorio
+          </button>
+          <div id="modrinthResults"></div>
+        </div>
+
+        <div class="tab-panel" id="panel-manual">
+          <div class="input-wrapper" id="manualNameWrapper">
+            <input type="text" id="manualModName" class="input-field" placeholder="Nombre del mod..." autocomplete="off" />
+          </div>
+          <div class="input-wrapper">
+            <input type="text" id="versionFilter" class="input-field" placeholder="Filtrar por versión..." oninput="filterPills()" />
+          </div>
+          <div class="folders-scroll-area" id="versionCheckboxes"></div>
+          <button class="btn-action" onclick="commitManualMod()">Guardar mod</button>
+        </div>
+
+      </div>
     </div>
   </div>
 
-  <div class="screen" id="add-view">
-    <header>
-      <div class="header-center">
-        <h1>Buscador de Entorno</h1>
-        <p class="subtitle">Selecciona el método de indexación</p>
+  <div class="modal-overlay" id="versions-modal" onclick="closeActiveModalOnOverlay(event)">
+    <div class="modal-sheet">
+      <div class="modal-header">
+        <span class="modal-title">Versiones Compatibles</span>
+        <button class="btn-icon" onclick="closeActiveModal('versions-modal')"><i data-lucide="x" size="18"></i></button>
       </div>
-      <button class="icon-btn-round" onclick="closeAddScreen()" style="color:white"><i data-lucide="arrow-left"></i></button>
-    </header>
-
-    <div class="main-content">
-      <div class="mode-selector-grid">
-        <div class="mode-card active" id="mode-tab-modrinth" onclick="switchAddTab('modrinth')">
-          <i data-lucide="search" class="lucide-icon"></i>
-          <span>Modrinth API</span>
+      <div class="modal-body" id="popupVersionsBody">
         </div>
-        <div class="mode-card" id="mode-tab-manual" onclick="switchAddTab('manual')">
-          <i data-lucide="keyboard" class="lucide-icon"></i>
-          <span>Manual Form</span>
-        </div>
-      </div>
-
-      <div class="sub-panel active" id="panel-modrinth">
-        <div class="search-row">
-          <input type="text" id="modrinthQuery" placeholder="Escribe el nombre del mod oficial..." onkeydown="if(event.key === 'Enter') buscarModrinth()"/>
-          <select id="modrinthLoader">
-            <option value="fabric">Fabric</option>
-            <option value="forge">Forge</option>
-          </select>
-        </div>
-        <button class="btn-submit" style="background:var(--accent-purple); color:white;" onclick="buscarModrinth()">
-          Interrogar Repositorio
-        </button>
-        <div id="modrinthResults"></div>
-      </div>
-
-      <div class="sub-panel" id="panel-manual">
-        <input type="text" id="modName" placeholder="Nombre del mod personalizado..." autocomplete="off"/>
-        <input type="text" id="versionSearch" placeholder="Filtrar versiones de Minecraft..." oninput="filterVersions()" />
-        <div class="version-wrapper">
-          <div class="version-list" id="versionCheckboxes"></div>
-        </div>
-        <button class="btn-submit" onclick="addModManual()">Vincular e Inyectar Mod</button>
-      </div>
     </div>
   </div>
 
-  <input type="file" id="importFile" accept=".json" style="display:none" />
+  <input type="file" id="hiddenImport" accept=".json" style="display:none" />
 
   <script>
-    let versionList = [];
-    let mods = JSON.parse(localStorage.getItem('mods')) || [];
+    let appData = { mods: [] };
+    let mcVersionsList = [];
+    let activeModalsStack = [];
+    let lastCalculatedCommonSet = [];
 
-    const versionCheckboxes = document.getElementById('versionCheckboxes');
-    const modList = document.getElementById('modList');
-    const compatibilityBox = document.getElementById('compatibilityBox');
-    const globalCounter = document.getElementById('globalCounter');
-
-    // NAVEGACIÓN DE VISTAS (SPA)
-    function openAddScreen() {
-      document.body.classList.add('searching');
-    }
-
-    function closeAddScreen() {
-      document.body.classList.remove('searching');
-      // Limpiar estados de búsqueda al regresar
-      document.getElementById('modrinthResults').innerHTML = '';
-      document.getElementById('modrinthQuery').value = '';
-    }
-
-    function switchAddTab(tab) {
-      document.querySelectorAll('.mode-card').forEach(c => c.classList.remove('active'));
-      document.querySelectorAll('.sub-panel').forEach(p => p.classList.remove('active'));
-      
-      document.getElementById(`mode-tab-${tab}`).classList.add('active');
-      document.getElementById(`panel-${tab}`).classList.add('active');
-    }
-
-    // LOGICA CENTRAL DE CONTROLADORES
-    async function fetchMinecraftVersions() {
-      const cached = localStorage.getItem("versionCache");
-      if (cached) {
-        versionList = JSON.parse(cached);
-        renderVersionCheckboxes();
-        return;
+    window.onload = async () => {
+      const stored = localStorage.getItem('neo_matrix_mods');
+      if (stored) {
+        appData = JSON.parse(stored);
+      } else {
+        appData.mods = [
+          { name: "Sodium", versions: ["1.21", "1.20.4", "1.20.1"] },
+          { name: "Lithium", versions: ["1.21", "1.20.4", "1.19.4"] }
+        ];
+        saveData();
       }
+      await fetchVersionsSpectrum();
+      renderApp();
+      lucide.createIcons();
+    };
+
+    function saveData() {
+      localStorage.setItem('neo_matrix_mods', JSON.stringify(appData));
+    }
+
+    async function fetchVersionsSpectrum() {
       try {
+        const cached = localStorage.getItem("mc_version_cache");
+        if (cached) {
+          mcVersionsList = JSON.parse(cached);
+          return;
+        }
         const res = await fetch("https://piston-meta.mojang.com/mc/game/version_manifest_v2.json");
         const data = await res.json();
-        versionList = data.versions.filter(v => v.type === "release").map(v => v.id);
-        localStorage.setItem("versionCache", JSON.stringify(versionList));
-        renderVersionCheckboxes();
-      } catch (err) {
-        versionList = ["1.21", "1.20.4", "1.20.1", "1.19.4"];
-        renderVersionCheckboxes();
+        mcVersionsList = data.versions.filter(v => v.type === "release").map(v => v.id);
+        localStorage.setItem("mc_version_cache", JSON.stringify(mcVersionsList));
+      } catch (e) {
+        mcVersionsList = ["1.21", "1.20.4", "1.20.1", "1.19.4", "1.18.2"];
       }
     }
 
-    function renderVersionCheckboxes() {
-      const selectedVersions = getSelectedVersions();
-      versionCheckboxes.innerHTML = versionList.map(v => {
-        const checked = selectedVersions.includes(v) ? 'checked' : '';
-        return `
-          <label class="version-checkbox" data-version="${v.toLowerCase()}">
-            <input type="checkbox" value="${v}" ${checked}/> ${v}
-          </label>
+    function renderApp() {
+      const listContainer = document.getElementById('modList');
+      listContainer.innerHTML = '';
+
+      appData.mods.forEach((mod, index) => {
+        const card = document.createElement('div');
+        card.className = 'mod-card';
+        const requiresCollapse = mod.versions.length > 8;
+
+        card.innerHTML = `
+          <div class="mod-card-header">
+            <span class="mod-card-title">${mod.name}</span>
+          </div>
+          <div class="versions-clamp">${mod.versions.join(', ')}</div>
+          ${requiresCollapse ? `
+            <button class="btn-toggle-expand" onclick="toggleCard(this)">
+              <i data-lucide="chevron-down" size="12"></i> Ver todas las versiones (${mod.versions.length})
+            </button>
+          ` : ''}
+          <button class="btn-icon danger card-remove-btn" onclick="removeMod(${index})">
+            <i data-lucide="x" size="14"></i>
+          </button>
         `;
-      }).join('');
-    }
-
-    function filterVersions() {
-      const search = document.getElementById('versionSearch').value.toLowerCase();
-      document.querySelectorAll('#versionCheckboxes label').forEach(label => {
-        const version = label.getAttribute('data-version');
-        label.style.display = version.includes(search) ? '' : 'none';
+        listContainer.appendChild(card);
       });
+
+      updateMetrics();
+      lucide.createIcons();
     }
 
-    function getSelectedVersions() {
-      return Array.from(document.querySelectorAll('#versionCheckboxes input:checked')).map(input => input.value);
-    }
-
-    function addModManual() {
-      const name = document.getElementById('modName').value.trim();
-      const versions = getSelectedVersions();
-      if (!name || versions.length === 0) return;
-
-      mods.push({ name, versions });
-      saveAndRefresh();
+    function updateMetrics() {
+      const counter = document.getElementById('globalCounter');
+      const banner = document.getElementById('compatibilityBox');
       
-      // Reset campos formulario manual
-      document.getElementById('modName').value = '';
-      document.getElementById('versionSearch').value = '';
-      renderVersionCheckboxes();
-      closeAddScreen();
+      counter.innerText = `${appData.mods.length} mod${appData.mods.length === 1 ? '' : 's'} guardados`;
+      counter.style.transform = 'scale(1.05)';
+      setTimeout(() => counter.style.transform = 'scale(1)', 150);
+
+      if (appData.mods.length === 0) {
+        banner.innerHTML = `<span style="color: var(--text-muted)">No hay mods registrados todavía.</span>`;
+        banner.classList.remove('clickable');
+        banner.onclick = null;
+        lastCalculatedCommonSet = [];
+        return;
+      }
+
+      let commonSet = appData.mods[0].versions;
+      for (let i = 1; i < appData.mods.length; i++) {
+        commonSet = commonSet.filter(v => appData.mods[i].versions.includes(v));
+      }
+
+      lastCalculatedCommonSet = commonSet;
+
+      if (commonSet.length === 0) {
+        banner.innerHTML = `<span style="color: var(--accent-danger)">⚠️ Sin versiones comunes detectadas entre estos mods.</span>`;
+        banner.classList.remove('clickable');
+        banner.onclick = null;
+      } else {
+        const hasMore = commonSet.length > 5;
+        banner.innerHTML = `<span style="color: var(--accent-success)">✅ Versiones compatibles comunes: ${commonSet.slice(0, 5).join(', ')}${hasMore ? '...' : ''}</span>`;
+        if (hasMore) {
+          banner.classList.add('clickable');
+          banner.onclick = () => openModal('versions-modal');
+        } else {
+          banner.classList.remove('clickable');
+          banner.onclick = null;
+        }
+      }
     }
 
-    function removeMod(index) {
-      mods.splice(index, 1);
-      saveAndRefresh();
-    }
-
-    function toggleExpandCard(btn, index) {
+    function toggleCard(btn) {
       const card = btn.closest('.mod-card');
       const isExpanded = card.classList.toggle('expanded');
       btn.innerHTML = isExpanded 
-        ? `<i data-lucide="chevron-up" style="width:12px"></i> Contraer lista` 
-        : `<i data-lucide="chevron-down" style="width:12px"></i> Expandir versiones (${mods[index].versions.length})`;
+        ? `<i data-lucide="chevron-up" size="12"></i> Contraer vista` 
+        : `<i data-lucide="chevron-down" size="12"></i> Ver todas las versiones`;
       lucide.createIcons();
     }
 
-    function saveAndRefresh() {
-      localStorage.setItem('mods', JSON.stringify(mods));
-      renderMods();
-      updateCompatibility();
+    function removeMod(index) {
+      appData.mods.splice(index, 1);
+      saveData();
+      renderApp();
     }
 
-    function updateCompatibility() {
-      if (mods.length === 0) {
-        compatibilityBox.innerHTML = 'Ningún espécimen añadido en el entorno activo.';
-        globalCounter.innerText = '0 mods cargados en la base';
+    /* CONTROL DE MODALES CON COMPORTAMIENTO FIJO DE CENTRADO */
+    function openModal(modalId) {
+      document.getElementById('main-view').classList.add('backgrounded');
+      document.getElementById(modalId).classList.add('active');
+      
+      if (modalId === 'add-modal') {
+        buildVersionPills();
+      } else if (modalId === 'versions-modal') {
+        buildPopupVersionsView();
+      }
+      
+      activeModalsStack.push(modalId);
+      window.history.pushState({ modalId: modalId }, "");
+    }
+
+    function closeActiveModal(modalId) {
+      if (activeModalsStack.includes(modalId)) {
+        window.history.back();
+      }
+    }
+
+    function closeActiveModalOnOverlay(e) {
+      if (e.target.classList.contains('modal-overlay')) {
+        const topModalId = activeModalsStack[activeModalsStack.length - 1];
+        if (topModalId) closeActiveModal(topModalId);
+      }
+    }
+
+    window.addEventListener('popstate', () => {
+      if (activeModalsStack.length > 0) {
+        const topModalId = activeModalsStack.pop();
+        document.getElementById(topModalId).classList.remove('active');
+        if (activeModalsStack.length === 0) {
+          document.getElementById('main-view').classList.remove('backgrounded');
+        }
+      }
+    });
+
+    /* ESTRUCTURACIÓN JERÁRQUICA E INDEPENDIENTE DE VERSIONES */
+    function buildPopupVersionsView() {
+      const container = document.getElementById('popupVersionsBody');
+      container.innerHTML = '';
+
+      const groups = {};
+      const independent = [];
+
+      lastCalculatedCommonSet.forEach(v => {
+        // Detecta el patrón estándar X.Y.Z o X.Y (ej: 1.21.1 o 1.20)
+        const match = v.match(/^(\d+\.\d+)(\.\d+)?$/);
+        if (match) {
+          const parent = match[1];
+          if (!groups[parent]) groups[parent] = [];
+          // Guarda la versión completa
+          groups[parent].push(v);
+        } else {
+          // Versiones nuevas o formatos diferentes (ej: 26.1) se manejan independientes
+          independent.push(v);
+        }
+      });
+
+      const listWrapper = document.createElement('div');
+      listWrapper.className = 'popup-versions-list';
+
+      // Renderizar los grupos anidados (Ej: 1.21)
+      Object.keys(groups).forEach(parent => {
+        const groupEl = document.createElement('div');
+        groupEl.className = 'popup-version-group';
+
+        const sortedSubversions = groups[parent].sort((a, b) => b.localeCompare(a, undefined, { numeric: true }));
+
+        groupEl.innerHTML = `
+          <div class="popup-group-title">
+            <i data-lucide="folder" size="16" style="color: var(--accent-cyan)"></i> - ${parent}
+          </div>
+          <div class="popup-version-sublist">
+            ${sortedSubversions.map(sv => `<div class="popup-version-item">- ${sv}</div>`).join('')}
+          </div>
+        `;
+        listWrapper.appendChild(groupEl);
+      });
+
+      // Renderizar las versiones independientes (Ej: 26.1)
+      independent.forEach(iv => {
+        const indEl = document.createElement('div');
+        indEl.className = 'popup-independent-item';
+        indEl.innerText = `- ${iv}`;
+        listWrapper.appendChild(indEl);
+      });
+
+      container.appendChild(listWrapper);
+      lucide.createIcons();
+    }
+
+    function switchTab(tab) {
+      document.querySelectorAll('.segment-btn').forEach(b => b.classList.remove('active'));
+      document.querySelectorAll('.tab-panel').forEach(p => p.classList.remove('active'));
+      
+      document.getElementById(`tab-btn-${tab}`).classList.add('active');
+      document.getElementById(`panel-${tab}`).classList.add('active');
+    }
+
+    function buildVersionPills() {
+      const container = document.getElementById('versionCheckboxes');
+      container.innerHTML = mcVersionsList.map(v => `
+        <label class="version-pill" data-v="${v}">
+          <input type="checkbox" value="${v}" onchange="togglePillStyle(this)" /> ${v}
+        </label>
+      `).join('');
+    }
+
+    function togglePillStyle(input) {
+      input.closest('.version-pill').classList.toggle('checked', input.checked);
+    }
+
+    function filterPills() {
+      const query = document.getElementById('versionFilter').value.toLowerCase();
+      document.querySelectorAll('.version-pill').forEach(pill => {
+        const version = pill.getAttribute('data-v');
+        pill.style.display = version.includes(query) ? '' : 'none';
+      });
+    }
+
+    function triggerShake(elementId) {
+      const el = document.getElementById(elementId);
+      el.classList.add('error-shake');
+      setTimeout(() => el.classList.remove('error-shake'), 300);
+    }
+
+    function commitManualMod() {
+      const nameInput = document.getElementById('manualModName');
+      const name = nameInput.value.trim();
+      const checkedInputs = Array.from(document.querySelectorAll('#versionCheckboxes input:checked')).map(i => i.value);
+
+      if (!name) {
+        triggerShake('manualModName');
+        return;
+      }
+      if (checkedInputs.length === 0) {
+        triggerShake('versionCheckboxes');
         return;
       }
 
-      globalCounter.innerText = `${mods.length} mod${mods.length === 1 ? '' : 's'} cargado${mods.length === 1 ? '' : 's'} en la base`;
-      let common = mods[0].versions;
-      for (let i = 1; i < mods.length; i++) {
-        common = common.filter(v => mods[i].versions.includes(v));
-      }
-
-      compatibilityBox.innerHTML =
-        common.length === 0
-          ? `<span class="no-common">⚠️ Bloqueo de Entorno: No existen versiones comunes estables.</span>`
-          : `<span class="common">✅ Entorno de Ejecución Compatible: ${common.join(', ')}</span>`;
+      appData.mods.push({ name, versions: checkedInputs });
+      saveData();
+      renderApp();
+      
+      nameInput.value = '';
+      document.getElementById('versionFilter').value = '';
+      closeActiveModal('add-modal');
     }
 
-    function renderMods() {
-      modList.innerHTML = '';
-      mods.forEach((mod, index) => {
-        const card = document.createElement('div');
-        card.className = 'mod-card';
-        
-        // Decidir si requiere botón expansor por volumen de versiones
-        const showExpandOption = mod.versions.length > 12;
-        
-        card.innerHTML = `
-          <div class="mod-card-header">
-            <strong>${mod.name}</strong>
-          </div>
-          <div class="versions-clamp">${mod.versions.join(', ')}</div>
-          ${showExpandOption ? `
-            <button class="btn-toggle-expand" onclick="toggleExpandCard(this, ${index})">
-              <i data-lucide="chevron-down" style="width:12px"></i> Expandir versiones (${mod.versions.length})
-            </button>
-          ` : ''}
-          <button class="icon-btn-round remove-btn" onclick="removeMod(${index})" title="Expulsar mod"><i data-lucide="x" style="width:14px"></i></button>
-        `;
-        modList.appendChild(card);
-      });
-      lucide.createIcons();
-    }
-
-    // BUSCADOR INTELIGENTE MODRINTH (LÍMITE EXTENDIDO A 20)
-    async function buscarModrinth() {
+    /* BÚSQUEDA NORMALIZADA EN API DE MODRINTH */
+    async function queryModrinth() {
       const query = document.getElementById('modrinthQuery').value.trim();
       const loader = document.getElementById('modrinthLoader').value;
-      const resultados = document.getElementById('modrinthResults');
+      const resContainer = document.getElementById('modrinthResults');
 
       if (!query) {
-        resultados.innerHTML = '<div class="status-msg">Escribe el término de la query...</div>';
+        triggerShake('modrinthQuery');
         return;
       }
-      resultados.innerHTML = '<div class="status-msg">Consultando Modrinth Core...</div>';
+
+      resContainer.innerHTML = '<div class="status-info">Buscando coincidencias...</div>';
 
       try {
         const facets = encodeURIComponent(JSON.stringify([["project_type:mod"], [`categories:${loader}`]]));
-        const res = await fetch(`https://api.modrinth.com/v2/search?query=${query}&facets=${facets}&limit=20`);
-        if (!res.ok) throw new Error();
-        const data = await res.json();
+        const response = await fetch(`https://api.modrinth.com/v2/search?query=${query}&facets=${facets}&limit=8`);
+        const data = await response.json();
 
         if (!data.hits || data.hits.length === 0) {
-          resultados.innerHTML = '<div class="status-msg">Sin correspondencias en el índice central.</div>';
+          resContainer.innerHTML = '<div class="status-info">No se encontraron resultados para esta búsqueda.</div>';
           return;
         }
 
-        resultados.innerHTML = '';
-        data.hits.forEach(mod => {
-          const div = document.createElement('div');
-          div.className = 'modrinth-result';
-          const icon = mod.icon_url || 'https://modrinth.com/default-icon.svg';
-          
-          div.innerHTML = `
-            <img src="${icon}" alt="Icon" />
-            <div class="modrinth-details">
-              <h4>${mod.title}</h4>
-              <p>${mod.description || 'Sin descripción de compilación.'}</p>
+        resContainer.innerHTML = '';
+        data.hits.forEach(hit => {
+          const item = document.createElement('div');
+          item.className = 'api-result-item';
+          item.innerHTML = `
+            <img src="${hit.icon_url || 'https://modrinth.com/default-icon.svg'}" alt="Icon" />
+            <div class="api-result-info">
+              <h4>${hit.title}</h4>
+              <p>${hit.description || 'Sin descripción disponible.'}</p>
             </div>
           `;
-
-          div.onclick = async () => {
-            try {
-              resultados.innerHTML = '<div class="status-msg">Indexando mapeo de versiones...</div>';
-              const versionRes = await fetch(`https://api.modrinth.com/v2/project/${mod.project_id}/version`);
-              const versionData = await versionRes.json();
-              const filteredVersions = versionData.filter(v => v.loaders.includes(loader));
-              const gameVersions = [...new Set(filteredVersions.flatMap(v => v.game_versions))];
-
-              if (gameVersions.length) {
-                mods.push({ name: mod.title, versions: gameVersions });
-                saveAndRefresh();
-                closeAddScreen();
-              } else {
-                alert('No hay entornos válidos para este loader.');
-                resultados.innerHTML = '';
-              }
-            } catch (err) {
-              alert('Error al parsear el árbol de versiones.');
-            }
-          };
-          resultados.appendChild(div);
+          item.onclick = () => injectModrinthTarget(hit.project_id, hit.title, loader);
+          resContainer.appendChild(item);
         });
       } catch (err) {
-        resultados.innerHTML = '<div class="status-msg" style="color:var(--accent-red)">Fallo crítico de enlace de datos.</div>';
+        resContainer.innerHTML = '<div class="status-info" style="color:var(--accent-danger)">Error de conexión con el servidor de Modrinth.</div>';
       }
     }
 
-    // OPERACIONES JSON
-    function exportMods() {
-      const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(mods, null, 2));
-      const a = document.createElement('a');
-      a.setAttribute("href", dataStr);
-      a.setAttribute("download", "matrix_mods.json");
-      document.body.appendChild(a);
-      a.click();
-      document.body.removeChild(a);
+    async function injectModrinthTarget(projectId, title, loader) {
+      const resContainer = document.getElementById('modrinthResults');
+      resContainer.innerHTML = '<div class="status-info">Obteniendo el listado de versiones...</div>';
+      
+      try {
+        const res = await fetch(`https://api.modrinth.com/v2/project/${projectId}/version`);
+        const versions = await res.json();
+        const targeted = versions.filter(v => v.loaders.includes(loader));
+        const cleanVersions = [...new Set(targeted.flatMap(v => v.game_versions))];
+
+        if (cleanVersions.length) {
+          appData.mods.push({ name: title, versions: cleanVersions });
+          saveData();
+          renderApp();
+          document.getElementById('modrinthQuery').value = '';
+          resContainer.innerHTML = '';
+          closeActiveModal('add-modal');
+        } else {
+          alert('Este mod no tiene versiones disponibles para el cargador seleccionado.');
+          resContainer.innerHTML = '';
+        }
+      } catch (e) {
+        alert('Hubo un error al descargar los datos del mod.');
+      }
     }
 
-    function importMods() {
-      const input = document.getElementById('importFile');
-      input.click();
-      input.onchange = () => {
-        const file = input.files[0];
-        const reader = new FileReader();
-        reader.onload = (e) => {
-          try {
-            const imported = JSON.parse(e.target.result);
-            if (Array.isArray(imported)) {
-              mods = imported;
-              saveAndRefresh();
-            }
-          } catch {
-            alert("Sintaxis de manifiesto JSON rota.");
+    /* OPERACIONES DE MANIFESTACIÓN JSON */
+    function exportData() {
+      const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(appData, null, 2));
+      const anchor = document.createElement('a');
+      anchor.setAttribute("href", dataStr);
+      anchor.setAttribute("download", "mod_checker_backup.json");
+      document.body.appendChild(anchor);
+      anchor.click();
+      anchor.remove();
+    }
+
+    function triggerImport() {
+      document.getElementById('hiddenImport').click();
+    }
+
+    document.getElementById('hiddenImport').onchange = (e) => {
+      const file = e.target.files[0];
+      if (!file) return;
+      const reader = new FileReader();
+      reader.onload = (evt) => {
+        try {
+          const parsed = JSON.parse(evt.target.result);
+          if (parsed && Array.isArray(parsed.mods)) {
+            appData = parsed;
+            saveData();
+            renderApp();
+          } else {
+            alert('El archivo no tiene el formato correcto.');
           }
-        };
-        reader.readAsText(file);
+        } catch (err) {
+          alert('Error al leer el archivo JSON.');
+        }
       };
-    }
+      reader.readAsText(file);
+    };
 
-    function clearAll() {
-      if (confirm("¿Vaciar por completo el modset de la memoria activa?")) {
-        mods = [];
-        saveAndRefresh();
+    function clearMatrix() {
+      if (confirm('¿Quieres eliminar de forma definitiva la lista de mods actual?')) {
+        appData.mods = [];
+        saveData();
+        renderApp();
       }
     }
-
-    // Inicialización de ciclo de vida
-    fetchMinecraftVersions();
-    renderMods();
-    updateCompatibility();
-    lucide.createIcons();
   </script>
 </body>
 </html>

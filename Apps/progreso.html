@@ -1,366 +1,590 @@
 <!DOCTYPE html>
 <html lang="es">
 <head>
-<meta charset="UTF-8" />
-<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
-<title>Progress Tracker Pro</title>
-<link rel="preconnect" href="https://fonts.googleapis.com" />
-<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-<link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700&display=swap" rel="stylesheet" />
-<script src="https://unpkg.com/lucide@latest"></script>
-<style>
-  :root {
-    --bg: #000000;
-    --surface: #121212;
-    --surface-hover: #1e1e1e;
-    --text: #ffffff;
-    --muted: #888888;
-    --border: rgba(255, 255, 255, 0.1);
-    --accent: #ffffff;
-    --spring: cubic-bezier(0.34, 1.56, 0.64, 1);
-    --gentle: cubic-bezier(0.2, 0.8, 0.2, 1);
-  }
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+    <title>Progress Tracker Pro</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@200;300;400;500;600;700&display=swap" rel="stylesheet">
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <style>
+        :root {
+            /* Colores Limpios y Orgánicos del Ecosistema (Clonado de Medidas) */
+            --bg: #000000;
+            --surface: #121212;
+            --surface-hover: #1c1c1e;
+            
+            /* Neo-Glass Pure */
+            --glass: rgba(15, 15, 15, 0.4);
+            --glass-border: rgba(255, 255, 255, 0.08);
+            --blur-val: 30px;
 
-  * { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
+            /* Textos */
+            --text-main: #FFFFFF;
+            --text-muted: #8E8E93;
 
-  body {
-    font-family: 'Outfit', sans-serif;
-    background: var(--bg);
-    color: var(--text);
-    overflow: hidden;
-    height: 100dvh;
-  }
+            /* Acentos */
+            --accent-danger: #FF453A;
+            --accent-success: #34C759;
 
-  /* --- PANTALLAS --- */
-  .screen {
-    position: fixed;
-    inset: 0;
-    background: var(--bg);
-    display: flex;
-    flex-direction: column;
-    transition: transform 0.5s var(--gentle), opacity 0.5s var(--gentle);
-  }
+            /* Curvas de Animación Fluidas */
+            --bezier: cubic-bezier(0.16, 1, 0.3, 1);
+            --spring: cubic-bezier(0.34, 1.56, 0.64, 1);
+            --gentle: cubic-bezier(0.2, 0.8, 0.2, 1);
+        }
 
-  #home { transform: translateX(0); z-index: 1; }
-  #home.hidden { transform: translateX(-20%); opacity: 0; pointer-events: none; }
+        /* Reset Estricto */
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: 'Outfit', sans-serif;
+            -webkit-tap-highlight-color: transparent;
+            user-select: none;
+        }
 
-  #view { transform: translateX(100%); z-index: 2; box-shadow: -10px 0 30px rgba(0,0,0,0.5); }
-  #view.active { transform: translateX(0); }
+        body {
+            background-color: var(--bg);
+            color: var(--text-main);
+            min-height: 100dvh;
+            overflow: hidden;
+            position: relative;
+        }
 
-  /* --- CABECERAS --- */
-  .header {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    padding: 24px 24px 12px;
-  }
-  .header h1 { font-size: 1.25rem; font-weight: 500; letter-spacing: -0.02em; display: flex; align-items: center; gap: 8px; }
-  
-  .icon-btn {
-    background: var(--surface);
-    border: 1px solid var(--border);
-    color: var(--text);
-    width: 40px; height: 40px;
-    border-radius: 50%;
-    display: flex; align-items: center; justify-content: center;
-    transition: transform 0.2s;
-  }
-  .icon-btn:active { transform: scale(0.9); }
+        /* Contenedor Adaptativo Multidispositivo (PC / Tablet / Móvil) */
+        .app-container {
+            height: 100dvh;
+            display: flex;
+            flex-direction: column;
+            padding: env(safe-area-inset-top) 24px calc(env(safe-area-inset-bottom) + 16px) 24px;
+            max-width: 1400px;
+            margin: 0 auto;
+            will-change: transform, opacity;
+            transition: transform 0.4s var(--bezier), opacity 0.4s var(--bezier);
+        }
 
-  /* --- HOME --- */
-  .dashboard {
-    flex: 1;
-    overflow-y: auto;
-    padding: 0 24px 40px;
-    display: flex;
-    flex-direction: column;
-    gap: 40px;
-  }
+        .app-container.backgrounded {
+            transform: scale(0.98);
+            opacity: 0.5;
+            pointer-events: none;
+        }
 
-  .progress-hero {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    gap: 20px;
-    margin-top: 20px;
-    animation: fadeInDown 0.8s var(--spring);
-  }
+        /* Cabecera Avanzada y Limpia */
+        header {
+            padding: 20px 0;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-bottom: 1px solid var(--glass-border);
+        }
 
-  .huge-percent {
-    font-size: 6rem;
-    font-weight: 700;
-    line-height: 1;
-    letter-spacing: -0.05em;
-    font-variant-numeric: tabular-nums;
-  }
+        .header-identity {
+            display: flex;
+            align-items: center;
+            gap: 14px;
+        }
 
-  .input-glass {
-    display: flex;
-    align-items: center;
-    background: var(--surface);
-    border: 1px solid var(--border);
-    border-radius: 28px;
-    padding: 10px 20px;
-    gap: 12px;
-    transition: border-color 0.3s;
-  }
-  .input-glass:focus-within { border-color: var(--accent); }
+        .app-icon-badge {
+            width: 40px;
+            height: 40px;
+            border-radius: 12px;
+            background: radial-gradient(circle at top, rgba(255,255,255,0.15), transparent);
+            border: 1px solid rgba(255,255,255,0.12);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.4);
+        }
 
-  .input-glass input {
-    background: transparent;
-    border: none;
-    color: var(--text);
-    font-size: 1.6rem;
-    font-family: inherit;
-    font-weight: 600;
-    width: 70px;
-    text-align: center;
-    outline: none;
-  }
+        .app-title-wrapper {
+            display: flex;
+            flex-direction: column;
+        }
 
-  /* --- GRID ANIMADO --- */
-  .mode-grid {
-    display: grid;
-    grid-template-columns: 1fr 1fr;
-    gap: 14px;
-  }
+        header h1 {
+            font-size: 1.35rem;
+            font-weight: 500;
+            letter-spacing: -0.3px;
+            color: var(--text-main);
+            line-height: 1.2;
+        }
 
-  .mode-card {
-    background: var(--surface);
-    border: 1px solid var(--border);
-    border-radius: 24px;
-    padding: 24px;
-    color: var(--text);
-    cursor: pointer;
-    display: flex;
-    flex-direction: column;
-    gap: 12px;
-    animation: slideUp 0.6s var(--spring) both;
-  }
-  .mode-card.full { grid-column: 1 / -1; flex-direction: row; align-items: center; justify-content: space-between; }
-  .mode-card:active { transform: scale(0.96); background: var(--surface-hover); }
+        .counter-badge-inline {
+            font-size: 0.78rem;
+            color: var(--text-muted);
+            font-weight: 400;
+            letter-spacing: 0.2px;
+        }
 
-  /* --- VISUALIZACIONES (ESTADOS) --- */
-  .view-container {
-    flex: 1;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    padding: 30px;
-    animation: scaleIn 0.5s var(--spring);
-  }
+        .header-actions {
+            display: flex;
+            gap: 12px;
+            align-items: center;
+        }
 
-  .svg-path { 
-    transition: stroke-dashoffset 0.8s var(--spring); 
-  }
+        /* Cuerpo de Contenido Principal con Layout de Escritorio */
+        .main-content {
+            flex: 1;
+            overflow-y: auto;
+            padding: 20px 0 120px 0;
+            scrollbar-width: none;
+            display: flex;
+            flex-direction: column;
+            gap: 32px;
+        }
+        .main-content::-webkit-scrollbar { display: none; }
 
-  .orbit-dot-wrap { 
-    transition: transform 0.8s var(--spring); 
-  }
+        /* Ajuste Dashboard en PC */
+        @media (min-width: 1024px) {
+            .main-content {
+                display: grid;
+                grid-template-columns: 360px 1fr;
+                align-items: start;
+                gap: 40px;
+            }
+        }
 
-  /* Animaciones */
-  @keyframes fadeInDown {
-    from { opacity: 0; transform: translateY(-20px); }
-    to { opacity: 1; transform: translateY(0); }
-  }
-  @keyframes slideUp {
-    from { opacity: 0; transform: translateY(30px); }
-    to { opacity: 1; transform: translateY(0); }
-  }
-  @keyframes scaleIn {
-    from { opacity: 0; transform: scale(0.9); }
-    to { opacity: 1; transform: scale(1); }
-  }
+        /* Hero de Progreso Centralizado de Configuración */
+        .progress-hero {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 24px;
+            padding: 30px 20px;
+            background: var(--glass);
+            border: 1px solid var(--glass-border);
+            backdrop-filter: blur(var(--blur-val));
+            -webkit-backdrop-filter: blur(var(--blur-val));
+            border-radius: 28px;
+            text-align: center;
+        }
 
-  /* Estilos específicos de gráficos */
-  .thermo-wrap { width: 40px; height: 300px; background: var(--surface); border-radius: 20px; padding: 4px; border: 1px solid var(--border); }
-  .thermo-fill { width: 100%; border-radius: 16px; background: linear-gradient(to top, #444, #fff); transition: height 0.8s var(--spring); position: relative; }
-  .thermo-fill::after { content: ''; position: absolute; top: 0; left: 0; right: 0; height: 20px; background: white; filter: blur(10px); opacity: 0.5; }
+        .huge-percent {
+            font-size: 5.5rem;
+            font-weight: 200;
+            line-height: 1;
+            letter-spacing: -3px;
+            color: var(--text-main);
+            font-variant-numeric: tabular-nums;
+        }
 
-  .block { opacity: 0.2; transform: scale(0.8); transition: all 0.4s var(--spring); }
-  .block.active { opacity: 1; transform: scale(1); background: white; }
+        .input-glass {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: var(--surface);
+            border: 1px solid var(--glass-border);
+            border-radius: 100px;
+            padding: 8px 24px;
+            gap: 12px;
+            transition: border-color 0.2s, background-color 0.2s;
+        }
+        .input-glass:focus-within {
+            border-color: rgba(255, 255, 255, 0.25);
+            background: var(--surface-hover);
+        }
 
-</style>
+        .input-glass input {
+            background: transparent;
+            border: none;
+            color: var(--text-main);
+            font-size: 1.4rem;
+            font-weight: 500;
+            width: 70px;
+            text-align: center;
+            outline: none;
+        }
+
+        /* Workspace Derecho para las Vistas de Gráficos */
+        .items-workspace {
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+        }
+
+        /* Grid de Modos Adaptativo Multi-columna (Mismo estilo que Medidas) */
+        .item-list-layout {
+            display: grid;
+            grid-template-columns: 1fr;
+            gap: 14px;
+        }
+        @media (min-width: 640px) { .item-list-layout { grid-template-columns: repeat(2, 1fr); } }
+        @media (min-width: 1200px) { .item-list-layout { grid-template-columns: repeat(2, 1fr); } }
+
+        .mode-card {
+            background: var(--glass);
+            backdrop-filter: blur(var(--blur-val));
+            -webkit-backdrop-filter: blur(var(--blur-val));
+            border: 1px solid var(--glass-border);
+            border-radius: 24px;
+            padding: 24px;
+            display: flex;
+            flex-direction: column;
+            align-items: flex-start;
+            gap: 16px;
+            cursor: pointer;
+            text-align: left;
+            transition: background 0.2s var(--bezier), transform 0.2s var(--bezier), border-color 0.2s;
+        }
+        .mode-card:hover { background: var(--surface-hover); border-color: rgba(255,255,255,0.15); }
+        .mode-card:active { transform: scale(0.97); }
+
+        .mode-card.full {
+            grid-column: 1 / -1;
+            flex-direction: row;
+            align-items: center;
+            justify-content: space-between;
+        }
+
+        .mode-card-info h3 { font-size: 1rem; font-weight: 500; letter-spacing: -0.1px; color: var(--text-main); }
+        .mode-card-info p { font-size: 0.8rem; color: var(--text-muted); margin-top: 2px; }
+
+        /* Modales Inmersivos estilo Side-Drawer */
+        .view-modal {
+            position: absolute;
+            top: 0;
+            right: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(10, 10, 10, 0.8);
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+            z-index: 20;
+            display: flex;
+            flex-direction: column;
+            padding: env(safe-area-inset-top) 24px calc(env(safe-area-inset-bottom) + 16px) 24px;
+            transform: translate3d(100%, 0, 0);
+            opacity: 0;
+            visibility: hidden;
+            transition: transform 0.4s var(--bezier), opacity 0.3s ease, visibility 0.4s;
+            will-change: transform, opacity;
+            border-left: 1px solid var(--glass-border);
+        }
+
+        @media (min-width: 600px) {
+            .view-modal {
+                width: 480px;
+                left: auto;
+                background: #0a0a0a;
+            }
+        }
+
+        .view-modal.active {
+            transform: translate3d(0, 0, 0);
+            opacity: 1;
+            visibility: visible;
+        }
+
+        .modal-header {
+            padding: 20px 0;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 16px;
+            border-bottom: 1px solid var(--glass-border);
+        }
+
+        .modal-body {
+            flex: 1;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 40px 0;
+        }
+
+        /* Ficha Técnica / Contenedores de Gráficos Integrados */
+        .detail-badge-box { 
+            background: var(--glass); 
+            border: 1px solid var(--glass-border); 
+            border-radius: 28px; 
+            padding: 40px 24px; 
+            text-align: center; 
+            backdrop-filter: blur(var(--blur-val));
+            width: 100%;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            gap: 20px;
+        }
+
+        /* Elementos del Canvas de Renderizado */
+        .svg-path { transition: stroke-dashoffset 0.6s var(--gentle); }
+        .orbit-dot-wrap { transition: transform 0.6s var(--gentle); }
+
+        .thermo-wrap { width: 44px; height: 280px; background: var(--surface); border-radius: 100px; padding: 5px; border: 1px solid var(--glass-border); position: relative; display: flex; align-items: flex-end; }
+        .thermo-fill { width: 100%; border-radius: 100px; background: linear-gradient(to top, rgba(255,255,255,0.3), #ffffff); transition: height 0.6s var(--gentle); position: relative; box-shadow: 0 0 20px rgba(255,255,255,0.2); }
+        .thermo-fill::after { content: ''; position: absolute; top: 0; left: 0; right: 0; height: 15px; background: white; filter: blur(4px); opacity: 0.6; }
+
+        .block { opacity: 0.12; transform: scale(0.85); transition: all 0.4s var(--gentle); }
+        .block.active { opacity: 1; transform: scale(1); background: white; box-shadow: 0 0 12px rgba(255,255,255,0.4); }
+
+        /* Botones de Anclaje Inferior */
+        .dock-action-area { position: absolute; bottom: 0; left: 0; padding: 20px 24px calc(env(safe-area-inset-bottom) + 16px); background: linear-gradient(to top, #000000 85%, transparent); display: flex; justify-content: center; width: 100%; z-index: 5; }
+        
+        .btn-icon-circular-round { background: var(--glass); border: 1px solid var(--glass-border); color: var(--text-muted); width: 42px; height: 42px; border-radius: 50%; display: flex; align-items: center; justify-content: center; cursor: pointer; flex-shrink: 0; transition: transform 0.15s ease, color 0.2s, border-color 0.2s; backdrop-filter: blur(var(--blur-val)); }
+        .btn-icon-circular-round:active { transform: scale(0.93); }
+        .btn-icon-circular-round:hover { color: var(--text-main); border-color: rgba(255,255,255,0.2); }
+
+        @keyframes pulseUp {
+            50% { transform: scale(1.03); }
+        }
+    </style>
 </head>
 <body>
 
-<div id="app">
-  <section id="home" class="screen">
-    <div class="header">
-      <h1><i data-lucide="layers"></i> Tracker</h1>
-      <div class="icon-btn"><i data-lucide="settings" size="18"></i></div>
-    </div>
-
-    <div class="dashboard">
-      <div class="progress-hero">
-        <div class="huge-percent" id="home-percent">0%</div>
-        <div class="input-glass">
-          <input id="current" type="number" inputmode="numeric" value="0" />
-          <span style="opacity: 0.3; font-size: 1.5rem">/</span>
-          <input id="total" type="number" inputmode="numeric" value="100" />
-        </div>
-      </div>
-
-      <div>
-        <h2 style="font-size: 0.8rem; text-transform: uppercase; letter-spacing: 0.1em; color: var(--muted); margin-bottom: 16px;">Vistas</h2>
-        <div class="mode-grid">
-          <button class="mode-card" data-mode="rings" style="animation-delay: 0.1s">
-            <i data-lucide="circle-dot" color="#fff"></i>
-            <div><h3 style="font-size: 1rem;">Rings</h3><p style="font-size: 0.75rem; color: var(--muted);">Anillos concéntricos</p></div>
-          </button>
-          <button class="mode-card" data-mode="arc" style="animation-delay: 0.2s">
-            <i data-lucide="gauge" color="#fff"></i>
-            <div><h3 style="font-size: 1rem;">Arc</h3><p style="font-size: 0.75rem; color: var(--muted);">Indicador curvo</p></div>
-          </button>
-          <button class="mode-card" data-mode="thermo" style="animation-delay: 0.3s">
-            <i data-lucide="bar-chart-2" color="#fff"></i>
-            <div><h3 style="font-size: 1rem;">Vertical</h3><p style="font-size: 0.75rem; color: var(--muted);">Termómetro luz</p></div>
-          </button>
-          <button class="mode-card" data-mode="grid" style="animation-delay: 0.4s">
-            <i data-lucide="layout-grid" color="#fff"></i>
-            <div><h3 style="font-size: 1rem;">Grid</h3><p style="font-size: 0.75rem; color: var(--muted);">Matriz de celdas</p></div>
-          </button>
-          <button class="mode-card full" data-mode="orbit" style="animation-delay: 0.5s">
-            <div style="display: flex; gap: 16px; align-items: center;">
-              <i data-lucide="orbit" size="28"></i>
-              <div><h3 style="font-size: 1rem;">Orbit Mode</h3><p style="font-size: 0.75rem; color: var(--muted);">Movimiento satelital 360</p></div>
+    <div class="app-container" id="main-view">
+        <header>
+            <div class="header-identity">
+                <div class="app-icon-badge">
+                    <i data-lucide="layers" size="20" style="color: var(--text-main);"></i>
+                </div>
+                <div class="app-title-wrapper">
+                    <h1>Tracker</h1>
+                    <span class="counter-badge-inline" id="total-counter">Progreso Activo</span>
+                </div>
             </div>
-            <i data-lucide="chevron-right" color="#444"></i>
-          </button>
+            <div class="header-actions">
+                <div class="btn-icon-circular-round" style="cursor: default;">
+                    <i data-lucide="activity" size="18"></i>
+                </div>
+            </div>
+        </header>
+
+        <main class="main-content">
+            <div class="progress-hero">
+                <div class="huge-percent" id="home-percent">0%</div>
+                <div class="input-glass">
+                    <input id="current" type="number" inputmode="numeric" value="0" />
+                    <span style="opacity: 0.2; font-size: 1.4rem; font-weight: 200;">/</span>
+                    <input id="total" type="number" inputmode="numeric" value="100" />
+                </div>
+            </div>
+
+            <div class="items-workspace">
+                <div class="section-header">
+                    <div style="font-size: 0.85rem; text-transform: uppercase; letter-spacing: 0.05em; color: var(--text-muted); font-weight: 600;">Vistas de Rendimiento</div>
+                </div>
+                
+                <div class="item-list-layout">
+                    <div class="mode-card" data-mode="rings">
+                        <div class="app-icon-badge"><i data-lucide="circle-dot" size="18"></i></div>
+                        <div class="mode-card-info">
+                            <h3>Rings</h3>
+                            <p>Anillos concéntricos limpios</p>
+                        </div>
+                    </div>
+
+                    <div class="mode-card" data-mode="arc">
+                        <div class="app-icon-badge"><i data-lucide="gauge" size="18"></i></div>
+                        <div class="mode-card-info">
+                            <h3>Arc</h3>
+                            <p>Indicador curvo de precisión</p>
+                        </div>
+                    </div>
+
+                    <div class="mode-card" data-mode="thermo">
+                        <div class="app-icon-badge"><i data-lucide="bar-chart-2" size="18"></i></div>
+                        <div class="mode-card-info">
+                            <h3>Vertical</h3>
+                            <p>Termómetro de luz sutil</p>
+                        </div>
+                    </div>
+
+                    <div class="mode-card" data-mode="grid">
+                        <div class="app-icon-badge"><i data-lucide="layout-grid" size="18"></i></div>
+                        <div class="mode-card-info">
+                            <h3>Grid</h3>
+                            <p>Matriz orgánica de celdas</p>
+                        </div>
+                    </div>
+
+                    <div class="mode-card full" data-mode="orbit">
+                        <div style="display: flex; gap: 16px; align-items: center;">
+                            <div class="app-icon-badge"><i data-lucide="orbit" size="20"></i></div>
+                            <div class="mode-card-info">
+                                <h3>Orbit Mode</h3>
+                                <p>Movimiento satelital inmersivo en 360 grados</p>
+                            </div>
+                        </div>
+                        <i data-lucide="chevron-right" size="16" style="color: var(--text-muted); opacity: 0.5;"></i>
+                    </div>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <div class="view-modal" id="view-modal">
+        <div class="modal-header">
+            <button class="btn-icon-circular-round" onclick="closeActiveModal()">
+                <i data-lucide="arrow-left" size="18"></i>
+            </button>
+            <h2 id="view-title" style="font-weight: 500; font-size: 1.1rem; text-transform: uppercase; letter-spacing: 0.05em;">Vista</h2>
+            <div style="width: 42px;"></div>
         </div>
-      </div>
+        
+        <div class="modal-body">
+            <div class="detail-badge-box">
+                <div id="view-canvas" style="min-height: 240px; display: flex; align-items: center; justify-content: center; width: 100%;"></div>
+                <div id="view-percent" style="font-size: 3.5rem; font-weight: 200; letter-spacing: -1px; margin-top: 10px;">0%</div>
+            </div>
+        </div>
     </div>
-  </section>
 
-  <section id="view" class="screen">
-    <div class="header">
-      <button class="icon-btn" id="btn-back"><i data-lucide="chevron-left"></i></button>
-      <h1 id="view-title">Vista</h1>
-      <div style="width: 40px"></div>
-    </div>
-    
-    <div class="view-container" id="view-canvas"></div>
-    
-    <div style="padding: 40px; text-align: center;">
-        <div id="view-percent" style="font-size: 3rem; font-weight: 700;">0%</div>
-    </div>
-  </section>
-</div>
+    <script>
+        // --- CORE DATA & STORAGE CONTROL ---
+        const elCurrent = document.getElementById('current');
+        const elTotal = document.getElementById('total');
 
-<script>
-  lucide.createIcons();
+        elCurrent.value = localStorage.getItem('tracker_current') || "0";
+        elTotal.value = localStorage.getItem('tracker_total') || "100";
 
-  let progress = 0;
-  let displayedProgress = 0;
-  let currentMode = 'rings';
-  
-  const elCurrent = document.getElementById('current');
-  const elTotal = document.getElementById('total');
-  const elHomePercent = document.getElementById('home-percent');
-  const elViewPercent = document.getElementById('view-percent');
-  const canvas = document.getElementById('view-canvas');
+        let progress = 0;
+        let currentMode = 'rings';
+        let activeModalsStack = [];
+        
+        const elHomePercent = document.getElementById('home-percent');
+        const elViewPercent = document.getElementById('view-percent');
+        const canvas = document.getElementById('view-canvas');
 
-  // --- CONTADOR ANIMADO ---
-  function animateValue(start, end, duration, element) {
-    let startTimestamp = null;
-    const step = (timestamp) => {
-      if (!startTimestamp) startTimestamp = timestamp;
-      const progressRatio = Math.min((timestamp - startTimestamp) / duration, 1);
-      const val = Math.floor(progressRatio * (end - start) + start);
-      element.innerText = `${val}%`;
-      if (progressRatio < 1) {
-        window.requestAnimationFrame(step);
-      }
-    };
-    window.requestAnimationFrame(step);
-  }
+        window.onload = () => {
+            lucide.createIcons();
+            initEngine();
+        };
 
-  // --- NAVEGACIÓN ---
-  history.replaceState({ screen: 'home' }, '');
+        // --- INTERPOLADOR ANIMADO (EASING CUBIC OUT) ---
+        function animateValue(start, end, duration, callback) {
+            if (start === end) {
+                callback(end);
+                return;
+            }
+            let startTimestamp = null;
+            const step = (timestamp) => {
+                if (!startTimestamp) startTimestamp = timestamp;
+                const progressRatio = Math.min((timestamp - startTimestamp) / duration, 1);
+                const ease = 1 - Math.pow(1 - progressRatio, 3);
+                const val = Math.floor(ease * (end - start) + start);
+                callback(val);
+                if (progressRatio < 1) {
+                    window.requestAnimationFrame(step);
+                }
+            };
+            window.requestAnimationFrame(step);
+        }
 
-  function openView(mode) {
-    currentMode = mode;
-    document.getElementById('view-title').innerText = mode.toUpperCase();
-    renderCanvas();
-    history.pushState({ screen: 'view', mode: mode }, '', `#${mode}`);
-    document.getElementById('home').classList.add('hidden');
-    document.getElementById('view').classList.add('active');
-  }
+        // --- SISTEMA DE MANEJO DE MODALES E HISTORIAL ---
+        function openModal(mode) {
+            currentMode = mode;
+            document.getElementById('view-title').innerText = `Vista ${mode}`;
+            renderCanvas();
 
-  function closeView() {
-    document.getElementById('home').classList.remove('hidden');
-    document.getElementById('view').classList.remove('active');
-  }
+            document.getElementById('main-view').classList.add('backgrounded');
+            document.getElementById('view-modal').classList.add('active');
+            
+            activeModalsStack.push('view-modal');
+            window.history.pushState({ screen: 'view', mode: mode }, "");
+        }
 
-  window.addEventListener('popstate', (e) => {
-    e.state && e.state.screen === 'view' ? openView(e.state.mode) : closeView();
-  });
+        function closeActiveModal() {
+            if (activeModalsStack.length > 0) {
+                window.history.back();
+            }
+        }
 
-  document.getElementById('btn-back').addEventListener('click', () => history.back());
-  document.querySelectorAll('.mode-card').forEach(card => {
-    card.addEventListener('click', () => openView(card.dataset.mode));
-  });
+        window.addEventListener('popstate', () => {
+            if (activeModalsStack.length > 0) {
+                activeModalsStack.pop();
+                document.getElementById('view-modal').classList.remove('active');
+                document.getElementById('main-view').classList.remove('backgrounded');
+            }
+        });
 
-  // --- LÓGICA ---
-  function update() {
-    let curr = parseFloat(elCurrent.value) || 0;
-    let tot = parseFloat(elTotal.value) || 100;
-    let newProgress = Math.round((Math.min(Math.max(curr, 0), tot) / tot) * 100);
-    
-    if (newProgress !== progress) {
-      animateValue(progress, newProgress, 600, elHomePercent);
-      animateValue(progress, newProgress, 600, elViewPercent);
-      progress = newProgress;
-      renderCanvas();
-    }
-  }
+        document.querySelectorAll('.mode-card').forEach(card => {
+            card.addEventListener('click', () => {
+                openModal(card.dataset.mode);
+            });
+        });
 
-  elCurrent.addEventListener('input', update);
-  elTotal.addEventListener('input', update);
+        // --- CONTROLADOR DE ACTUALIZACIÓN DE DATOS ---
+        function updateEngine() {
+            let curr = parseFloat(elCurrent.value) || 0;
+            let tot = parseFloat(elTotal.value) || 100;
+            if (tot <= 0) tot = 100;
+            
+            let newProgress = Math.round((Math.min(Math.max(curr, 0), tot) / tot) * 100);
+            
+            localStorage.setItem('tracker_current', elCurrent.value);
+            localStorage.setItem('tracker_total', elTotal.value);
 
-  function renderCanvas() {
-    const p = progress / 100;
-    canvas.innerHTML = ''; // Limpiar
+            if (newProgress !== progress) {
+                animateValue(progress, newProgress, 400, (val) => {
+                    elHomePercent.innerText = `${val}%`;
+                    elViewPercent.innerText = `${val}%`;
+                });
+                progress = newProgress;
+                renderCanvas();
+            }
+        }
 
-    if (currentMode === 'rings') {
-      const r = 90, c = 2 * Math.PI * r;
-      canvas.innerHTML = `
-        <svg viewBox="0 0 220 220" width="220" height="220">
-          <circle cx="110" cy="110" r="${r}" fill="none" stroke="var(--surface)" stroke-width="15" />
-          <circle class="svg-path" cx="110" cy="110" r="${r}" fill="none" stroke="#fff" stroke-width="15" 
-                  stroke-dasharray="${c}" stroke-dashoffset="${c - (p * c)}" stroke-linecap="round" 
-                  style="transform: rotate(-90deg); transform-origin: center;" />
-        </svg>`;
-    } 
-    else if (currentMode === 'arc') {
-      const r = 100, c = Math.PI * r;
-      canvas.innerHTML = `
-        <svg viewBox="0 0 240 140" width="240" height="140">
-          <path d="M 20,120 A 100,100 0 0,1 220,120" fill="none" stroke="var(--surface)" stroke-width="20" stroke-linecap="round" />
-          <path class="svg-path" d="M 20,120 A 100,100 0 0,1 220,120" fill="none" stroke="#fff" stroke-width="20" 
-                stroke-dasharray="${c}" stroke-dashoffset="${c - (p * c)}" stroke-linecap="round" />
-        </svg>`;
-    }
-    else if (currentMode === 'thermo') {
-      canvas.innerHTML = `<div class="thermo-wrap"><div class="thermo-fill" style="height: ${progress}%"></div></div>`;
-    }
-    else if (currentMode === 'grid') {
-      let html = '<div style="display:grid; grid-template-columns: repeat(5,1fr); gap:10px; width:200px;">';
-      for(let i=0; i<25; i++) html += `<div class="block ${i < (progress/4) ? 'active' : ''}" style="aspect-ratio:1; border-radius:6px; background:var(--surface);"></div>`;
-      canvas.innerHTML = html + '</div>';
-    }
-    else if (currentMode === 'orbit') {
-      canvas.innerHTML = `
-        <div style="position:relative; width:200px; height:200px; border:1px solid var(--border); border-radius:50%;">
-          <div class="orbit-dot-wrap" style="position:absolute; inset:0; transform: rotate(${p*360}deg)">
-            <div style="position:absolute; top:-10px; left:calc(50% - 10px); width:20px; height:20px; background:#fff; border-radius:50%; box-shadow: 0 0 20px #fff;"></div>
-          </div>
-          <div style="position:absolute; inset:0; display:flex; align-items:center; justify-content:center; font-size:1.5rem; opacity:0.2;">ORBIT</div>
-        </div>`;
-    }
-  }
+        elCurrent.addEventListener('input', updateEngine);
+        elTotal.addEventListener('input', updateEngine);
 
-  update(); // Initial load
-</script>
+        function initEngine() {
+            let curr = parseFloat(elCurrent.value) || 0;
+            let tot = parseFloat(elTotal.value) || 100;
+            progress = Math.round((Math.min(Math.max(curr, 0), tot) / tot) * 100);
+            elHomePercent.innerText = `${progress}%`;
+            elViewPercent.innerText = `${progress}%`;
+            renderCanvas();
+        }
+
+        // --- CANVAS RENDER ENGINE (GRÁFICOS) ---
+        function renderCanvas() {
+            const p = progress / 100;
+            canvas.innerHTML = ''; 
+
+            if (currentMode === 'rings') {
+                const r = 90, c = 2 * Math.PI * r;
+                canvas.innerHTML = `
+                    <svg viewBox="0 0 220 220" width="200" height="200">
+                        <circle cx="110" cy="110" r="${r}" fill="none" stroke="var(--surface)" stroke-width="14" />
+                        <circle class="svg-path" cx="110" cy="110" r="${r}" fill="none" stroke="#ffffff" stroke-width="14" 
+                                stroke-dasharray="${c}" stroke-dashoffset="${c - (p * c)}" stroke-linecap="round" 
+                                style="transform: rotate(-90deg); transform-origin: center;" />
+                    </svg>`;
+            } 
+            else if (currentMode === 'arc') {
+                const r = 100, c = Math.PI * r;
+                canvas.innerHTML = `
+                    <svg viewBox="0 0 240 140" width="220" height="130">
+                        <path d="M 20,120 A 100,100 0 0,1 220,120" fill="none" stroke="var(--surface)" stroke-width="18" stroke-linecap="round" />
+                        <path class="svg-path" d="M 20,120 A 100,100 0 0,1 220,120" fill="none" stroke="#ffffff" stroke-width="18" 
+                              stroke-dasharray="${c}" stroke-dashoffset="${c - (p * c)}" stroke-linecap="round" />
+                    </svg>`;
+            }
+            else if (currentMode === 'thermo') {
+                canvas.innerHTML = `<div class="thermo-wrap"><div class="thermo-fill" style="height: ${progress}%"></div></div>`;
+            }
+            else if (currentMode === 'grid') {
+                let html = '<div style="display:grid; grid-template-columns: repeat(5,1fr); gap:10px; width:190px;">';
+                for(let i=0; i<25; i++) {
+                    const isActive = i < Math.round(progress / 4);
+                    html += `<div class="block ${isActive ? 'active' : ''}" style="aspect-ratio:1; border-radius:6px; background:var(--surface);"></div>`;
+                }
+                canvas.innerHTML = html + '</div>';
+            }
+            else if (currentMode === 'orbit') {
+                canvas.innerHTML = `
+                    <div style="position:relative; width:190px; height:190px; border:1px solid var(--glass-border); border-radius:50%; background: rgba(255,255,255,0.01);">
+                        <div class="orbit-dot-wrap" style="position:absolute; inset:0; transform: rotate(${p*360}deg)">
+                            <div style="position:absolute; top:-10px; left:calc(50% - 10px); width:20px; height:20px; background:#ffffff; border-radius:50%; box-shadow: 0 0 20px #ffffff;"></div>
+                        </div>
+                        <div style="position:absolute; inset:0; display:flex; align-items:center; justify-content:center; font-size:0.8rem; font-weight: 500; opacity:0.2; letter-spacing: 0.15em;">ORBIT SYSTEM</div>
+                    </div>`;
+            }
+            lucide.createIcons();
+        }
+    </script>
 </body>
 </html>

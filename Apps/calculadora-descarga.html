@@ -1,81 +1,141 @@
 <!DOCTYPE html>
 <html lang="es">
 <head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
     <title>Calculador de Descarga Pro</title>
-    <link rel="preconnect" href="https://fonts.googleapis.com" />
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700&display=swap" rel="stylesheet" />
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@200;300;400;500;600;700&display=swap" rel="stylesheet">
     <script src="https://unpkg.com/lucide@latest"></script>
     <style>
         :root {
+            /* Paleta Cromática Orgánica y Oscura */
             --bg: #000000;
             --surface: #121212;
-            --surface-hover: #1e1e1e;
-            --text: #ffffff;
-            --muted: #888888;
-            --border: rgba(255, 255, 255, 0.1);
-            --accent: #6c5ce7;
-            --accent-glow: rgba(108, 92, 231, 0.3);
+            --surface-hover: #1c1c1e;
+            
+            /* Configuración Neo-Glass Pure */
+            --glass: rgba(15, 15, 15, 0.4);
+            --glass-border: rgba(255, 255, 255, 0.08);
+            --blur-val: 30px;
+
+            /* Jerarquía Textual */
+            --text-main: #FFFFFF;
+            --text-muted: #8E8E93;
+
+            /* Estados y Acentos de Sistema */
+            --accent-danger: #FF453A;
+            --accent: #FFFFFF;
+            --accent-glow: rgba(255, 255, 255, 0.15);
+
+            /* Físicas de Animación Progresivas */
+            --bezier: cubic-bezier(0.16, 1, 0.3, 1);
             --spring: cubic-bezier(0.34, 1.56, 0.64, 1);
-            --gentle: cubic-bezier(0.2, 0.8, 0.2, 1);
         }
 
-        * { 
-            box-sizing: border-box; 
-            margin: 0; 
-            padding: 0; 
-            -webkit-tap-highlight-color: transparent; 
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            -webkit-tap-highlight-color: transparent;
         }
 
         body {
             font-family: 'Outfit', sans-serif;
-            background: var(--bg);
-            color: var(--text);
+            background-color: var(--bg);
+            color: var(--text-main);
             overflow: hidden;
-            height: 100dvh;
-            display: flex;
-            justify-content: center;
-            align-items: center;
         }
 
         /* --- CONTENEDOR PRINCIPAL --- */
-        .calculator-card {
-            background: var(--surface);
-            border: 1px solid var(--border);
-            padding: 2.5rem 2rem;
-            border-radius: 32px;
-            box-shadow: 0 24px 60px rgba(0, 0, 0, 0.8);
-            width: 92%;
-            max-width: 440px;
-            animation: scaleIn 0.6s var(--spring);
+        .app-container {
+            height: 100dvh;
+            max-width: 650px;
+            margin: 0 auto;
+            padding: env(safe-area-inset-top) 24px calc(env(safe-area-inset-bottom) + 16px) 24px;
             display: flex;
             flex-direction: column;
-            gap: 24px;
+            justify-content: space-between;
+            transition: transform 0.5s var(--bezier), filter 0.5s var(--bezier);
+        }
+
+        .app-container.backgrounded {
+            transform: scale(0.96);
+            filter: blur(8px);
+            pointer-events: none;
         }
 
         /* --- CABECERA --- */
-        .header {
-            text-align: center;
-            margin-bottom: 8px;
-        }
-        .header h1 { 
-            font-size: 1.5rem; 
-            font-weight: 600; 
-            letter-spacing: -0.02em; 
-            display: flex; 
-            align-items: center; 
-            justify-content: center; 
-            gap: 10px; 
-        }
-        .header p {
-            font-size: 0.85rem;
-            color: var(--muted);
-            margin-top: 4px;
+        header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 24px 0 16px 0;
+            border-bottom: 1px solid var(--glass-border);
         }
 
-        /* --- GRUPOS DE INPUT GLASS --- */
+        .header-brand {
+            display: flex;
+            align-items: center;
+            gap: 14px;
+        }
+
+        .app-icon-badge {
+            width: 42px;
+            height: 42px;
+            border-radius: 12px;
+            background: radial-gradient(circle at center, rgba(255,255,255,0.06) 0%, rgba(255,255,255,0) 100%);
+            border: 1px solid var(--glass-border);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.5);
+        }
+
+        .header-title-group h1 {
+            font-size: 1.1rem;
+            font-weight: 600;
+            letter-spacing: -0.01em;
+        }
+
+        .header-title-group p {
+            font-size: 0.8rem;
+            color: var(--text-muted);
+        }
+
+        /* --- CONTENIDO PRINCIPAL Y ACCIONES --- */
+        .main-content {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+            padding: 24px 0;
+            overflow-y: auto;
+            scrollbar-width: none;
+        }
+        .main-content::-webkit-scrollbar { display: none; }
+
+        .workspace-grid {
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+        }
+
+        /* --- TARJETAS E INPUTS ESTILO GLASS --- */
+        .glass-panel {
+            background: var(--glass);
+            backdrop-filter: blur(var(--blur-val));
+            -webkit-backdrop-filter: blur(var(--blur-val));
+            border: 1px solid var(--glass-border);
+            border-radius: 24px;
+            padding: 24px;
+            display: flex;
+            flex-direction: column;
+            gap: 16px;
+            box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.37);
+        }
+
         .input-block {
             display: flex;
             flex-direction: column;
@@ -83,80 +143,70 @@
         }
 
         .input-block label {
-            font-size: 0.8rem;
+            font-size: 0.75rem;
             text-transform: uppercase;
-            letter-spacing: 0.08em;
-            color: var(--muted);
-            font-weight: 500;
+            letter-spacing: 0.05em;
+            color: var(--text-muted);
+            font-weight: 600;
             padding-left: 4px;
         }
 
-        .input-glass {
+        .input-glass-container {
             display: flex;
             align-items: center;
-            background: rgba(255, 255, 255, 0.03);
-            border: 1px solid var(--border);
-            border-radius: 20px;
-            padding: 12px 18px;
+            background: rgba(255, 255, 255, 0.02);
+            border: 1px solid var(--glass-border);
+            border-radius: 16px;
+            padding: 14px 18px;
             gap: 12px;
-            transition: all 0.3s var(--gentle);
-        }
-        
-        .input-glass:focus-within { 
-            border-color: var(--accent); 
-            background: rgba(108, 92, 231, 0.05);
-            box-shadow: 0 0 20px var(--accent-glow);
+            transition: all 0.4s var(--bezier);
         }
 
-        .input-glass input {
+        .input-glass-container:focus-within {
+            border-color: rgba(255, 255, 255, 0.25);
+            background: rgba(255, 255, 255, 0.05);
+            box-shadow: 0 0 24px var(--accent-glow);
+        }
+
+        .input-glass-container input {
             background: transparent;
             border: none;
-            color: var(--text);
-            font-size: 1.3rem;
+            color: var(--text-main);
+            font-size: 1.2rem;
             font-family: inherit;
-            font-weight: 600;
+            font-weight: 500;
             width: 100%;
             outline: none;
         }
+        .input-glass-container input::placeholder { color: #444; }
+        .input-glass-container input::-webkit-outer-spin-button,
+        .input-glass-container input::-webkit-inner-spin-button { -webkit-appearance: none; margin: 0; }
 
-        .input-glass input::placeholder {
-            color: #444;
-        }
-
-        /* Ocultar flechas nativas de los inputs numéricos */
-        .input-glass input::-webkit-outer-spin-button,
-        .input-glass input::-webkit-inner-spin-button {
-            -webkit-appearance: none;
-            margin: 0;
-        }
-
-        .input-glass select {
-            background: var(--bg);
-            border: 1px solid var(--border);
-            color: var(--text);
+        .input-glass-container select {
+            background: var(--surface);
+            border: 1px solid var(--glass-border);
+            color: var(--text-main);
             font-family: inherit;
-            font-size: 0.9rem;
+            font-size: 0.85rem;
             font-weight: 500;
             padding: 6px 12px;
-            border-radius: 12px;
+            border-radius: 10px;
             outline: none;
             cursor: pointer;
             transition: background 0.2s;
         }
-        .input-glass select:hover {
-            background: var(--surface-hover);
-        }
+        .input-glass-container select:hover { background: var(--surface-hover); }
 
-        /* --- HERO RESULTADO --- */
+        /* --- HERO DE RESULTADOS --- */
         .result-hero {
             background: linear-gradient(180deg, rgba(255,255,255,0.02) 0%, rgba(255,255,255,0) 100%);
-            border: 1px solid var(--border);
+            border: 1px solid var(--glass-border);
             border-radius: 24px;
-            padding: 24px;
+            padding: 28px;
             text-align: center;
             display: flex;
             flex-direction: column;
-            gap: 8px;
+            gap: 10px;
             position: relative;
             overflow: hidden;
         }
@@ -165,170 +215,506 @@
             content: '';
             position: absolute;
             top: 0; left: 50%; transform: translateX(-50%);
-            width: 80px; height: 1px;
-            background: linear-gradient(90deg, transparent, var(--accent), transparent);
+            width: 120px; height: 1px;
+            background: linear-gradient(90deg, transparent, var(--text-main), transparent);
         }
 
         .result-title {
-            font-size: 0.8rem;
+            font-size: 0.75rem;
             text-transform: uppercase;
-            letter-spacing: 0.1em;
-            color: var(--muted);
+            letter-spacing: 0.08em;
+            color: var(--text-muted);
+            font-weight: 500;
         }
 
         .huge-time {
-            font-size: 2.5rem;
-            font-weight: 700;
+            font-size: 2.8rem;
+            font-weight: 600;
             line-height: 1.1;
-            letter-spacing: -0.03em;
-            color: var(--text);
+            letter-spacing: -0.02em;
+            color: var(--text-main);
             font-variant-numeric: tabular-nums;
-            min-height: 44px;
+            min-height: 50px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: text-shadow 0.3s var(--bezier);
+        }
+
+        .huge-time.active {
+            text-shadow: 0 0 30px rgba(255, 255, 255, 0.6);
+            animation: pulseUp 0.4s var(--spring);
+        }
+
+        /* --- BOTONES --- */
+        .btn-prime {
+            background: var(--text-main);
+            color: var(--bg);
+            border: none;
+            padding: 14px;
+            border-radius: 16px;
+            font-family: inherit;
+            font-size: 0.95rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: opacity 0.2s, transform 0.3s var(--spring);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+        }
+        .btn-prime:active { transform: scale(0.98); }
+
+        .btn-secondary {
+            background: rgba(255,255,255,0.03);
+            border: 1px solid var(--glass-border);
+            color: var(--text-muted);
+            padding: 12px;
+            border-radius: 14px;
+            font-family: inherit;
+            font-size: 0.85rem;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.2s var(--bezier);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            margin-top: 10px;
+        }
+        .btn-secondary:hover {
+            background: rgba(255,255,255,0.06);
+            color: var(--text-main);
+        }
+
+        /* --- MODAL CAPA DE HISTORIAL (HISTORY API) --- */
+        .modal-overlay {
+            position: fixed;
+            top: 0; left: 0; width: 100vw; height: 100vh;
+            background: rgba(0,0,0,0.7);
+            z-index: 1000;
+            display: flex;
+            justify-content: flex-end;
+            opacity: 0;
+            pointer-events: none;
+            transition: opacity 0.4s var(--bezier);
+        }
+
+        .modal-overlay.active {
+            opacity: 1;
+            pointer-events: auto;
+        }
+
+        .modal-sheet {
+            width: 100%;
+            max-width: 480px;
+            height: 100%;
+            background: #0b0b0b;
+            border-left: 1px solid var(--glass-border);
+            padding: calc(env(safe-area-inset-top) + 24px) 24px 24px 24px;
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+            transform: translateX(100%);
+            transition: transform 0.4s var(--bezier);
+        }
+
+        .modal-overlay.active .modal-sheet {
+            transform: translateX(0);
+        }
+
+        .modal-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            border-bottom: 1px solid var(--glass-border);
+            padding-bottom: 14px;
+        }
+
+        .modal-header h2 {
+            font-size: 1.2rem;
+            font-weight: 600;
+        }
+
+        .close-modal-btn {
+            background: rgba(255,255,255,0.04);
+            border: 1px solid var(--glass-border);
+            width: 36px;
+            height: 36px;
+            border-radius: 100px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: var(--text-main);
+            cursor: pointer;
+            transition: background 0.2s;
+        }
+        .close-modal-btn:hover { background: rgba(255,255,255,0.08); }
+
+        .history-list {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+            overflow-y: auto;
+            flex: 1;
+            scrollbar-width: none;
+        }
+        .history-list::-webkit-scrollbar { display: none; }
+
+        .history-card {
+            background: rgba(255, 255, 255, 0.01);
+            border: 1px solid var(--glass-border);
+            padding: 14px 18px;
+            border-radius: 14px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            animation: slideInRow 0.3s var(--bezier);
+        }
+
+        .history-info {
+            display: flex;
+            flex-direction: column;
+            gap: 2px;
+        }
+
+        .history-primary {
+            font-size: 0.9rem;
+            font-weight: 500;
+        }
+
+        .history-secondary {
+            font-size: 0.75rem;
+            color: var(--text-muted);
+        }
+
+        .history-right {
+            display: flex;
+            align-items: center;
+            gap: 14px;
+        }
+
+        .history-value {
+            font-size: 1rem;
+            font-weight: 600;
+            font-variant-numeric: tabular-nums;
+        }
+
+        .delete-btn {
+            background: transparent;
+            border: none;
+            color: var(--text-muted);
+            cursor: pointer;
+            padding: 4px;
+            border-radius: 6px;
+            transition: all 0.2s;
             display: flex;
             align-items: center;
             justify-content: center;
         }
 
-        .huge-time.active {
-            color: var(--accent);
-            text-shadow: 0 0 25px var(--accent-glow);
-            animation: pulseUp 0.4s var(--spring);
+        .delete-btn:hover {
+            color: var(--accent-danger);
+            background: rgba(255, 69, 58, 0.1);
         }
 
         /* --- ANIMACIONES --- */
-        @keyframes scaleIn {
-            from { opacity: 0; transform: scale(0.95) translateY(15px); }
-            to { opacity: 1; transform: scale(1) translateY(0); }
-        }
-
         @keyframes pulseUp {
-            0% { transform: scale(0.96); }
-            50% { transform: scale(1.02); }
+            0% { transform: scale(0.97); }
+            50% { transform: scale(1.01); }
             100% { transform: scale(1); }
         }
 
-        @media (max-width: 480px) {
-            .calculator-card {
-                padding: 1.8rem 1.4rem;
-                gap: 20px;
-            }
-            .huge-time { font-size: 2rem; }
+        @keyframes error-shake {
+            0%, 100% { transform: translateX(0); }
+            20%, 60% { transform: translateX(-6px); }
+            40%, 80% { transform: translateX(6px); }
+        }
+
+        @keyframes slideInRow {
+            from { opacity: 0; transform: translateY(8px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .error-shake {
+            animation: error-shake 0.3s ease-in-out;
+            border-color: var(--accent-danger) !important;
+            box-shadow: 0 0 12px rgba(255, 69, 58, 0.2) !important;
         }
     </style>
 </head>
 <body>
 
-    <main class="calculator-card">
-        <header class="header">
-            <h1><i data-lucide="download-cloud" style="color: var(--accent)"></i> SpeedFlow</h1>
-            <p>Cálculo exacto de transferencia de datos</p>
+    <div class="app-container" id="main-view">
+        <header>
+            <div class="header-brand">
+                <div class="app-icon-badge">
+                    <i data-lucide="CloudDownload" size="20" style="color: var(--text-main);"></i>
+                </div>
+                <div class="header-title-group">
+                    <h1>SpeedFlow Pro</h1>
+                    <p>Cálculo exacto de transferencia</p>
+                </div>
+            </div>
         </header>
 
-        <div class="input-block">
-            <label>Tamaño del Archivo</label>
-            <div class="input-glass">
-                <i data-lucide="hard-drive" size="20" style="color: var(--muted)"></i>
-                <input type="number" id="size" placeholder="Ej: 50" inputmode="decimal" />
-                <select id="sizeUnit">
-                    <option value="MB">MB</option>
-                    <option value="GB" selected>GB</option>
-                    <option value="TB">TB</option>
-                </select>
-            </div>
-        </div>
+        <main class="main-content">
+            <div class="workspace-grid">
+                <div class="glass-panel">
+                    <div class="input-block" id="block-size">
+                        <label>Tamaño del Archivo</label>
+                        <div class="input-glass-container">
+                            <i data-lucide="hard-drive" size="18" style="color: var(--text-muted)"></i>
+                            <input type="number" id="app-size" placeholder="Ej: 50" inputmode="decimal">
+                            <select id="app-size-unit">
+                                <option value="MB">MB</option>
+                                <option value="GB" selected>GB</option>
+                                <option value="TB">TB</option>
+                            </select>
+                        </div>
+                    </div>
 
-        <div class="input-block">
-            <label>Velocidad de Red</label>
-            <div class="input-glass">
-                <i data-lucide="zap" size="20" style="color: var(--muted)"></i>
-                <input type="number" id="size" placeholder="Ej: 300" id="speed" placeholder="Ej: 100" inputmode="decimal" />
-                <select id="speedUnit">
-                    <option value="Mbps" selected>Mbps</option>
-                    <option value="Gbps">Gbps</option>
-                </select>
-            </div>
-        </div>
+                    <div class="input-block" id="block-speed">
+                        <label>Velocidad de Internet</label>
+                        <div class="input-glass-container">
+                            <i data-lucide="zap" size="18" style="color: var(--text-muted)"></i>
+                            <input type="number" id="app-speed" placeholder="Ej: 300" inputmode="decimal">
+                            <select id="app-speed-unit">
+                                <option value="Mbps" selected>Mbps</option>
+                                <option value="Gbps">Gbps</option>
+                            </select>
+                        </div>
+                    </div>
+                    
+                    <button class="btn-prime" onclick="saveCalculationRecord()">
+                        <i data-lucide="bookmark" size="16"></i>Guardar en Registro
+                    </button>
+                </div>
 
-        <div class="result-hero">
-            <div class="result-title">Tiempo Estimado de Espera</div>
-            <div class="huge-time" id="time">-</div>
+                <div class="result-hero">
+                    <div class="result-title">Tiempo Estimado de Espera</div>
+                    <div class="huge-time" id="app-time-result">-</div>
+                </div>
+            </div>
+
+            <button class="btn-secondary" onclick="openModal('history-modal')">
+                <i data-lucide="history" size="16"></i>Ver Historial de Cambios
+            </button>
+        </main>
+    </div>
+
+    <div class="modal-overlay" id="history-modal" onclick="if(event.target === this) closeActiveModal('history-modal')">
+        <div class="modal-sheet">
+            <div class="modal-header">
+                <h2>Historial de Cálculos Realizados</h2>
+                <button class="close-modal-btn" onclick="closeActiveModal('history-modal')">
+                    <i data-lucide="x" size="18"></i>
+                </button>
+            </div>
+
+            <div class="history-list" id="history-render-container">
+                </div>
         </div>
-    </main>
+    </div>
 
     <script>
-        // Inicializar iconos de Lucide
-        lucide.createIcons();
+        // --- CENTRALIZACIÓN DE ESTADO ---
+        let appData = {
+            records: []
+        };
 
-        // Enlazar los elementos mapeados correctamente
-        const inputs = document.querySelectorAll('.input-glass input');
-        const selects = document.querySelectorAll('.input-glass select');
-        
-        // El segundo input tiene un error de id duplicado heredado, lo arreglamos dinámicamente o por asignación fija:
-        const elSize = inputs[0];
-        const elSpeed = inputs[1]; 
-        const elSizeUnit = selects[0];
-        const elSpeedUnit = selects[1];
-        const elTime = document.getElementById('time');
+        let activeModalsStack = [];
 
-        function calculate() {
-            const size = parseFloat(elSize.value);
-            const speed = parseFloat(elSpeed.value);
-            const sizeUnit = elSizeUnit.value;
-            const speedUnit = elSpeedUnit.value;
+        window.onload = () => {
+            const saved = localStorage.getItem('speedflow_simple_data');
+            if (saved) {
+                try {
+                    appData = JSON.parse(saved);
+                } catch(e) {
+                    appData.records = [];
+                }
+            }
+            attachRealtimeEvents();
+            renderHistoryRows();
+            lucide.createIcons();
+        };
 
-            if (!speed || !size || speed <= 0 || size <= 0) {
-                elTime.textContent = "-";
-                elTime.classList.remove('active');
+        function saveData() {
+            localStorage.setItem('speedflow_simple_data', JSON.stringify(appData));
+        }
+
+        // --- ENLACE REACTIVO EN TIEMPO REAL ---
+        function attachRealtimeEvents() {
+            const sizeInput = document.getElementById('app-size');
+            const speedInput = document.getElementById('app-speed');
+            const sizeUnit = document.getElementById('app-size-unit');
+            const speedUnit = document.getElementById('app-speed-unit');
+
+            [sizeInput, speedInput].forEach(inp => inp.addEventListener('input', executeCalculation));
+            [sizeUnit, speedUnit].forEach(sel => sel.addEventListener('change', executeCalculation));
+        }
+
+        // --- CÁLCULO MATEMÁTICO ---
+        function executeCalculation() {
+            const size = parseFloat(document.getElementById('app-size').value);
+            const speed = parseFloat(document.getElementById('app-speed').value);
+            const sizeUnit = document.getElementById('app-size-unit').value;
+            const speedUnit = document.getElementById('app-speed-unit').value;
+            const resultDisplay = document.getElementById('app-time-result');
+
+            if (!size || !speed || size <= 0 || speed <= 0) {
+                resultDisplay.textContent = "-";
+                resultDisplay.classList.remove('active');
                 return;
             }
 
-            // Convertir tamaño de almacenamiento a Megabits (Unidad de transmisión de red)
-            let sizeInMegabits;
-            switch (sizeUnit) {
-                case 'MB':
-                    sizeInMegabits = size * 8;
-                    break;
-                case 'GB':
-                    sizeInMegabits = size * 8000;
-                    break;
-                case 'TB':
-                    sizeInMegabits = size * 8000000;
-                    break;
+            let sizeInMegabits = 0;
+            if (sizeUnit === 'MB') sizeInMegabits = size * 8;
+            else if (sizeUnit === 'GB') sizeInMegabits = size * 8192;
+            else if (sizeUnit === 'TB') sizeInMegabits = size * 8388608;
+
+            const speedInMbps = speedUnit === 'Gbps' ? speed * 1024 : speed;
+            const totalSeconds = sizeInMegabits / speedInMbps;
+
+            if (totalSeconds < 1) {
+                displayCalculatedResult(resultDisplay, "Menos de 1s");
+                return;
             }
 
-            // Convertir velocidad a Mbps si es necesario
-            const speedInMbps = speedUnit === 'Gbps' ? speed * 1000 : speed;
+            const hours = Math.floor(totalSeconds / 3600);
+            const minutes = Math.floor((totalSeconds % 3600) / 60);
+            const seconds = Math.floor(totalSeconds % 60);
 
-            // Operación matemática del tiempo de descarga
-            const timeInSeconds = sizeInMegabits / speedInMbps;
+            let segments = [];
+            if (hours > 0) segments.push(`${hours}h`);
+            if (minutes > 0) segments.push(`${minutes}m`);
+            if (seconds > 0 || segments.length === 0) segments.push(`${seconds}s`);
 
-            // Formatear a horas, minutos y segundos estándares
-            const hours = Math.floor(timeInSeconds / 3600);
-            const minutes = Math.floor((timeInSeconds % 3600) / 60);
-            const seconds = Math.floor(timeInSeconds % 60);
+            displayCalculatedResult(resultDisplay, segments.join(' '));
+        }
 
-            const formattedTime = [];
-            if (hours > 0) formattedTime.push(`${hours}h`);
-            if (minutes > 0) formattedTime.push(`${minutes}m`);
-            if (seconds > 0) formattedTime.push(`${seconds}s`);
-
-            const resultString = formattedTime.join(' ') || 'Menos de 1s';
-
-            // Insertar resultado y aplicar micro-animación de refresco
-            if (elTime.textContent !== resultString) {
-                elTime.textContent = resultString;
-                elTime.classList.add('active');
+        function displayCalculatedResult(element, text) {
+            if (element.textContent !== text) {
+                element.textContent = text;
+                element.classList.add('active');
                 
-                // Reiniciar animación reactiva
-                elTime.style.animation = 'none';
-                void elTime.offsetWidth; // Forzar reflow de hardware
-                elTime.style.animation = 'pulseUp 0.4s var(--spring)';
+                element.style.animation = 'none';
+                void element.offsetWidth; 
+                element.style.animation = 'pulseUp 0.4s var(--spring)';
             }
         }
 
-        // Eventos nativos en tiempo real reactivo sin botones pesados
-        [elSize, elSpeed].forEach(input => input.addEventListener('input', calculate));
-        [elSizeUnit, elSpeedUnit].forEach(select => select.addEventListener('change', calculate));
+        // --- RENDERIZADO EXCLUSIVO DEL HISTORIAL REAL ---
+        function renderHistoryRows() {
+            const container = document.getElementById('history-render-container');
+            container.innerHTML = '';
+
+            if (appData.records.length === 0) {
+                container.innerHTML = `<div style="text-align: center; color: var(--text-muted); font-size: 0.9rem; padding: 40px 0;">No hay registros guardados todavía</div>`;
+                return;
+            }
+
+            appData.records.forEach(record => {
+                const row = document.createElement('div');
+                row.className = 'history-card';
+                row.innerHTML = `
+                    <div class="history-info">
+                        <div class="history-primary">${record.size} ${record.sizeUnit} a ${record.speed} ${record.speedUnit}</div>
+                        <div class="history-secondary">${record.timestamp}</div>
+                    </div>
+                    <div class="history-right">
+                        <div class="history-value">${record.result}</div>
+                        <button class="delete-btn" onclick="deleteRecord(${record.id})">
+                            <i data-lucide="trash-2" size="15"></i>
+                        </button>
+                    </div>
+                `;
+                container.appendChild(row);
+            });
+        }
+
+        // --- PERSISTENCIA DE REGISTROS REALES ---
+        function saveCalculationRecord() {
+            const sizeInput = document.getElementById('app-size');
+            const speedInput = document.getElementById('app-speed');
+            const resultDisplay = document.getElementById('app-time-result');
+
+            let hasError = false;
+
+            if (!sizeInput.value || parseFloat(sizeInput.value) <= 0) {
+                triggerShakeError('block-size');
+                hasError = true;
+            }
+            if (!speedInput.value || parseFloat(speedInput.value) <= 0) {
+                triggerShakeError('block-speed');
+                hasError = true;
+            }
+
+            if (hasError) return;
+
+            const now = new Date();
+            const timeString = now.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+
+            const newRecord = {
+                id: Date.now(),
+                size: parseFloat(sizeInput.value),
+                sizeUnit: document.getElementById('app-size-unit').value,
+                speed: parseFloat(speedInput.value),
+                speedUnit: document.getElementById('app-speed-unit').value,
+                result: resultDisplay.textContent,
+                timestamp: `Hoy a las ${timeString}`
+            };
+
+            appData.records.unshift(newRecord);
+            saveData();
+            renderHistoryRows();
+            lucide.createIcons();
+            
+            // Abre automáticamente el modal para dar feedback visual de guardado exitoso
+            openModal('history-modal');
+        }
+
+        function deleteRecord(id) {
+            appData.records = appData.records.filter(r => r.id !== id);
+            saveData();
+            renderHistoryRows();
+            lucide.createIcons();
+        }
+
+        // --- MANEJO DE FEEDBACK DE ERROR ---
+        function triggerShakeError(elementId) {
+            const target = document.getElementById(elementId);
+            target.classList.add('error-shake');
+            setTimeout(() => {
+                target.classList.remove('error-shake');
+            }, 300);
+        }
+
+        // --- NAVEGACIÓN MECÁNICA HISTORY API ---
+        function openModal(modalId) {
+            document.getElementById('main-view').classList.add('backgrounded');
+            document.getElementById(modalId).classList.add('active');
+            
+            activeModalsStack.push(modalId);
+            window.history.pushState({ modalId: modalId }, "");
+            lucide.createIcons();
+        }
+
+        function closeActiveModal(modalId) {
+            if (activeModalsStack.includes(modalId)) {
+                window.history.back();
+            }
+        }
+
+        window.addEventListener('popstate', () => {
+            if (activeModalsStack.length > 0) {
+                const topModalId = activeModalsStack.pop();
+                document.getElementById(topModalId).classList.remove('active');
+                if (activeModalsStack.length === 0) {
+                    document.getElementById('main-view').classList.remove('backgrounded');
+                }
+            }
+        });
     </script>
 </body>
 </html>
