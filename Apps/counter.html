@@ -1,0 +1,889 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+    <title>Neo-Counter Pure Dark</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@200;300;400;500;600;700&display=swap" rel="stylesheet">
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <style>
+        :root {
+            --bg: #000000;
+            --surface: #121212;
+            --surface-hover: #1c1c1e;
+            
+            --glass: rgba(15, 15, 15, 0.4);
+            --glass-border: rgba(255, 255, 255, 0.08);
+            --blur-val: 30px;
+
+            --text-main: #FFFFFF;
+            --text-muted: #8E8E93;
+
+            --accent-danger: #FF453A;
+            --accent-success: #34C759;
+
+            --bezier: cubic-bezier(0.16, 1, 0.3, 1);
+            --spring: cubic-bezier(0.34, 1.56, 0.64, 1);
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            user-select: none;
+            -webkit-user-select: none;
+            -webkit-tap-highlight-color: transparent;
+        }
+
+        body {
+            background-color: var(--bg);
+            color: var(--text-main);
+            font-family: 'Outfit', sans-serif;
+            overflow: hidden;
+            height: 100vh;
+            height: 100dvh;
+        }
+
+        .app-container {
+            display: flex;
+            flex-direction: column;
+            height: 100dvh;
+            max-width: 900px;
+            margin: 0 auto;
+            padding: env(safe-area-inset-top) 24px calc(env(safe-area-inset-bottom) + 16px) 24px;
+            transition: transform 0.5s var(--bezier), filter 0.5s var(--bezier);
+        }
+
+        .app-container.backgrounded {
+            transform: scale(0.96);
+            filter: blur(10px);
+            pointer-events: none;
+        }
+
+        header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 20px 0 10px 0;
+            border-bottom: 1px solid var(--glass-border);
+        }
+
+        .header-left {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .app-icon-badge {
+            width: 40px;
+            height: 40px;
+            border-radius: 12px;
+            background: radial-gradient(circle at center, rgba(255,255,255,0.15) 0%, rgba(0,0,0,0) 100%), var(--surface);
+            border: 1px solid var(--glass-border);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.5);
+        }
+
+        .app-title-block h1 {
+            font-size: 18px;
+            font-weight: 600;
+            letter-spacing: -0.5px;
+        }
+
+        .counter-meta {
+            font-size: 12px;
+            color: var(--text-muted);
+            font-variant-numeric: tabular-nums;
+            transition: transform 0.1s var(--spring);
+        }
+
+        .counter-meta.pulse {
+            transform: scale(1.05);
+            color: var(--text-main);
+        }
+
+        .folders-scroll-area {
+            display: flex;
+            gap: 10px;
+            overflow-x: auto;
+            padding: 16px 0;
+            scrollbar-width: none;
+            -webkit-overflow-scrolling: touch;
+        }
+
+        .folders-scroll-area::-webkit-scrollbar { 
+            display: none; 
+        }
+
+        .pill {
+            background: var(--glass);
+            border: 1px solid var(--glass-border);
+            padding: 8px 16px;
+            border-radius: 100px;
+            font-size: 14px;
+            font-weight: 500;
+            color: var(--text-muted);
+            cursor: pointer;
+            white-space: nowrap;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            transition: all 0.3s var(--bezier);
+        }
+
+        .pill.active {
+            background: var(--text-main);
+            color: var(--bg);
+            border-color: var(--text-main);
+        }
+
+        .pill i {
+            width: 14px;
+            height: 14px;
+        }
+
+        .main-content {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+            position: relative;
+            padding-bottom: 100px;
+        }
+
+        .tap-zone {
+            flex: 1;
+            background: radial-gradient(circle at center, rgba(255,255,255,0.02) 0%, rgba(0,0,0,0) 70%);
+            border-radius: 24px;
+            border: 1px dashed rgba(255, 255, 255, 0.05);
+            margin: 10px 0;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            position: relative;
+            overflow: hidden;
+            transition: border-color 0.3s var(--bezier);
+        }
+
+        .tap-zone:active {
+            border-color: rgba(255, 255, 255, 0.15);
+        }
+
+        .tap-instruction {
+            color: var(--text-muted);
+            font-size: 14px;
+            font-weight: 400;
+            pointer-events: none;
+            text-align: center;
+            line-height: 1.6;
+        }
+
+        .counter-display-container {
+            height: 25dvh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            position: relative;
+        }
+
+        .counter-value {
+            font-size: clamp(80px, 18dvh, 160px);
+            font-weight: 200;
+            letter-spacing: -4px;
+            font-variant-numeric: tabular-nums;
+            line-height: 1;
+            transition: transform 0.1s var(--spring);
+            will-change: transform;
+        }
+
+        .counter-value.bump {
+            transform: scale(1.08);
+        }
+
+        .float-search-container {
+            position: fixed;
+            bottom: calc(env(safe-area-inset-bottom) + 24px);
+            left: 50%;
+            transform: translateX(-50%);
+            width: calc(100% - 48px);
+            max-width: 400px;
+            z-index: 100;
+            display: flex;
+            justify-content: center;
+        }
+
+        .search-bar-glass {
+            width: 56px;
+            height: 56px;
+            background: rgba(20, 20, 20, 0.75);
+            backdrop-filter: blur(var(--blur-val));
+            -webkit-backdrop-filter: blur(var(--blur-val));
+            border: 1px solid var(--glass-border);
+            border-radius: 100px;
+            display: flex;
+            align-items: center;
+            padding: 0 16px;
+            overflow: hidden;
+            transition: width 0.4s var(--bezier), background-color 0.3s var(--bezier);
+            box-shadow: 0 12px 40px rgba(0,0,0,0.7);
+        }
+
+        .search-bar-glass.expanded {
+            width: 100%;
+            background: rgba(28, 28, 30, 0.9);
+        }
+
+        .search-icon-btn {
+            background: none;
+            border: none;
+            color: var(--text-muted);
+            cursor: pointer;
+            width: 24px;
+            height: 24px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: color 0.3s var(--bezier);
+        }
+
+        .search-bar-glass.expanded .search-icon-btn {
+            color: var(--text-main);
+        }
+
+        .search-input {
+            flex: 1;
+            background: none;
+            border: none;
+            outline: none;
+            color: var(--text-main);
+            font-family: 'Outfit', sans-serif;
+            font-size: 16px;
+            margin-left: 12px;
+            opacity: 0;
+            pointer-events: none;
+            transition: opacity 0.2s var(--bezier);
+        }
+
+        .search-bar-glass.expanded .search-input {
+            opacity: 1;
+            pointer-events: auto;
+        }
+
+        .clear-search-btn {
+            background: none;
+            border: none;
+            color: var(--text-muted);
+            cursor: pointer;
+            opacity: 0;
+            pointer-events: none;
+            transition: opacity 0.2s var(--bezier);
+        }
+
+        .search-bar-glass.expanded .clear-search-btn.visible {
+            opacity: 1;
+            pointer-events: auto;
+        }
+
+        .modal-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100vw;
+            height: 100vh;
+            background: rgba(0,0,0,0.4);
+            backdrop-filter: blur(5px);
+            -webkit-backdrop-filter: blur(5px);
+            z-index: 200;
+            opacity: 0;
+            pointer-events: none;
+            transition: opacity 0.4s var(--bezier);
+            display: flex;
+            align-items: flex-end;
+            justify-content: center;
+        }
+
+        .modal-overlay.active {
+            opacity: 1;
+            pointer-events: auto;
+        }
+
+        .modal-sheet {
+            width: 100%;
+            max-width: 500px;
+            background: var(--surface);
+            border-top: 1px solid var(--glass-border);
+            border-radius: 24px 24px 0 0;
+            padding: 24px;
+            padding-bottom: calc(env(safe-area-inset-bottom) + 24px);
+            transform: translateY(100%);
+            transition: transform 0.4s var(--bezier);
+        }
+
+        .modal-overlay.active .modal-sheet {
+            transform: translateY(0);
+        }
+
+        .modal-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 20px;
+        }
+
+        .modal-header h2 {
+            font-size: 20px;
+            font-weight: 600;
+        }
+
+        .close-modal-btn {
+            background: var(--glass);
+            border: 1px solid var(--glass-border);
+            width: 32px;
+            height: 32px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: var(--text-main);
+            cursor: pointer;
+        }
+
+        .form-group {
+            margin-bottom: 16px;
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+        }
+
+        .form-group label {
+            font-size: 13px;
+            color: var(--text-muted);
+            font-weight: 500;
+        }
+
+        .input-control {
+            background: rgba(255,255,255,0.04);
+            border: 1px solid var(--glass-border);
+            border-radius: 12px;
+            padding: 12px 16px;
+            color: var(--text-main);
+            font-family: 'Outfit', sans-serif;
+            font-size: 15px;
+            outline: none;
+            transition: border-color 0.3s var(--bezier);
+        }
+
+        .input-control:focus {
+            border-color: rgba(255,255,255,0.2);
+        }
+
+        .input-control.error-shake {
+            border-color: var(--accent-danger) !important;
+            animation: shake 0.3s linear;
+        }
+
+        @keyframes shake {
+            0%, 100% { transform: translateX(0); }
+            20%, 60% { transform: translateX(-6px); }
+            40%, 80% { transform: translateX(6px); }
+        }
+
+        .preview-box {
+            background: rgba(255,255,255,0.02);
+            border: 1px dashed var(--glass-border);
+            border-radius: 12px;
+            padding: 16px;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            margin-top: 8px;
+        }
+
+        .preview-badge {
+            width: 36px;
+            height: 36px;
+            border-radius: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .action-btn {
+            background: var(--text-main);
+            color: var(--bg);
+            border: none;
+            padding: 14px;
+            border-radius: 12px;
+            font-size: 15px;
+            font-weight: 600;
+            cursor: pointer;
+            width: 100%;
+            margin-top: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            transition: opacity 0.2s var(--bezier);
+        }
+
+        .action-btn:active {
+            opacity: 0.8;
+        }
+
+        .action-btn.secondary {
+            background: transparent;
+            color: var(--accent-danger);
+            border: 1px solid rgba(255, 69, 58, 0.2);
+        }
+
+        .ripple {
+            position: absolute;
+            background: rgba(255, 255, 255, 0.08);
+            border-radius: 50%;
+            transform: scale(0);
+            animation: ripple-effect 0.6s ease-out;
+            pointer-events: none;
+        }
+
+        @keyframes ripple-effect {
+            to {
+                transform: scale(4);
+                opacity: 0;
+            }
+        }
+
+        @media (min-width: 600px) {
+            .main-content {
+                flex-direction: row;
+                align-items: center;
+                gap: 40px;
+                padding-bottom: 0;
+            }
+            .tap-zone {
+                height: 100%;
+            }
+            .counter-display-container {
+                height: auto;
+                flex: 1;
+                justify-content: flex-end;
+            }
+            .counter-value {
+                font-size: clamp(100px, 25vw, 220px);
+            }
+        }
+    </style>
+</head>
+<body>
+
+    <div class="app-container" id="main-view">
+        <header>
+            <div class="header-left">
+                <div class="app-icon-badge">
+                    <i data-lucide="layers" size="20" style="color: var(--text-main);"></i>
+                </div>
+                <div class="app-title-block">
+                    <h1 id="current-folder-title">Contador</h1>
+                    <div class="counter-meta" id="total-stats">Total: 0</div>
+                </div>
+            </div>
+            <button class="close-modal-btn" id="config-folder-btn" style="border-radius: 10px;">
+                <i data-lucide="sliders" size="16"></i>
+            </button>
+        </header>
+
+        <div class="folders-scroll-area" id="folders-container">
+            </div>
+
+        <main class="main-content">
+            <div class="tap-zone" id="click-surface">
+                <div class="tap-instruction">
+                    Toca aquí, pulsa <b style="color:var(--text-main)">Espacio</b> o las <b style="color:var(--text-main)">Flechas</b><br>
+                    <span style="font-size: 12px; color: var(--text-muted);">Shift + Click para restar</span>
+                </div>
+            </div>
+
+            <div class="counter-display-container">
+                <div class="counter-value" id="counter-num">0</div>
+            </div>
+        </main>
+    </div>
+
+    <div class="float-search-container">
+        <div class="search-bar-glass" id="search-bar">
+            <button class="search-icon-btn" id="search-trigger-btn">
+                <i data-lucide="search" size="20"></i>
+            </button>
+            <input type="text" class="search-input" id="search-field" placeholder="Buscar contador..." autocomplete="off">
+            <button class="clear-search-btn" id="search-clear-btn">
+                <i data-lucide="x" size="18"></i>
+            </button>
+        </div>
+    </div>
+
+    <div class="modal-overlay" id="folder-modal">
+        <div class="modal-sheet">
+            <div class="modal-header">
+                <h2 id="modal-action-title">Configurar Contador</h2>
+                <button class="close-modal-btn" onclick="closeActiveModal('folder-modal')">
+                    <i data-lucide="x" size="16"></i>
+                </button>
+            </div>
+            <div class="form-group">
+                <label for="folder-name-input">Nombre del Contador</label>
+                <input type="text" id="folder-name-input" class="input-control" placeholder="Ej. Flexiones, Cafés..." maxlength="20">
+            </div>
+            <div class="form-group">
+                <label for="folder-icon-input">Icono Lucide (singular)</label>
+                <input type="text" id="folder-icon-input" class="input-control" placeholder="ruler, box, flame, coffee, Award...">
+            </div>
+            <div class="form-group">
+                <label>Previsualización</label>
+                <div class="preview-box">
+                    <div class="preview-badge" id="preview-badge-element" style="background: var(--surface-hover); border: 1px solid var(--glass-border);">
+                        <i id="preview-icon-element" data-lucide="box" size="18"></i>
+                    </div>
+                    <span id="preview-text-element" style="font-weight: 500;">Nuevo Contador</span>
+                </div>
+            </div>
+            <button class="action-btn" id="save-folder-btn">
+                <i data-lucide="check" size="18"></i> Guardar Cambios
+            </button>
+            <button class="action-btn secondary" id="delete-folder-btn" style="display: none;">
+                <i data-lucide="trash-2" size="18"></i> Eliminar de la lista
+            </button>
+        </div>
+    </div>
+
+    <script>
+        // Ecosistema de Datos Centralizado
+        let appData = {
+            activeFolderId: "default",
+            folders: [
+                { id: "default", name: "General", count: 0, icon: "box" },
+                { id: "gym", name: "Entrenamiento", count: 0, icon: "flame" },
+                { id: "water", name: "Agua", count: 0, icon: "droplet" }
+            ]
+        };
+
+        let activeModalsStack = [];
+        let searchQuery = "";
+
+        // Inicialización Segura
+        window.onload = () => {
+            const localData = localStorage.getItem("neo_counter_data");
+            if (localData) {
+                try {
+                    appData = JSON.parse(localData);
+                } catch(e) {
+                    // Fallback automático si el JSON está corrupto
+                    saveData();
+                }
+            } else {
+                saveData();
+            }
+            setupEventListeners();
+            renderApp();
+        };
+
+        function saveData() {
+            localStorage.setItem("neo_counter_data", JSON.stringify(appData));
+        }
+
+        // Historial y Gestión Ergonómica de Modales
+        function openModal(modalId, isEdit = false) {
+            document.getElementById('main-view').classList.add('backgrounded');
+            document.getElementById(modalId).classList.add('active');
+            
+            activeModalsStack.push(modalId);
+            window.history.pushState({ modalId: modalId }, "");
+
+            if(modalId === 'folder-modal') {
+                const currentFolder = appData.folders.find(f => f.id === appData.activeFolderId);
+                const nameInput = document.getElementById('folder-name-input');
+                const iconInput = document.getElementById('folder-icon-input');
+                const deleteBtn = document.getElementById('delete-folder-btn');
+                
+                if(isEdit) {
+                    document.getElementById('modal-action-title').innerText = "Editar Contador";
+                    nameInput.value = currentFolder.name;
+                    iconInput.value = currentFolder.icon;
+                    deleteBtn.style.display = appData.folders.length > 1 ? "flex" : "none";
+                } else {
+                    document.getElementById('modal-action-title').innerText = "Nuevo Contador";
+                    nameInput.value = "";
+                    iconInput.value = "activity";
+                    deleteBtn.style.display = "none";
+                }
+                updateFormPreview();
+            }
+        }
+
+        function closeActiveModal(modalId) {
+            if (activeModalsStack.includes(modalId)) {
+                window.history.back();
+            }
+        }
+
+        window.addEventListener('popstate', () => {
+            if (activeModalsStack.length > 0) {
+                const topModalId = activeModalsStack.pop();
+                document.getElementById(topModalId).classList.remove('active');
+                if (activeModalsStack.length === 0) {
+                    document.getElementById('main-view').classList.remove('backgrounded');
+                }
+            }
+        });
+
+        // Motor de Impacto Háptico
+        function triggerVibration(type = "light") {
+            if (navigator.vibrate) {
+                if (type === "light") navigator.vibrate(12);
+                else if (type === "medium") navigator.vibrate(25);
+                else if (type === "error") navigator.vibrate([40, 60, 40]);
+            }
+        }
+
+        // Mecánica de Mutación Centralizada
+        function alterCounter(amount, event) {
+            const currentFolder = appData.folders.find(f => f.id === appData.activeFolderId);
+            if (!currentFolder) return;
+
+            if (currentFolder.count + amount >= 0) {
+                currentFolder.count += amount;
+                triggerVibration(amount < 0 ? "medium" : "light");
+                
+                // Animaciones de impacto visual
+                const counterEl = document.getElementById('counter-num');
+                const metaEl = document.getElementById('total-stats');
+                
+                counterEl.classList.remove('bump');
+                metaEl.classList.remove('pulse');
+                void counterEl.offsetWidth; // Reflow para reiniciar CSS animation
+                counterEl.classList.add('bump');
+                metaEl.classList.add('pulse');
+
+                createVisualRipple(event);
+                saveData();
+                renderApp();
+            } else {
+                triggerVibration("error");
+            }
+        }
+
+        function createVisualRipple(e) {
+            if (!e) return;
+            const surface = document.getElementById('click-surface');
+            const ripple = document.createElement('span');
+            ripple.classList.add('ripple');
+            
+            const rect = surface.getBoundingClientRect();
+            const x = (e.clientX || (e.touches && e.touches[0].clientX)) - rect.left;
+            const y = (e.clientY || (e.touches && e.touches[0].clientY)) - rect.top;
+            
+            if(x !== undefined && y !== undefined) {
+                ripple.style.left = `${x}px`;
+                ripple.style.top = `${y}px`;
+                surface.appendChild(ripple);
+                setTimeout(() => ripple.remove(), 600);
+            }
+        }
+
+        // Configuración y Orquestación del Input Global
+        function setupEventListeners() {
+            const surface = document.getElementById('click-surface');
+            
+            // Eventos Táctiles y Ratón
+            surface.addEventListener('pointerdown', (e) => {
+                e.preventDefault();
+                const step = e.shiftKey ? -1 : 1;
+                alterCounter(step, e);
+            });
+
+            // Teclado Accesible y Veloz
+            window.addEventListener('keydown', (e) => {
+                if (document.activeElement.tagName === 'INPUT') return;
+                
+                if (e.code === 'Space' || e.key === ' ' || e.key === 'ArrowUp' || e.key === 'ArrowRight') {
+                    e.preventDefault();
+                    alterCounter(1);
+                } else if (e.key === 'ArrowDown' || e.key === 'ArrowLeft') {
+                    e.preventDefault();
+                    alterCounter(-1);
+                }
+            });
+
+            // Motor del Buscador Dinámico (FAB)
+            const searchBar = document.getElementById('search-bar');
+            const searchField = document.getElementById('search-field');
+            const searchTrigger = document.getElementById('search-trigger-btn');
+            const searchClear = document.getElementById('search-clear-btn');
+
+            searchTrigger.addEventListener('click', () => {
+                if (!searchBar.classList.contains('expanded')) {
+                    searchBar.classList.add('expanded');
+                    searchField.focus();
+                }
+            });
+
+            searchField.addEventListener('input', (e) => {
+                searchQuery = e.target.value.toLowerCase().trim();
+                if(searchQuery.length > 0) {
+                    searchClear.classList.add('visible');
+                } else {
+                    searchClear.classList.remove('visible');
+                }
+                renderApp();
+            });
+
+            searchClear.addEventListener('click', () => {
+                searchField.value = "";
+                searchQuery = "";
+                searchClear.classList.remove('visible');
+                searchField.focus();
+                renderApp();
+            });
+
+            // Cierre del buscador al pulsar fuera de él
+            document.addEventListener('click', (e) => {
+                if (!searchBar.contains(e.target) && searchField.value === "") {
+                    searchBar.classList.remove('expanded');
+                }
+            });
+
+            // Formulario Reactivo
+            document.getElementById('config-folder-btn').addEventListener('click', () => {
+                openModal('folder-modal', true);
+            });
+
+            document.getElementById('folder-name-input').addEventListener('input', updateFormPreview);
+            document.getElementById('folder-icon-input').addEventListener('input', updateFormPreview);
+
+            document.getElementById('save-folder-btn').addEventListener('click', handleSaveFolder);
+            document.getElementById('delete-folder-btn').addEventListener('click', handleDeleteFolder);
+        }
+
+        function updateFormPreview() {
+            const name = document.getElementById('folder-name-input').value.trim() || "Nuevo Contador";
+            let icon = document.getElementById('folder-icon-input').value.trim().toLowerCase() || "box";
+            
+            document.getElementById('preview-text-element').innerText = name;
+            
+            const iconEl = document.getElementById('preview-icon-element');
+            iconEl.setAttribute('data-lucide', icon);
+            lucide.createIcons();
+        }
+
+        function handleSaveFolder() {
+            const nameInput = document.getElementById('folder-name-input');
+            const iconInput = document.getElementById('folder-icon-input');
+            
+            const name = nameInput.value.trim();
+            const icon = iconInput.value.trim().toLowerCase();
+
+            if (!name) {
+                triggerShake(nameInput);
+                return;
+            }
+
+            // Validación de Icono Lucide preventiva elemental
+            if (!icon) {
+                triggerShake(iconInput);
+                return;
+            }
+
+            const currentFolder = appData.folders.find(f => f.id === appData.activeFolderId);
+            if (currentFolder) {
+                currentFolder.name = name;
+                currentFolder.icon = icon;
+            }
+            
+            saveData();
+            closeActiveModal('folder-modal');
+            renderApp();
+        }
+
+        function handleDeleteFolder() {
+            if (appData.folders.length <= 1) return;
+            
+            appData.folders = appData.folders.filter(f => f.id !== appData.activeFolderId);
+            appData.activeFolderId = appData.folders[0].id;
+            
+            saveData();
+            closeActiveModal('folder-modal');
+            renderApp();
+        }
+
+        function triggerShake(element) {
+            triggerVibration("error");
+            element.classList.add('error-shake');
+            setTimeout(() => element.classList.remove('error-shake'), 300);
+        }
+
+        function selectFolder(id) {
+            if(id === '_add_new_') {
+                // Crear nueva id aleatoria y limpia
+                const newId = "f_" + Date.now();
+                appData.folders.push({ id: newId, name: "Nuevo Ítem", count: 0, icon: "plus" });
+                appData.activeFolderId = newId;
+                saveData();
+                renderApp();
+                openModal('folder-modal', true);
+                return;
+            }
+            appData.activeFolderId = id;
+            saveData();
+            renderApp();
+        }
+
+        // Rutina de Redibujado Unificada
+        function renderApp() {
+            const currentFolder = appData.folders.find(f => f.id === appData.activeFolderId) || appData.folders[0];
+            
+            // Sincronizar UI Principal
+            document.getElementById('current-folder-title').innerText = currentFolder.name;
+            document.getElementById('counter-num').innerText = currentFolder.count;
+            
+            const totalSum = appData.folders.reduce((acc, f) => acc + f.count, 0);
+            document.getElementById('total-stats').innerText = `Global: ${totalSum}`;
+
+            // Filtrado y Renderizado de la barra superior de píldoras
+            const foldersContainer = document.getElementById('folders-container');
+            foldersContainer.innerHTML = "";
+
+            const filteredFolders = appData.folders.filter(f => f.name.toLowerCase().includes(searchQuery));
+
+            filteredFolders.forEach(folder => {
+                const isSelected = folder.id === appData.activeFolderId;
+                const pill = document.createElement('div');
+                pill.className = `pill ${isSelected ? 'active' : ''}`;
+                pill.onclick = () => selectFolder(folder.id);
+                
+                pill.innerHTML = `
+                    <i data-lucide="${folder.icon || 'box'}"></i>
+                    <span>${folder.name}</span>
+                    <span style="font-size:11px; opacity: 0.6; font-variant-numeric: tabular-nums;">(${folder.count})</span>
+                `;
+                foldersContainer.appendChild(pill);
+            });
+
+            // Añadir botón ergonómico para agregar nuevo contador al final del scroll horizontal
+            if(searchQuery === "") {
+                const addPill = document.createElement('div');
+                addPill.className = "pill";
+                addPill.style.borderStyle = "dashed";
+                addPill.onclick = () => selectFolder('_add_new_');
+                addPill.innerHTML = `<i data-lucide="plus"></i> <span style="font-weight:400;">Nuevo...</span>`;
+                foldersContainer.appendChild(addPill);
+            }
+
+            // Forzar recarga segura de Iconos Lucide instalados
+            lucide.createIcons();
+        }
+    </script>
+</body>
+</html>

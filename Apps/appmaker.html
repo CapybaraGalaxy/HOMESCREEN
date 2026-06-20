@@ -1602,15 +1602,20 @@ function updateAppPreview() {
                 return;
             }
             try {
-                let tools = [];
-                let hiddenApps = [];
-                eval(input);
-                if (Array.isArray(tools) && tools.length > 0) {
-                    appData.tools = tools;
+                const parsedData = parseImportPayload(input);
+
+                if (Array.isArray(parsedData.tools) && parsedData.tools.length > 0) {
+                    appData.tools = parsedData.tools;
                 }
-                if (Array.isArray(hiddenApps) && hiddenApps.length > 0) {
-                    appData.hiddenApps = hiddenApps;
+
+                if (Array.isArray(parsedData.hiddenApps) && parsedData.hiddenApps.length > 0) {
+                    appData.hiddenApps = parsedData.hiddenApps;
+                } else if (parsedData.hiddenApp) {
+                    appData.hiddenApps = [parsedData.hiddenApp];
+                } else {
+                    appData.hiddenApps = [];
                 }
+
                 if (appData.tools.length === 0 && appData.hiddenApps.length === 0) {
                     alert('Error: No se encontraron datos válidos para importar.');
                     return;
@@ -1623,6 +1628,23 @@ function updateAppPreview() {
             } catch (e) {
                 alert('Error al procesar el código: ' + e.message);
             }
+        }
+
+        function parseImportPayload(input) {
+            const normalizedInput = input.replace(/\b(?:const|let|var)\s+(tools|hiddenApps|hiddenApp)\s*=/g, '$1 =');
+            let tools;
+            let hiddenApps;
+            let hiddenApp;
+
+            (function() {
+                eval(normalizedInput);
+            })();
+
+            return {
+                tools: Array.isArray(tools) ? tools : undefined,
+                hiddenApps: Array.isArray(hiddenApps) ? hiddenApps : undefined,
+                hiddenApp: hiddenApp && typeof hiddenApp === 'object' ? hiddenApp : undefined
+            };
         }
     </script>
 </body>
