@@ -2,7 +2,7 @@
 <html lang="es">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover, maximum-scale=1.0, user-scalable=no">
     <title>Neo-Counter Pure Dark</title>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -10,20 +10,25 @@
     <script src="https://unpkg.com/lucide@latest"></script>
     <style>
         :root {
+            /* Paleta Cromática Orgánica y Oscura */
             --bg: #000000;
             --surface: #121212;
             --surface-hover: #1c1c1e;
             
+            /* Configuración Neo-Glass Pure */
             --glass: rgba(15, 15, 15, 0.4);
             --glass-border: rgba(255, 255, 255, 0.08);
             --blur-val: 30px;
 
+            /* Jerarquía Textual */
             --text-main: #FFFFFF;
             --text-muted: #8E8E93;
 
+            /* Estados y Acentos de Sistema */
             --accent-danger: #FF453A;
             --accent-success: #34C759;
 
+            /* Físicas de Animación Progresivas */
             --bezier: cubic-bezier(0.16, 1, 0.3, 1);
             --spring: cubic-bezier(0.34, 1.56, 0.64, 1);
         }
@@ -44,6 +49,7 @@
             overflow: hidden;
             height: 100vh;
             height: 100dvh;
+            touch-action: none; /* Previene scroll y pull-to-refresh */
         }
 
         .app-container {
@@ -68,6 +74,7 @@
             justify-content: space-between;
             padding: 20px 0 10px 0;
             border-bottom: 1px solid var(--glass-border);
+            z-index: 10;
         }
 
         .header-left {
@@ -94,208 +101,204 @@
             letter-spacing: -0.5px;
         }
 
-        .counter-meta {
-            font-size: 12px;
-            color: var(--text-muted);
-            font-variant-numeric: tabular-nums;
-            transition: transform 0.1s var(--spring);
-        }
-
-        .counter-meta.pulse {
-            transform: scale(1.05);
-            color: var(--text-main);
-        }
-
-        .folders-scroll-area {
-            display: flex;
-            gap: 10px;
-            overflow-x: auto;
-            padding: 16px 0;
-            scrollbar-width: none;
-            -webkit-overflow-scrolling: touch;
-        }
-
-        .folders-scroll-area::-webkit-scrollbar { 
-            display: none; 
-        }
-
-        .pill {
-            background: var(--glass);
-            border: 1px solid var(--glass-border);
-            padding: 8px 16px;
-            border-radius: 100px;
-            font-size: 14px;
-            font-weight: 500;
-            color: var(--text-muted);
-            cursor: pointer;
-            white-space: nowrap;
-            display: flex;
-            align-items: center;
-            gap: 6px;
-            transition: all 0.3s var(--bezier);
-        }
-
-        .pill.active {
-            background: var(--text-main);
-            color: var(--bg);
-            border-color: var(--text-main);
-        }
-
-        .pill i {
-            width: 14px;
-            height: 14px;
-        }
-
         .main-content {
             flex: 1;
             display: flex;
-            flex-direction: column;
-            justify-content: space-between;
-            position: relative;
-            padding-bottom: 100px;
-        }
-
-        .tap-zone {
-            flex: 1;
-            background: radial-gradient(circle at center, rgba(255,255,255,0.02) 0%, rgba(0,0,0,0) 70%);
-            border-radius: 24px;
-            border: 1px dashed rgba(255, 255, 255, 0.05);
-            margin: 10px 0;
-            display: flex;
             align-items: center;
             justify-content: center;
-            cursor: pointer;
             position: relative;
+            cursor: pointer;
             overflow: hidden;
-            transition: border-color 0.3s var(--bezier);
+            border-radius: 24px;
+            margin-top: 16px;
         }
 
-        .tap-zone:active {
-            border-color: rgba(255, 255, 255, 0.15);
-        }
-
-        .tap-instruction {
-            color: var(--text-muted);
-            font-size: 14px;
-            font-weight: 400;
-            pointer-events: none;
-            text-align: center;
-            line-height: 1.6;
+        /* Extiende la caja casi hasta los bordes del viewport */
+        .main-content.wide-edge {
+            width: calc(100% + 48px);
+            margin-left: -24px;
+            margin-right: -24px;
+            border-radius: 20px;
+            padding: 12px 20px;
         }
 
         .counter-display-container {
-            height: 25dvh;
+            position: absolute;
+            inset: 0;
             display: flex;
             align-items: center;
             justify-content: center;
-            position: relative;
+            pointer-events: none; /* Permite que los clicks pasen al main-content */
+            z-index: 2;
         }
 
         .counter-value {
-            font-size: clamp(80px, 18dvh, 160px);
+            font-size: clamp(120px, 25dvh, 250px);
             font-weight: 200;
             letter-spacing: -4px;
             font-variant-numeric: tabular-nums;
             line-height: 1;
-            transition: transform 0.1s var(--spring);
+            transition: transform 0.1s var(--spring), color 0.3s var(--bezier);
             will-change: transform;
+            text-shadow: 0 10px 40px rgba(0,0,0,0.5);
         }
 
-        .counter-value.bump {
-            transform: scale(1.08);
-        }
-
-        .float-search-container {
-            position: fixed;
-            bottom: calc(env(safe-area-inset-bottom) + 24px);
-            left: 50%;
-            transform: translateX(-50%);
-            width: calc(100% - 48px);
-            max-width: 400px;
-            z-index: 100;
+        /* Mini-historial derecho */
+        .mini-history {
+            position: absolute;
+            top: 12%;
+            right: 12px;
+            width: 140px;
+            max-height: 76%;
+            overflow-y: auto;
             display: flex;
-            justify-content: center;
+            flex-direction: column;
+            gap: 8px;
+            padding: 10px;
+            background: rgba(255,255,255,0.04);
+            border: 1px solid rgba(255,255,255,0.06);
+            border-radius: 12px;
+            opacity: 0.75;
+            backdrop-filter: blur(6px);
+            -webkit-backdrop-filter: blur(6px);
+            box-shadow: 0 6px 24px rgba(0,0,0,0.6);
+            transition: opacity 0.25s var(--bezier), transform 0.25s var(--bezier);
+            z-index: 3;
         }
 
-        .search-bar-glass {
-            width: 56px;
-            height: 56px;
-            background: rgba(20, 20, 20, 0.75);
+        .mini-history-item {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            font-size: 12px;
+            color: rgba(255,255,255,0.9);
+            padding: 6px 8px;
+            border-radius: 8px;
+            background: linear-gradient(180deg, rgba(255,255,255,0.02), rgba(255,255,255,0.01));
+            transform: translateY(-8px);
+            opacity: 0;
+            animation: slideDownIn 300ms ease forwards;
+        }
+
+        .mini-dot {
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            flex: 0 0 8px;
+        }
+
+        .mini-dot.up { background: var(--accent-success); }
+        .mini-dot.down { background: var(--accent-danger); }
+
+        @keyframes slideDownIn {
+            from { opacity: 0; transform: translateY(-8px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .mini-history-item.mini-fade-out {
+            opacity: 0 !important;
+            transform: translateY(-6px) !important;
+            transition: opacity 300ms var(--bezier), transform 300ms var(--bezier);
+        }
+
+        .counter-value.bump-up {
+            transform: scale(1.08);
+            color: var(--accent-success);
+        }
+        
+        .counter-value.bump-down {
+            transform: scale(0.92);
+            color: var(--accent-danger);
+        }
+
+        /* Ondas de toque (Ripples) */
+        .ripple {
+            position: absolute;
+            border-radius: 50%;
+            transform: scale(0);
+            animation: ripple-effect 0.6s ease-out forwards;
+            pointer-events: none;
+            z-index: 1;
+        }
+
+        @keyframes ripple-effect {
+            to {
+                transform: scale(8);
+                opacity: 0;
+            }
+        }
+
+        /* Overlay de Mantener Presionado */
+        .hold-overlay {
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%) scale(0.9);
+            background: rgba(20, 20, 20, 0.85);
             backdrop-filter: blur(var(--blur-val));
             -webkit-backdrop-filter: blur(var(--blur-val));
             border: 1px solid var(--glass-border);
-            border-radius: 100px;
+            padding: 24px 32px;
+            border-radius: 24px;
             display: flex;
+            flex-direction: column;
             align-items: center;
-            padding: 0 16px;
-            overflow: hidden;
-            transition: width 0.4s var(--bezier), background-color 0.3s var(--bezier);
-            box-shadow: 0 12px 40px rgba(0,0,0,0.7);
+            gap: 16px;
+            opacity: 0;
+            pointer-events: none;
+            transition: opacity 0.3s var(--bezier), transform 0.3s var(--bezier);
+            z-index: 100;
+            box-shadow: 0 20px 50px rgba(0,0,0,0.8);
+            text-align: center;
         }
 
-        .search-bar-glass.expanded {
-            width: 100%;
-            background: rgba(28, 28, 30, 0.9);
+        .hold-overlay.active {
+            opacity: 1;
+            transform: translate(-50%, -50%) scale(1);
         }
 
-        .search-icon-btn {
-            background: none;
-            border: none;
-            color: var(--text-muted);
-            cursor: pointer;
-            width: 24px;
-            height: 24px;
+        .hold-ring {
+            width: 48px;
+            height: 48px;
+            border-radius: 50%;
+            background: conic-gradient(var(--text-main) 0%, transparent 0%);
+            position: relative;
             display: flex;
             align-items: center;
             justify-content: center;
-            transition: color 0.3s var(--bezier);
         }
 
-        .search-bar-glass.expanded .search-icon-btn {
+        .hold-ring::before {
+            content: '';
+            position: absolute;
+            inset: 4px;
+            background: #18181a;
+            border-radius: 50%;
+            z-index: 1;
+        }
+
+        .hold-ring i {
+            position: relative;
+            z-index: 2;
             color: var(--text-main);
         }
 
-        .search-input {
-            flex: 1;
-            background: none;
-            border: none;
-            outline: none;
-            color: var(--text-main);
-            font-family: 'Outfit', sans-serif;
-            font-size: 16px;
-            margin-left: 12px;
-            opacity: 0;
-            pointer-events: none;
-            transition: opacity 0.2s var(--bezier);
-        }
-
-        .search-bar-glass.expanded .search-input {
-            opacity: 1;
-            pointer-events: auto;
-        }
-
-        .clear-search-btn {
-            background: none;
-            border: none;
+        .hold-text {
+            font-size: 14px;
+            font-weight: 500;
             color: var(--text-muted);
-            cursor: pointer;
-            opacity: 0;
-            pointer-events: none;
-            transition: opacity 0.2s var(--bezier);
+            max-width: 180px;
+            line-height: 1.4;
         }
 
-        .search-bar-glass.expanded .clear-search-btn.visible {
-            opacity: 1;
-            pointer-events: auto;
-        }
-
+        /* Modales */
         .modal-overlay {
             position: fixed;
             top: 0;
             left: 0;
             width: 100vw;
             height: 100vh;
-            background: rgba(0,0,0,0.4);
+            background: rgba(0,0,0,0.6);
             backdrop-filter: blur(5px);
             -webkit-backdrop-filter: blur(5px);
             z-index: 200;
@@ -314,12 +317,13 @@
 
         .modal-sheet {
             width: 100%;
-            max-width: 500px;
+            max-width: 600px;
+            height: 85vh;
             background: var(--surface);
             border-top: 1px solid var(--glass-border);
             border-radius: 24px 24px 0 0;
-            padding: 24px;
-            padding-bottom: calc(env(safe-area-inset-bottom) + 24px);
+            display: flex;
+            flex-direction: column;
             transform: translateY(100%);
             transition: transform 0.4s var(--bezier);
         }
@@ -332,7 +336,8 @@
             display: flex;
             align-items: center;
             justify-content: space-between;
-            margin-bottom: 20px;
+            padding: 24px;
+            border-bottom: 1px solid var(--glass-border);
         }
 
         .modal-header h2 {
@@ -353,11 +358,28 @@
             cursor: pointer;
         }
 
+        .modal-body {
+            padding: 24px;
+            overflow-y: auto;
+            flex: 1;
+            padding-bottom: calc(env(safe-area-inset-bottom) + 24px);
+        }
+
+        .settings-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 16px;
+            margin-bottom: 24px;
+        }
+
         .form-group {
-            margin-bottom: 16px;
             display: flex;
             flex-direction: column;
             gap: 8px;
+        }
+
+        .form-group.full-width {
+            grid-column: 1 / -1;
         }
 
         .form-group label {
@@ -370,257 +392,367 @@
             background: rgba(255,255,255,0.04);
             border: 1px solid var(--glass-border);
             border-radius: 12px;
-            padding: 12px 16px;
+            padding: 14px 16px;
             color: var(--text-main);
             font-family: 'Outfit', sans-serif;
-            font-size: 15px;
+            font-size: 16px;
             outline: none;
             transition: border-color 0.3s var(--bezier);
+            font-variant-numeric: tabular-nums;
         }
 
         .input-control:focus {
             border-color: rgba(255,255,255,0.2);
         }
 
-        .input-control.error-shake {
-            border-color: var(--accent-danger) !important;
-            animation: shake 0.3s linear;
-        }
-
-        @keyframes shake {
-            0%, 100% { transform: translateX(0); }
-            20%, 60% { transform: translateX(-6px); }
-            40%, 80% { transform: translateX(6px); }
-        }
-
-        .preview-box {
-            background: rgba(255,255,255,0.02);
-            border: 1px dashed var(--glass-border);
-            border-radius: 12px;
-            padding: 16px;
-            display: flex;
-            align-items: center;
-            gap: 12px;
-            margin-top: 8px;
-        }
-
-        .preview-badge {
-            width: 36px;
-            height: 36px;
-            border-radius: 10px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-        }
-
         .action-btn {
             background: var(--text-main);
             color: var(--bg);
             border: none;
-            padding: 14px;
+            padding: 16px;
             border-radius: 12px;
             font-size: 15px;
             font-weight: 600;
             cursor: pointer;
             width: 100%;
-            margin-top: 12px;
             display: flex;
             align-items: center;
             justify-content: center;
             gap: 8px;
-            transition: opacity 0.2s var(--bezier);
+            transition: opacity 0.2s var(--bezier), transform 0.1s var(--bezier);
         }
 
         .action-btn:active {
             opacity: 0.8;
+            transform: scale(0.98);
         }
 
-        .action-btn.secondary {
-            background: transparent;
+        .action-btn.danger {
+            background: rgba(255, 69, 58, 0.1);
             color: var(--accent-danger);
             border: 1px solid rgba(255, 69, 58, 0.2);
         }
 
-        .ripple {
-            position: absolute;
-            background: rgba(255, 255, 255, 0.08);
-            border-radius: 50%;
-            transform: scale(0);
-            animation: ripple-effect 0.6s ease-out;
-            pointer-events: none;
+        /* Historial */
+        .history-section {
+            margin-top: 32px;
+            border-top: 1px solid var(--glass-border);
+            padding-top: 24px;
         }
 
-        @keyframes ripple-effect {
-            to {
-                transform: scale(4);
-                opacity: 0;
-            }
+        .history-section h3 {
+            font-size: 16px;
+            font-weight: 500;
+            margin-bottom: 16px;
+            color: var(--text-muted);
+        }
+
+        .history-list {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+        }
+
+        .history-item {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            background: rgba(255,255,255,0.02);
+            border: 1px solid var(--glass-border);
+            padding: 12px 16px;
+            border-radius: 12px;
+        }
+
+        .history-item-left {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .history-icon {
+            width: 32px;
+            height: 32px;
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .history-icon.up {
+            background: rgba(52, 199, 89, 0.1);
+            color: var(--accent-success);
+        }
+
+        .history-icon.down {
+            background: rgba(255, 69, 58, 0.1);
+            color: var(--accent-danger);
+        }
+        
+        .history-icon.reset {
+            background: rgba(255, 255, 255, 0.1);
+            color: var(--text-main);
+        }
+
+        .history-details {
+            display: flex;
+            flex-direction: column;
+            gap: 2px;
+        }
+
+        .history-action {
+            font-size: 14px;
+            font-weight: 500;
+        }
+
+        .history-time {
+            font-size: 12px;
+            color: var(--text-muted);
+        }
+
+        .history-result {
+            font-size: 16px;
+            font-weight: 600;
+            font-variant-numeric: tabular-nums;
         }
 
         @media (min-width: 600px) {
-            .main-content {
-                flex-direction: row;
-                align-items: center;
-                gap: 40px;
-                padding-bottom: 0;
+            .app-container {
+                padding-top: 40px;
             }
-            .tap-zone {
-                height: 100%;
-            }
-            .counter-display-container {
+            .modal-sheet {
+                border-radius: 24px;
                 height: auto;
-                flex: 1;
-                justify-content: flex-end;
-            }
-            .counter-value {
-                font-size: clamp(100px, 25vw, 220px);
+                max-height: 85vh;
+                margin-bottom: 24px;
             }
         }
     </style>
 </head>
-<body>
+<body oncontextmenu="return false;">
 
     <div class="app-container" id="main-view">
         <header>
             <div class="header-left">
                 <div class="app-icon-badge">
-                    <i data-lucide="layers" size="20" style="color: var(--text-main);"></i>
+                    <i data-lucide="activity" size="20" style="color: var(--text-main);"></i>
                 </div>
                 <div class="app-title-block">
-                    <h1 id="current-folder-title">Contador</h1>
-                    <div class="counter-meta" id="total-stats">Total: 0</div>
+                    <h1>Neo-Counter</h1>
                 </div>
             </div>
-            <button class="close-modal-btn" id="config-folder-btn" style="border-radius: 10px;">
-                <i data-lucide="sliders" size="16"></i>
-            </button>
         </header>
 
-        <div class="folders-scroll-area" id="folders-container">
-            </div>
-
-        <main class="main-content">
-            <div class="tap-zone" id="click-surface">
-                <div class="tap-instruction">
-                    Toca aquí, pulsa <b style="color:var(--text-main)">Espacio</b> o las <b style="color:var(--text-main)">Flechas</b><br>
-                    <span style="font-size: 12px; color: var(--text-muted);">Shift + Click para restar</span>
-                </div>
-            </div>
-
+        <main class="main-content wide-edge" id="touch-surface">
             <div class="counter-display-container">
                 <div class="counter-value" id="counter-num">0</div>
             </div>
+            <aside id="mini-history" class="mini-history" aria-hidden="false"></aside>
         </main>
     </div>
 
-    <div class="float-search-container">
-        <div class="search-bar-glass" id="search-bar">
-            <button class="search-icon-btn" id="search-trigger-btn">
-                <i data-lucide="search" size="20"></i>
-            </button>
-            <input type="text" class="search-input" id="search-field" placeholder="Buscar contador..." autocomplete="off">
-            <button class="clear-search-btn" id="search-clear-btn">
-                <i data-lucide="x" size="18"></i>
-            </button>
+    <div id="hold-overlay" class="hold-overlay">
+        <div class="hold-ring" id="hold-progress">
+            <i data-lucide="settings" size="20"></i>
         </div>
+        <div class="hold-text">Mantén presionado para acceder a ajustes</div>
     </div>
 
-    <div class="modal-overlay" id="folder-modal">
+    <div class="modal-overlay" id="settings-modal">
         <div class="modal-sheet">
             <div class="modal-header">
-                <h2 id="modal-action-title">Configurar Contador</h2>
-                <button class="close-modal-btn" onclick="closeActiveModal('folder-modal')">
+                <h2>Ajustes Globales</h2>
+                <button class="close-modal-btn" onclick="closeActiveModal('settings-modal')">
                     <i data-lucide="x" size="16"></i>
                 </button>
             </div>
-            <div class="form-group">
-                <label for="folder-name-input">Nombre del Contador</label>
-                <input type="text" id="folder-name-input" class="input-control" placeholder="Ej. Flexiones, Cafés..." maxlength="20">
-            </div>
-            <div class="form-group">
-                <label for="folder-icon-input">Icono Lucide (singular)</label>
-                <input type="text" id="folder-icon-input" class="input-control" placeholder="ruler, box, flame, coffee, Award...">
-            </div>
-            <div class="form-group">
-                <label>Previsualización</label>
-                <div class="preview-box">
-                    <div class="preview-badge" id="preview-badge-element" style="background: var(--surface-hover); border: 1px solid var(--glass-border);">
-                        <i id="preview-icon-element" data-lucide="box" size="18"></i>
+            <div class="modal-body">
+                <div class="settings-grid">
+                    <div class="form-group full-width">
+                        <label for="edit-total-input">Editar Valor Actual</label>
+                        <input type="number" id="edit-total-input" class="input-control" value="0">
                     </div>
-                    <span id="preview-text-element" style="font-weight: 500;">Nuevo Contador</span>
+                    <div class="form-group">
+                        <label for="step-up-input">Suma por Tap (Arriba)</label>
+                        <input type="number" id="step-up-input" class="input-control" value="1" min="1">
+                    </div>
+                    <div class="form-group">
+                        <label for="step-down-input">Resta por Tap (Abajo)</label>
+                        <input type="number" id="step-down-input" class="input-control" value="1" min="1">
+                    </div>
+                </div>
+
+                <button class="action-btn danger" id="reset-counter-btn">
+                    <i data-lucide="rotate-ccw" size="18"></i> Reiniciar Contador a Cero
+                </button>
+
+                <div class="history-section">
+                    <h3>Historial Reciente</h3>
+                    <div class="history-list" id="history-container">
+                        </div>
                 </div>
             </div>
-            <button class="action-btn" id="save-folder-btn">
-                <i data-lucide="check" size="18"></i> Guardar Cambios
-            </button>
-            <button class="action-btn secondary" id="delete-folder-btn" style="display: none;">
-                <i data-lucide="trash-2" size="18"></i> Eliminar de la lista
-            </button>
         </div>
     </div>
 
     <script>
-        // Ecosistema de Datos Centralizado
+        // --- ESTADO REACTIVO CENTRALIZADO ---
         let appData = {
-            activeFolderId: "default",
-            folders: [
-                { id: "default", name: "General", count: 0, icon: "box" },
-                { id: "gym", name: "Entrenamiento", count: 0, icon: "flame" },
-                { id: "water", name: "Agua", count: 0, icon: "droplet" }
-            ]
+            count: 0,
+            stepUp: 1,
+            stepDown: 1,
+            history: [] // { id, type: 'up'|'down'|'reset'|'edit', amount: number, result: number, time: timestamp }
         };
 
+        // --- SISTEMA DE MODALES (HISTORY API) ---
         let activeModalsStack = [];
-        let searchQuery = "";
 
-        // Inicialización Segura
         window.onload = () => {
-            const localData = localStorage.getItem("neo_counter_data");
+            const localData = localStorage.getItem("neo_counter_pure_data");
             if (localData) {
                 try {
                     appData = JSON.parse(localData);
                 } catch(e) {
-                    // Fallback automático si el JSON está corrupto
                     saveData();
                 }
             } else {
                 saveData();
             }
-            setupEventListeners();
+            
+            lucide.createIcons();
+            setupInteractions();
             renderApp();
+            syncSettingsForm();
+
+            // Poblado inicial del mini-historial (últimos 10), con pequeño stagger
+            const recent = (appData.history || []).slice(0, 10).reverse();
+            recent.forEach((it, idx) => {
+                setTimeout(() => addMiniHistoryEntry(it), idx * 80);
+            });
         };
 
         function saveData() {
-            localStorage.setItem("neo_counter_data", JSON.stringify(appData));
+            localStorage.setItem("neo_counter_pure_data", JSON.stringify(appData));
         }
 
-        // Historial y Gestión Ergonómica de Modales
-        function openModal(modalId, isEdit = false) {
+        function renderApp() {
+            // Actualizar vista principal
+            document.getElementById('counter-num').innerText = appData.count;
+
+            // Renderizar Historial
+            const historyContainer = document.getElementById('history-container');
+            historyContainer.innerHTML = '';
+
+            if (appData.history.length === 0) {
+                historyContainer.innerHTML = '<div style="color: var(--text-muted); font-size: 14px; text-align: center; padding: 20px;">No hay actividad reciente.</div>';
+            } else {
+                appData.history.forEach(item => {
+                    const el = document.createElement('div');
+                    el.className = 'history-item';
+                    
+                    let icon, iconClass, actionText;
+                    if (item.type === 'up') {
+                        icon = 'arrow-up'; iconClass = 'up'; actionText = `Sumó ${item.amount}`;
+                    } else if (item.type === 'down') {
+                        icon = 'arrow-down'; iconClass = 'down'; actionText = `Restó ${item.amount}`;
+                    } else if (item.type === 'reset') {
+                        icon = 'rotate-ccw'; iconClass = 'reset'; actionText = 'Reinicio';
+                    } else {
+                        icon = 'edit-2'; iconClass = 'reset'; actionText = 'Edición manual';
+                    }
+
+                    const date = new Date(item.time);
+                    const timeString = `${date.getHours().toString().padStart(2, '0')}:${date.getMinutes().toString().padStart(2, '0')}`;
+
+                    el.innerHTML = `
+                        <div class="history-item-left">
+                            <div class="history-icon ${iconClass}">
+                                <i data-lucide="${icon}" size="16"></i>
+                            </div>
+                            <div class="history-details">
+                                <span class="history-action">${actionText}</span>
+                                <span class="history-time">${timeString}</span>
+                            </div>
+                        </div>
+                        <div class="history-result">${item.result}</div>
+                    `;
+                    historyContainer.appendChild(el);
+                });
+                lucide.createIcons();
+            }
+
+        }
+
+        function logHistory(type, amount, result) {
+            const item = {
+                id: Date.now(),
+                type,
+                amount,
+                result,
+                time: Date.now()
+            };
+            appData.history.unshift(item);
+            // Mantener solo los últimos 20 registros
+            if (appData.history.length > 20) {
+                appData.history.pop();
+            }
+            return item;
+        }
+
+        // Añade una entrada al mini-historial (con timer individual de 10s)
+        function addMiniHistoryEntry(item) {
+            const mini = document.getElementById('mini-history');
+            if (!mini) return;
+
+            // Crear elemento
+            const el = document.createElement('div');
+            el.className = 'mini-history-item';
+            el.dataset.id = item.id;
+
+            // Icono + o - (lucide)
+            const iconName = item.type === 'up' ? 'plus' : (item.type === 'down' ? 'minus' : (item.type === 'reset' ? 'rotate-ccw' : 'edit-2'));
+            const color = item.type === 'up' ? 'var(--accent-success)' : (item.type === 'down' ? 'var(--accent-danger)' : 'rgba(255,255,255,0.9)');
+
+            el.innerHTML = `
+                <i data-lucide="${iconName}" class="mini-icon"></i>
+                <span style="flex:1; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;">${item.amount !== 0 ? (item.type === 'up' ? '+' : (item.type === 'down' ? '-' : '')) + item.amount : ''} ${item.result}</span>
+            `;
+
+            // Insertar al inicio
+            mini.prepend(el);
+
+            // Limitar cantidad visible a 10
+            while (mini.children.length > 10) {
+                mini.removeChild(mini.lastChild);
+            }
+
+            // Convertir iconos y aplicar color al svg generado
+            lucide.createIcons();
+            const svg = el.querySelector('svg');
+            if (svg) svg.style.color = color;
+
+            // Forzar reflow para que la animación de entrada funcione
+            void el.offsetWidth;
+
+            // Timer individual para desaparecer
+            const timeoutId = setTimeout(() => {
+                el.classList.add('mini-fade-out');
+                // eliminar después de transición
+                setTimeout(() => {
+                    if (el.parentNode) el.parentNode.removeChild(el);
+                }, 350);
+            }, 10000);
+
+            // Guardar timer por si se necesita cancelar más tarde
+            el.dataset.timer = timeoutId;
+        }
+
+        // --- MANEJO DE MODALES ---
+        function openModal(modalId) {
             document.getElementById('main-view').classList.add('backgrounded');
             document.getElementById(modalId).classList.add('active');
-            
+            syncSettingsForm();
             activeModalsStack.push(modalId);
             window.history.pushState({ modalId: modalId }, "");
-
-            if(modalId === 'folder-modal') {
-                const currentFolder = appData.folders.find(f => f.id === appData.activeFolderId);
-                const nameInput = document.getElementById('folder-name-input');
-                const iconInput = document.getElementById('folder-icon-input');
-                const deleteBtn = document.getElementById('delete-folder-btn');
-                
-                if(isEdit) {
-                    document.getElementById('modal-action-title').innerText = "Editar Contador";
-                    nameInput.value = currentFolder.name;
-                    iconInput.value = currentFolder.icon;
-                    deleteBtn.style.display = appData.folders.length > 1 ? "flex" : "none";
-                } else {
-                    document.getElementById('modal-action-title').innerText = "Nuevo Contador";
-                    nameInput.value = "";
-                    iconInput.value = "activity";
-                    deleteBtn.style.display = "none";
-                }
-                updateFormPreview();
-            }
         }
 
         function closeActiveModal(modalId) {
@@ -636,254 +768,245 @@
                 if (activeModalsStack.length === 0) {
                     document.getElementById('main-view').classList.remove('backgrounded');
                 }
+                renderApp(); // Redibuja al cerrar ajustes para reflejar cambios manuales
             }
         });
 
-        // Motor de Impacto Háptico
+        // --- MOTOR HÁPTICO ---
         function triggerVibration(type = "light") {
-            if (navigator.vibrate) {
-                if (type === "light") navigator.vibrate(12);
-                else if (type === "medium") navigator.vibrate(25);
-                else if (type === "error") navigator.vibrate([40, 60, 40]);
-            }
+            if (!navigator.vibrate) return;
+            if (type === "light") navigator.vibrate(15);
+            else if (type === "medium") navigator.vibrate(30);
+            else if (type === "heavy") navigator.vibrate([40, 60, 40]);
         }
 
-        // Mecánica de Mutación Centralizada
-        function alterCounter(amount, event) {
-            const currentFolder = appData.folders.find(f => f.id === appData.activeFolderId);
-            if (!currentFolder) return;
+        // --- MOTOR DE AUDIO (Generador de tonos) ---
+        const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
 
-            if (currentFolder.count + amount >= 0) {
-                currentFolder.count += amount;
-                triggerVibration(amount < 0 ? "medium" : "light");
-                
-                // Animaciones de impacto visual
-                const counterEl = document.getElementById('counter-num');
-                const metaEl = document.getElementById('total-stats');
-                
-                counterEl.classList.remove('bump');
-                metaEl.classList.remove('pulse');
-                void counterEl.offsetWidth; // Reflow para reiniciar CSS animation
-                counterEl.classList.add('bump');
-                metaEl.classList.add('pulse');
-
-                createVisualRipple(event);
-                saveData();
-                renderApp();
-            } else {
-                triggerVibration("error");
+        function playTone(frequency, duration) {
+            if (!audioCtx) return;
+            if (audioCtx.state === 'suspended') {
+                audioCtx.resume();
             }
+
+            const oscillator = audioCtx.createOscillator();
+            const gainNode = audioCtx.createGain();
+
+            oscillator.type = 'sine';
+            oscillator.frequency.value = frequency;
+
+            oscillator.connect(gainNode);
+            gainNode.connect(audioCtx.destination);
+
+            const now = audioCtx.currentTime;
+            gainNode.gain.setValueAtTime(1, now);
+            gainNode.gain.exponentialRampToValueAtTime(0.001, now + duration);
+
+            oscillator.start(now);
+            oscillator.stop(now + duration + 0.02);
         }
 
-        function createVisualRipple(e) {
-            if (!e) return;
-            const surface = document.getElementById('click-surface');
-            const ripple = document.createElement('span');
-            ripple.classList.add('ripple');
+        // --- LÓGICA DE INTERACCIÓN (TAP Y HOLD) ---
+        function setupInteractions() {
+            const surface = document.getElementById('touch-surface');
             
-            const rect = surface.getBoundingClientRect();
-            const x = (e.clientX || (e.touches && e.touches[0].clientX)) - rect.left;
-            const y = (e.clientY || (e.touches && e.touches[0].clientY)) - rect.top;
+            let pointerDownTime = 0;
+            let holdInitTimeout = null;
+            let fillInterval = null;
+            let isFilling = false;
             
-            if(x !== undefined && y !== undefined) {
-                ripple.style.left = `${x}px`;
-                ripple.style.top = `${y}px`;
-                surface.appendChild(ripple);
-                setTimeout(() => ripple.remove(), 600);
-            }
-        }
-
-        // Configuración y Orquestación del Input Global
-        function setupEventListeners() {
-            const surface = document.getElementById('click-surface');
-            
-            // Eventos Táctiles y Ratón
             surface.addEventListener('pointerdown', (e) => {
-                e.preventDefault();
-                const step = e.shiftKey ? -1 : 1;
-                alterCounter(step, e);
+                // Ignorar clicks derechos o multiples toques simultaneos
+                if (e.button === 2 || !e.isPrimary) return;
+                
+                pointerDownTime = Date.now();
+                isFilling = false;
+                
+                // Iniciar contador de pulsación larga (500ms para mostrar UI)
+                holdInitTimeout = setTimeout(() => {
+                    isFilling = true;
+                    startHoldAnimation();
+                    triggerVibration("medium");
+                }, 500);
             });
 
-            // Teclado Accesible y Veloz
+            const endInteraction = (e) => {
+                clearTimeout(holdInitTimeout);
+                
+                if (isFilling) {
+                    // Estaba en proceso de mantener presionado
+                    clearInterval(fillInterval);
+                    hideHoldAnimation();
+                    isFilling = false;
+                } else {
+                    // Fue un tap rápido (< 500ms)
+                    const duration = Date.now() - pointerDownTime;
+                    if (duration < 500 && pointerDownTime > 0) {
+                        processTap(e);
+                    }
+                }
+                pointerDownTime = 0;
+            };
+
+            surface.addEventListener('pointerup', endInteraction);
+            surface.addEventListener('pointercancel', endInteraction);
+            surface.addEventListener('pointerleave', endInteraction);
+
+            // Teclado (Accesibilidad)
             window.addEventListener('keydown', (e) => {
                 if (document.activeElement.tagName === 'INPUT') return;
-                
-                if (e.code === 'Space' || e.key === ' ' || e.key === 'ArrowUp' || e.key === 'ArrowRight') {
+                if (e.code === 'Space' || e.key === 'ArrowUp') {
                     e.preventDefault();
-                    alterCounter(1);
-                } else if (e.key === 'ArrowDown' || e.key === 'ArrowLeft') {
+                    executeMutation('up');
+                } else if (e.key === 'ArrowDown') {
                     e.preventDefault();
-                    alterCounter(-1);
+                    executeMutation('down');
                 }
             });
 
-            // Motor del Buscador Dinámico (FAB)
-            const searchBar = document.getElementById('search-bar');
-            const searchField = document.getElementById('search-field');
-            const searchTrigger = document.getElementById('search-trigger-btn');
-            const searchClear = document.getElementById('search-clear-btn');
-
-            searchTrigger.addEventListener('click', () => {
-                if (!searchBar.classList.contains('expanded')) {
-                    searchBar.classList.add('expanded');
-                    searchField.focus();
-                }
-            });
-
-            searchField.addEventListener('input', (e) => {
-                searchQuery = e.target.value.toLowerCase().trim();
-                if(searchQuery.length > 0) {
-                    searchClear.classList.add('visible');
-                } else {
-                    searchClear.classList.remove('visible');
-                }
-                renderApp();
-            });
-
-            searchClear.addEventListener('click', () => {
-                searchField.value = "";
-                searchQuery = "";
-                searchClear.classList.remove('visible');
-                searchField.focus();
-                renderApp();
-            });
-
-            // Cierre del buscador al pulsar fuera de él
-            document.addEventListener('click', (e) => {
-                if (!searchBar.contains(e.target) && searchField.value === "") {
-                    searchBar.classList.remove('expanded');
-                }
-            });
-
-            // Formulario Reactivo
-            document.getElementById('config-folder-btn').addEventListener('click', () => {
-                openModal('folder-modal', true);
-            });
-
-            document.getElementById('folder-name-input').addEventListener('input', updateFormPreview);
-            document.getElementById('folder-icon-input').addEventListener('input', updateFormPreview);
-
-            document.getElementById('save-folder-btn').addEventListener('click', handleSaveFolder);
-            document.getElementById('delete-folder-btn').addEventListener('click', handleDeleteFolder);
-        }
-
-        function updateFormPreview() {
-            const name = document.getElementById('folder-name-input').value.trim() || "Nuevo Contador";
-            let icon = document.getElementById('folder-icon-input').value.trim().toLowerCase() || "box";
-            
-            document.getElementById('preview-text-element').innerText = name;
-            
-            const iconEl = document.getElementById('preview-icon-element');
-            iconEl.setAttribute('data-lucide', icon);
-            lucide.createIcons();
-        }
-
-        function handleSaveFolder() {
-            const nameInput = document.getElementById('folder-name-input');
-            const iconInput = document.getElementById('folder-icon-input');
-            
-            const name = nameInput.value.trim();
-            const icon = iconInput.value.trim().toLowerCase();
-
-            if (!name) {
-                triggerShake(nameInput);
-                return;
-            }
-
-            // Validación de Icono Lucide preventiva elemental
-            if (!icon) {
-                triggerShake(iconInput);
-                return;
-            }
-
-            const currentFolder = appData.folders.find(f => f.id === appData.activeFolderId);
-            if (currentFolder) {
-                currentFolder.name = name;
-                currentFolder.icon = icon;
-            }
-            
-            saveData();
-            closeActiveModal('folder-modal');
-            renderApp();
-        }
-
-        function handleDeleteFolder() {
-            if (appData.folders.length <= 1) return;
-            
-            appData.folders = appData.folders.filter(f => f.id !== appData.activeFolderId);
-            appData.activeFolderId = appData.folders[0].id;
-            
-            saveData();
-            closeActiveModal('folder-modal');
-            renderApp();
-        }
-
-        function triggerShake(element) {
-            triggerVibration("error");
-            element.classList.add('error-shake');
-            setTimeout(() => element.classList.remove('error-shake'), 300);
-        }
-
-        function selectFolder(id) {
-            if(id === '_add_new_') {
-                // Crear nueva id aleatoria y limpia
-                const newId = "f_" + Date.now();
-                appData.folders.push({ id: newId, name: "Nuevo Ítem", count: 0, icon: "plus" });
-                appData.activeFolderId = newId;
+            // Ajustes Formulario Eventos
+            document.getElementById('edit-total-input').addEventListener('change', (e) => {
+                appData.count = parseInt(e.target.value) || 0;
+                const histItem = logHistory('edit', 0, appData.count);
                 saveData();
                 renderApp();
-                openModal('folder-modal', true);
-                return;
+                addMiniHistoryEntry(histItem);
+            });
+
+            document.getElementById('step-up-input').addEventListener('change', (e) => {
+                appData.stepUp = Math.max(1, parseInt(e.target.value) || 1);
+                saveData();
+            });
+
+            document.getElementById('step-down-input').addEventListener('change', (e) => {
+                appData.stepDown = Math.max(1, parseInt(e.target.value) || 1);
+                saveData();
+            });
+
+            document.getElementById('reset-counter-btn').addEventListener('click', () => {
+                appData.count = 0;
+                const histItem = logHistory('reset', 0, 0);
+                saveData();
+                syncSettingsForm();
+                renderApp();
+                triggerVibration("heavy");
+                addMiniHistoryEntry(histItem);
+            });
+        }
+
+        function processTap(e) {
+            const surface = document.getElementById('touch-surface');
+            const rect = surface.getBoundingClientRect();
+            
+            // Compatibilidad con Mouse y Touch
+            const clientY = e.clientY || (e.changedTouches && e.changedTouches[0].clientY) || rect.top;
+            const y = clientY - rect.top;
+            const percentY = y / rect.height;
+
+            if (percentY <= 0.75) {
+                executeMutation('up', e);
+            } else {
+                executeMutation('down', e);
             }
-            appData.activeFolderId = id;
+        }
+
+        function executeMutation(direction, e = null) {
+            const counterEl = document.getElementById('counter-num');
+            counterEl.classList.remove('bump-up', 'bump-down');
+            void counterEl.offsetWidth; // Reflow
+
+            if (direction === 'up') {
+                appData.count += appData.stepUp;
+                const histItem = logHistory('up', appData.stepUp, appData.count);
+                counterEl.classList.add('bump-up');
+                // Sonido agudo y vibración corta
+                try { playTone(800, 0.15); } catch (err) {}
+                if (navigator.vibrate) navigator.vibrate(30);
+                if (e) createVisualRipple(e, 'rgba(52, 199, 89, 0.25)'); // Verde
+                addMiniHistoryEntry(histItem);
+            } else {
+                appData.count -= appData.stepDown;
+                const histItem = logHistory('down', appData.stepDown, appData.count);
+                counterEl.classList.add('bump-down');
+                // Sonido grave y patrón de vibración doble
+                try { playTone(300, 0.2); } catch (err) {}
+                if (navigator.vibrate) navigator.vibrate([40, 30, 40]);
+                if (e) createVisualRipple(e, 'rgba(255, 69, 58, 0.25)'); // Rojo
+                addMiniHistoryEntry(histItem);
+            }
+
             saveData();
             renderApp();
         }
 
-        // Rutina de Redibujado Unificada
-        function renderApp() {
-            const currentFolder = appData.folders.find(f => f.id === appData.activeFolderId) || appData.folders[0];
+        function createVisualRipple(e, color) {
+            const surface = document.getElementById('touch-surface');
+            const rect = surface.getBoundingClientRect();
+            const clientX = e.clientX || (e.changedTouches && e.changedTouches[0].clientX) || (rect.left + rect.width/2);
+            const clientY = e.clientY || (e.changedTouches && e.changedTouches[0].clientY) || (rect.top + rect.height/2);
             
-            // Sincronizar UI Principal
-            document.getElementById('current-folder-title').innerText = currentFolder.name;
-            document.getElementById('counter-num').innerText = currentFolder.count;
+            const x = clientX - rect.left;
+            const y = clientY - rect.top;
+
+            const ripple = document.createElement('span');
+            ripple.classList.add('ripple');
+            // Asegurar tamaño suficiente para cubrir la pantalla
+            const size = Math.max(rect.width, rect.height);
+            ripple.style.width = ripple.style.height = `${size}px`;
+            ripple.style.left = `${x - size/2}px`;
+            ripple.style.top = `${y - size/2}px`;
+            ripple.style.background = `radial-gradient(circle, ${color} 0%, transparent 70%)`;
             
-            const totalSum = appData.folders.reduce((acc, f) => acc + f.count, 0);
-            document.getElementById('total-stats').innerText = `Global: ${totalSum}`;
-
-            // Filtrado y Renderizado de la barra superior de píldoras
-            const foldersContainer = document.getElementById('folders-container');
-            foldersContainer.innerHTML = "";
-
-            const filteredFolders = appData.folders.filter(f => f.name.toLowerCase().includes(searchQuery));
-
-            filteredFolders.forEach(folder => {
-                const isSelected = folder.id === appData.activeFolderId;
-                const pill = document.createElement('div');
-                pill.className = `pill ${isSelected ? 'active' : ''}`;
-                pill.onclick = () => selectFolder(folder.id);
-                
-                pill.innerHTML = `
-                    <i data-lucide="${folder.icon || 'box'}"></i>
-                    <span>${folder.name}</span>
-                    <span style="font-size:11px; opacity: 0.6; font-variant-numeric: tabular-nums;">(${folder.count})</span>
-                `;
-                foldersContainer.appendChild(pill);
-            });
-
-            // Añadir botón ergonómico para agregar nuevo contador al final del scroll horizontal
-            if(searchQuery === "") {
-                const addPill = document.createElement('div');
-                addPill.className = "pill";
-                addPill.style.borderStyle = "dashed";
-                addPill.onclick = () => selectFolder('_add_new_');
-                addPill.innerHTML = `<i data-lucide="plus"></i> <span style="font-weight:400;">Nuevo...</span>`;
-                foldersContainer.appendChild(addPill);
-            }
-
-            // Forzar recarga segura de Iconos Lucide instalados
-            lucide.createIcons();
+            surface.appendChild(ripple);
+            setTimeout(() => ripple.remove(), 600);
         }
+
+        // --- ANIMACIÓN DE MANTENER PRESIONADO ---
+        let holdProgressInterval;
+
+        function startHoldAnimation() {
+            const overlay = document.getElementById('hold-overlay');
+            const progressRing = document.getElementById('hold-progress');
+            
+            overlay.classList.add('active');
+            
+            const startTime = Date.now();
+            const duration = 2000; // 2 segundos llenando
+            
+            holdProgressInterval = setInterval(() => {
+                const elapsed = Date.now() - startTime;
+                const percent = Math.min(100, (elapsed / duration) * 100);
+                
+                progressRing.style.background = `conic-gradient(var(--text-main) ${percent}%, transparent 0%)`;
+                
+                if (percent >= 100) {
+                    clearInterval(holdProgressInterval);
+                    hideHoldAnimation();
+                    triggerVibration("heavy");
+                    openModal('settings-modal');
+                }
+            }, 16);
+        }
+
+        function hideHoldAnimation() {
+            const overlay = document.getElementById('hold-overlay');
+            const progressRing = document.getElementById('hold-progress');
+            
+            clearInterval(holdProgressInterval);
+            overlay.classList.remove('active');
+            
+            // Resetear anillo después de la transición de opacidad
+            setTimeout(() => {
+                progressRing.style.background = `conic-gradient(var(--text-main) 0%, transparent 0%)`;
+            }, 300);
+        }
+
+        function syncSettingsForm() {
+            document.getElementById('edit-total-input').value = appData.count;
+            document.getElementById('step-up-input').value = appData.stepUp;
+            document.getElementById('step-down-input').value = appData.stepDown;
+        }
+
     </script>
 </body>
 </html>
