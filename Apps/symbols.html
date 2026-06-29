@@ -1,0 +1,1088 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+    <title>PureSímbolos - Neo-Glass Gallery</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@200;300;400;500;600;700&display=swap" rel="stylesheet">
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <style>
+        :root {
+            /* Paleta Cromática Orgánica y Oscura */
+            --bg: #000000;
+            --surface: #121212;
+            --surface-hover: #1c1c1e;
+            
+            /* Configuración Neo-Glass Pure */
+            --glass: rgba(15, 15, 15, 0.4);
+            --glass-border: rgba(255, 255, 255, 0.08);
+            --blur-val: 30px;
+
+            /* Jerarquía Textual */
+            --text-main: #FFFFFF;
+            --text-muted: #8E8E93;
+
+            /* Estados y Acentos de Sistema */
+            --accent-danger: #FF453A;
+            --accent-success: #34C759;
+
+            /* Físicas de Animación Progresivas */
+            --bezier: cubic-bezier(0.16, 1, 0.3, 1);
+            --spring: cubic-bezier(0.34, 1.56, 0.64, 1);
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            -webkit-tap-highlight-color: transparent;
+        }
+
+        body {
+            background-color: var(--bg);
+            color: var(--text-main);
+            font-family: 'Outfit', sans-serif;
+            min-height: 100dvh;
+            overflow: hidden;
+        }
+
+        /* Contenedor Principal */
+        .app-container {
+            height: 100dvh;
+            display: flex;
+            flex-direction: column;
+            padding: env(safe-area-inset-top) 24px calc(env(safe-area-inset-bottom) + 16px) 24px;
+            max-width: 900px;
+            margin: 0 auto;
+            transition: transform 0.4s var(--bezier), filter 0.4s var(--bezier);
+        }
+
+        .app-container.backgrounded {
+            transform: scale(0.96);
+            filter: blur(8px);
+            pointer-events: none;
+        }
+
+        /* Cabecera Limpia */
+        header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 16px 0 12px 0;
+        }
+
+        .header-left {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .app-icon-badge {
+            width: 40px;
+            height: 40px;
+            border-radius: 12px;
+            background: radial-gradient(circle at center, rgba(255,255,255,0.1) 0%, rgba(0,0,0,0) 80%);
+            border: 1px solid var(--glass-border);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.5);
+        }
+
+        h1 {
+            font-size: 20px;
+            font-weight: 600;
+            letter-spacing: -0.5px;
+        }
+
+        .counter-badge {
+            font-size: 13px;
+            color: var(--text-muted);
+            font-variant-numeric: tabular-nums;
+            margin-left: 6px;
+            transition: transform 0.2s var(--spring);
+        }
+        
+        .counter-badge.pulse {
+            transform: scale(1.15);
+            color: var(--text-main);
+        }
+
+        .header-actions {
+            display: flex;
+            gap: 8px;
+        }
+
+        .btn-icon {
+            background: var(--glass);
+            border: 1px solid var(--glass-border);
+            backdrop-filter: blur(var(--blur-val));
+            width: 38px;
+            height: 38px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: var(--text-main);
+            cursor: pointer;
+            transition: background 0.2s var(--bezier), transform 0.2s var(--spring);
+        }
+
+        .btn-icon:hover {
+            background: var(--surface-hover);
+        }
+
+        .btn-icon:active {
+            transform: scale(0.92);
+        }
+
+        /* Navegación de píldoras */
+        .folders-scroll-area {
+            display: flex;
+            gap: 10px;
+            overflow-x: auto;
+            padding: 4px 0 16px 0;
+            scrollbar-width: none;
+            -webkit-overflow-scrolling: touch;
+            flex-shrink: 0;
+        }
+        .folders-scroll-area::-webkit-scrollbar { display: none; }
+
+        .pill {
+            background: var(--glass);
+            border: 1px solid var(--glass-border);
+            padding: 8px 16px;
+            border-radius: 100px;
+            font-size: 14px;
+            font-weight: 500;
+            color: var(--text-muted);
+            white-space: nowrap;
+            cursor: pointer;
+            transition: all 0.3s var(--bezier);
+            backdrop-filter: blur(var(--blur-val));
+        }
+
+        .pill:hover {
+            color: var(--text-main);
+            background: rgba(255, 255, 255, 0.05);
+        }
+
+        .pill.active {
+            background: var(--text-main);
+            color: var(--bg);
+            border-color: var(--text-main);
+            transform: scale(1.02);
+        }
+
+        /* Contenido Principal */
+        .main-content {
+            flex: 1;
+            overflow-y: auto;
+            padding-bottom: 90px;
+            scrollbar-width: none;
+        }
+        .main-content::-webkit-scrollbar { display: none; }
+
+        .section-title {
+            font-size: 15px;
+            font-weight: 500;
+            color: var(--text-muted);
+            margin: 16px 0 12px 0;
+            letter-spacing: 0.3px;
+        }
+
+        /* Layout Grid Adaptativo Símbolos */
+        .symbols-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(56px, 1fr));
+            gap: 10px;
+            margin-bottom: 24px;
+        }
+
+        .symbol-item {
+            background: var(--glass);
+            border: 1px solid var(--glass-border);
+            height: 56px;
+            border-radius: 14px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 22px;
+            color: var(--text-main);
+            cursor: pointer;
+            backdrop-filter: blur(var(--blur-val));
+            transition: transform 0.2s var(--spring), background 0.2s var(--bezier), border-color 0.2s var(--bezier);
+            user-select: none;
+        }
+
+        .symbol-item:hover {
+            background: var(--surface-hover);
+            border-color: rgba(255, 255, 255, 0.2);
+            transform: translateY(-2px);
+        }
+
+        .symbol-item:active {
+            transform: scale(0.9);
+        }
+
+        /* Categorías en vista global */
+        .category-group {
+            margin-bottom: 24px;
+        }
+
+        .category-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 12px;
+        }
+
+        .category-header h3 {
+            font-size: 16px;
+            font-weight: 500;
+            color: var(--text-muted);
+        }
+
+        /* Buscador Flotante (FAB Search) */
+        .search-fab-container {
+            position: fixed;
+            bottom: calc(env(safe-area-inset-bottom) + 24px);
+            left: 50%;
+            transform: translateX(-50%);
+            width: calc(100% - 48px);
+            max-width: 400px;
+            z-index: 100;
+            pointer-events: none;
+        }
+
+        .search-wrapper {
+            width: 50px;
+            height: 50px;
+            background: rgba(20, 20, 20, 0.85);
+            border: 1px solid var(--glass-border);
+            border-radius: 100px;
+            margin: 0 auto;
+            backdrop-filter: blur(40px);
+            box-shadow: 0 12px 40px rgba(0, 0, 0, 0.7);
+            display: flex;
+            align-items: center;
+            transition: width 0.4s var(--spring), cubic-bezier(0.34, 1.3, 0.64, 1);
+            pointer-events: auto;
+            overflow: hidden;
+            position: relative;
+        }
+
+        .search-wrapper.expanded {
+            width: 100%;
+        }
+
+        .search-icon-btn {
+            width: 50px;
+            height: 50px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: var(--text-main);
+            cursor: pointer;
+            flex-shrink: 0;
+            background: transparent;
+            border: none;
+        }
+
+        .search-input {
+            width: 100%;
+            background: transparent;
+            border: none;
+            outline: none;
+            color: var(--text-main);
+            font-family: 'Outfit', sans-serif;
+            font-size: 16px;
+            font-weight: 400;
+            padding-right: 48px;
+            opacity: 0;
+            pointer-events: none;
+            transition: opacity 0.2s var(--bezier);
+        }
+
+        .search-wrapper.expanded .search-input {
+            opacity: 1;
+            pointer-events: auto;
+        }
+
+        .search-clear-btn {
+            position: absolute;
+            right: 6px;
+            width: 38px;
+            height: 38px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: var(--text-muted);
+            background: transparent;
+            border: none;
+            cursor: pointer;
+            opacity: 0;
+            transform: scale(0.8);
+            transition: opacity 0.2s var(--bezier), transform 0.2s var(--bezier);
+        }
+
+        .search-wrapper.expanded .search-clear-btn.visible {
+            opacity: 1;
+            transform: scale(1);
+        }
+
+        /* Notificación Toast Copiado */
+        .toast {
+            position: fixed;
+            top: calc(env(safe-area-inset-top) + 20px);
+            left: 50%;
+            transform: translate(-50%, -30px);
+            background: rgba(255, 255, 255, 0.95);
+            color: #000000;
+            padding: 10px 20px;
+            border-radius: 100px;
+            font-size: 14px;
+            font-weight: 600;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.5);
+            opacity: 0;
+            pointer-events: none;
+            transition: transform 0.4s var(--spring), opacity 0.3s var(--bezier);
+            z-index: 1000;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .toast.active {
+            opacity: 1;
+            transform: translate(-50%, 0);
+        }
+
+        /* Modales Estilo Sistema */
+        .modal-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100vw;
+            height: 100vh;
+            background: transparent;
+            z-index: 500;
+            pointer-events: none;
+            display: flex;
+            align-items: flex-end;
+            justify-content: center;
+        }
+
+        .modal-sheet {
+            width: 100%;
+            max-width: 550px;
+            background: rgba(20, 20, 20, 0.85);
+            border-top: 1px solid var(--glass-border);
+            border-left: 1px solid var(--glass-border);
+            border-right: 1px solid var(--glass-border);
+            border-radius: 24px 24px 0 0;
+            backdrop-filter: blur(40px);
+            padding: 24px;
+            padding-bottom: calc(env(safe-area-inset-bottom) + 30px);
+            transform: translateY(100%);
+            transition: transform 0.4s var(--bezier);
+            pointer-events: auto;
+            box-shadow: 0 -10px 40px rgba(0,0,0,0.8);
+        }
+
+        .modal-overlay.active .modal-sheet {
+            transform: translateY(0);
+        }
+
+        .modal-overlay.active {
+            pointer-events: auto;
+        }
+
+        .modal-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 20px;
+        }
+
+        .modal-title {
+            font-size: 18px;
+            font-weight: 600;
+        }
+
+        /* Form Estructura */
+        .form-group {
+            margin-bottom: 18px;
+        }
+
+        .form-label {
+            display: block;
+            font-size: 13px;
+            font-weight: 500;
+            color: var(--text-muted);
+            margin-bottom: 8px;
+        }
+
+        .form-input {
+            width: 100%;
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid var(--glass-border);
+            border-radius: 12px;
+            padding: 12px 16px;
+            color: var(--text-main);
+            font-family: 'Outfit', sans-serif;
+            font-size: 15px;
+            transition: border-color 0.2s var(--bezier), background 0.2s var(--bezier);
+        }
+
+        .form-input:focus {
+            outline: none;
+            border-color: rgba(255,255,255,0.3);
+            background: rgba(255, 255, 255, 0.08);
+        }
+
+        /* Shake & Error Validation */
+        @keyframes errorShake {
+            0%, 100% { transform: translateX(0); }
+            20%, 60% { transform: translateX(-6px); }
+            40%, 80% { transform: translateX(6px); }
+        }
+
+        .error-shake {
+            animation: errorShake 0.3s var(--bezier);
+            border-color: var(--accent-danger) !important;
+        }
+
+        /* Previsualizador reactivo */
+        .asset-preview {
+            width: 100%;
+            height: 100px;
+            background: rgba(255, 255, 255, 0.02);
+            border: 1px dashed var(--glass-border);
+            border-radius: 14px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            margin-bottom: 20px;
+        }
+
+        .preview-box {
+            font-size: 28px;
+            min-height: 40px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .preview-caption {
+            font-size: 12px;
+            color: var(--text-muted);
+            margin-top: 4px;
+        }
+
+        .btn-submit {
+            width: 100%;
+            background: var(--text-main);
+            color: var(--bg);
+            border: none;
+            border-radius: 14px;
+            padding: 14px;
+            font-size: 15px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: opacity 0.2s var(--bezier), transform 0.2s var(--spring);
+        }
+
+        .btn-submit:active {
+            transform: scale(0.98);
+        }
+
+        /* Lista de elementos en papelera */
+        .trash-list {
+            max-height: 200px;
+            overflow-y: auto;
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+            margin-bottom: 16px;
+        }
+
+        .trash-row {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            background: rgba(255,255,255,0.03);
+            padding: 10px 14px;
+            border-radius: 10px;
+            border: 1px solid var(--glass-border);
+        }
+
+        .trash-char {
+            font-size: 18px;
+        }
+
+        .trash-actions {
+            display: flex;
+            gap: 8px;
+        }
+
+        .btn-text-action {
+            background: transparent;
+            border: none;
+            color: var(--accent-success);
+            font-size: 13px;
+            font-weight: 500;
+            cursor: pointer;
+        }
+
+        .btn-text-action.danger {
+            color: var(--accent-danger);
+        }
+
+        /* Layouts Dinámicos via Media Queries */
+        @media(min-width: 600px) {
+            .symbols-grid {
+                grid-template-columns: repeat(auto-fill, minmax(64px, 1fr));
+                gap: 12px;
+            }
+            .symbol-item {
+                height: 64px;
+                font-size: 24px;
+            }
+        }
+    </style>
+</head>
+<body>
+
+    <div class="app-container" id="main-view">
+        <header>
+            <div class="header-left">
+                <div class="app-icon-badge">
+                    <i data-lucide="layers" size="20" style="color: var(--text-main);"></i>
+                </div>
+                <div>
+                    <h1 style="display: flex; align-items: center;">
+                        PureSímbolos
+                        <span class="counter-badge" id="global-count">0</span>
+                    </h1>
+                </div>
+            </div>
+            <div class="header-actions">
+                <button class="btn-icon" id="open-trash-btn" title="Papelera de reciclaje">
+                    <i data-lucide="trash-2" size="18"></i>
+                </button>
+                <button class="btn-icon" id="open-add-btn" title="Añadir Símbolo Personalizado">
+                    <i data-lucide="plus" size="18"></i>
+                </button>
+            </div>
+        </header>
+
+        <div class="folders-scroll-area" id="categories-pills">
+            </div>
+
+        <main class="main-content" id="symbols-content-area">
+            </main>
+    </div>
+
+    <div class="search-fab-container">
+        <div class="search-wrapper" id="search-container">
+            <button class="search-icon-btn" id="search-trigger" title="Buscar Símbolo">
+                <i data-lucide="search" size="20" id="search-icon"></i>
+            </button>
+            <input type="text" class="search-input" id="search-input" placeholder="Buscar por nombre o carácter...">
+            <button class="search-clear-btn" id="search-clear" title="Limpiar búsqueda">
+                <i data-lucide="x" size="16"></i>
+            </button>
+        </div>
+    </div>
+
+    <div class="toast" id="toast-notification">
+        <i data-lucide="check" size="16" style="color: #000;"></i>
+        <span id="toast-text">Copiado al portapapeles</span>
+    </div>
+
+    <div class="modal-overlay" id="modal-add">
+        <div class="modal-sheet">
+            <div class="modal-header">
+                <div class="modal-title">Añadir Símbolo</div>
+                <button class="btn-icon" onclick="closeActiveModal('modal-add')">
+                    <i data-lucide="x" size="18"></i>
+                </button>
+            </div>
+            <div class="form-group">
+                <label class="form-label">Símbolo / Carácter Único</label>
+                <input type="text" class="form-input" id="input-char" maxlength="4" placeholder="Ej. ✦">
+            </div>
+            <div class="form-group">
+                <label class="form-label">Etiqueta / Nombre Descriptivo</label>
+                <input type="text" class="form-input" id="input-name" placeholder="Ej. Estrella Brillante">
+            </div>
+            <div class="form-group">
+                <label class="form-label">Categoría Asignada</label>
+                <select class="form-input" id="input-category" style="background: rgba(30,30,30,0.9); border: 1px solid var(--glass-border); color: var(--text-main);">
+                    <option value="custom">Personalizados</option>
+                    <option value="popular">Populares</option>
+                    <option value="chess">Ajedrez</option>
+                    <option value="music">Música</option>
+                    <option value="weather">Tiempo</option>
+                    <option value="business">Negocios</option>
+                    <option value="objects">Objetos</option>
+                    <option value="tech">Técnicos</option>
+                    <option value="monochrome">Monocromáticos</option>
+                </select>
+            </div>
+            <div class="asset-preview">
+                <div class="preview-box" id="live-preview-char">-</div>
+                <div class="preview-caption" id="live-preview-name">Previsualización en tiempo real</div>
+            </div>
+            <button class="btn-submit" id="save-symbol-btn">Guardar en Colección</button>
+        </div>
+    </div>
+
+    <div class="modal-overlay" id="modal-trash">
+        <div class="modal-sheet">
+            <div class="modal-header">
+                <div class="modal-title">Papelera Logic</div>
+                <button class="btn-icon" onclick="closeActiveModal('modal-trash')">
+                    <i data-lucide="x" size="18"></i>
+                </button>
+            </div>
+            <div class="trash-list" id="trash-items-container">
+                </div>
+            <button class="btn-submit" id="empty-trash-btn" style="background: transparent; border: 1px solid var(--accent-danger); color: var(--accent-danger);">
+                Vaciar Papelera por Completo
+            </button>
+        </div>
+    </div>
+
+    <script>
+        // Estructura Base del Ecosistema Inyectado desde Símbolo.htm
+        const INITIAL_CATEGORIES = {
+            "recents": "Usados recientemente",
+            "popular": "Símbolos Populares",
+            "chess": "Símbolos De Ajedrez",
+            "music": "Music Note Símbolos",
+            "weather": "Símbolos De Tiempo",
+            "business": "Símbolos De Negocios",
+            "objects": "Símbolos De Objetos",
+            "tech": "Símbolos Técnicos",
+            "monochrome": "Emoji Monocromático",
+            "custom": "Símbolos Personalizados"
+        };
+
+        const INITIAL_SYMBOLS = [
+            // Populares
+            {char: "ღ", name: "corazon floral", cat: "popular"}, {char: "•", name: "punto", cat: "popular"}, {char: "⁂", name: "asterismo", cat: "popular"}, {char: "€", name: "euro", cat: "popular"}, {char: "™", name: "trade mark", cat: "popular"},
+            {char: "↑", name: "flecha arriba", cat: "popular"}, {char: "→", name: "flecha derecha", cat: "popular"}, {char: "↓", name: "flecha abajo", cat: "popular"}, {char: "⇝", name: "flecha curva", cat: "popular"}, {char: "√", name: "raiz cuadrada", cat: "popular"},
+            {char: "∞", name: "infinito", cat: "popular"}, {char: "░", name: "bloque degradado", cat: "popular"}, {char: "▲", name: "triangulo arriba", cat: "popular"}, {char: "▶", name: "play", cat: "popular"}, {char: "◀", name: "back", cat: "popular"},
+            {char: "●", name: "circulo negro", cat: "popular"}, {char: "☀", name: "sol brillante", cat: "popular"}, {char: "☁", name: "nube", cat: "popular"}, {char: "☂", name: "paraguas", cat: "popular"}, {char: "☃", name: "muneco de nieve", cat: "popular"},
+            {char: "☄", name: "cometa", cat: "popular"}, {char: "★", name: "estrella rellena", cat: "popular"}, {char: "☆", name: "estrella vacia", cat: "popular"}, {char: "☉", name: "sol con punto", cat: "popular"}, {char: "☐", name: "casilla vacia", cat: "popular"},
+            {char: "☑", name: "casilla verificada", cat: "popular"}, {char: "☚", name: "mano izquierda", cat: "popular"}, {char: "☛", name: "mano derecha", cat: "popular"}, {char: "☠", name: "calavera", cat: "popular"}, {char: "☢", name: "radiactivo", cat: "popular"},
+            {char: "☣", name: "riesgo biologico", cat: "popular"}, {char: "☪", name: "media luna", cat: "popular"}, {char: "☮", name: "paz", cat: "popular"}, {char: "☯", name: "yin yang", cat: "popular"}, {char: "☸", name: "rueda dharma", cat: "popular"},
+            {char: "☹", name: "cara triste", cat: "popular"}, {char: "☺", name: "cara feliz", cat: "popular"}, {char: "☻", name: "cara feliz negra", cat: "popular"}, {char: "☼", name: "sol con rayos", cat: "popular"}, {char: "✈", name: "avion", cat: "popular"},
+            {char: "✉", name: "sobre", cat: "popular"}, {char: "✎", name: "lapiz", cat: "popular"}, {char: "✓", name: "check fino", cat: "popular"}, {char: "✔", name: "check grueso", cat: "popular"}, {char: "✘", name: "cruz", cat: "popular"},
+            {char: "❤", name: "corazon rojo", cat: "popular"}, {char: "❣", name: "exclamacion corazon", cat: "popular"}, {char: "➤", name: "puntero", cat: "popular"},
+            // Ajedrez
+            {char: "♔", name: "rey blanco", cat: "chess"}, {char: "♕", name: "reina blanca", cat: "chess"}, {char: "♖", name: "torre blanca", cat: "chess"}, {char: "♗", name: "alfil blanco", cat: "chess"}, {char: "♘", name: "caballo blanco", cat: "chess"},
+            {char: "♙", name: "peon blanco", cat: "chess"}, {char: "♚", name: "rey negro", cat: "chess"}, {char: "♛", name: "reina negra", cat: "chess"}, {char: "♜", name: "torre negra", cat: "chess"}, {char: "♝", name: "alfil negro", cat: "chess"},
+            {char: "♞", name: "caballo negro", cat: "chess"}, {char: "♟", name: "peon negro", cat: "chess"},
+            // Música
+            {char: "♩", name: "negra", cat: "music"}, {char: "♪", name: "corchea", cat: "music"}, {char: "♫", name: "dos corcheas", cat: "music"}, {char: "♬", name: "semicorcheas", cat: "music"}, {char: "♭", name: "bemol", cat: "music"},
+            {char: "♮", name: "becuadro", cat: "music"}, {char: "♯", name: "sostenido", cat: "music"}, {char: "𝄞", name: "clave de sol", cat: "music"}, {char: "🎵", name: "nota musical emoji", cat: "music"}, {char: "🎶", name: "notas flotantes", cat: "music"},
+            // Tiempo
+            {char: "ϟ", name: "rayo", cat: "weather"}, {char: "⛆", name: "lluvia continua", cat: "weather"}, {char: "⛇", name: "muneco nieve bajo nieve", cat: "weather"}, {char: "⛈︎", name: "tormenta", cat: "weather"}, {char: "☽", name: "luna creciente", cat: "weather"},
+            {char: "☾", name: "luna menguante", cat: "weather"}, {char: "❄", name: "copo nieve", cat: "weather"}, {char: "❅", name: "cristal helado", cat: "weather"}, {char: "❆", name: "flor de nieve", cat: "weather"}, {char: "♨", name: "aguas termales", cat: "weather"},
+            // Negocios
+            {char: "©", name: "copyright", cat: "business"}, {char: "®", name: "registrado", cat: "business"}, {char: "℗", name: "fonograma", cat: "business"}, {char: "℠", name: "service mark", cat: "business"}, {char: "℡", name: "telefono logotipo", cat: "business"},
+            // Objetos
+            {char: "☏", name: "telefono viejo", cat: "objects"}, {char: "✁", name: "tijeras arriba", cat: "objects"}, {char: "✂", name: "tijeras", cat: "objects"}, {char: "✄", name: "tijeras corte", cat: "objects"}, {char: "⚖", name: "balanza", cat: "objects"},
+            {char: "⚗", name: "alambique", cat: "objects"}, {char: "⚐", name: "bandera blanca", cat: "objects"}, {char: "⚑", name: "bandera negra", cat: "objects"}, {char: "⚓", name: "ancla", cat: "objects"},
+            // Técnicos
+            {char: "⏎", name: "retorno de carro enter", cat: "tech"}, {char: "⇧", name: "shift", cat: "tech"}, {char: "⏏", name: "eject", cat: "tech"}, {char: "⌂", name: "casa home", cat: "tech"}, {char: "⌘", name: "command mac", cat: "tech"},
+            {char: "⎋", name: "escape esc", cat: "tech"}, {char: "⊞", name: "windows logo", cat: "tech"}, {char: "⌨", name: "teclado", cat: "tech"},
+            // Monocromáticos
+            {char: "☺︎", name: "smile monocromo", cat: "monochrome"}, {char: "☘︎", name: "trebol monocromo", cat: "monochrome"}, {char: "♠︎", name: "picas", cat: "monochrome"}, {char: "♥︎", name: "corazones baraja", cat: "monochrome"}, {char: "♦︎", name: "diamantes", cat: "monochrome"},
+            {char: "♣︎", name: "treboles", cat: "monochrome"}, {char: "⚛︎", name: "atomo", cat: "monochrome"}, {char: "⚓︎", name: "ancla fija", cat: "monochrome"}
+        ];
+
+        // Estado Global Reactivo Centralizado
+        let appData = {
+            categories: INITIAL_CATEGORIES,
+            items: [],
+            recents: [],
+            trash: [],
+            currentCategory: 'all',
+            searchQuery: ''
+        };
+
+        // Historial de Modales Activos Stack (History API Control)
+        let activeModalsStack = [];
+
+        window.onload = function() {
+            initStorage();
+            bindEvents();
+            renderApp();
+            lucide.createIcons();
+        };
+
+        function initStorage() {
+            try {
+                const stored = localStorage.getItem('pure_symbols_schema');
+                if (stored) {
+                    const parsed = JSON.parse(stored);
+                    appData.items = parsed.items || [];
+                    appData.recents = parsed.recents || [];
+                    appData.trash = parsed.trash || [];
+                } else {
+                    appData.items = [...INITIAL_SYMBOLS];
+                    saveData();
+                }
+            } catch (e) {
+                appData.items = [...INITIAL_SYMBOLS];
+            }
+        }
+
+        function saveData() {
+            localStorage.setItem('pure_symbols_schema', JSON.stringify({
+                items: appData.items,
+                recents: appData.recents,
+                trash: appData.trash
+            }));
+        }
+
+        // Sistema Unificado de Renderizado Base
+        function renderApp() {
+            renderPills();
+            renderSymbols();
+            renderTrash();
+            updateGlobalCounter();
+        }
+
+        function updateGlobalCounter() {
+            const countEl = document.getElementById('global-count');
+            const total = appData.items.filter(i => !appData.trash.some(t => t.char === i.char)).length;
+            
+            if (countEl.textContent !== String(total)) {
+                countEl.textContent = total;
+                countEl.classList.add('pulse');
+                setTimeout(() => countEl.classList.remove('pulse'), 250);
+            }
+        }
+
+        function renderPills() {
+            const container = document.getElementById('categories-pills');
+            container.innerHTML = '';
+
+            // Píldora "Todos"
+            const allPill = document.createElement('div');
+            allPill.className = `pill ${appData.currentCategory === 'all' ? 'active' : ''}`;
+            allPill.textContent = 'Ver Todos';
+            allPill.onclick = () => { appData.currentCategory = 'all'; renderApp(); };
+            container.appendChild(allPill);
+
+            // Resto de categorías configuradas
+            for (let key in appData.categories) {
+                if (key === 'recents' && appData.recents.length === 0) continue;
+                
+                const pill = document.createElement('div');
+                pill.className = `pill ${appData.currentCategory === key ? 'active' : ''}`;
+                pill.textContent = appData.categories[key];
+                pill.onclick = () => { appData.currentCategory = key; renderApp(); };
+                container.appendChild(pill);
+            }
+        }
+
+        function renderSymbols() {
+            const area = document.getElementById('symbols-content-area');
+            area.innerHTML = '';
+
+            let filteredItems = appData.items;
+
+            // Filtro por Buscador
+            if (appData.searchQuery.trim() !== '') {
+                const q = appData.searchQuery.toLowerCase();
+                filteredItems = filteredItems.filter(i => i.char.includes(q) || i.name.toLowerCase().includes(q));
+                
+                // Vista de búsqueda plana
+                const title = document.createElement('div');
+                title.className = 'section-title';
+                title.textContent = `Resultados para "${appData.searchQuery}"`;
+                area.appendChild(title);
+
+                const grid = document.createElement('div');
+                grid.className = 'symbols-grid';
+                filteredItems.forEach(item => grid.appendChild(createSymbolNode(item)));
+                area.appendChild(grid);
+                return;
+            }
+
+            // Vista por Filtro de Categorías
+            if (appData.currentCategory === 'recents') {
+                createCategoryBlock(area, 'recents', 'Usados recientemente', appData.recents);
+            } else if (appData.currentCategory !== 'all') {
+                const itemsInCat = filteredItems.filter(i => i.cat === appData.currentCategory);
+                createCategoryBlock(area, appData.currentCategory, appData.categories[appData.currentCategory], itemsInCat);
+            } else {
+                // Renderizar todas agrupadas de manera corporativa y limpia
+                if (appData.recents.length > 0) {
+                    createCategoryBlock(area, 'recents', 'Usados recientemente', appData.recents);
+                }
+                for (let catKey in appData.categories) {
+                    if (catKey === 'recents') continue;
+                    const itemsInCat = filteredItems.filter(i => i.cat === catKey);
+                    if (itemsInCat.length > 0) {
+                        createCategoryBlock(area, catKey, appData.categories[catKey], itemsInCat);
+                    }
+                }
+            }
+        }
+
+        function createCategoryBlock(parent, key, label, items) {
+            const group = document.createElement('div');
+            group.className = 'category-group';
+
+            const header = document.createElement('div');
+            header.className = 'category-header';
+            header.innerHTML = `<h3>${label}</h3>`;
+            group.appendChild(header);
+
+            const grid = document.createElement('div');
+            grid.className = 'symbols-grid';
+
+            items.forEach(item => {
+                grid.appendChild(createSymbolNode(item));
+            });
+
+            group.appendChild(grid);
+            parent.appendChild(group);
+        }
+
+        function createSymbolNode(item) {
+            const node = document.createElement('div');
+            node.className = 'symbol-item';
+            node.textContent = item.char;
+            node.title = item.name;
+            
+            // Copiar directamente por microinteracción táctil
+            node.onclick = () => {
+                navigator.clipboard.writeText(item.char).then(() => {
+                    triggerToast(`¡Copiado: ${item.char}!`);
+                    pushRecent(item);
+                });
+            };
+
+            // Evento contextual para eliminar lógicamente del listado (clic derecho o pulsación larga)
+            node.oncontextmenu = (e) => {
+                e.preventDefault();
+                moveItemToTrash(item);
+            };
+
+            return node;
+        }
+
+        function pushRecent(item) {
+            appData.recents = appData.recents.filter(r => r.char !== item.char);
+            appData.recents.unshift(item);
+            if (appData.recents.length > 16) appData.recents.pop();
+            saveData();
+            renderPills();
+        }
+
+        function moveItemToTrash(item) {
+            appData.items = appData.items.filter(i => i.char !== item.char);
+            appData.recents = appData.recents.filter(r => r.char !== item.char);
+            appData.trash.push(item);
+            saveData();
+            renderApp();
+            triggerToast(`Símbolo movido a la papelera.`);
+        }
+
+        function renderTrash() {
+            const container = document.getElementById('trash-items-container');
+            container.innerHTML = '';
+
+            if (appData.trash.length === 0) {
+                container.innerHTML = `<div style="color:var(--text-muted); font-size:14px; text-align:center; padding: 20px 0;">La papelera está vacía</div>`;
+                return;
+            }
+
+            appData.trash.forEach((item, index) => {
+                const row = document.createElement('div');
+                row.className = 'trash-row';
+                row.innerHTML = `
+                    <span class="trash-char">${item.char} <small style="color:var(--text-muted); font-size:12px;">(${item.name})</small></span>
+                    <div class="trash-actions">
+                        <button class="btn-text-action" onclick="restoreFromTrash(${index})">Restaurar</button>
+                        <button class="btn-text-action danger" onclick="purgeFromTrash(${index})">Purgar</button>
+                    </div>
+                `;
+                container.appendChild(row);
+            });
+        }
+
+        function restoreFromTrash(index) {
+            const item = appData.trash.splice(index, 1)[0];
+            appData.items.push(item);
+            saveData();
+            renderApp();
+        }
+
+        function purgeFromTrash(index) {
+            appData.trash.splice(index, 1);
+            saveData();
+            renderApp();
+        }
+
+        function triggerToast(text) {
+            const toast = document.getElementById('toast-notification');
+            document.getElementById('toast-text').textContent = text;
+            toast.classList.add('active');
+            setTimeout(() => toast.classList.remove('active'), 2500);
+        }
+
+        // Control Avanzado Historial y Modales (History API Stack)
+        function openModal(modalId) {
+            document.getElementById('main-view').classList.add('backgrounded');
+            document.getElementById(modalId).classList.add('active');
+            
+            activeModalsStack.push(modalId);
+            window.history.pushState({ modalId: modalId }, "");
+        }
+
+        function closeActiveModal(modalId) {
+            if (activeModalsStack.includes(modalId)) {
+                window.history.back();
+            }
+        }
+
+        window.addEventListener('popstate', () => {
+            if (activeModalsStack.length > 0) {
+                const topModalId = activeModalsStack.pop();
+                document.getElementById(topModalId).classList.remove('active');
+                if (activeModalsStack.length === 0) {
+                    document.getElementById('main-view').classList.remove('backgrounded');
+                }
+            }
+        });
+
+        // Enlace de Eventos y Lógica Reactiva
+        function bindEvents() {
+            // Buscador FAB Lógica de Expansión
+            const searchContainer = document.getElementById('search-container');
+            const searchInput = document.getElementById('search-input');
+            const searchTrigger = document.getElementById('search-trigger');
+            const searchClear = document.getElementById('search-clear');
+            const searchIcon = document.getElementById('search-icon');
+
+            searchTrigger.onclick = () => {
+                if (!searchContainer.classList.contains('expanded')) {
+                    searchContainer.classList.add('expanded');
+                    searchInput.focus();
+                }
+            };
+
+            searchInput.oninput = (e) => {
+                appData.searchQuery = e.target.value;
+                if (appData.searchQuery.length > 0) {
+                    searchClear.classList.add('visible');
+                    searchIcon.setAttribute('data-lucide', 'arrow-left');
+                } else {
+                    searchClear.classList.remove('visible');
+                    searchIcon.setAttribute('data-lucide', 'search');
+                }
+                lucide.createIcons();
+                renderSymbols();
+            };
+
+            searchClear.onclick = () => {
+                searchInput.value = '';
+                appData.searchQuery = '';
+                searchClear.classList.remove('visible');
+                searchIcon.setAttribute('data-lucide', 'search');
+                lucide.createIcons();
+                renderSymbols();
+                searchInput.focus();
+            };
+
+            // Cerrar buscador si se pulsa fuera de él de manera inteligente
+            document.addEventListener('click', (e) => {
+                if (!searchContainer.contains(e.target) && searchInput.value.trim() === '') {
+                    searchContainer.classList.remove('expanded');
+                }
+            });
+
+            // Modales Action Triggers
+            document.getElementById('open-add-btn').onclick = () => openModal('modal-add');
+            document.getElementById('open-trash-btn').onclick = () => openModal('modal-trash');
+
+            // Formulario Reactivo Previsualizador
+            const inputChar = document.getElementById('input-char');
+            const inputName = document.getElementById('input-name');
+            const liveChar = document.getElementById('live-preview-char');
+            const liveName = document.getElementById('live-preview-name');
+
+            inputChar.oninput = (e) => {
+                liveChar.textContent = e.target.value || '-';
+            };
+            inputName.oninput = (e) => {
+                liveName.textContent = e.target.value || 'Previsualización en tiempo real';
+            };
+
+            // Guardado Reactivo con Shake Error UI Validation
+            document.getElementById('save-symbol-btn').onclick = () => {
+                const charVal = inputChar.value.trim();
+                const nameVal = inputName.value.trim();
+                const catVal = document.getElementById('input-category').value;
+
+                let hasError = false;
+
+                if (!charVal) {
+                    applyShake(inputChar);
+                    hasError = true;
+                }
+                if (!nameVal) {
+                    applyShake(inputName);
+                    hasError = true;
+                }
+
+                if (hasError) return;
+
+                // Insertar en estado centralizado
+                const newItem = { char: charVal, name: nameVal, cat: catVal };
+                appData.items.push(newItem);
+                saveData();
+                renderApp();
+
+                // Limpiar formulario de forma higiénica
+                inputChar.value = '';
+                inputName.value = '';
+                liveChar.textContent = '-';
+                liveName.textContent = 'Previsualización en tiempo real';
+
+                closeActiveModal('modal-add');
+                triggerToast('Símbolo personalizado añadido.');
+            };
+
+            // Vaciar completamente la papelera
+            document.getElementById('empty-trash-btn').onclick = () => {
+                appData.trash = [];
+                saveData();
+                renderApp();
+                closeActiveModal('modal-trash');
+                triggerToast('Papelera vaciada por completo.');
+            };
+        }
+
+        function applyShake(element) {
+            element.classList.add('error-shake');
+            setTimeout(() => {
+                element.classList.remove('error-shake');
+            }, 300);
+        }
+    </script>
+</body>
+</html>

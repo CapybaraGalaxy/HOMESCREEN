@@ -1,0 +1,907 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+    <title>Neo-Glass Fancy Text Studio</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@200;300;400;500;600;700&display=swap" rel="stylesheet">
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <style>
+        :root {
+            --bg: #000000;
+            --surface: #121212;
+            --surface-hover: #1c1c1e;
+            --glass: rgba(15, 15, 15, 0.4);
+            --glass-border: rgba(255, 255, 255, 0.08);
+            --blur-val: 30px;
+            --text-main: #FFFFFF;
+            --text-muted: #8E8E93;
+            --accent-danger: #FF453A;
+            --accent-success: #34C759;
+            --accent-blue: #0A84FF;
+            --bezier: cubic-bezier(0.16, 1, 0.3, 1);
+            --spring: cubic-bezier(0.34, 1.56, 0.64, 1);
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            -webkit-tap-highlight-color: transparent;
+        }
+
+        body {
+            background-color: var(--bg);
+            color: var(--text-main);
+            font-family: 'Outfit', sans-serif;
+            min-height: 100dvh;
+            overflow: hidden;
+        }
+
+        .app-container {
+            display: flex;
+            flex-direction: column;
+            height: 100dvh;
+            max-width: 900px;
+            margin: 0 auto;
+            padding: env(safe-area-inset-top) 24px calc(env(safe-area-inset-bottom) + 16px) 24px;
+            transition: transform 0.5s var(--bezier), filter 0.5s var(--bezier);
+        }
+
+        .app-container.backgrounded {
+            transform: scale(0.96);
+            filter: blur(8px);
+            pointer-events: none;
+        }
+
+        header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 20px 0;
+            border-bottom: 1px solid var(--glass-border);
+        }
+
+        .header-left {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .app-icon-badge {
+            width: 42px;
+            height: 42px;
+            border-radius: 12px;
+            background: radial-gradient(circle at center, rgba(255,255,255,0.1) 0%, rgba(0,0,0,0) 100%);
+            border: 1px solid var(--glass-border);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.5);
+        }
+
+        .brand-title {
+            font-size: 20px;
+            font-weight: 600;
+            letter-spacing: -0.5px;
+        }
+
+        .counter-badge {
+            font-size: 13px;
+            color: var(--text-muted);
+            font-variant-numeric: tabular-nums;
+            margin-left: 6px;
+            animation: pulse-light 1.5s infinite ease-in-out;
+        }
+
+        .folders-scroll-area {
+            display: flex;
+            gap: 10px;
+            overflow-x: auto;
+            padding: 16px 0;
+            scrollbar-width: none;
+            -webkit-overflow-scrolling: touch;
+        }
+        .folders-scroll-area::-webkit-scrollbar { display: none; }
+
+        .pill-button {
+            background: var(--glass);
+            border: 1px solid var(--glass-border);
+            color: var(--text-muted);
+            padding: 8px 16px;
+            border-radius: 100px;
+            font-size: 14px;
+            font-weight: 500;
+            cursor: pointer;
+            white-space: nowrap;
+            transition: all 0.3s var(--bezier);
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .pill-button:hover, .pill-button.active {
+            color: var(--text-main);
+            border-color: rgba(255, 255, 255, 0.25);
+            background: rgba(255,255,255,0.05);
+        }
+
+        .pill-button.active {
+            background: rgba(255, 255, 255, 0.1);
+            box-shadow: 0 0 15px rgba(255,255,255,0.05);
+        }
+
+        .main-content {
+            flex: 1;
+            overflow-y: auto;
+            padding-bottom: 90px;
+            scrollbar-width: none;
+        }
+        .main-content::-webkit-scrollbar { display: none; }
+
+        .input-hero-box {
+            background: var(--glass);
+            border: 1px solid var(--glass-border);
+            border-radius: 16px;
+            padding: 16px;
+            margin-bottom: 20px;
+            backdrop-filter: blur(var(--blur-val));
+            -webkit-backdrop-filter: blur(var(--blur-val));
+            transition: border-color 0.3s var(--bezier);
+        }
+
+        .input-hero-box:focus-within {
+            border-color: rgba(255, 255, 255, 0.2);
+        }
+
+        .input-textarea {
+            width: 100%;
+            background: transparent;
+            border: none;
+            color: var(--text-main);
+            font-family: 'Outfit', sans-serif;
+            font-size: 16px;
+            resize: none;
+            outline: none;
+            min-height: 44px;
+            max-height: 120px;
+        }
+
+        .grid-layout {
+            display: grid;
+            grid-template-columns: 1fr;
+            gap: 12px;
+        }
+
+        @media (min-width: 600px) {
+            .grid-layout {
+                grid-template-columns: repeat(2, 1fr);
+            }
+        }
+
+        .card-item {
+            background: var(--glass);
+            border: 1px solid var(--glass-border);
+            border-radius: 16px;
+            padding: 16px;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+            gap: 12px;
+            backdrop-filter: blur(var(--blur-val));
+            -webkit-backdrop-filter: blur(var(--blur-val));
+            transition: transform 0.3s var(--bezier), background 0.3s var(--bezier);
+            cursor: pointer;
+            position: relative;
+        }
+
+        .card-item:hover {
+            background: var(--surface-hover);
+            transform: translateY(-2px);
+        }
+
+        .card-meta {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            color: var(--text-muted);
+            font-size: 12px;
+            font-weight: 500;
+        }
+
+        .card-value {
+            font-size: 18px;
+            word-break: break-all;
+            user-select: all;
+            min-height: 26px;
+        }
+
+        .fab-search-container {
+            position: fixed;
+            bottom: calc(env(safe-area-inset-bottom) + 24px);
+            left: 50%;
+            transform: translateX(-50%);
+            z-index: 100;
+            width: calc(100% - 48px);
+            max-width: 400px;
+            display: flex;
+            justify-content: center;
+        }
+
+        .fab-search {
+            background: rgba(20, 20, 20, 0.85);
+            border: 1px solid var(--glass-border);
+            backdrop-filter: blur(40px);
+            -webkit-backdrop-filter: blur(40px);
+            border-radius: 100px;
+            padding: 6px 12px 6px 18px;
+            display: flex;
+            align-items: center;
+            width: 100%;
+            box-shadow: 0 10px 40px rgba(0,0,0,0.6);
+            transition: all 0.4s var(--spring);
+        }
+
+        .fab-search input {
+            background: transparent;
+            border: none;
+            outline: none;
+            color: var(--text-main);
+            font-family: 'Outfit', sans-serif;
+            font-size: 15px;
+            flex: 1;
+            padding-right: 10px;
+        }
+
+        .fab-btn {
+            width: 36px;
+            height: 36px;
+            border-radius: 50%;
+            background: transparent;
+            border: none;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            color: var(--text-muted);
+            transition: color 0.2s var(--bezier);
+        }
+
+        .fab-btn:hover {
+            color: var(--text-main);
+        }
+
+        .modal-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0,0,0,0.4);
+            backdrop-filter: blur(10px);
+            -webkit-backdrop-filter: blur(10px);
+            z-index: 1000;
+            opacity: 0;
+            pointer-events: none;
+            transition: opacity 0.4s var(--bezier);
+            display: flex;
+            align-items: flex-end;
+            justify-content: center;
+        }
+
+        @media (min-width: 600px) {
+            .modal-overlay {
+                align-items: center;
+            }
+        }
+
+        .modal-overlay.active {
+            opacity: 1;
+            pointer-events: auto;
+        }
+
+        .modal-sheet {
+            background: #0d0d0d;
+            border-top: 1px solid var(--glass-border);
+            border-radius: 24px 24px 0 0;
+            width: 100%;
+            max-width: 500px;
+            padding: 24px;
+            transform: translateY(100%);
+            transition: transform 0.4s var(--bezier);
+            box-shadow: 0 -10px 40px rgba(0,0,0,0.5);
+        }
+
+        @media (min-width: 600px) {
+            .modal-sheet {
+                border: 1px solid var(--glass-border);
+                border-radius: 24px;
+                transform: scale(0.9) translateY(30px);
+                transition: transform 0.4s var(--spring);
+            }
+        }
+
+        .modal-overlay.active .modal-sheet {
+            transform: translateY(0);
+        }
+
+        @media (min-width: 600px) {
+            .modal-overlay.active .modal-sheet {
+                transform: scale(1) translateY(0);
+            }
+        }
+
+        .modal-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+        }
+
+        .modal-title {
+            font-size: 18px;
+            font-weight: 600;
+        }
+
+        .form-group {
+            margin-bottom: 16px;
+        }
+
+        .form-label {
+            font-size: 13px;
+            color: var(--text-muted);
+            margin-bottom: 6px;
+            display: block;
+            font-weight: 500;
+        }
+
+        .form-input {
+            width: 100%;
+            background: var(--surface);
+            border: 1px solid var(--glass-border);
+            border-radius: 12px;
+            padding: 12px 14px;
+            color: var(--text-main);
+            font-family: 'Outfit', sans-serif;
+            font-size: 15px;
+            outline: none;
+            transition: border-color 0.3s var(--bezier);
+        }
+
+        .form-input:focus {
+            border-color: rgba(255, 255, 255, 0.2);
+        }
+
+        .live-preview {
+            background: rgba(255,255,255,0.02);
+            border: 1px dashed var(--glass-border);
+            border-radius: 12px;
+            padding: 12px;
+            margin-top: 8px;
+            font-size: 14px;
+            min-height: 42px;
+            display: flex;
+            align-items: center;
+            color: var(--text-muted);
+        }
+
+        .modal-actions {
+            display: flex;
+            gap: 12px;
+            margin-top: 24px;
+        }
+
+        .btn {
+            flex: 1;
+            padding: 12px;
+            border-radius: 12px;
+            font-family: 'Outfit', sans-serif;
+            font-size: 15px;
+            font-weight: 600;
+            cursor: pointer;
+            border: none;
+            transition: all 0.2s var(--bezier);
+        }
+
+        .btn-secondary {
+            background: var(--surface);
+            color: var(--text-main);
+            border: 1px solid var(--glass-border);
+        }
+
+        .btn-primary {
+            background: var(--text-main);
+            color: var(--bg);
+        }
+
+        .btn-secondary:hover { background: var(--surface-hover); }
+        .btn-primary:hover { opacity: 0.9; }
+
+        .toast {
+            position: fixed;
+            top: 24px;
+            left: 50%;
+            transform: translateX(-50%) translateY(-100px);
+            background: rgba(20,20,20,0.9);
+            border: 1px solid var(--glass-border);
+            padding: 10px 18px;
+            border-radius: 100px;
+            font-size: 14px;
+            font-weight: 500;
+            z-index: 2000;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            pointer-events: none;
+            opacity: 0;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.5);
+            transition: transform 0.4s var(--spring), opacity 0.3s var(--bezier);
+        }
+
+        .toast.active {
+            transform: translateX(-50%) translateY(0);
+            opacity: 1;
+        }
+
+        .error-shake {
+            animation: shake 0.3s var(--bezier);
+            border-color: var(--accent-danger) !important;
+        }
+
+        @keyframes shake {
+            0%, 100% { transform: translateX(0); }
+            20%, 60% { transform: translateX(-6px); }
+            40%, 80% { transform: translateX(6px); }
+        }
+
+        @keyframes pulse-light {
+            0%, 100% { opacity: 0.6; }
+            50% { opacity: 1; }
+        }
+
+        .toast-success i { color: var(--accent-success); }
+        .toast-error i { color: var(--accent-danger); }
+
+        .empty-state {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            padding: 60px 24px;
+            color: var(--text-muted);
+            gap: 12px;
+            text-align: center;
+        }
+    </style>
+</head>
+<body>
+
+    <div class="app-container" id="main-view">
+        <header>
+            <div class="header-left">
+                <div class="app-icon-badge">
+                    <i data-lucide="layers"></i>
+                </div>
+                <div>
+                    <h1 class="brand-title">Fancy Text</h1>
+                </div>
+            </div>
+            <div style="display:flex; align-items:center; gap:12px;">
+                <span class="counter-badge" id="styles-count">0 Estilos</span>
+                <button class="pill-button" onclick="openModal('customStyleModal')" style="padding: 6px 12px;"><i data-lucide="plus" size="16"></i></button>
+            </div>
+        </header>
+
+        <div class="folders-scroll-area" id="category-pills">
+            </div>
+
+        <main class="main-content">
+            <div class="input-hero-box">
+                <textarea class="input-textarea" id="main-input" placeholder="Escribe algo increíble aquí..." oninput="handleInput(this)"></textarea>
+            </div>
+
+            <div class="grid-layout" id="output-grid">
+                </div>
+        </main>
+    </div>
+
+    <div class="fab-search-container">
+        <div class="fab-search">
+            <input type="text" id="search-input" placeholder="Buscar estilo..." oninput="handleSearch(this)">
+            <button class="fab-btn" id="search-clear-btn" onclick="clearSearch()">
+                <i data-lucide="search" size="18"></i>
+            </button>
+        </div>
+    </div>
+
+    <div class="modal-overlay" id="customStyleModal" onclick="closeModalOnOverlay(event, 'customStyleModal')">
+        <div class="modal-sheet">
+            <div class="modal-header">
+                <h3 class="modal-title">Añadir Estilo Custom</h3>
+                <button class="fab-btn" onclick="closeActiveModal('customStyleModal')"><i data-lucide="x" size="20"></i></button>
+            </div>
+            <div class="form-group" id="form-group-name">
+                <label class="form-label">Nombre del Estilo</label>
+                <input type="text" id="custom-name" class="form-input" placeholder="Ej. Subrayado Especial" oninput="previewCustomStyle()">
+            </div>
+            <div class="form-group" id="form-group-prefix">
+                <label class="form-label">Prefijo / Adorno Izquierdo</label>
+                <input type="text" id="custom-prefix" class="form-input" placeholder="Ej. ⚡" oninput="previewCustomStyle()">
+            </div>
+            <div class="form-group" id="form-group-suffix">
+                <label class="form-label">Sufijo / Adorno Derecho</label>
+                <input type="text" id="custom-suffix" class="form-input" placeholder="Ej. ⚡" oninput="previewCustomStyle()">
+            </div>
+            <label class="form-label">Vista Previa</label>
+            <div class="live-preview" id="custom-preview-box">Escribe para previsualizar...</div>
+            <div class="modal-actions">
+                <button class="btn btn-secondary" onclick="closeActiveModal('customStyleModal')">Cancelar</button>
+                <button class="btn btn-primary" onclick="saveCustomStyle()">Guardar Estilo</button>
+            </div>
+        </div>
+    </div>
+
+    <div class="toast" id="app-toast"></div>
+
+    <script>
+        // Mapeos de transformación alfanuméricos estables
+        const alphabetMaps = {
+            "squares_filled": {
+                a:'🅰',b:'🅱',c:'🅲',d:'🅳',e:'🅴',f:'🅵',g:'🅶',h:'🅷',i:'🅸',j:'🅹',k:'🅺',l:'🅻',m:'🅼',n:'🅽',o:'🅾',p:'🅿',q:'展现',r:'🆁',s:'🆂',t:'🆃',u:'🆄',v:'🆅',w:'🆆',x:'🆇',y:'🆈',z:'🆪',
+                A:'🅰',B:'🅱',C:'🅲',D:'🅳',E:'🅴',F:'🅵',G:'🅶',H:'🅷',I:'🅸',J:'🅹',K:'🅺',L:'🅻',M:'🅼',N:'🅽',O:'🅾',P:'🅿',Q:'展现',R:'🆁',S:'🆂',T:'🆃',U:'🆄',V:'🆅',W:'🆆',X:'🆇',Y:'🆈',Z:'🆪'
+            },
+            "squares": {
+                a:'🄰',b:'🄱',c:'🄲',d:'🄳',e:'🄴',f:'🄵',g:'🄶',h:'🄷',i:'🄸',j:'🄹',k:'🄺',l:'🄻',m:'🄼',n:'🄽',o:'🄾',p:'🄿',q:'🅀',r:'🅁',s:'🅂',t:'🅃',u:'🅄',v:'🅅',w:'🅆',x:'🅇',y:'🅈',z:'🅉',
+                A:'🄰',B:'🄱',C:'🄲',D:'🄳',E:'🄴',F:'🄵',G:'🄶',H:'🄷',I:'🄸',J:'🄹',K:'🄺',L:'🄻',M:'🄼',N:'🄽',O:'🄾',P:'🄿',Q:'🅀',R:'🅁',S:'🅂',T:'🅃',U:'🅄',V:'🅅',W:'🅆',X:'🅇',Y:'🅈',Z:'🅉'
+            },
+            "fraktur": {
+                a:'𝔞',b:'𝔟',c:'𝔠',d:'𝔡',e:'𝔢',f:'𝔣',g:'𝔤',h:'𝔥',i:'𝔦',j:'j',k:'𝔨',l:'𝔩',m:'𝔪',n:'𝔫',o:'𝔬',p:'𝔭',q:'𝔮',r:'𝔯',s:'𝔰',t:'𝔱',u:'𝔲',v:'𝔳',w:'𝔴',x:'𝔵',y:'𝔶',z:'𝔷',
+                A:'𝔄',B:'𝔅',C:'𝔔',D:'𝔇',E:'𝔈',F:'𝔉',G:'𝔊',H:'𝔋',I:'𝔌',J:'𝔍',K:'𝔎',L:'𝔏',M:'𝔐',N:'𝔑',O:'𝔒',P:'𝔓',Q:'𝔔',R:'ℜ',S:'𝔖',T:'𝔗',U:'𝔘',V:'𝔙',W:'𝔚',X:'𝔛',Y:'𝔜',Z:'ℨ'
+            },
+            "fraktur_bold": {
+                a:'𝖆',b:'𝖇',c:'𝖈',d:'𝖉',e:'𝖊',f:'𝖋',g:' Add',h:'𝖍',i:'𝖎',j:' clearance',k:'𝖐',l:'𝖑',m:'𝖒',n:'𝖓',o:'𝖔',p:'𝖕',q:'𝖖',r:'𝖗',s:'𝖘',t:'𝖙',u:'𝖚',v:'𝖛',w:'𝖜',x:'𝖝',y:'𝖞',z:'𝖟',
+                A:'𝕬',B:'𝕭',C:'𝕮',D:'𝕯',E:'𝕰',F:'𝕱',G:'𝕲',H:'𝕳',I:'𝕴',J:'𝕵',K:'𝕶',L:'𝕷',M:'𝕸',N:'𝕹',O:'𝕺',P:'𝕻',Q:'𝕼',R:'𝕽',S:'𝕾',T:'𝕿',U:'𝖀',V:'𝖁',W:'𝖂',X:'𝖃',Y:'𝖄',Z:'𝖅'
+            },
+            "double_struck": {
+                a:'𝕒',b:'𝕓',c:'𝕔',d:'𝕕',e:'𝕖',f:'𝕗',g:'𝕘',h:'𝕙',i:'𝕚',j:'𝕛',k:'𝕜',l:'𝕝',m:'𝕞',n:'𝕟',o:'𝕠',p:'𝕡',q:'𝕢',r:'𝕣',s:'𝕤',t:'𝕥',u:'𝕦',v:'𝕧',w:'𝕨',x:'𝕩',y:'𝕪',z:'𝕫',
+                A:'𝔸',B:'𝔹',C:'ℂ',D:'𝔻',E:'𝔼',F:'𝔽',G:'𝔾',H:'ℍ',I:'𝕀',J:'𝕁',K:'𝕂',L:'𝕃',M:'𝕄',N:'ℕ',O:'𝕆',P:'ℙ',Q:'ℚ',R:'ℝ',S:'𝕊',T:'𝕋',U:'𝕌',V:'𝕍',W:'𝕎',X:'𝕏',Y:'𝕐',Z:'ℤ'
+            },
+            "small_caps": {
+                a:'ᴀ',b:'ʙ',c:'ᴄ',d:'ᴅ',e:'ᴇ',f:'ꜰ',g:'ɢ',h:'ʜ',i:'ɪ',j:'ᴊ',k:'ᴋ',l:'ʟ',m:'ᴍ',n:'ɴ',o:'ᴏ',p:'ᴘ',q:'ǫ',r:'ʀ',s:'ѕ',t:'ᴛ',u:'ᴜ',v:'ᴠ',w:'ᴡ',x:'x',y:'ʏ',z:'ᴢ',
+                A:'ᴀ',B:'ʙ',C:'ᴄ',D:'ᴅ',E:'ᴇ',F:'ꜰ',G:'ɢ',H:'ʜ',I:'ɪ',J:'ᴊ',K:'ᴋ',L:'ʟ',M:'ᴍ',N:'ɴ',O:'尋',P:'ᴘ',Q:'ǫ',R:'ʀ',S:'ѕ',T:'ᴛ',U:'ᴜ',V:'ᴠ',W:'ᴡ',X:'x',Y:'ʏ',Z:'ᴢ'
+            },
+            "circles_filled": {
+                a:'🅴',b:'🅵',c:'🅶',d:'🅷',e:'🅸',f:'🅹',g:'🅺',h:'🅻',i:'🅼',j:'🅽',k:'🅾',l:'🅿',m:'展现',n:'🆁',o:'🆂',p:'🆃',u:'🆄',v:'🆅',w:'🆆',x:'🆇',y:'🆈',z:'🆪',
+                A:'🅴',B:'🅵',C:'🅶',D:'🅷',E:'🅸',F:'🅹',G:'🅺',H:'🅻',I:'🅼',J:'🅽',K:'🅾',L:'🅿',M:'展现',N:'🆁',O:'🆂',P:'🆃',U:'🆄',V:'🆅',W:'🆆',X:'🆇',Y:'🆈',Z:'🆪'
+            },
+            "circles": {
+                a:'ⓐ',b:'ⓑ',c:'ⓒ',d:'ⓓ',e:'ⓔ',f:'ⓕ',g:'ⓖ',h:'ⓗ',i:'ⓘ',j:'ⓙ',k:'ⓚ',l:'ⓛ',m:'ⓜ',n:'ⓝ',o:'ⓞ',p:'ⓟ',q:'ⓠ',r:'ⓡ',s:'ⓢ',t:'ⓣ',u:'ⓤ',v:'ⓥ',w:'ⓦ',x:'ⓧ',y:'ⓨ',z:'ⓩ',
+                A:'Ⓐ',B:'Ⓑ',C:'Ⓒ',D:'Ⓓ',E:'Ⓔ',F:'Ⓕ',G:'Ⓖ',H:'Ⓗ',I:'Ⓘ',J:'Ⓙ',K:'Ⓚ',L:'Ⓛ',M:'Ⓜ',N:'Ⓝ',O:'Ⓞ',P:'Ⓟ',Q:'Ⓠ',R:'Ⓡ',S:'Ⓢ',T:'Ⓣ',U:'Ⓤ',V:'Ⓥ',W:'Ⓦ',X:'Ⓧ',Y:'Ⓨ',Z:'Ⓩ'
+            },
+            "script": {
+                a:'𝒶',b:'𝒷',c:'𝒸',d:'𝒹',e:'𝑒',f:'𝒻',g:'𝑔',h:'𝒽',i:'𝒾',j:'𝒿',k:'𝓀',l:'𝓁',m:'𝓂',n:'𝓃',o:'𝑜',p:'𝓅',q:'𝓆',r:'𝓇',s:'𝓈',t:'𝓉',u:'𝓊',v:'𝓋',w:'𝓌',x:'𝓍',y:'𝓎',z:'𝓏',
+                A:'𝒜',B:'ℬ',C:'𝒞',D:'𝒵',E:'ℰ',F:'ℱ',G:'𝒢',H:'ℋ',I:'ℐ',J:'𝒥',K:'𝒦',L:'ℒ',M:'ℳ',N:'𝒩',O:'𝒪',P:'𝒫',Q:'𝒬',R:'ℛ',S:'𝒮',T:'𝒯',U:'𝒰',V:'𝒱',W:'𝒲',X:'𝒳',Y:'𝒴',Z:'𝒵'
+            },
+            "script_bold": {
+                a:'𝓪',b:'𝓫',c:'𝓬',d:'𝓭',e:'𝓮',f:'𝓯',g:'𝓰',h:'𝓱',i:'𝓲',j:'𝓳',k:'𝓴',l:'𝓵',m:'𝓶',n:'𝓷',o:'𝓸',p:'𝓹',q:'𝓺',r:'𝓻',s:'𝓼',t:'𝓽',u:'𝓾',v:'𝓿',w:'𝔀',x:'e',y:'𝔂',z:'𝔃',
+                A:'𝓐',B:'𝓑',C:'𝓒',D:'𝓓',E:'𝓔',F:'𝓕',G:'𝓖',H:'𝓗',I:'𝓘',J:'𝓙',K:'𝓚',L:'𝓛',M:'𝓜',N:'𝓝',O:'𝓞',P:'𝓟',Q:'𝓠',R:'𝓡',S:'𝓢',T:'𝓣',U:'𝓤',V:'𝓥',W:'𝓦',X:'X',Y:'Y',Z:'𝓩'
+            },
+            "bold_sans": {
+                a:'𝗳',b:'𝗮',c:'𝗻',d:'𝗰',e:'𝘆',f:' ',g:'𝘁',h:'𝗲',i:'𝘅',j:'𝘁',k:'𝗸',l:'𝗹',m:'𝗺',n:'𝗻',o:'𝗼',p:'𝗽',q:'𝗾',r:'𝗿',s:'𝘀',t:'𝘁',u:'𝘂',v:'𝘃',w:'𝘄',x:'𝘅',y:'𝘆',z:'𝘇',
+                A:'𝗔',B:'𝗕',C:'𝗖',D:'𝗗',E:'𝗘',F:'𝗙',G:'𝗚',H:'𝗛',I:'𝗜',J:'𝗝',K:'𝗞',L:'𝗟',M:'𝗠',N:'𝗡',O:'𝗢',P:'𝗣',Q:'𝗤',R:'𝗥',S:'𝗦',T:'𝗧',U:'𝗨',V:'𝗩',W:'𝗪',X:'𝗫',Y:'𝗬',Z:'𝗭'
+            },
+            "bold_serif": {
+                a:'𝐟',b:'𝐚',c:'𝐧',d:'𝐜',e:'𝐲',f:' ',g:'𝐭',h:'𝐞',i:'𝐱',j:'𝐭',k:'𝐤',l:'𝐥',m:'𝐦',n:'𝐧',o:'𝐨',p:'𝐩',q:'𝐪',r:'𝐫',s:'𝐬',t:'𝐭',u:'𝐮',v:'𝐯',w:'𝐰',x:'𝐱',y:'𝐲',z:'𝐳',
+                A:'𝐅',B:'𝐀',C:'𝐍',D:'𝐂',E:'𝐘',F:' ',G:'𝐓',H:'𝐄',I:'𝐗',J:'𝐓',K:'𝐊',L:'𝐋',M:'𝐌',N:'𝐍',O:'𝐎',P:'𝐏',Q:'𝐐',R:'𝐑',S:'𝐒',T:'𝐓',U:'𝐔',V:'𝐕',W:'𝐖',X:'𝐗',Y:'𝐘',Z:'𝐙'
+            },
+            "italic_bold_sans": {
+                a:'𝙯',b:'𝙖',c:'𝙗',d:'𝙘',e:'𝙙',f:'𝙚',g:'𝙛',h:'𝙜',i:'𝙝',j:'𝙞',k:'𝙟',l:'𝙠',m:'𝙡',n:'𝙢',o:'𝙣',p:'𝙤',q:'𝙥',r:'𝙦',s:'𝙧',t:'𝙨',u:'𝙩',v:'𝙪',w:'𝙫',x:'𝙬',y:'𝙭',z:'𝙮',
+                A:'𝙕',B:'𝘼',C:'𝘽',D:'𝘾',E:'𝘿',F:'𝙀',G:'𝙁',H:'𝙂',I:'𝙃',J:'𝙄',K:'𝙅',L:'𝙆',M:'𝙇',N:'𝙈',O:'𝙉',P:'𝙊',Q:'𝙋',R:'𝙌',S:'𝙍',T:'𝙎',U:'𝙏',V:'𝙊',W:'𝙑',X:'𝙒',Y:'𝙭',Z:'𝙔'
+            },
+            "italic_bold_serif": {
+                a:'𝒇',b:'𝒂',c:'𝒏',d:'𝒄',e:'𝒚',f:' ',g:'𝒕',h:'𝒆',i:'𝒙',j:'𝒕',k:'𝒌',l:'𝒍',m:'𝒎',n:'𝒏',o:'𝒐',p:'𝒑',q:'𝒒',r:'𝒓',s:'𝒔',t:'𝒕',u:'𝒖',v:'𝒗',w:'𝒘',x:'𝒙',y:'𝒚',z:'𝒛',
+                A:'𝑭',B:'𝑨',C:'𝑵',D:'𝑪',E:'𝒀',F:' ',G:'𝑻',H:'𝑬',I:'𝑿',J:'𝑻',K:'𝑲',L:'𝑳',M:'𝑴',N:'𝑵',O:'𝑶',P:'𝑷',Q:'𝑸',R:'𝑹',S:'𝑺',T:'𝑻',U:'𝑼',V:'𝑽',W:'𝑾',X:'𝑿',Y:'𝒀',Z:'𝒁'
+            },
+            "italic_sans": {
+                a:'𝘧',b:'𝘢',c:'𝘯',d:'𝘤',e:'𝘺',f:' ',g:'𝘵',h:'𝘦',i:'𝘹',j:'𝘵',k:'𝘬',l:'𝘭',m:'𝘮',n:'𝘯',o:'𝘰',p:'𝘱',q:'𝘲',r:'𝘳',s:'𝘴',t:'𝘵',u:'𝘶',v:'𝘷',w:'𝘸',x:'𝘹',y:'𝘺',z:'𝘻',
+                A:'𝘍',B:'𝘈',C:'𝘕',D:'𝘊',E:'𝘠',F:' ',G:'𝘛',H:'𝘌',I:'𝘟',J:'𝘛',K:'𝘒',L:'𝘓',M:'𝘔',N:'𝘕',O:'𝘖',P:'𝘗',Q:'𝘲',R:'𝘙',S:'𝘚',T:'𝘛',U:'𝘜',V:'𝘝',W:'𝘞',X:'𝘟',Y:'𝘠',Z:'𝘡'
+            },
+            "italic_serif": {
+                a:'𝑓',b:'𝑎',c:'𝑛',d:'𝑐',e:'𝑦',f:' ',g:'𝑡',h:'𝑒',i:'𝑥',j:'𝑡',k:'𝑘',l:'𝑙',m:'𝑚',n:'𝑛',o:'𝑜',p:'𝑝',q:'𝑞',r:'𝑟',s:'𝑠',t:'𝑡',u:'𝑢',v:'𝑣',w:'𝑤',x:'𝑥',y:'𝑦',z:'𝑧',
+                A:'𝐹',B:'𝐴',C:'𝑁',D:'𝐶',E:'𝑌',F:' ',G:'𝑇',H:'𝐸',I:'𝑋',J:'𝑇',K:'𝐾',L:'𝐿',M:'𝑀',N:'registered',O:'𝑂',P:'𝑃',Q:'𝑄',R:'𝑅',S:'𝑆',T:'𝑇',U:'𝑈',V:'𝑉',W:'𝑊',X:'𝑋',Y:'𝑌',Z:'𝑍'
+            },
+            "monospace": {
+                a:'𝚏',b:'𝚊',c:'𝚗',d:'𝚌',e:'𝚢',f:' ',g:'𝚝',h:'𝚎',i:'𝚡',j:'𝚝',k:'𝚔',l:'𝚕',m:'𝚖',n:'𝚗',o:'𝚘',p:'𝚠',q:'𝚚',r:'𝚛',s:'𝚜',t:'𝚝',u:'𝚞',v:'𝚟',w:'𝚠',x:'𝚡',y:'𝚢',z:'𝚣',
+                A:'𝙵',B:'𝙰',C:'𝙽',D:'𝙲',E:'𝚈',F:' ',G:'𝚃',H:'𝙴',I:'𝚇',J:'𝚃',K:'𝚙',L:'𝙻',M:'𝙼',N:'𝙽',O:'𝙾',P:'𝙿',Q:'𝚀',R:'𝚁',S:'𝚂',T:'𝚃',U:'𝚄',V:'𝚅',W:'𝚆',X:'𝚇',Y:'𝚈',Z:'𝚉'
+            }
+        };
+
+        let appData = {
+            currentCategory: 'all',
+            searchQuery: '',
+            inputValue: 'fancy text',
+            customStyles: []
+        };
+
+        let activeModalsStack = [];
+
+        const defaultStyles = [
+            { id: 'squares_filled', name: 'Cuadrados Rellenos', type: 'map', key: 'squares_filled' },
+            { id: 'squares', name: 'Cuadrados', type: 'map', key: 'squares' },
+            { id: 'fraktur', name: 'Gótico Fraktur', type: 'map', key: 'fraktur' },
+            { id: 'fraktur_bold', name: 'Gótico Negrita', type: 'map', key: 'fraktur_bold' },
+            { id: 'double_struck', name: 'Línea Doble', type: 'map', key: 'double_struck' },
+            { id: 'small_caps', name: 'Mayúsculas Pequeñas', type: 'map', key: 'small_caps' },
+            { id: 'circles', name: 'Círculos', type: 'map', key: 'circles' },
+            { id: 'script', name: 'Itálica Manuscrita', type: 'map', key: 'script' },
+            { id: 'script_bold', name: 'Manuscrita Negrita', type: 'map', key: 'script_bold' },
+            { id: 'bold_sans', name: 'Sans Negrita', type: 'map', key: 'bold_sans' },
+            { id: 'bold_serif', name: 'Serif Negrita', type: 'map', key: 'bold_serif' },
+            { id: 'italic_bold_sans', name: 'Sans Itálica Negrita', type: 'map', key: 'italic_bold_sans' },
+            { id: 'italic_bold_serif', name: 'Serif Itálica Negrita', type: 'map', key: 'italic_bold_serif' },
+            { id: 'italic_sans', name: 'Sans Itálica', type: 'map', key: 'italic_sans' },
+            { id: 'italic_serif', name: 'Serif Itálica', type: 'map', key: 'italic_serif' },
+            { id: 'monospace', name: 'Monoespaciado', type: 'map', key: 'monospace' },
+            { id: 'strike', name: 'Tachado', type: 'fn', fn: (t) => t.split('').map(c => c + '\u0336').join('') },
+            { id: 'slash', name: 'Barra Diagonal', type: 'fn', fn: (t) => t.split('').map(c => c + '\u0338').join('') },
+            { id: 'sparkle', name: 'Brillantes', type: 'fn', fn: (t) => t.split('').map(c => '҉' + c).join('') },
+            { id: 'underline_wave', name: 'Olas Inferiores', type: 'fn', fn: (t) => t.split('').map(c => c + '\u035c').join('') },
+            { id: 'underline_double', name: 'Subrayado Doble', type: 'fn', fn: (t) => t.split('').map(c => c + '\u0347').join('') },
+            { id: 'superscript', name: 'Superíndice', type: 'fn', fn: (t) => {
+                const map = {a:'ᵃ',b:'ᵇ',c:'ᶜ',d:'ᵈ',e:'ᵉ',f:'ᶠ',g:'ᵍ',h:'ʰ',i:'ⁱ',j:'ʲ',k:'ᵏ',l:'ˡ',m:'ᵐ',n:'ⁿ',o:'ᵒ',p:'ᵖ',r:'ʳ',s:'ˢ',t:'ᵗ',u:'ᵘ',v:'ᵛ',w:'ʷ',x:'ˣ',y:'ʸ',z:'ᶻ'};
+                return t.toLowerCase().split('').map(c => map[c] || c).join('');
+            }}
+        ];
+
+        window.onload = () => {
+            if (localStorage.getItem('neo_fancy_data')) {
+                appData.customStyles = JSON.parse(localStorage.getItem('neo_fancy_data'));
+            }
+            document.getElementById('main-input').value = appData.inputValue;
+            renderApp();
+            lucide.createIcons();
+        };
+
+        function saveData() {
+            localStorage.setItem('neo_fancy_data', JSON.stringify(appData.customStyles));
+        }
+
+        function transformText(text, style) {
+            if (!text) return 'Escribe algo...';
+            if (style.type === 'map') {
+                const map = alphabetMaps[style.key];
+                return text.split('').map(char => map[char] || char).join('');
+            } else if (style.type === 'fn') {
+                return style.fn(text);
+            } else if (style.type === 'custom') {
+                return `${style.prefix}${text}${style.suffix}`;
+            }
+            return text;
+        }
+
+        function renderApp() {
+            renderCategories();
+            renderGrid();
+            
+            const totalStyles = defaultStyles.length + appData.customStyles.length;
+            document.getElementById('styles-count').innerText = `${totalStyles} Estilos`;
+        }
+
+        function renderCategories() {
+            const container = document.getElementById('category-pills');
+            const categories = [
+                { id: 'all', name: 'Todos', icon: 'layers' },
+                { id: 'alphabets', name: 'Alfabetos', icon: 'type' },
+                { id: 'decorations', name: 'Decoraciones', icon: 'sparkles' },
+                { id: 'custom', name: 'Mis Estilos', icon: 'smile' }
+            ];
+
+            container.innerHTML = categories.map(cat => {
+                const activeClass = appData.currentCategory === cat.id ? 'active' : '';
+                return `
+                    <button class="pill-button ${activeClass}" onclick="setCategory('${cat.id}')">
+                        <i data-lucide="${cat.icon}" size="14"></i>
+                        <span>${cat.name}</span>
+                    </button>
+                `;
+            }).join('');
+            lucide.createIcons();
+        }
+
+        function setCategory(catId) {
+            appData.currentCategory = catId;
+            renderCategories();
+            renderGrid();
+        }
+
+        function handleInput(el) {
+            appData.inputValue = el.value;
+            renderGrid();
+        }
+
+        function handleSearch(el) {
+            appData.searchQuery = el.value.toLowerCase();
+            const btn = document.getElementById('search-clear-btn');
+            if (appData.searchQuery) {
+                btn.innerHTML = '<i data-lucide="x" size="18"></i>';
+                btn.onclick = clearSearch;
+            } else {
+                btn.innerHTML = '<i data-lucide="search" size="18"></i>';
+                btn.onclick = null;
+            }
+            lucide.createIcons();
+            renderGrid();
+        }
+
+        function clearSearch() {
+            const input = document.getElementById('search-input');
+            input.value = '';
+            appData.searchQuery = '';
+            const btn = document.getElementById('search-clear-btn');
+            btn.innerHTML = '<i data-lucide="search" size="18"></i>';
+            btn.onclick = null;
+            lucide.createIcons();
+            renderGrid();
+        }
+
+        function renderGrid() {
+            const grid = document.getElementById('output-grid');
+            grid.innerHTML = '';
+
+            let stylesPool = [...defaultStyles, ...appData.customStyles];
+
+            // Filtrado por categoría
+            if (appData.currentCategory === 'alphabets') {
+                stylesPool = stylesPool.filter(s => s.type === 'map');
+            } else if (appData.currentCategory === 'decorations') {
+                stylesPool = stylesPool.filter(s => s.type === 'fn');
+            } else if (appData.currentCategory === 'custom') {
+                stylesPool = stylesPool.filter(s => s.type === 'custom');
+            }
+
+            // Filtrado por búsqueda
+            if (appData.searchQuery) {
+                stylesPool = stylesPool.filter(s => s.name.toLowerCase().includes(appData.searchQuery));
+            }
+
+            if (stylesPool.length === 0) {
+                grid.innerHTML = `
+                    <div class="empty-state" style="grid-column: 1/-1;">
+                        <i data-lucide="search-slash" size="32"></i>
+                        <p>No se encontraron estilos para tu selección.</p>
+                    </div>
+                `;
+                lucide.createIcons();
+                return;
+            }
+
+            stylesPool.forEach(style => {
+                const transformed = transformText(appData.inputValue, style);
+                const card = document.createElement('div');
+                card.className = 'card-item';
+                card.onclick = () => copyToClipboard(transformed);
+
+                card.innerHTML = `
+                    <div class="card-meta">
+                        <span>${style.name}</span>
+                        <i data-lucide="copy" size="14"></i>
+                    </div>
+                    <div class="card-value">${transformed}</div>
+                `;
+                grid.appendChild(card);
+            });
+            lucide.createIcons();
+        }
+
+        function copyToClipboard(text) {
+            navigator.clipboard.writeText(text).then(() => {
+                showToast('Copiado al portapapeles', 'success');
+            }).catch(() => {
+                showToast('Error al copiar', 'error');
+            });
+        }
+
+        function showToast(message, type = 'success') {
+            const toast = document.getElementById('app-toast');
+            toast.className = `toast active toast-${type}`;
+            toast.innerHTML = `
+                <i data-lucide="${type === 'success' ? 'check-circle' : 'alert-circle'}" size="16"></i>
+                <span>${message}</span>
+            `;
+            lucide.createIcons();
+            setTimeout(() => {
+                toast.classList.remove('active');
+            }, 2500);
+        }
+
+        // Sistema de Navegación e Historial de Modales
+        function openModal(modalId) {
+            document.getElementById('main-view').classList.add('backgrounded');
+            document.getElementById(modalId).classList.add('active');
+            activeModalsStack.push(modalId);
+            window.history.pushState({ modalId: modalId }, "");
+        }
+
+        function closeModalOnOverlay(e, modalId) {
+            if (e.target.id === modalId) {
+                closeActiveModal(modalId);
+            }
+        }
+
+        function closeActiveModal(modalId) {
+            if (activeModalsStack.includes(modalId)) {
+                window.history.back();
+            }
+        }
+
+        window.addEventListener('popstate', () => {
+            if (activeModalsStack.length > 0) {
+                const topModalId = activeModalsStack.pop();
+                document.getElementById(topModalId).classList.remove('active');
+                if (activeModalsStack.length === 0) {
+                    document.getElementById('main-view').classList.remove('backgrounded');
+                }
+            }
+        });
+
+        // Formulario Reactivo Custom Styles
+        function previewCustomStyle() {
+            const prefix = document.getElementById('custom-prefix').value;
+            const suffix = document.getElementById('custom-suffix').value;
+            const previewBox = document.getElementById('custom-preview-box');
+            const sampleText = appData.inputValue || 'Texto de Ejemplo';
+            previewBox.innerText = `${prefix}${sampleText}${suffix}`;
+        }
+
+        function saveCustomStyle() {
+            const nameInput = document.getElementById('custom-name');
+            const prefixInput = document.getElementById('custom-prefix');
+            const suffixInput = document.getElementById('custom-suffix');
+
+            let hasError = false;
+
+            if (!nameInput.value.trim()) {
+                triggerShake('form-group-name');
+                hasError = true;
+            }
+            if (!prefixInput.value.trim() && !suffixInput.value.trim()) {
+                triggerShake('form-group-prefix');
+                triggerShake('form-group-suffix');
+                hasError = true;
+            }
+
+            if (hasError) return;
+
+            const newStyle = {
+                id: 'custom_' + Date.now(),
+                name: nameInput.value.trim(),
+                type: 'custom',
+                prefix: prefixInput.value,
+                suffix: suffixInput.value
+            };
+
+            appData.customStyles.push(newStyle);
+            saveData();
+            renderApp();
+            closeActiveModal('customStyleModal');
+            showToast('Estilo creado correctamente', 'success');
+
+            // Reset campos
+            nameInput.value = '';
+            prefixInput.value = '';
+            suffixInput.value = '';
+            document.getElementById('custom-preview-box').innerText = 'Escribe para previsualizar...';
+        }
+
+        function triggerShake(elementId) {
+            const el = document.getElementById(elementId);
+            el.classList.add('error-shake');
+            setTimeout(() => {
+                el.classList.remove('error-shake');
+            }, 300);
+        }
+    </script>
+</body>
+</html>
