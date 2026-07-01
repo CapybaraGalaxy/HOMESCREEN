@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
-    <title>PureSímbolos - Neo-Glass Gallery</title>
+    <title>Símbolos</title>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@200;300;400;500;600;700&display=swap" rel="stylesheet">
@@ -245,93 +245,208 @@
             color: var(--text-muted);
         }
 
-        /* Buscador Flotante (FAB Search) */
-        .search-fab-container {
-            position: fixed;
-            bottom: calc(env(safe-area-inset-bottom) + 24px);
-            left: 50%;
-            transform: translateX(-50%);
-            width: calc(100% - 48px);
-            max-width: 400px;
-            z-index: 100;
-            pointer-events: none;
+        .view-toggle-group {
+            display: flex;
+            gap: 10px;
+            flex-wrap: wrap;
+            margin-bottom: 16px;
         }
 
-        .search-wrapper {
-            width: 50px;
-            height: 50px;
-            background: rgba(20, 20, 20, 0.85);
+        .view-toggle {
+            background: var(--glass);
             border: 1px solid var(--glass-border);
-            border-radius: 100px;
-            margin: 0 auto;
-            backdrop-filter: blur(40px);
-            box-shadow: 0 12px 40px rgba(0, 0, 0, 0.7);
-            display: flex;
-            align-items: center;
-            transition: width 0.4s var(--spring), cubic-bezier(0.34, 1.3, 0.64, 1);
-            pointer-events: auto;
-            overflow: hidden;
-            position: relative;
-        }
-
-        .search-wrapper.expanded {
-            width: 100%;
-        }
-
-        .search-icon-btn {
-            width: 50px;
-            height: 50px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            color: var(--text-main);
-            cursor: pointer;
-            flex-shrink: 0;
-            background: transparent;
-            border: none;
-        }
-
-        .search-input {
-            width: 100%;
-            background: transparent;
-            border: none;
-            outline: none;
-            color: var(--text-main);
-            font-family: 'Outfit', sans-serif;
-            font-size: 16px;
-            font-weight: 400;
-            padding-right: 48px;
-            opacity: 0;
-            pointer-events: none;
-            transition: opacity 0.2s var(--bezier);
-        }
-
-        .search-wrapper.expanded .search-input {
-            opacity: 1;
-            pointer-events: auto;
-        }
-
-        .search-clear-btn {
-            position: absolute;
-            right: 6px;
-            width: 38px;
-            height: 38px;
-            border-radius: 50%;
-            display: flex;
-            align-items: center;
-            justify-content: center;
+            border-radius: 999px;
+            padding: 10px 16px;
+            font-size: 14px;
             color: var(--text-muted);
-            background: transparent;
-            border: none;
             cursor: pointer;
-            opacity: 0;
-            transform: scale(0.8);
-            transition: opacity 0.2s var(--bezier), transform 0.2s var(--bezier);
+            transition: all 0.25s var(--bezier);
+            min-width: 94px;
+            text-align: center;
         }
 
-        .search-wrapper.expanded .search-clear-btn.visible {
-            opacity: 1;
-            transform: scale(1);
+        .view-toggle.active {
+            background: var(--text-main);
+            color: var(--bg);
+            border-color: rgba(255,255,255,0.2);
+            transform: scale(1.02);
+        }
+
+        .pill-icon,
+        .category-icon {
+            margin-right: 8px;
+            vertical-align: middle;
+            opacity: 0.85;
+        }
+
+        .discover-section {
+            margin-bottom: 22px;
+            animation: fadeUp 0.4s var(--spring);
+        }
+
+        .category-group {
+            margin-bottom: 24px;
+            animation: fadeUp 0.35s var(--spring);
+            will-change: transform, opacity;
+            transition: transform 0.25s var(--spring), opacity 0.25s var(--bezier);
+        }
+
+        .category-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 12px;
+            opacity: 0.98;
+        }
+
+        .category-header strong,
+        .category-header h3 {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .discover-card {
+            background: rgba(255,255,255,0.04);
+            border: 1px solid var(--glass-border);
+            border-radius: 18px;
+            padding: 14px;
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+            transition: transform 0.3s var(--spring), border-color 0.3s var(--bezier), box-shadow 0.3s var(--bezier), background 0.3s var(--bezier);
+        }
+
+        .discover-card:hover {
+            transform: translateY(-3px);
+            border-color: rgba(255,255,255,0.18);
+            box-shadow: 0 18px 35px rgba(0,0,0,0.18);
+            background: rgba(255,255,255,0.06);
+        }
+
+        .view-toggle,
+        .pill,
+        .btn-icon,
+        .btn-submit,
+        .trash-row,
+        .symbol-item {
+            transition: all 0.25s var(--spring);
+        }
+
+        .symbol-item:hover {
+            background: var(--surface-hover);
+            border-color: rgba(255, 255, 255, 0.3);
+            transform: translateY(-2px) scale(1.01);
+            box-shadow: 0 8px 22px rgba(0,0,0,0.22);
+        }
+
+        @keyframes fadeUp {
+            from { opacity: 0; transform: translateY(12px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .discover-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 14px;
+        }
+
+        .discover-title {
+            font-size: 17px;
+            font-weight: 600;
+            letter-spacing: -0.25px;
+        }
+
+        .discover-subtitle {
+            font-size: 13px;
+            color: var(--text-muted);
+        }
+
+        .discover-grid {
+            display: grid;
+            gap: 12px;
+            grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+        }
+
+        .discover-card h4 {
+            font-size: 14px;
+            margin-bottom: 6px;
+            color: var(--text-main);
+        }
+
+        .discover-preview {
+            display: grid;
+            grid-template-columns: repeat(5, minmax(0, 1fr));
+            gap: 8px;
+        }
+
+        .discover-preview .symbol-preview-item {
+            background: rgba(255,255,255,0.06);
+            border-radius: 12px;
+            height: 34px;
+            display: grid;
+            place-items: center;
+            font-size: 16px;
+            color: var(--text-main);
+        }
+
+        .discover-card button {
+            margin-top: auto;
+            border: 1px solid var(--glass-border);
+            background: transparent;
+            color: var(--text-main);
+            border-radius: 999px;
+            padding: 10px 14px;
+            cursor: pointer;
+            transition: background 0.2s var(--bezier), transform 0.2s var(--spring);
+            font-size: 13px;
+            font-weight: 600;
+        }
+
+        .discover-card button:hover {
+            background: rgba(255,255,255,0.06);
+        }
+
+        .favorite-indicator {
+            position: absolute;
+            top: 8px;
+            right: 8px;
+            font-size: 12px;
+            color: #FFCB47;
+            pointer-events: none;
+        }
+
+        .symbol-item {
+            position: relative;
+            background: var(--glass);
+            border: 1px solid var(--glass-border);
+            height: 56px;
+            border-radius: 14px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 22px;
+            color: var(--text-main);
+            cursor: pointer;
+            backdrop-filter: blur(var(--blur-val));
+            transition: transform 0.2s var(--spring), background 0.2s var(--bezier), border-color 0.2s var(--bezier);
+            user-select: none;
+        }
+
+        body.dense-view .symbols-grid {
+            grid-template-columns: repeat(auto-fill, minmax(42px, 1fr));
+            gap: 8px;
+        }
+
+        body.dense-view .symbol-item {
+            height: 48px;
+            font-size: 18px;
+            border-radius: 12px;
+        }
+
+        body.dense-view .discover-preview {
+            gap: 6px;
         }
 
         /* Notificación Toast Copiado */
@@ -566,7 +681,7 @@
                 </div>
                 <div>
                     <h1 style="display: flex; align-items: center;">
-                        PureSímbolos
+                        Símbolos
                         <span class="counter-badge" id="global-count">0</span>
                     </h1>
                 </div>
@@ -581,23 +696,14 @@
             </div>
         </header>
 
-        <div class="folders-scroll-area" id="categories-pills">
-            </div>
-
-        <main class="main-content" id="symbols-content-area">
-            </main>
-    </div>
-
-    <div class="search-fab-container">
-        <div class="search-wrapper" id="search-container">
-            <button class="search-icon-btn" id="search-trigger" title="Buscar Símbolo">
-                <i data-lucide="search" size="20" id="search-icon"></i>
-            </button>
-            <input type="text" class="search-input" id="search-input" placeholder="Buscar por nombre o carácter...">
-            <button class="search-clear-btn" id="search-clear" title="Limpiar búsqueda">
-                <i data-lucide="x" size="16"></i>
-            </button>
+        <div class="view-toggle-group" id="view-toggle-group">
+            <button class="view-toggle active" data-density="normal">Actual</button>
+            <button class="view-toggle" data-density="dense">Densa</button>
         </div>
+
+        <div class="folders-scroll-area" id="categories-pills"></div>
+
+        <main class="main-content" id="symbols-content-area"></main>
     </div>
 
     <div class="toast" id="toast-notification">
@@ -633,6 +739,7 @@
                     <option value="objects">Objetos</option>
                     <option value="tech">Técnicos</option>
                     <option value="monochrome">Monocromáticos</option>
+                    <option value="arrows">Flechas</option>
                 </select>
             </div>
             <div class="asset-preview">
@@ -651,8 +758,7 @@
                     <i data-lucide="x" size="18"></i>
                 </button>
             </div>
-            <div class="trash-list" id="trash-items-container">
-                </div>
+            <div class="trash-list" id="trash-items-container"></div>
             <button class="btn-submit" id="empty-trash-btn" style="background: transparent; border: 1px solid var(--accent-danger); color: var(--accent-danger);">
                 Vaciar Papelera por Completo
             </button>
@@ -660,7 +766,6 @@
     </div>
 
     <script>
-        // Estructura Base del Ecosistema Inyectado desde Símbolo.htm
         const INITIAL_CATEGORIES = {
             "recents": "Usados recientemente",
             "popular": "Símbolos Populares",
@@ -671,418 +776,612 @@
             "objects": "Símbolos De Objetos",
             "tech": "Símbolos Técnicos",
             "monochrome": "Emoji Monocromático",
+            "miscellaneous": "Símbolos Varios",
+            "menu": "Menú",
+            "zodiac": "Símbolos Del Zodiaco",
+            "trademark": "Símbolo De Marca",
+            "cards": "Símbolos De Los Palos De La Baraja",
+            "dice": "Símbolos De Dados",
+            "units": "Símbolos De Unidad",
+            "numeric": "Símbolos Numéricos",
+            "punctuation": "Signos De Puntuación",
+            "parentheses": "Símbolo Paréntesis",
+            "quotes": "Comillas",
+            "paragraph": "Marca De Párrafo",
+            "confidential": "Símbolos De Texto Confidenciales",
+            "people": "Personas Y Actividades",
+            "smiley": "Símbolos De Cara Y Smiley",
+            "eyes": "Símbolos De Ojos",
+            "gender": "Símbolos De Género",
+            "heart": "Símbolos Del Corazón",
+            "hand": "Símbolos De Mano",
+            "religious": "Símbolos Religiosos Y Culturales",
+            "cross": "Símbolos De La Cruz Cristiana",
+            "totemic": "Símbolos Totémicos",
+            "animals": "Símbolos Animales",
+            "sky_stars": "Estrellas En El Cielo",
+            "asterisk": "Símbolos De Asterisco",
+            "flowers": "Símbolos De Flores",
+            "arrows": "Símbolos De Flecha",
+            "squares": "Símbolos Cuadrados",
+            "triangles": "Símbolos Triangulares",
+            "lines": "Símbolos De Línea",
+            "random_lines": "Líneas Aleatorias",
+            "circles": "Símbolos De Círculo",
+            "other_shapes": "Otras Formas",
+            "mark_x": "Símbolos De Marca X",
+            "bullets": "Lista De Viñetas",
+            "braille": "Símbolos Braille",
+            "math": "Símbolos Matemáticos Comunes",
+            "fractions": "Símbolos De Fracción",
+            "sub_super": "Subíndice Y Superíndice",
+            "pi": "Símbolo PI",
+            "greek": "Símbolos Griegos",
+            "latin_letters": "Letras Latinas",
+            "extended_latin": "Caracteres Extendidos Latinos",
+            "fonts": "Fuentes De Letras",
+            "chinese": "Símbolos Chinos",
+            "japanese": "Caracteres Japoneses",
+            "korean": "Símbolos Coreanos",
+            "currency": "Símbolos De Moneda",
             "custom": "Símbolos Personalizados"
         };
 
-        const INITIAL_SYMBOLS = [
-            // Populares
-            {char: "ღ", name: "corazon floral", cat: "popular"}, {char: "•", name: "punto", cat: "popular"}, {char: "⁂", name: "asterismo", cat: "popular"}, {char: "€", name: "euro", cat: "popular"}, {char: "™", name: "trade mark", cat: "popular"},
-            {char: "↑", name: "flecha arriba", cat: "popular"}, {char: "→", name: "flecha derecha", cat: "popular"}, {char: "↓", name: "flecha abajo", cat: "popular"}, {char: "⇝", name: "flecha curva", cat: "popular"}, {char: "√", name: "raiz cuadrada", cat: "popular"},
-            {char: "∞", name: "infinito", cat: "popular"}, {char: "░", name: "bloque degradado", cat: "popular"}, {char: "▲", name: "triangulo arriba", cat: "popular"}, {char: "▶", name: "play", cat: "popular"}, {char: "◀", name: "back", cat: "popular"},
-            {char: "●", name: "circulo negro", cat: "popular"}, {char: "☀", name: "sol brillante", cat: "popular"}, {char: "☁", name: "nube", cat: "popular"}, {char: "☂", name: "paraguas", cat: "popular"}, {char: "☃", name: "muneco de nieve", cat: "popular"},
-            {char: "☄", name: "cometa", cat: "popular"}, {char: "★", name: "estrella rellena", cat: "popular"}, {char: "☆", name: "estrella vacia", cat: "popular"}, {char: "☉", name: "sol con punto", cat: "popular"}, {char: "☐", name: "casilla vacia", cat: "popular"},
-            {char: "☑", name: "casilla verificada", cat: "popular"}, {char: "☚", name: "mano izquierda", cat: "popular"}, {char: "☛", name: "mano derecha", cat: "popular"}, {char: "☠", name: "calavera", cat: "popular"}, {char: "☢", name: "radiactivo", cat: "popular"},
-            {char: "☣", name: "riesgo biologico", cat: "popular"}, {char: "☪", name: "media luna", cat: "popular"}, {char: "☮", name: "paz", cat: "popular"}, {char: "☯", name: "yin yang", cat: "popular"}, {char: "☸", name: "rueda dharma", cat: "popular"},
-            {char: "☹", name: "cara triste", cat: "popular"}, {char: "☺", name: "cara feliz", cat: "popular"}, {char: "☻", name: "cara feliz negra", cat: "popular"}, {char: "☼", name: "sol con rayos", cat: "popular"}, {char: "✈", name: "avion", cat: "popular"},
-            {char: "✉", name: "sobre", cat: "popular"}, {char: "✎", name: "lapiz", cat: "popular"}, {char: "✓", name: "check fino", cat: "popular"}, {char: "✔", name: "check grueso", cat: "popular"}, {char: "✘", name: "cruz", cat: "popular"},
-            {char: "❤", name: "corazon rojo", cat: "popular"}, {char: "❣", name: "exclamacion corazon", cat: "popular"}, {char: "➤", name: "puntero", cat: "popular"},
-            // Ajedrez
-            {char: "♔", name: "rey blanco", cat: "chess"}, {char: "♕", name: "reina blanca", cat: "chess"}, {char: "♖", name: "torre blanca", cat: "chess"}, {char: "♗", name: "alfil blanco", cat: "chess"}, {char: "♘", name: "caballo blanco", cat: "chess"},
-            {char: "♙", name: "peon blanco", cat: "chess"}, {char: "♚", name: "rey negro", cat: "chess"}, {char: "♛", name: "reina negra", cat: "chess"}, {char: "♜", name: "torre negra", cat: "chess"}, {char: "♝", name: "alfil negro", cat: "chess"},
-            {char: "♞", name: "caballo negro", cat: "chess"}, {char: "♟", name: "peon negro", cat: "chess"},
-            // Música
-            {char: "♩", name: "negra", cat: "music"}, {char: "♪", name: "corchea", cat: "music"}, {char: "♫", name: "dos corcheas", cat: "music"}, {char: "♬", name: "semicorcheas", cat: "music"}, {char: "♭", name: "bemol", cat: "music"},
-            {char: "♮", name: "becuadro", cat: "music"}, {char: "♯", name: "sostenido", cat: "music"}, {char: "𝄞", name: "clave de sol", cat: "music"}, {char: "🎵", name: "nota musical emoji", cat: "music"}, {char: "🎶", name: "notas flotantes", cat: "music"},
-            // Tiempo
-            {char: "ϟ", name: "rayo", cat: "weather"}, {char: "⛆", name: "lluvia continua", cat: "weather"}, {char: "⛇", name: "muneco nieve bajo nieve", cat: "weather"}, {char: "⛈︎", name: "tormenta", cat: "weather"}, {char: "☽", name: "luna creciente", cat: "weather"},
-            {char: "☾", name: "luna menguante", cat: "weather"}, {char: "❄", name: "copo nieve", cat: "weather"}, {char: "❅", name: "cristal helado", cat: "weather"}, {char: "❆", name: "flor de nieve", cat: "weather"}, {char: "♨", name: "aguas termales", cat: "weather"},
-            // Negocios
-            {char: "©", name: "copyright", cat: "business"}, {char: "®", name: "registrado", cat: "business"}, {char: "℗", name: "fonograma", cat: "business"}, {char: "℠", name: "service mark", cat: "business"}, {char: "℡", name: "telefono logotipo", cat: "business"},
-            // Objetos
-            {char: "☏", name: "telefono viejo", cat: "objects"}, {char: "✁", name: "tijeras arriba", cat: "objects"}, {char: "✂", name: "tijeras", cat: "objects"}, {char: "✄", name: "tijeras corte", cat: "objects"}, {char: "⚖", name: "balanza", cat: "objects"},
-            {char: "⚗", name: "alambique", cat: "objects"}, {char: "⚐", name: "bandera blanca", cat: "objects"}, {char: "⚑", name: "bandera negra", cat: "objects"}, {char: "⚓", name: "ancla", cat: "objects"},
-            // Técnicos
-            {char: "⏎", name: "retorno de carro enter", cat: "tech"}, {char: "⇧", name: "shift", cat: "tech"}, {char: "⏏", name: "eject", cat: "tech"}, {char: "⌂", name: "casa home", cat: "tech"}, {char: "⌘", name: "command mac", cat: "tech"},
-            {char: "⎋", name: "escape esc", cat: "tech"}, {char: "⊞", name: "windows logo", cat: "tech"}, {char: "⌨", name: "teclado", cat: "tech"},
-            // Monocromáticos
-            {char: "☺︎", name: "smile monocromo", cat: "monochrome"}, {char: "☘︎", name: "trebol monocromo", cat: "monochrome"}, {char: "♠︎", name: "picas", cat: "monochrome"}, {char: "♥︎", name: "corazones baraja", cat: "monochrome"}, {char: "♦︎", name: "diamantes", cat: "monochrome"},
-            {char: "♣︎", name: "treboles", cat: "monochrome"}, {char: "⚛︎", name: "atomo", cat: "monochrome"}, {char: "⚓︎", name: "ancla fija", cat: "monochrome"}
+        // Procesamiento en bloque sin saltarse ningún carácter provisto
+        const rawData = [
+            { cat: "popular", chars: "ღ•临€™↑→↓⇝√∞░▲▶◀●☀☁☂☃☄★☆☉☐☑☚☛☜☝☞☟☠☢☣☪☮☯☸☹☺☻☼☽☾♔♕♖♗♘♚♛♜♝♞♟♡♨♩♪♫♬✈✉✎✓✔✘✚✞✟✠✡✦✧✩✪✮✯✹✿❀❁❂❄❅❆❝❞❣❤❥❦➤" },
+            { cat: "chess", chars: "♔♕♖♗♘♙♚♛♜♝♞♟" },
+            { cat: "music", chars: "♩♪♫♬♭♮♯𝄞𝄡𝄢𝄪𝄫🎵🎶🎼𓏢" },
+            { cat: "weather", chars: "ϟ☀☁☂☃⛆⛇⛈︎☄☉☼☽☾♁♨❄❅❆༄࿓𐓷𐓏𖤓𖣔" },
+            { cat: "business", chars: "©®℗℠™℡℻℀℁℅℆" },
+            { cat: "objects", chars: "☏✁✂✃✄✆✇✈✉✎✏✐✑✒𓍝⚐⚑⚖⚗⚿⛟⛨⛫⛾⛿⎈࿄𖠦𖠿ꗃ𓄲𓊔𖤘𖣘߷𖠚𖠜𖡡𖥣𖥔𖥠⌖⊹𓊝𖠎𖡌𖣳𖤠𖥈𖥩𖧶ꚰ⛀⛁⛂⛃" },
+            { cat: "tech", chars: "⏎⇧⏏⌂⌘⎋⊞⌨↹⌥⌫⎗⎘⎙⎵⇥" },
+            { cat: "monochrome", chars: "☺︎☹︎☠︎❣︎❤︎☘︎⛸︎♠︎♥︎♦︎♣︎♟︎⛷︎⛰︎⛩︎♨︎⛴︎✈︎☀︎⏱︎⏲︎☁︎⛈︎☂︎⛱︎❄︎☃︎☄︎⛑︎☎︎⌨︎✏︎✒︎✉︎✂︎⛏︎⚒︎⚔︎⚙︎⚖︎⛓︎⚗︎⚰︎⚱︎⚠︎☢︎☣︎⬆︎↗︎➡︎↘︎⬇︎↙︎⬅︎↖︎↕︎↔︎↩︎↪︎⤴︎⤵︎⚛︎✡︎☸︎☯︎✝︎☦︎☪︎☮︎▶︎⏭︎⏯︎◀︎⏮︎⏸︎⏹︎⏺︎⏏︎♀︎♂︎⚧︎✖︎♾︎‼︎⁉︎⚕︎♻︎⚜︎☑︎✔︎〽︎✳︎✴︎❇︎©︎®︎™︎🅰︎🅱︎ℹ︎Ⓜ︎🅾︎🅿︎🈂︎🈷︎㊗︎㊙︎◼︎◻︎▪︎▫︎" },
+            { cat: "miscellaneous", chars: "⛐⛍⛕⛖⛗⛘⛙⛜⛠⛚⛛⛞⛡♲♳♴♵♶♷♸♹♺♻♼♽⚬⚭⚮⚯⛻⛼⛬⛭⛮⛯" },
+            { cat: "menu", chars: "☰≡Ξ㊂≣⁝⋮︙⦙⁞⋯…∷▲▼▶△▽▷⌃⌄︿﹀︽︾⌵𓏬𓃑𓏧⸬⛶" },
+            { cat: "zodiac", chars: "♓♒♑♐♏♎♍♌♋♊♉♈☉☽☿♀⊕♁♂♃♄♅⛢♆♇" },
+            { cat: "trademark", chars: "✓✔✖✗✘∛∜⍻☐☑☒□■○●༝྾∨🆅🆇🅥🅧⊗" },
+            { cat: "cards", chars: "♡♢♤♧♣♦♥♠🂠🂡🂢🂣🂤🂥🂦🂧🂨🂩🂪🂫🂬🂭🂮🂱🂲🂳🂴🂵🂶🂷🂸🂹🂺🂻🂼🂽🂾🃁🃂🃃🃄🃅🃆🃇🃈🃉🃊🃋🃌🃍🃎🃑🃒🃓🃔🃕🃖🃗🃘🃙🃚🃛🃜🃝🃞🃟" },
+            { cat: "dice", chars: "⚀⚁⚂⚃⚄⚅" },
+            { cat: "units", chars: "μ°℃℉㎍㎎㎏℥㏌㎚㎛㎜㎝㎞²³㎖㎗㎘㏄㏖㏒㎅㎆㎇㎈㎉㎐㎑㎒㎓㎾Ω㏑㏈㏐㏂㏘㎳㎭㏅㎪㏗′″" },
+            { cat: "numeric", chars: "ⅠⅡⅢⅣⅤⅥⅦⅧⅨⅩⅪⅫⅰⅱⅲⅳⅴⅵⅶⅷⅸⅹⅺⅻ⓪①②③④⑤⑥⑦⑧⑨⑩⓵⓶⓷⓸⓹⓺⓻⓼⓽⓾➀➁➂➃➄➅➆➇➈➉➊➋➌➍➎➏➐➑➒➓⑴⑵⑶⑷⑸⑹⑺⑻⑼⑽⓿❶❷❸❹❺❻❼❽❾❿㈠㈡㈢㈣㈤㈥㈦㈧㈨㈩㊀㊁㊂㊃㊄㊅㊆㊇㊈㊉０１２３４５６７８９𝟬𝟭𝟮𝟯𝟰𝟱𝟲𝟳𝟴𝟵" },
+            { cat: "punctuation", chars: "˙‥‧‵、。﹐﹒﹔﹕！＃＄％＆＊，．：；？＠～•…·.ᐟ¡¿¦¨¯´·¸º‽‼⁏※†‡ˉ˘⁇⁈⁉ˆ⁊⸘№" },
+            { cat: "parentheses", chars: "〈〉《》「」『』【】〔〕︵︶︷︸︹︺︻︼︽︾︿﹀﹁﹂﹃﹄﹙﹚﹛﹜﹝﹞﹤﹥（）＜＞｛｝❬❭❮❯❰❱〖〗〘〙〚〛⟨⟩‹›«»｢｣⌃⌄⌵⌢⌣⎴⏜⏝⏞⏟⏠⏡" },
+            { cat: "quotes", chars: "\"'«»‘’‚‛“”„‟‹›❛❜❝❞〝〞〟〃＂＇′″‴⁗‵‶‷`ˊ" },
+            { cat: "paragraph", chars: "§¶❡⁋※" },
+            { cat: "confidential", chars: "█▀▄▌▐▗▘▙▚▛▜▝▞▟▖░▒▓◼●⬛⬜⚫⚪" },
+            { cat: "people", chars: "𓀞𓀟𓀠𓀡𓀢𓀣𓀤𓀥𓀦𓀧𓀨𓀩𓀪𓀫𓀬𓀀𓀁𓀂𓀃𓀄𓀅𓀆𓀇𓀈𓀉𓀊𓀋𓀌𓀍𓀎𓀏𓀑𓀒𓀓𓀔𓀕𓀖𓀗𓀘𓀙𓀚𓀛𓀜𓀝𓁁𓁂𓁃𓁄𓁅𓁆𓁇𓁈𓁉𓁊𓁋𓁌𓁍𓁎𓁏𓁐𓁑𓁒𓁓𓁔𓁕𓁖𓁗𓁘𓁙𓀭𓀮𓀯𓀰𓀱𓀲𓀳𓀴𓀵𓀶𓀷𓀸𓀹𓀺𓀻𓀼𓀽𓀾𓀿𓁀𓁲𓁚𓁛𓁜𓁝𓁞𓁟𓁠𓁡𓁢𓁣𓁤𓁥𓁦𓁧𓁨𓁩𓁪𓁫𓁬𓁭𓁮𓁯𓁰𓁱𓁳𓁴𓁵" },
+            { cat: "smiley", chars: "☹☺☻〠ヅツ㋡쓰üت⍢⍨ᴗ̈⚇⚉𓁷𓁶𓂈𓂎ဩඩ𖥶𖦆𖠔𖤑冏웃유𖧀𖠋𖨆ⶆ𖦔𖤾𖦯𖧱" },
+            { cat: "eyes", chars: "𓂀𓁿𓁾𓁽𓁼𓁻𓁺𓁹𓂉𓂊𓎲𓎱ಠʘಥஇຈꙨꙩ⚆◠◕𓏗⊙⊚◉◎☉⦾⦿𖠂𖥕𖥂𖧼༎ຶ" },
+            { cat: "gender", chars: "⚤♂♀☿⚣⚥⚦⚧⚨⚢⚲" },
+            { cat: "heart", chars: "♡♥❣❤❦❧❥☙დღოᦂᦦʚɞᏬ" },
+            { cat: "hand", chars: "☚☛☜☝☞☟✌𓂬𓂩𓂨𓂷𓂭𓂝𓂡𓂦𓃈⍝" },
+            { cat: "religious", chars: "☤☥☪☫☬☮☭☯☸☽☾♰♱⚚✡卍﷽✵ૐ𓉴𓉸۞࿊۩࿅࿉࿈" },
+            { cat: "cross", chars: "✝✞✠☦✙✜✟✚☧☨☩✛✢⛪†⚜" },
+            { cat: "totemic", chars: "𖣐𖠦𖡷𖢅𖣴𖣔𖣓𖤌𖣘𖣁𖢘𖤍༒༄༅࿓༗𓊈𓊉𓊆𓊇⩨⩩༚༛༜༝༞༟࿎࿏𖡼⋱⋰𖡻𖡟𖡤𖡥𖡦𖡧𖡽𖣢𖤗𖤝𖤞𖤫𖤼𖥂𖥅𖥑𖥓𖥖𖥗𖥘𖥙𖥚𖥟𖥤⩨⩩𒀺𒀹𒍻ดูแล𒁹𒀸𒅂𒁂𒇹𒌋𒑱𒌍𒉼豐富𒈝𒈞 Authorities𒆳เมือง𒑴𒀭𒀮𒀯𒆙𒆜𒉺𒌑ięcy𒆸𒇻𒁈𒇔𒐦แทน𒐪𒐬𒐮𒐰𒀱𒅒𒋲𒂭𒇫𒍟𒅄ဪ꧅𒐫" },
+            { cat: "animals", chars: "𖠊𖢥𖠌𖠍𖠐𖠅ଳꙮ𖠽𖡉𖢘𖠑𖠒𖡒𖢂𖤖𖠓𓃥𓃠𓃰𓃱𓃯𓃭𓃸𓃵𓃗𓃘𓃙𓃟𓄀𓄁𓄂𓄃𓃚𓃛𓃜𓃝𓃞𓃒𓃓𓃔𓃕𓃖𓃡𓃢𓃦𓃩𓃫𓃬𓃮𓃲𓃴𓃶𓃷𓃹𓃻𓃽𓃾𓃿𓄄𓄅𓄆𓄇𓆇𓆈𓆉𓆌𓆏𓆗𓆘𓆙𓆚𓆐𓆑𓆒𓆓𓆔𓆕𓆖𓆊𓆍𓆣𓆤𓆥𓆦𓆧𓆨𓆛𓆜𓆝𓆞𓆟𓆠𓆡𓆢𓄿𓅀𓅁𓅂𓅃𓅄𓅅𓅆𓅇𓅈𓅉𓅊𓅋𓅌𓅍𓅎𓅏𓅐𓅑𓅒𓅓𓅔𓅕𓅖𓅗𓅘𓅙𓅚𓅛𓅜𓅝𓅞𓅟𓅠𓅡𓅢𓅣𓅤𓅥𓅦𓅧𓅨𓅩𓅪𓅫𓅬𓅭𓅮𓅯𓅰𓅱𓅲𓅳𓅴𓅵𓅶𓅷𓅸𓅹𓅺𓅻𓅼𓅽𓅾𓅿𓆀𓆁𓆂𓆃𓆆" },
+            { cat: "sky_stars", chars: "★☆✡✦✧⌑✩✪⍟❂✫✬✭✮✯✰☪⚝⛤⛥⛦⛧⍣⋆≛𓇼𓇻𓇽꙳⭑⭒𖤐𖣔⟡⟢⟣⊹" },
+            { cat: "asterisk", chars: "*∗٭※⁂⁎⁑⁕⃰⊛☸❋✱✲✳✴✵✶✷✸✹✺𖡽𖥤𖥟𖡟𖤗✽⧆＊﹡＊†‡𒀭𒀯𒄬" },
+            { cat: "flowers", chars: "✻✼✾✿❀❁❃❇❈❉❊✢✣✤✥⚜ꕥ𓇬⚘𓆸𓆹𓆼𓇊𓇚𓇕𓇗𓋇𓁙𓁋֍֎𓆭𓆰𓆱𓇋𓇑𓇛𓇟𓇣𖧷ꕤ𑁍᪥𖠁𖠇𖤣𖤥𖡗𖢨𖣶𖦞𖧧༗𖣂𖠺𖠻𓄟𖢔𐌙𐊵𐡘𐡙𐡚꧁꧂𒂭" },
+            { cat: "arrows", chars: "⬅⬆⬇⮕⬈⬉⬊⬋⬌⬍⭠⭡⭢⭣⭤⭥⮂⮃⮐⮑⬎⬏⬐⬑⬱⬳⬸⬿⭅⭆↕↖↗↘↙↚↛↜↝↞↟↠↡↢↣↤↥↦↧↨↩↪↫↬↭↮↯↰↱↲↳↴↶↷↸↹↺↻⟲⟳↼↽↾↿⇀⇁⇂⇃⇄⇅⇆⇇⇈⇉⇊⇋⇌⇍⇎⇏⇕⇖⇗⇘⇙⇚⇛⇜⇝⇞⇟⇠⇡⇢⇣⇤⇥⇦⇧⇨⇩⇪⌅⌆⌤⏎▶☇☈➔➘➙➚➛➜➝➞➟➠➡➢➣➤➥➦➧➨➩➪➫➬➭➮➯➱➲➳➴➵➶➷➸➹➺➻➼➽➾⤴⤵↵↓↔←→↑⍇⍈⍐⍗⇫⇬⇭⇮⇯⇰⇱⇲⇳⇴⇵⇶⇷⇸⇹⇺⇻⇼⇽⇾⇿⇐⇑⇒⇓⇔𖣫𖤂⬀⬁⬂⬃⬄" },
+            { cat: "squares", chars: "∎⊞⊟⊠⊡▀▁▂▃▄▅▆▇█▉▊▋▋▌▍▎▏▐░▒▓▔■□▢▣▤▥▦▧▨▩▪▫▬▭▮▯◘◙◚◛◧◨◩◪◫❏❐❑❒❘❙❚▖▗▘▙▚▛▜▝▞▟◱◲◳𖣯⿴⿻" },
+            { cat: "triangles", chars: "⊿▲△▴▵▶▷▸▹►▻▼▽▾▿◀◁◂◃◄◅◢◣◤◥◬◭◮◸◹◺◿∇∆𓇮⫷⫸" },
+            { cat: "lines", chars: "ˍ‐⎯‒―⎺⎻⎼⎽◗‖─━│┃┄┅┆┇┈┉┊┋╌╍╎╴╵╶╷╸╹╺╻╼╽╾╿▏▕╏–—⌌⌍⌎⌏⌜⌝⌞⌟┌┍┎┏┐┑┒┓└└┕┖┗┘┙┚┛├├┝┞┟┠┡┢┣┤┥┦┧┨┩┪┫┬┭┮┯┰┱┲┳┴┵┶┷┸┹┺┻┼┽┾┿╀╁╂╃╄╅╆╇╈╉╊╋═║╒╓╔╔╔╕╕╖╖╗╗╘╙╚╚╛╛╜╜╝╝╞╟╟╠╡╡╢╢╣╣╤╤╥╥╦╦╧╧╨╨╩╩╪╪╫╬╱╲╳╭╮╯╰◜◝◞◟◠◡⌈⌊⌉⌋⎡⎣⎤⎦⎧⎩⎫⎭⎸⎹⎾⎿⏉⏊⏋⏌≡≣☰☱☲☳☴☵☶☷" },
+            { cat: "random_lines", chars: "𖡎☡༘෴؄ᔐᔑᔓᔕ𖡬𖢦꧖𖨂𖦹⎛⎝⎞⎠𖣢𖥷𖣸𖣿𖤩𖥾𖨘𓂃𓂅𓏲𓍱𓍲𓎆⦚⌇" },
+            { cat: "circles", chars: "⊖⊘⊙⊚⊛⊜⊝◉○◌◍◎●◐◑◒◓◔◕◖◗◦◯◴◵◶◷❍ₒ॰°৹๐º𐤏Ｏ⦿⊕⊗⨷⭕🅞Ⓞⓞ𖣠𖣐᪤𖥕𖥞𖦹𖥚𖤞𒊹" },
+            { cat: "other_shapes", chars: "⬟⬠⭓⭔☖☗◊⟠⧫⋄◆◇◈❖⬬⬭⬮⬯⎔⎚⌑▰▱⬢⬡⬣" },
+            { cat: "mark_x", chars: "×☓✕✖❌❎⨉⨯☐☒✗✘Χχꭓᚷ⊗⨷ₓˣ𒉽⛌⛒⛝🆇🅇🅧Ⓧ𝕏" },
+            { cat: "bullets", chars: "•·∙⊙⊚⊛◉○◌◍◎●◘◦。☉⦾⦿⁃⁌⁍◆◇◈★☆■□☐☑☒✓✔❖⋄❥❧☙☸✤✱✲✦✧↠↣↦↬⇛⇝⇢⇨➔➙➛➜➝➞➟➠➡➢➣➤➥➦➧➨➮➱➲➳➵➸➼➽➾→⇾⇒‣▶▷▸▹►▻" },
+            { cat: "braille", chars: "⣿⠿⠾⠽⠼⠻⠺⠹⠸⠷⠶⠵⠴⠳⠲⠱⠰⠯⠮⠭⠬⠫⠪⠩⠨⠧⠦⠥⠤⠣⠢⠡⠠⠟⠞⠝⠜⠛⠚⠙⠘⠗⠖⠕⠔⠓⠒⠑⠐⠏⠎⠍⠌⠋⠊⠉⠈⠇⠆⠅⠄⠃⠂⠁⠀" },
+            { cat: "math", chars: "±∓×÷∶…≤≥≠√∛∜∑∏∞♾ℕℤℚℝℂαβγδεμφπσθ∈∉∅∫∬∭∮∯∂∆∇≈≅≡≟∝∠‘’∪∩∼∣≃≄≇°⋅⊗⊕⊙⟨⟩∨∧¬∴∵⇒⇔∀∃∄⊆⊇⊂⊃∖℘ρX̄↔→↦⇥⊥⊤⊧⊢¦!∎ℑℍ𝔸⊖⌈⌉″′↟[]□■⌃⋀⋁∁⇔⅋∦∧∨≦≧≪≫≬≭≰≱≲≳⊀⊁◅‰‱" },
+            { cat: "fractions", chars: "½⅓⅔¼¾⅕⅖⅗⅘⅙⅚⅐⅛⅜⅝⅞⅑⅒↉⅟" },
+            { cat: "sub_super", chars: "⁰¹²³⁴⁵⁶⁷⁸⁹‧⁺⁻ˣᐟ⁼⁽⁾ⁿꜝ₀₁₂₃₄₅₆₇₈₉₊₋₌₍₎ₐₑₒₓₔ°ⁱ²³ᴬᴮᴰᴱᴳᴴᴵᴶᴷᴸᴹᴺᴼᴾᴿᵀᵁⱽᵂᵃᵇᶜᵈᵉᶠᵍʰⁱʲᵏˡᵐⁿᵒᵖʳˢᵗᵘᵛʷˣʸᶻₐₑₕᵢⱼₖₗₘₙₒₚᵣₛₜᵤᵥₓᵋᵝᵞᵟᵠᵡᵦᵧᵨᵩᵪᶥᶿ" },
+            { cat: "pi", chars: "Ππ𝜫𝝅𝝥𝝿𝞟𝞹Пп∏ϖ∐ℼㄇ兀" },
+            { cat: "greek", chars: "ΑΒΓΔΕΖΗΘΙΚΛΜΝΞΟΠΡΣΤΥΦΧΨΩαβγδεζηθικλμνξοπρςστυφχψω" },
+            { cat: "latin_letters", chars: "ÆÁÂÂÀÅÃÄÇÐÉÊÈËÍÎÌÏÑÓÔÒØÕÖÞÚÛÙÜÝáâæàåãäçéêèðëíîìïñóôòøõößþúûùüýÿ" },
+            { cat: "extended_latin", chars: "ĀāĂăĄąĆćĈĉĊċČčĎďĐđĒēĔĕĖėĘęĚěĜĝĞğĠġĢģĤĥĦħĨĩĪīĬĭĮįİıĲĳĴĵĶķĸĹĺĻļĽľĿŀŁłŃńŅņŇňŊŋŌōŎŏŐőŒœŔŕŖŗŘřŚśŜŝŞşŠšŢţŤťŦŧŨũŪūŬŭŮůŰűŲųŴŵŶŷŸŹźŻżŽžſŉ" },
+            { cat: "fonts", chars: "ⒶⒷⒸⒹⒺⒻⒼⒽⒾⒿⓀⓁⓂⓃⓄⓅⓆⓇⓈⓉⓊⓋⓌⓍⓎⓏⓐⓑⓒⓓⓔⓕⓖⓗⓘⓙⓚⓛⓜⓝⓞⓟⓠⓡⓢⓣⓤⓥⓦⓧⓨⓩᴀʙᴄ提ᴅᴇғɢʜɪᴊᴋʟᴍɴᴏᴘǫʀsᴛᴜᴠᴡxʏᴢ𝓐𝓑𝓒𝓓𝓔𝓕𝓖𝓗𝓘𝓙𝓚𝓛𝓜𝓝𝓞𝓟𝓠𝓡𝓢𝓣𝓤𝓥𝓦𝓧𝓨𝓩𝓪𝓫𝓬𝓭𝓮𝓯𝓰𝓱𝓲𝓳𝓴𝓵𝓶𝓷𝓸𝓹𝓺𝓻𝓼𝓽𝓾𝓿𝔀𝔁𝔂𝔃𝒜ℬ𝒞𝒟ℰℱ𝒢ℋℐ𝒥𝒦ℒℳ𝒩𝒪𝒫𝒬ℛ𝒮𝒯𝒰𝒱𝒲𝒳𝒴𝒵𝒶𝒷𝒸𝒹𝑒𝒻𝑔𝒽𝒾𝒿𝓀𝓁𝓂🇳🇴𓅅𝓺𝓇𝓼𝓉𝓊𓅆𝓿𝓌𝓍𝓎𝓏🅐🅑🅒🅓🅔🅕🅖🅗🅘🅙🅚🅛🅜🅝🅞🅟🅠🅡🅢🅣🅤🅥🅦🅧🅨🅩𝔸𝔹ℂ𝔻𝔼𝔽𝔾ℍ𝕀𝕁𝕂𝕃𝕄ℕ𝕆ℙℚℝ𝕊𝕋𝕌𝕍𝕎𝕏𝕐ℤ𝕒𝕓𝕔𝕕𝕖𝕗𝕘𝕙𝕚𝕛𝕜𝕝𝕞𝕟𝕠𝕡𝕢𝕣𝕤𝕥𝕦𝕧𝕨𝕩𝕪𝕫🄰🄱🄲🄳🄴🄵🄶🄷🄸🄹🄺🄻🄼🄽🄾🄿🅀🅁🅂🅃🅄🅅🅆🅇🅈🅉🅰🅱🅲🅳🅴🅵🅶🅷🅸🅹🅺🅻🅼🅽🅾🅿🆀🆁🆂🆃🆄🆅🆆🆇🆈🆉𝕬𝕭𝕮𝕯𝕰𝕱𝕲𝕳𝕴𝕵𝕶𝕷𝕸𝕹𝕺𝕻𝕼𝕽𝕾𝕿𝖀𝖁𝖂𝖃𝖄𝖅𝖆𝖇𝖈𝖉𝖊𝖋𝖌𝖍𝖎𝖏𝖐𝖑𝖒𝖓𝖔𝖕𝖖𝖗𝖘𝖙𝖚𝖛𝖜𝖝𝖞𝖟𝔄𝔅ℭ𝔇𝔈𝔉𝔊ℌℑ𝔍𝔎𝔏𝔐𝔑𝔒𝔓𝔔ℜ𝔖𝔗𝔘𝔙𝔚𝔛𝔜ℨ𝔞𝔟𝔠𝔡𝔢𝔣𝔤𝔥𝔦𝔧𝔨𝔩𝔪𝔫𝔬𝔭𝔮𝔯𝔰𝔱𝔲𝔳𝔴𝔵𝔶𝔷𝐀𝐁𝐂𝐃𝐄𝐅𝐆𝐇𝐈𝐉𝐊𝐋𝐌𝐍𝐎𝐏𝐐𝐑𝐒𝐓𝐔|𝐕𝐖𝐗𝐘𝐙𝐚𝐛𝐜𝐝𝐞𝐟𝐠𝐡𝐢𝐣𝐤|𝐥𝐦𝐧𝐨𝐩𝐪𝐫𝐬𝐭𝐮𝐯𝐰𝐱𝐲𝐳𝘈𝘉𝘊𝘋𝘌𝘍𝘎𝘏𝘐𝘑𝘒𝘓𝘔𝘕𝘖𝘗𝘘𝘙𝘚𝘛𝘜𝘝|𝘞𝘟𝘠𝘡𝘢𝘣🇨🇩𝘦𝘧𝘨𝘩🇮🇯𝘬𝘭𝘮🇳🇴𝘱𝘲𝘳𝘴𝘵𝘶𝘷𝘸𝘹𝘺𝘻𝘼𝘽🇨🇩𝙀𝙁𝙂𝙃𝙄𝙅𝙆𝙇𝙈𝙉𝙊𝙋𝙌𝙍𝙎𝙏𝙐𝙑𝙒𝙓𝙔𝙕𝙖𝙗🇨🇩𝙚𝙯𝙜𝙝𝙞𝙟𝙆𝙡𝙢𝙣𝙤𝙥𝙦𝙧𝙨𝙩𝙪𝙫𝙬𝙭𝙮𝙯" },
+            { cat: "chinese", chars: "㊊㊋㊌㊍㊎㊏㊐㊑㊒㊓㊔㊕㊖㊗㊘㊙㊚㊛㊜㊝㊞㊟㊠㊡㊢㊣㊤㊥㊦㊧㊨㊩㊪㊫㊬㊭㊮㊯㊰" },
+            { cat: "japanese", chars: "ぁあぃいぅうぇえぉおかがきぎくぐけげこごさざしじすずせぜそぞただちぢっつづてでとどなにぬねのはばぱひびぴふぶぷへべぺほぼぽまみむめもゃやゅゆょよらりるれろゎわゐゑをんゔゕゖゝゞァアィイゥウェエォオカガキギクグケゲコゴサザシジスズセゼソゾタダチヂッツヅテデトドナニヌネノハバPAヒビピフブプヘベペホボポマミムメモャヤュユョヨラリルレロヮワヰヱヲンヴヵヶヷヸヹヺ･ｦｧｨｩｪｫｬｭｮｯｰｱｲｳｴｵｶｷｸｹｺｻｼｽｾｿﾀﾁﾂﾃﾄﾅﾆﾇﾈﾉﾊﾋﾌﾍﾎﾏﾐﾑﾒﾓﾔﾕﾖﾗﾘﾙﾚﾛﾜﾝﾞﾟ㋐㋑㋒㋓㋔㋕㋖㋗㋘㋙㋚㋛㋜㋝㋞㋟㋠㋡㋢㋣㋤㋥㋦㋧㋨㋩㋪㋫㋬㋭㋮㋯㋰㋱㋲㋳㋴㋵㋶㋷㋸㋹㋺㋻㋼㋽㋾㋿㍻㍼㍽㍾◌゙◌゚゛゜・ーヽヾヿ㍐㍿々〒〜〃※〆" },
+            { cat: "korean", chars: "ㄱㄲㄳㄴㄵㄶㄷㄸㄹㄺㄻㄼㄽㄾㄿㅀㅁㅂㅃㅄㅅㅆㅇㅈㅉㅊㅋㅌㅍㅎㅏㅐㅑㅒㅓㅔㅕㅖㅗㅘㅙㅚㅛㅜㅝㅞㅟㅠㅡㅢㅣﾡﾢﾣﾤﾥﾦﾧﾨﾩﾪﾫﾬﾭﾮﾯﾰﾱﾲﾳﾴﾵﾶﾷﾸﾹﾺﾻﾼﾽﾾￂￃￄￅￆￇￊￋￌￍￎￏￒￓￔￕￖￗￚￛￜ㈀㈁㈂㈃㈄㈅㈆㈇㈈㈉㈊㈋㈌㈍㈎㈏㈐㈑㈒㈓㈔㈕㈖㈗㈘㈙㈚㈛㈜㈝㈞㉠㉡㉢㉣㉤㉥㉦㉧㉨㉩㉪㉫㉬㉭㉮㉯㉰㉱㉲㉳㉴㉵㉶㉷㉸㉹㉺㉻₩㉿〮〯ー" },
+            { cat: "currency", chars: "$¢€£¥₩₽₹¤₱₦ƒ₮৲৳₨௹฿៛₪₫₭₲₴₵﷼≋₿ŁÐ₳" }
         ];
 
-        // Estado Global Reactivo Centralizado
-        let appData = {
-            categories: INITIAL_CATEGORIES,
-            items: [],
-            recents: [],
-            trash: [],
-            currentCategory: 'all',
-            searchQuery: ''
-        };
+        const INITIAL_SYMBOLS = [];
 
-        // Historial de Modales Activos Stack (History API Control)
-        let activeModalsStack = [];
-
-        window.onload = function() {
-            initStorage();
-            bindEvents();
-            renderApp();
-            lucide.createIcons();
-        };
-
-        function initStorage() {
-            try {
-                const stored = localStorage.getItem('pure_symbols_schema');
-                if (stored) {
-                    const parsed = JSON.parse(stored);
-                    appData.items = parsed.items || [];
-                    appData.recents = parsed.recents || [];
-                    appData.trash = parsed.trash || [];
-                } else {
-                    appData.items = [...INITIAL_SYMBOLS];
-                    saveData();
-                }
-            } catch (e) {
-                appData.items = [...INITIAL_SYMBOLS];
+        function splitGraphemes(value) {
+            if (typeof Intl !== 'undefined' && Intl.Segmenter) {
+                return [...new Intl.Segmenter('es', { granularity: 'grapheme' }).segment(value)].map(part => part.segment);
             }
+            return Array.from(value);
+        }
+
+        rawData.forEach(group => {
+            const charsArray = splitGraphemes(group.chars);
+            charsArray.forEach((character, index) => {
+                INITIAL_SYMBOLS.push({
+                    char: character,
+                    name: `Simbolo ${INITIAL_CATEGORIES[group.cat]} ${index + 1}`,
+                    cat: group.cat,
+                    favorite: false
+                });
+            });
+        });
+
+        const DISCOVER_CATEGORIES = [
+            'popular', 'music', 'weather', 'business', 'objects', 'tech', 'monochrome', 'smiley', 'animals', 'arrows'
+        ];
+
+        const CATEGORY_ICONS = {
+            popular: 'star',
+            chess: 'award',
+            music: 'music',
+            weather: 'cloud-snow',
+            business: 'briefcase',
+            objects: 'package',
+            tech: 'cpu',
+            monochrome: 'circle',
+            miscellaneous: 'layout',
+            menu: 'menu',
+            zodiac: 'sparkles',
+            trademark: 'clipboard',
+            cards: 'grid',
+            dice: 'dice',
+            units: 'tool',
+            numeric: 'hash',
+            punctuation: 'type',
+            parentheses: 'corner-left-down',
+            quotes: 'quote',
+            paragraph: 'paragraph',
+            confidential: 'shield',
+            people: 'users',
+            smiley: 'smile',
+            eyes: 'eye',
+            gender: 'gender-male',
+            heart: 'heart',
+            hand: 'hand',
+            religious: 'book-open',
+            cross: 'cross',
+            totemic: 'hexagon',
+            animals: 'paw-print',
+            sky_stars: 'star',
+            asterisk: 'asterisk',
+            flowers: 'flower',
+            arrows: 'arrow-right',
+            squares: 'square',
+            triangles: 'triangle',
+            lines: 'slash',
+            random_lines: 'shuffle',
+            circles: 'circle',
+            other_shapes: 'shapes',
+            mark_x: 'x',
+            bullets: 'disc',
+            braille: 'dots-vertical',
+            math: 'divide',
+            fractions: 'percent',
+            sub_super: 'arrow-up-right',
+            pi: 'pi',
+            greek: 'activity',
+            latin_letters: 'type',
+            extended_latin: 'type',
+            fonts: 'font',
+            chinese: 'globe',
+            japanese: 'globe',
+            korean: 'globe',
+            currency: 'dollar-sign'
+        };
+
+        function getCategoryIcon(category) {
+            return CATEGORY_ICONS[category] || 'circle';
+        }
+
+        let appData = {
+            items: [],
+            trash: [],
+            recents: []
+        };
+
+        let currentActiveCategory = 'all';
+        let gridDensity = 'normal';
+
+        // Sistema de Persistencia e Inicialización
+        function loadOrCreateData() {
+            const local = localStorage.getItem('puresymbols_pro_state');
+            if (local) {
+                try {
+                    appData = JSON.parse(local);
+                    if (!appData.recents) appData.recents = [];
+                    if (!Array.isArray(appData.items)) appData.items = [...INITIAL_SYMBOLS];
+                    if (!Array.isArray(appData.trash)) appData.trash = [];
+                    appData.items = appData.items.map(item => ({ favorite: false, ...item }));
+                } catch(e) {
+                    resetToFactory();
+                }
+            } else {
+                resetToFactory();
+            }
+        }
+
+        function resetToFactory() {
+            appData.items = [...INITIAL_SYMBOLS];
+            appData.trash = [];
+            appData.recents = [];
+            saveData();
         }
 
         function saveData() {
-            localStorage.setItem('pure_symbols_schema', JSON.stringify({
-                items: appData.items,
-                recents: appData.recents,
-                trash: appData.trash
-            }));
+            localStorage.setItem('puresymbols_pro_state', JSON.stringify(appData));
         }
 
-        // Sistema Unificado de Renderizado Base
+        // Renderizado del Core Dinámico
         function renderApp() {
             renderPills();
-            renderSymbols();
-            renderTrash();
+            renderGrid();
             updateGlobalCounter();
-        }
-
-        function updateGlobalCounter() {
-            const countEl = document.getElementById('global-count');
-            const total = appData.items.filter(i => !appData.trash.some(t => t.char === i.char)).length;
-            
-            if (countEl.textContent !== String(total)) {
-                countEl.textContent = total;
-                countEl.classList.add('pulse');
-                setTimeout(() => countEl.classList.remove('pulse'), 250);
-            }
+            lucide.createIcons();
         }
 
         function renderPills() {
             const container = document.getElementById('categories-pills');
             container.innerHTML = '';
 
-            // Píldora "Todos"
+            // Píldora Global
             const allPill = document.createElement('div');
-            allPill.className = `pill ${appData.currentCategory === 'all' ? 'active' : ''}`;
-            allPill.textContent = 'Ver Todos';
-            allPill.onclick = () => { appData.currentCategory = 'all'; renderApp(); };
+            allPill.className = `pill ${currentActiveCategory === 'all' ? 'active' : ''}`;
+            allPill.textContent = 'Todos los Símbolos';
+            allPill.onclick = () => { currentActiveCategory = 'all'; renderApp(); };
             container.appendChild(allPill);
 
-            // Resto de categorías configuradas
-            for (let key in appData.categories) {
+            const favoritesCount = appData.items.filter(i => i.favorite).length;
+            if (favoritesCount > 0 || currentActiveCategory === 'favorites') {
+                const favPill = document.createElement('div');
+                favPill.className = `pill ${currentActiveCategory === 'favorites' ? 'active' : ''}`;
+                favPill.textContent = `Favoritos (${favoritesCount})`;
+                favPill.onclick = () => { currentActiveCategory = 'favorites'; renderApp(); };
+                container.appendChild(favPill);
+            }
+
+            // Resto de píldoras configuradas
+            for (const [key, label] of Object.entries(INITIAL_CATEGORIES)) {
                 if (key === 'recents' && appData.recents.length === 0) continue;
                 
+                const count = key === 'recents' ? appData.recents.length : appData.items.filter(i => i.cat === key).length;
+                if (count === 0 && key !== 'custom' && key !== 'recents') continue;
+
                 const pill = document.createElement('div');
-                pill.className = `pill ${appData.currentCategory === key ? 'active' : ''}`;
-                pill.textContent = appData.categories[key];
-                pill.onclick = () => { appData.currentCategory = key; renderApp(); };
+                pill.className = `pill ${currentActiveCategory === key ? 'active' : ''}`;
+                pill.innerHTML = `<i data-lucide="${getCategoryIcon(key)}" class="pill-icon" size="14"></i>${label} (${count})`;
+                pill.onclick = () => { currentActiveCategory = key; renderApp(); };
                 container.appendChild(pill);
             }
         }
 
-        function renderSymbols() {
-            const area = document.getElementById('symbols-content-area');
-            area.innerHTML = '';
+        function renderGrid() {
+            const mainContainer = document.getElementById('symbols-content-area');
+            mainContainer.innerHTML = '';
 
-            let filteredItems = appData.items;
+            if (currentActiveCategory === 'all') {
+                renderDiscoverSection(mainContainer);
+            }
 
-            // Filtro por Buscador
-            if (appData.searchQuery.trim() !== '') {
-                const q = appData.searchQuery.toLowerCase();
-                filteredItems = filteredItems.filter(i => i.char.includes(q) || i.name.toLowerCase().includes(q));
-                
-                // Vista de búsqueda plana
-                const title = document.createElement('div');
-                title.className = 'section-title';
-                title.textContent = `Resultados para "${appData.searchQuery}"`;
-                area.appendChild(title);
-
-                const grid = document.createElement('div');
-                grid.className = 'symbols-grid';
-                filteredItems.forEach(item => grid.appendChild(createSymbolNode(item)));
-                area.appendChild(grid);
+            if (currentActiveCategory === 'recents') {
+                createCategorySection(mainContainer, 'recents', INITIAL_CATEGORIES['recents'], appData.recents);
                 return;
             }
 
-            // Vista por Filtro de Categorías
-            if (appData.currentCategory === 'recents') {
-                createCategoryBlock(area, 'recents', 'Usados recientemente', appData.recents);
-            } else if (appData.currentCategory !== 'all') {
-                const itemsInCat = filteredItems.filter(i => i.cat === appData.currentCategory);
-                createCategoryBlock(area, appData.currentCategory, appData.categories[appData.currentCategory], itemsInCat);
-            } else {
-                // Renderizar todas agrupadas de manera corporativa y limpia
-                if (appData.recents.length > 0) {
-                    createCategoryBlock(area, 'recents', 'Usados recientemente', appData.recents);
-                }
-                for (let catKey in appData.categories) {
-                    if (catKey === 'recents') continue;
-                    const itemsInCat = filteredItems.filter(i => i.cat === catKey);
-                    if (itemsInCat.length > 0) {
-                        createCategoryBlock(area, catKey, appData.categories[catKey], itemsInCat);
-                    }
+            if (currentActiveCategory === 'favorites') {
+                const favorites = appData.items.filter(i => i.favorite);
+                createCategorySection(mainContainer, 'favorites', 'Favoritos', favorites);
+                return;
+            }
+
+            if (currentActiveCategory !== 'all') {
+                const categoryItems = appData.items.filter(i => i.cat === currentActiveCategory);
+                createCategorySection(mainContainer, currentActiveCategory, INITIAL_CATEGORIES[currentActiveCategory], categoryItems);
+                return;
+            }
+
+            if (appData.recents.length > 0) {
+                createCategorySection(mainContainer, 'recents', INITIAL_CATEGORIES['recents'], appData.recents);
+            }
+
+            for (const [catKey, catLabel] of Object.entries(INITIAL_CATEGORIES)) {
+                if (catKey === 'recents') continue;
+                const catItems = appData.items.filter(i => i.cat === catKey);
+                if (catItems.length > 0) {
+                    createCategorySection(mainContainer, catKey, catLabel, catItems);
                 }
             }
         }
 
-        function createCategoryBlock(parent, key, label, items) {
+        function renderDiscoverSection(targetContainer) {
+            const section = document.createElement('section');
+            section.className = 'discover-section';
+
+            const header = document.createElement('div');
+            header.className = 'discover-header';
+            header.innerHTML = `
+                <div>
+                    <div class="discover-title">Descubrir en Homescreen</div>
+                    <div class="discover-subtitle">Explora categorías destacadas y expande tu colección</div>
+                </div>
+            `;
+            section.appendChild(header);
+
+            const grid = document.createElement('div');
+            grid.className = 'discover-grid';
+
+            DISCOVER_CATEGORIES.forEach(catKey => {
+                const items = appData.items.filter(i => i.cat === catKey).slice(0, 10);
+                if (!items.length) return;
+
+                const card = document.createElement('div');
+                card.className = 'discover-card';
+                card.innerHTML = `
+                    <h4>${INITIAL_CATEGORIES[catKey] || catKey}</h4>
+                `;
+
+                const preview = document.createElement('div');
+                preview.className = 'discover-preview';
+                items.slice(0, 5).forEach(item => {
+                    const previewItem = document.createElement('div');
+                    previewItem.className = 'symbol-preview-item';
+                    previewItem.textContent = item.char;
+                    preview.appendChild(previewItem);
+                });
+                card.appendChild(preview);
+
+                const button = document.createElement('button');
+                button.textContent = 'Explorar más';
+                button.onclick = () => {
+                    currentActiveCategory = catKey;
+                    renderApp();
+                    window.scrollTo({ top: 0, behavior: 'smooth' });
+                };
+                card.appendChild(button);
+                grid.appendChild(card);
+            });
+
+            section.appendChild(grid);
+            targetContainer.appendChild(section);
+        }
+
+        function createCategorySection(targetContainer, catKey, label, itemsList) {
             const group = document.createElement('div');
             group.className = 'category-group';
 
             const header = document.createElement('div');
             header.className = 'category-header';
-            header.innerHTML = `<h3>${label}</h3>`;
+            header.innerHTML = `
+                <h3><i data-lucide="${getCategoryIcon(catKey)}" class="category-icon" size="18"></i>${label}</h3>
+            `;
             group.appendChild(header);
 
             const grid = document.createElement('div');
             grid.className = 'symbols-grid';
 
-            items.forEach(item => {
-                grid.appendChild(createSymbolNode(item));
+            itemsList.forEach(item => {
+                const node = document.createElement('div');
+                node.className = 'symbol-item';
+                node.title = item.name;
+
+                const charSpan = document.createElement('span');
+                charSpan.textContent = item.char;
+                node.appendChild(charSpan);
+
+                if (item.favorite) {
+                    const favoriteMark = document.createElement('span');
+                    favoriteMark.className = 'favorite-indicator';
+                    favoriteMark.textContent = '★';
+                    node.appendChild(favoriteMark);
+                }
+
+                let holdTimer = null;
+                let wasHeld = false;
+
+                node.onpointerdown = () => {
+                    wasHeld = false;
+                    holdTimer = setTimeout(() => {
+                        wasHeld = true;
+                        toggleFavorite(item);
+                    }, 550);
+                };
+
+                node.onpointerup = () => {
+                    clearTimeout(holdTimer);
+                    if (!wasHeld) {
+                        handleSymbolCopy(item);
+                    }
+                };
+
+                node.onpointerleave = node.onpointercancel = () => {
+                    clearTimeout(holdTimer);
+                };
+
+                node.oncontextmenu = (e) => {
+                    e.preventDefault();
+                    if (catKey !== 'recents') moveSymbolToTrash(item);
+                };
+
+                grid.appendChild(node);
             });
 
             group.appendChild(grid);
-            parent.appendChild(group);
+            targetContainer.appendChild(group);
         }
 
-        function createSymbolNode(item) {
-            const node = document.createElement('div');
-            node.className = 'symbol-item';
-            node.textContent = item.char;
-            node.title = item.name;
-            
-            // Copiar directamente por microinteracción táctil
-            node.onclick = () => {
-                navigator.clipboard.writeText(item.char).then(() => {
-                    triggerToast(`¡Copiado: ${item.char}!`);
-                    pushRecent(item);
-                });
-            };
-
-            // Evento contextual para eliminar lógicamente del listado (clic derecho o pulsación larga)
-            node.oncontextmenu = (e) => {
-                e.preventDefault();
-                moveItemToTrash(item);
-            };
-
-            return node;
+        function handleSymbolCopy(item) {
+            navigator.clipboard.writeText(item.char).then(() => {
+                triggerToast(`Copiado: ${item.char}`);
+                registerRecentUse(item);
+            }).catch(() => {
+                // Fallback clásico si es necesario
+                const el = document.createElement('textarea');
+                el.value = item.char;
+                document.body.appendChild(el);
+                el.select();
+                document.execCommand('copy');
+                document.body.removeChild(el);
+                triggerToast(`Copiado: ${item.char}`);
+                registerRecentUse(item);
+            });
         }
 
-        function pushRecent(item) {
+        function registerRecentUse(item) {
+            // El sistema recoge y reorganiza automáticamente los caracteres de uso más reciente
             appData.recents = appData.recents.filter(r => r.char !== item.char);
             appData.recents.unshift(item);
-            if (appData.recents.length > 16) appData.recents.pop();
+            if (appData.recents.length > 24) appData.recents.pop(); // Limite Higiénico
             saveData();
-            renderPills();
+            renderApp();
         }
 
-        function moveItemToTrash(item) {
-            appData.items = appData.items.filter(i => i.char !== item.char);
-            appData.recents = appData.recents.filter(r => r.char !== item.char);
+        function moveSymbolToTrash(item) {
+            appData.items = appData.items.filter(i => !(i.char === item.char && i.cat === item.cat));
+            appData.recents = appData.recents.filter(r => !(r.char === item.char && r.cat === item.cat));
             appData.trash.push(item);
             saveData();
             renderApp();
-            triggerToast(`Símbolo movido a la papelera.`);
+            triggerToast('Símbolo movido a la papelera.');
         }
 
-        function renderTrash() {
+        function updateGlobalCounter() {
+            const badge = document.getElementById('global-count');
+            badge.textContent = appData.items.length;
+            badge.classList.add('pulse');
+            setTimeout(() => badge.classList.remove('pulse'), 250);
+        }
+
+        function triggerToast(message) {
+            const toast = document.getElementById('toast-notification');
+            document.getElementById('toast-text').textContent = message;
+            toast.className = 'toast active';
+            setTimeout(() => { toast.className = 'toast'; }, 2000);
+        }
+
+        function toggleFavorite(item) {
+            item.favorite = !item.favorite;
+            saveData();
+            renderApp();
+            triggerToast(item.favorite ? 'Añadido a favoritos' : 'Eliminado de favoritos');
+        }
+
+        function applyViewDensity(density) {
+            gridDensity = density;
+            if (density === 'dense') {
+                document.body.classList.add('dense-view');
+            } else {
+                document.body.classList.remove('dense-view');
+            }
+            document.querySelectorAll('.view-toggle').forEach(btn => {
+                btn.classList.toggle('active', btn.dataset.density === density);
+            });
+        }
+
+        document.querySelectorAll('.view-toggle').forEach(btn => {
+            btn.onclick = () => applyViewDensity(btn.dataset.density);
+        });
+
+        // Modales e Interacciones Avanzadas
+        function openModal(id) {
+            document.getElementById('main-view').classList.add('backgrounded');
+            document.getElementById(id).classList.add('active');
+            if (id === 'modal-trash') renderTrashView();
+        }
+
+        function closeActiveModal(id) {
+            document.getElementById('main-view').classList.remove('backgrounded');
+            document.getElementById(id).classList.remove('active');
+        }
+
+        document.getElementById('open-add-btn').onclick = () => openModal('modal-add');
+        document.getElementById('open-trash-btn').onclick = () => openModal('modal-trash');
+
+        // Formulario Reactivo Símbolos Nuevos
+        const inputChar = document.getElementById('input-char');
+        const inputName = document.getElementById('input-name');
+        const liveChar = document.getElementById('live-preview-char');
+        const liveName = document.getElementById('live-preview-name');
+
+        inputChar.oninput = (e) => { liveChar.textContent = e.target.value || '-'; };
+        inputName.oninput = (e) => { liveName.textContent = e.target.value || 'Previsualización en tiempo real'; };
+
+        document.getElementById('save-symbol-btn').onclick = () => {
+            const charVal = inputChar.value.trim();
+            const nameVal = inputName.value.trim();
+            const catVal = document.getElementById('input-category').value;
+
+            let hasError = false;
+            if (!charVal) { applyShake(inputChar); hasError = true; }
+            if (!nameVal) { applyShake(inputName); hasError = true; }
+            if (hasError) return;
+
+            appData.items.push({ char: charVal, name: nameVal, cat: catVal, favorite: false });
+            saveData();
+            renderApp();
+
+            inputChar.value = '';
+            inputName.value = '';
+            liveChar.textContent = '-';
+            liveName.textContent = 'Previsualización en tiempo real';
+            closeActiveModal('modal-add');
+            triggerToast('Símbolo personalizado añadido.');
+        };
+
+        function renderTrashView() {
             const container = document.getElementById('trash-items-container');
             container.innerHTML = '';
-
             if (appData.trash.length === 0) {
-                container.innerHTML = `<div style="color:var(--text-muted); font-size:14px; text-align:center; padding: 20px 0;">La papelera está vacía</div>`;
+                container.innerHTML = '<div style="color: var(--text-muted); font-size:14px; text-align:center; padding: 20px;">La papelera está vacía</div>';
                 return;
             }
-
-            appData.trash.forEach((item, index) => {
+            appData.trash.forEach((item, idx) => {
                 const row = document.createElement('div');
                 row.className = 'trash-row';
                 row.innerHTML = `
-                    <span class="trash-char">${item.char} <small style="color:var(--text-muted); font-size:12px;">(${item.name})</small></span>
+                    <span class="trash-char">${item.char}</span>
                     <div class="trash-actions">
-                        <button class="btn-text-action" onclick="restoreFromTrash(${index})">Restaurar</button>
-                        <button class="btn-text-action danger" onclick="purgeFromTrash(${index})">Purgar</button>
+                        <button class="btn-text-action" onclick="restoreFromTrash(${idx})">Restaurar</button>
+                        <button class="btn-text-action danger" onclick="purgeFromTrash(${idx})">Eliminar</button>
                     </div>
                 `;
                 container.appendChild(row);
             });
         }
 
-        function restoreFromTrash(index) {
-            const item = appData.trash.splice(index, 1)[0];
+        window.restoreFromTrash = (idx) => {
+            const item = appData.trash.splice(idx, 1)[0];
             appData.items.push(item);
             saveData();
             renderApp();
-        }
+            renderTrashView();
+            triggerToast('Símbolo restaurado.');
+        };
 
-        function purgeFromTrash(index) {
-            appData.trash.splice(index, 1);
+        window.purgeFromTrash = (idx) => {
+            appData.trash.splice(idx, 1);
             saveData();
-            renderApp();
-        }
+            renderTrashView();
+            triggerToast('Eliminado permanentemente.');
+        };
 
-        function triggerToast(text) {
-            const toast = document.getElementById('toast-notification');
-            document.getElementById('toast-text').textContent = text;
-            toast.classList.add('active');
-            setTimeout(() => toast.classList.remove('active'), 2500);
-        }
-
-        // Control Avanzado Historial y Modales (History API Stack)
-        function openModal(modalId) {
-            document.getElementById('main-view').classList.add('backgrounded');
-            document.getElementById(modalId).classList.add('active');
-            
-            activeModalsStack.push(modalId);
-            window.history.pushState({ modalId: modalId }, "");
-        }
-
-        function closeActiveModal(modalId) {
-            if (activeModalsStack.includes(modalId)) {
-                window.history.back();
-            }
-        }
-
-        window.addEventListener('popstate', () => {
-            if (activeModalsStack.length > 0) {
-                const topModalId = activeModalsStack.pop();
-                document.getElementById(topModalId).classList.remove('active');
-                if (activeModalsStack.length === 0) {
-                    document.getElementById('main-view').classList.remove('backgrounded');
-                }
-            }
-        });
-
-        // Enlace de Eventos y Lógica Reactiva
-        function bindEvents() {
-            // Buscador FAB Lógica de Expansión
-            const searchContainer = document.getElementById('search-container');
-            const searchInput = document.getElementById('search-input');
-            const searchTrigger = document.getElementById('search-trigger');
-            const searchClear = document.getElementById('search-clear');
-            const searchIcon = document.getElementById('search-icon');
-
-            searchTrigger.onclick = () => {
-                if (!searchContainer.classList.contains('expanded')) {
-                    searchContainer.classList.add('expanded');
-                    searchInput.focus();
-                }
-            };
-
-            searchInput.oninput = (e) => {
-                appData.searchQuery = e.target.value;
-                if (appData.searchQuery.length > 0) {
-                    searchClear.classList.add('visible');
-                    searchIcon.setAttribute('data-lucide', 'arrow-left');
-                } else {
-                    searchClear.classList.remove('visible');
-                    searchIcon.setAttribute('data-lucide', 'search');
-                }
-                lucide.createIcons();
-                renderSymbols();
-            };
-
-            searchClear.onclick = () => {
-                searchInput.value = '';
-                appData.searchQuery = '';
-                searchClear.classList.remove('visible');
-                searchIcon.setAttribute('data-lucide', 'search');
-                lucide.createIcons();
-                renderSymbols();
-                searchInput.focus();
-            };
-
-            // Cerrar buscador si se pulsa fuera de él de manera inteligente
-            document.addEventListener('click', (e) => {
-                if (!searchContainer.contains(e.target) && searchInput.value.trim() === '') {
-                    searchContainer.classList.remove('expanded');
-                }
-            });
-
-            // Modales Action Triggers
-            document.getElementById('open-add-btn').onclick = () => openModal('modal-add');
-            document.getElementById('open-trash-btn').onclick = () => openModal('modal-trash');
-
-            // Formulario Reactivo Previsualizador
-            const inputChar = document.getElementById('input-char');
-            const inputName = document.getElementById('input-name');
-            const liveChar = document.getElementById('live-preview-char');
-            const liveName = document.getElementById('live-preview-name');
-
-            inputChar.oninput = (e) => {
-                liveChar.textContent = e.target.value || '-';
-            };
-            inputName.oninput = (e) => {
-                liveName.textContent = e.target.value || 'Previsualización en tiempo real';
-            };
-
-            // Guardado Reactivo con Shake Error UI Validation
-            document.getElementById('save-symbol-btn').onclick = () => {
-                const charVal = inputChar.value.trim();
-                const nameVal = inputName.value.trim();
-                const catVal = document.getElementById('input-category').value;
-
-                let hasError = false;
-
-                if (!charVal) {
-                    applyShake(inputChar);
-                    hasError = true;
-                }
-                if (!nameVal) {
-                    applyShake(inputName);
-                    hasError = true;
-                }
-
-                if (hasError) return;
-
-                // Insertar en estado centralizado
-                const newItem = { char: charVal, name: nameVal, cat: catVal };
-                appData.items.push(newItem);
-                saveData();
-                renderApp();
-
-                // Limpiar formulario de forma higiénica
-                inputChar.value = '';
-                inputName.value = '';
-                liveChar.textContent = '-';
-                liveName.textContent = 'Previsualización en tiempo real';
-
-                closeActiveModal('modal-add');
-                triggerToast('Símbolo personalizado añadido.');
-            };
-
-            // Vaciar completamente la papelera
-            document.getElementById('empty-trash-btn').onclick = () => {
-                appData.trash = [];
-                saveData();
-                renderApp();
-                closeActiveModal('modal-trash');
-                triggerToast('Papelera vaciada por completo.');
-            };
-        }
+        document.getElementById('empty-trash-btn').onclick = () => {
+            appData.trash = [];
+            saveData();
+            renderTrashView();
+            closeActiveModal('modal-trash');
+            triggerToast('Papelera vaciada por completo.');
+        };
 
         function applyShake(element) {
             element.classList.add('error-shake');
-            setTimeout(() => {
-                element.classList.remove('error-shake');
-            }, 300);
+            setTimeout(() => { element.classList.remove('error-shake'); }, 300);
         }
+
+        // Inicialización General
+        loadOrCreateData();
+        applyViewDensity(gridDensity);
+        renderApp();
     </script>
 </body>
 </html>

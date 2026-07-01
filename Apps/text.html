@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
-    <title>Neo-Glass Fancy Text Studio</title>
+    <title>Fancy Text</title>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@200;300;400;500;600;700&display=swap" rel="stylesheet">
@@ -21,6 +21,8 @@
             --accent-danger: #FF453A;
             --accent-success: #34C759;
             --accent-blue: #0A84FF;
+            /* Fuente partiendo de emoji para banderas y símbolos color */
+            --emoji-font: 'Segoe UI Emoji', 'Apple Color Emoji', 'Noto Color Emoji', 'EmojiSymbols', 'Segoe UI Symbol', sans-serif;
             --bezier: cubic-bezier(0.16, 1, 0.3, 1);
             --spring: cubic-bezier(0.34, 1.56, 0.64, 1);
         }
@@ -167,6 +169,7 @@
             outline: none;
             min-height: 44px;
             max-height: 120px;
+            white-space: pre-wrap;
         }
 
         .grid-layout {
@@ -195,6 +198,7 @@
             transition: transform 0.3s var(--bezier), background 0.3s var(--bezier);
             cursor: pointer;
             position: relative;
+            min-width: 0;
         }
 
         .card-item:hover {
@@ -213,7 +217,10 @@
 
         .card-value {
             font-size: 18px;
+            font-family: 'Outfit', sans-serif;
             word-break: break-all;
+            overflow-wrap: anywhere;
+            white-space: pre-wrap;
             user-select: all;
             min-height: 26px;
         }
@@ -615,6 +622,10 @@
             "monospace": {
                 a:'𝚏',b:'𝚊',c:'𝚗',d:'𝚌',e:'𝚢',f:' ',g:'𝚝',h:'𝚎',i:'𝚡',j:'𝚝',k:'𝚔',l:'𝚕',m:'𝚖',n:'𝚗',o:'𝚘',p:'𝚠',q:'𝚚',r:'𝚛',s:'𝚜',t:'𝚝',u:'𝚞',v:'𝚟',w:'𝚠',x:'𝚡',y:'𝚢',z:'𝚣',
                 A:'𝙵',B:'𝙰',C:'𝙽',D:'𝙲',E:'𝚈',F:' ',G:'𝚃',H:'𝙴',I:'𝚇',J:'𝚃',K:'𝚙',L:'𝙻',M:'𝙼',N:'𝙽',O:'𝙾',P:'𝙿',Q:'𝚀',R:'𝚁',S:'𝚂',T:'𝚃',U:'𝚄',V:'𝚅',W:'𝚆',X:'𝚇',Y:'𝚈',Z:'𝚉'
+            },
+            "emoji_flags": {
+                a:'🇦',b:'🇧',c:'🇨',d:'🇩',e:'🇪',f:'🇫',g:'🇬',h:'🇭',i:'🇮',j:'🇯',k:'🇰',l:'🇱',m:'🇲',n:'🇳',o:'🇴',p:'🇵',q:'🇶',r:'🇷',s:'🇸',t:'🇹',u:'🇺',v:'🇻',w:'🇼',x:'🇽',y:'🇾',z:'🇿',
+                A:'🇦',B:'🇧',C:'🇨',D:'🇩',E:'🇪',F:'🇫',G:'🇬',H:'🇭',I:'🇮',J:'🇯',K:'🇰',L:'🇱',M:'🇲',N:'🇳',O:'🇴',P:'🇵',Q:'🇶',R:'🇷',S:'🇸',T:'🇹',U:'🇺',V:'🇻',W:'🇼',X:'🇽',Y:'🇾',Z:'🇿'
             }
         };
 
@@ -644,6 +655,7 @@
             { id: 'italic_sans', name: 'Sans Itálica', type: 'map', key: 'italic_sans' },
             { id: 'italic_serif', name: 'Serif Itálica', type: 'map', key: 'italic_serif' },
             { id: 'monospace', name: 'Monoespaciado', type: 'map', key: 'monospace' },
+            { id: 'emoji_flags', name: 'Banderas Emoji', type: 'map', key: 'emoji_flags' },
             { id: 'strike', name: 'Tachado', type: 'fn', fn: (t) => t.split('').map(c => c + '\u0336').join('') },
             { id: 'slash', name: 'Barra Diagonal', type: 'fn', fn: (t) => t.split('').map(c => c + '\u0338').join('') },
             { id: 'sparkle', name: 'Brillantes', type: 'fn', fn: (t) => t.split('').map(c => '҉' + c).join('') },
@@ -672,6 +684,14 @@
             if (!text) return 'Escribe algo...';
             if (style.type === 'map') {
                 const map = alphabetMaps[style.key];
+                if (style.key === 'emoji_flags') {
+                    const separator = '\u200B';
+                    return text.split('').map(char => {
+                        const mapped = map[char] || char;
+                        const isRegionalIndicator = mapped.length === 2 && mapped.codePointAt(0) >= 0x1F1E6 && mapped.codePointAt(0) <= 0x1F1FF;
+                        return mapped + (isRegionalIndicator ? separator : '');
+                    }).join('');
+                }
                 return text.split('').map(char => map[char] || char).join('');
             } else if (style.type === 'fn') {
                 return style.fn(text);

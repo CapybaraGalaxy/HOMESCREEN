@@ -1,0 +1,796 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+    <title>Combos</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@200;300;400;500;600;700&display=swap" rel="stylesheet">
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <style>
+        :root {
+            /* Paleta Cromática Orgánica y Oscura */
+            --bg: #000000;
+            --surface: #121212;
+            --surface-hover: #1c1c1e;
+            
+            /* Configuración Neo-Glass Pure */
+            --glass: rgba(15, 15, 15, 0.4);
+            --glass-border: rgba(255, 255, 255, 0.08);
+            --blur-val: 30px;
+
+            /* Jerarquía Textual */
+            --text-main: #FFFFFF;
+            --text-muted: #8E8E93;
+
+            /* Estados y Acentos de Sistema */
+            --accent-danger: #FF453A;
+            --accent-success: #34C759;
+
+            /* Físicas de Animación Progresivas */
+            --bezier: cubic-bezier(0.16, 1, 0.3, 1);
+            --spring: cubic-bezier(0.34, 1.56, 0.64, 1);
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            -webkit-tap-highlight-color: transparent;
+        }
+
+        body {
+            background-color: var(--bg);
+            color: var(--text-main);
+            font-family: 'Outfit', sans-serif;
+            min-height: 100dvh;
+            overflow: hidden;
+        }
+
+        /* Contenedor Principal */
+        .app-container {
+            height: 100dvh;
+            display: flex;
+            flex-direction: column;
+            padding: env(safe-area-inset-top) 24px calc(env(safe-area-inset-bottom) + 16px) 24px;
+            max-width: 900px;
+            margin: 0 auto;
+            transition: transform 0.4s var(--bezier), filter 0.4s var(--bezier);
+        }
+
+        .app-container.backgrounded {
+            transform: scale(0.96);
+            filter: blur(8px);
+            pointer-events: none;
+        }
+
+        header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 16px 0 12px 0;
+        }
+
+        .header-left {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .app-icon-badge {
+            width: 40px;
+            height: 40px;
+            border-radius: 12px;
+            background: radial-gradient(circle at center, rgba(255,255,255,0.1) 0%, rgba(0,0,0,0) 80%);
+            border: 1px solid var(--glass-border);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.5);
+        }
+
+        h1 {
+            font-size: 20px;
+            font-weight: 600;
+            letter-spacing: -0.5px;
+        }
+
+        .counter-badge {
+            font-size: 13px;
+            color: var(--text-muted);
+            font-variant-numeric: tabular-nums;
+            margin-left: 6px;
+            transition: transform 0.2s var(--spring);
+        }
+        
+        .counter-badge.pulse {
+            transform: scale(1.15);
+            color: var(--text-main);
+        }
+
+        .header-actions {
+            display: flex;
+            gap: 8px;
+        }
+
+        .btn-icon {
+            background: var(--glass);
+            border: 1px solid var(--glass-border);
+            backdrop-filter: blur(var(--blur-val));
+            width: 38px;
+            height: 38px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: var(--text-main);
+            cursor: pointer;
+            transition: background 0.2s var(--bezier), transform 0.2s var(--spring);
+        }
+
+        .btn-icon:hover {
+            background: var(--surface-hover);
+        }
+
+        .btn-icon:active {
+            transform: scale(0.92);
+        }
+
+        .folders-scroll-area {
+            display: flex;
+            gap: 10px;
+            overflow-x: auto;
+            padding: 4px 0 16px 0;
+            scrollbar-width: none;
+            -webkit-overflow-scrolling: touch;
+            flex-shrink: 0;
+        }
+        .folders-scroll-area::-webkit-scrollbar { display: none; }
+
+        .pill {
+            background: var(--glass);
+            border: 1px solid var(--glass-border);
+            padding: 8px 16px;
+            border-radius: 100px;
+            font-size: 14px;
+            font-weight: 500;
+            color: var(--text-muted);
+            white-space: nowrap;
+            cursor: pointer;
+            transition: all 0.3s var(--bezier);
+            backdrop-filter: blur(var(--blur-val));
+        }
+
+        .pill:hover {
+            color: var(--text-main);
+            background: rgba(255, 255, 255, 0.05);
+        }
+
+        .pill.active {
+            background: var(--text-main);
+            color: var(--bg);
+            border-color: var(--text-main);
+            transform: scale(1.02);
+        }
+
+        .main-content {
+            flex: 1;
+            overflow-y: auto;
+            padding-bottom: 90px;
+            scrollbar-width: none;
+        }
+        .main-content::-webkit-scrollbar { display: none; }
+
+        /* OPTIMIZACIÓN REORGANIZADA DE GRID A LISTA ADAPTATIVA DE COMBOS */
+        .combos-container {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+            margin-bottom: 24px;
+        }
+
+        .combo-item {
+            background: var(--glass);
+            border: 1px solid var(--glass-border);
+            border-radius: 14px;
+            padding: 16px;
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+            cursor: pointer;
+            backdrop-filter: blur(var(--blur-val));
+            transition: transform 0.25s var(--spring), background 0.25s var(--bezier), border-color 0.25s var(--bezier);
+            user-select: none;
+            position: relative;
+        }
+
+        .combo-text-wrapper {
+            font-size: 15px;
+            color: var(--text-main);
+            white-space: pre-wrap;
+            word-break: break-word;
+            font-family: monospace, sans-serif;
+            background: rgba(0, 0, 0, 0.2);
+            padding: 12px;
+            border-radius: 8px;
+            border: 1px solid rgba(255, 255, 255, 0.03);
+            line-height: 1.4;
+        }
+
+        .combo-meta {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            font-size: 12px;
+            color: var(--text-muted);
+        }
+
+        .combo-item:hover {
+            background: var(--surface-hover);
+            border-color: rgba(255, 255, 255, 0.2);
+            transform: translateY(-2px);
+        }
+
+        .combo-item:active {
+            transform: scale(0.99);
+        }
+
+        .category-group {
+            margin-bottom: 28px;
+            animation: fadeUp 0.35s var(--spring);
+        }
+
+        .category-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 14px;
+        }
+
+        .category-header h3 {
+            font-size: 16px;
+            font-weight: 500;
+            color: var(--text-muted);
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        @keyframes fadeUp {
+            from { opacity: 0; transform: translateY(12px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        /* Notificación Toast */
+        .toast {
+            position: fixed;
+            top: calc(env(safe-area-inset-top) + 20px);
+            left: 50%;
+            transform: translate(-50%, -30px);
+            background: rgba(255, 255, 255, 0.95);
+            color: #000000;
+            padding: 10px 20px;
+            border-radius: 100px;
+            font-size: 14px;
+            font-weight: 600;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.5);
+            opacity: 0;
+            pointer-events: none;
+            transition: transform 0.4s var(--spring), opacity 0.3s var(--bezier);
+            z-index: 1000;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .toast.active {
+            opacity: 1;
+            transform: translate(-50%, 0);
+        }
+
+        /* Modales */
+        .modal-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100vw;
+            height: 100vh;
+            background: transparent;
+            z-index: 500;
+            pointer-events: none;
+            display: flex;
+            align-items: flex-end;
+            justify-content: center;
+        }
+
+        .modal-sheet {
+            width: 100%;
+            max-width: 550px;
+            background: rgba(20, 20, 20, 0.85);
+            border-top: 1px solid var(--glass-border);
+            border-left: 1px solid var(--glass-border);
+            border-right: 1px solid var(--glass-border);
+            border-radius: 24px 24px 0 0;
+            backdrop-filter: blur(40px);
+            padding: 24px;
+            padding-bottom: calc(env(safe-area-inset-bottom) + 30px);
+            transform: translateY(100%);
+            transition: transform 0.4s var(--bezier);
+            pointer-events: auto;
+            box-shadow: 0 -10px 40px rgba(0,0,0,0.8);
+        }
+
+        .modal-overlay.active .modal-sheet {
+            transform: translateY(0);
+        }
+
+        .modal-overlay.active {
+            pointer-events: auto;
+        }
+
+        .modal-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 20px;
+        }
+
+        .modal-title {
+            font-size: 18px;
+            font-weight: 600;
+        }
+
+        .form-group {
+            margin-bottom: 18px;
+        }
+
+        .form-label {
+            display: block;
+            font-size: 13px;
+            font-weight: 500;
+            color: var(--text-muted);
+            margin-bottom: 8px;
+        }
+
+        .form-input {
+            width: 100%;
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid var(--glass-border);
+            border-radius: 12px;
+            padding: 12px 16px;
+            color: var(--text-main);
+            font-family: 'Outfit', sans-serif;
+            font-size: 15px;
+            transition: border-color 0.2s var(--bezier), background 0.2s var(--bezier);
+        }
+
+        textarea.form-input {
+            resize: vertical;
+            min-height: 80px;
+            font-family: monospace;
+        }
+
+        .btn-submit {
+            width: 100%;
+            background: var(--text-main);
+            color: var(--bg);
+            border: none;
+            border-radius: 14px;
+            padding: 14px;
+            font-size: 15px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: opacity 0.2s var(--bezier), transform 0.2s var(--spring);
+        }
+
+        .btn-submit:active {
+            transform: scale(0.98);
+        }
+
+        .trash-list {
+            max-height: 200px;
+            overflow-y: auto;
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+            margin-bottom: 16px;
+        }
+
+        .trash-row {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            background: rgba(255,255,255,0.03);
+            padding: 10px 14px;
+            border-radius: 10px;
+            border: 1px solid var(--glass-border);
+        }
+
+        .btn-text-action {
+            background: transparent;
+            border: none;
+            color: var(--accent-success);
+            font-size: 13px;
+            font-weight: 500;
+            cursor: pointer;
+        }
+
+        .btn-text-action.danger {
+            color: var(--accent-danger);
+        }
+    </style>
+</head>
+<body>
+
+    <div class="app-container" id="main-view">
+        <header>
+            <div class="header-left">
+                <div class="app-icon-badge">
+                    <i data-lucide="sparkles" size="20" style="color: var(--text-main);"></i>
+                </div>
+                <div>
+                    <h1 style="display: flex; align-items: center;">
+                        Combos
+                        <span class="counter-badge" id="global-count">0</span>
+                    </h1>
+                </div>
+            </div>
+            <div class="header-actions">
+                <button class="btn-icon" id="open-trash-btn" title="Papelera">
+                    <i data-lucide="trash-2" size="18"></i>
+                </button>
+                <button class="btn-icon" id="open-add-btn" title="Añadir Combo">
+                    <i data-lucide="plus" size="18"></i>
+                </button>
+            </div>
+        </header>
+
+        <div class="folders-scroll-area" id="categories-pills"></div>
+
+        <main class="main-content" id="combos-content-area"></main>
+    </div>
+
+    <div class="toast" id="toast-notification">
+        <i data-lucide="check" size="16" style="color: #000;"></i>
+        <span id="toast-text">¡Combo copiado!</span>
+    </div>
+
+    <div class="modal-overlay" id="modal-add">
+        <div class="modal-sheet">
+            <div class="modal-header">
+                <div class="modal-title">Añadir Nuevo Combo</div>
+                <button class="btn-icon" onclick="closeActiveModal('modal-add')">
+                    <i data-lucide="x" size="18"></i>
+                </button>
+            </div>
+            <div class="form-group">
+                <label class="form-label">Contenido del Combo (puedes incluir varias líneas)</label>
+                <textarea class="form-input" id="input-char" placeholder="Pega aquí tu combo..."></textarea>
+            </div>
+            <div class="form-group">
+                <label class="form-label">Etiqueta / Nombre Descriptivo</label>
+                <input type="text" class="form-input" id="input-name" placeholder="Ej. Reproductor de Música Neon">
+            </div>
+            <div class="form-group">
+                <label class="form-label">Categoría Asignada</label>
+                <select class="form-input" id="input-category" style="background: rgba(30,30,30,0.9); border: 1px solid var(--glass-border); color: var(--text-main);">
+                    <option value="music">🎵 Reproductores de Música</option>
+                    <option value="astrology">☾ Noche y Astronomía Mística</option>
+                    <option value="nature">↟ Naturaleza, Bosques y Lluvia</option>
+                    <option value="gaming">△ Gaming y Figuras Geométricas</option>
+                    <option value="cozy">☕ Estilo Soft y Cafetería</option>
+                    <option value="custom">✨ Personalizados</option>
+                </select>
+            </div>
+            <button class="btn-submit" id="save-symbol-btn">Guardar Combo</button>
+        </div>
+    </div>
+
+    <div class="modal-overlay" id="modal-trash">
+        <div class="modal-sheet">
+            <div class="modal-header">
+                <div class="modal-title">Papelera de Combos</div>
+                <button class="btn-icon" onclick="closeActiveModal('modal-trash')">
+                    <i data-lucide="x" size="18"></i>
+                </button>
+            </div>
+            <div class="trash-list" id="trash-items-container"></div>
+            <button class="btn-submit" id="empty-trash-btn" style="background: transparent; border: 1px solid var(--accent-danger); color: var(--accent-danger);">
+                Vaciar Papelera por Completo
+            </button>
+        </div>
+    </div>
+
+    <script>
+        // Categorías rediseñadas para tus combos seleccionados
+        const INITIAL_CATEGORIES = {
+            "all": "✨ Ver Todo",
+            "recents": "🕒 Usados recientemente",
+            "music": "🎵 Reproductores de Música",
+            "astrology": "☾ Noche y Astronomía",
+            "nature": "↟ Naturaleza y Bosques",
+            "gaming": "△ Gaming y Formas",
+            "cozy": "☕ Soft & Cozy",
+            "custom": "⭐ Mis Combos"
+        };
+
+        // Combos complejos reales insertados directamente de forma limpia en el set inicial
+        const initialCombos = [
+            // MUSICA
+            { id: "m1", cat: "music", name: "Sweater Weather Player", char: "               [ 🌌 Sweater Weather ]      \n                    ♫  ᵀʰᵉ ᴺᵉⁱᵍʰᵇᵒᵘʳʰᵒᵒᵈ  ♫\n           1:03 ───⚬───────────────────── 3:45\n                ⇆    ◁◁       ıı       ▷▷    ↻\n           ᴠᴏʟᴜᴍᴇ : ▁▂▃▄▅▆▇▉   ━━━●─── 𝟾𝟶%" },
+            { id: "m2", cat: "music", name: "Never Gonna Give You Up Card", char: "        ╭────────────────────────────────────────╮\n        │   正在播放 《Never Gonna Give You Up》 │\n        │   01:43 ━━━━━━━●────────────── 03:50  │\n        │   ⇆ ㅤ ◁ ㅤ ❚❚ ㅤ ▷ ㅤ ↻   ᴠᴏʟᴜᴍᴇ: █▄▅▆▇│\n        ╰────────────────────────────────────────╯" },
+            { id: "m3", cat: "music", name: "Space Song Saturn Loop", char: "                 [ 🪐 𝘚𝘱𝘢𝘤𝘦 𝘚𝘰𝘯𝘨 - 𝘉𝘦𝘢𝘤𝘩 𝘏𝘰𝘶𝘴𝘦 ]\n         𝄥𝄾𝄿𝄽 ───────────────────●─────────────── 𝄽𝄿𝄾𝄥\n               ↻      ⏮      ıı      ⏭      ↺\n                 🎧 𝖯𝗅𝖺𝗒𝗂𝗇𝗅 𝗈𝗇: 𝖲𝗉𝗈𝗍𝗂𝖿𝗒_𝖠𝗎𝖽𝗂𝗈" },
+            { id: "m4", cat: "music", name: "Midnight City Box", char: "            ┌──────────────────────────────────┐\n               Now Playing: ⌫  𝖬𝗂𝖽𝗇𝗂𝗀𝗍 𝖢𝗂𝗍𝗒 \n              𝟢𝟤:𝟣𝟧 ━━━━━━━●━━━━━━━ 𝟢𝟦:𝟤𝟢\n               🔀   ⏮   ▋▋   ⏭   🔁  [🔊 𝟫𝟢%]\n            └──────────────────────────────────┘" },
+            { id: "m5", cat: "music", name: "Die With A Smile Double Frame", char: "         ╔══════════════════════════════════════╗\n             ♫  𝖣𝗂𝖤 𝖶𝗂𝖳𝗁 𝖠 𝖲𝗆𝗂𝖫𝖾 — 𝖡𝗋𝗎𝗇ο 𝖬𝖺𝗋𝗌  ♫\n            00:01 ─⚬───────────────────── 04:12\n                 ⇄   ◂◂   Ⅱ   ▸▸   ↻  ılı.lıllılı\n         ╚══════════════════════════════════════╝" },
+            { id: "m6", cat: "music", name: "Cherry Bomb Rounded", char: "              ╭🎵───────────────🎧───────────────🎵╮\n                     ᴺᵒʷ ᵖˡᵃʸᶦⁿᵍ: ᶜʰᵉʳʳʸ ᴮᵒᵐᵇ\n                𝟢:𝟻𝟾 ───────────〇─────────── 𝟹:𝟷𝟸\n                     ⇆    ◁    ❚❚    ▷    ↻\n              ╰──────────────────────────────────╯" },
+            { id: "m7", cat: "music", name: "Starboy Minimalist bar", char: "          ⚡︎ ─── [ 𝖲𝖳𝖠𝖱𝖡𝖮𝖸 — 𝖳𝖧𝖤 𝖶𝖤𝖤𝖪𝖭𝖣 ] ─── ⚡︎\n          ılıllı ━━━━━━●───────────────────────────\n          [▶] 𝖯|𝖺𝗒   [𝖨𝖨] 𝖯𝖺𝗎𝗌𝖾   [↻] 𝖱𝖾code  [🔊𝖬𝖺𝗑]" },
+            { id: "m8", cat: "music", name: "After Hours Cinematic", char: "         ◤━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━◥\n             🎧 𝘊𝘶𝘳𝘳𝘦𝘯𝘵𝘭𝘺 𝘗|𝘢𝘗𝘪𝘯𝘨: 𝘈𝘧𝘵𝘦𝘳 𝘏𝘰𝘶𝘳𝘴\n           1:23 ──────────●────────────────── 6:01\n                ⏮      ⏵      ⏸      ⏭      ⏭\n         ◣━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━◢" },
+            { id: "m9", cat: "music", name: "Lunar Eclipse Player", char: "          🌌  [ 𝘓🇺🇳🇦𝘳 𝘌𝘤𝘭𝘪𝘱𝘴𝘦 - 𝘓𝘰𝘧𝘪 𝘊𝘩𝘪𝘭𝘭 ]  🌌\n          ─── 𝟶𝟶:𝟺𝟻 ───●─────────── 𝟶𝟻:𝟻𝟶 ───\n          ⇆ㅤ ㅤ◁ㅤ ❚❚ ㅤ▷ ㅤㅤ↻﻿  ᴠᴏʟᴜᴍᴇ : ▁▂▃▄▅▆▇▉" },
+            
+            // ASTROLOGIA MÍSTICA (Inspiración ˚ ⋆.˚ ⭒⋆.˚ **☾**⭒⋆.˚ ⭒⋆.˚ ⭒)
+            { id: "a1", cat: "astrology", name: "The Night Is Ours Banner", char: "˚ ⋆.˚ ⭒⋆.˚ **☾**⭒⋆.˚ ⭒⋆.˚ ⭒ 🌌 𝘛𝘩𝘦 𝘕𝘪𝘨𝘩𝘵 𝘐𝘴 𝘖𝘶𝘳𝘴 🌌 ˚ ⋆.˚ ⭒⋆.˚ **☾**⭒⋆.˚" },
+            { id: "a2", cat: "astrology", name: "Midnight Magic Stars", char: "🪐✨•*¨*•.¸¸ ☾ ⋆*･ﾟ:⋆*･ﾟ: * 𝘔𝘪𝘥𝘯𝘪𝘨𝘩𝘵 𝘔𝘢𝘨𝘪𝘤 * :･ﾟ✧.:･ﾟ✧ ☾ ¸¸.•*¨*•✨🪐" },
+            { id: "a3", cat: "astrology", name: "Cosmic Dust Orbit", char: "☄️💫 ˚𖦹. 🪐 🪐 .𖦹˚ 𝘊𝘰𝘴𝘮𝘪𝘤 𝘋𝘶𝘴𝘵 ˚𖦹. 🪐 🪐 .𖦹˚ 💫☄️" },
+            { id: "a4", cat: "astrology", name: "Galaxy Wanderer Sky", char: "🌌🛸👽 ˚ ⋆.˚ ⭒⋆.˚ **☾**⭒⋆.˚ 𝘎𝘢|𝘢𝘹𝘺 𝘜𝘢𝘯𝘥𝘦𝘳𝘦𝘳 ˚ ⋆.˚ ⭒⋆.˚ **☾**⭒⋆.˚ 👽🛸🌌" },
+            { id: "a5", cat: "astrology", name: "Sleepless Nights Clouds", char: "☾ ⋆⁺₊⋆ ☁︎ ⋆⁺₊⋆ 🖤 𝘚|𝘦𝘦𝘱|𝘦𝘴𝘴 𝘕𝘪𝘨𝘩𝘵𝘴 🖤 ⋆⁺₊⋆ ☁︎ ⋆⁺₊⋆ ☽" },
+            { id: "a6", cat: "astrology", name: "Midnight Thoughts Corner", char: "Nice ᶻ 𝗓 𐰁 .ᐟ ˚ ⋆.˚ ⭒⋆.˚ **☾**⭒⋆.˚ 𝘔𝘪𝘥𝘯𝘪𝘨𝘩𝘵 𝘛𝘩𝘰𝘶𝘨𝘩𝘵𝘴 ˚ ⋆.˚ ⭒⋆.˚ **☾**⭒⋆.˚" },
+            { id: "a7", cat: "astrology", name: "Saturn Ring Waves", char: "🪐💫 ˚𖦹. 𝘚𝘢𝘵𝘶𝘳𝘯's 𝘙𝘪𝘯𝘨𝘴 .𖦹˚ 💫🪐" },
+            { id: "a8", cat: "astrology", name: "Lunar Eclipse Soft", char: "✧ ☽ ˚ ₊ ♡ 𝖫🇺🇳𝖺𝗋 𝖤𝖼|𝗂𝖿𝗌𝖾 ♡ ₊ ˚ ☾ ✧" },
+            
+            // NATURALEZA MÍSTICA (Inspiración ↟↟𓂃 ོ𓂃↟ 𖠰𓂃 ོ𓂃)
+            { id: "n1", cat: "nature", name: "Mystical Forest Path", char: "↟↟𓂃 ོ𓂃↟ 𖠰𓂃 ོ𓂃 🌲 𝘔𝘺𝘴𝘵𝘪𝘤𝘢𝘭 𝘍𝘰𝘳𝘦𝘴𝘵 🌲 ↟↟𓂃 ོ𓂃↟ 𖠰𓂃 ོ𓂃" },
+            { id: "n2", cat: "nature", name: "Green Soul Meadow", char: "🌿🌱 ↟↟𓂃 ོ𓂃↟ 𝘎𝘳𝘦𝘦𝘯 𝘚𝘰𝘶𝘭 ↟↟𓂃 ོ𓂃↟ 🌱🌿" },
+            { id: "n3", cat: "nature", name: "Cottagecore Magic Sprout", char: "🍄🧚‍♂️ ↟↟𓂃 ོ𓂃↟ 𝘊𝘰𝘵𝘵𝘢𝘨𝘦𝘤𝘰𝘳𝘦 𝘔𝘢𝘨𝘪𝘤 ↟↟𓂃 ོ𓂃↟ 🧚‍♂️🍄" },
+            { id: "n4", cat: "nature", name: "Pluviophile Rain Vibe", char: "🌧️☔ ↟↟𓂃 ོ𓂃↟ 𝘗|𝘶𝘷𝘪𝘰𝘱𝘩𝘪|𝘦 𝘝𝘪𝘣𝘦𝘴 ↟↟𓂃 ོ𓂃↟ ☔🌧️" },
+            { id: "n5", cat: "nature", name: "Foggy Woods Silence", char: "🌫️🍂 ↟↟𓂃 ོ𓂃↟ 𝘍𝘰𝘨𝘨𝘺 𝘞𝘰𝘰𝘥𝘴 ↟↟𓂃 ོ𓂃↟ 🍂🌫️" },
+            { id: "n6", cat: "nature", name: "Campfire Glowing Smoke", char: "🏕️🔥 ↟↟𓂃 ོ𓂃↟ 𝖢𝖺𝗆𝗉𝖿𝗂𝗋𝖾 𝖭𝗂𝗀𝗁𝗍𝗌 ↟↟𓂃 ོ𓂃↟ 🔥🏕️" },
+            
+            // GAMING / GEOMETRICOS (Inspiración △◯ ✕ ◻)
+            { id: "g1", cat: "gaming", name: "Game Over Control", char: "△◯ ✕ ◻ 🎮👾 𝖦𝖺𝗆𝖾 𝖮𝗏𝖾𝗋 👾🎮 △◯ ✕ ◻" },
+            { id: "g2", cat: "gaming", name: "Loading Console Status", char: "△◯ ✕ ◻ ⚡🔌 [ 𝖫𝗈𝖺𝖽𝗂𝗇𝗀... 𝟪𝟢% ] 🔌⚡ △◯ ✕ ◻" },
+            { id: "g3", cat: "gaming", name: "Level Up Arcade", char: "△◯ ✕ ◻ 🎧👾 𝘓𝘦𝘷𝘦𝘭 𝘜𝘱! 👾🎧 △◯ ✕ ◻" },
+            { id: "g4", cat: "gaming", name: "Neon Dreams Cyberpunk", char: "△◯ ✕ ◻ 🌆🤖 𝘕𝘦𝘰𝘯 𝘋𝘳𝘦𝘢𝘮𝘴 🤖🌆 △◯ ✕ ◻" },
+            
+            // COZY & SOFT
+            { id: "c1", cat: "cozy", name: "Cozy Afternoon Candle", char: "☕📖 ˚ ⋆.˚ ⭒⋆.˚ 𝘊𝘰𝘻𝘺 𝘢fternoon ˚ ⋆.˚ ⭒⋆.˚ 📜🕯️" },
+            { id: "c2", cat: "cozy", name: "Milk and Honey Teddy", char: "₊˚🥛🧷🧸 ↟↟𓂃 ོ𓂃↟ 𝖬𝗂𝗅𝗄 & 𝖧ο𝗇𝖾𝗒 ↟↟𓂃 ོ𓂃↟ 🧸🧷🥛˚₊" }
+        ];
+
+        let appData = {
+            items: [],
+            trash: [],
+            recents: []
+        };
+
+        let currentActiveCategory = "all";
+
+        function loadOrCreateData() {
+            const stored = localStorage.getItem('aesthetic_combos_data');
+            if (stored) {
+                try {
+                    appData = JSON.parse(stored);
+                } catch(e) {
+                    resetToDefault();
+                }
+            } else {
+                resetToDefault();
+            }
+        }
+
+        function resetToDefault() {
+            appData.items = [...initialCombos];
+            appData.trash = [];
+            appData.recents = [];
+            saveData();
+        }
+
+        function saveData() {
+            localStorage.setItem('aesthetic_combos_data', JSON.stringify(appData));
+        }
+
+        // Renderizado de las píldoras de navegación superior
+        function renderPills() {
+            const container = document.getElementById('categories-pills');
+            container.innerHTML = '';
+            
+            Object.keys(INITIAL_CATEGORIES).forEach(key => {
+                const pill = document.createElement('div');
+                pill.className = `pill ${currentActiveCategory === key ? 'active' : ''}`;
+                pill.textContent = INITIAL_CATEGORIES[key];
+                pill.onclick = () => {
+                    currentActiveCategory = key;
+                    renderPills();
+                    renderCombos();
+                };
+                container.appendChild(pill);
+            });
+        }
+
+        // Renderizado de los bloques de combos con layouts optimizados para copiar filas completas
+        function renderCombos() {
+            const container = document.getElementById('combos-content-area');
+            container.innerHTML = '';
+
+            let filtered = [];
+            if (currentActiveCategory === 'all') {
+                filtered = appData.items;
+            } else if (currentActiveCategory === 'recents') {
+                filtered = appData.recents.map(id => appData.items.find(i => i.id === id)).filter(Boolean);
+            } else {
+                filtered = appData.items.filter(i => i.cat === currentActiveCategory);
+            }
+
+            document.getElementById('global-count').textContent = filtered.length;
+
+            if (filtered.length === 0) {
+                container.innerHTML = `<p style="color: var(--text-muted); text-align: center; margin-top: 40px; font-size:14px;">No hay combos en esta sección.</p>`;
+                return;
+            }
+
+            const wrapperGrid = document.createElement('div');
+            wrapperGrid.className = "combos-container";
+
+            filtered.forEach(item => {
+                const comboCard = document.createElement('div');
+                comboCard.className = "combo-item";
+                
+                // Click para copiar automáticamente el combo al portapapeles
+                comboCard.onclick = () => handleCopyCombo(item.char, item.id);
+
+                comboCard.innerHTML = `
+                    <div class="combo-meta">
+                        <strong>${item.name || 'Sin nombre'}</strong>
+                        <span style="opacity: 0.6;">🗂️ ${INITIAL_CATEGORIES[item.cat] || item.cat}</span>
+                    </div>
+                    <div class="combo-text-wrapper">${escapeHtml(item.char)}</div>
+                    <div style="text-align: right; font-size: 11px; color: var(--accent-danger); margin-top: 2px;" onclick="event.stopPropagation(); deleteCombo('${item.id}')">
+                        Mover a papelera
+                    </div>
+                `;
+                wrapperGrid.appendChild(comboCard);
+            });
+
+            container.appendChild(wrapperGrid);
+        }
+
+        function escapeHtml(text) {
+            return text.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
+        }
+
+        // Manejo de la acción de copiado
+        function handleCopyCombo(text, id) {
+            navigator.clipboard.writeText(text).then(() => {
+                // Registrar en recientes
+                appData.recents = [id, ...appData.recents.filter(x => x !== id)].slice(0, 15);
+                saveData();
+                triggerToast('¡Combo copiado al portapapeles!');
+            }).catch(() => {
+                triggerToast('Error al copiar el combo.');
+            });
+        }
+
+        function triggerToast(msg) {
+            const toast = document.getElementById('toast-notification');
+            document.getElementById('toast-text').textContent = msg;
+            toast.classList.add('active');
+            setTimeout(() => toast.classList.remove('active'), 2500);
+        }
+
+        // Eliminar combo (mover a papelera)
+        window.deleteCombo = (id) => {
+            const idx = appData.items.findIndex(i => i.id === id);
+            if(idx !== -1) {
+                const item = appData.items.splice(idx, 1)[0];
+                appData.trash.push(item);
+                // Remover de recientes si existía
+                appData.recents = appData.recents.filter(x => x !== id);
+                saveData();
+                renderCombos();
+                triggerToast('Combo movido a la papelera.');
+            }
+        };
+
+        // Modales estructurales
+        window.closeActiveModal = (id) => {
+            document.getElementById(id).classList.remove('active');
+            document.getElementById('main-view').classList.remove('backgrounded');
+        };
+
+        function openModal(id) {
+            document.getElementById(id).classList.add('active');
+            document.getElementById('main-view').classList.add('backgrounded');
+        }
+
+        document.getElementById('open-add-btn').onclick = () => openModal('modal-add');
+        document.getElementById('open-trash-btn').onclick = () => {
+            openModal('modal-trash');
+            renderTrashView();
+        };
+
+        // Guardar nuevo combo personalizado
+        document.getElementById('save-symbol-btn').onclick = () => {
+            const charVal = document.getElementById('input-char').value.trim();
+            const nameVal = document.getElementById('input-name').value.trim() || "Combo Personalizado";
+            const catVal = document.getElementById('input-category').value;
+
+            if(!charVal) {
+                document.getElementById('input-char').classList.add('error-shake');
+                setTimeout(() => document.getElementById('input-char').classList.remove('error-shake'), 300);
+                return;
+            }
+
+            const newCombo = {
+                id: "custom_" + Date.now(),
+                cat: catVal,
+                name: nameVal,
+                char: charVal
+            };
+
+            appData.items.unshift(newCombo);
+            saveData();
+            document.getElementById('input-char').value = '';
+            document.getElementById('input-name').value = '';
+            closeActiveModal('modal-add');
+            renderCombos();
+            triggerToast('¡Nuevo combo guardado con éxito!');
+        };
+
+        // Papelera
+        function renderTrashView() {
+            const container = document.getElementById('trash-items-container');
+            container.innerHTML = '';
+            
+            if(appData.trash.length === 0) {
+                container.innerHTML = `<p style="color:var(--text-muted); font-size:13px; text-align:center; padding:12px;">La papelera está vacía.</p>`;
+                return;
+            }
+
+            appData.trash.forEach((item, idx) => {
+                const row = document.createElement('div');
+                row.className = 'trash-row';
+                row.innerHTML = `
+                    <div style="max-width:60%; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; font-size:12px;">
+                        <strong>${item.name}</strong>
+                    </div>
+                    <div class="trash-actions">
+                        <button class="btn-text-action" onclick="restoreFromTrash(${idx})">Restaurar</button>
+                        <button class="btn-text-action danger" onclick="purgeFromTrash(${idx})">Eliminar</button>
+                    </div>
+                `;
+                container.appendChild(row);
+            });
+        }
+
+        window.restoreFromTrash = (idx) => {
+            const item = appData.trash.splice(idx, 1)[0];
+            appData.items.push(item);
+            saveData();
+            renderCombos();
+            renderTrashView();
+            triggerToast('Combo restaurado.');
+        };
+
+        window.purgeFromTrash = (idx) => {
+            appData.trash.splice(idx, 1);
+            saveData();
+            renderTrashView();
+            triggerToast('Eliminado permanentemente.');
+        };
+
+        document.getElementById('empty-trash-btn').onclick = () => {
+            appData.trash = [];
+            saveData();
+            renderTrashView();
+            closeActiveModal('modal-trash');
+            triggerToast('Papelera vaciada.');
+        };
+
+        // Inicializar App
+        loadOrCreateData();
+        renderPills();
+        renderCombos();
+        lucide.createIcons();
+    </script>
+</body>
+</html>
