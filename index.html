@@ -434,7 +434,7 @@
         <div><strong>VERSIÓN LOCAL</strong> <span>· Ir a web</span></div>
     </a>
 
-    <div class="version-tag" id="versionTag">v0.9.1</div>
+    <div class="version-tag" id="versionTag">v0.9.2</div>
 
     <div class="ui-layer">
         <header class="header">
@@ -448,7 +448,7 @@
 
     <div class="custom-modal" id="hiddenFolderModal">
         <div class="modal-title"><i data-lucide="folder-lock" style="color: #FFD60A;"></i> Carpeta Oculta</div>
-        <p class="modal-text">Estás a punto de acceder a una carpeta oculta del sistema.</p>
+        <p class="modal-text">Estás a punto de acceder a una carpeta oculta.</p>
         <div style="margin-bottom: 25px; display: flex; justify-content: center;" id="hiddenAppArea"></div>
         <div class="modal-buttons">
             <button class="modal-btn secondary" onclick="closeModal('hiddenFolderModal')">Cerrar</button>
@@ -502,11 +502,11 @@ const tools = [
         icon: 'Toolbox',
         folder: true,
         apps: [
-            { name: 'Progreso', icon: 'Loader2', url: 'Apps/progreso.html' },
             { name: 'Calculadora de dinero', icon: 'Coins', url: 'Apps/dinero.html' },
             { name: 'Calculadora tiempo de descarga', icon: 'Download', url: 'Apps/calculadora-descarga.html' },
             { name: 'Medidas', icon: 'Ruler', url: 'Apps/medidas.html' },
-            { name: 'Contador', icon: 'ListOrdered', url: 'Apps/counter.html' }
+            { name: 'Contador', icon: 'ListOrdered', url: 'Apps/counter.html' },
+            { name: 'Visualizador de progreso', icon: 'Loader2', url: 'Apps/progreso.html' }
         ]
     },
     {
@@ -525,6 +525,14 @@ const tools = [
             { name: 'Combos', icon: 'PencilSparkles', url: 'Apps/combos.html' },
             { name: 'Símbolos', icon: 'Images', url: 'Apps/symbols.html' },
             { name: 'Fancy Text', icon: 'LetterText', url: 'Apps/text.html' }
+        ]
+    },
+    {
+        name: 'Entretenimiento y Randomizers',
+        icon: 'dices',
+        folder: true,
+        apps: [
+            { name: 'Ruleta aleatoria', icon: 'Ferris-Wheel', url: 'Apps/aleatorio.html' }
         ]
     },
     {
