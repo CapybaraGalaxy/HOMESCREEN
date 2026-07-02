@@ -1,0 +1,1287 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+    <title>Neo-Kanban Pro - Ultimate Edition (BETA)</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@200;300;400;500;600;700&display=swap" rel="stylesheet">
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <style>
+        :root {
+            /* Paleta Ultimate Dark */
+            --bg: #050505;
+            --surface: #0e0e11;
+            --surface-card: #16161a;
+            --surface-hover: #1e1e24;
+            --surface-active: #2a2a35;
+            
+            --glass: rgba(14, 14, 17, 0.6);
+            --glass-border: rgba(255, 255, 255, 0.08);
+            --blur-val: 30px;
+
+            --text-main: #FFFFFF;
+            --text-muted: #9CA3AF;
+
+            --accent-danger: #ef4444;
+            --accent-success: #22c55e;
+            --accent-warning: #f59e0b;
+            --accent-blue: #3b82f6;
+            --accent-purple: #8b5cf6;
+
+            --bezier: cubic-bezier(0.16, 1, 0.3, 1);
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: 'Outfit', sans-serif;
+            -webkit-tap-highlight-color: transparent;
+        }
+
+        /* Custom Premium Scrollbar */
+        ::-webkit-scrollbar { width: 6px; height: 6px; }
+        ::-webkit-scrollbar-track { background: transparent; }
+        ::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.1); border-radius: 10px; }
+        ::-webkit-scrollbar-thumb:hover { background: rgba(255,255,255,0.2); }
+
+        body {
+            background-color: var(--bg);
+            color: var(--text-main);
+            overflow: hidden;
+            height: 100vh;
+        }
+
+        .app-container {
+            height: 100dvh;
+            padding: env(safe-area-inset-top) 24px calc(env(safe-area-inset-bottom) + 16px) 24px;
+            max-width: 1500px;
+            margin: 0 auto;
+            display: flex;
+            flex-direction: column;
+            transition: transform 0.4s var(--bezier), filter 0.4s var(--bezier);
+        }
+
+        .app-container.backgrounded {
+            transform: scale(0.97);
+            filter: blur(8px);
+            pointer-events: none;
+        }
+
+        /* HEADER */
+        header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 20px 0 12px 0;
+            border-bottom: 1px solid var(--glass-border);
+            flex-shrink: 0;
+        }
+
+        .header-left { display: flex; align-items: center; gap: 12px; }
+        .app-icon-badge {
+            width: 42px; height: 42px;
+            border-radius: 12px;
+            background: linear-gradient(135deg, rgba(255,255,255,0.1), rgba(255,255,255,0.02));
+            border: 1px solid var(--glass-border);
+            display: flex; align-items: center; justify-content: center;
+            cursor: pointer;
+            transition: transform 0.2s var(--bezier);
+        }
+        .app-icon-badge:hover { transform: scale(1.05); }
+
+        .brand-title {
+            font-size: 20px; font-weight: 600;
+            display: flex; align-items: center; gap: 10px;
+        }
+        .counter-badge {
+            font-size: 12px; color: var(--text-muted);
+            background: var(--surface-card); padding: 2px 8px;
+            border-radius: 20px; border: 1px solid var(--glass-border);
+        }
+        
+        .beta-badge-label {
+            font-size: 10px;
+            background-color: var(--accent-warning);
+            color: var(--bg);
+            padding: 2px 6px;
+            border-radius: 6px;
+            font-weight: 800;
+            letter-spacing: 1px;
+            margin-left: 4px;
+        }
+
+        .header-actions { display: flex; align-items: center; gap: 8px; }
+
+        .search-wrapper { position: relative; display: flex; align-items: center; width: 40px; transition: width 0.3s var(--bezier); }
+        .search-wrapper.expanded { width: 260px; }
+        .search-wrapper .search-input {
+            width: 100%; height: 40px; border-radius: 12px;
+            background: var(--surface); border: 1px solid var(--glass-border);
+            padding-left: 42px; padding-right: 12px; color: var(--text-main);
+            outline: none; opacity: 0; pointer-events: none; transition: opacity 0.2s var(--bezier);
+        }
+        .search-wrapper.expanded .search-input { opacity: 1; pointer-events: auto; }
+        .search-trigger-btn { position: absolute; left: 0; top: 0; z-index: 2; border: none !important; }
+
+        .icon-btn {
+            background: var(--surface);
+            border: 1px solid var(--glass-border); color: var(--text-main);
+            width: 40px; height: 40px; border-radius: 12px;
+            display: flex; align-items: center; justify-content: center;
+            cursor: pointer; transition: all 0.2s var(--bezier);
+        }
+        .icon-btn:hover:not(:disabled) { background: var(--surface-hover); transform: translateY(-2px); box-shadow: 0 4px 12px rgba(0,0,0,0.2); }
+        .icon-btn:disabled { opacity: 0.3; cursor: not-allowed; }
+
+        /* VISTAS (WORKSPACE / DASHBOARD) */
+        .workspace-view { display: none; flex-direction: column; flex: 1; overflow: hidden; }
+        .workspace-view.active-view { display: flex; animation: fadeIn 0.4s var(--bezier); }
+
+        .dashboard-grid {
+            display: grid; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+            gap: 20px; padding: 24px 0; overflow-y: auto; flex: 1;
+        }
+
+        .project-card {
+            background: var(--surface-card); border: 1px solid var(--glass-border);
+            border-radius: 20px; padding: 24px; display: flex; flex-direction: column; gap: 16px;
+            cursor: pointer; transition: all 0.3s var(--bezier);
+        }
+        .project-card:hover { transform: translateY(-6px); border-color: rgba(255,255,255,0.2); box-shadow: 0 12px 30px rgba(0,0,0,0.4); }
+        .project-card-header { display: flex; align-items: center; justify-content: space-between; }
+        .project-card-title { font-size: 18px; font-weight: 600; display: flex; align-items: center; gap: 10px; }
+        .project-card-actions { display: flex; gap: 6px; opacity: 0; transition: opacity 0.2s var(--bezier); }
+        .project-card:hover .project-card-actions { opacity: 1; }
+
+        .tabs-row {
+            display: flex; align-items: center; justify-content: space-between;
+            border-bottom: 1px solid var(--glass-border); padding: 12px 0; flex-shrink: 0; gap: 12px;
+        }
+        .folders-scroll-area { display: flex; gap: 10px; overflow-x: auto; flex: 1; padding-bottom: 4px; }
+        
+        .pill {
+            background: var(--surface); border: 1px solid var(--glass-border); color: var(--text-muted);
+            padding: 8px 16px; border-radius: 100px; font-size: 13px; font-weight: 500;
+            white-space: nowrap; cursor: pointer; display: flex; align-items: center; gap: 8px;
+            transition: all 0.2s var(--bezier);
+        }
+        .pill:hover { background: var(--surface-hover); color: var(--text-main); }
+        .pill.active { background: var(--text-main); color: var(--bg); border-color: var(--text-main); }
+        .pill .close-tab-btn {
+            display: inline-flex; align-items: center; justify-content: center;
+            width: 18px; height: 18px; border-radius: 50%; margin-left: 8px; opacity: 0.6; transition: all 0.2s;
+        }
+        .pill .close-tab-btn:hover { background: rgba(255,255,255,0.2); opacity: 1; }
+        .pill.active .close-tab-btn:hover { background: rgba(0,0,0,0.15); }
+
+        /* TABLERO KANBAN */
+        .main-content { display: flex; gap: 20px; overflow-x: auto; padding: 20px 0 24px 0; flex: 1; align-items: flex-start;}
+        
+        .kanban-column {
+            background: var(--glass); backdrop-filter: blur(var(--blur-val));
+            border: 1px solid var(--glass-border); border-radius: 20px;
+            display: flex; flex-direction: column; width: 340px; min-width: 340px;
+            max-height: 100%; transition: all 0.2s var(--bezier);
+        }
+        .kanban-column.drag-over { background: rgba(255,255,255,0.05); border-color: rgba(255,255,255,0.2); }
+        .kanban-column.column-dragging { opacity: 0.4; transform: scale(0.98); }
+
+        /* HANDLE DE ARRASTRE DE FASE */
+        .column-header {
+            padding: 16px 20px; display: flex; align-items: center; justify-content: space-between;
+            border-bottom: 1px solid var(--glass-border); cursor: grab; background: rgba(255,255,255,0.02);
+            border-radius: 20px 20px 0 0;
+        }
+        .column-header:active { cursor: grabbing; }
+        .column-title { font-size: 15px; font-weight: 600; display: flex; align-items: center; gap: 10px; pointer-events: none;}
+        .column-actions { display: flex; gap: 6px; }
+
+        .column-body { padding: 16px; display: flex; flex-direction: column; gap: 12px; overflow-y: auto; flex: 1; min-height: 200px; }
+
+        /* TARJETAS */
+        .task-card {
+            background: var(--surface-card); border: 1px solid var(--glass-border);
+            border-radius: 16px; padding: 16px; display: flex; flex-direction: column; gap: 12px;
+            cursor: grab; transition: transform 0.2s var(--bezier), border-color 0.2s, box-shadow 0.2s;
+            animation: fadeIn 0.3s var(--bezier) forwards; position: relative;
+        }
+        .task-card:hover { border-color: rgba(255,255,255,0.15); box-shadow: 0 8px 20px rgba(0,0,0,0.3); }
+        .task-card:active { cursor: grabbing; }
+        .task-card.dragging { opacity: 0.5; transform: scale(0.95); box-shadow: none; }
+        
+        .task-card-img-preview { width: 100%; height: 120px; object-fit: cover; border-radius: 10px; }
+        .task-title { font-size: 15px; font-weight: 600; line-height: 1.4; }
+        .task-subtitle { font-size: 13px; color: var(--text-muted); }
+        
+        .task-tags-row { display: flex; flex-wrap: wrap; gap: 6px; }
+        .mini-tag {
+            font-size: 11px; font-weight: 500; padding: 4px 8px;
+            border-radius: 6px; background: var(--surface-active); color: var(--text-muted);
+        }
+        
+        .task-footer {
+            display: flex; align-items: center; justify-content: space-between;
+            font-size: 12px; border-top: 1px solid rgba(255,255,255,0.05); padding-top: 10px;
+        }
+        
+        .custom-field-badge { display: flex; align-items: center; gap: 6px; color: var(--text-muted); }
+
+        /* MODALES */
+        .modal-overlay {
+            position: fixed; top: 0; left: 0; width: 100vw; height: 100vh;
+            background: rgba(0,0,0,0.7); backdrop-filter: blur(15px);
+            z-index: 100; display: flex; align-items: center; justify-content: center;
+            opacity: 0; pointer-events: none; transition: opacity 0.3s var(--bezier);
+        }
+        .modal-overlay.active { opacity: 1; pointer-events: auto; }
+        .modal-sheet {
+            background: var(--surface-card); border: 1px solid var(--glass-border);
+            border-radius: 24px; width: calc(100% - 32px); max-width: 580px; max-height: 90vh; overflow-y: auto;
+            padding: 28px; box-shadow: 0 30px 60px rgba(0,0,0,0.9);
+            transform: translateY(20px) scale(0.98); transition: transform 0.3s var(--bezier);
+        }
+        .modal-overlay.active .modal-sheet { transform: translateY(0) scale(1); }
+        .modal-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 24px; }
+        .modal-title { font-size: 20px; font-weight: 600; }
+
+        /* MODAL BETA ESPECÍFICO */
+        .center-modal { align-items: center; padding: 20px; }
+        .center-modal .modal-sheet { border-radius: 24px; transform: scale(0.9) translateY(0); opacity: 0; transition: all 0.3s var(--bezier); }
+        .modal-overlay.active.center-modal .modal-sheet { transform: scale(1) translateY(0); opacity: 1; }
+
+        .form-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+        .form-group { display: flex; flex-direction: column; gap: 8px; margin-bottom: 16px; }
+        .form-group.full-width { grid-column: span 2; }
+        .form-label { font-size: 12px; font-weight: 600; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.5px; }
+        .form-input, .form-textarea, .form-select {
+            background: var(--surface); border: 1px solid var(--glass-border); color: var(--text-main);
+            padding: 12px 16px; border-radius: 12px; font-size: 14px; outline: none; transition: all 0.2s;
+        }
+        .form-input:focus, .form-textarea:focus, .form-select:focus { border-color: rgba(255,255,255,0.3); background: #1a1a20; }
+        .form-textarea { resize: vertical; height: 90px; }
+
+        .modal-footer-btns { display: flex; justify-content: flex-end; gap: 12px; margin-top: 24px; }
+        .btn { padding: 12px 20px; border-radius: 12px; font-size: 14px; font-weight: 600; cursor: pointer; border: none; transition: all 0.2s; }
+        .btn-muted { background: transparent; color: var(--text-muted); }
+        .btn-muted:hover { color: var(--text-main); background: rgba(255,255,255,0.05); }
+        .btn-primary { background: var(--text-main); color: var(--bg); }
+        .btn-primary:hover { transform: translateY(-2px); box-shadow: 0 6px 16px rgba(255,255,255,0.2); }
+        .btn-danger { background: rgba(239, 68, 68, 0.1); color: var(--accent-danger); }
+        .btn-danger:hover { background: var(--accent-danger); color: #FFF; }
+
+        .task-btn {
+            background: transparent; border: none; color: var(--text-muted); cursor: pointer;
+            width: 32px; height: 32px; border-radius: 8px; display: flex; align-items: center; justify-content: center;
+            transition: all 0.2s;
+        }
+        .task-btn:hover { background: rgba(255,255,255,0.1); color: var(--text-main); }
+        .task-btn.delete:hover { color: var(--accent-danger); background: rgba(239, 68, 68, 0.15); }
+
+        /* SISTEMA DE TOASTS */
+        #toast-container {
+            position: fixed; bottom: 30px; right: 30px; display: flex; flex-direction: column; gap: 10px;
+            z-index: 9999; pointer-events: none;
+        }
+        .toast {
+            background: var(--surface-card); border: 1px solid var(--glass-border); color: #FFF;
+            padding: 14px 20px; border-radius: 14px; font-size: 14px; font-weight: 500;
+            display: flex; align-items: center; gap: 12px; box-shadow: 0 10px 40px rgba(0,0,0,0.6);
+            animation: slideUpFade 0.4s var(--bezier) forwards; pointer-events: auto;
+        }
+        .toast.closing { animation: slideDownFade 0.3s var(--bezier) forwards; }
+        
+        .error-shake { animation: shake 0.3s var(--bezier) !important; border-color: var(--accent-danger) !important; }
+        @keyframes shake { 0%, 100% { transform: translateX(0); } 20%, 60% { transform: translateX(-5px); } 40%, 80% { transform: translateX(5px); } }
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+        @keyframes slideUpFade { from { opacity: 0; transform: translateY(30px) scale(0.9); } to { opacity: 1; transform: translateY(0) scale(1); } }
+        @keyframes slideDownFade { from { opacity: 1; transform: translateY(0) scale(1); } to { opacity: 0; transform: translateY(30px) scale(0.9); } }
+    </style>
+</head>
+<body>
+
+    <div class="app-container" id="main-view">
+        <header>
+            <div class="header-left">
+                <div class="app-icon-badge" onclick="navigateToDashboard()" title="Dashboard Principal">
+                    <i data-lucide="layout-dashboard" style="color: var(--text-main); width: 22px;"></i>
+                </div>
+                <div class="brand-title">
+                    <span id="nav-location-text">Proyectos</span>
+                    <span class="beta-badge-label">BETA</span>
+                    <span class="counter-badge" id="global-task-counter" style="margin-left: 8px;">0</span>
+                </div>
+            </div>
+            <div class="header-actions">
+                <div class="search-wrapper" id="search-container">
+                    <button class="icon-btn search-trigger-btn" onclick="toggleSearch()" title="Buscar">
+                        <i data-lucide="search" style="width: 18px;"></i>
+                    </button>
+                    <input type="text" class="search-input" id="search-input" placeholder="Buscar tareas..." oninput="handleSearch(this.value)">
+                </div>
+                <button class="icon-btn" id="btn-undo" onclick="undo()" title="Deshacer (Ctrl+Z)" disabled>
+                    <i data-lucide="undo-2" style="width: 18px;"></i>
+                </button>
+                <button class="icon-btn" id="btn-redo" onclick="redo()" title="Rehacer (Ctrl+Y)" disabled>
+                    <i data-lucide="redo-2" style="width: 18px;"></i>
+                </button>
+                <button class="icon-btn" id="btn-config" onclick="openDashboardConfig()" title="Configuración de Propiedades del Proyecto" style="display:none;">
+                    <i data-lucide="settings-2" style="width: 18px;"></i>
+                </button>
+                <button class="icon-btn" onclick="openModal('modal-project')" title="Nuevo Proyecto">
+                    <i data-lucide="folder-plus" style="width: 18px;"></i>
+                </button>
+                <button class="icon-btn" onclick="exportData()" title="Exportar Backup">
+                    <i data-lucide="download" style="width: 18px;"></i>
+                </button>
+                <button class="icon-btn" onclick="document.getElementById('import-file').click()" title="Importar Backup">
+                    <i data-lucide="upload" style="width: 18px;"></i>
+                </button>
+                <input type="file" id="import-file" accept=".json" style="display:none" onchange="importData(event)">
+            </div>
+        </header>
+
+        <div class="workspace-view active-view" id="view-dashboard">
+            <div class="dashboard-grid" id="dashboard-projects-grid"></div>
+        </div>
+
+        <div class="workspace-view" id="view-board">
+            <div class="tabs-row">
+                <div class="folders-scroll-area" id="tabs-pills-container"></div>
+                <button class="pill" onclick="openModal('modal-phase')" style="border-style: dashed; flex-shrink:0;">
+                    <i data-lucide="plus" style="width:14px;"></i> Nueva Fase
+                </button>
+            </div>
+            <main class="main-content" id="board-columns-container"></main>
+        </div>
+    </div>
+
+    <div id="toast-container"></div>
+
+    <div class="modal-overlay center-modal" id="modal-beta" role="dialog" aria-modal="true">
+        <div class="modal-sheet" style="max-width: 380px; text-align: center; padding: 32px 24px;">
+            <div style="background: rgba(255,255,255,0.03); border: 1px solid var(--glass-border); width: 56px; height: 56px; border-radius: 18px; display: flex; align-items: center; justify-content: center; margin: 0 auto 20px;">
+                <i data-lucide="rocket" style="color: var(--accent-blue); width: 26px; height: 26px;"></i>
+            </div>
+            <div class="modal-title" style="margin-bottom: 8px; font-size: 0.85rem; letter-spacing: 3px; text-transform: uppercase;">Fase Beta Temprana</div>
+            <p style="font-size: 0.88rem; line-height: 1.5; color: var(--text-muted); margin-bottom: 24px;">
+               La app <strong>Neo-Kanban Pro v3.2</strong> se encuentra en fase de desarrollo y puede presentar errores o inconsistencias al personalizar esquemas.<br><br>
+               Explora la personalización total de campos y dinos qué opinas.
+            </p>
+            <button class="btn btn-primary" style="width: 100%;" onclick="acceptBeta()">Entendido, Acceder</button>
+        </div>
+    </div>
+
+    <div class="modal-overlay" id="modal-project" onclick="closeModalOnOverlay(event, 'modal-project')">
+        <div class="modal-sheet">
+            <div class="modal-header">
+                <div class="modal-title" id="project-modal-title">Nuevo Proyecto</div>
+                <button class="task-btn" onclick="triggerAutoSave('modal-project')"><i data-lucide="x"></i></button>
+            </div>
+            <input type="hidden" id="edit-project-id">
+            <div class="form-group">
+                <label class="form-label">Nombre del Proyecto</label>
+                <input type="text" id="project-name-input" class="form-input" placeholder="Ej. Alpha Build">
+            </div>
+            <div class="modal-footer-btns">
+                <button class="btn btn-primary" onclick="saveProject()">Guardar</button>
+            </div>
+        </div>
+    </div>
+
+    <div class="modal-overlay" id="modal-phase" onclick="closeModalOnOverlay(event, 'modal-phase')">
+        <div class="modal-sheet">
+            <div class="modal-header">
+                <div class="modal-title" id="phase-modal-title">Fase / Columna</div>
+                <button class="task-btn" onclick="triggerAutoSave('modal-phase')"><i data-lucide="x"></i></button>
+            </div>
+            <input type="hidden" id="edit-phase-id">
+            <div class="form-grid">
+                <div class="form-group full-width">
+                    <label class="form-label">Nombre</label>
+                    <input type="text" id="phase-name-input" class="form-input" placeholder="Ej. Testing">
+                </div>
+                <div class="form-group">
+                    <label class="form-label">Icono (Lucide)</label>
+                    <input type="text" id="phase-icon-input" class="form-input" value="circle">
+                </div>
+                <div class="form-group">
+                    <label class="form-label">Color</label>
+                    <select id="phase-color-input" class="form-select">
+                        <option value="var(--accent-blue)">Azul</option>
+                        <option value="var(--accent-warning)">Naranja</option>
+                        <option value="var(--accent-success)">Verde</option>
+                        <option value="var(--accent-danger)">Rojo</option>
+                        <option value="var(--accent-purple)">Púrpura</option>
+                        <option value="var(--text-main)">Blanco</option>
+                    </select>
+                </div>
+            </div>
+            <div class="modal-footer-btns" style="justify-content: space-between;">
+                <button class="btn btn-danger" id="btn-delete-phase" style="display:none;" onclick="deletePhaseCurrent()">Eliminar</button>
+                <button class="btn btn-primary" onclick="savePhase()" style="margin-left:auto;">Guardar Fase</button>
+            </div>
+        </div>
+    </div>
+
+    <div class="modal-overlay" id="modal-task" onclick="closeModalOnOverlay(event, 'modal-task')">
+        <div class="modal-sheet" style="max-width: 680px;">
+            <div class="modal-header">
+                <div class="modal-title">Detalles de Tarea</div>
+                <button class="task-btn" onclick="triggerAutoSave('modal-task')"><i data-lucide="x"></i></button>
+            </div>
+            <input type="hidden" id="task-target-column">
+            <input type="hidden" id="task-target-id">
+            
+            <div class="form-grid">
+                <div class="form-group full-width">
+                    <label class="form-label">Título <span style="color:var(--accent-danger)">*</span></label>
+                    <input type="text" id="task-title-input" class="form-input" placeholder="Título principal">
+                </div>
+                <div class="form-group full-width">
+                    <label class="form-label">Subtítulo Corto</label>
+                    <input type="text" id="task-subtitle-input" class="form-input" placeholder="Contexto rápido">
+                </div>
+                
+                <div id="dynamic-task-fields" style="display:contents;"></div>
+            </div>
+
+            <div class="modal-footer-btns" style="justify-content: space-between; margin-top:30px;">
+                <button class="btn btn-danger" id="btn-delete-task" onclick="deleteTaskCurrent()">Eliminar Tarea</button>
+                <button class="btn btn-primary" onclick="saveTask()">Guardar Tarea</button>
+            </div>
+        </div>
+    </div>
+
+    <div class="modal-overlay" id="modal-config" onclick="closeModalOnOverlay(event, 'modal-config')">
+        <div class="modal-sheet">
+            <div class="modal-header">
+                <div class="modal-title">Esquema del Proyecto (Personalización)</div>
+                <button class="task-btn" onclick="triggerAutoSave('modal-config')"><i data-lucide="x"></i></button>
+            </div>
+            
+            <p style="font-size:13px; color:var(--text-muted); margin-bottom: 20px;">
+                Configura los campos personalizados que tendrán todas las tareas de este proyecto. Tienes control total. (Ej: Prioridad, Imagen, Etiquetas, Presupuesto).
+            </p>
+
+            <div id="config-schema-list" style="display:flex; flex-direction:column; gap:10px; margin-bottom:20px;"></div>
+            
+            <div style="background:var(--surface); padding:16px; border-radius:12px; border:1px solid var(--glass-border);">
+                <h4 style="font-size:12px; text-transform:uppercase; color:var(--text-muted); margin-bottom:12px;">Añadir Nuevo Campo</h4>
+                <div class="form-grid" style="gap:10px;">
+                    <div class="form-group" style="margin:0;">
+                        <input type="text" id="new-schema-label" class="form-input" placeholder="Nombre (Ej: Horas)">
+                    </div>
+                    <div class="form-group" style="margin:0;">
+                        <select id="new-schema-type" class="form-select">
+                            <option value="text">Texto Corto</option>
+                            <option value="textarea">Texto Largo</option>
+                            <option value="tags">Etiquetas (Tags)</option>
+                            <option value="image">URL Imagen (Portada)</option>
+                            <option value="priority">Prioridad Visual</option>
+                            <option value="user">Usuario (Badge)</option>
+                        </select>
+                    </div>
+                </div>
+                <button class="btn btn-primary" style="margin-top:10px; width:100%;" onclick="addSchemaField()">Añadir al Esquema</button>
+            </div>
+
+            <div class="modal-footer-btns">
+                <button class="btn btn-primary" onclick="saveDashboardConfig()">Listo</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // --- DATA STATE & CORE ---
+        let appData = {
+            proyectos: {},
+            proyectoActivo: "", 
+            openTabs: []
+        };
+
+        const baseSchemaTemplate = [
+            { id: "f_desc", label: "Descripción", type: "textarea", showInCard: false },
+            { id: "f_user", label: "Asignado A", type: "user", showInCard: true },
+            { id: "f_prio", label: "Prioridad", type: "priority", showInCard: true },
+            { id: "f_img", label: "URL Imagen Portada", type: "image", showInCard: true },
+            { id: "f_tags", label: "Etiquetas", type: "tags", showInCard: true }
+        ];
+
+        let undoStack = [];
+        let redoStack = [];
+        const MAX_HISTORY = 30;
+        let searchQuery = "";
+        let activeModalsStack = [];
+        const DATA_KEY = "neo_kanban_pro_master_v3_2";
+        let draggedColumnId = null; 
+
+        // --- SISTEMA TOAST ---
+        function showToast(message, type = "info") {
+            const container = document.getElementById('toast-container');
+            const toast = document.createElement('div');
+            toast.className = 'toast';
+            
+            let icon = 'info';
+            let color = 'var(--accent-blue)';
+            if(type === 'success') { icon = 'check-circle'; color = 'var(--accent-success)'; }
+            if(type === 'error') { icon = 'alert-triangle'; color = 'var(--accent-danger)'; }
+            if(type === 'warning') { icon = 'alert-circle'; color = 'var(--accent-warning)'; }
+            
+            toast.style.borderLeft = `4px solid ${color}`;
+            toast.innerHTML = `<i data-lucide="${icon}" style="color:${color}; width:18px;"></i> <span>${escapeHTML(message)}</span>`;
+            
+            container.appendChild(toast);
+            lucide.createIcons();
+
+            setTimeout(() => {
+                toast.classList.add('closing');
+                setTimeout(() => toast.remove(), 300);
+            }, 3000);
+        }
+
+        // --- HISTORY (UNDO/REDO) ---
+        function saveHistoryState() {
+            if (undoStack.length >= MAX_HISTORY) undoStack.shift();
+            undoStack.push(JSON.stringify(appData));
+            redoStack = [];
+            updateUndoRedoButtons();
+        }
+
+        function undo() {
+            if (undoStack.length === 0) return;
+            redoStack.push(JSON.stringify(appData));
+            appData = JSON.parse(undoStack.pop());
+            updateUndoRedoButtons();
+            saveDataDirect();
+            renderApp();
+            showToast("Acción deshecha", "warning");
+        }
+
+        function redo() {
+            if (redoStack.length === 0) return;
+            undoStack.push(JSON.stringify(appData));
+            appData = JSON.parse(redoStack.pop());
+            updateUndoRedoButtons();
+            saveDataDirect();
+            renderApp();
+            showToast("Acción rehecha", "success");
+        }
+
+        function updateUndoRedoButtons() {
+            document.getElementById('btn-undo').disabled = undoStack.length === 0;
+            document.getElementById('btn-redo').disabled = redoStack.length === 0;
+        }
+
+        // --- INIT & PERSISTENCE ---
+        window.onload = () => {
+            loadData();
+            setupKeyboardShortcuts();
+            renderApp();
+
+            // Lógica Aviso Beta
+            if (!localStorage.getItem('neo_kanban_beta_accepted')) {
+                openModal('modal-beta');
+            }
+        };
+
+        function acceptBeta() {
+            localStorage.setItem('neo_kanban_beta_accepted', 'true');
+            closeActiveModal('modal-beta');
+        }
+
+        function loadData() {
+            const raw = localStorage.getItem(DATA_KEY);
+            if (raw) {
+                try {
+                    appData = JSON.parse(raw);
+                    if (!appData.openTabs) appData.openTabs = Object.keys(appData.proyectos);
+                    Object.values(appData.proyectos).forEach(p => {
+                        if(!p.schema) p.schema = JSON.parse(JSON.stringify(baseSchemaTemplate));
+                    });
+                } catch(e) { appData = createSeed(); }
+            } else {
+                appData = createSeed();
+                saveDataDirect();
+            }
+        }
+
+        function createSeed() {
+            return {
+                proyectos: {
+                    "proj-1": {
+                        id: "proj-1", nombre: "Alpha Build V1",
+                        schema: JSON.parse(JSON.stringify(baseSchemaTemplate)),
+                        columnas: [
+                            { id: "col-1", titulo: "Backlog", icon: "layers", color: "var(--accent-purple)" },
+                            { id: "col-2", titulo: "In Progress", icon: "activity", color: "var(--accent-warning)" }
+                        ],
+                        tareas: [
+                            { id: "t1", colId: "col-1", titulo: "Diseñar UI Principal", subtitulo: "Figma File", fields: { f_user: "Ana", f_prio: "alta", f_tags: "Diseño, UX" } }
+                        ]
+                    }
+                },
+                proyectoActivo: "", openTabs: ["proj-1"]
+            };
+        }
+
+        function saveDataDirect() {
+            localStorage.setItem(DATA_KEY, JSON.stringify(appData));
+        }
+
+        // --- KEYBOARD SHORTCUTS & AUTO-SAVE ---
+        function setupKeyboardShortcuts() {
+            window.addEventListener('keydown', (e) => {
+                if (e.key.toLowerCase() === 'z' && (e.ctrlKey || e.metaKey) && !e.shiftKey) {
+                    e.preventDefault(); undo();
+                }
+                if ((e.key.toLowerCase() === 'y' && (e.ctrlKey || e.metaKey)) || 
+                    (e.key.toLowerCase() === 'z' && (e.ctrlKey || e.metaKey) && e.shiftKey)) {
+                    e.preventDefault(); redo();
+                }
+                if (e.key === 'Escape') {
+                    if (activeModalsStack.length > 0 && activeModalsStack[activeModalsStack.length - 1] !== 'modal-beta') {
+                        e.preventDefault();
+                        triggerAutoSave(activeModalsStack[activeModalsStack.length - 1]);
+                    }
+                }
+                if (e.key === 'Enter' && e.target.tagName !== 'TEXTAREA') {
+                    if (activeModalsStack.length > 0 && activeModalsStack[activeModalsStack.length - 1] !== 'modal-beta') {
+                        e.preventDefault();
+                        triggerAutoSave(activeModalsStack[activeModalsStack.length - 1]);
+                    }
+                }
+            });
+        }
+
+        function triggerAutoSave(modalId) {
+            if(modalId === 'modal-task') saveTask();
+            else if(modalId === 'modal-project') saveProject();
+            else if(modalId === 'modal-phase') savePhase();
+            else if(modalId === 'modal-config') saveDashboardConfig();
+            else closeActiveModal(modalId);
+        }
+
+        // --- NAVEGACIÓN ---
+        function navigateToDashboard() {
+            appData.proyectoActivo = "";
+            saveDataDirect();
+            renderApp();
+        }
+
+        function selectProject(id) {
+            appData.proyectoActivo = id;
+            if (!appData.openTabs.includes(id)) appData.openTabs.push(id);
+            saveDataDirect();
+            renderApp();
+        }
+
+        function closeTab(id, event) {
+            event.stopPropagation();
+            appData.openTabs = appData.openTabs.filter(t => t !== id);
+            if (appData.proyectoActivo === id) {
+                appData.proyectoActivo = appData.openTabs.length > 0 ? appData.openTabs[0] : "";
+            }
+            saveDataDirect();
+            renderApp();
+        }
+
+        // --- RENDERIZADO PRINCIPAL ---
+        function renderApp() {
+            const isDashboard = (appData.proyectoActivo === "");
+            const configBtn = document.getElementById('btn-config');
+            
+            if (isDashboard) {
+                document.getElementById('view-dashboard').classList.add('active-view');
+                document.getElementById('view-board').classList.remove('active-view');
+                document.getElementById('nav-location-text').innerText = "Proyectos";
+                configBtn.style.display = 'none';
+                renderDashboardHub();
+            } else {
+                document.getElementById('view-dashboard').classList.remove('active-view');
+                document.getElementById('view-board').classList.add('active-view');
+                configBtn.style.display = 'flex';
+                
+                const currentProj = appData.proyectos[appData.proyectoActivo];
+                document.getElementById('nav-location-text').innerText = currentProj ? currentProj.nombre : "Tablero";
+                renderActiveTabsRow();
+                renderBoardWorkspace();
+            }
+            
+            updateCounters();
+            lucide.createIcons();
+        }
+
+        function renderDashboardHub() {
+            const grid = document.getElementById('dashboard-projects-grid');
+            grid.innerHTML = '';
+            Object.keys(appData.proyectos).forEach(id => {
+                const proj = appData.proyectos[id];
+                const card = document.createElement('div');
+                card.className = 'project-card';
+                card.onclick = () => selectProject(id);
+                card.innerHTML = `
+                    <div class="project-card-header">
+                        <div class="project-card-title">
+                            <i data-lucide="folder" style="color:var(--accent-blue);"></i> ${escapeHTML(proj.nombre)}
+                        </div>
+                        <div class="project-card-actions" onclick="event.stopPropagation();">
+                            <button class="task-btn" onclick="openEditProject('${id}')" title="Editar"><i data-lucide="edit-3"></i></button>
+                            <button class="task-btn delete" onclick="deleteProject('${id}')"><i data-lucide="trash-2"></i></button>
+                        </div>
+                    </div>
+                    <div style="font-size:13px; color:var(--text-muted); display:flex; gap:12px;">
+                        <span>Fases: <b>${proj.columnas.length}</b></span>
+                        <span>Tareas: <b>${proj.tareas.length}</b></span>
+                    </div>
+                `;
+                grid.appendChild(card);
+            });
+        }
+
+        function renderActiveTabsRow() {
+            const container = document.getElementById('tabs-pills-container');
+            container.innerHTML = '';
+            appData.openTabs.forEach(id => {
+                const proj = appData.proyectos[id];
+                if (!proj) return;
+                const pill = document.createElement('div');
+                pill.className = `pill ${id === appData.proyectoActivo ? 'active' : ''}`;
+                pill.innerHTML = `
+                    <i data-lucide="folder" style="width:14px;"></i> ${escapeHTML(proj.nombre)}
+                    <span class="close-tab-btn" onclick="closeTab('${id}', event)"><i data-lucide="x" style="width:12px;"></i></span>
+                `;
+                pill.onclick = () => selectProject(id);
+                container.appendChild(pill);
+            });
+        }
+
+        function renderBoardWorkspace() {
+            const container = document.getElementById('board-columns-container');
+            container.innerHTML = '';
+            const currentProj = appData.proyectos[appData.proyectoActivo];
+            if (!currentProj) return;
+
+            currentProj.columnas.forEach((col) => {
+                const columnEl = document.createElement('div');
+                columnEl.className = 'kanban-column';
+                columnEl.id = `col-${col.id}`;
+
+                columnEl.addEventListener('dragenter', (e) => {
+                    if (!draggedColumnId) columnEl.classList.add('drag-over');
+                });
+                columnEl.addEventListener('dragleave', () => columnEl.classList.remove('drag-over'));
+                columnEl.addEventListener('dragover', (e) => e.preventDefault());
+                columnEl.addEventListener('drop', (e) => {
+                    columnEl.classList.remove('drag-over');
+                    if(draggedColumnId) return; 
+                    const taskId = e.dataTransfer.getData('text/task-id');
+                    if (taskId) handleDropTaskOnColumn(taskId, col.id);
+                });
+
+                columnEl.innerHTML = `
+                    <div class="column-header" draggable="true" id="header-${col.id}">
+                        <div class="column-title" style="color: ${col.color || 'var(--text-main)'}">
+                            <i data-lucide="${col.icon || 'circle'}" style="width:18px;"></i>
+                            <span>${escapeHTML(col.titulo)}</span>
+                        </div>
+                        <div class="column-actions" onclick="event.stopPropagation();">
+                            <button class="task-btn" onclick="openAddTaskModal('${col.id}')"><i data-lucide="plus"></i></button>
+                            <button class="task-btn" onclick="openEditPhase('${col.id}')"><i data-lucide="more-horizontal"></i></button>
+                        </div>
+                    </div>
+                    <div class="column-body" id="body-col-${col.id}"></div>
+                `;
+
+                container.appendChild(columnEl);
+
+                const headerEl = columnEl.querySelector('.column-header');
+                headerEl.addEventListener('dragstart', (e) => {
+                    draggedColumnId = col.id;
+                    columnEl.classList.add('column-dragging');
+                    e.dataTransfer.setData('text/column-id', col.id);
+                });
+                headerEl.addEventListener('dragend', () => {
+                    columnEl.classList.remove('column-dragging');
+                    draggedColumnId = null;
+                });
+                headerEl.addEventListener('dragover', (e) => {
+                    e.preventDefault();
+                    if (draggedColumnId && draggedColumnId !== col.id) {
+                        reorderColumns(draggedColumnId, col.id);
+                    }
+                });
+
+                const bodyContainer = columnEl.querySelector(`#body-col-${col.id}`);
+                const tasks = currentProj.tareas.filter(t => t.colId === col.id);
+                
+                tasks.forEach(task => {
+                    if (searchQuery && !task.titulo.toLowerCase().includes(searchQuery.toLowerCase()) && 
+                       (!task.subtitulo || !task.subtitulo.toLowerCase().includes(searchQuery.toLowerCase()))) return;
+
+                    const card = document.createElement('div');
+                    card.className = 'task-card';
+                    card.draggable = true;
+                    
+                    card.addEventListener('dragstart', (e) => {
+                        e.stopPropagation();
+                        card.classList.add('dragging');
+                        e.dataTransfer.setData('text/task-id', task.id);
+                    });
+                    card.addEventListener('dragend', () => card.classList.remove('dragging'));
+                    card.onclick = () => openTaskDetailsModal(task.id);
+
+                    let imgHtml = '', tagsHtml = '', prioHtml = '', userHtml = '';
+                    
+                    currentProj.schema.forEach(schemaField => {
+                        if (!schemaField.showInCard || !task.fields || !task.fields[schemaField.id]) return;
+                        const val = task.fields[schemaField.id];
+                        
+                        if (schemaField.type === 'image') {
+                            imgHtml = `<img src="${escapeHTML(val)}" class="task-card-img-preview">`;
+                        } else if (schemaField.type === 'tags' && val.trim() !== '') {
+                            // Bugfix: Evita crear tags vacíos si hay espacios o comas sueltas
+                            const validTags = val.split(',').map(t => t.trim()).filter(t => t.length > 0);
+                            if(validTags.length > 0) {
+                                tagsHtml = `<div class="task-tags-row">` + validTags.map(t => `<span class="mini-tag">${escapeHTML(t)}</span>`).join('') + `</div>`;
+                            }
+                        } else if (schemaField.type === 'priority') {
+                            const p = val.toLowerCase();
+                            prioHtml = `<span class="mini-tag" style="background:rgba(255,255,255,0.1); color:var(--text-main); font-weight:700; text-transform:uppercase; font-size:10px;">${escapeHTML(p)}</span>`;
+                        } else if (schemaField.type === 'user') {
+                            userHtml = `<div class="custom-field-badge"><i data-lucide="user" style="width:12px;"></i> ${escapeHTML(val)}</div>`;
+                        }
+                    });
+
+                    card.innerHTML = `
+                        ${imgHtml}
+                        <div class="task-title">${escapeHTML(task.titulo)}</div>
+                        ${task.subtitulo ? `<div class="task-subtitle">${escapeHTML(task.subtitulo)}</div>` : ''}
+                        ${tagsHtml}
+                        <div class="task-footer">
+                            ${prioHtml}
+                            ${userHtml}
+                        </div>
+                    `;
+                    bodyContainer.appendChild(card);
+                });
+            });
+        }
+
+        // --- FÍSICAS D&D ---
+        function handleDropTaskOnColumn(taskId, targetColId) {
+            const currentProj = appData.proyectos[appData.proyectoActivo];
+            const task = currentProj.tareas.find(t => t.id === taskId);
+            if (task && task.colId !== targetColId) {
+                saveHistoryState();
+                task.colId = targetColId;
+                saveDataDirect();
+                renderBoardWorkspace();
+                updateCounters();
+                showToast("Tarea reubicada", "success");
+            }
+        }
+
+        function reorderColumns(draggedId, targetId) {
+            const currentProj = appData.proyectos[appData.proyectoActivo];
+            const cols = currentProj.columnas;
+            const draggedIndex = cols.findIndex(c => c.id === draggedId);
+            const targetIndex = cols.findIndex(c => c.id === targetId);
+            
+            if (draggedIndex !== -1 && targetIndex !== -1) {
+                saveHistoryState();
+                const [removed] = cols.splice(draggedIndex, 1);
+                cols.splice(targetIndex, 0, removed);
+                saveDataDirect();
+                renderBoardWorkspace();
+            }
+        }
+
+        function updateCounters() {
+            const badge = document.getElementById('global-task-counter');
+            if (appData.proyectoActivo === "") badge.innerText = Object.keys(appData.proyectos).length;
+            else {
+                const currentProj = appData.proyectos[appData.proyectoActivo];
+                badge.innerText = currentProj ? currentProj.tareas.length : 0;
+            }
+        }
+
+        // --- ENGINE MODALES ---
+        function openModal(modalId) {
+            document.getElementById('main-view').classList.add('backgrounded');
+            document.getElementById(modalId).classList.add('active');
+            activeModalsStack.push(modalId);
+        }
+
+        function closeActiveModal(modalId) {
+            const index = activeModalsStack.indexOf(modalId);
+            if(index > -1) activeModalsStack.splice(index, 1);
+            document.getElementById(modalId).classList.remove('active');
+            if (activeModalsStack.length === 0) document.getElementById('main-view').classList.remove('backgrounded');
+        }
+
+        function closeModalOnOverlay(e, modalId) {
+            if (e.target.id === modalId) triggerAutoSave(modalId);
+        }
+
+        // --- CRUD PROYECTOS ---
+        function openEditProject(id) {
+            const proj = appData.proyectos[id];
+            document.getElementById('project-modal-title').innerText = "Editar Proyecto";
+            document.getElementById('edit-project-id').value = id;
+            document.getElementById('project-name-input').value = proj.nombre;
+            openModal('modal-project');
+        }
+
+        function saveProject() {
+            const input = document.getElementById('project-name-input');
+            const name = input.value.trim();
+            if (!name) { triggerShake(input); return; }
+
+            saveHistoryState();
+            const editId = document.getElementById('edit-project-id').value;
+            let actionType = "actualizado";
+
+            if (editId) {
+                appData.proyectos[editId].nombre = name;
+            } else {
+                const newId = 'proj-' + Date.now();
+                appData.proyectos[newId] = {
+                    id: newId, nombre: name,
+                    schema: JSON.parse(JSON.stringify(baseSchemaTemplate)),
+                    columnas: [
+                        { id: "col-todo", titulo: "Por hacer", icon: "circle", color: "var(--accent-blue)" },
+                        { id: "col-done", titulo: "Hecho", icon: "check-circle-2", color: "var(--accent-success)" }
+                    ], tareas: []
+                };
+                appData.openTabs.push(newId);
+                actionType = "creado";
+            }
+
+            saveDataDirect();
+            closeActiveModal('modal-project');
+            input.value = ''; document.getElementById('edit-project-id').value = '';
+            document.getElementById('project-modal-title').innerText = "Nuevo Proyecto";
+            renderApp();
+            showToast(`Proyecto ${actionType}`, "success");
+        }
+
+        function deleteProject(id) {
+            if (confirm("¿Eliminar definitivamente el proyecto y sus tareas?")) {
+                saveHistoryState();
+                delete appData.proyectos[id];
+                appData.openTabs = appData.openTabs.filter(t => t !== id);
+                if (appData.proyectoActivo === id) appData.proyectoActivo = "";
+                saveDataDirect();
+                renderApp();
+                showToast("Proyecto eliminado", "info");
+            }
+        }
+
+        // --- CRUD FASES ---
+        function openEditPhase(phaseId) {
+            const col = appData.proyectos[appData.proyectoActivo].columnas.find(c => c.id === phaseId);
+            if (!col) return;
+            document.getElementById('phase-modal-title').innerText = "Editar Fase";
+            document.getElementById('edit-phase-id').value = phaseId;
+            document.getElementById('phase-name-input').value = col.titulo;
+            document.getElementById('phase-icon-input').value = col.icon || 'circle';
+            document.getElementById('phase-color-input').value = col.color || 'var(--accent-blue)';
+            document.getElementById('btn-delete-phase').style.display = 'block';
+            openModal('modal-phase');
+        }
+
+        function savePhase() {
+            const input = document.getElementById('phase-name-input');
+            const titulo = input.value.trim();
+            if (!titulo) { triggerShake(input); return; }
+
+            saveHistoryState();
+            const currentProj = appData.proyectos[appData.proyectoActivo];
+            const editPhaseId = document.getElementById('edit-phase-id').value;
+
+            if (editPhaseId) {
+                const col = currentProj.columnas.find(c => c.id === editPhaseId);
+                if (col) {
+                    col.titulo = titulo;
+                    col.icon = document.getElementById('phase-icon-input').value.trim() || 'circle';
+                    col.color = document.getElementById('phase-color-input').value;
+                }
+            } else {
+                currentProj.columnas.push({
+                    id: 'col-' + Date.now(), titulo: titulo,
+                    icon: document.getElementById('phase-icon-input').value.trim() || 'circle',
+                    color: document.getElementById('phase-color-input').value
+                });
+            }
+
+            saveDataDirect();
+            closeActiveModal('modal-phase');
+            document.getElementById('edit-phase-id').value = ''; input.value = '';
+            document.getElementById('btn-delete-phase').style.display = 'none';
+            document.getElementById('phase-modal-title').innerText = "Fase / Columna";
+            renderApp();
+            showToast("Fase guardada", "success");
+        }
+
+        function deletePhaseCurrent() {
+            const phaseId = document.getElementById('edit-phase-id').value;
+            if (!phaseId) return;
+            if (confirm("¿Borrar fase y perder sus tareas?")) {
+                saveHistoryState();
+                const currentProj = appData.proyectos[appData.proyectoActivo];
+                currentProj.columnas = currentProj.columnas.filter(c => c.id !== phaseId);
+                currentProj.tareas = currentProj.tareas.filter(t => t.colId !== phaseId);
+                saveDataDirect();
+                closeActiveModal('modal-phase');
+                document.getElementById('edit-phase-id').value = '';
+                renderApp();
+                showToast("Fase eliminada", "info");
+            }
+        }
+
+        // --- CRUD TAREAS & DYNAMIC BUILDER ---
+        function openAddTaskModal(columnId) {
+            document.getElementById('task-target-column').value = columnId;
+            document.getElementById('task-target-id').value = '';
+            document.getElementById('task-title-input').value = '';
+            document.getElementById('task-subtitle-input').value = '';
+            document.getElementById('btn-delete-task').style.display = 'none';
+            
+            buildDynamicTaskForm({});
+            openModal('modal-task');
+        }
+
+        function openTaskDetailsModal(taskId) {
+            const currentProj = appData.proyectos[appData.proyectoActivo];
+            const task = currentProj.tareas.find(t => t.id === taskId);
+            if (!task) return;
+
+            document.getElementById('task-target-column').value = task.colId;
+            document.getElementById('task-target-id').value = task.id;
+            document.getElementById('task-title-input').value = task.titulo || '';
+            document.getElementById('task-subtitle-input').value = task.subtitulo || '';
+            document.getElementById('btn-delete-task').style.display = 'block';
+
+            buildDynamicTaskForm(task.fields || {});
+            openModal('modal-task');
+        }
+
+        function buildDynamicTaskForm(fieldValues) {
+            const container = document.getElementById('dynamic-task-fields');
+            container.innerHTML = '';
+            const schema = appData.proyectos[appData.proyectoActivo].schema;
+
+            schema.forEach(field => {
+                const val = fieldValues[field.id] || '';
+                const formGroup = document.createElement('div');
+                formGroup.className = field.type === 'textarea' || field.type === 'image' || field.type === 'tags' ? 'form-group full-width' : 'form-group';
+                
+                let inputHtml = '';
+                if(field.type === 'textarea') {
+                    inputHtml = `<textarea class="form-textarea dynamic-input" data-id="${field.id}">${escapeHTML(val)}</textarea>`;
+                } else if (field.type === 'priority') {
+                    const selected = (o) => val.toLowerCase() === o ? 'selected' : '';
+                    inputHtml = `
+                        <select class="form-select dynamic-input" data-id="${field.id}">
+                            <option value="Baja" ${selected('baja')}>Baja</option>
+                            <option value="Media" ${selected('media')}>Media</option>
+                            <option value="Alta" ${selected('alta')}>Alta</option>
+                        </select>
+                    `;
+                } else if(field.type === 'tags') {
+                     inputHtml = `<input type="text" class="form-input dynamic-input" data-id="${field.id}" value="${escapeHTML(val)}" placeholder="Ej: Diseño, UX, Urgente (Separado por comas)">`;
+                } else {
+                    inputHtml = `<input type="text" class="form-input dynamic-input" data-id="${field.id}" value="${escapeHTML(val)}">`;
+                }
+
+                formGroup.innerHTML = `<label class="form-label">${escapeHTML(field.label)}</label>${inputHtml}`;
+                container.appendChild(formGroup);
+            });
+        }
+
+        function saveTask() {
+            const titleInput = document.getElementById('task-title-input');
+            const titulo = titleInput.value.trim();
+            if (!titulo) { triggerShake(titleInput); return; }
+
+            saveHistoryState();
+            const currentProj = appData.proyectos[appData.proyectoActivo];
+            const taskId = document.getElementById('task-target-id').value;
+            
+            let fieldsObj = {};
+            document.querySelectorAll('.dynamic-input').forEach(input => {
+                fieldsObj[input.getAttribute('data-id')] = input.value.trim();
+            });
+
+            const payload = {
+                titulo: titulo,
+                subtitulo: document.getElementById('task-subtitle-input').value.trim(),
+                fields: fieldsObj
+            };
+
+            if (taskId) {
+                const task = currentProj.tareas.find(t => t.id === taskId);
+                if (task) Object.assign(task, payload);
+            } else {
+                currentProj.tareas.push(Object.assign({ 
+                    id: 'task-' + Date.now(), 
+                    colId: document.getElementById('task-target-column').value 
+                }, payload));
+            }
+
+            saveDataDirect();
+            closeActiveModal('modal-task');
+            renderApp();
+            showToast("Tarea guardada", "success");
+        }
+
+        function deleteTaskCurrent() {
+            const taskId = document.getElementById('task-target-id').value;
+            if (!taskId) return;
+            if (confirm("¿Eliminar permanentemente esta tarea?")) {
+                saveHistoryState();
+                const currentProj = appData.proyectos[appData.proyectoActivo];
+                currentProj.tareas = currentProj.tareas.filter(t => t.id !== taskId);
+                saveDataDirect();
+                closeActiveModal('modal-task');
+                renderApp();
+                showToast("Tarea eliminada", "info");
+            }
+        }
+
+        // --- DASHBOARD ESQUEMAS CONFIG ---
+        function openDashboardConfig() {
+            renderSchemaList();
+            openModal('modal-config');
+        }
+
+        function renderSchemaList() {
+            const container = document.getElementById('config-schema-list');
+            container.innerHTML = '';
+            const schema = appData.proyectos[appData.proyectoActivo].schema;
+
+            schema.forEach(field => {
+                const row = document.createElement('div');
+                row.style = "display:flex; align-items:center; justify-content:space-between; background:var(--surface); padding:10px 16px; border-radius:10px; border:1px solid var(--glass-border);";
+                row.innerHTML = `
+                    <div style="display:flex; flex-direction:column; gap:4px;">
+                        <span style="font-size:14px; font-weight:600;">${escapeHTML(field.label)}</span>
+                        <span style="font-size:11px; color:var(--text-muted); text-transform:uppercase;">Tipo: ${field.type}</span>
+                    </div>
+                    <div style="display:flex; align-items:center; gap:8px;">
+                        <button class="task-btn ${field.showInCard ? '' : 'delete'}" onclick="toggleSchemaCardVisibility('${field.id}')" title="Mostrar en Tarjeta">
+                            <i data-lucide="${field.showInCard ? 'eye' : 'eye-off'}"></i>
+                        </button>
+                        <button class="task-btn delete" onclick="deleteSchemaField('${field.id}')" title="Eliminar Campo">
+                            <i data-lucide="trash-2"></i>
+                        </button>
+                    </div>
+                `;
+                container.appendChild(row);
+            });
+            lucide.createIcons();
+        }
+
+        function addSchemaField() {
+            const input = document.getElementById('new-schema-label');
+            const label = input.value.trim();
+            const type = document.getElementById('new-schema-type').value;
+            
+            if (!label) { triggerShake(input); return; }
+
+            saveHistoryState();
+            const schema = appData.proyectos[appData.proyectoActivo].schema;
+            schema.push({
+                id: 'f_' + Date.now(),
+                label: label,
+                type: type,
+                showInCard: false
+            });
+
+            saveDataDirect();
+            input.value = '';
+            renderSchemaList();
+            showToast("Campo añadido al esquema", "success");
+        }
+
+        function toggleSchemaCardVisibility(fieldId) {
+            saveHistoryState();
+            const schema = appData.proyectos[appData.proyectoActivo].schema;
+            const field = schema.find(f => f.id === fieldId);
+            if (field) field.showInCard = !field.showInCard;
+            saveDataDirect();
+            renderSchemaList();
+        }
+
+        function deleteSchemaField(fieldId) {
+            saveHistoryState();
+            const proj = appData.proyectos[appData.proyectoActivo];
+            proj.schema = proj.schema.filter(f => f.id !== fieldId);
+            
+            proj.tareas.forEach(t => {
+                if(t.fields && t.fields[fieldId]) delete t.fields[fieldId];
+            });
+
+            saveDataDirect();
+            renderSchemaList();
+            showToast("Campo eliminado", "info");
+        }
+
+        function saveDashboardConfig() {
+            closeActiveModal('modal-config');
+            renderApp();
+            showToast("Esquema configurado", "success");
+        }
+
+        // --- BÚSQUEDA ---
+        function toggleSearch() {
+            const wrapper = document.getElementById('search-container');
+            const input = document.getElementById('search-input');
+            wrapper.classList.toggle('expanded');
+            if(wrapper.classList.contains('expanded')) input.focus();
+            else { input.value = ''; searchQuery = ''; renderApp(); }
+        }
+
+        function handleSearch(val) {
+            searchQuery = val;
+            if (appData.proyectoActivo !== "") { renderBoardWorkspace(); lucide.createIcons(); }
+        }
+
+        // --- EXPORTAR / IMPORTAR ---
+        function exportData() {
+            const str = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(appData));
+            const a = document.createElement('a'); a.href = str; a.download = `neo_kanban_v3_2_${Date.now()}.json`;
+            document.body.appendChild(a); a.click(); a.remove();
+            showToast("Backup exportado", "success");
+        }
+
+        function importData(e) {
+            const file = e.target.files[0];
+            if (!file) return;
+            const reader = new FileReader();
+            reader.onload = function(evt) {
+                try {
+                    const p = JSON.parse(evt.target.result);
+                    if (p && p.proyectos) {
+                        saveHistoryState(); appData = p; saveDataDirect(); renderApp();
+                        showToast("Datos importados con éxito", "success");
+                    } else throw new Error();
+                } catch(err) { showToast("Archivo corrupto o inválido", "error"); }
+            };
+            reader.readAsText(file); e.target.value = '';
+        }
+
+        // --- UTILS ---
+        function triggerShake(el) {
+            el.classList.add('error-shake'); setTimeout(() => el.classList.remove('error-shake'), 320);
+        }
+        function escapeHTML(str) {
+            if (!str) return '';
+            return String(str).replace(/[&<>'"]/g, tag => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', "'": '&#39;', '"': '&quot;' }[tag] || tag));
+        }
+    </script>
+</body>
+</html>
