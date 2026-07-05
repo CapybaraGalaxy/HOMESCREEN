@@ -26,6 +26,7 @@
 
       /* Estados y Acentos de Sistema */
       --accent-danger: #FF453A;
+      --accent-warning: #FF9F0A;
       --accent-success: #34C759;
       --accent-purple: #BF5AF2;
       --accent-cyan: #64D2FF;
@@ -131,6 +132,11 @@
       background: var(--surface-hover);
       color: var(--text-main);
     }
+    
+    .btn-icon.accent-cyan:hover {
+      background: rgba(100, 210, 255, 0.15);
+      color: var(--accent-cyan);
+    }
 
     .btn-icon.danger:hover {
       background: rgba(255, 69, 58, 0.1);
@@ -198,15 +204,44 @@
 
     .mod-card-header {
       display: flex;
-      justify-content: space-between;
-      align-items: flex-start;
-      padding-right: 28px;
+      align-items: center;
+      gap: 10px;
+      padding-right: 32px;
+      flex-wrap: wrap;
     }
 
     .mod-card-title {
       font-weight: 600;
       font-size: 1.05rem;
       letter-spacing: -0.01em;
+    }
+
+    /* BADGES DE SALUD/COMPATIBILIDAD */
+    .mod-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
+      font-size: 0.65rem;
+      font-weight: 700;
+      padding: 4px 8px;
+      border-radius: 8px;
+      letter-spacing: 0.03em;
+      text-transform: uppercase;
+    }
+    .badge-danger {
+      background: rgba(255, 69, 58, 0.12);
+      color: var(--accent-danger);
+      border: 1px solid rgba(255, 69, 58, 0.25);
+    }
+    .badge-warning {
+      background: rgba(255, 159, 10, 0.12);
+      color: var(--accent-warning);
+      border: 1px solid rgba(255, 159, 10, 0.25);
+    }
+    .badge-success {
+      background: rgba(52, 199, 89, 0.12);
+      color: var(--accent-success);
+      border: 1px solid rgba(52, 199, 89, 0.25);
     }
 
     .versions-clamp {
@@ -364,7 +399,7 @@
       background: transparent;
       border: none;
       color: var(--text-muted);
-      padding: 10px;
+      padding: 10px 5px;
       font-size: 0.85rem;
       font-weight: 500;
       border-radius: 8px;
@@ -372,7 +407,7 @@
       display: flex;
       align-items: center;
       justify-content: center;
-      gap: 8px;
+      gap: 6px;
       font-family: inherit;
       transition: all 0.2s var(--bezier);
     }
@@ -412,6 +447,11 @@
 
     .input-field:focus {
       border-color: rgba(255,255,255,0.25);
+    }
+
+    textarea.input-field {
+      resize: vertical;
+      min-height: 120px;
     }
 
     .search-row {
@@ -470,8 +510,12 @@
       transition: transform 0.2s var(--bezier), opacity 0.2s var(--bezier);
     }
 
-    .btn-action:active {
+    .btn-action:active:not(:disabled) {
       transform: scale(0.98);
+    }
+    
+    .btn-action:disabled {
+      cursor: not-allowed;
     }
 
     /* LISTA DE VERSIONES EN POPUP COMPLETO */
@@ -575,6 +619,59 @@
       color: var(--text-muted);
       font-size: 0.85rem;
     }
+    
+    /* BOTTLENECK ANALYSIS STYLES */
+    .bottleneck-scenario {
+      background: var(--bg);
+      border: 1px solid var(--glass-border);
+      border-radius: 16px;
+      padding: 16px;
+      margin-bottom: 12px;
+      transition: border-color 0.3s ease;
+    }
+    
+    .bottleneck-scenario:hover {
+      border-color: rgba(255, 255, 255, 0.2);
+    }
+    
+    .scenario-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 12px;
+    }
+    
+    .scenario-title {
+      font-size: 1.1rem;
+      font-weight: 600;
+      color: var(--accent-cyan);
+    }
+    
+    .scenario-subtitle {
+      font-size: 0.8rem;
+      color: var(--text-muted);
+      background: var(--surface-hover);
+      padding: 4px 8px;
+      border-radius: 6px;
+    }
+    
+    .sacrifices-list {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+    }
+    
+    .sacrifice-tag {
+      background: rgba(255, 69, 58, 0.1);
+      color: var(--accent-danger);
+      border: 1px solid rgba(255, 69, 58, 0.2);
+      padding: 6px 10px;
+      border-radius: 8px;
+      font-size: 0.85rem;
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+    }
 
     /* ANIMACIONES */
     @keyframes cardAppear {
@@ -608,6 +705,9 @@
         </div>
       </div>
       <div class="toolbox">
+        <button class="btn-icon accent-cyan" onclick="openModal('bottleneck-modal')" title="Análisis de Actualización (Cuellos de botella)">
+          <i data-lucide="git-branch" size="18"></i>
+        </button>
         <button class="btn-icon" onclick="exportData()" title="Exportar Copia"><i data-lucide="download" size="18"></i></button>
         <button class="btn-icon" onclick="triggerImport()" title="Importar Copia"><i data-lucide="upload" size="18"></i></button>
         <button class="btn-icon danger" onclick="clearMatrix()" title="Eliminar Todo"><i data-lucide="trash-2" size="18"></i></button>
@@ -627,6 +727,7 @@
     <i data-lucide="plus" size="24"></i>
   </button>
 
+  <!-- MODAL AÑADIR MOD -->
   <div class="modal-overlay" id="add-modal" onclick="closeActiveModalOnOverlay(event)">
     <div class="modal-sheet">
       <div class="modal-header">
@@ -636,10 +737,13 @@
       <div class="modal-body">
         <div class="segmented-control">
           <button class="segment-btn active" id="tab-btn-modrinth" onclick="switchTab('modrinth')">
-            <i data-lucide="search" size="14"></i> Buscar en Modrinth
+            <i data-lucide="search" size="14"></i> Buscar
           </button>
           <button class="segment-btn" id="tab-btn-manual" onclick="switchTab('manual')">
-            <i data-lucide="edit-3" size="14"></i> Crear Manualmente
+            <i data-lucide="edit-3" size="14"></i> Manual
+          </button>
+          <button class="segment-btn" id="tab-btn-markdown" onclick="switchTab('markdown')">
+            <i data-lucide="list" size="14"></i> Importar MD
           </button>
         </div>
 
@@ -668,10 +772,28 @@
           <button class="btn-action" onclick="commitManualMod()">Guardar mod</button>
         </div>
 
+        <!-- PANEL DE IMPORTACIÓN MARKDOWN -->
+        <div class="tab-panel" id="panel-markdown">
+          <div class="input-wrapper">
+            <textarea id="markdownInput" class="input-field" placeholder="Pega aquí tu lista de mods en formato markdown...&#10;Ej: [Axiom](https://modrinth.com/mod/axiom)"></textarea>
+          </div>
+          <div class="input-wrapper">
+            <select id="markdownLoader" class="input-field">
+              <option value="fabric">Importar como: Fabric</option>
+              <option value="forge">Importar como: Forge</option>
+            </select>
+          </div>
+          <button class="btn-action" style="background: var(--accent-success); color: #fff;" onclick="importMarkdown()">
+            Importar desde Lista
+          </button>
+          <div id="markdownStatus" class="status-info" style="margin-top: 10px; padding: 12px 0;"></div>
+        </div>
+
       </div>
     </div>
   </div>
 
+  <!-- MODAL VERSIONES COMUNES -->
   <div class="modal-overlay" id="versions-modal" onclick="closeActiveModalOnOverlay(event)">
     <div class="modal-sheet">
       <div class="modal-header">
@@ -680,6 +802,19 @@
       </div>
       <div class="modal-body" id="popupVersionsBody">
         </div>
+    </div>
+  </div>
+  
+  <!-- MODAL ANÁLISIS DE CUELLO DE BOTELLA -->
+  <div class="modal-overlay" id="bottleneck-modal" onclick="closeActiveModalOnOverlay(event)">
+    <div class="modal-sheet">
+      <div class="modal-header">
+        <span class="modal-title">Análisis de Actualización</span>
+        <button class="btn-icon" onclick="closeActiveModal('bottleneck-modal')"><i data-lucide="x" size="18"></i></button>
+      </div>
+      <div class="modal-body" id="bottleneckBody">
+        <!-- Renderizado dinámico -->
+      </div>
     </div>
   </div>
 
@@ -735,10 +870,21 @@
         const card = document.createElement('div');
         card.className = 'mod-card';
         const requiresCollapse = mod.versions.length > 8;
+        
+        // INDICADOR DE COMPATIBILIDAD (SEMÁFORO)
+        let badgeHTML = '';
+        if (mod.versions.length <= 3) {
+          badgeHTML = `<span class="mod-badge badge-danger" title="Solo soporta ${mod.versions.length} versiones"><i data-lucide="alert-triangle" size="12"></i> Crítico</span>`;
+        } else if (mod.versions.length <= 10) {
+          badgeHTML = `<span class="mod-badge badge-warning" title="Soporta ${mod.versions.length} versiones"><i data-lucide="shield-alert" size="12"></i> Moderado</span>`;
+        } else {
+          badgeHTML = `<span class="mod-badge badge-success" title="Soporta ${mod.versions.length} versiones"><i data-lucide="shield-check" size="12"></i> Flexible</span>`;
+        }
 
         card.innerHTML = `
           <div class="mod-card-header">
             <span class="mod-card-title">${mod.name}</span>
+            ${badgeHTML}
           </div>
           <div class="versions-clamp">${mod.versions.join(', ')}</div>
           ${requiresCollapse ? `
@@ -781,7 +927,7 @@
       lastCalculatedCommonSet = commonSet;
 
       if (commonSet.length === 0) {
-        banner.innerHTML = `<span style="color: var(--accent-danger)">⚠️ Sin versiones comunes detectadas entre estos mods.</span>`;
+        banner.innerHTML = `<span style="color: var(--accent-danger)">⚠️ Sin versiones comunes. <a style="color:var(--accent-cyan);text-decoration:underline;margin-left:8px;" onclick="event.stopPropagation(); openModal('bottleneck-modal')">Ver Cuellos de Botella</a></span>`;
         banner.classList.remove('clickable');
         banner.onclick = null;
       } else {
@@ -812,7 +958,6 @@
       renderApp();
     }
 
-    /* CONTROL DE MODALES CON COMPORTAMIENTO FIJO DE CENTRADO */
     function openModal(modalId) {
       document.getElementById('main-view').classList.add('backgrounded');
       document.getElementById(modalId).classList.add('active');
@@ -821,6 +966,8 @@
         buildVersionPills();
       } else if (modalId === 'versions-modal') {
         buildPopupVersionsView();
+      } else if (modalId === 'bottleneck-modal') {
+        buildBottleneckView();
       }
       
       activeModalsStack.push(modalId);
@@ -859,15 +1006,12 @@
       const independent = [];
 
       lastCalculatedCommonSet.forEach(v => {
-        // Detecta el patrón estándar X.Y.Z o X.Y (ej: 1.21.1 o 1.20)
         const match = v.match(/^(\d+\.\d+)(\.\d+)?$/);
         if (match) {
           const parent = match[1];
           if (!groups[parent]) groups[parent] = [];
-          // Guarda la versión completa
           groups[parent].push(v);
         } else {
-          // Versiones nuevas o formatos diferentes (ej: 26.1) se manejan independientes
           independent.push(v);
         }
       });
@@ -875,7 +1019,6 @@
       const listWrapper = document.createElement('div');
       listWrapper.className = 'popup-versions-list';
 
-      // Renderizar los grupos anidados (Ej: 1.21)
       Object.keys(groups).forEach(parent => {
         const groupEl = document.createElement('div');
         groupEl.className = 'popup-version-group';
@@ -893,7 +1036,6 @@
         listWrapper.appendChild(groupEl);
       });
 
-      // Renderizar las versiones independientes (Ej: 26.1)
       independent.forEach(iv => {
         const indEl = document.createElement('div');
         indEl.className = 'popup-independent-item';
@@ -902,6 +1044,74 @@
       });
 
       container.appendChild(listWrapper);
+      lucide.createIcons();
+    }
+    
+    /* VISTA DE ANÁLISIS DE CUELLO DE BOTELLA */
+    function buildBottleneckView() {
+      const container = document.getElementById('bottleneckBody');
+      container.innerHTML = '';
+      
+      if (appData.mods.length === 0) {
+        container.innerHTML = '<div class="status-info">Añade mods primero para analizarlos.</div>';
+        return;
+      }
+
+      let allVersions = new Set();
+      appData.mods.forEach(m => m.versions.forEach(v => allVersions.add(v)));
+      
+      let analysis = [];
+      allVersions.forEach(v => {
+        let missingMods = [];
+        appData.mods.forEach(m => {
+          if (!m.versions.includes(v)) {
+            missingMods.push(m.name);
+          }
+        });
+        analysis.push({ version: v, missing: missingMods });
+      });
+      
+      // Filtrar versiones que ya son soportadas por todos (no son cuello de botella)
+      // Y opcionalmente evitar versiones donde falta casi todo (ej. si faltan 90 de 100 mods, no es un escenario útil)
+      analysis = analysis.filter(a => a.missing.length > 0 && a.missing.length < (appData.mods.length * 0.8));
+      
+      analysis.sort((a, b) => {
+        if (a.missing.length !== b.missing.length) return a.missing.length - b.missing.length;
+        return b.version.localeCompare(a.version, undefined, { numeric: true });
+      });
+      
+      const topScenarios = analysis.slice(0, 15); // Los mejores 15 escenarios
+      
+      if (topScenarios.length === 0) {
+        container.innerHTML = '<div class="status-info" style="color:var(--accent-success)">¡Increíble! O todos tus mods son perfectamente compatibles o el pack es muy asimétrico.</div>';
+        return;
+      }
+      
+      const infoText = document.createElement('p');
+      infoText.className = 'status-info';
+      infoText.style.paddingTop = '0';
+      infoText.style.textAlign = 'left';
+      infoText.innerText = 'Si quieres cambiar a una de estas versiones, tendrías que eliminar (sacrificar) los mods listados:';
+      container.appendChild(infoText);
+      
+      topScenarios.forEach(scen => {
+        const card = document.createElement('div');
+        card.className = 'bottleneck-scenario';
+        
+        let tagsHTML = scen.missing.map(m => `<span class="sacrifice-tag"><i data-lucide="trash-2" size="12"></i> ${m}</span>`).join('');
+        
+        card.innerHTML = `
+          <div class="scenario-header">
+            <span class="scenario-title">Versión ${scen.version}</span>
+            <span class="scenario-subtitle">Faltan ${scen.missing.length} mod${scen.missing.length > 1 ? 's' : ''}</span>
+          </div>
+          <div class="sacrifices-list">
+            ${tagsHTML}
+          </div>
+        `;
+        container.appendChild(card);
+      });
+      
       lucide.createIcons();
     }
 
@@ -1016,9 +1226,12 @@
         const cleanVersions = [...new Set(targeted.flatMap(v => v.game_versions))];
 
         if (cleanVersions.length) {
-          appData.mods.push({ name: title, versions: cleanVersions });
-          saveData();
-          renderApp();
+          // Evitar duplicados
+          if (!appData.mods.some(m => m.name === title)) {
+            appData.mods.push({ name: title, versions: cleanVersions });
+            saveData();
+            renderApp();
+          }
           document.getElementById('modrinthQuery').value = '';
           resContainer.innerHTML = '';
           closeActiveModal('add-modal');
@@ -1029,6 +1242,83 @@
       } catch (e) {
         alert('Hubo un error al descargar los datos del mod.');
       }
+    }
+
+    /* IMPORTACIÓN MASIVA DESDE MARKDOWN */
+    async function importMarkdown() {
+      const text = document.getElementById('markdownInput').value.trim();
+      const loader = document.getElementById('markdownLoader').value;
+      const statusBox = document.getElementById('markdownStatus');
+      const btn = document.querySelector('#panel-markdown .btn-action');
+
+      if (!text) {
+        triggerShake('markdownInput');
+        return;
+      }
+
+      // Extrae todos los enlaces con formato [Nombre del mod](https://modrinth.com/mod/slug)
+      const regex = /\[(.*?)\]\((https:\/\/modrinth\.com\/mod\/([^)]+))\)/g;
+      let match;
+      const modsToImport = [];
+
+      while ((match = regex.exec(text)) !== null) {
+        modsToImport.push({
+          name: match[1],
+          slug: match[3]
+        });
+      }
+
+      if (modsToImport.length === 0) {
+        statusBox.innerHTML = '<span style="color:var(--accent-danger)">No se encontraron enlaces válidos de Modrinth en el texto.</span>';
+        triggerShake('markdownInput');
+        return;
+      }
+
+      btn.disabled = true;
+      btn.style.opacity = '0.5';
+
+      let successCount = 0;
+      let failCount = 0;
+
+      for (let i = 0; i < modsToImport.length; i++) {
+        const mod = modsToImport[i];
+        statusBox.innerText = `Consultando API (${i + 1}/${modsToImport.length}): ${mod.name}...`;
+
+        try {
+          const res = await fetch(`https://api.modrinth.com/v2/project/${mod.slug}/version`);
+          if (res.ok) {
+            const versions = await res.json();
+            const targeted = versions.filter(v => v.loaders.includes(loader));
+            const cleanVersions = [...new Set(targeted.flatMap(v => v.game_versions))];
+
+            if (cleanVersions.length > 0) {
+              if (!appData.mods.some(m => m.name === mod.name)) {
+                appData.mods.push({ name: mod.name, versions: cleanVersions });
+                successCount++;
+              }
+            } else {
+              failCount++;
+            }
+          } else {
+            failCount++;
+          }
+        } catch (e) {
+          failCount++;
+        }
+      }
+
+      saveData();
+      renderApp();
+
+      statusBox.innerHTML = `<span style="color:var(--accent-success)">¡Completado! ${successCount} mods añadidos exitosamente. (${failCount} omitidos)</span>`;
+
+      setTimeout(() => {
+        document.getElementById('markdownInput').value = '';
+        statusBox.innerText = '';
+        btn.disabled = false;
+        btn.style.opacity = '1';
+        closeActiveModal('add-modal');
+      }, 3000);
     }
 
     /* OPERACIONES DE MANIFESTACIÓN JSON */

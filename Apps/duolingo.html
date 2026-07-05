@@ -1,0 +1,1077 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+    <title>DuoTools</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@200;300;400;500;600;700&display=swap" rel="stylesheet">
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <style>
+        :root {
+            --bg: #000000;
+            --surface: #121212;
+            --surface-hover: #1c1c1e;
+            
+            --glass: rgba(15, 15, 15, 0.4);
+            --glass-border: rgba(255, 255, 255, 0.08);
+            --blur-val: 30px;
+
+            --text-main: #FFFFFF;
+            --text-muted: #8E8E93;
+
+            --accent-danger: #FF453A;
+            --accent-success: #34C759;
+            --accent-brand: #58CC02;
+
+            --bezier: cubic-bezier(0.16, 1, 0.3, 1);
+            --spring: cubic-bezier(0.34, 1.56, 0.64, 1);
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: 'Outfit', sans-serif;
+            -webkit-tap-highlight-color: transparent;
+        }
+
+        body {
+            background-color: var(--bg);
+            color: var(--text-main);
+            overflow: hidden;
+            display: flex;
+            justify-content: center;
+        }
+
+        .app-container {
+            width: 100%;
+            max-width: 900px;
+            height: 100dvh;
+            padding: env(safe-area-inset-top) 24px calc(env(safe-area-inset-bottom) + 24px) 24px;
+            display: flex;
+            flex-direction: column;
+            transition: transform 0.4s var(--bezier), filter 0.4s var(--bezier);
+        }
+
+        .app-container.backgrounded {
+            transform: scale(0.97);
+            filter: blur(12px);
+            pointer-events: none;
+        }
+
+        header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 24px 0 16px 0;
+            border-bottom: 1px solid var(--glass-border);
+            flex-shrink: 0;
+        }
+
+        .brand {
+            display: flex;
+            align-items: center;
+            gap: 14px;
+        }
+
+        .app-icon-badge {
+            width: 42px;
+            height: 42px;
+            border-radius: 12px;
+            background: radial-gradient(circle at center, rgba(88, 204, 2, 0.15) 0%, rgba(0,0,0,0) 100%);
+            border: 1px solid var(--glass-border);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            box-shadow: 0 4px 20px rgba(88, 204, 2, 0.05);
+        }
+
+        .brand-text h1 {
+            font-size: 1.25rem;
+            font-weight: 600;
+            letter-spacing: -0.02em;
+        }
+
+        .brand-text span {
+            font-size: 0.85rem;
+            color: var(--text-muted);
+            font-variant-numeric: tabular-nums;
+            display: inline-block;
+            transition: transform 0.3s var(--spring);
+        }
+
+        .pulse-meta {
+            animation: metaPulse 0.3s var(--spring);
+        }
+
+        @keyframes metaPulse {
+            0% { transform: scale(1); color: var(--accent-brand); }
+            50% { transform: scale(1.05); }
+            100% { transform: scale(1); color: var(--text-muted); }
+        }
+
+        .action-hub {
+            display: flex;
+            gap: 8px;
+        }
+
+        .icon-btn {
+            background: var(--surface);
+            border: 1px solid var(--glass-border);
+            color: var(--text-main);
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            transition: background 0.2s, border-color 0.2s, transform 0.1s;
+        }
+
+        .icon-btn:hover {
+            background: var(--surface-hover);
+            border-color: rgba(255,255,255,0.2);
+        }
+
+        .icon-btn:active {
+            transform: scale(0.95);
+        }
+
+        .folders-scroll-area {
+            display: flex;
+            gap: 10px;
+            overflow-x: auto;
+            padding: 16px 0 20px 0;
+            scrollbar-width: none;
+            -webkit-overflow-scrolling: touch;
+            flex-shrink: 0;
+        }
+        .folders-scroll-area::-webkit-scrollbar { display: none; }
+
+        .nav-pill {
+            background: var(--surface);
+            border: 1px solid var(--glass-border);
+            color: var(--text-muted);
+            padding: 12px 22px;
+            border-radius: 100px;
+            font-size: 0.9rem;
+            font-weight: 500;
+            cursor: pointer;
+            white-space: nowrap;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            transition: background 0.3s var(--bezier), color 0.3s var(--bezier), border-color 0.3s var(--bezier), transform 0.2s var(--bezier);
+        }
+
+        .nav-pill:hover {
+            background: var(--surface-hover);
+            color: var(--text-main);
+        }
+
+        .nav-pill:active {
+            transform: scale(0.97);
+        }
+
+        .nav-pill.active {
+            background: rgba(255, 255, 255, 0.08);
+            border-color: rgba(255, 255, 255, 0.2);
+            color: var(--text-main);
+        }
+
+        .main-content {
+            flex: 1;
+            overflow-y: auto;
+            padding-bottom: 24px;
+            scrollbar-width: none;
+        }
+        .main-content::-webkit-scrollbar { display: none; }
+
+        .module-pane {
+            display: none;
+            animation: fadeIn 0.4s var(--bezier) forwards;
+        }
+
+        .module-pane.active {
+            display: block;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(8px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .grid-layout {
+            display: grid;
+            grid-template-columns: 1fr;
+            gap: 24px;
+        }
+
+        @media(min-width: 768px) {
+            .grid-layout {
+                grid-template-columns: 1fr 1fr;
+            }
+        }
+
+        .panel-form, .panel-results {
+            background: var(--glass);
+            backdrop-filter: blur(var(--blur-val));
+            -webkit-backdrop-filter: blur(var(--blur-val));
+            border: 1px solid var(--glass-border);
+            border-radius: 24px;
+            padding: 28px;
+            display: flex;
+            flex-direction: column;
+            gap: 24px;
+        }
+
+        .panel-results {
+            background: linear-gradient(135deg, rgba(20, 20, 20, 0.15) 0%, rgba(10, 10, 10, 0.35) 100%);
+            justify-content: space-between;
+        }
+
+        .results-wrapper {
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+        }
+
+        .form-group {
+            position: relative;
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+        }
+
+        .form-group label {
+            display: block;
+            font-size: 0.85rem;
+            color: var(--text-muted);
+            font-weight: 500;
+        }
+
+        .input-wrapper {
+            position: relative;
+            display: flex;
+            align-items: center;
+        }
+
+        .input-wrapper i {
+            position: absolute;
+            left: 16px;
+            color: var(--text-muted);
+            pointer-events: none;
+            transition: color 0.2s var(--bezier);
+        }
+
+        .input-wrapper input {
+            width: 100%;
+            background: rgba(255, 255, 255, 0.02);
+            border: 1px solid var(--glass-border);
+            border-radius: 14px;
+            padding: 14px 16px 14px 48px;
+            color: var(--text-main);
+            font-size: 1rem;
+            font-weight: 400;
+            font-variant-numeric: tabular-nums;
+            transition: border-color 0.2s var(--bezier), background 0.2s var(--bezier), box-shadow 0.2s var(--bezier);
+        }
+
+        .input-wrapper input:focus {
+            outline: none;
+            border-color: rgba(255, 255, 255, 0.25);
+            background: rgba(255, 255, 255, 0.05);
+            box-shadow: 0 0 0 4px rgba(255, 255, 255, 0.02);
+        }
+
+        .input-wrapper input:focus + i {
+            color: var(--text-main);
+        }
+
+        .error-shake {
+            animation: shake 0.3s ease-in-out;
+            border-color: var(--accent-danger) !important;
+        }
+
+        @keyframes shake {
+            0%, 100% { transform: translateX(0); }
+            20%, 60% { transform: translateX(-6px); }
+            40%, 80% { transform: translateX(6px); }
+        }
+
+        .result-card {
+            border-bottom: 1px solid rgba(255, 255, 255, 0.04);
+            padding-bottom: 18px;
+        }
+
+        .result-card:last-child {
+            border-bottom: none;
+            padding-bottom: 0;
+        }
+
+        .result-label {
+            font-size: 0.8rem;
+            color: var(--text-muted);
+            text-transform: uppercase;
+            letter-spacing: 0.06em;
+            margin-bottom: 6px;
+        }
+
+        .result-value {
+            font-size: 1.75rem;
+            font-weight: 600;
+            color: var(--text-main);
+            font-variant-numeric: tabular-nums;
+            display: flex;
+            align-items: baseline;
+        }
+
+        .result-value span {
+            font-size: 0.95rem;
+            color: var(--text-muted);
+            font-weight: 400;
+            margin-left: 6px;
+        }
+
+        .status-banner {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            padding: 16px;
+            border-radius: 14px;
+            font-size: 0.9rem;
+            font-weight: 500;
+            margin-top: 12px;
+        }
+
+        .status-banner.success {
+            background: rgba(52, 199, 89, 0.08);
+            border: 1px solid rgba(52, 199, 89, 0.15);
+            color: #30d158;
+        }
+
+        .status-banner.danger {
+            background: rgba(255, 69, 58, 0.08);
+            border: 1px solid rgba(255, 69, 58, 0.15);
+            color: #ff453a;
+        }
+
+        .empty-state {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            gap: 12px;
+            color: var(--text-muted);
+            height: 100%;
+            min-height: 200px;
+            text-align: center;
+            padding: 20px;
+        }
+
+        .empty-state i {
+            color: rgba(255,255,255,0.05);
+            margin-bottom: 4px;
+        }
+
+        .empty-state p {
+            font-size: 0.95rem;
+        }
+
+        /* SISTEMA DE MODALES Y COMPARTICIÓN */
+        .modal-layer {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100vw;
+            height: 100vh;
+            background: rgba(0, 0, 0, 0.5);
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+            z-index: 200;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            opacity: 0;
+            pointer-events: none;
+            transition: opacity 0.4s var(--bezier);
+        }
+
+        .modal-layer.active {
+            opacity: 1;
+            pointer-events: auto;
+        }
+
+        .modal-window {
+            width: calc(100% - 48px);
+            max-width: 500px;
+            background: var(--surface);
+            border: 1px solid var(--glass-border);
+            border-radius: 24px;
+            padding: 28px;
+            transform: scale(0.95) translateY(10px);
+            transition: transform 0.4s var(--spring);
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+        }
+
+        .modal-layer.active .modal-window {
+            transform: scale(1) translateY(0);
+        }
+
+        .modal-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+
+        .modal-header h3 {
+            font-size: 1.2rem;
+            font-weight: 600;
+        }
+
+        .close-modal-btn {
+            background: none;
+            border: none;
+            color: var(--text-muted);
+            cursor: pointer;
+            transition: color 0.2s;
+        }
+
+        .close-modal-btn:hover {
+            color: var(--text-main);
+        }
+
+        .modal-body {
+            display: flex;
+            flex-direction: column;
+            gap: 16px;
+        }
+
+        .json-textarea {
+            width: 100%;
+            height: 140px;
+            background: rgba(255, 255, 255, 0.02);
+            border: 1px solid var(--glass-border);
+            border-radius: 14px;
+            padding: 14px;
+            color: var(--text-main);
+            font-family: monospace;
+            font-size: 0.85rem;
+            resize: none;
+            outline: none;
+            transition: border-color 0.2s var(--bezier);
+        }
+
+        .json-textarea:focus {
+            border-color: rgba(255, 255, 255, 0.2);
+        }
+
+        .btn-group {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 10px;
+        }
+
+        .action-btn {
+            background: rgba(255, 255, 255, 0.06);
+            border: 1px solid var(--glass-border);
+            color: var(--text-main);
+            padding: 12px;
+            border-radius: 12px;
+            font-size: 0.9rem;
+            font-weight: 500;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            transition: background 0.2s, border-color 0.2s;
+        }
+
+        .action-btn:hover {
+            background: rgba(255, 255, 255, 0.1);
+            border-color: rgba(255, 255, 255, 0.2);
+        }
+
+        .action-btn.primary {
+            background: var(--text-main);
+            color: var(--bg);
+            border: none;
+        }
+
+        .action-btn.primary:hover {
+            background: #e5e5ea;
+        }
+
+        .template-pills {
+            display: flex;
+            gap: 8px;
+            overflow-x: auto;
+            padding-bottom: 4px;
+            scrollbar-width: none;
+        }
+        .template-pills::-webkit-scrollbar { display: none; }
+
+        .sub-pill {
+            background: rgba(255,255,255,0.03);
+            border: 1px solid var(--glass-border);
+            color: var(--text-muted);
+            padding: 6px 12px;
+            border-radius: 100px;
+            font-size: 0.8rem;
+            cursor: pointer;
+            white-space: nowrap;
+            transition: background 0.2s, color 0.2s;
+        }
+
+        .sub-pill:hover {
+            background: rgba(255,255,255,0.07);
+            color: var(--text-main);
+        }
+    </style>
+</head>
+<body>
+
+    <div class="app-container" id="main-view">
+        <header>
+            <div class="brand">
+                <div class="app-icon-badge">
+                    <i data-lucide="layers" size="20" style="color: var(--accent-brand);"></i>
+                </div>
+                <div class="brand-text">
+                    <h1>DuoTools</h1>
+                    <span id="global-counter">Módulos listos</span>
+                </div>
+            </div>
+            <div class="action-hub">
+                <button class="icon-btn" title="Copiar Automatización IA (Prompt)" onclick="copyAIPrompt()">
+                    <i data-lucide="bot" size="18"></i>
+                </button>
+                <button class="icon-btn" title="Importar / Exportar JSON" onclick="openModal('io-modal')">
+                    <i data-lucide="share-2" size="18"></i>
+                </button>
+            </div>
+        </header>
+
+        <nav class="folders-scroll-area">
+            <button class="nav-pill active" onclick="switchTab('liga-tab')">
+                <i data-lucide="zap" size="16"></i>Calculadora de Ligas
+            </button>
+            <button class="nav-pill" onclick="switchTab('racha-tab')">
+                <i data-lucide="calendar" size="16"></i>Conversor de Racha
+            </button>
+            <button class="nav-pill" onclick="switchTab('misiones-tab')">
+                <i data-lucide="award" size="16"></i>Planificador Mensual
+            </button>
+        </nav>
+
+        <main class="main-content">
+            
+            <section id="liga-tab" class="module-pane active">
+                <div class="grid-layout">
+                    <div class="panel-form">
+                        <div class="form-group">
+                            <label>XP Actual</label>
+                            <div class="input-wrapper">
+                                <input type="number" id="liga_xp_actual" placeholder="Ej: 500" min="0" oninput="calculateLigas()">
+                                <i data-lucide="user"></i>
+                            </div>
+                        </div>
+                        <div class="form-group">
+                            <label>XP Objetivo (Meta de la Liga)</label>
+                            <div class="input-wrapper">
+                                <input type="number" id="liga_xp_objetivo" placeholder="Ej: 1500" min="0" oninput="calculateLigas()">
+                                <i data-lucide="target"></i>
+                            </div>
+                        </div>
+                        <div class="form-group">
+                            <label>Horas Restantes para el Cierre</label>
+                            <div class="input-wrapper">
+                                <input type="number" id="liga_horas_restantes" placeholder="Ej: 24" min="0" oninput="calculateLigas()">
+                                <i data-lucide="clock"></i>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="panel-results" id="panel_res_liga">
+                        <div class="empty-state">
+                            <i data-lucide="calculator" size="48"></i>
+                            <p>Introduce los datos para calcular la proyección de esfuerzo semanal.</p>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <section id="racha-tab" class="module-pane">
+                <div class="grid-layout">
+                    <div class="panel-form">
+                        <div class="form-group">
+                            <label>Racha Actual (Días)</label>
+                            <div class="input-wrapper">
+                                <input type="number" id="racha_actual" placeholder="Ej: 100" min="0" oninput="calculateRachas()">
+                                <i data-lucide="flame"></i>
+                            </div>
+                        </div>
+                        <div class="form-group">
+                            <label>Racha Objetivo (Hito)</label>
+                            <div class="input-wrapper">
+                                <input type="number" id="racha_objetivo" placeholder="Ej: 365" min="0" oninput="calculateRachas()">
+                                <i data-lucide="milestone"></i>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="panel-results" id="panel_res_racha">
+                        <div class="empty-state">
+                            <i data-lucide="calendar-range" size="48"></i>
+                            <p>Introduce tu racha para proyectar hitos históricos y métricas de hábito.</p>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <section id="misiones-tab" class="module-pane">
+                <div class="grid-layout">
+                    <div class="panel-form">
+                        <div class="form-group">
+                            <label>Meta de Puntos del Mes</label>
+                            <div class="input-wrapper">
+                                <input type="number" id="misiones_meta" placeholder="Ej: 30" min="0" oninput="calculateMisiones()">
+                                <i data-lucide="shield"></i>
+                            </div>
+                        </div>
+                        <div class="form-group">
+                            <label>Puntos Acumulados</label>
+                            <div class="input-wrapper">
+                                <input type="number" id="misiones_actuales" placeholder="Ej: 10" min="0" oninput="calculateMisiones()">
+                                <i data-lucide="check-square"></i>
+                            </div>
+                        </div>
+                        <div class="form-group">
+                            <label>Días Restantes del Mes</label>
+                            <div class="input-wrapper">
+                                <input type="number" id="misiones_dias_restantes" min="0" oninput="calculateMisiones()">
+                                <i data-lucide="calendar-days"></i>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="panel-results" id="panel_res_misiones">
+                        <div class="empty-state">
+                            <i data-lucide="compass" size="48"></i>
+                            <p>Introduce los objetivos del mes para estimar el ritmo crítico diario.</p>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+        </main>
+    </div>
+
+    <div class="modal-layer" id="io-modal">
+        <div class="modal-window">
+            <div class="modal-header">
+                <h3>Intercambio de Datos Lógicos</h3>
+                <button class="close-modal-btn" onclick="closeActiveModal('io-modal')">
+                    <i data-lucide="x" size="20"></i>
+                </button>
+            </div>
+            <div class="modal-body">
+                <div class="form-group">
+                    <label>Plantillas Estructuradas rápidos</label>
+                    <div class="template-pills">
+                        <span class="sub-pill" onclick="loadTemplate('liga')">Plantilla Ligas</span>
+                        <span class="sub-pill" onclick="loadTemplate('racha')">Plantilla Racha</span>
+                        <span class="sub-pill" onclick="loadTemplate('misiones')">Plantilla Misiones</span>
+                        <span class="sub-pill" onclick="loadTemplate('global')">Ecosistema Completo</span>
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label>JSON Estructural (Pega o Copia)</label>
+                    <textarea class="json-textarea" id="json-io-area" placeholder='{\n  "tipo": "liga",\n  "xp_actual": 450,\n  ...\n}'></textarea>
+                </div>
+                <div class="btn-group">
+                    <button class="action-btn" onclick="exportDataToArea()">
+                        <i data-lucide="download" size="16"></i>Generar JSON
+                    </button>
+                    <button class="action-btn primary" onclick="importDataFromArea()">
+                        <i data-lucide="upload" size="16"></i>Procesar & Aplicar
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        let appData = {
+            currentTab: 'liga-tab'
+        };
+
+        let activeModalsStack = [];
+
+        window.onload = function() {
+            lucide.createIcons();
+            setDefaultRemainingDays();
+            updateGlobalCounter("Módulos listos");
+        };
+
+        function setDefaultRemainingDays() {
+            const hoy = new Date();
+            const anio = hoy.getFullYear();
+            const mes = hoy.getMonth();
+            const ultimoDiaMes = new Date(anio, mes + 1, 0).getDate();
+            const diasRestantes = (ultimoDiaMes - hoy.getDate()) + 1; 
+            document.getElementById('misiones_dias_restantes').value = diasRestantes;
+        }
+
+        function updateGlobalCounter(text) {
+            const counter = document.getElementById('global-counter');
+            counter.innerText = text;
+            counter.classList.remove('pulse-meta');
+            void counter.offsetWidth; 
+            counter.classList.add('pulse-meta');
+        }
+
+        function switchTab(tabId) {
+            document.querySelectorAll('.module-pane').forEach(pane => pane.classList.remove('active'));
+            document.querySelectorAll('.nav-pill').forEach(pill => pill.classList.remove('active'));
+
+            document.getElementById(tabId).classList.add('active');
+            
+            const eventTarget = Array.from(document.querySelectorAll('.nav-pill')).find(pill => {
+                return pill.getAttribute('onclick').includes(tabId);
+            });
+            if(eventTarget) eventTarget.classList.add('active');
+
+            appData.currentTab = tabId;
+            updateGlobalCounter(`Módulo: ${tabId.replace('-tab', '').toUpperCase()}`);
+        }
+
+        function validateNegative(inputEl) {
+            if (inputEl.value === "") return null;
+            let val = parseFloat(inputEl.value);
+            if (isNaN(val) || val < 0) {
+                inputEl.classList.add('error-shake');
+                inputEl.style.borderColor = "var(--accent-danger)";
+                setTimeout(() => {
+                    inputEl.classList.remove('error-shake');
+                    inputEl.style.borderColor = "";
+                }, 300);
+                inputEl.value = "";
+                return null;
+            }
+            return val;
+        }
+
+        // --- MÓDULO 1: CALCULADORA DE LIGAS ---
+        function calculateLigas() {
+            const currentInput = document.getElementById('liga_xp_actual');
+            const targetInput = document.getElementById('liga_xp_objetivo');
+            const hoursInput = document.getElementById('liga_horas_restantes');
+            const panelRes = document.getElementById('panel_res_liga');
+
+            let xp_actual = validateNegative(currentInput);
+            let xp_objetivo = validateNegative(targetInput);
+            let hours = validateNegative(hoursInput);
+
+            if (xp_actual === null || xp_objetivo === null || hours === null) {
+                panelRes.innerHTML = `
+                    <div class="empty-state">
+                        <i data-lucide="calculator" size="48"></i>
+                        <p>Introduce los datos para calcular la proyección de esfuerzo semanal.</p>
+                    </div>`;
+                lucide.createIcons();
+                return;
+            }
+
+            let xp_faltante = Math.max(0, xp_objetivo - xp_actual);
+            let dias_restantes = hours / 24;
+            let xp_por_dia = dias_restantes > 0 ? xp_faltante / dias_restantes : xp_faltante;
+            let xp_por_hora = hours > 0 ? xp_faltante / hours : xp_faltante;
+
+            panelRes.innerHTML = `
+                <div class="results-wrapper">
+                    <div class="result-card">
+                        <div class="result-label">XP Faltante Total</div>
+                        <div class="result-value">${Math.ceil(xp_faltante)}<span>XP</span></div>
+                    </div>
+                    <div class="result-card">
+                        <div class="result-label">Ritmo Diario Requerido</div>
+                        <div class="result-value">${Math.ceil(xp_por_dia)}<span>XP/día</span></div>
+                    </div>
+                    <div class="result-card">
+                        <div class="result-label">Ritmo por Hora Requerido</div>
+                        <div class="result-value">${xp_por_hora.toFixed(1)}<span>XP/hr</span></div>
+                    </div>
+                </div>`;
+        }
+
+        // --- MÓDULO 2: CONVERSOR DE RACHAS ---
+        function calculateRachas() {
+            const actualInput = document.getElementById('racha_actual');
+            const targetInput = document.getElementById('racha_objetivo');
+            const panelRes = document.getElementById('panel_res_racha');
+
+            let racha_actual = validateNegative(actualInput);
+            let racha_objetivo = validateNegative(targetInput);
+
+            if (racha_actual === null) {
+                panelRes.innerHTML = `
+                    <div class="empty-state">
+                        <i data-lucide="calendar-range" size="48"></i>
+                        <p>Introduce tu racha para proyectar hitos históricos y métricas de hábito.</p>
+                    </div>`;
+                lucide.createIcons();
+                return;
+            }
+
+            let semanas = Math.floor(racha_actual / 7);
+            let dias_restantes_semana = racha_actual % 7;
+            let meses = Math.floor(racha_actual / 30.4);
+            let anos = (racha_actual / 365).toFixed(1);
+            let habitos = Math.floor(racha_actual / 66);
+
+            let hoy = new Date();
+            let fechaInicio = new Date();
+            fechaInicio.setDate(hoy.getDate() - racha_actual);
+            const opcionesFecha = { day: 'numeric', month: 'short', year: 'numeric' };
+
+            let metaHTML = "-";
+            if (racha_objetivo !== null) {
+                let diasFaltantes = racha_objetivo - racha_actual;
+                if (diasFaltantes > 0) {
+                    let fechaMeta = new Date();
+                    fechaMeta.setDate(hoy.getDate() + diasFaltantes);
+                    metaHTML = fechaMeta.toLocaleDateString('es-ES', opcionesFecha);
+                } else {
+                    metaHTML = "¡Hito alcanzado!";
+                }
+            }
+
+            panelRes.innerHTML = `
+                <div class="results-wrapper">
+                    <div class="result-card">
+                        <div class="result-label">Equivalencia Temporal</div>
+                        <div class="result-value" style="font-size:1.3rem; font-weight:500; line-height:1.4;">${semanas} sem, ${dias_restantes_semana} días<br><span style="margin:4px 0 0 0; font-size:0.95rem; color:var(--text-muted);">≈ ${meses} meses (${anos} años)</span></div>
+                    </div>
+                    <div class="result-card">
+                        <div class="result-label">Hábitos Consolidados (Mín. 66 días)</div>
+                        <div class="result-value">${habitos}<span>${habitos === 1 ? 'hábito fijado' : 'hábitos fijados'}</span></div>
+                    </div>
+                    <div class="result-card">
+                        <div class="result-label">Fecha de Inicio Real</div>
+                        <div class="result-value" style="font-size:1.3rem;">${fechaInicio.toLocaleDateString('es-ES', opcionesFecha)}</div>
+                    </div>
+                    <div class="result-card">
+                        <div class="result-label">Fecha para el Hito Objetivo</div>
+                        <div class="result-value" style="font-size:1.3rem;">${metaHTML}</div>
+                    </div>
+                </div>`;
+        }
+
+        // --- MÓDULO 3: PLANIFICADOR DE DESAFÍOS ---
+        function calculateMisiones() {
+            const metaInput = document.getElementById('misiones_meta');
+            const actualesInput = document.getElementById('misiones_actuales');
+            const diasInput = document.getElementById('misiones_dias_restantes');
+            const panelRes = document.getElementById('panel_res_misiones');
+
+            let meta_mes = validateNegative(metaInput);
+            let puntos_actuales = validateNegative(actualesInput);
+            let dias_restantes = validateNegative(diasInput);
+
+            if (meta_mes === null || puntos_actuales === null || dias_restantes === null) {
+                panelRes.innerHTML = `
+                    <div class="empty-state">
+                        <i data-lucide="compass" size="48"></i>
+                        <p>Introduce los objetivos del mes para estimar el ritmo crítico diario.</p>
+                    </div>`;
+                lucide.createIcons();
+                return;
+            }
+
+            let puntos_faltantes = Math.max(0, meta_mes - puntos_actuales);
+            let misiones_por_dia = dias_restantes > 0 ? puntos_faltantes / dias_restantes : puntos_faltantes;
+
+            let isSuccess = misiones_por_dia <= 3;
+            let bannerClass = isSuccess ? "status-banner success" : "status-banner danger";
+            let bannerText = isSuccess ? "¡Ritmo alcanzable!" : "Matemáticamente inalcanzable (Máx 3/día)";
+            let bannerIcon = isSuccess ? "check-circle" : "alert-triangle";
+
+            panelRes.innerHTML = `
+                <div class="results-wrapper">
+                    <div class="result-card">
+                        <div class="result-label">Puntos Faltantes</div>
+                        <div class="result-value">${puntos_faltantes}<span>puntos</span></div>
+                    </div>
+                    <div class="result-card">
+                        <div class="result-label">Misiones Diarias Necesarias</div>
+                        <div class="result-value">${misiones_por_dia.toFixed(2)}<span>misiones/día</span></div>
+                    </div>
+                </div>
+                <div class="${bannerClass}">
+                    <i data-lucide="${bannerIcon}" size="18"></i>
+                    <span>${bannerText}</span>
+                </div>`;
+            lucide.createIcons();
+        }
+
+        // --- CONTROL DE MODALES POR HISTORIAL ---
+        function openModal(modalId) {
+            document.getElementById('main-view').classList.add('backgrounded');
+            document.getElementById(modalId).classList.add('active');
+            activeModalsStack.push(modalId);
+            window.history.pushState({ modalId: modalId }, "");
+        }
+
+        function closeActiveModal(modalId) {
+            if (activeModalsStack.includes(modalId)) {
+                window.history.back();
+            }
+        }
+
+        window.addEventListener('popstate', () => {
+            if (activeModalsStack.length > 0) {
+                const topModalId = activeModalsStack.pop();
+                document.getElementById(topModalId).classList.remove('active');
+                if (activeModalsStack.length === 0) {
+                    document.getElementById('main-view').classList.remove('backgrounded');
+                }
+            }
+        });
+
+        // --- SISTEMA DE IMPORTACIÓN / EXPORTACIÓN TÁCTICO ---
+        const templates = {
+            liga: { tipo: "liga", xp_actual: 320, xp_objetivo: 1000, horas_restantes: 48 },
+            racha: { tipo: "racha", racha_actual: 420, racha_objetivo: 500 },
+            misiones: { tipo: "misiones", misiones_meta: 50, misiones_actuales: 22, misiones_dias_restantes: 14 },
+            global: {
+                global: true,
+                liga: { xp_actual: 600, xp_objetivo: 1200, horas_restantes: 18 },
+                racha: { racha_actual: 180, racha_objetivo: 365 },
+                misiones: { misiones_meta: 40, misiones_actuales: 32, misiones_dias_restantes: 4 }
+            }
+        };
+
+        function loadTemplate(key) {
+            document.getElementById('json-io-area').value = JSON.stringify(templates[key], null, 2);
+        }
+
+        function exportDataToArea() {
+            const currentTab = appData.currentTab;
+            let exportObj = {};
+
+            if (currentTab === 'liga-tab') {
+                exportObj = {
+                    tipo: "liga",
+                    xp_actual: Number(document.getElementById('liga_xp_actual').value) || 0,
+                    xp_objetivo: Number(document.getElementById('liga_xp_objetivo').value) || 0,
+                    horas_restantes: Number(document.getElementById('liga_horas_restantes').value) || 0
+                };
+            } else if (currentTab === 'racha-tab') {
+                exportObj = {
+                    tipo: "racha",
+                    racha_actual: Number(document.getElementById('racha_actual').value) || 0,
+                    racha_objetivo: Number(document.getElementById('racha_objetivo').value) || 0
+                };
+            } else if (currentTab === 'misiones-tab') {
+                exportObj = {
+                    tipo: "misiones",
+                    misiones_meta: Number(document.getElementById('misiones_meta').value) || 0,
+                    misiones_actuales: Number(document.getElementById('misiones_actuales').value) || 0,
+                    misiones_dias_restantes: Number(document.getElementById('misiones_dias_restantes').value) || 0
+                };
+            }
+            document.getElementById('json-io-area').value = JSON.stringify(exportObj, null, 2);
+        }
+
+        function importDataFromArea() {
+            const area = document.getElementById('json-io-area');
+            let data;
+            try {
+                data = JSON.parse(area.value);
+            } catch (e) {
+                area.classList.add('error-shake');
+                setTimeout(() => area.classList.remove('error-shake'), 300);
+                return;
+            }
+
+            if (data.global || (data.liga && data.racha && data.misiones)) {
+                if (data.liga) {
+                    document.getElementById('liga_xp_actual').value = data.liga.xp_actual || "";
+                    document.getElementById('liga_xp_objetivo').value = data.liga.xp_objetivo || "";
+                    document.getElementById('liga_horas_restantes').value = data.liga.horas_restantes || "";
+                }
+                if (data.racha) {
+                    document.getElementById('racha_actual').value = data.racha.racha_actual || "";
+                    document.getElementById('racha_objetivo').value = data.racha.racha_objetivo || "";
+                }
+                if (data.misiones) {
+                    document.getElementById('misiones_meta').value = data.misiones.misiones_meta || "";
+                    document.getElementById('misiones_actuales').value = data.misiones.misiones_actuales || "";
+                    document.getElementById('misiones_dias_restantes').value = data.misiones.misiones_dias_restantes || "";
+                }
+                calculateLigas(); calculateRachas(); calculateMisiones();
+                closeActiveModal('io-modal');
+                updateGlobalCounter("Datos Globales Aplicados");
+            } else if (data.tipo === "liga" || ('xp_actual' in data)) {
+                document.getElementById('liga_xp_actual').value = data.xp_actual || "";
+                document.getElementById('liga_xp_objetivo').value = data.xp_objetivo || "";
+                document.getElementById('liga_horas_restantes').value = data.horas_restantes || "";
+                switchTab('liga-tab'); calculateLigas();
+                closeActiveModal('io-modal');
+            } else if (data.tipo === "racha" || ('racha_actual' in data)) {
+                document.getElementById('racha_actual').value = data.racha_actual || "";
+                document.getElementById('racha_objetivo').value = data.racha_objetivo || "";
+                switchTab('racha-tab'); calculateRachas();
+                closeActiveModal('io-modal');
+            } else if (data.tipo === "misiones" || ('misiones_meta' in data)) {
+                document.getElementById('misiones_meta').value = data.misiones_meta || "";
+                document.getElementById('misiones_actuales').value = data.misiones_actuales || "";
+                document.getElementById('misiones_dias_restantes').value = data.misiones_dias_restantes || "";
+                switchTab('misiones-tab'); calculateMisiones();
+                closeActiveModal('io-modal');
+            } else {
+                area.classList.add('error-shake');
+                setTimeout(() => area.classList.remove('error-shake'), 300);
+            }
+        }
+
+        // --- AUTOMATIZACIÓN DE PROMPTS PARA IA ---
+        function copyAIPrompt() {
+            const ligaXpAct = document.getElementById('liga_xp_actual').value || "0";
+            const ligaXpObj = document.getElementById('liga_xp_objetivo').value || "0";
+            const ligaHrs = document.getElementById('liga_horas_restantes').value || "0";
+            
+            const rachaAct = document.getElementById('racha_actual').value || "0";
+            const rachaObj = document.getElementById('racha_objetivo').value || "0";
+
+            const misMeta = document.getElementById('misiones_meta').value || "0";
+            const misAct = document.getElementById('misiones_actuales').value || "0";
+            const misDias = document.getElementById('misiones_dias_restantes').value || "0";
+
+            const promptText = `Actúa como un estructurador de datos lógicos de Duolingo. Procesa los siguientes inputs actuales del usuario y genera ÚNICAMENTE un bloque de código JSON (codeblock sin texto explicativo complementario) estructurado con la clave "global" o dividida para importar directamente en el ecosistema DuoStats. No inventes campos extra, mantén la sintaxis estricta.
+
+Datos proporcionados:
+- Calculadora de Ligas: XP Actual = ${ligaXpAct}, XP Objetivo = ${ligaXpObj}, Horas Restantes = ${ligaHrs}.
+- Conversor de Rachas: Racha Actual = ${rachaAct}, Racha Objetivo = ${rachaObj}.
+- Planificador Mensual: Meta Puntos = ${misMeta}, Puntos Acumulados = ${misAct}, Días Restantes = ${misDias}.
+
+Estructura esperada:
+{
+  "liga": { "xp_actual": ${ligaXpAct}, "xp_objetivo": ${ligaXpObj}, "horas_restantes": ${ligaHrs} },
+  "racha": { "racha_actual": ${rachaAct}, "racha_objetivo": ${rachaObj} },
+  "misiones": { "misiones_meta": ${misMeta}, "misiones_actuales": ${misAct}, "misiones_dias_restantes": ${misDias} }
+}`;
+
+            navigator.clipboard.writeText(promptText).then(() => {
+                updateGlobalCounter("¡Prompt IA Copiado!");
+            }).catch(() => {
+                alert("Error al acceder al portapapeles.");
+            });
+        }
+    </script>
+</body>
+</html>

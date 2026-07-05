@@ -3,39 +3,34 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
-    <title>Neo-Kanban Pro - Ultimate</title>
+    <title>Neo-Kanban Pro - Ultimate Edition (BETA)</title>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@200;300;400;500;600;700&display=swap" rel="stylesheet">
     <script src="https://unpkg.com/lucide@latest"></script>
     <style>
         :root {
-            /* Paleta Cromática Orgánica y Oscura */
-            --bg: #000000;
-            --surface: #121212;
-            --surface-card: #161616;
-            --surface-hover: #1c1c1e;
-            --surface-active: #2c2c2e;
+            /* Paleta Ultimate Dark */
+            --bg: #050505;
+            --surface: #0e0e11;
+            --surface-card: #16161a;
+            --surface-hover: #1e1e24;
+            --surface-active: #2a2a35;
             
-            /* Configuración Neo-Glass Pure */
-            --glass: rgba(15, 15, 15, 0.4);
+            --glass: rgba(14, 14, 17, 0.6);
             --glass-border: rgba(255, 255, 255, 0.08);
             --blur-val: 30px;
 
-            /* Jerarquía Textual */
             --text-main: #FFFFFF;
-            --text-muted: #8E8E93;
+            --text-muted: #9CA3AF;
 
-            /* Estados y Acentos de Sistema */
-            --accent-danger: #FF453A;
-            --accent-success: #34C759;
-            --accent-warning: #FF9F0A;
-            --accent-blue: #0A84FF;
-            --accent-purple: #BF5AF2;
+            --accent-danger: #ef4444;
+            --accent-success: #22c55e;
+            --accent-warning: #f59e0b;
+            --accent-blue: #3b82f6;
+            --accent-purple: #8b5cf6;
 
-            /* Físicas de Animación Progresivas */
             --bezier: cubic-bezier(0.16, 1, 0.3, 1);
-            --spring: cubic-bezier(0.34, 1.56, 0.64, 1);
         }
 
         * {
@@ -47,10 +42,7 @@
         }
 
         /* Custom Premium Scrollbar */
-        ::-webkit-scrollbar { width: 6px; height: 6px; display: none; }
-        @media (min-width: 768px) {
-            ::-webkit-scrollbar { display: block; }
-        }
+        ::-webkit-scrollbar { width: 6px; height: 6px; }
         ::-webkit-scrollbar-track { background: transparent; }
         ::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.1); border-radius: 10px; }
         ::-webkit-scrollbar-thumb:hover { background: rgba(255,255,255,0.2); }
@@ -83,39 +75,56 @@
             display: flex;
             align-items: center;
             justify-content: space-between;
-            padding: 16px 0;
+            padding: 20px 0 12px 0;
             border-bottom: 1px solid var(--glass-border);
             flex-shrink: 0;
         }
 
         .header-left { display: flex; align-items: center; gap: 12px; }
-        
         .app-icon-badge {
             width: 42px; height: 42px;
             border-radius: 12px;
-            background: radial-gradient(circle at top left, rgba(255,255,255,0.15), rgba(255,255,255,0.02));
+            background: linear-gradient(135deg, rgba(255,255,255,0.1), rgba(255,255,255,0.02));
             border: 1px solid var(--glass-border);
             display: flex; align-items: center; justify-content: center;
             cursor: pointer;
             transition: transform 0.2s var(--bezier);
-            box-shadow: 0 4px 12px rgba(0,0,0,0.5);
         }
         .app-icon-badge:hover { transform: scale(1.05); }
 
         .brand-title {
-            font-size: 18px; font-weight: 500;
-            display: flex; align-items: center; gap: 8px;
+            font-size: 20px; font-weight: 600;
+            display: flex; align-items: center; gap: 10px;
         }
         .counter-badge {
             font-size: 12px; color: var(--text-muted);
-            font-variant-numeric: tabular-nums;
-            background: var(--surface); padding: 4px 10px;
-            border-radius: 100px; border: 1px solid var(--glass-border);
-            transition: all 0.2s var(--spring);
+            background: var(--surface-card); padding: 2px 8px;
+            border-radius: 20px; border: 1px solid var(--glass-border);
         }
-        .counter-badge.pulse { transform: scale(1.1); color: var(--text-main); }
+        
+        .beta-badge-label {
+            font-size: 10px;
+            background-color: var(--accent-warning);
+            color: var(--bg);
+            padding: 2px 6px;
+            border-radius: 6px;
+            font-weight: 800;
+            letter-spacing: 1px;
+            margin-left: 4px;
+        }
 
         .header-actions { display: flex; align-items: center; gap: 8px; }
+
+        .search-wrapper { position: relative; display: flex; align-items: center; width: 40px; transition: width 0.3s var(--bezier); }
+        .search-wrapper.expanded { width: 260px; }
+        .search-wrapper .search-input {
+            width: 100%; height: 40px; border-radius: 12px;
+            background: var(--surface); border: 1px solid var(--glass-border);
+            padding-left: 42px; padding-right: 12px; color: var(--text-main);
+            outline: none; opacity: 0; pointer-events: none; transition: opacity 0.2s var(--bezier);
+        }
+        .search-wrapper.expanded .search-input { opacity: 1; pointer-events: auto; }
+        .search-trigger-btn { position: absolute; left: 0; top: 0; z-index: 2; border: none !important; }
 
         .icon-btn {
             background: var(--surface);
@@ -127,234 +136,158 @@
         .icon-btn:hover:not(:disabled) { background: var(--surface-hover); transform: translateY(-2px); box-shadow: 0 4px 12px rgba(0,0,0,0.2); }
         .icon-btn:disabled { opacity: 0.3; cursor: not-allowed; }
 
-        /* BUSCADOR FLOTANTE (FAB Search) */
-        .search-fab-wrapper {
-            position: fixed;
-            bottom: max(30px, env(safe-area-inset-bottom));
-            left: 50%;
-            transform: translateX(-50%);
-            z-index: 50;
-            display: flex;
-            align-items: center;
-            background: var(--glass);
-            backdrop-filter: blur(var(--blur-val));
-            border: 1px solid var(--glass-border);
-            border-radius: 100px;
-            padding: 4px;
-            width: 56px;
-            transition: width 0.4s var(--bezier), box-shadow 0.4s var(--bezier);
-            box-shadow: 0 10px 30px rgba(0,0,0,0.5);
-        }
-        .search-fab-wrapper.expanded { width: min(320px, 90vw); box-shadow: 0 12px 40px rgba(0,0,0,0.7); }
-        .search-fab-btn {
-            width: 46px; height: 46px; border-radius: 50%; background: transparent;
-            border: none; color: var(--text-main); cursor: pointer;
-            display: flex; align-items: center; justify-content: center; flex-shrink: 0;
-            transition: transform 0.2s;
-        }
-        .search-fab-btn:hover { transform: scale(1.05); }
-        .search-fab-input {
-            width: 100%; border: none; background: transparent; color: var(--text-main);
-            font-size: 15px; padding: 0 16px 0 8px; outline: none; opacity: 0; pointer-events: none;
-            transition: opacity 0.3s var(--bezier); font-family: 'Outfit', sans-serif;
-        }
-        .search-fab-wrapper.expanded .search-fab-input { opacity: 1; pointer-events: auto; }
-
         /* VISTAS (WORKSPACE / DASHBOARD) */
         .workspace-view { display: none; flex-direction: column; flex: 1; overflow: hidden; }
         .workspace-view.active-view { display: flex; animation: fadeIn 0.4s var(--bezier); }
 
         .dashboard-grid {
-            display: grid; 
-            grid-template-columns: 1fr;
-            gap: 16px; padding: 24px 0; overflow-y: auto; flex: 1;
-            max-width: 900px; margin: 0 auto; width: 100%;
-        }
-        @media (min-width: 768px) {
-            .dashboard-grid { grid-template-columns: repeat(auto-fill, minmax(320px, 1fr)); }
+            display: grid; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+            gap: 20px; padding: 24px 0; overflow-y: auto; flex: 1;
         }
 
         .project-card {
-            background: var(--surface); border: 1px solid var(--glass-border);
-            border-radius: 20px; padding: 20px; display: flex; flex-direction: column; gap: 12px;
+            background: var(--surface-card); border: 1px solid var(--glass-border);
+            border-radius: 20px; padding: 24px; display: flex; flex-direction: column; gap: 16px;
             cursor: pointer; transition: all 0.3s var(--bezier);
         }
-        .project-card:hover { transform: translateY(-4px); border-color: rgba(255,255,255,0.2); box-shadow: 0 12px 30px rgba(0,0,0,0.4); background: var(--surface-hover); }
+        .project-card:hover { transform: translateY(-6px); border-color: rgba(255,255,255,0.2); box-shadow: 0 12px 30px rgba(0,0,0,0.4); }
         .project-card-header { display: flex; align-items: center; justify-content: space-between; }
-        .project-card-title { font-size: 16px; font-weight: 500; display: flex; align-items: center; gap: 10px; }
-        .project-card-actions { display: flex; gap: 4px; opacity: 0; transition: opacity 0.2s var(--bezier); }
+        .project-card-title { font-size: 18px; font-weight: 600; display: flex; align-items: center; gap: 10px; }
+        .project-card-actions { display: flex; gap: 6px; opacity: 0; transition: opacity 0.2s var(--bezier); }
         .project-card:hover .project-card-actions { opacity: 1; }
-        @media (max-width: 768px) { .project-card-actions { opacity: 1; } }
 
         .tabs-row {
             display: flex; align-items: center; justify-content: space-between;
             border-bottom: 1px solid var(--glass-border); padding: 12px 0; flex-shrink: 0; gap: 12px;
         }
-        
-        .folders-scroll-area {
-            display: flex; gap: 10px; overflow-x: auto; flex: 1; padding-bottom: 4px;
-            scrollbar-width: none; -webkit-overflow-scrolling: touch;
-        }
-        .folders-scroll-area::-webkit-scrollbar { display: none; }
+        .folders-scroll-area { display: flex; gap: 10px; overflow-x: auto; flex: 1; padding-bottom: 4px; }
         
         .pill {
             background: var(--surface); border: 1px solid var(--glass-border); color: var(--text-muted);
             padding: 8px 16px; border-radius: 100px; font-size: 13px; font-weight: 500;
             white-space: nowrap; cursor: pointer; display: flex; align-items: center; gap: 8px;
             transition: all 0.2s var(--bezier);
-            max-width: 180px; overflow: hidden; text-overflow: ellipsis;
         }
-        .pill-text { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
         .pill:hover { background: var(--surface-hover); color: var(--text-main); }
         .pill.active { background: var(--text-main); color: var(--bg); border-color: var(--text-main); }
-        .pill i { flex-shrink: 0; }
-        
         .pill .close-tab-btn {
             display: inline-flex; align-items: center; justify-content: center;
-            width: 18px; height: 18px; border-radius: 50%; margin-left: 4px; opacity: 0.6; transition: all 0.2s;
-            flex-shrink: 0;
+            width: 18px; height: 18px; border-radius: 50%; margin-left: 8px; opacity: 0.6; transition: all 0.2s;
         }
         .pill .close-tab-btn:hover { background: rgba(255,255,255,0.2); opacity: 1; }
         .pill.active .close-tab-btn:hover { background: rgba(0,0,0,0.15); }
 
         /* TABLERO KANBAN */
-        .main-content { display: flex; gap: 16px; overflow-x: auto; padding: 20px 0 80px 0; flex: 1; align-items: flex-start;}
+        .main-content { display: flex; gap: 20px; overflow-x: auto; padding: 20px 0 24px 0; flex: 1; align-items: flex-start;}
         
         .kanban-column {
             background: var(--glass); backdrop-filter: blur(var(--blur-val));
-            border: 1px solid var(--glass-border); border-radius: 16px;
-            display: flex; flex-direction: column; width: 320px; min-width: 320px;
-            max-height: 100%; transition: border-color 0.2s var(--bezier);
+            border: 1px solid var(--glass-border); border-radius: 20px;
+            display: flex; flex-direction: column; width: 340px; min-width: 340px;
+            max-height: 100%; transition: all 0.2s var(--bezier);
         }
-        .kanban-column.drag-over { background: rgba(255,255,255,0.03); border-color: rgba(255,255,255,0.2); }
+        .kanban-column.drag-over { background: rgba(255,255,255,0.05); border-color: rgba(255,255,255,0.2); }
         .kanban-column.column-dragging { opacity: 0.4; transform: scale(0.98); }
 
+        /* HANDLE DE ARRASTRE DE FASE */
         .column-header {
-            padding: 16px; display: flex; align-items: center; justify-content: space-between;
-            border-bottom: 1px solid var(--glass-border); cursor: grab; background: rgba(255,255,255,0.01);
-            border-radius: 16px 16px 0 0;
+            padding: 16px 20px; display: flex; align-items: center; justify-content: space-between;
+            border-bottom: 1px solid var(--glass-border); cursor: grab; background: rgba(255,255,255,0.02);
+            border-radius: 20px 20px 0 0;
         }
         .column-header:active { cursor: grabbing; }
-        .column-title { font-size: 14px; font-weight: 500; display: flex; align-items: center; gap: 8px; pointer-events: none;}
-        .column-actions { display: flex; gap: 4px; }
+        .column-title { font-size: 15px; font-weight: 600; display: flex; align-items: center; gap: 10px; pointer-events: none;}
+        .column-actions { display: flex; gap: 6px; }
 
-        .column-body { padding: 12px; display: flex; flex-direction: column; gap: 10px; overflow-y: auto; flex: 1; min-height: 150px; }
+        .column-body { padding: 16px; display: flex; flex-direction: column; gap: 12px; overflow-y: auto; flex: 1; min-height: 200px; }
 
         /* TARJETAS */
         .task-card {
-            background: var(--surface); border: 1px solid var(--glass-border);
-            border-radius: 12px; padding: 14px; display: flex; flex-direction: column; gap: 10px;
+            background: var(--surface-card); border: 1px solid var(--glass-border);
+            border-radius: 16px; padding: 16px; display: flex; flex-direction: column; gap: 12px;
             cursor: grab; transition: transform 0.2s var(--bezier), border-color 0.2s, box-shadow 0.2s;
             animation: fadeIn 0.3s var(--bezier) forwards; position: relative;
         }
-        .task-card:hover { border-color: rgba(255,255,255,0.15); box-shadow: 0 4px 15px rgba(0,0,0,0.3); background: var(--surface-hover); }
+        .task-card:hover { border-color: rgba(255,255,255,0.15); box-shadow: 0 8px 20px rgba(0,0,0,0.3); }
         .task-card:active { cursor: grabbing; }
-        .task-card.dragging { opacity: 0.5; transform: scale(0.95); box-shadow: none; border-color: var(--accent-blue); z-index: 10; }
+        .task-card.dragging { opacity: 0.5; transform: scale(0.95); box-shadow: none; }
         
-        .task-card-img-preview { width: 100%; height: 140px; object-fit: cover; border-radius: 8px; }
-        .task-title { font-size: 14px; font-weight: 500; line-height: 1.4; }
-        .task-subtitle { font-size: 12px; color: var(--text-muted); }
-        .task-custom-text { font-size: 12px; color: var(--text-muted); padding: 6px 10px; background: var(--surface-active); border-radius: 8px; border: 1px solid var(--glass-border); margin-top: 2px; }
+        .task-card-img-preview { width: 100%; height: 120px; object-fit: cover; border-radius: 10px; }
+        .task-title { font-size: 15px; font-weight: 600; line-height: 1.4; }
+        .task-subtitle { font-size: 13px; color: var(--text-muted); }
         
         .task-tags-row { display: flex; flex-wrap: wrap; gap: 6px; }
         .mini-tag {
-            font-size: 10px; font-weight: 500; padding: 4px 8px;
-            border-radius: 4px; background: var(--surface-active); color: var(--text-muted);
+            font-size: 11px; font-weight: 500; padding: 4px 8px;
+            border-radius: 6px; background: var(--surface-active); color: var(--text-muted);
         }
         
         .task-footer {
             display: flex; align-items: center; justify-content: space-between;
-            font-size: 11px; border-top: 1px solid rgba(255,255,255,0.05); padding-top: 10px; gap: 6px; flex-wrap: wrap;
+            font-size: 12px; border-top: 1px solid rgba(255,255,255,0.05); padding-top: 10px;
         }
         
-        .custom-field-badge { display: flex; align-items: center; gap: 4px; color: var(--text-muted); }
-
-        /* SWITCH PREMIUM TOGGLE */
-        .premium-switch-label {
-            display: flex; align-items: center; justify-content: space-between;
-            background: var(--bg); border: 1px solid var(--glass-border);
-            padding: 12px 16px; border-radius: 12px; cursor: pointer; transition: background 0.2s;
-        }
-        .premium-switch-label:hover { background: var(--surface-hover); }
-        .premium-switch { display: none; }
-        .premium-switch-slider {
-            width: 40px; height: 22px; background: var(--surface-active);
-            border-radius: 100px; position: relative; transition: background 0.3s var(--bezier);
-            border: 1px solid var(--glass-border); flex-shrink: 0;
-        }
-        .premium-switch-slider::before {
-            content: ''; position: absolute; width: 16px; height: 16px; border-radius: 50%;
-            background: var(--text-main); top: 2px; left: 2px; transition: transform 0.3s var(--spring);
-        }
-        .premium-switch:checked + .premium-switch-slider { background: var(--accent-success); }
-        .premium-switch:checked + .premium-switch-slider::before { transform: translateX(18px); }
+        .custom-field-badge { display: flex; align-items: center; gap: 6px; color: var(--text-muted); }
 
         /* MODALES */
         .modal-overlay {
             position: fixed; top: 0; left: 0; width: 100vw; height: 100vh;
-            background: rgba(0,0,0,0.7); backdrop-filter: blur(10px);
+            background: rgba(0,0,0,0.7); backdrop-filter: blur(15px);
             z-index: 100; display: flex; align-items: center; justify-content: center;
             opacity: 0; pointer-events: none; transition: opacity 0.3s var(--bezier);
         }
         .modal-overlay.active { opacity: 1; pointer-events: auto; }
         .modal-sheet {
-            background: var(--surface); border: 1px solid var(--glass-border);
-            border-radius: 24px; width: calc(100% - 32px); max-width: 540px; max-height: 90vh; overflow-y: auto;
-            padding: 24px; box-shadow: 0 30px 60px rgba(0,0,0,0.9);
-            transform: translateX(40px) scale(0.98); transition: transform 0.4s var(--bezier);
+            background: var(--surface-card); border: 1px solid var(--glass-border);
+            border-radius: 24px; width: calc(100% - 32px); max-width: 580px; max-height: 90vh; overflow-y: auto;
+            padding: 28px; box-shadow: 0 30px 60px rgba(0,0,0,0.9);
+            transform: translateY(20px) scale(0.98); transition: transform 0.3s var(--bezier);
         }
-        @media (max-width: 768px) {
-            .modal-sheet { transform: translateY(40px) scale(0.98); align-self: flex-end; border-radius: 24px 24px 0 0; margin-bottom: 0; width: 100%; max-height: 85vh;}
-            .modal-overlay.active .modal-sheet { transform: translateY(0) scale(1); }
-        }
-        @media (min-width: 769px) {
-            .modal-overlay.active .modal-sheet { transform: translateX(0) scale(1); }
-        }
-        
+        .modal-overlay.active .modal-sheet { transform: translateY(0) scale(1); }
         .modal-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 24px; }
-        .modal-title { font-size: 18px; font-weight: 500; }
+        .modal-title { font-size: 20px; font-weight: 600; }
+
+        /* MODAL BETA ESPECÍFICO */
+        .center-modal { align-items: center; padding: 20px; }
+        .center-modal .modal-sheet { border-radius: 24px; transform: scale(0.9) translateY(0); opacity: 0; transition: all 0.3s var(--bezier); }
+        .modal-overlay.active.center-modal .modal-sheet { transform: scale(1) translateY(0); opacity: 1; }
 
         .form-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
-        @media (max-width: 600px) { .form-grid { grid-template-columns: 1fr; } }
-        
-        .form-group { display: flex; flex-direction: column; gap: 8px; margin-bottom: 8px; }
-        .form-group.full-width { grid-column: 1 / -1; }
-        .form-label { font-size: 11px; font-weight: 500; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.5px; }
+        .form-group { display: flex; flex-direction: column; gap: 8px; margin-bottom: 16px; }
+        .form-group.full-width { grid-column: span 2; }
+        .form-label { font-size: 12px; font-weight: 600; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.5px; }
         .form-input, .form-textarea, .form-select {
-            background: var(--bg); border: 1px solid var(--glass-border); color: var(--text-main);
+            background: var(--surface); border: 1px solid var(--glass-border); color: var(--text-main);
             padding: 12px 16px; border-radius: 12px; font-size: 14px; outline: none; transition: all 0.2s;
         }
-        .form-input:focus, .form-textarea:focus, .form-select:focus { border-color: rgba(255,255,255,0.3); background: #161618; }
+        .form-input:focus, .form-textarea:focus, .form-select:focus { border-color: rgba(255,255,255,0.3); background: #1a1a20; }
         .form-textarea { resize: vertical; height: 90px; }
 
         .modal-footer-btns { display: flex; justify-content: flex-end; gap: 12px; margin-top: 24px; }
-        .btn { padding: 12px 20px; border-radius: 12px; font-size: 14px; font-weight: 500; cursor: pointer; border: none; transition: all 0.2s var(--spring); display: flex; align-items: center; justify-content: center; gap: 8px;}
+        .btn { padding: 12px 20px; border-radius: 12px; font-size: 14px; font-weight: 600; cursor: pointer; border: none; transition: all 0.2s; }
         .btn-muted { background: transparent; color: var(--text-muted); }
         .btn-muted:hover { color: var(--text-main); background: rgba(255,255,255,0.05); }
         .btn-primary { background: var(--text-main); color: var(--bg); }
         .btn-primary:hover { transform: translateY(-2px); box-shadow: 0 6px 16px rgba(255,255,255,0.2); }
-        .btn-danger { background: rgba(255, 69, 58, 0.1); color: var(--accent-danger); }
+        .btn-danger { background: rgba(239, 68, 68, 0.1); color: var(--accent-danger); }
         .btn-danger:hover { background: var(--accent-danger); color: #FFF; }
 
         .task-btn {
             background: transparent; border: none; color: var(--text-muted); cursor: pointer;
             width: 32px; height: 32px; border-radius: 8px; display: flex; align-items: center; justify-content: center;
-            transition: all 0.2s; flex-shrink: 0;
+            transition: all 0.2s;
         }
         .task-btn:hover { background: rgba(255,255,255,0.1); color: var(--text-main); }
-        .task-btn.delete:hover { color: var(--accent-danger); background: rgba(255, 69, 58, 0.15); }
+        .task-btn.delete:hover { color: var(--accent-danger); background: rgba(239, 68, 68, 0.15); }
 
         /* SISTEMA DE TOASTS */
         #toast-container {
-            position: fixed; bottom: max(30px, env(safe-area-inset-bottom)); right: 24px; display: flex; flex-direction: column; gap: 10px;
+            position: fixed; bottom: 30px; right: 30px; display: flex; flex-direction: column; gap: 10px;
             z-index: 9999; pointer-events: none;
         }
-        @media (max-width: 768px) {
-            #toast-container { right: 50%; transform: translateX(50%); bottom: 90px; width: max-content; }
-        }
         .toast {
-            background: var(--surface); border: 1px solid var(--glass-border); color: var(--text-main);
-            padding: 14px 20px; border-radius: 100px; font-size: 13px; font-weight: 500;
+            background: var(--surface-card); border: 1px solid var(--glass-border); color: #FFF;
+            padding: 14px 20px; border-radius: 14px; font-size: 14px; font-weight: 500;
             display: flex; align-items: center; gap: 12px; box-shadow: 0 10px 40px rgba(0,0,0,0.6);
             animation: slideUpFade 0.4s var(--bezier) forwards; pointer-events: auto;
         }
@@ -373,14 +306,21 @@
         <header>
             <div class="header-left">
                 <div class="app-icon-badge" onclick="navigateToDashboard()" title="Dashboard Principal">
-                    <i data-lucide="layers" style="color: var(--text-main); width: 20px;"></i>
+                    <i data-lucide="layout-dashboard" style="color: var(--text-main); width: 22px;"></i>
                 </div>
                 <div class="brand-title">
                     <span id="nav-location-text">Proyectos</span>
-                    <span class="counter-badge" id="global-task-counter">0</span>
+                    <span class="beta-badge-label">BETA</span>
+                    <span class="counter-badge" id="global-task-counter" style="margin-left: 8px;">0</span>
                 </div>
             </div>
             <div class="header-actions">
+                <div class="search-wrapper" id="search-container">
+                    <button class="icon-btn search-trigger-btn" onclick="toggleSearch()" title="Buscar">
+                        <i data-lucide="search" style="width: 18px;"></i>
+                    </button>
+                    <input type="text" class="search-input" id="search-input" placeholder="Buscar tareas..." oninput="handleSearch(this.value)">
+                </div>
                 <button class="icon-btn" id="btn-undo" onclick="undo()" title="Deshacer (Ctrl+Z)" disabled>
                     <i data-lucide="undo-2" style="width: 18px;"></i>
                 </button>
@@ -411,30 +351,37 @@
             <div class="tabs-row">
                 <div class="folders-scroll-area" id="tabs-pills-container"></div>
                 <button class="pill" onclick="openModal('modal-phase')" style="border-style: dashed; flex-shrink:0;">
-                    <i data-lucide="plus" style="width:14px;"></i> <span class="pill-text">Nueva Fase</span>
+                    <i data-lucide="plus" style="width:14px;"></i> Nueva Fase
                 </button>
             </div>
             <main class="main-content" id="board-columns-container"></main>
         </div>
     </div>
 
-    <div class="search-fab-wrapper" id="search-fab-container">
-        <button class="search-fab-btn" onclick="toggleSearch()" id="search-fab-icon">
-            <i data-lucide="search" style="width: 20px;"></i>
-        </button>
-        <input type="text" class="search-fab-input" id="search-input" placeholder="Buscar..." oninput="handleSearch(this.value)">
-    </div>
-
     <div id="toast-container"></div>
+
+    <div class="modal-overlay center-modal" id="modal-beta" role="dialog" aria-modal="true">
+        <div class="modal-sheet" style="max-width: 380px; text-align: center; padding: 32px 24px;">
+            <div style="background: rgba(255,255,255,0.03); border: 1px solid var(--glass-border); width: 56px; height: 56px; border-radius: 18px; display: flex; align-items: center; justify-content: center; margin: 0 auto 20px;">
+                <i data-lucide="rocket" style="color: var(--accent-blue); width: 26px; height: 26px;"></i>
+            </div>
+            <div class="modal-title" style="margin-bottom: 8px; font-size: 0.85rem; letter-spacing: 3px; text-transform: uppercase;">Fase Beta Temprana</div>
+            <p style="font-size: 0.88rem; line-height: 1.5; color: var(--text-muted); margin-bottom: 24px;">
+               La app <strong>Neo-Kanban Pro v3.2</strong> se encuentra en fase de desarrollo y puede presentar errores o inconsistencias al personalizar esquemas.<br><br>
+               Explora la personalización total de campos y dinos qué opinas.
+            </p>
+            <button class="btn btn-primary" style="width: 100%;" onclick="acceptBeta()">Entendido, Acceder</button>
+        </div>
+    </div>
 
     <div class="modal-overlay" id="modal-project" onclick="closeModalOnOverlay(event, 'modal-project')">
         <div class="modal-sheet">
             <div class="modal-header">
                 <div class="modal-title" id="project-modal-title">Nuevo Proyecto</div>
-                <button class="task-btn" onclick="closeActiveModal('modal-project')"><i data-lucide="x"></i></button>
+                <button class="task-btn" onclick="triggerAutoSave('modal-project')"><i data-lucide="x"></i></button>
             </div>
             <input type="hidden" id="edit-project-id">
-            <div class="form-group full-width">
+            <div class="form-group">
                 <label class="form-label">Nombre del Proyecto</label>
                 <input type="text" id="project-name-input" class="form-input" placeholder="Ej. Alpha Build">
             </div>
@@ -448,7 +395,7 @@
         <div class="modal-sheet">
             <div class="modal-header">
                 <div class="modal-title" id="phase-modal-title">Fase / Columna</div>
-                <button class="task-btn" onclick="closeActiveModal('modal-phase')"><i data-lucide="x"></i></button>
+                <button class="task-btn" onclick="triggerAutoSave('modal-phase')"><i data-lucide="x"></i></button>
             </div>
             <input type="hidden" id="edit-phase-id">
             <div class="form-grid">
@@ -458,12 +405,7 @@
                 </div>
                 <div class="form-group">
                     <label class="form-label">Icono (Lucide)</label>
-                    <div style="display:flex; gap:8px;">
-                        <input type="text" id="phase-icon-input" class="form-input" value="circle" style="flex:1;" oninput="updateIconPreview()">
-                        <div id="icon-preview-box" style="width:46px; height:46px; border-radius:12px; border:1px solid var(--glass-border); display:flex; align-items:center; justify-content:center; background:var(--bg);">
-                            <i data-lucide="circle" id="icon-preview-el"></i>
-                        </div>
-                    </div>
+                    <input type="text" id="phase-icon-input" class="form-input" value="circle">
                 </div>
                 <div class="form-group">
                     <label class="form-label">Color</label>
@@ -485,10 +427,10 @@
     </div>
 
     <div class="modal-overlay" id="modal-task" onclick="closeModalOnOverlay(event, 'modal-task')">
-        <div class="modal-sheet">
+        <div class="modal-sheet" style="max-width: 680px;">
             <div class="modal-header">
                 <div class="modal-title">Detalles de Tarea</div>
-                <button class="task-btn" onclick="closeActiveModal('modal-task')"><i data-lucide="x"></i></button>
+                <button class="task-btn" onclick="triggerAutoSave('modal-task')"><i data-lucide="x"></i></button>
             </div>
             <input type="hidden" id="task-target-column">
             <input type="hidden" id="task-target-id">
@@ -516,19 +458,23 @@
     <div class="modal-overlay" id="modal-config" onclick="closeModalOnOverlay(event, 'modal-config')">
         <div class="modal-sheet">
             <div class="modal-header">
-                <div class="modal-title">Esquema del Proyecto</div>
-                <button class="task-btn" onclick="closeActiveModal('modal-config')"><i data-lucide="x"></i></button>
+                <div class="modal-title">Esquema del Proyecto (Personalización)</div>
+                <button class="task-btn" onclick="triggerAutoSave('modal-config')"><i data-lucide="x"></i></button>
             </div>
             
+            <p style="font-size:13px; color:var(--text-muted); margin-bottom: 20px;">
+                Configura los campos personalizados que tendrán todas las tareas de este proyecto. Tienes control total. (Ej: Prioridad, Imagen, Etiquetas, Presupuesto).
+            </p>
+
             <div id="config-schema-list" style="display:flex; flex-direction:column; gap:10px; margin-bottom:20px;"></div>
             
-            <div style="background:var(--bg); padding:16px; border-radius:16px; border:1px solid var(--glass-border);">
-                <h4 style="font-size:11px; text-transform:uppercase; color:var(--text-muted); margin-bottom:12px; font-weight:500;">Añadir Nuevo Campo</h4>
+            <div style="background:var(--surface); padding:16px; border-radius:12px; border:1px solid var(--glass-border);">
+                <h4 style="font-size:12px; text-transform:uppercase; color:var(--text-muted); margin-bottom:12px;">Añadir Nuevo Campo</h4>
                 <div class="form-grid" style="gap:10px;">
-                    <div class="form-group full-width" style="margin:0;">
+                    <div class="form-group" style="margin:0;">
                         <input type="text" id="new-schema-label" class="form-input" placeholder="Nombre (Ej: Horas)">
                     </div>
-                    <div class="form-group full-width" style="margin:0;">
+                    <div class="form-group" style="margin:0;">
                         <select id="new-schema-type" class="form-select">
                             <option value="text">Texto Corto</option>
                             <option value="textarea">Texto Largo</option>
@@ -536,24 +482,25 @@
                             <option value="image">URL Imagen (Portada)</option>
                             <option value="priority">Prioridad Visual</option>
                             <option value="user">Usuario (Badge)</option>
-                            <option value="boolean">Sí / No (Toggle Switch)</option>
                         </select>
                     </div>
                 </div>
-                <button class="btn btn-surface" style="margin-top:12px; width:100%; border: 1px solid var(--glass-border); background:var(--surface-hover); color:var(--text-main);" onclick="addSchemaField()">
-                    <i data-lucide="plus" style="width:16px;"></i> Añadir Campo
-                </button>
+                <button class="btn btn-primary" style="margin-top:10px; width:100%;" onclick="addSchemaField()">Añadir al Esquema</button>
             </div>
 
             <div class="modal-footer-btns">
-                <button class="btn btn-primary" onclick="closeActiveModal('modal-config')">Cerrar</button>
+                <button class="btn btn-primary" onclick="saveDashboardConfig()">Listo</button>
             </div>
         </div>
     </div>
 
     <script>
         // --- DATA STATE & CORE ---
-        let appData = { proyectos: {}, proyectoActivo: "", openTabs: [] };
+        let appData = {
+            proyectos: {},
+            proyectoActivo: "", 
+            openTabs: []
+        };
 
         const baseSchemaTemplate = [
             { id: "f_desc", label: "Descripción", type: "textarea", showInCard: false },
@@ -568,10 +515,8 @@
         const MAX_HISTORY = 30;
         let searchQuery = "";
         let activeModalsStack = [];
-        const DATA_KEY = "neo_kanban_pro_master_v4";
+        const DATA_KEY = "neo_kanban_pro_master_v3_2";
         let draggedColumnId = null; 
-        let draggedTaskId = null;
-        let historySavedOnDrag = false;
 
         // --- SISTEMA TOAST ---
         function showToast(message, type = "info") {
@@ -586,7 +531,7 @@
             if(type === 'warning') { icon = 'alert-circle'; color = 'var(--accent-warning)'; }
             
             toast.style.borderLeft = `4px solid ${color}`;
-            toast.innerHTML = `<i data-lucide="${icon}" style="color:${color}; width:16px;"></i> <span>${escapeHTML(message)}</span>`;
+            toast.innerHTML = `<i data-lucide="${icon}" style="color:${color}; width:18px;"></i> <span>${escapeHTML(message)}</span>`;
             
             container.appendChild(toast);
             lucide.createIcons();
@@ -603,15 +548,6 @@
             undoStack.push(JSON.stringify(appData));
             redoStack = [];
             updateUndoRedoButtons();
-            
-            sessionStorage.setItem(`${DATA_KEY}_undo`, JSON.stringify(undoStack));
-        }
-
-        function restoreHistoryStacks() {
-            const savedUndo = sessionStorage.getItem(`${DATA_KEY}_undo`);
-            if (savedUndo) {
-                try { undoStack = JSON.parse(savedUndo); updateUndoRedoButtons(); } catch(e){}
-            }
         }
 
         function undo() {
@@ -619,8 +555,9 @@
             redoStack.push(JSON.stringify(appData));
             appData = JSON.parse(undoStack.pop());
             updateUndoRedoButtons();
-            sessionStorage.setItem(`${DATA_KEY}_undo`, JSON.stringify(undoStack));
-            saveDataDirect(); renderApp(); showToast("Acción deshecha", "warning");
+            saveDataDirect();
+            renderApp();
+            showToast("Acción deshecha", "warning");
         }
 
         function redo() {
@@ -628,8 +565,9 @@
             undoStack.push(JSON.stringify(appData));
             appData = JSON.parse(redoStack.pop());
             updateUndoRedoButtons();
-            sessionStorage.setItem(`${DATA_KEY}_undo`, JSON.stringify(undoStack));
-            saveDataDirect(); renderApp(); showToast("Acción rehecha", "success");
+            saveDataDirect();
+            renderApp();
+            showToast("Acción rehecha", "success");
         }
 
         function updateUndoRedoButtons() {
@@ -640,11 +578,19 @@
         // --- INIT & PERSISTENCE ---
         window.onload = () => {
             loadData();
-            restoreHistoryStacks();
             setupKeyboardShortcuts();
             renderApp();
-            lucide.createIcons();
+
+            // Lógica Aviso Beta
+            if (!localStorage.getItem('neo_kanban_beta_accepted')) {
+                openModal('modal-beta');
+            }
         };
+
+        function acceptBeta() {
+            localStorage.setItem('neo_kanban_beta_accepted', 'true');
+            closeActiveModal('modal-beta');
+        }
 
         function loadData() {
             const raw = localStorage.getItem(DATA_KEY);
@@ -683,10 +629,9 @@
 
         function saveDataDirect() {
             localStorage.setItem(DATA_KEY, JSON.stringify(appData));
-            updateCountersAnim();
         }
 
-        // --- KEYBOARD SHORTCUTS ---
+        // --- KEYBOARD SHORTCUTS & AUTO-SAVE ---
         function setupKeyboardShortcuts() {
             window.addEventListener('keydown', (e) => {
                 if (e.key.toLowerCase() === 'z' && (e.ctrlKey || e.metaKey) && !e.shiftKey) {
@@ -697,24 +642,26 @@
                     e.preventDefault(); redo();
                 }
                 if (e.key === 'Escape') {
-                    if (activeModalsStack.length > 0) {
+                    if (activeModalsStack.length > 0 && activeModalsStack[activeModalsStack.length - 1] !== 'modal-beta') {
                         e.preventDefault();
-                        closeActiveModal(activeModalsStack[activeModalsStack.length - 1]);
-                    } else if (searchQuery) {
-                        e.preventDefault();
-                        closeSearch();
+                        triggerAutoSave(activeModalsStack[activeModalsStack.length - 1]);
                     }
                 }
-                if (e.key === 'Enter' && e.target.tagName !== 'TEXTAREA' && e.target.tagName !== 'BUTTON') {
-                    if (activeModalsStack.length > 0) {
+                if (e.key === 'Enter' && e.target.tagName !== 'TEXTAREA') {
+                    if (activeModalsStack.length > 0 && activeModalsStack[activeModalsStack.length - 1] !== 'modal-beta') {
                         e.preventDefault();
-                        const topModal = activeModalsStack[activeModalsStack.length - 1];
-                        if (topModal === 'modal-task') saveTask();
-                        else if (topModal === 'modal-project') saveProject();
-                        else if (topModal === 'modal-phase') savePhase();
+                        triggerAutoSave(activeModalsStack[activeModalsStack.length - 1]);
                     }
                 }
             });
+        }
+
+        function triggerAutoSave(modalId) {
+            if(modalId === 'modal-task') saveTask();
+            else if(modalId === 'modal-project') saveProject();
+            else if(modalId === 'modal-phase') savePhase();
+            else if(modalId === 'modal-config') saveDashboardConfig();
+            else closeActiveModal(modalId);
         }
 
         // --- NAVEGACIÓN ---
@@ -763,7 +710,7 @@
                 renderBoardWorkspace();
             }
             
-            updateCountersAnim();
+            updateCounters();
             lucide.createIcons();
         }
 
@@ -772,25 +719,22 @@
             grid.innerHTML = '';
             Object.keys(appData.proyectos).forEach(id => {
                 const proj = appData.proyectos[id];
-                
-                if (searchQuery && !proj.nombre.toLowerCase().includes(searchQuery.toLowerCase())) return;
-
                 const card = document.createElement('div');
                 card.className = 'project-card';
                 card.onclick = () => selectProject(id);
                 card.innerHTML = `
                     <div class="project-card-header">
                         <div class="project-card-title">
-                            <i data-lucide="folder" style="color:var(--accent-blue); width:18px;"></i> ${escapeHTML(proj.nombre)}
+                            <i data-lucide="folder" style="color:var(--accent-blue);"></i> ${escapeHTML(proj.nombre)}
                         </div>
                         <div class="project-card-actions" onclick="event.stopPropagation();">
-                            <button class="task-btn" onclick="openEditProject('${id}')" title="Editar"><i data-lucide="edit-3" style="width:14px;"></i></button>
-                            <button class="task-btn delete" onclick="deleteProject('${id}')" title="Eliminar"><i data-lucide="trash-2" style="width:14px;"></i></button>
+                            <button class="task-btn" onclick="openEditProject('${id}')" title="Editar"><i data-lucide="edit-3"></i></button>
+                            <button class="task-btn delete" onclick="deleteProject('${id}')"><i data-lucide="trash-2"></i></button>
                         </div>
                     </div>
-                    <div style="font-size:12px; color:var(--text-muted); display:flex; gap:16px;">
-                        <span>Fases: <b style="color:var(--text-main)">${proj.columnas.length}</b></span>
-                        <span>Tareas: <b style="color:var(--text-main)">${proj.tareas.length}</b></span>
+                    <div style="font-size:13px; color:var(--text-muted); display:flex; gap:12px;">
+                        <span>Fases: <b>${proj.columnas.length}</b></span>
+                        <span>Tareas: <b>${proj.tareas.length}</b></span>
                     </div>
                 `;
                 grid.appendChild(card);
@@ -806,7 +750,7 @@
                 const pill = document.createElement('div');
                 pill.className = `pill ${id === appData.proyectoActivo ? 'active' : ''}`;
                 pill.innerHTML = `
-                    <i data-lucide="folder" style="width:14px;"></i> <span class="pill-text">${escapeHTML(proj.nombre)}</span>
+                    <i data-lucide="folder" style="width:14px;"></i> ${escapeHTML(proj.nombre)}
                     <span class="close-tab-btn" onclick="closeTab('${id}', event)"><i data-lucide="x" style="width:12px;"></i></span>
                 `;
                 pill.onclick = () => selectProject(id);
@@ -825,16 +769,27 @@
                 columnEl.className = 'kanban-column';
                 columnEl.id = `col-${col.id}`;
 
+                columnEl.addEventListener('dragenter', (e) => {
+                    if (!draggedColumnId) columnEl.classList.add('drag-over');
+                });
+                columnEl.addEventListener('dragleave', () => columnEl.classList.remove('drag-over'));
+                columnEl.addEventListener('dragover', (e) => e.preventDefault());
+                columnEl.addEventListener('drop', (e) => {
+                    columnEl.classList.remove('drag-over');
+                    if(draggedColumnId) return; 
+                    const taskId = e.dataTransfer.getData('text/task-id');
+                    if (taskId) handleDropTaskOnColumn(taskId, col.id);
+                });
+
                 columnEl.innerHTML = `
                     <div class="column-header" draggable="true" id="header-${col.id}">
                         <div class="column-title" style="color: ${col.color || 'var(--text-main)'}">
-                            <i data-lucide="${col.icon || 'circle'}" style="width:16px;"></i>
+                            <i data-lucide="${col.icon || 'circle'}" style="width:18px;"></i>
                             <span>${escapeHTML(col.titulo)}</span>
-                            <span style="font-size:10px; color:var(--text-muted); margin-left:4px;">${currentProj.tareas.filter(t => t.colId === col.id).length}</span>
                         </div>
                         <div class="column-actions" onclick="event.stopPropagation();">
-                            <button class="task-btn" onclick="openAddTaskModal('${col.id}')"><i data-lucide="plus" style="width:14px;"></i></button>
-                            <button class="task-btn" onclick="openEditPhase('${col.id}')"><i data-lucide="more-horizontal" style="width:14px;"></i></button>
+                            <button class="task-btn" onclick="openAddTaskModal('${col.id}')"><i data-lucide="plus"></i></button>
+                            <button class="task-btn" onclick="openEditPhase('${col.id}')"><i data-lucide="more-horizontal"></i></button>
                         </div>
                     </div>
                     <div class="column-body" id="body-col-${col.id}"></div>
@@ -844,12 +799,9 @@
 
                 const headerEl = columnEl.querySelector('.column-header');
                 headerEl.addEventListener('dragstart', (e) => {
-                    if(e.target !== headerEl) return;
                     draggedColumnId = col.id;
-                    historySavedOnDrag = false;
                     columnEl.classList.add('column-dragging');
                     e.dataTransfer.setData('text/column-id', col.id);
-                    e.dataTransfer.effectAllowed = 'move';
                 });
                 headerEl.addEventListener('dragend', () => {
                     columnEl.classList.remove('column-dragging');
@@ -859,33 +811,6 @@
                     e.preventDefault();
                     if (draggedColumnId && draggedColumnId !== col.id) {
                         reorderColumns(draggedColumnId, col.id);
-                    }
-                });
-
-                columnEl.addEventListener('dragover', (e) => {
-                    e.preventDefault();
-                    if (draggedColumnId) return; 
-                    
-                    const draggingCard = document.querySelector('.dragging');
-                    if (!draggingCard) return;
-
-                    const body = columnEl.querySelector('.column-body');
-                    const afterElement = getDragAfterElement(body, e.clientY);
-                    
-                    if (afterElement == null) {
-                        body.appendChild(draggingCard);
-                    } else {
-                        body.insertBefore(draggingCard, afterElement);
-                    }
-                    columnEl.classList.add('drag-over');
-                });
-                columnEl.addEventListener('dragleave', () => columnEl.classList.remove('drag-over'));
-                columnEl.addEventListener('drop', (e) => {
-                    columnEl.classList.remove('drag-over');
-                    if(draggedColumnId) return; 
-                    const taskId = e.dataTransfer.getData('text/task-id');
-                    if (taskId) {
-                        handleTaskDropReorder(taskId, col.id);
                     }
                 });
 
@@ -899,43 +824,34 @@
                     const card = document.createElement('div');
                     card.className = 'task-card';
                     card.draggable = true;
-                    card.setAttribute('data-task-id', task.id);
                     
                     card.addEventListener('dragstart', (e) => {
                         e.stopPropagation();
                         card.classList.add('dragging');
                         e.dataTransfer.setData('text/task-id', task.id);
-                        draggedTaskId = task.id;
-                        historySavedOnDrag = false;
                     });
-                    card.addEventListener('dragend', () => {
-                        card.classList.remove('dragging');
-                        draggedTaskId = null;
-                    });
+                    card.addEventListener('dragend', () => card.classList.remove('dragging'));
                     card.onclick = () => openTaskDetailsModal(task.id);
 
-                    let imgHtml = '', tagsHtml = '', prioHtml = '', userHtml = '', textHtml = '', booleanHtml = '';
+                    let imgHtml = '', tagsHtml = '', prioHtml = '', userHtml = '';
                     
                     currentProj.schema.forEach(schemaField => {
-                        if (!schemaField.showInCard || !task.fields || task.fields[schemaField.id] === undefined) return;
+                        if (!schemaField.showInCard || !task.fields || !task.fields[schemaField.id]) return;
                         const val = task.fields[schemaField.id];
                         
-                        if (schemaField.type === 'image' && String(val).trim() !== '') {
-                            imgHtml = `<img src="${escapeHTML(val)}" class="task-card-img-preview" loading="lazy">`;
-                        } else if (schemaField.type === 'tags' && String(val).trim() !== '') {
-                            const validTags = String(val).split(',').map(t => t.trim()).filter(t => t.length > 0);
+                        if (schemaField.type === 'image') {
+                            imgHtml = `<img src="${escapeHTML(val)}" class="task-card-img-preview">`;
+                        } else if (schemaField.type === 'tags' && val.trim() !== '') {
+                            // Bugfix: Evita crear tags vacíos si hay espacios o comas sueltas
+                            const validTags = val.split(',').map(t => t.trim()).filter(t => t.length > 0);
                             if(validTags.length > 0) {
                                 tagsHtml = `<div class="task-tags-row">` + validTags.map(t => `<span class="mini-tag">${escapeHTML(t)}</span>`).join('') + `</div>`;
                             }
-                        } else if (schemaField.type === 'priority' && String(val).trim() !== '') {
-                            const p = String(val).toLowerCase();
-                            prioHtml = `<span class="mini-tag" style="background:rgba(255,255,255,0.05); color:var(--text-main); font-weight:600; text-transform:capitalize;">${escapeHTML(p)}</span>`;
-                        } else if (schemaField.type === 'user' && String(val).trim() !== '') {
+                        } else if (schemaField.type === 'priority') {
+                            const p = val.toLowerCase();
+                            prioHtml = `<span class="mini-tag" style="background:rgba(255,255,255,0.1); color:var(--text-main); font-weight:700; text-transform:uppercase; font-size:10px;">${escapeHTML(p)}</span>`;
+                        } else if (schemaField.type === 'user') {
                             userHtml = `<div class="custom-field-badge"><i data-lucide="user" style="width:12px;"></i> ${escapeHTML(val)}</div>`;
-                        } else if ((schemaField.type === 'text' || schemaField.type === 'textarea') && String(val).trim() !== '') {
-                            textHtml += `<div class="task-custom-text"><strong>${escapeHTML(schemaField.label)}:</strong> ${escapeHTML(val)}</div>`;
-                        } else if (schemaField.type === 'boolean' && (val === true || val === 'true')) {
-                            booleanHtml += `<span class="mini-tag" style="border: 1px solid var(--accent-success); color: var(--accent-success); background: rgba(52, 199, 89, 0.1); display: inline-flex; align-items: center; gap: 3px;"><i data-lucide="check" style="width:10px; height:10px;"></i>${escapeHTML(schemaField.label)}</span>`;
                         }
                     });
 
@@ -943,11 +859,9 @@
                         ${imgHtml}
                         <div class="task-title">${escapeHTML(task.titulo)}</div>
                         ${task.subtitulo ? `<div class="task-subtitle">${escapeHTML(task.subtitulo)}</div>` : ''}
-                        ${textHtml}
                         ${tagsHtml}
                         <div class="task-footer">
                             ${prioHtml}
-                            ${booleanHtml}
                             ${userHtml}
                         </div>
                     `;
@@ -957,108 +871,60 @@
         }
 
         // --- FÍSICAS D&D ---
-        function getDragAfterElement(container, y) {
-            const draggableElements = [...container.querySelectorAll('.task-card:not(.dragging)')];
-            return draggableElements.reduce((closest, child) => {
-                const box = child.getBoundingClientRect();
-                const offset = y - box.top - box.height / 2;
-                if (offset < 0 && offset > closest.offset) {
-                    return { offset: offset, element: child };
-                } else {
-                    return closest;
-                }
-            }, { offset: Number.NEGATIVE_INFINITY }).element;
-        }
-
-        function handleTaskDropReorder(taskId, targetColId) {
-            if (searchQuery) return; 
-            
-            if (!historySavedOnDrag) { saveHistoryState(); historySavedOnDrag = true; }
-            
+        function handleDropTaskOnColumn(taskId, targetColId) {
             const currentProj = appData.proyectos[appData.proyectoActivo];
-            const newTasksOrder = [];
-            const columns = document.querySelectorAll('.kanban-column');
-            
-            columns.forEach(colEl => {
-                const colId = colEl.id.replace('col-', '');
-                const cards = colEl.querySelectorAll('.task-card');
-                cards.forEach(card => {
-                    const tId = card.getAttribute('data-task-id');
-                    const taskObj = currentProj.tareas.find(t => t.id === tId);
-                    if (taskObj) {
-                        taskObj.colId = colId;
-                        newTasksOrder.push(taskObj);
-                    }
-                });
-            });
-            
-            const tasksInDOM = new Set(newTasksOrder.map(t => t.id));
-            const tasksNotInDOM = currentProj.tareas.filter(t => !tasksInDOM.has(t.id));
-            
-            currentProj.tareas = [...newTasksOrder, ...tasksNotInDOM];
-            saveDataDirect();
-            renderApp();
+            const task = currentProj.tareas.find(t => t.id === taskId);
+            if (task && task.colId !== targetColId) {
+                saveHistoryState();
+                task.colId = targetColId;
+                saveDataDirect();
+                renderBoardWorkspace();
+                updateCounters();
+                showToast("Tarea reubicada", "success");
+            }
         }
 
         function reorderColumns(draggedId, targetId) {
-            if (!historySavedOnDrag) { saveHistoryState(); historySavedOnDrag = true; }
             const currentProj = appData.proyectos[appData.proyectoActivo];
             const cols = currentProj.columnas;
             const draggedIndex = cols.findIndex(c => c.id === draggedId);
             const targetIndex = cols.findIndex(c => c.id === targetId);
             
             if (draggedIndex !== -1 && targetIndex !== -1) {
+                saveHistoryState();
                 const [removed] = cols.splice(draggedIndex, 1);
                 cols.splice(targetIndex, 0, removed);
                 saveDataDirect();
                 renderBoardWorkspace();
-                lucide.createIcons();
             }
         }
 
-        function updateCountersAnim() {
+        function updateCounters() {
             const badge = document.getElementById('global-task-counter');
-            let newVal = 0;
-            if (appData.proyectoActivo === "") newVal = Object.keys(appData.proyectos).length;
+            if (appData.proyectoActivo === "") badge.innerText = Object.keys(appData.proyectos).length;
             else {
                 const currentProj = appData.proyectos[appData.proyectoActivo];
-                newVal = currentProj ? currentProj.tareas.length : 0;
-            }
-            
-            if (badge.innerText != newVal) {
-                badge.innerText = newVal;
-                badge.classList.add('pulse');
-                setTimeout(() => badge.classList.remove('pulse'), 200);
+                badge.innerText = currentProj ? currentProj.tareas.length : 0;
             }
         }
 
-        // --- ENGINE MODALES (History API) ---
+        // --- ENGINE MODALES ---
         function openModal(modalId) {
             document.getElementById('main-view').classList.add('backgrounded');
             document.getElementById(modalId).classList.add('active');
             activeModalsStack.push(modalId);
-            window.history.pushState({ modalId: modalId }, "");
         }
 
         function closeActiveModal(modalId) {
-            if (activeModalsStack.includes(modalId)) {
-                window.history.back(); 
-            }
+            const index = activeModalsStack.indexOf(modalId);
+            if(index > -1) activeModalsStack.splice(index, 1);
+            document.getElementById(modalId).classList.remove('active');
+            if (activeModalsStack.length === 0) document.getElementById('main-view').classList.remove('backgrounded');
         }
 
-        function closeModalOnOverlay(event, modalId) {
-            if (event.target.id === modalId) closeActiveModal(modalId);
+        function closeModalOnOverlay(e, modalId) {
+            if (e.target.id === modalId) triggerAutoSave(modalId);
         }
-
-        window.addEventListener('popstate', () => {
-            if (activeModalsStack.length > 0) {
-                const topModalId = activeModalsStack.pop();
-                document.getElementById(topModalId).classList.remove('active');
-                if (activeModalsStack.length === 0) {
-                    document.getElementById('main-view').classList.remove('backgrounded');
-                }
-            }
-        });
 
         // --- CRUD PROYECTOS ---
         function openEditProject(id) {
@@ -1087,7 +953,7 @@
                     schema: JSON.parse(JSON.stringify(baseSchemaTemplate)),
                     columnas: [
                         { id: "col-todo", titulo: "Por hacer", icon: "circle", color: "var(--accent-blue)" },
-                        { id: "col-done", titulo: "Hecho", icon: "check-circle", color: "var(--accent-success)" }
+                        { id: "col-done", titulo: "Hecho", icon: "check-circle-2", color: "var(--accent-success)" }
                     ], tareas: []
                 };
                 appData.openTabs.push(newId);
@@ -1115,13 +981,6 @@
         }
 
         // --- CRUD FASES ---
-        function updateIconPreview() {
-            const val = document.getElementById('phase-icon-input').value.trim() || 'circle';
-            const box = document.getElementById('icon-preview-box');
-            box.innerHTML = `<i data-lucide="${val}"></i>`;
-            try { lucide.createIcons({root: box}); } catch(e){}
-        }
-
         function openEditPhase(phaseId) {
             const col = appData.proyectos[appData.proyectoActivo].columnas.find(c => c.id === phaseId);
             if (!col) return;
@@ -1131,7 +990,6 @@
             document.getElementById('phase-icon-input').value = col.icon || 'circle';
             document.getElementById('phase-color-input').value = col.color || 'var(--accent-blue)';
             document.getElementById('btn-delete-phase').style.display = 'block';
-            updateIconPreview();
             openModal('modal-phase');
         }
 
@@ -1217,44 +1075,30 @@
             const schema = appData.proyectos[appData.proyectoActivo].schema;
 
             schema.forEach(field => {
-                const val = fieldValues[field.id] !== undefined ? fieldValues[field.id] : '';
+                const val = fieldValues[field.id] || '';
                 const formGroup = document.createElement('div');
-                formGroup.className = field.type === 'textarea' || field.type === 'image' || field.type === 'tags' || field.type === 'boolean' ? 'form-group full-width' : 'form-group';
+                formGroup.className = field.type === 'textarea' || field.type === 'image' || field.type === 'tags' ? 'form-group full-width' : 'form-group';
                 
                 let inputHtml = '';
                 if(field.type === 'textarea') {
-                    inputHtml = `<textarea class="form-textarea dynamic-input" data-type="textarea" data-id="${field.id}">${escapeHTML(val)}</textarea>`;
+                    inputHtml = `<textarea class="form-textarea dynamic-input" data-id="${field.id}">${escapeHTML(val)}</textarea>`;
                 } else if (field.type === 'priority') {
-                    const currentVal = String(val).toLowerCase();
-                    const selected = (o) => currentVal === o ? 'selected' : '';
+                    const selected = (o) => val.toLowerCase() === o ? 'selected' : '';
                     inputHtml = `
-                        <select class="form-select dynamic-input" data-type="select" data-id="${field.id}" style="text-transform: capitalize;">
-                            <option value="baja" ${selected('baja')}>Baja</option>
-                            <option value="media" ${selected('media')}>Media</option>
-                            <option value="alta" ${selected('alta')}>Alta</option>
+                        <select class="form-select dynamic-input" data-id="${field.id}">
+                            <option value="Baja" ${selected('baja')}>Baja</option>
+                            <option value="Media" ${selected('media')}>Media</option>
+                            <option value="Alta" ${selected('alta')}>Alta</option>
                         </select>
                     `;
                 } else if(field.type === 'tags') {
-                     inputHtml = `<input type="text" class="form-input dynamic-input" data-type="text" data-id="${field.id}" value="${escapeHTML(val)}" placeholder="Ej: Diseño, UX, Urgente (Separado por comas)">`;
-                } else if(field.type === 'boolean') {
-                    const isChecked = (val === true || val === 'true') ? 'checked' : '';
-                    inputHtml = `
-                        <label class="premium-switch-label">
-                            <span style="font-size:14px; color:var(--text-main);">${escapeHTML(field.label)}</span>
-                            <input type="checkbox" class="premium-switch dynamic-input" data-type="boolean" data-id="${field.id}" ${isChecked}>
-                            <span class="premium-switch-slider"></span>
-                        </label>
-                    `;
+                     inputHtml = `<input type="text" class="form-input dynamic-input" data-id="${field.id}" value="${escapeHTML(val)}" placeholder="Ej: Diseño, UX, Urgente (Separado por comas)">`;
                 } else {
-                    inputHtml = `<input type="text" class="form-input dynamic-input" data-type="text" data-id="${field.id}" value="${escapeHTML(val)}">`;
+                    inputHtml = `<input type="text" class="form-input dynamic-input" data-id="${field.id}" value="${escapeHTML(val)}">`;
                 }
 
-                if (field.type === 'boolean') {
-                    container.appendChild(formGroup.appendChild(document.createRange().createContextualFragment(inputHtml)));
-                } else {
-                    formGroup.innerHTML = `<label class="form-label">${escapeHTML(field.label)}</label>${inputHtml}`;
-                    container.appendChild(formGroup);
-                }
+                formGroup.innerHTML = `<label class="form-label">${escapeHTML(field.label)}</label>${inputHtml}`;
+                container.appendChild(formGroup);
             });
         }
 
@@ -1269,13 +1113,7 @@
             
             let fieldsObj = {};
             document.querySelectorAll('.dynamic-input').forEach(input => {
-                const type = input.getAttribute('data-type');
-                const id = input.getAttribute('data-id');
-                if (type === 'boolean') {
-                    fieldsObj[id] = input.checked;
-                } else {
-                    fieldsObj[id] = input.value.trim();
-                }
+                fieldsObj[input.getAttribute('data-id')] = input.value.trim();
             });
 
             const payload = {
@@ -1327,18 +1165,18 @@
 
             schema.forEach(field => {
                 const row = document.createElement('div');
-                row.style = "display:flex; align-items:center; justify-content:space-between; background:var(--bg); padding:10px 16px; border-radius:12px; border:1px solid var(--glass-border);";
+                row.style = "display:flex; align-items:center; justify-content:space-between; background:var(--surface); padding:10px 16px; border-radius:10px; border:1px solid var(--glass-border);";
                 row.innerHTML = `
-                    <div style="display:flex; flex-direction:column; gap:2px;">
-                        <span style="font-size:14px; font-weight:500;">${escapeHTML(field.label)}</span>
-                        <span style="font-size:10px; color:var(--text-muted); text-transform:uppercase; letter-spacing:0.5px;">TIPO: ${field.type}</span>
+                    <div style="display:flex; flex-direction:column; gap:4px;">
+                        <span style="font-size:14px; font-weight:600;">${escapeHTML(field.label)}</span>
+                        <span style="font-size:11px; color:var(--text-muted); text-transform:uppercase;">Tipo: ${field.type}</span>
                     </div>
-                    <div style="display:flex; align-items:center; gap:4px;">
+                    <div style="display:flex; align-items:center; gap:8px;">
                         <button class="task-btn ${field.showInCard ? '' : 'delete'}" onclick="toggleSchemaCardVisibility('${field.id}')" title="Mostrar en Tarjeta">
-                            <i data-lucide="${field.showInCard ? 'eye' : 'eye-off'}" style="width:16px;"></i>
+                            <i data-lucide="${field.showInCard ? 'eye' : 'eye-off'}"></i>
                         </button>
                         <button class="task-btn delete" onclick="deleteSchemaField('${field.id}')" title="Eliminar Campo">
-                            <i data-lucide="trash-2" style="width:16px;"></i>
+                            <i data-lucide="trash-2"></i>
                         </button>
                     </div>
                 `;
@@ -1354,15 +1192,8 @@
             
             if (!label) { triggerShake(input); return; }
 
-            const schema = appData.proyectos[appData.proyectoActivo].schema;
-            
-            if (schema.some(f => f.label.toLowerCase() === label.toLowerCase())) {
-                triggerShake(input);
-                showToast("Ya existe un campo con este nombre", "warning");
-                return;
-            }
-
             saveHistoryState();
+            const schema = appData.proyectos[appData.proyectoActivo].schema;
             schema.push({
                 id: 'f_' + Date.now(),
                 label: label,
@@ -1391,7 +1222,7 @@
             proj.schema = proj.schema.filter(f => f.id !== fieldId);
             
             proj.tareas.forEach(t => {
-                if(t.fields && t.fields[fieldId] !== undefined) delete t.fields[fieldId];
+                if(t.fields && t.fields[fieldId]) delete t.fields[fieldId];
             });
 
             saveDataDirect();
@@ -1399,44 +1230,30 @@
             showToast("Campo eliminado", "info");
         }
 
-        // --- BÚSQUEDA FLOTANTE ---
-        function toggleSearch() {
-            const wrapper = document.getElementById('search-fab-container');
-            const input = document.getElementById('search-input');
-            const icon = document.getElementById('search-fab-icon');
-            
-            wrapper.classList.toggle('expanded');
-            if(wrapper.classList.contains('expanded')) {
-                input.focus();
-                icon.innerHTML = `<i data-lucide="x" style="width:20px;"></i>`;
-            } else { 
-                closeSearch();
-            }
-            lucide.createIcons();
-        }
-        
-        function closeSearch() {
-            const wrapper = document.getElementById('search-fab-container');
-            const input = document.getElementById('search-input');
-            const icon = document.getElementById('search-fab-icon');
-            
-            wrapper.classList.remove('expanded');
-            input.value = ''; 
-            searchQuery = ''; 
-            icon.innerHTML = `<i data-lucide="search" style="width:20px;"></i>`;
-            lucide.createIcons();
+        function saveDashboardConfig() {
+            closeActiveModal('modal-config');
             renderApp();
+            showToast("Esquema configurado", "success");
+        }
+
+        // --- BÚSQUEDA ---
+        function toggleSearch() {
+            const wrapper = document.getElementById('search-container');
+            const input = document.getElementById('search-input');
+            wrapper.classList.toggle('expanded');
+            if(wrapper.classList.contains('expanded')) input.focus();
+            else { input.value = ''; searchQuery = ''; renderApp(); }
         }
 
         function handleSearch(val) {
             searchQuery = val;
-            renderApp();
+            if (appData.proyectoActivo !== "") { renderBoardWorkspace(); lucide.createIcons(); }
         }
 
         // --- EXPORTAR / IMPORTAR ---
         function exportData() {
             const str = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(appData));
-            const a = document.createElement('a'); a.href = str; a.download = `neo_kanban_pro_${Date.now()}.json`;
+            const a = document.createElement('a'); a.href = str; a.download = `neo_kanban_v3_2_${Date.now()}.json`;
             document.body.appendChild(a); a.click(); a.remove();
             showToast("Backup exportado", "success");
         }
@@ -1448,20 +1265,10 @@
             reader.onload = function(evt) {
                 try {
                     const p = JSON.parse(evt.target.result);
-                    if (p && p.proyectos && typeof p.proyectos === 'object') {
-                        const keys = Object.keys(p.proyectos);
-                        if (keys.length > 0) {
-                            const firstProj = p.proyectos[keys[0]];
-                            if (!firstProj.schema || !firstProj.columnas || !firstProj.tareas) {
-                                throw new Error("Estructura interna inválida");
-                            }
-                        }
-                        saveHistoryState(); 
-                        appData = p; 
-                        saveDataDirect(); 
-                        renderApp();
+                    if (p && p.proyectos) {
+                        saveHistoryState(); appData = p; saveDataDirect(); renderApp();
                         showToast("Datos importados con éxito", "success");
-                    } else throw new Error("Raíz inválida");
+                    } else throw new Error();
                 } catch(err) { showToast("Archivo corrupto o inválido", "error"); }
             };
             reader.readAsText(file); e.target.value = '';
