@@ -1,0 +1,1032 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+    <title>NeoType - Advanced Typing Tracker</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght=200;300;400;500;600;700&display=swap" rel="stylesheet">
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <style>
+        :root {
+            --bg: #000000;
+            --surface: #121212;
+            --surface-hover: #1c1c1e;
+            
+            --glass: rgba(15, 15, 15, 0.6);
+            --glass-border: rgba(255, 255, 255, 0.08);
+            --blur-val: 30px;
+
+            --text-main: #FFFFFF;
+            --text-muted: #8E8E93;
+            --text-dark: #333333;
+
+            --accent-danger: #FF453A;
+            --accent-success: #34C759;
+            --accent-primary: #0A84FF;
+            
+            --bezier: cubic-bezier(0.16, 1, 0.3, 1);
+            --spring: cubic-bezier(0.34, 1.56, 0.64, 1);
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            -webkit-tap-highlight-color: transparent;
+        }
+
+        body {
+            background-color: var(--bg);
+            color: var(--text-main);
+            font-family: 'Outfit', sans-serif;
+            font-variant-numeric: tabular-nums;
+            overflow: hidden;
+            width: 100vw;
+            height: 100dvh;
+        }
+
+        .app-container {
+            width: 100%;
+            max-width: 900px;
+            height: 100dvh;
+            margin: 0 auto;
+            display: flex;
+            flex-direction: column;
+            padding: env(safe-area-inset-top) 24px calc(env(safe-area-inset-bottom) + 16px) 24px;
+            transition: transform 0.4s var(--bezier), filter 0.4s var(--bezier);
+            position: relative;
+        }
+
+        .app-container.backgrounded {
+            transform: scale(0.96);
+            filter: blur(8px);
+            pointer-events: none;
+        }
+
+        header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 16px 0 12px 0;
+        }
+
+        .header-brand {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .app-icon-badge {
+            width: 40px;
+            height: 40px;
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: radial-gradient(circle at top left, rgba(255,255,255,0.1), transparent 70%);
+            border: 1px solid var(--glass-border);
+            box-shadow: 0 4px 12px rgba(0,0,0,0.5);
+        }
+
+        .brand-text {
+            font-size: 1.2rem;
+            font-weight: 600;
+            letter-spacing: -0.02em;
+        }
+
+        .stats-badge {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            background: var(--surface);
+            padding: 6px 12px;
+            border-radius: 20px;
+            border: 1px solid var(--glass-border);
+            font-size: 0.85rem;
+            color: var(--text-muted);
+        }
+
+        .stats-badge span {
+            color: var(--text-main);
+            font-weight: 600;
+        }
+
+        .section-label {
+            font-size: 0.75rem;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            color: var(--text-muted);
+            margin-top: 8px;
+            margin-bottom: 4px;
+        }
+
+        .folders-scroll-area {
+            display: flex;
+            gap: 8px;
+            overflow-x: auto;
+            padding: 4px 0 12px 0;
+            scrollbar-width: none;
+            -webkit-overflow-scrolling: touch;
+        }
+        
+        .folders-scroll-area::-webkit-scrollbar { display: none; }
+
+        .pill {
+            background: var(--surface);
+            border: 1px solid var(--glass-border);
+            padding: 8px 16px;
+            border-radius: 100px;
+            font-size: 0.85rem;
+            color: var(--text-muted);
+            cursor: pointer;
+            white-space: nowrap;
+            transition: all 0.3s var(--bezier);
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .pill.active, .pill:hover {
+            background: var(--text-main);
+            color: var(--bg);
+            border-color: var(--text-main);
+        }
+        
+        .pill i { stroke-width: 2.5; }
+
+        .nav-divider {
+            border-bottom: 1px solid var(--glass-border);
+            margin-bottom: 16px;
+        }
+
+        .main-content {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            position: relative;
+            outline: none;
+        }
+
+        .typing-meta {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 16px;
+        }
+
+        .timer {
+            font-size: 2rem;
+            font-weight: 700;
+            color: var(--accent-primary);
+        }
+
+        .typing-container {
+            font-size: 1.5rem;
+            line-height: 1.6;
+            color: var(--text-dark);
+            font-weight: 500;
+            letter-spacing: 0.02em;
+            position: relative;
+            max-height: 45vh;
+            overflow: hidden;
+            mask-image: linear-gradient(to bottom, black 60%, transparent 100%);
+            -webkit-mask-image: linear-gradient(to bottom, black 60%, transparent 100%);
+        }
+
+        .word {
+            display: inline-block;
+            margin-right: 10px;
+            margin-bottom: 8px;
+            position: relative;
+        }
+
+        .char {
+            transition: color 0.05s linear;
+            position: relative;
+        }
+
+        .char.correct { color: var(--accent-success); }
+        .char.incorrect { color: var(--accent-danger); }
+        .char.active { color: var(--text-muted); }
+        
+        .cursor {
+            position: absolute;
+            width: 2px;
+            height: 1.3em;
+            background-color: var(--accent-primary);
+            top: 50%;
+            transform: translateY(-50%);
+            left: 0;
+            transition: left 0.08s var(--bezier), top 0.08s var(--bezier);
+            animation: blink 1s infinite step-end;
+            z-index: 10;
+        }
+
+        @keyframes blink {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0; }
+        }
+
+        .fab-wrapper {
+            position: absolute;
+            bottom: calc(env(safe-area-inset-bottom) + 24px);
+            left: 50%;
+            transform: translateX(-50%);
+            display: flex;
+            gap: 12px;
+            z-index: 50;
+        }
+
+
+
+        .fab-button {
+            width: 56px;
+            height: 56px;
+            border-radius: 50%;
+            background: var(--surface);
+            border: 1px solid var(--glass-border);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: var(--text-main);
+            cursor: pointer;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.5);
+            transition: transform 0.2s var(--spring), background 0.2s ease;
+        }
+        
+        .fab-button:active {
+            transform: scale(0.9);
+            background: var(--surface-hover);
+        }
+
+        .modal {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100vw;
+            height: 100dvh;
+            background: var(--bg);
+            z-index: 100;
+            transform: translateX(100%);
+            transition: transform 0.4s var(--spring);
+            display: flex;
+            flex-direction: column;
+            padding: env(safe-area-inset-top) 24px calc(env(safe-area-inset-bottom) + 24px) 24px;
+        }
+
+        .modal.active {
+            transform: translateX(0);
+        }
+
+        .modal-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding-bottom: 24px;
+            border-bottom: 1px solid var(--glass-border);
+            margin-bottom: 24px;
+        }
+
+        .modal-header h2 {
+            font-size: 1.4rem;
+            font-weight: 500;
+        }
+
+        .btn-icon {
+            background: transparent;
+            border: none;
+            color: var(--text-main);
+            cursor: pointer;
+            width: 40px;
+            height: 40px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 50%;
+            background: var(--surface);
+        }
+
+        .modal-body {
+            flex: 1;
+            overflow-y: auto;
+            scrollbar-width: none;
+        }
+        .modal-body::-webkit-scrollbar { display: none; }
+
+        .results-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 16px;
+            margin-bottom: 32px;
+        }
+
+        .stat-card {
+            background: var(--surface);
+            border: 1px solid var(--glass-border);
+            border-radius: 16px;
+            padding: 24px;
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+        }
+
+        .stat-card .label {
+            color: var(--text-muted);
+            font-size: 0.9rem;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+        }
+
+        .stat-card .value {
+            font-size: 2.5rem;
+            font-weight: 700;
+            color: var(--text-main);
+        }
+
+        .stat-card.primary .value { color: var(--accent-primary); }
+
+        .history-list {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+        }
+
+        .history-item {
+            background: var(--surface);
+            border: 1px solid var(--glass-border);
+            border-radius: 12px;
+            padding: 16px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .history-item .wpm { font-size: 1.2rem; font-weight: 600; }
+        .history-item .details { color: var(--text-muted); font-size: 0.85rem; }
+
+        .form-group {
+            margin-bottom: 24px;
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+        }
+
+        .form-group label {
+            color: var(--text-muted);
+            font-size: 0.9rem;
+        }
+
+        .input-text {
+            background: var(--surface);
+            border: 1px solid var(--glass-border);
+            color: var(--text-main);
+            padding: 16px;
+            border-radius: 12px;
+            font-family: inherit;
+            font-size: 1rem;
+            outline: none;
+            transition: border-color 0.3s ease;
+            width: 100%;
+        }
+        
+        .input-text:focus { border-color: var(--accent-primary); }
+
+        .btn-primary {
+            background: var(--text-main);
+            color: var(--bg);
+            border: none;
+            padding: 16px;
+            border-radius: 12px;
+            font-family: inherit;
+            font-size: 1rem;
+            font-weight: 600;
+            cursor: pointer;
+            width: 100%;
+            transition: transform 0.2s var(--spring);
+        }
+        
+        .btn-primary:active { transform: scale(0.98); }
+
+        .error-shake {
+            animation: shake 0.3s cubic-bezier(.36,.07,.19,.97) both;
+            border-color: var(--accent-danger) !important;
+        }
+
+        @keyframes shake {
+            10%, 90% { transform: translate3d(-1px, 0, 0); }
+            20%, 80% { transform: translate3d(2px, 0, 0); }
+            30%, 50%, 70% { transform: translate3d(-4px, 0, 0); }
+            40%, 60% { transform: translate3d(4px, 0, 0); }
+        }
+
+        .preview-box {
+            background: var(--surface-hover);
+            border: 1px dashed var(--glass-border);
+            border-radius: 12px;
+            padding: 16px;
+            min-height: 80px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: var(--text-muted);
+            text-align: center;
+            margin-bottom: 24px;
+            word-break: break-all;
+        }
+    </style>
+</head>
+<body>
+
+    <div class="app-container" id="main-view" tabindex="0">
+        <header>
+            <div class="header-brand">
+                <div class="app-icon-badge">
+                    <i data-lucide="keyboard" size="20" style="color: var(--text-main);"></i>
+                </div>
+                <div class="brand-text">NeoType</div>
+            </div>
+            <div class="stats-badge" id="global-stats-badge" title="Velocidad Promedio Global">
+                <i data-lucide="bar-chart-2" size="14"></i>
+                <span id="avg-wpm-display">0</span> WPM
+            </div>
+        </header>
+
+        <div class="section-label">Tipo de Contenido</div>
+        <nav class="folders-scroll-area" id="content-modes">
+            <div class="pill active" data-mode="words"><i data-lucide="shuffle" size="14"></i> Palabras</div>
+            <div class="pill" data-mode="sensible"><i data-lucide="sparkles" size="14"></i> Sensibles</div>
+            <div class="pill" data-mode="quotes"><i data-lucide="quote" size="14"></i> Frases Históricas</div>
+            <div class="pill" data-mode="books"><i data-lucide="book-open" size="14"></i> Libros Famosos</div>
+            <div class="pill" onclick="openModal('custom-modal')"><i data-lucide="plus" size="14"></i> Custom</div>
+        </nav>
+
+        <div class="section-label">Duración</div>
+        <nav class="folders-scroll-area" id="time-modes">
+            <div class="pill" data-time="15">15s</div>
+            <div class="pill active" data-time="30">30s</div>
+            <div class="pill" data-time="60">60s</div>
+            <div class="pill" data-time="0"><i data-lucide="infinity" size="14"></i> Endless</div>
+        </nav>
+        
+        <div class="nav-divider"></div>
+
+        <main class="main-content">
+            <div class="typing-meta">
+                <div class="timer" id="timer-display">30</div>
+                <div class="stats-badge" style="background: transparent; border: none;">
+                    <i data-lucide="history" size="16" style="cursor: pointer;" onclick="openModal('history-modal')"></i>
+                </div>
+            </div>
+            <div class="typing-container" id="typing-box">
+                <div class="cursor" id="cursor"></div>
+                <div id="words-container"></div>
+            </div>
+        </main>
+
+        <div class="fab-wrapper">
+            <div class="fab-button" onclick="initTest()" title="Reiniciar (Tab)">
+                <i data-lucide="rotate-ccw" size="20"></i>
+            </div>
+        </div>
+    </div>
+
+    <div id="results-modal" class="modal">
+        <div class="modal-header">
+            <h2>Resultados</h2>
+            <button class="btn-icon" onclick="closeActiveModal('results-modal')">
+                <i data-lucide="x" size="20"></i>
+            </button>
+        </div>
+        <div class="modal-body">
+            <div class="results-grid">
+                <div class="stat-card primary">
+                    <span class="label">WPM</span>
+                    <span class="value" id="result-wpm">0</span>
+                </div>
+                <div class="stat-card">
+                    <span class="label">Precisión</span>
+                    <span class="value" id="result-acc">0%</span>
+                </div>
+                <div class="stat-card">
+                    <span class="label">Correctas</span>
+                    <span class="value" id="result-correct" style="color: var(--accent-success);">0</span>
+                </div>
+                <div class="stat-card">
+                    <span class="label">Errores</span>
+                    <span class="value" id="result-errors" style="color: var(--accent-danger);">0</span>
+                </div>
+            </div>
+            <button class="btn-primary" onclick="closeActiveModal('results-modal'); initTest();">Siguiente Prueba</button>
+        </div>
+    </div>
+
+    <div id="history-modal" class="modal">
+        <div class="modal-header">
+            <h2>Historial de Sesiones</h2>
+            <button class="btn-icon" onclick="closeActiveModal('history-modal')">
+                <i data-lucide="x" size="20"></i>
+            </button>
+        </div>
+        <div class="modal-body">
+            <div class="history-list" id="history-list-container"></div>
+        </div>
+    </div>
+
+    <div id="custom-modal" class="modal">
+        <div class="modal-header">
+            <h2>Añadir Texto Custom</h2>
+            <button class="btn-icon" onclick="closeActiveModal('custom-modal')">
+                <i data-lucide="x" size="20"></i>
+            </button>
+        </div>
+        <div class="modal-body">
+            <div class="preview-box" id="custom-preview">
+                Escribe tu propio texto o copia un párrafo completo para practicar con él.
+            </div>
+            <div class="form-group" id="custom-input-group">
+                <label>Tu texto personalizado</label>
+                <input type="text" id="custom-words-input" class="input-text" placeholder="Copia aquí el texto que quieras entrenar..." oninput="updateCustomPreview()">
+            </div>
+            <button class="btn-primary" onclick="saveCustomWords()">Aplicar y Empezar</button>
+        </div>
+    </div>
+
+    <script>
+        // BBDD Estáticas integradas
+        const DICTIONARIES = {
+            words: "el la de que y a en un ser se no haber por con su para como estar tener le lo todo pero más hacer o poder decir este ir otro ese la si me ya ver porque dar cuando él muy sin vez mucho saber qué sobre mi alguno mismo yo también hasta año dos querer entre así primero desde grande eso ni nos llegar pasar tiempo ella sí día uno bien poco deber entonces poner cosa tanto hombre parecer nuestro bajo parte".split(" "),
+            // Categorías para generar frases con sentido
+            articles: ["el", "la", "un", "una", "los", "las", "unos", "unas"],
+            nouns: ["gato", "perro", "casa", "árbol", "libro", "mesa", "silla", "persona", "hombre", "mujer", "niño", "día", "noche", "sol", "luna", "estrella", "río", "montaña", "flor", "pájaro", "corazón", "mente", "alma", "viento", "lluvia", "fuego", "agua", "tierra", "mar", "playa"],
+            adjectives: ["grande", "pequeño", "hermoso", "feo", "bueno", "malo", "rápido", "lento", "feliz", "triste", "caliente", "frío", "fuerte", "débil", "nuevo", "viejo", "joven", "antiguo", "claro", "oscuro", "brillante", "apagado", "dulce", "amargo", "suave", "áspero", "tierno", "duro"],
+            verbs: ["estar", "ser", "tener", "hacer", "ir", "venir", "ver", "hablar", "correr", "caminar", "saltar", "volar", "nadar", "vivir", "morir", "reír", "llorar", "cantar", "bailar", "escribir", "leer", "pensar", "sentir", "soñar", "despertar", "dormir", "comer", "beber", "amar", "odiar"],
+            adverbs: ["muy", "poco", "bastante", "demasiado", "más", "menos", "aquí", "allá", "ahora", "después", "antes", "siempre", "nunca", "jamás", "pronto", "lentamente", "rápidamente", "felizmente", "tristemente", "bien", "mal", "fácilmente", "difícilmente"],
+            quotes: [
+                "Pienso luego existo frase que cambió el rumbo de la filosofía moderna en occidente",
+                "Solo sé que no sé nada una declaración de humildad intelectual ante el conocimiento",
+                "La vida es aquello que te va sucediendo mientras te empeñas en hacer otros planes",
+                "El único modo de hacer un gran trabajo es amar profundamente lo que haces cada día",
+                "No hay caminos para la paz la paz es el único camino válido para la humanidad",
+                "Ser o no ser esa es la cuestión que toda mente reflexiva debe plantearse en algún momento",
+                "El tiempo es oro cada momento que pierdes es dinero que no recuperarás jamás",
+                "La libertad no es la ausencia de limitaciones sino la capacidad de elegir tus limitaciones",
+                "Aquello que no te mata te fortalece es la ley fundamental de la existencia humana",
+                "La verdad no cambia dependiendo de si alguien la cree o no cree ella simplemente es",
+                "Los que pueden imaginar cualquier cosa pueden crear lo imposible en realidad",
+                "Todos los hombres nacen iguales pero algunos se esfuerzan más que otros para serlo",
+                "Vive como si fueras a morir mañana aprende como si fueras a vivir para siempre",
+                "El silencio es oro pero a veces la palabra es diamante puro y valioso",
+                "No es la montaña la que se mueve sino la mente del que la observa"
+            ],
+            books: [
+                "En un lugar de la Mancha de cuyo nombre no quiero acordarme no ha mucho tiempo que vivía un hidalgo",
+                "Muchos años después frente al pelotón de fusilamiento el coronel Aureliano Buendía había de recordar aquella tarde",
+                "El hombre sabio no se sienta a lamentarse por sus pérdidas sino que busca con entusiasmo cómo reparar el daño",
+                "Es una verdad mundialmente reconocida que un hombre soltero poseedor de una gran fortuna necesita una esposa",
+                "Llamadme Ismael algunos años atrás cuando tenía poco dinero en la bolsa decidí irme navegando por el mundo",
+                "Era el mejor de los tiempos era el peor de los tiempos la época de la sabiduría la época de la insensatez",
+                "Fuera de la ciudad hay una comunidad donde todos viven en perfecta armonía entre árboles y naturaleza pura",
+                "Las grandes obras no se construyen en un día sino a través de constancia esfuerzo y dedicación inquebrantables",
+                "He viajado por tierras lejanas he conocido gentes extrañas y he aprendido lecciones que ningún libro puede enseñar",
+                "En el corazón de la selva existe un templo antiguo guardián de secretos que la humanidad olvidó hace siglos"
+            ]
+        };
+        
+        let appData = {
+            history: [],
+            settings: { time: 30, contentType: 'words', customDict: [], isEndless: false }
+        };
+
+        let testState = {
+            active: false,
+            finished: false,
+            timeLeft: 30,
+            timerId: null,
+            words: [],
+            currentWordIndex: 0,
+            currentCharIndex: 0,
+            correctChars: 0,
+            incorrectChars: 0,
+            totalKeystrokes: 0,
+            isEndless: false
+        };
+
+        let activeModalsStack = [];
+
+        function openModal(modalId) {
+            document.getElementById('main-view').classList.add('backgrounded');
+            document.getElementById(modalId).classList.add('active');
+            activeModalsStack.push(modalId);
+            window.history.pushState({ modalId: modalId }, "");
+            if(modalId === 'history-modal') renderHistory();
+            if(modalId === 'custom-modal') document.getElementById('custom-words-input').focus();
+        }
+
+        function closeActiveModal(modalId) {
+            if (activeModalsStack.includes(modalId)) {
+                window.history.back(); 
+            }
+        }
+
+        window.addEventListener('popstate', () => {
+            if (activeModalsStack.length > 0) {
+                const topModalId = activeModalsStack.pop();
+                document.getElementById(topModalId).classList.remove('active');
+                if (activeModalsStack.length === 0) {
+                    document.getElementById('main-view').classList.remove('backgrounded');
+                    document.getElementById('main-view').focus();
+                }
+            }
+        });
+
+        function initApp() {
+            const stored = localStorage.getItem('neoTypeData');
+            if (stored) appData = JSON.parse(stored);
+            lucide.createIcons();
+            setupPills();
+            initTest();
+            updateGlobalStats();
+            document.getElementById('main-view').focus();
+        }
+
+        function saveData() {
+            localStorage.setItem('neoTypeData', JSON.stringify(appData));
+            updateGlobalStats();
+        }
+
+        function setupPills() {
+            // Pills de tiempo
+            const timePills = document.querySelectorAll('#time-modes .pill');
+            timePills.forEach(pill => {
+                pill.addEventListener('click', (e) => {
+                    timePills.forEach(p => p.classList.remove('active'));
+                    e.currentTarget.classList.add('active');
+                    appData.settings.time = parseInt(e.currentTarget.dataset.time);
+                    appData.settings.isEndless = e.currentTarget.dataset.time === '0';
+                    initTest();
+                });
+            });
+
+            // Pills de tipo de contenido
+            const contentPills = document.querySelectorAll('#content-modes .pill[data-mode]');
+            contentPills.forEach(pill => {
+                pill.addEventListener('click', (e) => {
+                    contentPills.forEach(p => p.classList.remove('active'));
+                    e.currentTarget.classList.add('active');
+                    appData.settings.contentType = e.currentTarget.dataset.mode;
+                    appData.settings.customDict = []; 
+                    initTest();
+                });
+            });
+        }
+
+        function shuffleArray(array) {
+            let arr = [...array];
+            for (let i = arr.length - 1; i > 0; i--) {
+                const j = Math.floor(Math.random() * (i + 1));
+                [arr[i], arr[j]] = [arr[j], arr[i]];
+            }
+            return arr;
+        }
+
+        function generateSensibleWords(count = 100) {
+            const words = [];
+            const patterns = [
+                () => [getRandomItem(DICTIONARIES.articles), getRandomItem(DICTIONARIES.nouns)],
+                () => [getRandomItem(DICTIONARIES.articles), getRandomItem(DICTIONARIES.adjectives), getRandomItem(DICTIONARIES.nouns)],
+                () => [getRandomItem(DICTIONARIES.articles), getRandomItem(DICTIONARIES.nouns), getRandomItem(DICTIONARIES.verbs)],
+                () => [getRandomItem(DICTIONARIES.nouns), getRandomItem(DICTIONARIES.verbs)],
+                () => [getRandomItem(DICTIONARIES.verbs), getRandomItem(DICTIONARIES.adverbs)],
+                () => [getRandomItem(DICTIONARIES.articles), getRandomItem(DICTIONARIES.adjectives), getRandomItem(DICTIONARIES.nouns), getRandomItem(DICTIONARIES.verbs)]
+            ];
+            
+            while (words.length < count) {
+                const pattern = patterns[Math.floor(Math.random() * patterns.length)];
+                words.push(...pattern);
+            }
+            
+            return words.slice(0, count);
+        }
+
+        function getRandomItem(array) {
+            return array[Math.floor(Math.random() * array.length)];
+        }
+
+        function generateTestWords() {
+            // Si hay un diccionario custom activo
+            if (appData.settings.customDict.length > 0) {
+                return appData.settings.customDict;
+            }
+
+            const mode = appData.settings.contentType;
+            if (mode === 'words') {
+                let result = [];
+                while(result.length < 100) {
+                    result = result.concat(shuffleArray(DICTIONARIES.words));
+                }
+                return result.slice(0, 100);
+            } else if (mode === 'sensible') {
+                return generateSensibleWords(100);
+            } else {
+                // Seleccionar una frase o fragmento de libro aleatorio y partirlo en palabras
+                const pool = DICTIONARIES[mode];
+                const selectedText = pool[Math.floor(Math.random() * pool.length)];
+                return selectedText.split(" ");
+            }
+        }
+
+        function initTest() {
+            clearInterval(testState.timerId);
+            testState = {
+                active: false,
+                finished: false,
+                timeLeft: appData.settings.time,
+                timerId: null,
+                words: generateTestWords(),
+                currentWordIndex: 0,
+                currentCharIndex: 0,
+                correctChars: 0,
+                incorrectChars: 0,
+                totalKeystrokes: 0,
+                isEndless: appData.settings.isEndless
+            };
+
+            const displayTime = appData.settings.isEndless ? '∞' : testState.timeLeft;
+            document.getElementById('timer-display').innerText = displayTime;
+            renderWords();
+            updateCursor();
+            document.getElementById('main-view').focus();
+        }
+
+        function renderWords() {
+            const container = document.getElementById('words-container');
+            container.innerHTML = '';
+            
+            testState.words.forEach((word, wIdx) => {
+                const wordEl = document.createElement('div');
+                wordEl.className = 'word';
+                wordEl.id = `word-${wIdx}`;
+                
+                for (let i = 0; i < word.length; i++) {
+                    const charEl = document.createElement('span');
+                    charEl.className = 'char';
+                    charEl.innerText = word[i];
+                    charEl.id = `char-${wIdx}-${i}`;
+                    wordEl.appendChild(charEl);
+                }
+                container.appendChild(wordEl);
+            });
+        }
+
+        function updateCursor() {
+            if(testState.finished) return;
+            const wordEl = document.getElementById(`word-${testState.currentWordIndex}`);
+            const charEl = document.getElementById(`char-${testState.currentWordIndex}-${testState.currentCharIndex}`);
+            const cursor = document.getElementById('cursor');
+            const container = document.getElementById('typing-box');
+            
+            if (charEl) {
+                // SOLUCIÓN AL BUG: Sumamos el offset de la palabra contenedor + el carácter local
+                cursor.style.left = `${wordEl.offsetLeft + charEl.offsetLeft}px`;
+                cursor.style.top = `${wordEl.offsetTop + (charEl.offsetHeight / 2)}px`;
+            } else if (wordEl) {
+                // Final de una palabra (esperando barra espaciadora)
+                const lastChar = wordEl.lastChild;
+                if(lastChar) {
+                    cursor.style.left = `${wordEl.offsetLeft + lastChar.offsetLeft + lastChar.offsetWidth}px`;
+                    cursor.style.top = `${wordEl.offsetTop + (lastChar.offsetHeight / 2)}px`;
+                }
+            }
+
+            if (wordEl && wordEl.offsetTop > container.scrollTop + 60) {
+                container.scrollTo({ top: wordEl.offsetTop - 40, behavior: 'smooth' });
+            } else if (testState.currentWordIndex === 0) {
+                container.scrollTo({ top: 0, behavior: 'smooth' });
+            }
+        }
+
+        function startTimer() {
+            if (testState.isEndless) return; // No iniciar timer en modo endless
+            testState.active = true;
+            testState.timerId = setInterval(() => {
+                testState.timeLeft--;
+                document.getElementById('timer-display').innerText = testState.timeLeft;
+                
+                if (testState.timeLeft <= 0) {
+                    endTest();
+                }
+            }, 1000);
+        }
+
+        function endTest() {
+            clearInterval(testState.timerId);
+            testState.finished = true;
+            testState.active = false;
+            
+            const timeSpent = appData.settings.time - testState.timeLeft;
+            const minutes = timeSpent / 60;
+            const wpm = minutes > 0 ? Math.round((testState.correctChars / 5) / minutes) : 0;
+            const accuracy = testState.totalKeystrokes > 0 ? Math.round((testState.correctChars / testState.totalKeystrokes) * 100) : 0;
+
+            document.getElementById('result-wpm').innerText = wpm;
+            document.getElementById('result-acc').innerText = `${accuracy}%`;
+            document.getElementById('result-correct').innerText = testState.correctChars;
+            document.getElementById('result-errors').innerText = testState.incorrectChars;
+
+            appData.history.unshift({
+                date: new Date().toISOString(),
+                wpm: wpm,
+                accuracy: accuracy,
+                time: appData.settings.time
+            });
+            if(appData.history.length > 50) appData.history.pop();
+            saveData();
+            
+            openModal('results-modal');
+        }
+
+        // Event Listener de Teclado Global
+        document.getElementById('main-view').addEventListener('keydown', (e) => {
+            if (e.ctrlKey || e.metaKey || e.altKey) return;
+            if (activeModalsStack.length > 0) return; 
+            if (testState.finished) {
+                if (e.key === 'Tab') { e.preventDefault(); initTest(); }
+                return;
+            }
+
+            const currentWord = testState.words[testState.currentWordIndex];
+            if(!currentWord) return; // Fin del bloque de texto disponible
+
+            if (!testState.active && e.key.length === 1 && e.key !== ' ') {
+                if (testState.isEndless) {
+                    testState.active = true; // En endless, simplemente activar sin timer
+                } else {
+                    startTimer();
+                }
+            }
+
+            if (e.key === 'Tab') {
+                e.preventDefault();
+                initTest();
+                return;
+            }
+
+            if (e.key === 'Backspace') {
+                if (testState.currentCharIndex > 0) {
+                    testState.currentCharIndex--;
+                    const charEl = document.getElementById(`char-${testState.currentWordIndex}-${testState.currentCharIndex}`);
+                    if (charEl.classList.contains('correct')) testState.correctChars--;
+                    if (charEl.classList.contains('incorrect')) testState.incorrectChars--;
+                    charEl.classList.remove('correct', 'incorrect');
+                } else if (testState.currentWordIndex > 0) {
+                    testState.currentWordIndex--;
+                    const prevWord = testState.words[testState.currentWordIndex];
+                    testState.currentCharIndex = prevWord.length;
+                }
+                updateCursor();
+                return;
+            }
+
+            if (e.key === ' ') {
+                e.preventDefault();
+                if (testState.currentCharIndex > 0) { 
+                    testState.currentWordIndex++;
+                    testState.currentCharIndex = 0;
+                    
+                    // En modo endless, generar más palabras cuando se llega al final
+                    if(testState.currentWordIndex >= testState.words.length) {
+                        if (testState.isEndless) {
+                            const newWords = generateTestWords();
+                            const startIndex = testState.words.length;
+                            testState.words = testState.words.concat(newWords);
+                            renderAdditionalWords(newWords, startIndex);
+                            updateCursor();
+                        } else {
+                            endTest();
+                        }
+                    } else {
+                        updateCursor();
+                    }
+                }
+                return;
+            }
+
+            if (e.key.length === 1) {
+                testState.totalKeystrokes++;
+                if (testState.currentCharIndex < currentWord.length) {
+                    const charEl = document.getElementById(`char-${testState.currentWordIndex}-${testState.currentCharIndex}`);
+                    if (e.key === currentWord[testState.currentCharIndex]) {
+                        charEl.classList.add('correct');
+                        testState.correctChars++;
+                    } else {
+                        charEl.classList.add('incorrect');
+                        testState.incorrectChars++;
+                    }
+                    testState.currentCharIndex++;
+                    
+                    // Auto-avance de palabra solo en modo cerrado (no endless)
+                    if(testState.currentCharIndex === currentWord.length && testState.currentWordIndex === testState.words.length - 1 && !testState.isEndless) {
+                        endTest();
+                    } else {
+                        updateCursor();
+                    }
+                }
+            }
+        });
+
+        function renderAdditionalWords(newWords, startIndex) {
+            const container = document.getElementById('words-container');
+            
+            newWords.forEach((word, idx) => {
+                const wIdx = startIndex + idx;
+                const wordEl = document.createElement('div');
+                wordEl.className = 'word';
+                wordEl.id = `word-${wIdx}`;
+                
+                for (let i = 0; i < word.length; i++) {
+                    const charEl = document.createElement('span');
+                    charEl.className = 'char';
+                    charEl.innerText = word[i];
+                    charEl.id = `char-${wIdx}-${i}`;
+                    wordEl.appendChild(charEl);
+                }
+                container.appendChild(wordEl);
+            });
+        }
+
+        function updateGlobalStats() {
+            if (appData.history.length === 0) return;
+            const sumWPM = appData.history.reduce((acc, curr) => acc + curr.wpm, 0);
+            document.getElementById('avg-wpm-display').innerText = Math.round(sumWPM / appData.history.length);
+        }
+
+
+
+        function renderHistory() {
+            const container = document.getElementById('history-list-container');
+            container.innerHTML = '';
+            
+            if (appData.history.length === 0) {
+                container.innerHTML = '<p style="color: var(--text-muted); text-align: center;">No hay historial disponible.</p>';
+                return;
+            }
+
+            const filtered = appData.history;
+            
+            filtered.forEach(h => {
+                const d = new Date(h.date);
+                const dateStr = `${d.getDate()}/${d.getMonth()+1}/${d.getFullYear()} ${d.getHours()}:${d.getMinutes().toString().padStart(2, '0')}`;
+                container.innerHTML += `
+                    <div class="history-item">
+                        <div>
+                            <div class="wpm">${h.wpm} WPM</div>
+                            <div class="details">Precisión: ${h.accuracy}% • ${h.time}s</div>
+                        </div>
+                        <div class="details">${dateStr}</div>
+                    </div>
+                `;
+            });
+        }
+
+        function updateCustomPreview() {
+            const input = document.getElementById('custom-words-input').value.trim();
+            const preview = document.getElementById('custom-preview');
+            if (input === '') {
+                preview.innerHTML = 'Escribe tu propio texto o copia un párrafo completo para practicar con él.';
+                preview.style.color = 'var(--text-muted)';
+            } else {
+                const words = input.split(/\s+/).slice(0, 10);
+                preview.innerHTML = words.join(' ') + (input.split(/\s+/).length > 10 ? '...' : '');
+                preview.style.color = 'var(--text-main)';
+            }
+        }
+
+        function saveCustomWords() {
+            const inputGroup = document.getElementById('custom-input-group');
+            const input = document.getElementById('custom-words-input').value.trim();
+            
+            if (input === '') {
+                inputGroup.classList.remove('error-shake');
+                void inputGroup.offsetWidth;
+                inputGroup.classList.add('error-shake');
+                setTimeout(() => inputGroup.classList.remove('error-shake'), 300);
+                return;
+            }
+
+            const wordsArray = input.split(/\s+/).filter(w => w.length > 0);
+
+            document.querySelectorAll('#content-modes .pill').forEach(p => p.classList.remove('active'));
+            document.querySelectorAll('#content-modes .pill')[3].classList.add('active');
+
+            appData.settings.customDict = wordsArray;
+            saveData();
+            closeActiveModal('custom-modal');
+            initTest();
+        }
+
+        window.onload = initApp;
+    </script>
+</body>
+</html>
