@@ -1,0 +1,253 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+    <title>Contador de Palabras</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@200;300;400;500;600;700&display=swap" rel="stylesheet">
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <style>
+        :root {
+            --bg: #000000;
+            --surface: #121212;
+            --surface-hover: #1c1c1e;
+            --glass: rgba(15, 15, 15, 0.4);
+            --glass-border: rgba(255, 255, 255, 0.08);
+            --blur-val: 30px;
+            --text-main: #FFFFFF;
+            --text-muted: #8E8E93;
+            --accent-blue: #0A84FF;
+            --bezier: cubic-bezier(0.16, 1, 0.3, 1);
+            --spring: cubic-bezier(0.34, 1.56, 0.64, 1);
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            -webkit-tap-highlight-color: transparent;
+        }
+
+        body {
+            background-color: var(--bg);
+            color: var(--text-main);
+            font-family: 'Outfit', sans-serif;
+            width: 100vw;
+            height: 100vh;
+            overflow: hidden;
+        }
+
+        .app-container {
+            width: 100%;
+            height: 100dvh;
+            max-width: 900px;
+            margin: 0 auto;
+            padding: env(safe-area-inset-top) 24px calc(env(safe-area-inset-bottom) + 24px) 24px;
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+        }
+
+        header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 20px 0 10px 0;
+            border-bottom: 1px solid var(--glass-border);
+            flex-shrink: 0;
+        }
+
+        .header-brand {
+            display: flex;
+            align-items: center;
+            gap: 14px;
+        }
+
+        .app-icon-badge {
+            width: 42px;
+            height: 42px;
+            border-radius: 12px;
+            background: radial-gradient(circle at center, rgba(255,255,255,0.05) 0%, rgba(0,0,0,0) 100%);
+            border: 1px solid var(--glass-border);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            box-shadow: 0 4px 24px rgba(0,0,0,0.5);
+        }
+
+        .header-title-container h1 {
+            font-size: 1.2rem;
+            font-weight: 600;
+            letter-spacing: -0.01em;
+        }
+
+        .main-content {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+            min-height: 0;
+        }
+
+        .workspace {
+            display: grid;
+            grid-template-columns: 1fr;
+            gap: 20px;
+            flex: 1;
+            min-height: 0;
+        }
+
+        @media (min-width: 768px) {
+            .workspace {
+                grid-template-columns: 3fr 1fr;
+            }
+        }
+
+        .editor-container {
+            background: var(--glass);
+            backdrop-filter: blur(var(--blur-val));
+            -webkit-backdrop-filter: blur(var(--blur-val));
+            border: 1px solid var(--glass-border);
+            border-radius: 20px;
+            display: flex;
+            flex-direction: column;
+            padding: 20px;
+            min-height: 0;
+        }
+
+        .editor-textarea {
+            width: 100%;
+            height: 100%;
+            background: transparent;
+            border: none;
+            resize: none;
+            color: var(--text-main);
+            font-family: 'Outfit', sans-serif;
+            font-size: 1.05rem;
+            line-height: 1.6;
+            outline: none;
+        }
+
+        .editor-textarea::placeholder {
+            color: var(--text-muted);
+        }
+
+        .metrics-panel {
+            display: flex;
+            flex-direction: row;
+            flex-wrap: wrap;
+            gap: 12px;
+            align-content: flex-start;
+        }
+
+        @media (min-width: 768px) {
+            .metrics-panel {
+                flex-direction: column;
+                flex-wrap: nowrap;
+            }
+        }
+
+        .metric-card {
+            background: var(--surface);
+            border: 1px solid var(--glass-border);
+            border-radius: 16px;
+            padding: 16px;
+            flex: 1;
+            min-width: 140px;
+            display: flex;
+            flex-direction: column;
+            gap: 4px;
+            transition: transform 0.2s var(--spring);
+        }
+
+        .metric-value {
+            font-size: 1.8rem;
+            font-weight: 700;
+            font-variant-numeric: tabular-nums;
+            color: var(--text-main);
+        }
+
+        .metric-label {
+            font-size: 0.75rem;
+            color: var(--text-muted);
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+        }
+    </style>
+</head>
+<body>
+
+    <div class="app-container">
+        <header>
+            <div class="header-brand">
+                <div class="app-icon-badge">
+                    <i data-lucide="binary" size="22" style="color: var(--text-main);"></i>
+                </div>
+                <div class="header-title-container">
+                    <h1>Contador de Palabras</h1>
+                </div>
+            </div>
+        </header>
+
+        <main class="main-content">
+            <div class="workspace">
+                <div class="editor-container">
+                    <textarea class="editor-textarea" id="text-input" placeholder="Pega o escribe tu texto aquí para analizarlo al instante..." oninput="analyzeText()"></textarea>
+                </div>
+
+                <div class="metrics-panel">
+                    <div class="metric-card">
+                        <span class="metric-value" id="count-words">0</span>
+                        <span class="metric-label">Palabras</span>
+                    </div>
+                    <div class="metric-card">
+                        <span class="metric-value" id="count-chars">0</span>
+                        <span class="metric-label">Caracteres</span>
+                    </div>
+                    <div class="metric-card">
+                        <span class="metric-value" id="count-paragraphs">0</span>
+                        <span class="metric-label">Párrafos</span>
+                    </div>
+                    <div class="metric-card">
+                        <span class="metric-value" id="count-reading">0m</span>
+                        <span class="metric-label">Lectura aprox.</span>
+                    </div>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <script>
+        window.onload = () => {
+            lucide.createIcons();
+            document.getElementById('text-input').focus();
+        };
+
+        function analyzeText() {
+            const text = document.getElementById('text-input').value;
+
+            // Procesamiento de Palabras sin fallos ópticos
+            const trimmed = text.trim();
+            const wordCount = trimmed === "" ? 0 : (trimmed.match(/\s+/g) ? trimmed.match(/\s+/g).length + 1 : 1);
+            
+            // Caracteres
+            const charCount = text.length;
+            
+            // Párrafos
+            const paragraphCount = text.split(/\n+/).filter(p => p.trim().length > 0).length;
+            
+            // Tiempo de lectura (Media de 200 palabras por minuto)
+            const readTime = Math.ceil(wordCount / 200);
+            const readingDisplay = readTime === 0 ? "0m" : `${readTime}m`;
+
+            // Renderizado en DOM
+            document.getElementById('count-words').innerText = wordCount;
+            document.getElementById('count-chars').innerText = charCount;
+            document.getElementById('count-paragraphs').innerText = paragraphCount;
+            document.getElementById('count-reading').innerText = readingDisplay;
+        }
+    </script>
+</body>
+</html>

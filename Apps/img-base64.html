@@ -1,0 +1,803 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+    <title>Conversor a Base64</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <style>
+        :root {
+            --bg: #000000;
+            --surface: #121212;
+            --surface-hover: #1c1c1e;
+            
+            --glass: rgba(15, 15, 15, 0.4);
+            --glass-border: rgba(255, 255, 255, 0.08);
+            --blur-val: 30px;
+
+            --text-main: #FFFFFF;
+            --text-muted: #8E8E93;
+
+            --accent-danger: #FF453A;
+            --accent-success: #34C759;
+            --accent-blue: #0A84FF;
+
+            --bezier: cubic-bezier(0.16, 1, 0.3, 1);
+            --spring: cubic-bezier(0.34, 1.56, 0.64, 1);
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            -webkit-tap-highlight-color: transparent;
+        }
+
+        body {
+            background-color: var(--bg);
+            color: var(--text-main);
+            font-family: 'Outfit', sans-serif;
+            overflow: hidden;
+        }
+
+        .app-container {
+            height: 100dvh;
+            padding: env(safe-area-inset-top, 24px) 24px calc(env(safe-area-inset-bottom, 16px) + 16px) 24px;
+            max-width: 900px;
+            margin: 0 auto;
+            display: flex;
+            flex-direction: column;
+            gap: 16px;
+            transition: transform 0.5s var(--bezier), filter 0.5s var(--bezier);
+        }
+
+        .app-container.backgrounded {
+            transform: scale(0.96);
+            filter: blur(8px) brightness(0.5);
+            pointer-events: none;
+        }
+
+        header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 8px 0;
+        }
+
+        .header-brand {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .app-icon-badge {
+            width: 40px;
+            height: 40px;
+            border-radius: 12px;
+            background: radial-gradient(circle at center, rgba(255,255,255,0.15) 0%, rgba(0,0,0,0) 70%);
+            border: 1px solid var(--glass-border);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            backdrop-filter: blur(var(--blur-val));
+        }
+
+        .header-title-area h1 {
+            font-size: 18px;
+            font-weight: 600;
+            letter-spacing: -0.5px;
+            line-height: 1.2;
+        }
+
+        .counter-badge {
+            font-size: 12px;
+            color: var(--text-muted);
+            font-variant-numeric: tabular-nums;
+            transition: transform 0.3s var(--spring);
+            display: inline-block;
+        }
+
+        .counter-badge.pulse {
+            transform: scale(1.2);
+            color: var(--accent-blue);
+        }
+
+        .folders-scroll-area {
+            display: flex;
+            gap: 10px;
+            overflow-x: auto;
+            padding: 4px 0 12px 0;
+            scrollbar-width: none;
+            -webkit-overflow-scrolling: touch;
+            flex-shrink: 0;
+        }
+        
+        .folders-scroll-area::-webkit-scrollbar { 
+            display: none; 
+        }
+
+        .pill-button {
+            background: var(--glass);
+            border: 1px solid var(--glass-border);
+            color: var(--text-muted);
+            padding: 8px 16px;
+            border-radius: 100px;
+            font-family: 'Outfit', sans-serif;
+            font-size: 14px;
+            font-weight: 500;
+            cursor: pointer;
+            white-space: nowrap;
+            transition: background 0.3s var(--bezier), color 0.3s var(--bezier), border-color 0.3s var(--bezier);
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .pill-button:hover, .pill-button.active {
+            background: var(--surface-hover);
+            color: var(--text-main);
+            border-color: rgba(255,255,255,0.2);
+        }
+
+        .pill-button.active {
+            background: rgba(255, 255, 255, 0.1);
+            border-color: rgba(255, 255, 255, 0.3);
+        }
+
+        .main-content {
+            flex: 1;
+            overflow-y: auto;
+            padding-bottom: 80px;
+            scrollbar-width: none;
+        }
+
+        .main-content::-webkit-scrollbar {
+            display: none;
+        }
+
+        .dropzone-container {
+            background: var(--glass);
+            border: 2px dashed var(--glass-border);
+            border-radius: 20px;
+            padding: 32px;
+            text-align: center;
+            cursor: pointer;
+            transition: border-color 0.3s var(--bezier), background 0.3s var(--bezier);
+            margin-bottom: 20px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 12px;
+            position: relative;
+        }
+
+        .dropzone-container:hover, .dropzone-container.dragover {
+            border-color: var(--accent-blue);
+            background: rgba(10, 132, 255, 0.05);
+        }
+
+        .dropzone-container input[type="file"] {
+            position: absolute;
+            top: 0; left: 0; width: 100%; height: 100%;
+            opacity: 0;
+            cursor: pointer;
+        }
+
+        .dropzone-title {
+            font-size: 15px;
+            color: var(--text-muted);
+            font-weight: 400;
+        }
+
+        .dropzone-title strong {
+            color: var(--text-main);
+            font-weight: 500;
+        }
+
+        .items-grid {
+            display: grid;
+            grid-template-columns: 1fr;
+            gap: 12px;
+        }
+
+        @media (min-width: 600px) {
+            .items-grid {
+                grid-template-columns: repeat(2, 1fr);
+            }
+        }
+
+        .item-card {
+            background: var(--surface);
+            border: 1px solid var(--glass-border);
+            border-radius: 16px;
+            padding: 12px;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            transition: background 0.2s var(--bezier), border-color 0.2s var(--bezier);
+            position: relative;
+        }
+
+        .item-card:hover {
+            background: var(--surface-hover);
+            border-color: rgba(255,255,255,0.15);
+        }
+
+        .item-preview {
+            width: 50px;
+            height: 50px;
+            border-radius: 10px;
+            object-fit: cover;
+            background: #1c1c1e;
+            border: 1px solid rgba(255,255,255,0.05);
+        }
+
+        .item-info {
+            flex: 1;
+            min-width: 0;
+        }
+
+        .item-name {
+            font-size: 14px;
+            font-weight: 500;
+            color: var(--text-main);
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+
+        .item-meta {
+            font-size: 12px;
+            color: var(--text-muted);
+            margin-top: 2px;
+            font-variant-numeric: tabular-nums;
+        }
+
+        .item-actions {
+            display: flex;
+            gap: 4px;
+        }
+
+        .action-btn {
+            background: transparent;
+            border: none;
+            color: var(--text-muted);
+            width: 32px;
+            height: 32px;
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            transition: background 0.2s var(--bezier), color 0.2s var(--bezier);
+        }
+
+        .action-btn:hover {
+            background: rgba(255,255,255,0.08);
+            color: var(--text-main);
+        }
+
+        .action-btn.danger:hover {
+            background: rgba(255, 69, 58, 0.15);
+            color: var(--accent-danger);
+        }
+
+        .search-fab-container {
+            position: fixed;
+            bottom: calc(env(safe-area-inset-bottom, 16px) + 20px);
+            left: 50%;
+            transform: translateX(-50%);
+            width: calc(100% - 48px);
+            max-width: 400px;
+            z-index: 999;
+            transition: width 0.3s var(--bezier);
+        }
+
+        .search-bar {
+            background: rgba(20, 20, 20, 0.85);
+            border: 1px solid var(--glass-border);
+            backdrop-filter: blur(20px);
+            border-radius: 100px;
+            padding: 6px 6px 6px 16px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            box-shadow: 0 12px 40px rgba(0,0,0,0.6);
+        }
+
+        .search-input {
+            flex: 1;
+            background: transparent;
+            border: none;
+            color: var(--text-main);
+            font-family: 'Outfit', sans-serif;
+            font-size: 15px;
+            outline: none;
+        }
+
+        .search-input::placeholder {
+            color: var(--text-muted);
+        }
+
+        .modal-overlay {
+            position: fixed;
+            top: 0; left: 0; width: 100vw; height: 100vh;
+            background: transparent;
+            z-index: 1000;
+            display: flex;
+            justify-content: center;
+            align-items: flex-end;
+            pointer-events: none;
+            transition: background 0.4s var(--bezier);
+        }
+
+        @media (min-width: 600px) {
+            .modal-overlay {
+                align-items: center;
+            }
+        }
+
+        .modal-overlay.active {
+            background: rgba(0, 0, 0, 0.4);
+            pointer-events: auto;
+        }
+
+        .modal-sheet {
+            width: 100%;
+            background: #161618;
+            border-top: 1px solid var(--glass-border);
+            border-radius: 24px 24px 0 0;
+            padding: 24px;
+            transform: translateY(100%);
+            transition: transform 0.4s var(--bezier);
+            max-height: 85dvh;
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+        }
+
+        @media (min-width: 600px) {
+            .modal-sheet {
+                width: 500px;
+                border: 1px solid var(--glass-border);
+                border-radius: 24px;
+                transform: scale(0.9) translateY(30px);
+                opacity: 0;
+                transition: transform 0.4s var(--bezier), opacity 0.4s var(--bezier);
+            }
+            .modal-overlay.active .modal-sheet {
+                transform: scale(1) translateY(0);
+                opacity: 1;
+            }
+        }
+
+        .modal-overlay.active .modal-sheet {
+            transform: translateY(0);
+        }
+
+        .modal-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .modal-title {
+            font-size: 18px;
+            font-weight: 600;
+        }
+
+        .modal-body {
+            overflow-y: auto;
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            gap: 16px;
+        }
+
+        .form-group {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+        }
+
+        .form-label {
+            font-size: 13px;
+            font-weight: 500;
+            color: var(--text-muted);
+        }
+
+        .form-input {
+            background: rgba(255,255,255,0.04);
+            border: 1px solid var(--glass-border);
+            border-radius: 12px;
+            padding: 12px;
+            color: var(--text-main);
+            font-family: 'Outfit', sans-serif;
+            font-size: 14px;
+            outline: none;
+            transition: border-color 0.2s var(--bezier);
+        }
+
+        .form-input:focus {
+            border-color: rgba(255,255,255,0.2);
+        }
+
+        .form-input.error-shake {
+            animation: shake 0.3s ease-in-out;
+            border-color: var(--accent-danger) !important;
+        }
+
+        .textarea-output {
+            background: #09090b;
+            border: 1px solid var(--glass-border);
+            border-radius: 12px;
+            padding: 12px;
+            color: #34C759;
+            font-family: monospace;
+            font-size: 12px;
+            resize: none;
+            height: 140px;
+            outline: none;
+            word-break: break-all;
+        }
+
+        .category-preview-box {
+            height: 60px;
+            border-radius: 14px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 600;
+            font-size: 14px;
+            transition: background 0.3s var(--bezier);
+        }
+
+        .btn-primary {
+            background: var(--text-main);
+            color: var(--bg);
+            border: none;
+            border-radius: 12px;
+            padding: 14px;
+            font-family: 'Outfit', sans-serif;
+            font-weight: 600;
+            font-size: 15px;
+            cursor: pointer;
+            transition: opacity 0.2s var(--bezier);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+        }
+
+        .btn-primary:hover {
+            opacity: 0.9;
+        }
+
+        .empty-state {
+            padding: 40px 20px;
+            text-align: center;
+            color: var(--text-muted);
+            font-size: 14px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 12px;
+        }
+
+        @keyframes shake {
+            0%, 100% { transform: translateX(0); }
+            20%, 60% { transform: translateX(-6px); }
+            40%, 80% { transform: translateX(6px); }
+        }
+    </style>
+</head>
+<body>
+
+    <div class="app-container" id="main-view">
+        <header>
+            <div class="header-brand">
+                <div class="app-icon-badge">
+                    <i data-lucide="layers" size="20" style="color: var(--text-main);"></i>
+                </div>
+                <div class="header-title-area">
+                    <h1>Conversor Base64</h1>
+                    <span class="counter-badge" id="global-counter">0 elementos</span>
+                </div>
+            </div>
+        </header>
+
+        <main class="main-content">
+            <div class="dropzone-container" id="dropzone">
+                <input type="file" id="file-input" accept="image/*" multiple>
+                <div class="app-icon-badge">
+                    <i data-lucide="upload-cloud" size="20" style="color: var(--accent-blue);"></i>
+                </div>
+                <div class="dropzone-title">
+                    Arrastra imágenes aquí o <strong>selecciona archivos</strong>
+                </div>
+            </div>
+
+            <div class="items-grid" id="items-container">
+                </div>
+        </main>
+    </div>
+
+    <div class="search-fab-container">
+        <div class="search-bar">
+            <i data-lucide="search" size="18" style="color: var(--text-muted);"></i>
+            <input type="text" class="search-input" id="search-input" placeholder="Buscar imágenes..." oninput="handleSearch()">
+            <button class="action-btn" id="search-clear-btn" style="display: none;" onclick="clearSearch()">
+                <i data-lucide="x" size="16"></i>
+            </button>
+        </div>
+    </div>
+
+    <div class="modal-overlay" id="viewer-modal" onclick="closeActiveModalOnOverlay(event)">
+        <div class="modal-sheet">
+            <div class="modal-header">
+                <h3 class="modal-title" id="viewer-title">Detalles Base64</h3>
+                <button class="action-btn" onclick="closeActiveModal('viewer-modal')">
+                    <i data-lucide="x" size="18"></i>
+                </button>
+            </div>
+            <div class="modal-body">
+                <img id="viewer-img-preview" src="" alt="Preview" style="width: 100%; height: 160px; object-fit: contain; background: #09090b; border-radius: 12px; border: 1px solid var(--glass-border);">
+                <div class="form-group">
+                    <label class="form-label">Código Base64 Estándar</label>
+                    <textarea class="textarea-output" id="base64-output" readonly></textarea>
+                </div>
+                <button class="btn-primary" onclick="copyBase64Content()">
+                    <i data-lucide="copy" size="16"></i> Copiar Código
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // --- MOTOR DE ESTADO CENTRALIZADO ---
+        let appData = {
+            items: [],
+            searchQuery: ''
+        };
+
+        let activeModalsStack = [];
+
+        // --- INICIALIZACIÓN ---
+        window.onload = () => {
+            const savedData = localStorage.getItem('purebase64_data');
+            if (savedData) {
+                appData = JSON.parse(savedData);
+                if (!Array.isArray(appData.items)) appData.items = [];
+                appData.searchQuery = '';
+            } else {
+                appData.items = [];
+                saveData();
+            }
+            renderApp();
+            setupDragAndDrop();
+        };
+
+        function saveData() {
+            localStorage.setItem('purebase64_data', JSON.stringify(appData));
+            triggerCounterPulse();
+        }
+
+        function triggerCounterPulse() {
+            const counter = document.getElementById('global-counter');
+            if(counter) {
+                counter.classList.add('pulse');
+                setTimeout(() => counter.classList.remove('pulse'), 300);
+            }
+        }
+
+        // --- CONTROL DE MODALES (HISTORY API) ---
+        function openModal(modalId) {
+            document.getElementById('main-view').classList.add('backgrounded');
+            document.getElementById(modalId).classList.add('active');
+            activeModalsStack.push(modalId);
+            window.history.pushState({ modalId: modalId }, "");
+        }
+
+        function closeActiveModal(modalId) {
+            if (activeModalsStack.includes(modalId)) {
+                window.history.back();
+            }
+        }
+
+        function closeActiveModalOnOverlay(event) {
+            if (event.target.classList.contains('modal-overlay')) {
+                const activeModalId = activeModalsStack[activeModalsStack.length - 1];
+                if (activeModalId) closeActiveModal(activeModalId);
+            }
+        }
+
+        window.addEventListener('popstate', () => {
+            if (activeModalsStack.length > 0) {
+                const topModalId = activeModalsStack.pop();
+                document.getElementById(topModalId).classList.remove('active');
+                if (activeModalsStack.length === 0) {
+                    document.getElementById('main-view').classList.remove('backgrounded');
+                }
+            }
+        });
+
+        // --- MANEJO DE IMÁGENES & CONVERSIÓN ---
+        function setupDragAndDrop() {
+            const dropzone = document.getElementById('dropzone');
+            const fileInput = document.getElementById('file-input');
+
+            dropzone.addEventListener('dragover', (e) => {
+                e.preventDefault();
+                dropzone.classList.add('dragover');
+            });
+
+            dropzone.addEventListener('dragleave', () => {
+                dropzone.classList.remove('dragover');
+            });
+
+            dropzone.addEventListener('drop', (e) => {
+                e.preventDefault();
+                dropzone.classList.remove('dragover');
+                handleFiles(e.dataTransfer.files);
+            });
+
+            fileInput.addEventListener('change', (e) => {
+                handleFiles(e.target.files);
+            });
+        }
+
+        function handleFiles(files) {
+            Array.from(files).forEach(file => {
+                if (!file.type.startsWith('image/')) return;
+
+                const reader = new FileReader();
+                reader.onload = (event) => {
+                    const newItem = {
+                        id: 'item-' + Date.now() + Math.random().toString(36).substr(2, 5),
+                        name: file.name,
+                        size: formatBytes(file.size),
+                        base64: event.target.result,
+                        timestamp: Date.now()
+                    };
+                    appData.items.unshift(newItem);
+                    saveData();
+                    renderApp();
+                };
+                reader.readAsDataURL(file);
+            });
+        }
+
+        function formatBytes(bytes) {
+            if (bytes === 0) return '0 Bytes';
+            const k = 1024;
+            const sizes = ['Bytes', 'KB', 'MB'];
+            const i = Math.floor(Math.log(bytes) / Math.log(k));
+            return parseFloat((bytes / Math.pow(k, i)).toFixed(1)) + ' ' + sizes[i];
+        }
+
+        function deleteItem(itemId) {
+            appData.items = appData.items.filter(i => i.id !== itemId);
+            saveData();
+            renderApp();
+        }
+
+        // --- BUSCADOR ---
+        function handleSearch() {
+            const query = document.getElementById('search-input').value.toLowerCase();
+            appData.searchQuery = query;
+            
+            const clearBtn = document.getElementById('search-clear-btn');
+            clearBtn.style.display = query ? 'flex' : 'none';
+            
+            renderItemsOnly();
+        }
+
+        function clearSearch() {
+            document.getElementById('search-input').value = '';
+            appData.searchQuery = '';
+            document.getElementById('search-clear-btn').style.display = 'none';
+            renderItemsOnly();
+        }
+
+        // --- VISOR Y COPIADO ---
+        let currentViewingBase64 = '';
+        function viewItemDetails(itemId) {
+            const item = appData.items.find(i => i.id === itemId);
+            if (!item) return;
+
+            currentViewingBase64 = item.base64;
+            document.getElementById('viewer-title').innerText = item.name;
+            document.getElementById('viewer-img-preview').src = item.base64;
+            document.getElementById('base64-output').value = item.base64;
+
+            openModal('viewer-modal');
+        }
+
+        function copyBase64Content() {
+            const textarea = document.getElementById('base64-output');
+            textarea.select();
+            navigator.clipboard.writeText(currentViewingBase64).then(() => {
+                const btn = document.querySelector('#viewer-modal .btn-primary');
+                const originalHtml = btn.innerHTML;
+                btn.innerHTML = `<i data-lucide="check" size="16"></i> ¡Copiado con éxito!`;
+                btn.style.backgroundColor = 'var(--accent-success)';
+                lucide.createIcons();
+                
+                setTimeout(() => {
+                    btn.innerHTML = originalHtml;
+                    btn.style.backgroundColor = 'var(--text-main)';
+                    lucide.createIcons();
+                }, 2000);
+            });
+        }
+
+        // --- RUTINAS DE RENDERIZADO UNIFICADAS ---
+        function renderApp() {
+            renderItemsOnly();
+            
+            // Actualizar contadores superiores
+            const counter = document.getElementById('global-counter');
+            counter.innerText = `${appData.items.length} ${appData.items.length === 1 ? 'elemento' : 'elementos'}`;
+        }
+
+        function renderItemsOnly() {
+            const container = document.getElementById('items-container');
+            let filtered = [...appData.items];
+
+            if (appData.searchQuery) {
+                filtered = filtered.filter(item => item.name.toLowerCase().includes(appData.searchQuery));
+            }
+
+            filtered.sort((a, b) => (b.timestamp || 0) - (a.timestamp || 0));
+
+            if (filtered.length === 0) {
+                container.innerHTML = `
+                    <div class="empty-state" style="grid-column: 1 / -1;">
+                        <i data-lucide="image-off" size="32" style="color: var(--text-muted);"></i>
+                        <p>No hay elementos en el historial todavía</p>
+                    </div>
+                `;
+                lucide.createIcons();
+                return;
+            }
+
+            let html = '';
+            filtered.forEach(item => {
+                const timestampText = item.timestamp
+                    ? new Date(item.timestamp).toLocaleString('es-ES', {
+                        day: '2-digit',
+                        month: 'short',
+                        year: 'numeric',
+                        hour: '2-digit',
+                        minute: '2-digit'
+                    })
+                    : 'Sin fecha';
+
+                html += `
+                    <div class="item-card">
+                        <img class="item-preview" src="${item.base64}" alt="" onclick="viewItemDetails('${item.id}')" style="cursor: pointer;">
+                        <div class="item-info" onclick="viewItemDetails('${item.id}')" style="cursor: pointer;">
+                            <div class="item-name">${item.name}</div>
+                            <div class="item-meta">${item.size} • ${timestampText}</div>
+                        </div>
+                        <div class="item-actions">
+                            <button class="action-btn" onclick="viewItemDetails('${item.id}')">
+                                <i data-lucide="code" size="15"></i>
+                            </button>
+                            <button class="action-btn danger" onclick="deleteItem('${item.id}')">
+                                <i data-lucide="trash-2" size="15"></i>
+                            </button>
+                        </div>
+                    </div>
+                `;
+            });
+
+            container.innerHTML = html;
+            lucide.createIcons();
+        }
+    </script>
+</body>
+</html>

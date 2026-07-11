@@ -1,0 +1,272 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+    <title>Comparador de Texto</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600&display=swap" rel="stylesheet">
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <style>
+        :root {
+            --bg: #000000;
+            --surface: #121212;
+            --surface-hover: #1c1c1e;
+            --glass: rgba(15, 15, 15, 0.4);
+            --glass-border: rgba(255, 255, 255, 0.08);
+            --blur-val: 30px;
+            --text-main: #FFFFFF;
+            --text-muted: #8E8E93;
+            --accent-danger: #FF453A;
+            --accent-success: #34C759;
+            --bezier: cubic-bezier(0.16, 1, 0.3, 1);
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: 'Outfit', sans-serif;
+            -webkit-font-smoothing: antialiased;
+        }
+
+        body {
+            background-color: var(--bg);
+            color: var(--text-main);
+            overflow: hidden;
+            height: 100vh;
+        }
+
+        .app-container {
+            height: 100dvh;
+            padding: env(safe-area-inset-top) 24px calc(env(safe-area-inset-bottom) + 16px) 24px;
+            max-width: 900px;
+            margin: 0 auto;
+            display: flex;
+            flex-direction: column;
+        }
+
+        header {
+            display: flex;
+            align-items: center;
+            padding: 20px 0;
+            border-bottom: 1px solid var(--glass-border);
+            flex-shrink: 0;
+            gap: 12px;
+        }
+
+        .app-icon-badge {
+            width: 40px;
+            height: 40px;
+            border-radius: 12px;
+            background: radial-gradient(circle at center, rgba(255,255,255,0.1) 0%, rgba(0,0,0,0) 100%);
+            border: 1px solid var(--glass-border);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .header-title-group h1 {
+            font-size: 18px;
+            font-weight: 600;
+            letter-spacing: -0.02em;
+        }
+
+        .main-content {
+            flex: 1;
+            overflow-y: auto;
+            padding-top: 24px;
+            padding-bottom: 24px;
+            scrollbar-width: none;
+        }
+        .main-content::-webkit-scrollbar { display: none; }
+
+        .workspace-grid {
+            display: grid;
+            grid-template-columns: 1fr;
+            gap: 16px;
+        }
+
+        @media (min-width: 768px) {
+            .workspace-grid {
+                grid-template-columns: 1fr 1fr;
+            }
+        }
+
+        .input-box {
+            background: var(--surface);
+            border: 1px solid var(--glass-border);
+            border-radius: 16px;
+            padding: 16px;
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+        }
+
+        .input-box label {
+            font-size: 12px;
+            font-weight: 600;
+            color: var(--text-muted);
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+        }
+
+        textarea {
+            width: 100%;
+            height: 180px;
+            background: transparent;
+            border: none;
+            outline: none;
+            color: var(--text-main);
+            font-size: 14px;
+            line-height: 1.6;
+            resize: none;
+        }
+
+        .diff-output-card {
+            background: var(--surface);
+            border: 1px solid var(--glass-border);
+            border-radius: 16px;
+            padding: 20px;
+            margin-top: 16px;
+        }
+
+        .diff-output-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 16px;
+        }
+
+        .diff-output-title {
+            font-size: 14px;
+            font-weight: 600;
+            color: var(--text-muted);
+        }
+
+        .diff-view {
+            font-size: 14px;
+            line-height: 1.6;
+            white-space: pre-wrap;
+            word-break: break-word;
+        }
+
+        .diff-line {
+            padding: 2px 6px;
+            border-radius: 4px;
+            display: block;
+        }
+
+        .diff-added {
+            background: rgba(52, 199, 89, 0.15);
+            color: #30d158;
+        }
+
+        .diff-removed {
+            background: rgba(255, 69, 58, 0.15);
+            color: #ff453a;
+            text-decoration: line-through;
+        }
+    </style>
+</head>
+<body>
+
+    <div class="app-container">
+        <header>
+            <div class="app-icon-badge">
+                <i data-lucide="split" size="20" style="color: var(--text-main);"></i>
+            </div>
+            <div class="header-title-group">
+                <h1>Comparador de Texto</h1>
+            </div>
+        </header>
+
+        <main class="main-content">
+            <div class="workspace-grid">
+                <div class="input-box">
+                    <label>Texto Original</label>
+                    <textarea id="text-original" placeholder="Introduce o pega el texto base aquí..." oninput="executeLiveDiff()"></textarea>
+                </div>
+                <div class="input-box">
+                    <label>Texto Modificado</label>
+                    <textarea id="text-modified" placeholder="Introduce o pega el texto modificado aquí..." oninput="executeLiveDiff()"></textarea>
+                </div>
+            </div>
+
+            <div class="diff-output-card">
+                <div class="diff-output-header">
+                    <span class="diff-output-title">Resultado de la comparación</span>
+                </div>
+                <div class="diff-view" id="diff-result">Las diferencias aparecerán en tiempo real a medida que escribas en los paneles superiores.</div>
+            </div>
+        </main>
+    </div>
+
+    <script>
+        function executeLiveDiff() {
+            const original = document.getElementById('text-original').value;
+            const modified = document.getElementById('text-modified').value;
+            const output = document.getElementById('diff-result');
+
+            if (!original && !modified) {
+                output.innerHTML = 'Las diferencias aparecerán en tiempo real a medida que escribas en los paneles superiores.';
+                return;
+            }
+
+            const diff = computeLineDiff(original, modified);
+            
+            output.innerHTML = '';
+            if (diff.length === 0) {
+                output.innerHTML = '<span style="color: var(--accent-success);">Los textos son idénticos.</span>';
+                return;
+            }
+
+            diff.forEach(part => {
+                const span = document.createElement('span');
+                if (part.added) {
+                    span.className = 'diff-line diff-added';
+                    span.innerText = `+ ${part.value}`;
+                } else if (part.removed) {
+                    span.className = 'diff-line diff-removed';
+                    span.innerText = `- ${part.value}`;
+                } else {
+                    span.className = 'diff-line';
+                    span.style.color = 'var(--text-main)';
+                    span.innerText = `  ${part.value}`;
+                }
+                output.appendChild(span);
+            });
+        }
+
+        function computeLineDiff(oldStr, newStr) {
+            const oldLines = oldStr.split('\n');
+            const newLines = newStr.split('\n');
+            let result = [];
+            let i = 0, j = 0;
+
+            while (i < oldLines.length || j < newLines.length) {
+                if (i < oldLines.length && j < newLines.length && oldLines[i] === newLines[j]) {
+                    result.push({ value: oldLines[i], added: false, removed: false });
+                    i++;
+                    j++;
+                } else if (j < newLines.length && (i >= oldLines.length || oldLines.indexOf(newLines[j], i) === -1)) {
+                    result.push({ value: newLines[j], added: true, removed: false });
+                    j++;
+                } else {
+                    result.push({ value: oldLines[i], added: false, removed: true });
+                    i++;
+                }
+            }
+            
+            // Si el resultado sólo contiene líneas idénticas y los strings iniciales eran iguales en longitud
+            if (oldStr === newStr) return [];
+            
+            return result;
+        }
+
+        // Inicializar iconos de Lucide de forma nativa
+        lucide.createIcons();
+    </script>
+</body>
+</html>

@@ -1,0 +1,490 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+    <title>Generador Lorem Ipsum & Analizador</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@200;300;400;500;600;700&display=swap" rel="stylesheet">
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <style>
+        :root {
+            --bg: #000000;
+            --surface: #121212;
+            --surface-hover: #1c1c1e;
+            --glass: rgba(15, 15, 15, 0.4);
+            --glass-border: rgba(255, 255, 255, 0.08);
+            --blur-val: 30px;
+            --text-main: #FFFFFF;
+            --text-muted: #8E8E93;
+            --accent-success: #34C759;
+            --accent-blue: #0A84FF;
+            --bezier: cubic-bezier(0.16, 1, 0.3, 1);
+            --spring: cubic-bezier(0.34, 1.56, 0.64, 1);
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            -webkit-tap-highlight-color: transparent;
+        }
+
+        body {
+            background-color: var(--bg);
+            color: var(--text-main);
+            font-family: 'Outfit', sans-serif;
+            width: 100vw;
+            height: 100dvh;
+            overflow: hidden;
+        }
+
+        .app-container {
+            width: 100%;
+            height: 100dvh;
+            max-width: 850px;
+            margin: 0 auto;
+            padding: env(safe-area-inset-top) 24px calc(env(safe-area-inset-bottom) + 24px) 24px;
+            display: flex;
+            flex-direction: column;
+            gap: 16px;
+        }
+
+        header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 24px 0 8px 0;
+            flex-shrink: 0;
+        }
+
+        .brand-meta {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .app-icon-badge {
+            width: 44px;
+            height: 44px;
+            border-radius: 14px;
+            background: radial-gradient(circle at center, rgba(255,255,255,0.15) 0%, rgba(0,0,0,0) 80%);
+            border: 1px solid var(--glass-border);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            backdrop-filter: blur(var(--blur-val));
+        }
+
+        .brand-text h1 {
+            font-size: 20px;
+            font-weight: 600;
+            letter-spacing: -0.5px;
+        }
+
+        .brand-text span {
+            font-size: 13px;
+            color: var(--text-muted);
+        }
+
+        .workspace {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            gap: 16px;
+            min-height: 0;
+        }
+
+        .control-panel {
+            background: var(--glass);
+            border: 1px solid var(--glass-border);
+            border-radius: 16px;
+            padding: 16px;
+            backdrop-filter: blur(var(--blur-val));
+            display: flex;
+            flex-direction: column;
+            gap: 14px;
+            flex-shrink: 0;
+        }
+
+        .selectors-row {
+            display: flex;
+            gap: 8px;
+        }
+
+        .pill-button {
+            background: var(--surface);
+            border: 1px solid var(--glass-border);
+            color: var(--text-muted);
+            padding: 10px 16px;
+            border-radius: 100px;
+            font-size: 14px;
+            font-weight: 500;
+            cursor: pointer;
+            flex: 1;
+            text-align: center;
+            transition: background 0.2s var(--bezier), color 0.2s var(--bezier), border-color 0.2s var(--bezier);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 6px;
+        }
+
+        .pill-button:hover, .pill-button.active {
+            background: var(--surface-hover);
+            color: var(--text-main);
+            border-color: rgba(255,255,255,0.2);
+        }
+
+        .pill-button.active {
+            background: rgba(255,255,255,0.1);
+        }
+
+        .options-grid {
+            display: grid;
+            grid-template-columns: 1fr;
+            gap: 12px;
+        }
+
+        @media (min-width: 600px) {
+            .options-grid {
+                grid-template-columns: repeat(2, 1fr);
+            }
+        }
+
+        .config-box {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            background: rgba(255,255,255,0.02);
+            padding: 10px 14px;
+            border-radius: 12px;
+            border: 1px solid var(--glass-border);
+        }
+
+        .config-box label {
+            font-size: 13px;
+            color: var(--text-muted);
+            font-weight: 500;
+            white-space: nowrap;
+        }
+
+        .config-box input[type="range"] {
+            flex: 1;
+            accent-color: var(--text-main);
+            cursor: pointer;
+        }
+
+        .config-box select {
+            flex: 1;
+            background: var(--surface);
+            border: 1px solid var(--glass-border);
+            color: var(--text-main);
+            font-family: 'Outfit', sans-serif;
+            font-size: 13px;
+            padding: 4px 8px;
+            border-radius: 6px;
+            outline: none;
+            cursor: pointer;
+        }
+
+        .checkbox-container {
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            font-size: 13px;
+            color: var(--text-muted);
+            user-select: none;
+        }
+
+        .checkbox-container input {
+            accent-color: var(--text-main);
+            width: 15px;
+            height: 15px;
+        }
+
+        .range-val {
+            font-variant-numeric: tabular-nums;
+            font-size: 14px;
+            font-weight: 600;
+            min-width: 28px;
+            text-align: right;
+        }
+
+        .editor-container {
+            flex: 1;
+            position: relative;
+            background: var(--glass);
+            border: 1px solid var(--glass-border);
+            border-radius: 20px;
+            backdrop-filter: blur(var(--blur-val));
+            display: flex;
+            flex-direction: column;
+            min-height: 0;
+        }
+
+        .text-editor {
+            width: 100%;
+            flex: 1;
+            background: transparent;
+            border: none;
+            resize: none;
+            outline: none;
+            color: var(--text-main);
+            font-family: 'Outfit', sans-serif;
+            font-size: 16px;
+            line-height: 1.6;
+            padding: 20px;
+            overflow-y: auto;
+            font-weight: 300;
+        }
+
+        .editor-footer {
+            border-top: 1px solid var(--glass-border);
+            padding: 12px 20px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            background: rgba(0,0,0,0.2);
+            border-radius: 0 0 20px 20px;
+            flex-shrink: 0;
+            flex-wrap: wrap;
+            gap: 12px;
+        }
+
+        .stats-group {
+            display: flex;
+            gap: 16px;
+            flex-wrap: wrap;
+        }
+
+        .stat-item {
+            font-size: 13px;
+            color: var(--text-muted);
+        }
+
+        .stat-item strong {
+            color: var(--text-main);
+            font-variant-numeric: tabular-nums;
+            font-weight: 600;
+            margin-left: 4px;
+        }
+
+        .actions-wrapper {
+            display: flex;
+            gap: 8px;
+        }
+
+        .action-btn {
+            background: transparent;
+            border: none;
+            color: var(--text-muted);
+            cursor: pointer;
+            padding: 8px;
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: color 0.2s var(--bezier), background 0.2s var(--bezier);
+        }
+
+        .action-btn:hover {
+            color: var(--text-main);
+            background: rgba(255,255,255,0.05);
+        }
+    </style>
+</head>
+<body>
+
+    <div class="app-container">
+        <header>
+            <div class="brand-meta">
+                <div class="app-icon-badge">
+                    <i data-lucide="sparkles" size="22" style="color: var(--text-main);"></i>
+                </div>
+                <div class="brand-text">
+                    <h1>Generador Lorem Ipsum</h1>
+                    <span>Personalización avanzada y métricas en tiempo real</span>
+                </div>
+            </div>
+        </header>
+
+        <div class="workspace">
+            <div class="control-panel">
+                <div class="selectors-row">
+                    <button class="pill-button active" id="btn-paragraphs" onclick="changeType('paragraphs')">Párrafos</button>
+                    <button class="pill-button" id="btn-sentences" onclick="changeType('sentences')">Frases</button>
+                    <button class="pill-button" id="btn-words" onclick="changeType('words')">Palabras</button>
+                </div>
+                
+                <div class="options-grid">
+                    <div class="config-box">
+                        <label id="range-label">Cantidad</label>
+                        <input type="range" id="quantity-slider" min="1" max="10" value="3" oninput="updateQuantity(this.value)">
+                        <span class="range-val" id="slider-value">3</span>
+                    </div>
+
+                    <div class="config-box">
+                        <label>Variación</label>
+                        <select id="flavor-select" onchange="updateFlavor(this.value)">
+                            <option value="classic">Lorem Ipsum Clásico</option>
+                            <option value="tech">Cyber / Tecnológico</option>
+                            <option value="modern">Minimalista / Limpio</option>
+                        </select>
+                    </div>
+
+                    <div class="config-box" style="grid-column: 1 / -1; justify-content: space-between;">
+                        <label class="checkbox-container">
+                            <input type="checkbox" id="start-lorem-check" checked onchange="triggerGeneration()">
+                            <span>Iniciar obligatoriamente con "Lorem ipsum dolor..."</span>
+                        </label>
+                    </div>
+                </div>
+            </div>
+
+            <div class="editor-container">
+                <textarea class="text-editor" id="editor" placeholder="Modifica o escribe aquí el contenido generado..." oninput="updateStats()"></textarea>
+                
+                <div class="editor-footer">
+                    <div class="stats-group">
+                        <div class="stat-item">Palabras:<strong id="stat-words">0</strong></div>
+                        <div class="stat-item">Caracteres:<strong id="stat-chars">0</strong></div>
+                        <div class="stat-item">Párrafos:<strong id="stat-paragraphs">0</strong></div>
+                    </div>
+                    <div class="actions-wrapper">
+                        <button class="action-btn" onclick="triggerGeneration()" title="Regenerar Variación">
+                            <i data-lucide="refresh-cw" size="18"></i>
+                        </button>
+                        <button class="action-btn" onclick="copyText(this)" title="Copiar al portapapeles">
+                            <i data-lucide="copy" size="18"></i>
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const DICTIONARIES = {
+            classic: ["lorem", "ipsum", "dolor", "sit", "amet", "consectetur", "adipiscing", "elit", "sed", "do", "eiusmod", "tempor", "incididunt", "ut", "labore", "et", "dolore", "magna", "aliqua", "ut", "enim", "ad", "minim", "veniam", "quis", "nostrud", "exercitation", "ullamco", "laboris", "nisi", "ut", "aliquip", "ex", "ea", "commodo", "consequat", "duis", "aute", "irure", "dolor", "in", "reprehenderit", "in", "voluptate", "velit", "esse", "cillum", "dolore", "eu", "fugiat", "nulla", "pariatur", "excepteur", "sint", "occaecat", "cupidatat", "non", "proident", "sunt", "in", "culpa", "qui", "officia", "deserunt", "mollit", "anim", "id", "est", "laborum"],
+            tech: ["cyber", "quantum", "matrix", "interface", "protocol", "array", "algorithm", "mainframe", "bandwidth", "node", "synthetic", "sensor", "compiler", "proxy", "firewall", "encryption", "pixel", "byte", "neural", "cloud", "firmware", "subsystem", "holographic", "vector", "binary", "database", "backup", "latency", "kernel", "buffer", "optical", "digital"],
+            modern: ["ambient", "minimal", "organic", "structure", "texture", "vibe", "aesthetic", "essence", "balance", "pure", "canvas", "element", "module", "studio", "concept", "harmony", "fluid", "space", "form", "neutral", "tone", "aspect", "surface", "sculpt", "focus", "clarity", "linear", "detail", "subtle", "raw", "craft"]
+        };
+
+        let currentType = 'paragraphs';
+        let currentQty = 3;
+        let currentFlavor = 'classic';
+        const editor = document.getElementById('editor');
+
+        window.onload = () => {
+            lucide.createIcons();
+            triggerGeneration();
+        };
+
+        function changeType(type) {
+            currentType = type;
+            document.querySelectorAll('.pill-button').forEach(b => b.classList.remove('active'));
+            document.getElementById(`btn-${type}`).classList.add('active');
+
+            const slider = document.getElementById('quantity-slider');
+            if (type === 'words') { slider.max = 150; slider.value = 40; } 
+            else if (type === 'sentences') { slider.max = 25; slider.value = 6; } 
+            else { slider.max = 12; slider.value = 3; }
+
+            currentQty = parseInt(slider.value);
+            document.getElementById('slider-value').innerText = currentQty;
+            triggerGeneration();
+        }
+
+        function updateQuantity(val) {
+            currentQty = parseInt(val);
+            document.getElementById('slider-value').innerText = val;
+            triggerGeneration();
+        }
+
+        function updateFlavor(val) {
+            currentFlavor = val;
+            triggerGeneration();
+        }
+
+        function getRandomWord() {
+            const dict = DICTIONARIES[currentFlavor];
+            return dict[Math.floor(Math.random() * dict.length)];
+        }
+
+        function triggerGeneration() {
+            let result = [];
+            const forceLorem = document.getElementById('start-lorem-check').checked;
+
+            if (currentType === 'words') {
+                for (let i = 0; i < currentQty; i++) {
+                    result.push(getRandomWord());
+                }
+                let text = result.join(' ') + '.';
+                if (forceLorem && currentFlavor === 'classic') {
+                    text = "Lorem ipsum dolor " + text;
+                }
+                editor.value = text;
+            } 
+            else if (currentType === 'sentences') {
+                for (let i = 0; i < currentQty; i++) {
+                    let len = 6 + Math.floor(Math.random() * 8);
+                    let words = [];
+                    for (let w = 0; w < len; w++) { words.push(getRandomWord()); }
+                    let s = words.join(' ');
+                    result.push(s.charAt(0).toUpperCase() + s.slice(1) + '.');
+                }
+                let text = result.join(' ');
+                if (forceLorem && currentFlavor === 'classic' && !text.toLowerCase().startsWith('lorem')) {
+                    text = "Lorem ipsum dolor sit amet. " + text;
+                }
+                editor.value = text;
+            } 
+            else if (currentType === 'paragraphs') {
+                for (let p = 0; p < currentQty; p++) {
+                    let pLen = 3 + Math.floor(Math.random() * 3);
+                    let sentences = [];
+                    for (let i = 0; i < pLen; i++) {
+                        let len = 8 + Math.floor(Math.random() * 8);
+                        let words = [];
+                        for (let w = 0; w < len; w++) { words.push(getRandomWord()); }
+                        let s = words.join(' ');
+                        sentences.push(s.charAt(0).toUpperCase() + s.slice(1) + '.');
+                    }
+                    result.push(sentences.join(' '));
+                }
+                if (forceLorem && currentFlavor === 'classic') {
+                    result[0] = "Lorem ipsum dolor sit amet, consectetur adipiscing elit. " + result[0];
+                }
+                editor.value = result.join('\n\n');
+            }
+            updateStats();
+        }
+
+        function updateStats() {
+            const text = editor.value.trim();
+            const words = text === '' ? 0 : text.split(/\s+/).filter(w => w.length > 0).length;
+            const chars = editor.value.length;
+            const paragraphs = text === '' ? 0 : editor.value.split(/\n+/).filter(p => p.trim().length > 0).length;
+
+            document.getElementById('stat-words').innerText = words;
+            document.getElementById('stat-chars').innerText = chars;
+            document.getElementById('stat-paragraphs').innerText = paragraphs;
+        }
+
+        function copyText(btnElement) {
+            navigator.clipboard.writeText(editor.value).then(() => {
+                const origInner = btnElement.innerHTML;
+                btnElement.innerHTML = `<i data-lucide="check" size="18" style="color: var(--accent-success);"></i>`;
+                lucide.createIcons();
+                setTimeout(() => {
+                    btnElement.innerHTML = origInner;
+                    lucide.createIcons();
+                }, 1500);
+            });
+        }
+    </script>
+</body>
+</html>

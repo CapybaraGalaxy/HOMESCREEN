@@ -1,0 +1,494 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+    <title>Limpiador de textos</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600&display=swap" rel="stylesheet">
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <style>
+        :root {
+            --bg: #000000;
+            --surface: #121212;
+            --surface-hover: #1c1c1e;
+            --glass: rgba(15, 15, 15, 0.6);
+            --glass-border: rgba(255, 255, 255, 0.08);
+            --blur-val: 30px;
+            --text-main: #FFFFFF;
+            --text-muted: #8E8E93;
+            --accent-danger: #FF453A;
+            --accent-success: #34C759;
+            --bezier: cubic-bezier(0.16, 1, 0.3, 1);
+            --spring: cubic-bezier(0.34, 1.56, 0.64, 1);
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: 'Outfit', sans-serif;
+            -webkit-tap-highlight-color: transparent;
+        }
+
+        body {
+            background-color: var(--bg);
+            color: var(--text-main);
+            overflow: hidden;
+        }
+
+        .app-container {
+            height: 100dvh;
+            max-width: 900px;
+            margin: 0 auto;
+            padding: env(safe-area-inset-top) 24px calc(env(safe-area-inset-bottom) + 16px) 24px;
+            display: flex;
+            flex-direction: column;
+        }
+
+        header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 24px 0 16px 0;
+        }
+
+        .header-left {
+            display: flex;
+            align-items: center;
+            gap: 16px;
+        }
+
+        .app-icon-badge {
+            width: 42px;
+            height: 42px;
+            border-radius: 12px;
+            background: radial-gradient(circle at center, rgba(255,255,255,0.1) 0%, rgba(0,0,0,0) 80%);
+            border: 1px solid var(--glass-border);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .header-title h1 {
+            font-size: 20px;
+            font-weight: 600;
+            letter-spacing: -0.5px;
+        }
+
+        .main-content {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            gap: 16px;
+            overflow-y: auto;
+            padding-bottom: 24px;
+            scrollbar-width: none;
+        }
+
+        .main-content::-webkit-scrollbar {
+            display: none;
+        }
+
+        .metrics-bar {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 12px;
+            padding: 4px 0 8px 0;
+        }
+
+        .metric-card {
+            background: var(--glass);
+            border: 1px solid var(--glass-border);
+            border-radius: 14px;
+            padding: 12px;
+            text-align: center;
+            display: flex;
+            flex-direction: column;
+            gap: 4px;
+        }
+
+        .metric-value {
+            font-size: 20px;
+            font-weight: 600;
+            font-variant-numeric: tabular-nums;
+            transition: transform 0.2s var(--spring);
+        }
+
+        .metric-value.pulse {
+            transform: scale(1.1);
+            color: var(--accent-success);
+        }
+
+        .metric-label {
+            font-size: 12px;
+            color: var(--text-muted);
+            font-weight: 500;
+        }
+
+        .workspace-grid {
+            display: grid;
+            grid-template-columns: 1fr;
+            gap: 16px;
+            flex: 1;
+        }
+
+        @media (min-width: 768px) {
+            .workspace-grid {
+                grid-template-columns: 1fr 1fr;
+            }
+        }
+
+        .panel {
+            background: var(--glass);
+            backdrop-filter: blur(var(--blur-val));
+            -webkit-backdrop-filter: blur(var(--blur-val));
+            border: 1px solid var(--glass-border);
+            border-radius: 20px;
+            padding: 20px;
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+        }
+
+        .panel-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .panel-title {
+            font-size: 13px;
+            font-weight: 600;
+            color: var(--text-muted);
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .panel-actions {
+            display: flex;
+            gap: 8px;
+        }
+
+        .icon-btn {
+            background: transparent;
+            border: none;
+            color: var(--text-muted);
+            cursor: pointer;
+            width: 32px;
+            height: 32px;
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: background 0.2s var(--bezier), color 0.2s var(--bezier);
+        }
+
+        .icon-btn:hover {
+            background: var(--surface-hover);
+            color: var(--text-main);
+        }
+
+        .icon-btn.success-toast {
+            color: var(--accent-success);
+        }
+
+        textarea {
+            width: 100%;
+            flex: 1;
+            background: transparent;
+            border: none;
+            resize: none;
+            color: var(--text-main);
+            font-size: 15px;
+            line-height: 1.6;
+            outline: none;
+            min-height: 250px;
+        }
+
+        textarea::placeholder {
+            color: rgba(255, 255, 255, 0.3);
+        }
+
+        .config-box {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+            max-height: 200px;
+            overflow-y: auto;
+            scrollbar-width: none;
+            padding-right: 4px;
+        }
+
+        .config-box::-webkit-scrollbar {
+            display: none;
+        }
+
+        .config-row {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 6px 0;
+            border-bottom: 1px solid rgba(255,255,255,0.04);
+        }
+
+        .config-info {
+            display: flex;
+            flex-direction: column;
+        }
+
+        .config-label {
+            font-size: 13px;
+            font-weight: 500;
+        }
+
+        .toggle-switch {
+            position: relative;
+            display: inline-block;
+            width: 40px;
+            height: 22px;
+        }
+
+        .toggle-switch input {
+            opacity: 0;
+            width: 0;
+            height: 0;
+        }
+
+        .slider {
+            position: absolute;
+            cursor: pointer;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background-color: var(--surface-hover);
+            transition: .3s var(--bezier);
+            border-radius: 22px;
+            border: 1px solid var(--glass-border);
+        }
+
+        .slider:before {
+            position: absolute;
+            content: "";
+            height: 16px;
+            width: 16px;
+            left: 2px;
+            bottom: 2px;
+            background-color: white;
+            transition: .3s var(--bezier);
+            border-radius: 50%;
+        }
+
+        input:checked + .slider {
+            background-color: var(--accent-success);
+        }
+
+        input:checked + .slider:before {
+            transform: translateX(18px);
+        }
+    </style>
+</head>
+<body>
+
+    <div class="app-container">
+        <header>
+            <div class="header-left">
+                <div class="app-icon-badge">
+                    <i data-lucide="sparkles" size="20" style="color: var(--text-main);"></i>
+                </div>
+                <div class="header-title">
+                    <h1>PureText</h1>
+                </div>
+            </div>
+        </header>
+
+        <div class="metrics-bar">
+            <div class="metric-card">
+                <span class="metric-value" id="val-words">0</span>
+                <span class="metric-label">Palabras</span>
+            </div>
+            <div class="metric-card">
+                <span class="metric-value" id="val-chars">0</span>
+                <span class="metric-label">Caracteres</span>
+            </div>
+            <div class="metric-card">
+                <span class="metric-value" id="val-lines">0</span>
+                <span class="metric-label">Líneas</span>
+            </div>
+        </div>
+
+        <main class="main-content">
+            <div class="workspace-grid">
+                <div class="panel">
+                    <div class="panel-header">
+                        <span class="panel-title">Texto Sucio / Original</span>
+                        <div class="panel-actions">
+                            <button class="icon-btn" onclick="clearInput()" title="Limpiar Entrada">
+                                <i data-lucide="trash-2" size="16"></i>
+                            </button>
+                        </div>
+                    </div>
+                    <textarea id="text-input" placeholder="Pega o escribe tu texto desorganizado aquí..." oninput="processText()"></textarea>
+                </div>
+
+                <div class="panel">
+                    <div class="panel-header">
+                        <span class="panel-title">Personalización & Resultado</span>
+                        <div class="panel-actions">
+                            <button class="icon-btn" onclick="copyOutput(this)" title="Copiar Resultado">
+                                <i data-lucide="copy" size="16"></i>
+                            </button>
+                        </div>
+                    </div>
+                    
+                    <div class="config-box">
+                        <div class="config-row">
+                            <div class="config-info">
+                                <span class="config-label">Eliminar espacios dobles</span>
+                            </div>
+                            <label class="toggle-switch">
+                                <input type="checkbox" id="chk-spaces" checked onchange="processText()">
+                                <span class="slider"></span>
+                            </label>
+                        </div>
+                        <div class="config-row">
+                            <div class="config-info">
+                                <span class="config-label">Eliminar saltos de línea vacíos</span>
+                            </div>
+                            <label class="toggle-switch">
+                                <input type="checkbox" id="chk-lines" checked onchange="processText()">
+                                <span class="slider"></span>
+                            </label>
+                        </div>
+                        <div class="config-row">
+                            <div class="config-info">
+                                <span class="config-label">Remover emojis y símbolos raros</span>
+                            </div>
+                            <label class="toggle-switch">
+                                <input type="checkbox" id="chk-emojis" onchange="processText()">
+                                <span class="slider"></span>
+                            </label>
+                        </div>
+                        <div class="config-row">
+                            <div class="config-info">
+                                <span class="config-label">Convertir todo a minúsculas</span>
+                            </div>
+                            <label class="toggle-switch">
+                                <input type="checkbox" id="chk-lower" onchange="processText()">
+                                <span class="slider"></span>
+                            </label>
+                        </div>
+                        <div class="config-row">
+                            <div class="config-info">
+                                <span class="config-label">Convertir todo a MAYÚSCULAS</span>
+                            </div>
+                            <label class="toggle-switch">
+                                <input type="checkbox" id="chk-upper" onchange="processText()">
+                                <span class="slider"></span>
+                            </label>
+                        </div>
+                    </div>
+
+                    <textarea id="text-output" readonly placeholder="El texto procesado y limpio aparecerá aquí inmediatamente..."></textarea>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <script>
+        window.onload = function() {
+            lucide.createIcons();
+        };
+
+        function processText() {
+            const input = document.getElementById('text-input').value;
+            let output = input;
+
+            const chkSpaces = document.getElementById('chk-spaces').checked;
+            const chkLines = document.getElementById('chk-lines').checked;
+            const chkEmojis = document.getElementById('chk-emojis').checked;
+            const chkLower = document.getElementById('chk-lower').checked;
+            const chkUpper = document.getElementById('chk-upper').checked;
+
+            // Evitar conflicto mutuo directo de mayúsculas/minúsculas de forma suave
+            if (chkLower && chkUpper) {
+                // Si ambos están activos, prioriza el último modificado o desactiva uno visualmente
+                // Para simplificar, priorizamos minúsculas
+            }
+
+            // Aplicación secuencial de filtros seleccionados
+            if (chkSpaces) {
+                output = output.replace(/[ \t]+/g, ' ');
+            }
+            if (chkLines) {
+                output = output.replace(/\n\s*\n/g, '\n').replace(/^\s*[\r\n]/gm, '');
+            }
+            if (chkEmojis) {
+                output = output.replace(/[^\x20-\x7E\u00C0-\u00FF\n]/g, '');
+            }
+            if (chkLower && !chkUpper) {
+                output = output.toLowerCase();
+            }
+            if (chkUpper && !chkLower) {
+                output = output.toUpperCase();
+            }
+
+            document.getElementById('text-output').value = output;
+
+            // Recálculo dinámico en tiempo real de métricas analíticas
+            const cleanTrimmed = output.trim();
+            const words = cleanTrimmed === '' ? 0 : cleanTrimmed.split(/\s+/).length;
+            const chars = output.length;
+            const lines = output === '' ? 0 : output.split('\n').length;
+
+            updateMetric('val-words', words);
+            updateMetric('val-chars', chars);
+            updateMetric('val-lines', lines);
+        }
+
+        function updateMetric(id, value) {
+            const element = document.getElementById(id);
+            if (element.innerText != value) {
+                element.innerText = value;
+                element.classList.add('pulse');
+                setTimeout(() => element.classList.remove('pulse'), 200);
+            }
+        }
+
+        function clearInput() {
+            document.getElementById('text-input').value = '';
+            processText();
+        }
+
+        function copyOutput(btn) {
+            const outputText = document.getElementById('text-output').value;
+            if (!outputText) return;
+            
+            navigator.clipboard.writeText(outputText).then(() => {
+                const originalHtml = btn.innerHTML;
+                btn.innerHTML = `<i data-lucide="check" size="16"></i>`;
+                btn.classList.add('success-toast');
+                lucide.createIcons();
+
+                setTimeout(() => {
+                    btn.innerHTML = originalHtml;
+                    btn.classList.remove('success-toast');
+                    lucide.createIcons();
+                }, 1500);
+            });
+        }
+
+        // Manejo intuitivo de exclusión mutua para los toggles de mayúsculas/minúsculas
+        document.getElementById('chk-lower').addEventListener('change', function() {
+            if (this.checked) document.getElementById('chk-upper').checked = false;
+            processText();
+        });
+        document.getElementById('chk-upper').addEventListener('change', function() {
+            if (this.checked) document.getElementById('chk-lower').checked = false;
+            processText();
+        });
+    </script>
+</body>
+</html>

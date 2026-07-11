@@ -1,0 +1,424 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+    <title>Convertidor de Texto</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <style>
+        :root {
+            --bg: #000000;
+            --surface: #121212;
+            --surface-hover: #1c1c1e;
+            --glass: rgba(15, 15, 15, 0.6);
+            --glass-border: rgba(255, 255, 255, 0.08);
+            --blur-val: 30px;
+            --text-main: #FFFFFF;
+            --text-muted: #8E8E93;
+            --accent-danger: #FF453A;
+            --accent-success: #34C759;
+            --bezier: cubic-bezier(0.16, 1, 0.3, 1);
+            --spring: cubic-bezier(0.34, 1.56, 0.64, 1);
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            -webkit-tap-highlight-color: transparent;
+        }
+
+        body {
+            background-color: var(--bg);
+            color: var(--text-main);
+            font-family: 'Outfit', sans-serif;
+            overflow: hidden;
+            height: 100dvh;
+        }
+
+        .app-container {
+            height: 100dvh;
+            max-width: 900px;
+            margin: 0 auto;
+            padding: env(safe-area-inset-top) 24px calc(env(safe-area-inset-bottom) + 16px) 24px;
+            display: flex;
+            flex-direction: column;
+        }
+
+        header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 20px 0 16px 0;
+        }
+
+        .brand-meta {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .app-icon-badge {
+            width: 42px;
+            height: 42px;
+            border-radius: 12px;
+            background: radial-gradient(circle at center, rgba(255,255,255,0.15) 0%, rgba(255,255,255,0) 100%);
+            border: 1px solid var(--glass-border);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.5);
+        }
+
+        .brand-text h1 {
+            font-size: 20px;
+            font-weight: 600;
+            letter-spacing: -0.5px;
+        }
+
+        .counter-badge {
+            font-size: 13px;
+            color: var(--text-muted);
+            font-variant-numeric: tabular-nums;
+            transition: transform 0.2s var(--spring);
+        }
+
+        .counter-badge.pulse {
+            transform: scale(1.1);
+            color: var(--text-main);
+        }
+
+        .folders-scroll-area {
+            display: flex;
+            gap: 8px;
+            overflow-x: auto;
+            padding: 4px 0 16px 0;
+            scrollbar-width: none;
+            -webkit-overflow-scrolling: touch;
+        }
+        
+        .folders-scroll-area::-webkit-scrollbar { 
+            display: none; 
+        }
+
+        .pill-button {
+            background: var(--surface);
+            border: 1px solid var(--glass-border);
+            color: var(--text-muted);
+            padding: 8px 16px;
+            border-radius: 100px;
+            font-size: 14px;
+            font-weight: 500;
+            cursor: pointer;
+            white-space: nowrap;
+            transition: all 0.3s var(--bezier);
+        }
+
+        .pill-button:hover, .pill-button.active {
+            color: var(--text-main);
+            background: var(--surface-hover);
+            border-color: rgba(255,255,255,0.2);
+        }
+
+        .pill-button.active {
+            background: rgba(255, 255, 255, 0.1);
+            box-shadow: 0 0 15px rgba(255,255,255,0.05);
+        }
+
+        .main-content {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            gap: 16px;
+            overflow-y: auto;
+            scrollbar-width: none;
+        }
+
+        .main-content::-webkit-scrollbar {
+            display: none;
+        }
+
+        .workspace {
+            display: flex;
+            flex-direction: column;
+            gap: 16px;
+            flex: 1;
+        }
+
+        .text-panel {
+            background: var(--glass);
+            backdrop-filter: blur(var(--blur-val));
+            -webkit-backdrop-filter: blur(var(--blur-val));
+            border: 1px solid var(--glass-border);
+            border-radius: 20px;
+            padding: 20px;
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+            position: relative;
+        }
+
+        .panel-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .panel-title {
+            font-size: 12px;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            color: var(--text-muted);
+            font-weight: 600;
+        }
+
+        .actions-group {
+            display: flex;
+            gap: 8px;
+        }
+
+        .action-btn {
+            background: transparent;
+            border: none;
+            color: var(--text-muted);
+            cursor: pointer;
+            padding: 6px;
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.2s var(--bezier);
+        }
+
+        .action-btn:hover {
+            color: var(--text-main);
+            background: rgba(255, 255, 255, 0.05);
+        }
+
+        .action-btn.success {
+            color: var(--accent-success);
+        }
+
+        textarea {
+            width: 100%;
+            background: transparent;
+            border: none;
+            color: var(--text-main);
+            font-family: 'Outfit', sans-serif;
+            font-size: 16px;
+            line-height: 1.5;
+            resize: none;
+            outline: none;
+            flex: 1;
+            min-height: 140px;
+        }
+
+        textarea::placeholder {
+            color: rgba(255, 255, 255, 0.25);
+        }
+
+        .stats-row {
+            display: flex;
+            gap: 16px;
+            font-size: 13px;
+            color: var(--text-muted);
+            font-variant-numeric: tabular-nums;
+            border-top: 1px solid rgba(255,255,255,0.05);
+            padding-top: 10px;
+        }
+
+        .error-shake {
+            animation: shake 0.3s var(--bezier);
+            border-color: var(--accent-danger) !important;
+        }
+
+        @keyframes shake {
+            0%, 100% { transform: translateX(0); }
+            20%, 60% { transform: translateX(-6px); }
+            40%, 80% { transform: translateX(6px); }
+        }
+
+        @media (min-width: 768px) {
+            .workspace {
+                flex-direction: row;
+            }
+            textarea {
+                min-height: auto;
+            }
+        }
+    </style>
+</head>
+<body>
+
+    <div class="app-container">
+        <header>
+            <div class="brand-meta">
+                <div class="app-icon-badge">
+                    <i data-lucide="case-sensitive" size="20" style="color: var(--text-main);"></i>
+                </div>
+                <div class="brand-text">
+                    <h1>Convertidor de Texto</h1>
+                </div>
+            </div>
+            <div class="counter-badge" id="global-counter">0 cambios</div>
+        </header>
+
+        <nav class="folders-scroll-area" id="transformation-methods">
+            </nav>
+
+        <main class="main-content">
+            <div class="workspace">
+                <div class="text-panel" id="input-panel">
+                    <div class="panel-header">
+                        <span class="panel-title">Entrada</span>
+                        <div class="actions-group">
+                            <button class="action-btn" onclick="clearInput()" title="Limpiar Entrada">
+                                <i data-lucide="trash-2" size="16"></i>
+                            </button>
+                        </div>
+                    </div>
+                    <textarea id="input-text" placeholder="Escribe o pega tu texto aquí..." oninput="processTransformation()"></textarea>
+                    <div class="stats-row">
+                        <span id="input-chars">0 caracteres</span>
+                        <span id="input-words">0 palabras</span>
+                    </div>
+                </div>
+
+                <div class="text-panel" id="output-panel">
+                    <div class="panel-header">
+                        <span class="panel-title">Resultado</span>
+                        <div class="actions-group">
+                            <button class="action-btn" id="copy-btn" onclick="copyOutput()" title="Copiar Resultado">
+                                <i data-lucide="copy" size="16"></i>
+                            </button>
+                        </div>
+                    </div>
+                    <textarea id="output-text" readonly placeholder="El resultado aparecerá aquí..."></textarea>
+                    <div class="stats-row">
+                        <span id="output-chars">0 caracteres</span>
+                        <span id="output-words">0 palabras</span>
+                    </div>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <script>
+        const METHODS = [
+            { id: 'upper', label: 'MAYÚSCULAS', fn: t => t.toUpperCase() },
+            { id: 'lower', label: 'minúsculas', fn: t => t.toLowerCase() },
+            { id: 'title', label: 'Título Propio', fn: t => t.replace(/\b\w/g, c => c.toUpperCase()) },
+            { id: 'sentence', label: 'Frase inicial', fn: t => t.toLowerCase().replace(/(^\s*\w|[\.\!\?]\s*\w)/g, c => c.toUpperCase()) },
+            { id: 'camel', label: 'camelCase', fn: t => t.toLowerCase().replace(/[^a-zA-Z0-9]+(.)/g, (m, chr) => chr.toUpperCase()).replace(/[^a-zA-Z0-9]/g, '') },
+            { id: 'snake', label: 'snake_case', fn: t => t.toLowerCase().replace(/\s+/g, '_').replace(/[^a-z0-9_]/g, '') },
+            { id: 'kebab', label: 'kebab-case', fn: t => t.toLowerCase().replace(/\s+/g, '-').replace(/[^a-z0-9-]/g, '') }
+        ];
+
+        let appData = {
+            currentMethod: 'upper',
+            totalTransformations: 0
+        };
+
+        window.onload = () => {
+            const savedData = localStorage.getItem('text_converter_data');
+            if (savedData) {
+                appData = JSON.parse(savedData);
+            }
+            renderTabs();
+            renderApp();
+            lucide.createIcons();
+        };
+
+        function saveData() {
+            localStorage.setItem('text_converter_data', JSON.stringify(appData));
+        }
+
+        function renderTabs() {
+            const container = document.getElementById('transformation-methods');
+            container.innerHTML = METHODS.map(m => `
+                <button class="pill-button ${appData.currentMethod === m.id ? 'active' : ''}" onclick="setMethod('${m.id}')">
+                    ${m.label}
+                </button>
+            `).join('');
+        }
+
+        function renderApp() {
+            const counter = document.getElementById('global-counter');
+            counter.innerText = `${appData.totalTransformations} cambios`;
+            counter.classList.add('pulse');
+            setTimeout(() => counter.classList.remove('pulse'), 200);
+        }
+
+        function setMethod(methodId) {
+            appData.currentMethod = methodId;
+            renderTabs();
+            processTransformation();
+        }
+
+        function processTransformation() {
+            const input = document.getElementById('input-text').value;
+            const outputArea = document.getElementById('output-text');
+            
+            updateStats('input', input);
+
+            if (!input.trim()) {
+                outputArea.value = '';
+                updateStats('output', '');
+                return;
+            }
+
+            const activeMethod = METHODS.find(m => m.id === appData.currentMethod);
+            if (activeMethod) {
+                const result = activeMethod.fn(input);
+                outputArea.value = result;
+                updateStats('output', result);
+            }
+        }
+
+        function updateStats(type, text) {
+            const chars = text.length;
+            const words = text.trim() ? text.trim().split(/\s+/).length : 0;
+            document.getElementById(`${type}-chars`).innerText = `${chars} caracteres`;
+            document.getElementById(`${type}-words`).innerText = `${words} palabras`;
+        }
+
+        function clearInput() {
+            const inputArea = document.getElementById('input-text');
+            inputArea.value = '';
+            processTransformation();
+            inputArea.focus();
+        }
+
+        function copyOutput() {
+            const outputArea = document.getElementById('output-text');
+            const copyBtn = document.getElementById('copy-btn');
+
+            if (!outputArea.value.trim()) {
+                const panel = document.getElementById('output-panel');
+                panel.classList.add('error-shake');
+                setTimeout(() => panel.classList.remove('error-shake'), 300);
+                return;
+            }
+
+            navigator.clipboard.writeText(outputArea.value).then(() => {
+                copyBtn.innerHTML = `<i data-lucide="check" size="16"></i>`;
+                copyBtn.classList.add('success');
+                lucide.createIcons();
+
+                appData.totalTransformations += 1;
+                saveData();
+                renderApp();
+
+                setTimeout(() => {
+                    copyBtn.innerHTML = `<i data-lucide="copy" size="16"></i>`;
+                    copyBtn.classList.remove('success');
+                    lucide.createIcons();
+                }, 2000);
+            });
+        }
+    </script>
+</body>
+</html>
