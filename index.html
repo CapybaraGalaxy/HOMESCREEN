@@ -260,7 +260,9 @@
         .settings-btn { position: fixed; bottom: 25px; right: 25px; background: var(--glass); border: 1px solid var(--glass-border); width: 45px; height: 45px; border-radius: 50%; display: flex; align-items: center; justify-content: center; cursor: pointer; z-index: 110; transition: all 0.4s var(--bezier); }
         .settings-panel { position: fixed; bottom: 85px; right: 25px; width: 280px; background: var(--glass); backdrop-filter: blur(var(--blur-val)); border: 1px solid var(--glass-border); border-radius: 24px; padding: 25px; transform: scale(0.9) translateY(20px); opacity: 0; pointer-events: none; transition: all 0.4s var(--bezier); z-index: 110; }
         .settings-panel.active { transform: scale(1) translateY(0); opacity: 1; pointer-events: auto; }
-        .setting-item { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; }
+        .setting-item { display: flex; justify-content: space-between; align-items: center; gap: 10px; margin-bottom: 16px; flex-wrap: wrap; }
+        .setting-item > span { flex: 1 1 140px; min-width: 0; }
+        .settings-actions { display: flex; gap: 8px; flex-wrap: wrap; justify-content: flex-end; }
         .settings-action-btn {
             border: 1px solid var(--glass-border);
             background: var(--glass);
@@ -272,6 +274,8 @@
             cursor: pointer;
             transition: all 0.25s var(--bezier);
             backdrop-filter: blur(var(--blur-val));
+            white-space: nowrap;
+            flex-shrink: 0;
         }
         .settings-action-btn:hover { background: rgba(255,255,255,0.12); transform: translateY(-1px); }
         .settings-action-btn:disabled { opacity: 0.6; cursor: wait; }
@@ -280,6 +284,17 @@
             display: inline-flex;
             animation: spin 0.9s linear infinite;
         }
+        .settings-info {
+            margin: 10px 0 18px;
+            padding: 10px 12px;
+            border-radius: 14px;
+            background: rgba(255,255,255,0.06);
+            border: 1px solid rgba(255,255,255,0.08);
+            font-size: 0.82rem;
+            color: var(--text-muted);
+            line-height: 1.45;
+        }
+        .settings-info strong { color: var(--text-main); display: block; margin-bottom: 3px; }
         @keyframes spin { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }
         
         #settingLocalChip { display: none; }
@@ -565,7 +580,7 @@ transform:scale(1.05);
         <div><strong>VERSIÓN LOCAL</strong> <span>· Ir a web</span></div>
     </a>
 
-    <div class="version-tag" id="versionTag">DEV v0.9.9.16</div>
+    <div class="version-tag" id="versionTag">DEV v0.9.9.17</div>
 
     <div class="ui-layer">
         <header class="header">
@@ -621,6 +636,14 @@ transform:scale(1.05);
             >
                 Cerrar
             </button>
+        </div>
+    </div>
+
+    <div class="custom-modal" id="changelogModal">
+        <div class="modal-title"><i data-lucide="history"></i> Changelog</div>
+        <div id="changelogContent" style="text-align:left; max-height:280px; overflow-y:auto; margin-bottom:20px;"></div>
+        <div class="modal-buttons">
+            <button class="modal-btn secondary" onclick="closeModal('changelogModal')">Cerrar</button>
         </div>
     </div>
 
@@ -714,13 +737,20 @@ const hiddenApp = { name: 'Neo GameCenter', icon: 'Gamepad2', url: 'games.html' 
     <div class="settings-btn" id="setBtn"><i data-lucide="settings" style="width: 20px;"></i></div>
     <div class="settings-panel" id="setPanel">
         <h3 style="margin: 0 0 20px 0; font-weight: 500;">Ajustes</h3>
+        <div class="settings-info" id="settingsVersionInfo">
+            <strong>Versión actual</strong>
+            <span>Cargando...</span>
+        </div>
         <div class="setting-item"><span>Fondo Animado</span><div class="switch" id="toggleBg"></div></div>
         <div class="setting-item"><span>Fondo Negro</span><div class="switch" id="toggleDarkBg"></div></div>
         <div class="setting-item"><span>Modo Lista</span><div class="switch" id="toggleList"></div></div>
         <div class="setting-item"><span>Desactivar Blur</span><div class="switch" id="toggleBlur"></div></div>
         <div class="setting-item">
-            <span>Buscar actualizaciones</span>
-            <button class="settings-action-btn" id="checkUpdatesBtn" type="button">Comprobar</button>
+            <span>Actualizaciones</span>
+            <div class="settings-actions">
+                <button class="settings-action-btn" id="checkUpdatesBtn" type="button">Comprobar</button>
+                <button class="settings-action-btn" id="showChangelogBtn" type="button">Changelog</button>
+            </div>
         </div>
         
         <div class="setting-item" id="settingLocalChip"><span>Ocultar Aviso Local</span><div class="switch" id="toggleLocalChip"></div></div>
@@ -849,6 +879,27 @@ const hiddenApp = { name: 'Neo GameCenter', icon: 'Gamepad2', url: 'games.html' 
             }
             overlay.classList.add('active');
             document.getElementById(id).classList.add('active');
+        }
+
+        async function showChangelogModal() {
+            const changelogBox = document.getElementById('changelogContent');
+            if (!changelogBox) return;
+
+            changelogBox.innerHTML = '<div style="color: var(--text-muted);">Cargando changelog...</div>';
+            openModal('changelogModal');
+
+            const versionInfo = await window.getVersionInfo?.();
+            const version = versionInfo?.version || 'Sin versión';
+            const changes = Array.isArray(versionInfo?.changes) && versionInfo.changes.length ? versionInfo.changes : ['No hay cambios registrados.'];
+            const date = versionInfo?.date ? ` · ${versionInfo.date}` : '';
+
+            changelogBox.innerHTML = `
+                <div style="margin-bottom: 10px; color: var(--text-main); font-weight: 500;">${version}${date}</div>
+                <div style="display:flex; flex-direction:column; gap:8px;">
+                    ${changes.map(item => `<div style="padding:10px 12px; border-radius:12px; background: rgba(255,255,255,0.06); border: 1px solid rgba(255,255,255,0.08);">✓ ${item}</div>`).join('')}
+                </div>
+            `;
+            lucide.createIcons();
         }
 
         function openFolder(folder) {
@@ -1098,12 +1149,19 @@ const hiddenApp = { name: 'Neo GameCenter', icon: 'Gamepad2', url: 'games.html' 
 
             const setBtn = document.getElementById('setBtn');
             const checkUpdatesBtn = document.getElementById('checkUpdatesBtn');
+            const showChangelogBtn = document.getElementById('showChangelogBtn');
+            const settingsVersionInfo = document.getElementById('settingsVersionInfo');
             if(setBtn) {
                 setBtn.onclick = (e) => { e.stopPropagation(); setPanel.classList.toggle('active'); };
             }
 
+            if(setPanel) {
+                setPanel.addEventListener('click', (e) => { e.stopPropagation(); });
+            }
+
             if(checkUpdatesBtn && window.checkForUpdates) {
-                checkUpdatesBtn.onclick = async () => {
+                checkUpdatesBtn.onclick = async (e) => {
+                    e.stopPropagation();
                     checkUpdatesBtn.disabled = true;
                     checkUpdatesBtn.innerHTML = '<span class="btn-label"><i data-lucide="loader-2" class="spinner"></i><span>Comprobando...</span></span>';
                     if(window.lucide) lucide.createIcons();
@@ -1114,6 +1172,27 @@ const hiddenApp = { name: 'Neo GameCenter', icon: 'Gamepad2', url: 'games.html' 
                         checkUpdatesBtn.innerHTML = '<span class="btn-label">Comprobar</span>';
                     }
                 };
+            }
+
+            if(showChangelogBtn) {
+                showChangelogBtn.onclick = (e) => {
+                    e.stopPropagation();
+                    showChangelogModal();
+                };
+            }
+
+            if(settingsVersionInfo && window.getVersionInfo) {
+                window.getVersionInfo().then(info => {
+                    const versionLabel = info?.version ? `v${info.version}` : 'Sin datos';
+                    const dateLabel = info?.date ? ` · ${info.date}` : '';
+                    if (settingsVersionInfo) {
+                        settingsVersionInfo.innerHTML = `<strong>Versión actual</strong><span>${versionLabel}${dateLabel}</span>`;
+                    }
+                }).catch(() => {
+                    if (settingsVersionInfo) {
+                        settingsVersionInfo.innerHTML = '<strong>Versión actual</strong><span>No disponible</span>';
+                    }
+                });
             }
             
             document.addEventListener('click', (e) => { if(setPanel && !setPanel.contains(e.target)) setPanel.classList.remove('active'); });

@@ -25,7 +25,7 @@ function showHomescreenToast(message, duration = 2600) {
 
 async function getVersionInfo() {
     try {
-        const response = await fetch("./version.json");
+        const response = await fetch("./version.json", { cache: "no-store" });
         if (!response.ok) {
             throw new Error("No se pudo cargar version.json");
         }
@@ -151,6 +151,7 @@ async function checkForUpdates(options = {}) {
 
 window.checkForUpdates = checkForUpdates;
 window.showHomescreenToast = showHomescreenToast;
+window.getVersionInfo = getVersionInfo;
 
 (() => {
     if (!("serviceWorker" in navigator)) {
