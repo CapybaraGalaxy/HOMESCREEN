@@ -1,7 +1,7 @@
 {
-  "version": "0.9.9.17",
+  "version": "0.9.9.18",
   "date": "12 Julio 2026",
   "changes": [
-    "Probando funcionamiento general de la app :)"
+    "Fixed typer dark text color",
   ]
 }
