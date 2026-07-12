@@ -1,3 +1,4 @@
+let isUpdating = false;
 (() => {
 
     if (!("serviceWorker" in navigator))
@@ -40,6 +41,8 @@
 
                 if (!newWorker) return;
 
+                isUpdating = true;
+
                 newWorker.postMessage("SKIP_WAITING");
 
             };
@@ -80,13 +83,17 @@
 
         });
 
-    navigator.serviceWorker.addEventListener(
-        "controllerchange",
-        () => {
+navigator.serviceWorker.addEventListener(
+    "controllerchange",
+    () => {
+
+        if (isUpdating) {
 
             window.location.reload();
 
         }
-    );
+
+    }
+);
 
 })();
