@@ -1,7 +1,7 @@
 {
-  "version": "0.9.9.18.1",
+  "version": "0.9.9.18.2",
   "date": "12 Julio 2026",
   "changes": [
-    "Fixed typer dark text color"
+    "Fixed some bugs in the update manager."
   ]
 }

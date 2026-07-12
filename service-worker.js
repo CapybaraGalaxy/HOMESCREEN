@@ -60,6 +60,21 @@ self.addEventListener("fetch", event => {
         return;
     }
 
+    // version.json siempre desde red para no mostrar datos obsoletos
+    if (url.pathname.endsWith("/version.json") || url.pathname.endsWith("version.json")) {
+        event.respondWith(
+            fetch(event.request, { cache: "no-store" })
+                .then(response => {
+                    const clone = response.clone();
+                    caches.open(CACHE_NAME)
+                        .then(cache => cache.put(event.request, clone));
+                    return response;
+                })
+                .catch(() => caches.match(event.request))
+        );
+        return;
+    }
+
 
     // Todo lo demás: cache primero
     event.respondWith(

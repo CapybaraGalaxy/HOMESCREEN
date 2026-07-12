@@ -580,7 +580,7 @@ transform:scale(1.05);
         <div><strong>VERSIÓN LOCAL</strong> <span>· Ir a web</span></div>
     </a>
 
-    <div class="version-tag" id="versionTag">DEV v0.9.9.18.1</div>
+    <div class="version-tag" id="versionTag">DEV v0.9.9.18.2</div>
 
     <div class="ui-layer">
         <header class="header">
@@ -925,6 +925,22 @@ const hiddenApp = { name: 'Neo GameCenter', icon: 'Gamepad2', url: 'games.html' 
             if(warningTimer) clearInterval(warningTimer);
         }
 
+        async function refreshSettingsVersionInfo() {
+            const settingsVersionInfo = document.getElementById('settingsVersionInfo');
+            if (!settingsVersionInfo) return;
+
+            settingsVersionInfo.innerHTML = '<strong>Versión actual</strong><span>Cargando...</span>';
+
+            try {
+                const info = await window.getVersionInfo?.();
+                const versionLabel = info?.version ? `v${info.version}` : 'Sin datos';
+                const dateLabel = info?.date ? ` · ${info.date}` : '';
+                settingsVersionInfo.innerHTML = `<strong>Versión actual</strong><span>${versionLabel}${dateLabel}</span>`;
+            } catch (error) {
+                settingsVersionInfo.innerHTML = '<strong>Versión actual</strong><span>No disponible</span>';
+            }
+        }
+
         function triggerGameWarning() {
             document.getElementById('hiddenFolderModal').classList.remove('active');
             openModal('warningModal');
@@ -1152,7 +1168,14 @@ const hiddenApp = { name: 'Neo GameCenter', icon: 'Gamepad2', url: 'games.html' 
             const showChangelogBtn = document.getElementById('showChangelogBtn');
             const settingsVersionInfo = document.getElementById('settingsVersionInfo');
             if(setBtn) {
-                setBtn.onclick = (e) => { e.stopPropagation(); setPanel.classList.toggle('active'); };
+                setBtn.onclick = async (e) => {
+                    e.stopPropagation();
+                    const willOpen = !setPanel.classList.contains('active');
+                    setPanel.classList.toggle('active');
+                    if (willOpen && window.getVersionInfo) {
+                        await refreshSettingsVersionInfo();
+                    }
+                };
             }
 
             if(setPanel) {
@@ -1182,17 +1205,7 @@ const hiddenApp = { name: 'Neo GameCenter', icon: 'Gamepad2', url: 'games.html' 
             }
 
             if(settingsVersionInfo && window.getVersionInfo) {
-                window.getVersionInfo().then(info => {
-                    const versionLabel = info?.version ? `v${info.version}` : 'Sin datos';
-                    const dateLabel = info?.date ? ` · ${info.date}` : '';
-                    if (settingsVersionInfo) {
-                        settingsVersionInfo.innerHTML = `<strong>Versión actual</strong><span>${versionLabel}${dateLabel}</span>`;
-                    }
-                }).catch(() => {
-                    if (settingsVersionInfo) {
-                        settingsVersionInfo.innerHTML = '<strong>Versión actual</strong><span>No disponible</span>';
-                    }
-                });
+                refreshSettingsVersionInfo();
             }
             
             document.addEventListener('click', (e) => { if(setPanel && !setPanel.contains(e.target)) setPanel.classList.remove('active'); });
