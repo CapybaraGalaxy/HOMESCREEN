@@ -261,8 +261,51 @@
         .settings-panel { position: fixed; bottom: 85px; right: 25px; width: 280px; background: var(--glass); backdrop-filter: blur(var(--blur-val)); border: 1px solid var(--glass-border); border-radius: 24px; padding: 25px; transform: scale(0.9) translateY(20px); opacity: 0; pointer-events: none; transition: all 0.4s var(--bezier); z-index: 110; }
         .settings-panel.active { transform: scale(1) translateY(0); opacity: 1; pointer-events: auto; }
         .setting-item { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; }
+        .settings-action-btn {
+            border: 1px solid var(--glass-border);
+            background: var(--glass);
+            color: var(--text-main);
+            padding: 8px 12px;
+            border-radius: 999px;
+            font-family: 'Outfit';
+            font-size: 0.85rem;
+            cursor: pointer;
+            transition: all 0.25s var(--bezier);
+            backdrop-filter: blur(var(--blur-val));
+        }
+        .settings-action-btn:hover { background: rgba(255,255,255,0.12); transform: translateY(-1px); }
+        .settings-action-btn:disabled { opacity: 0.6; cursor: wait; }
+        .settings-action-btn .btn-label { display: inline-flex; align-items: center; gap: 6px; }
+        .settings-action-btn .spinner {
+            display: inline-flex;
+            animation: spin 0.9s linear infinite;
+        }
+        @keyframes spin { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }
         
         #settingLocalChip { display: none; }
+
+        #homescreenToast {
+            position: fixed;
+            left: 50%;
+            bottom: 92px;
+            transform: translateX(-50%) translateY(12px);
+            background: var(--glass);
+            backdrop-filter: blur(var(--blur-val));
+            border: 1px solid var(--glass-border);
+            color: var(--text-main);
+            padding: 10px 16px;
+            border-radius: 999px;
+            z-index: 190;
+            opacity: 0;
+            pointer-events: none;
+            transition: all 0.35s var(--bezier);
+            box-shadow: 0 14px 30px rgba(0,0,0,0.3);
+            font-size: 0.9rem;
+        }
+        #homescreenToast.show {
+            opacity: 1;
+            transform: translateX(-50%) translateY(0);
+        }
 
         .switch { width: 40px; height: 22px; background: #333; border-radius: 20px; position: relative; cursor: pointer; transition: 0.3s; }
         .switch::after { content:''; position:absolute; width:18px; height:18px; background:#fff; border-radius:50%; top:2px; left:2px; transition:0.3s var(--bezier); }
@@ -522,7 +565,7 @@ transform:scale(1.05);
         <div><strong>VERSIÓN LOCAL</strong> <span>· Ir a web</span></div>
     </a>
 
-    <div class="version-tag" id="versionTag">DEV v0.9.9.13</div>
+    <div class="version-tag" id="versionTag">DEV v0.9.9.14</div>
 
     <div class="ui-layer">
         <header class="header">
@@ -675,6 +718,10 @@ const hiddenApp = { name: 'Neo GameCenter', icon: 'Gamepad2', url: 'games.html' 
         <div class="setting-item"><span>Fondo Negro</span><div class="switch" id="toggleDarkBg"></div></div>
         <div class="setting-item"><span>Modo Lista</span><div class="switch" id="toggleList"></div></div>
         <div class="setting-item"><span>Desactivar Blur</span><div class="switch" id="toggleBlur"></div></div>
+        <div class="setting-item">
+            <span>Buscar actualizaciones</span>
+            <button class="settings-action-btn" id="checkUpdatesBtn" type="button">Comprobar</button>
+        </div>
         
         <div class="setting-item" id="settingLocalChip"><span>Ocultar Aviso Local</span><div class="switch" id="toggleLocalChip"></div></div>
     </div>
@@ -1050,8 +1097,23 @@ const hiddenApp = { name: 'Neo GameCenter', icon: 'Gamepad2', url: 'games.html' 
             }
 
             const setBtn = document.getElementById('setBtn');
+            const checkUpdatesBtn = document.getElementById('checkUpdatesBtn');
             if(setBtn) {
                 setBtn.onclick = (e) => { e.stopPropagation(); setPanel.classList.toggle('active'); };
+            }
+
+            if(checkUpdatesBtn && window.checkForUpdates) {
+                checkUpdatesBtn.onclick = async () => {
+                    checkUpdatesBtn.disabled = true;
+                    checkUpdatesBtn.innerHTML = '<span class="btn-label"><i data-lucide="loader-2" class="spinner"></i><span>Comprobando...</span></span>';
+                    if(window.lucide) lucide.createIcons();
+                    try {
+                        await window.checkForUpdates({ showToast: true });
+                    } finally {
+                        checkUpdatesBtn.disabled = false;
+                        checkUpdatesBtn.innerHTML = '<span class="btn-label">Comprobar</span>';
+                    }
+                };
             }
             
             document.addEventListener('click', (e) => { if(setPanel && !setPanel.contains(e.target)) setPanel.classList.remove('active'); });

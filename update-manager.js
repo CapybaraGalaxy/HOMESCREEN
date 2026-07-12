@@ -1,136 +1,194 @@
 let isUpdating = false;
-(() => {
+let newWorker = null;
+let currentRegistration = null;
 
-    if (!("serviceWorker" in navigator))
-        return;
+function showHomescreenToast(message, duration = 2600) {
+    const existingToast = document.getElementById("homescreenToast");
+    if (existingToast) {
+        existingToast.remove();
+    }
 
-    let newWorker = null;
+    const toast = document.createElement("div");
+    toast.id = "homescreenToast";
+    toast.innerHTML = `<span>${message}</span>`;
+    document.body.appendChild(toast);
 
-async function showUpdateBanner() {
+    requestAnimationFrame(() => {
+        toast.classList.add("show");
+    });
 
-    if (document.getElementById("updateBanner"))
-        return;
+    window.setTimeout(() => {
+        toast.classList.remove("show");
+        window.setTimeout(() => toast.remove(), 250);
+    }, duration);
+}
 
-
-    let info = {
-        version:"",
-        changes:[]
-    };
-
-
+async function getVersionInfo() {
     try {
-
         const response = await fetch("./version.json");
+        if (!response.ok) {
+            throw new Error("No se pudo cargar version.json");
+        }
+        return await response.json();
+    } catch (error) {
+        return { version: "", changes: [] };
+    }
+}
 
-        info = await response.json();
+async function showUpdateBanner(info = null) {
+    if (document.getElementById("updateBanner")) {
+        return;
+    }
 
-    } catch(e){}
-
-
-
+    const versionInfo = info || await getVersionInfo();
     const banner = document.createElement("div");
-
     banner.id = "updateBanner";
 
-
     banner.innerHTML = `
-
         <div class="update-title">
-            🚀 HOMESCREEN ${info.version || ""}
+            🚀 HOMESCREEN ${versionInfo.version || ""}
         </div>
-
 
         <div class="update-text">
-
             Nueva versión disponible
-
-            ${
-                info.changes?.length
-                ?
-                "<br><br>" +
-                info.changes.map(
-                    c=>"✓ "+c
-                ).join("<br>")
-                :
-                ""
-            }
-
+            ${versionInfo.changes?.length ? "<br><br>" + versionInfo.changes.map(c => "✓ " + c).join("<br>") : ""}
         </div>
-
 
         <button id="updateNow">
             Actualizar
         </button>
-
     `;
-
 
     document.body.appendChild(banner);
 
-
-    requestAnimationFrame(()=>{
-
+    requestAnimationFrame(() => {
         banner.classList.add("show");
-
     });
 
-
-    document
-    .getElementById("updateNow")
-    .onclick=()=>{
-
-        if(newWorker)
+    document.getElementById("updateNow").onclick = () => {
+        if (newWorker) {
             newWorker.postMessage("SKIP_WAITING");
-
+        }
     };
-
 }
 
-    navigator.serviceWorker.register("./service-worker.js")
+function canUseServiceWorker() {
+    if (!("serviceWorker" in navigator)) {
+        return false;
+    }
+
+    const protocol = window.location.protocol;
+    const hostname = window.location.hostname;
+
+    return protocol === "https:" || (
+        protocol === "http:" && (
+            hostname === "localhost" ||
+            hostname === "127.0.0.1" ||
+            hostname === "::1" ||
+            hostname === "[::1]"
+        )
+    );
+}
+
+async function ensureRegistration() {
+    if (currentRegistration) {
+        return currentRegistration;
+    }
+
+    if (!canUseServiceWorker()) {
+        return null;
+    }
+
+    currentRegistration = await navigator.serviceWorker.getRegistration();
+
+    if (!currentRegistration) {
+        currentRegistration = await navigator.serviceWorker.register("./service-worker.js");
+    }
+
+    return currentRegistration;
+}
+
+async function checkForUpdates(options = {}) {
+    const { showToast = false, registration = null } = options;
+
+    if (!canUseServiceWorker()) {
+        if (showToast) {
+            await new Promise(resolve => setTimeout(resolve, 700));
+            showHomescreenToast("✓ Ya tienes la última versión");
+        }
+        return { available: false, checked: false };
+    }
+
+    const activeRegistration = registration || await ensureRegistration();
+
+    if (!activeRegistration) {
+        if (showToast) {
+            await new Promise(resolve => setTimeout(resolve, 700));
+            showHomescreenToast("✓ Ya tienes la última versión");
+        }
+        return { available: false, checked: false };
+    }
+
+    try {
+        await activeRegistration.update();
+    } catch (error) {
+        console.warn("No se pudo comprobar la actualización:", error);
+    }
+
+    if (activeRegistration.waiting) {
+        newWorker = activeRegistration.waiting;
+        const versionInfo = await getVersionInfo();
+        await showUpdateBanner(versionInfo);
+        return { available: true, checked: true };
+    }
+
+    if (showToast) {
+        showHomescreenToast("✓ Ya tienes la última versión");
+    }
+
+    return { available: false, checked: true };
+}
+
+window.checkForUpdates = checkForUpdates;
+window.showHomescreenToast = showHomescreenToast;
+
+(() => {
+    if (!("serviceWorker" in navigator)) {
+        return;
+    }
+
+    ensureRegistration()
         .then(registration => {
-
-            if (registration.waiting) {
-
-                newWorker = registration.waiting;
-
-                showUpdateBanner();
-
+            if (!registration) {
+                return;
             }
 
             registration.addEventListener("updatefound", () => {
-
                 const installing = registration.installing;
+                if (!installing) {
+                    return;
+                }
 
                 installing.addEventListener("statechange", () => {
-
                     if (
                         installing.state === "installed" &&
                         navigator.serviceWorker.controller
                     ) {
-
                         newWorker = installing;
-
                         showUpdateBanner();
-
                     }
-
                 });
-
             });
 
+            return checkForUpdates({ showToast: false, registration });
+        })
+        .catch(error => {
+            console.warn("No se pudo inicializar el gestor de actualizaciones:", error);
         });
 
-navigator.serviceWorker.addEventListener(
-    "controllerchange",
-    () => {
-
+    navigator.serviceWorker.addEventListener("controllerchange", () => {
         if (isUpdating) {
-
             window.location.reload();
-
         }
-
-    }
-);
-
+    });
 })();
