@@ -6,48 +6,85 @@ let isUpdating = false;
 
     let newWorker = null;
 
-    function showUpdateBanner() {
+async function showUpdateBanner() {
 
-        if (document.getElementById("updateBanner"))
-            return;
+    if (document.getElementById("updateBanner"))
+        return;
 
-        const banner = document.createElement("div");
 
-        banner.id = "updateBanner";
+    let info = {
+        version:"",
+        changes:[]
+    };
 
-        banner.innerHTML = `
-            <div class="update-title">
-                🚀 Nueva versión disponible
-            </div>
 
-            <div class="update-text">
-                Se han descargado las últimas mejoras.
-            </div>
+    try {
 
-            <button id="updateNow">
-                Actualizar
-            </button>
-        `;
+        const response = await fetch("./version.json");
 
-        document.body.appendChild(banner);
+        info = await response.json();
 
-        requestAnimationFrame(() => {
-            banner.classList.add("show");
-        });
+    } catch(e){}
 
-        document
-            .getElementById("updateNow")
-            .onclick = () => {
 
-                if (!newWorker) return;
 
-                isUpdating = true;
+    const banner = document.createElement("div");
 
-                newWorker.postMessage("SKIP_WAITING");
+    banner.id = "updateBanner";
 
-            };
 
-    }
+    banner.innerHTML = `
+
+        <div class="update-title">
+            🚀 HOMESCREEN ${info.version || ""}
+        </div>
+
+
+        <div class="update-text">
+
+            Nueva versión disponible
+
+            ${
+                info.changes?.length
+                ?
+                "<br><br>" +
+                info.changes.map(
+                    c=>"✓ "+c
+                ).join("<br>")
+                :
+                ""
+            }
+
+        </div>
+
+
+        <button id="updateNow">
+            Actualizar
+        </button>
+
+    `;
+
+
+    document.body.appendChild(banner);
+
+
+    requestAnimationFrame(()=>{
+
+        banner.classList.add("show");
+
+    });
+
+
+    document
+    .getElementById("updateNow")
+    .onclick=()=>{
+
+        if(newWorker)
+            newWorker.postMessage("SKIP_WAITING");
+
+    };
+
+}
 
     navigator.serviceWorker.register("./service-worker.js")
         .then(registration => {

@@ -1,11 +1,12 @@
-const CACHE_NAME = "homescreen-v12";
+const CACHE_NAME = "homescreen";
 
 const CORE = [
     "./",
     "./index.html",
     "./manifest.json",
     "./favicon.png",
-    "./games.html"
+    "./games.html",
+    "./version.json"
 ];
 
 // ---------- INSTALL ----------
