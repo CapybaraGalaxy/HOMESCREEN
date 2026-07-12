@@ -1,4 +1,4 @@
-const CACHE_NAME = "homescreen-v2";
+const CACHE_NAME = "homescreen-v3";
 
 const CORE = [
     "./",
@@ -23,33 +23,62 @@ self.addEventListener("activate", event => {
 // ---------- FETCH ----------
 self.addEventListener("fetch", event => {
 
-    if (event.request.method !== "GET") return;
+    if (event.request.method !== "GET")
+        return;
 
+
+    const url = new URL(event.request.url);
+
+
+    // HTML siempre actualizado
+    if (
+        event.request.headers.get("accept")?.includes("text/html")
+    ) {
+
+        event.respondWith(
+
+            fetch(event.request)
+            .then(response => {
+
+                const clone = response.clone();
+
+                caches.open(CACHE_NAME)
+                    .then(cache => {
+                        cache.put(event.request, clone);
+                    });
+
+                return response;
+
+            })
+            .catch(() =>
+                caches.match(event.request)
+            )
+
+        );
+
+        return;
+    }
+
+
+    // Todo lo demás: cache primero
     event.respondWith(
 
-        caches.match(event.request).then(cache => {
+        caches.match(event.request)
+        .then(cache => {
 
-            const networkFetch = fetch(event.request)
+            return cache || fetch(event.request)
                 .then(response => {
 
-                    if (
-                        response &&
-                        response.status === 200 &&
-                        event.request.url.startsWith(self.location.origin)
-                    ) {
+                    const clone = response.clone();
 
-                        caches.open(CACHE_NAME).then(c => {
-                            c.put(event.request, response.clone());
-                        });
-
-                    }
+                    caches.open(CACHE_NAME)
+                    .then(c =>
+                        c.put(event.request, clone)
+                    );
 
                     return response;
 
-                })
-                .catch(() => cache);
-
-            return cache || networkFetch;
+                });
 
         })
 
