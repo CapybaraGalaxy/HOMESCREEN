@@ -1,4 +1,4 @@
-const CACHE_NAME = "homescreen-v5";
+const CACHE_NAME = "homescreen-v6";
 
 const CORE = [
     "./",
