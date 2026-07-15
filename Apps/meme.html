@@ -520,6 +520,17 @@
         </div>
     </div>
 
+    <div class="modal center-modal" id="mobileWarningModal" role="dialog" aria-modal="true">
+        <div class="modal-content" style="max-width: 420px; text-align: center; padding: 24px;">
+            <div style="background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.07); width: 56px; height: 56px; border-radius: 18px; display: flex; align-items: center; justify-content: center; margin: 0 auto 16px;">
+                <i data-lucide="smartphone" size="20"></i>
+            </div>
+            <div class="modal-title" style="margin-bottom: 10px; font-size: 0.95rem; letter-spacing: 1px;">Aviso de compatibilidad móvil</div>
+            <p style="color: var(--text-muted); font-size: 0.95rem; line-height: 1.4; margin-bottom: 16px;">Esta aplicación no está optimizada para teléfonos móviles. Puedes encontrar errores, comportamiento inestable o problemas de rendimiento. Se recomienda usarla en tablet o escritorio.</p>
+            <button class="action-btn-main" onclick="closeMobileWarning()">Entendido, continuar</button>
+        </div>
+    </div>
+
     <header>
         <div class="header-brand">
             <div class="app-badge"><i data-lucide="layers"></i></div>
@@ -1709,6 +1720,23 @@
         });
 
         initCanvas();
+        (function(){
+            try {
+                const key = 'meme_mobile_warning_seen';
+                const isMobileUA = /Mobi|Android|iPhone|iPad|iPod|Mobile/i.test(navigator.userAgent);
+                const smallScreen = window.innerWidth && window.innerWidth <= 820;
+                const isMobile = isMobileUA || smallScreen;
+                if (isMobile && !localStorage.getItem(key)) {
+                    openModal('mobileWarningModal');
+                    try { lucide.createIcons(); } catch(e) {}
+                }
+
+                window.closeMobileWarning = function() {
+                    try { localStorage.setItem(key, '1'); } catch(e) {}
+                    closeModal('mobileWarningModal');
+                };
+            } catch(e) { /* noop */ }
+        })();
     </script>
 </body>
 </html>

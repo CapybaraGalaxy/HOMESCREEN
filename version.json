@@ -1,7 +1,9 @@
 {
-  "version": "1.0",
+  "version": "1.0.1",
   "date": "15 de Julio 2026",
   "changes": [
+    "Advertencia de compatibilidad con dispositivos moviles en la herramienta de creación de memes.",
+    "✦ Novedades de 1.0",
     "🚀 Lanzamiento Oficial v1.0: ¡La suite definitiva de herramientas ya está aquí, totalmente estable y optimizada!",
     "🛠️ Catálogo Completo de Apps: Utilidades de texto avanzadas, Ruleta aleatoria para sorteos, Minecraft tools (CraftPalette y Mod checker) y utilidades de desarrollo (App Maker y visor Lucide).",
     "📱 Nueva Interfaz Adaptable: Cambia al instante entre tres modos de visualización (Burbuja, Lista o Cuadrícula) desde ajustes. ¡Las carpetas heredan tu diseño automáticamente!",
