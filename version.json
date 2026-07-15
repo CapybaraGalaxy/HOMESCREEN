@@ -1,9 +1,16 @@
 {
-  "version": "DEV v0.9.9.19",
+  "version": "1.0",
   "date": "15 Julio 2026",
   "changes": [
-    "Se ha arreglado un error con la carga de la tipografía ''outfit''.",
-    "Se ha añadido un creador de memes a la lista de aplicaciones."
-
+    "🚀 Lanzamiento Oficial v1.0: ¡La suite definitiva de herramientas ya está aquí, totalmente estable y optimizada!",
+    "🛠️ Catálogo Completo de Apps: Utilidades de texto avanzadas, Ruleta aleatoria para sorteos, Minecraft tools (CraftPalette y Mod checker) y utilidades de desarrollo (App Maker y visor Lucide).",
+    "📱 Nueva Interfaz Adaptable: Cambia al instante entre tres modos de visualización (Burbuja, Lista o Cuadrícula) desde ajustes. ¡Las carpetas heredan tu diseño automáticamente!",
+    "⚡ Modo Anti-Fatiga (Sin Blur): Desactiva el desenfoque 'glassmorphism' para usar colores planos y sólidos oscuros. ¡Ideal para conseguir el máximo rendimiento en cualquier dispositivo!",
+    "🔋 Modo Oscuro Puro: Activa la opción de fondo negro absoluto (#121212) para ahorrar batería en pantallas OLED/AMOLED y descansar tu vista.",
+    "✨ Canvas de Partículas Interactivas: Disfruta de un fondo animado de partículas flotantes que reacciona a tu pantalla (con interruptor de apagado en ajustes).",
+    "⏱️ Reloj Central de 3 Estados: Haz un clic normal para entrar al 'Modo Zen' (reloj gigante sin distracciones) o mantén pulsado (>500ms) para activar el cronómetro de alta precisión.",
+    "⭐ Carpeta de Favoritos Persistente: Añade una estrella a tus apps preferidas para guardarlas localmente mediante localStorage y agrúpalas en una categoría dinámica.",
+    "🔍 Buscador Inteligente (Ctrl + K): Encuentra cualquier app al vuelo y realiza operaciones matemáticas de forma segura en la barra de búsqueda para copiar el resultado con un clic.",
+    "🛡️ Sistema Seguro (Safe-Engine): Incorpora un capturador visual de errores de código para evitar pantallas en blanco y un detector de entorno local offline con redirección web."
   ]
 }

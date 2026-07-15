@@ -10,35 +10,22 @@
     <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@200;400;500&display=swap" rel="stylesheet">
     <script src="https://unpkg.com/lucide@latest"></script>
     <style>
-        /* ==========================================
-           1. VARIABLES GLOBALES Y CONFIGURACIÓN BASE
-           ========================================== */
         :root {
-            --bg: #121212; /* Color de fondo por defecto (Negro claro) */
+            --bg: #121212; /* Negro claro por defecto */
             --text-main: #ffffff;
             --text-muted: #888888;
             --glass: rgba(15, 15, 15, 0.281);
             --glass-border: rgba(255, 255, 255, 0.1);
             --bezier: cubic-bezier(0.16, 1, 0.3, 1);
-            --blur-val: 30px; /* Nivel del efecto esmerilado (Glassmorphism) */
+            --blur-val: 30px;
         }
 
-        /* Desactivación de Blur (Mejora de rendimiento para dispositivos lentos) */
         body.no-blur { --blur-val: 0px; }
-        body.no-blur .overlay, 
-        body.no-blur .search-panel, 
-        body.no-blur .settings-panel, 
-        body.no-blur .tool-card, 
-        body.no-blur .local-chip, 
-        body.no-blur .custom-modal { 
-            backdrop-filter: none !important; 
-            background: #111 !important; 
+        body.no-blur .overlay, body.no-blur .search-panel, body.no-blur .settings-panel, body.no-blur .tool-card, body.no-blur .local-chip, body.no-blur .custom-modal { 
+            backdrop-filter: none !important; background: #111 !important; 
         }
 
-        * { 
-            box-sizing: border-box; 
-            -webkit-tap-highlight-color: transparent; 
-        }
+        * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
 
         body {
             margin: 0;
@@ -53,7 +40,6 @@
             transition: background-color 0.4s var(--bezier);
         }
 
-        /* Canvas para el fondo de partículas */
         #bgCanvas {
             position: fixed;
             top: 0; left: 0;
@@ -65,11 +51,7 @@
         }
         body.bg-active #bgCanvas { opacity: 0.6; }
 
-        /* ==========================================
-           2. COMPONENTES DE INTERFAZ (CHIPS Y TAGS)
-           ========================================== */
-        
-        /* Chip indicador de Versión Local */
+        /* --- ESTILOS DEL CHIP LOCAL --- */
         .local-chip {
             position: fixed;
             top: 25px;
@@ -82,7 +64,7 @@
             color: var(--text-main);
             text-decoration: none;
             font-size: 0.85rem;
-            display: none; 
+            display: none; /* Oculto por defecto */
             align-items: center;
             gap: 10px;
             z-index: 100;
@@ -97,7 +79,7 @@
         .local-chip strong { font-weight: 500; }
         .local-chip span { color: var(--text-muted); }
 
-        /* Etiqueta de versión (Esquina inferior izquierda) */
+        /* --- ESTILO DE LA VERSIÓN --- */
         .version-tag {
             position: fixed;
             bottom: 15px;
@@ -121,7 +103,6 @@
             width: 100%;
         }
 
-        /* Cabecera con Reloj y Fecha */
         .header {
             margin-top: 10vh;
             margin-bottom: 5vh;
@@ -150,35 +131,20 @@
             transition: font-size 0.6s var(--bezier), letter-spacing 0.6s var(--bezier), color 0.6s var(--bezier), opacity 0.3s ease;
         }
 
-        /* ==========================================
-           3. CONTENEDORES Y TARJETAS DE APLICACIONES
-           ========================================== */
-        
-        /* Contenedor con scroll controlado contra desbordamientos */
         .scroll-wrapper {
             width: 100%;
             max-height: 52vh; 
             overflow-y: auto;
-            display: block; 
-            scrollbar-width: thin;
-            scrollbar-color: rgba(255, 255, 255, 0.12) transparent;
+            display: flex;
+            justify-content: center;
+            scrollbar-width: none; 
+            -ms-overflow-style: none;  
             transition: opacity 0.4s var(--bezier), transform 0.4s var(--bezier);
         }
         .scroll-wrapper::-webkit-scrollbar {
-            width: 6px;
-        }
-        .scroll-wrapper::-webkit-scrollbar-track {
-            background: transparent;
-        }
-        .scroll-wrapper::-webkit-scrollbar-thumb {
-            background: rgba(255, 255, 255, 0.12);
-            border-radius: 10px;
-        }
-        .scroll-wrapper::-webkit-scrollbar-thumb:hover {
-            background: rgba(255, 255, 255, 0.25);
+            display: none; 
         }
 
-        /* Contenedor por defecto de aplicaciones (Modo Pill / Burbuja) */
         .tools-container {
             width: 100%;
             max-width: 800px;
@@ -187,65 +153,20 @@
             flex-wrap: wrap;
             justify-content: center;
             gap: 12px;
-            margin: 0 auto; 
             transition: transform 0.5s var(--bezier);
         }
         
-        /* MODO LISTA */
         .tools-container.list-mode { 
             flex-direction: column; 
             align-items: center; 
             flex-wrap: nowrap; 
+            margin-top: auto;
+            margin-bottom: auto;
             padding-top: 10px;
             padding-bottom: 20px;
         }
-        .tools-container.list-mode .tool-card { 
-            width: 100%; 
-            max-width: 500px; 
-            justify-content: flex-start; 
-            border-radius: 16px;
-            padding: 14px 24px;
-        }
+        .tools-container.list-mode .tool-card { width: 100%; max-width: 500px; justify-content: flex-start; }
 
-        /* MODO CUADRÍCULA */
-        .tools-container.grid-mode {
-            display: grid;
-            grid-template-columns: repeat(auto-fill, minmax(110px, 1fr));
-            gap: 16px;
-            justify-content: center;
-            align-content: start;
-            width: 100%;
-            max-width: 700px;
-            padding: 20px;
-            margin: 0 auto;
-        }
-        .tools-container.grid-mode .tool-card {
-            flex-direction: column;
-            align-items: center;
-            justify-content: center;
-            text-align: center;
-            width: auto;
-            aspect-ratio: 1 / 1;
-            padding: 16px 10px;
-            border-radius: 20px;
-            gap: 8px;
-        }
-        .tools-container.grid-mode .tool-card i, 
-        .tools-container.grid-mode .tool-card svg {
-            width: 28px !important;
-            height: 28px !important;
-        }
-        .tools-container.grid-mode .tool-card span {
-            font-size: 0.8rem;
-            line-height: 1.2;
-            word-break: break-word;
-            display: -webkit-box;
-            -webkit-line-clamp: 2;
-            -webkit-box-orient: vertical;
-            overflow: hidden;
-        }
-
-        /* Tarjeta base de aplicación */
         .tool-card {
             display: flex;
             align-items: center;
@@ -262,7 +183,6 @@
             animation: fadeInItem 0.6s var(--bezier) both;
             flex-shrink: 0; 
             cursor: pointer;
-            position: relative;
         }
         .tool-card:hover { background: #fff; color: #000; transform: translateY(-4px); }
         .tool-card:active { transform: scale(0.96); }
@@ -274,46 +194,8 @@
             width: 18px; 
             height: 18px;
             flex-shrink: 0;
-            transition: color 0.3s;
         }
 
-        /* ==========================================
-           4. SISTEMA DE FAVORITOS (BOTÓN ESTRELLA)
-           ========================================== */
-        .tool-card .star-btn {
-            background: transparent;
-            border: none;
-            color: rgba(255, 255, 255, 0.4);
-            cursor: pointer;
-            display: inline-flex;
-            align-items: center;
-            justify-content: center;
-            padding: 4px;
-            border-radius: 50%;
-            transition: all 0.3s var(--bezier);
-            margin-left: auto;
-            z-index: 5;
-            outline: none;
-        }
-        .tool-card .star-btn:hover {
-            color: #FFD60A !important;
-            transform: scale(1.2);
-        }
-        .tool-card .star-btn.active {
-            color: #FFD60A !important;
-        }
-        /* Prevención de conflicto de contraste al pasar el ratón (tarjeta se vuelve blanca) */
-        .tool-card:hover .star-btn {
-            color: rgba(0, 0, 0, 0.35) !important;
-        }
-        .tool-card:hover .star-btn.active {
-            color: #E6A100 !important; /* Dorado oscuro visible sobre blanco */
-        }
-        .tool-card:hover .star-btn:hover {
-            color: #CC8E00 !important;
-        }
-
-        /* Error de Sintaxis (Mapeado visualmente) */
         .error-card {
             display: flex;
             flex-direction: column;
@@ -333,9 +215,6 @@
         .error-card span { font-size: 0.95rem; font-weight: 400; line-height: 1.4; }
         .error-card small { color: rgba(255, 255, 255, 0.6); font-family: monospace; font-size: 0.8rem; margin-top: 5px; display: block; background: rgba(0,0,0,0.2); padding: 5px 10px; border-radius: 6px; }
 
-        /* ==========================================
-           5. CAJA DE BÚSQUEDA FLOTANTE
-           ========================================== */
         .search-wrapper {
             position: fixed;
             bottom: 40px;
@@ -378,150 +257,17 @@
         .result-item { display: flex; align-items: center; padding: 14px 18px; border-radius: 20px; text-decoration: none; color: var(--text-main); margin-bottom: 5px; transition: 0.3s; }
         .result-item:hover { background: rgba(255,255,255,0.08); transform: translateX(8px); }
 
-        /* Botón de Ajustes (Engranaje) */
         .settings-btn { position: fixed; bottom: 25px; right: 25px; background: var(--glass); border: 1px solid var(--glass-border); width: 45px; height: 45px; border-radius: 50%; display: flex; align-items: center; justify-content: center; cursor: pointer; z-index: 110; transition: all 0.4s var(--bezier); }
-        
-        /* ==========================================
-           6. PANEL DE CONFIGURACIÓN LATERAL
-           ========================================== */
-        .settings-panel { 
-            position: fixed; 
-            bottom: 85px; 
-            right: 25px; 
-            width: 320px; 
-            max-height: 80vh;
-            overflow-y: auto;
-            background: rgba(18, 18, 18, 0.85); 
-            backdrop-filter: blur(var(--blur-val)); 
-            border: 1px solid var(--glass-border); 
-            border-radius: 24px; 
-            padding: 22px; 
-            transform: scale(0.9) translateY(20px); 
-            opacity: 0; 
-            pointer-events: none; 
-            transition: all 0.4s var(--bezier); 
-            z-index: 110; 
-            box-shadow: 0 20px 45px rgba(0,0,0,0.6);
-            display: flex;
-            flex-direction: column;
-            gap: 18px;
-        }
-        .settings-panel::-webkit-scrollbar {
-            width: 4px;
-        }
-        .settings-panel::-webkit-scrollbar-thumb {
-            background: rgba(255, 255, 255, 0.15);
-            border-radius: 4px;
-        }
+        .settings-panel { position: fixed; bottom: 85px; right: 25px; width: 280px; background: var(--glass); backdrop-filter: blur(var(--blur-val)); border: 1px solid var(--glass-border); border-radius: 24px; padding: 25px; transform: scale(0.9) translateY(20px); opacity: 0; pointer-events: none; transition: all 0.4s var(--bezier); z-index: 110; }
         .settings-panel.active { transform: scale(1) translateY(0); opacity: 1; pointer-events: auto; }
-        
-        .settings-header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            border-bottom: 1px solid rgba(255,255,255,0.08);
-            padding-bottom: 10px;
-        }
-        .settings-section {
-            display: flex;
-            flex-direction: column;
-            gap: 12px;
-        }
-        .settings-section-title {
-            font-size: 0.75rem;
-            text-transform: uppercase;
-            letter-spacing: 1.5px;
-            color: var(--text-muted);
-            font-weight: 500;
-        }
-
-        .setting-item-row { 
-            display: flex; 
-            justify-content: space-between; 
-            align-items: center; 
-            padding: 8px 10px;
-            border-radius: 14px;
-            background: rgba(255, 255, 255, 0.02);
-            border: 1px solid rgba(255, 255, 255, 0.04);
-            transition: background 0.3s;
-        }
-        .setting-item-row:hover {
-            background: rgba(255, 255, 255, 0.05);
-        }
-        .setting-item-meta {
-            display: flex;
-            align-items: center;
-            gap: 12px;
-            flex: 1;
-        }
-        .setting-item-meta i, .setting-item-meta svg {
-            width: 18px;
-            height: 18px;
-            color: var(--text-muted);
-            flex-shrink: 0;
-        }
-        .setting-label {
-            font-size: 0.9rem;
-            font-weight: 400;
-            display: block;
-            color: var(--text-main);
-        }
-        .setting-desc {
-            font-size: 0.72rem;
-            color: var(--text-muted);
-            display: block;
-            margin-top: 2px;
-        }
-
-        /* Selector Segmentado de Layout (Pill, Lista, Grid) */
-        .layout-selector {
-            display: grid;
-            grid-template-columns: repeat(3, 1fr);
-            background: rgba(0,0,0,0.3);
-            padding: 4px;
-            border-radius: 14px;
-            border: 1px solid var(--glass-border);
-        }
-        .layout-opt {
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            gap: 6px;
-            padding: 8px 0;
-            background: transparent;
-            border: none;
-            color: var(--text-muted);
-            border-radius: 10px;
-            cursor: pointer;
-            transition: all 0.3s var(--bezier);
-            font-family: 'Outfit', sans-serif;
-        }
-        .layout-opt i, .layout-opt svg {
-            width: 16px;
-            height: 16px;
-        }
-        .layout-opt span {
-            font-size: 0.78rem;
-        }
-        .layout-opt:hover {
-            color: var(--text-main);
-        }
-        .layout-opt.active {
-            background: rgba(255, 255, 255, 0.15);
-            color: var(--text-main);
-            box-shadow: 0 4px 10px rgba(0,0,0,0.2);
-        }
-
-        .settings-actions-grid { 
-            display: grid;
-            grid-template-columns: repeat(2, 1fr);
-            gap: 8px; 
-        }
+        .setting-item { display: flex; justify-content: space-between; align-items: center; gap: 10px; margin-bottom: 16px; flex-wrap: wrap; }
+        .setting-item > span { flex: 1 1 140px; min-width: 0; }
+        .settings-actions { display: flex; gap: 8px; flex-wrap: wrap; justify-content: flex-end; }
         .settings-action-btn {
             border: 1px solid var(--glass-border);
             background: var(--glass);
             color: var(--text-main);
-            padding: 10px 12px;
+            padding: 8px 12px;
             border-radius: 999px;
             font-family: 'Outfit';
             font-size: 0.85rem;
@@ -529,18 +275,17 @@
             transition: all 0.25s var(--bezier);
             backdrop-filter: blur(var(--blur-val));
             white-space: nowrap;
-            display: inline-flex;
-            align-items: center;
-            justify-content: center;
-            gap: 6px;
+            flex-shrink: 0;
         }
         .settings-action-btn:hover { background: rgba(255,255,255,0.12); transform: translateY(-1px); }
         .settings-action-btn:disabled { opacity: 0.6; cursor: wait; }
+        .settings-action-btn .btn-label { display: inline-flex; align-items: center; gap: 6px; }
         .settings-action-btn .spinner {
             display: inline-flex;
             animation: spin 0.9s linear infinite;
         }
         .settings-info {
+            margin: 10px 0 18px;
             padding: 10px 12px;
             border-radius: 14px;
             background: rgba(255,255,255,0.06);
@@ -554,33 +299,30 @@
         
         #settingLocalChip { display: none; }
 
-        /* ==========================================
-           7. TOAST REDISEÑADO (ESTILO ANDROID)
-           ========================================== */
         #homescreenToast {
             position: fixed;
             left: 50%;
-            bottom: 105px; /* Elevado para no colisionar con elementos inferiores */
+            bottom: 92px;
             transform: translateX(-50%) translateY(12px);
-            background: rgba(255, 255, 255, 0.95); /* Fondo claro plano semi-transparente estilo Android */
-            color: #121212; /* Texto oscuro de gran legibilidad */
-            padding: 12px 24px;
+            background: var(--glass);
+            backdrop-filter: blur(var(--blur-val));
+            border: 1px solid var(--glass-border);
+            color: var(--text-main);
+            padding: 10px 16px;
             border-radius: 999px;
-            z-index: 9999;
+            z-index: 190;
             opacity: 0;
             pointer-events: none;
             transition: all 0.35s var(--bezier);
-            box-shadow: 0 10px 30px rgba(0,0,0,0.3);
+            box-shadow: 0 14px 30px rgba(0,0,0,0.3);
             font-size: 0.9rem;
-            font-weight: 500;
         }
         #homescreenToast.show {
             opacity: 1;
             transform: translateX(-50%) translateY(0);
         }
 
-        /* Switches estilizados */
-        .switch { width: 40px; height: 22px; background: #333; border-radius: 20px; position: relative; cursor: pointer; transition: 0.3s; flex-shrink: 0; }
+        .switch { width: 40px; height: 22px; background: #333; border-radius: 20px; position: relative; cursor: pointer; transition: 0.3s; }
         .switch::after { content:''; position:absolute; width:18px; height:18px; background:#fff; border-radius:50%; top:2px; left:2px; transition:0.3s var(--bezier); }
         .switch.on { background: #34C759; }
         .switch.on::after { transform: translateX(18px); }
@@ -588,9 +330,7 @@
         .overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.6); backdrop-filter: blur(15px); opacity: 0; pointer-events: none; transition: 0.5s; z-index: 90; }
         .overlay.active { opacity: 1; pointer-events: auto; }
 
-        /* ==========================================
-           8. CONFIGURACIONES DE MODO ZEN
-           ========================================== */
+        /* --- BOTÓN DE SALIDA MODO ZEN --- */
         .exit-zen-btn {
             position: fixed;
             bottom: 25px;
@@ -612,6 +352,7 @@
         }
         .exit-zen-btn:hover { background: #fff; color: #000; transform: scale(1.05); }
 
+        /* --- ESTILOS EXCLUSIVOS MODO ZEN --- */
         body.zen-mode .scroll-wrapper,
         body.zen-mode .settings-btn,
         body.zen-mode .settings-panel,
@@ -625,6 +366,7 @@
             transform: translateY(20px);
         }
 
+        /* Ampliación y desplazamiento del reloj al centro de la pantalla */
         body.zen-mode .header {
             transform: translateY(18vh); 
         }
@@ -639,8 +381,8 @@
         }
 
         body.zen-mode .search-panel {
-            width: 110px; 
-            height: 38px; 
+            width: 110px; /* Versión más pequeña en ancho */
+            height: 38px; /* Versión más fina en alto */
             border-radius: 19px;
         }
 
@@ -653,7 +395,7 @@
             font-size: 0.8rem;
         }
         body.zen-mode .chip-placeholder small {
-            display: none; 
+            display: none; /* Escondemos el Ctrl+K en modo compacto */
         }
 
         body.zen-mode .exit-zen-btn {
@@ -670,117 +412,33 @@
             min-height: 48px;
         }
 
-        /* ==========================================
-           9. MODALES ADAPTABLES (SISTEMA EVOLUCIONADO)
-           ========================================== */
+        /* --- ESTILOS MODALES --- */
         .custom-modal {
             position: fixed;
             top: 50%; left: 50%;
             transform: translate(-50%, -50%) scale(0.9);
-            width: 90%; 
-            max-width: 450px; /* Reducido a 450px de la v0.9.9.20 */
-            max-height: 85vh; 
-            background: rgba(20, 20, 20, 0.85);
+            width: 90%; max-width: 450px;
+            background: rgba(20, 20, 20, 0.75);
             backdrop-filter: blur(var(--blur-val));
             border: 1px solid var(--glass-border);
             border-radius: 28px;
-            padding: 25px;
+            padding: 30px;
             z-index: 200;
             opacity: 0;
             pointer-events: none;
             transition: all 0.4s var(--bezier);
             box-shadow: 0 30px 60px rgba(0,0,0,0.6);
-            display: flex;
-            flex-direction: column;
+            text-align: center;
         }
-        
-        /* Expansión dinámica del modal si está la vista de carpeta en cuadrícula */
-        #folderModal.grid-active {
-            max-width: 600px;
-        }
-
         .custom-modal.active {
             transform: translate(-50%, -50%) scale(1);
             opacity: 1;
             pointer-events: auto;
         }
-        .modal-title { font-size: 1.3rem; font-weight: 500; margin-bottom: 15px; display: flex; align-items: center; justify-content: center; gap: 10px; flex-shrink: 0; }
-        .modal-text { font-size: 0.95rem; color: var(--text-muted); line-height: 1.5; margin-bottom: 20px; text-align: center; flex-shrink: 0; }
+        .modal-title { font-size: 1.4rem; font-weight: 500; margin-bottom: 12px; display: flex; align-items: center; justify-content: center; gap: 10px; }
+        .modal-text { font-size: 0.95rem; color: var(--text-muted); line-height: 1.5; margin-bottom: 25px; }
         
-        /* Contenedor interno para Carpetas con Modos Adaptativos */
-        #folderApps {
-            display: flex;
-            flex-wrap: wrap;
-            gap: 12px;
-            justify-content: center;
-            margin-bottom: 20px;
-            overflow-y: auto;
-            max-height: 45vh; 
-            padding: 10px 4px;
-        }
-        #folderApps::-webkit-scrollbar {
-            width: 4px;
-        }
-        #folderApps::-webkit-scrollbar-thumb {
-            background: rgba(255, 255, 255, 0.15);
-            border-radius: 4px;
-        }
-
-        /* MODOS DE CARPETA DINÁMICOS */
-        #folderApps.list-mode {
-            flex-direction: column;
-            align-items: center;
-            flex-wrap: nowrap;
-        }
-        #folderApps.list-mode .tool-card {
-            width: 100%;
-            max-width: 100%;
-            justify-content: flex-start;
-            border-radius: 16px;
-            padding: 14px 24px;
-        }
-
-        #folderApps.grid-mode {
-            display: grid;
-            grid-template-columns: repeat(auto-fill, minmax(110px, 1fr));
-            gap: 16px;
-            justify-content: center;
-            width: 100%;
-        }
-        #folderApps.grid-mode .tool-card {
-            flex-direction: column;
-            align-items: center;
-            justify-content: center;
-            text-align: center;
-            width: auto;
-            aspect-ratio: 1 / 1;
-            padding: 16px 10px;
-            border-radius: 20px;
-            gap: 8px;
-        }
-        #folderApps.grid-mode .tool-card i, 
-        #folderApps.grid-mode .tool-card svg {
-            width: 28px !important;
-            height: 28px !important;
-        }
-        #folderApps.grid-mode .tool-card span {
-            font-size: 0.8rem;
-            line-height: 1.2;
-            word-break: break-word;
-            display: -webkit-box;
-            -webkit-line-clamp: 2;
-            -webkit-box-orient: vertical;
-            overflow: hidden;
-        }
-        /* Ajuste de botón estrella en vista cuadrícula dentro de carpeta */
-        #folderApps.grid-mode .tool-card .star-btn {
-            position: absolute;
-            top: 6px;
-            right: 6px;
-            margin: 0;
-        }
-
-        .modal-buttons { display: flex; gap: 12px; justify-content: center; flex-shrink: 0; }
+        .modal-buttons { display: flex; gap: 12px; justify-content: center; }
         .modal-btn {
             padding: 12px 24px;
             border-radius: 50px;
@@ -799,65 +457,93 @@
         @keyframes slideUp { from { opacity: 0; transform: translateY(30px); } to { opacity: 1; transform: translateY(0); } }
         @keyframes clockScale { from { transform: scale(1.15); opacity: 0; filter: blur(10px); } to { transform: scale(1); opacity: 1; filter: blur(0); } }
 
-        /* ==========================================
-           10. BANNER DE ACTUALIZACIÓN
-           ========================================== */
-/* UPDATE BANNER */
-        #updateBanner {
-            position: fixed;
-            left: 50%;
-            bottom: 28px;
-            transform: translateX(-50%) translateY(40px); /* Reducimos el desplazamiento vertical pesado */
-            background: var(--glass);
-            backdrop-filter: blur(var(--blur-val));
-            border: 1px solid var(--glass-border);
-            padding: 18px 22px;
-            border-radius: 24px;
-            z-index: 9999;
-            min-width: 330px;
-            max-width: 90%;
-            transition: .45s var(--bezier);
-            box-shadow: 0 20px 60px rgba(0,0,0,.45);
-            
-            /* NUEVAS LÍNEAS PARA OCULTARLO */
-            opacity: 0;
-            pointer-events: none;
-        }
+        /* UPDATE */
 
-        #updateBanner.show {
-            transform: translateX(-50%) translateY(0);
-            
-            /* NUEVAS LÍNEAS PARA MOSTRARLO */
-            opacity: 1;
-            pointer-events: auto;
-        }
-        .update-title {
-            font-weight: 500;
-            font-size: 1rem;
-            margin-bottom: 6px;
-        }
+#updateBanner{
 
-        .update-text {
-            font-size: .88rem;
-            color: var(--text-muted);
-            margin-bottom: 14px;
-        }
+position:fixed;
 
-        #updateNow {
-            border: none;
-            background: white;
-            color: black;
-            padding: 10px 18px;
-            border-radius: 999px;
-            cursor: pointer;
-            font-family: Outfit;
-            font-size: .9rem;
-            transition: .25s;
-        }
+left:50%;
 
-        #updateNow:hover {
-            transform: scale(1.05);
-        }
+bottom:28px;
+
+transform:translateX(-50%) translateY(140px);
+
+background:var(--glass);
+
+backdrop-filter:blur(var(--blur-val));
+
+border:1px solid var(--glass-border);
+
+padding:18px 22px;
+
+border-radius:24px;
+
+z-index:9999;
+
+min-width:330px;
+
+max-width:90%;
+
+transition:.45s var(--bezier);
+
+box-shadow:0 20px 60px rgba(0,0,0,.45);
+
+}
+
+#updateBanner.show{
+
+transform:translateX(-50%) translateY(0);
+
+}
+
+.update-title{
+
+font-weight:500;
+
+font-size:1rem;
+
+margin-bottom:6px;
+
+}
+
+.update-text{
+
+font-size:.88rem;
+
+color:var(--text-muted);
+
+margin-bottom:14px;
+
+}
+
+#updateNow{
+
+border:none;
+
+background:white;
+
+color:black;
+
+padding:10px 18px;
+
+border-radius:999px;
+
+cursor:pointer;
+
+font-family:Outfit;
+
+font-size:.9rem;
+
+transition:.25s;
+
+}
+
+#updateNow:hover{
+
+transform:scale(1.05);
+
+}
     </style>
     
     <script>
@@ -894,7 +580,7 @@
         <div><strong>VERSIÓN LOCAL</strong> <span>· Ir a web</span></div>
     </a>
 
-    <div class="version-tag" id="versionTag">1.0</div>
+    <div class="version-tag" id="versionTag">DEV v0.9.9.19</div>
 
     <div class="ui-layer">
         <header class="header">
@@ -932,10 +618,22 @@
             <span id="folderTitle">Carpeta</span>
         </div>
 
-        <div id="folderApps"></div>
+        <div
+            id="folderApps"
+            style="
+                display:flex;
+                flex-wrap:wrap;
+                gap:12px;
+                justify-content:center;
+                margin-bottom:20px;
+            "
+        ></div>
 
         <div class="modal-buttons">
-            <button class="modal-btn secondary" onclick="closeModal('folderModal')">
+            <button
+                class="modal-btn secondary"
+                onclick="closeModal('folderModal')"
+            >
                 Cerrar
             </button>
         </div>
@@ -950,13 +648,6 @@
     </div>
 
     <div class="exit-zen-btn" id="exitZenBtn" title="Salir de Modo Zen"><i data-lucide="eye"></i></div>
-    <div id="homescreenToast">Toast Notification</div>
-
-    <div id="updateBanner">
-        <div class="update-title">Nueva versión disponible</div>
-        <div class="update-text">Se ha descargado una actualización en segundo plano.</div>
-        <button id="updateNow">Actualizar ahora</button>
-    </div>
 
     <script>
 const tools = [
@@ -1045,107 +736,25 @@ const hiddenApp = { name: 'Neo GameCenter', icon: 'Gamepad2', url: 'games.html' 
     </div>
 
     <div class="settings-btn" id="setBtn"><i data-lucide="settings" style="width: 20px;"></i></div>
-    
     <div class="settings-panel" id="setPanel">
-        <div class="settings-header">
-            <h3 style="margin: 0; font-weight: 500; display: flex; align-items: center; gap: 8px;">
-                <i data-lucide="sliders-horizontal" style="width: 18px; height: 18px;"></i> Ajustes
-            </h3>
-            <span style="cursor: pointer; opacity: 0.5;" onclick="document.getElementById('setPanel').classList.remove('active')">&times;</span>
+        <h3 style="margin: 0 0 20px 0; font-weight: 500;">Ajustes</h3>
+        <div class="settings-info" id="settingsVersionInfo">
+            <strong>Versión actual</strong>
+            <span>Cargando...</span>
         </div>
-
-        <div class="settings-section">
-            <span class="settings-section-title">Diseño de Interfaz</span>
-            <div class="layout-selector">
-                <button class="layout-opt" data-layout="pill">
-                    <i data-lucide="shapes"></i>
-                    <span>Pill</span>
-                </button>
-                <button class="layout-opt" data-layout="list">
-                    <i data-lucide="list"></i>
-                    <span>Lista</span>
-                </button>
-                <button class="layout-opt" data-layout="grid">
-                    <i data-lucide="grid"></i>
-                    <span>Cuadrícula</span>
-                </button>
-            </div>
-            
-            <div class="setting-item-row" style="margin-top: 12px;">
-                <div class="setting-item-meta">
-                    <i data-lucide="star"></i>
-                    <div>
-                        <span class="setting-label">Carpeta Favoritos</span>
-                        <span class="setting-desc">Mostrar atajo de favoritos en inicio</span>
-                    </div>
-                </div>
-                <div class="switch" id="toggleFavFolder"></div>
+        <div class="setting-item"><span>Fondo Animado</span><div class="switch" id="toggleBg"></div></div>
+        <div class="setting-item"><span>Fondo Negro</span><div class="switch" id="toggleDarkBg"></div></div>
+        <div class="setting-item"><span>Modo Lista</span><div class="switch" id="toggleList"></div></div>
+        <div class="setting-item"><span>Desactivar Blur</span><div class="switch" id="toggleBlur"></div></div>
+        <div class="setting-item">
+            <span>Actualizaciones</span>
+            <div class="settings-actions">
+                <button class="settings-action-btn" id="checkUpdatesBtn" type="button">Comprobar</button>
+                <button class="settings-action-btn" id="showChangelogBtn" type="button">Changelog</button>
             </div>
         </div>
-
-        <div class="settings-section">
-            <span class="settings-section-title">Efectos Visuales</span>
-            
-            <div class="setting-item-row">
-                <div class="setting-item-meta">
-                    <i data-lucide="sparkles"></i>
-                    <div>
-                        <span class="setting-label">Fondo Animado</span>
-                        <span class="setting-desc">Partículas interactivas flotando</span>
-                    </div>
-                </div>
-                <div class="switch" id="toggleBg"></div>
-            </div>
-
-            <div class="setting-item-row">
-                <div class="setting-item-meta">
-                    <i data-lucide="moon"></i>
-                    <div>
-                        <span class="setting-label">Fondo Negro</span>
-                        <span class="setting-desc">Negro AMOLED puro para ahorrar energía</span>
-                    </div>
-                </div>
-                <div class="switch" id="toggleDarkBg"></div>
-            </div>
-
-            <div class="setting-item-row">
-                <div class="setting-item-meta">
-                    <i data-lucide="droplet"></i>
-                    <div>
-                        <span class="setting-label">Desactivar Blur</span>
-                        <span class="setting-desc">Mejora el rendimiento en PC/móviles lentos</span>
-                    </div>
-                </div>
-                <div class="switch" id="toggleBlur"></div>
-            </div>
-
-            <div class="setting-item-row" id="settingLocalChip">
-                <div class="setting-item-meta">
-                    <i data-lucide="alert-circle"></i>
-                    <div>
-                        <span class="setting-label">Ocultar Aviso Local</span>
-                        <span class="setting-desc">No mostrar chip de versión web</span>
-                    </div>
-                </div>
-                <div class="switch" id="toggleLocalChip"></div>
-            </div>
-        </div>
-
-        <div class="settings-section">
-            <span class="settings-section-title">Sistema</span>
-            <div class="settings-info" id="settingsVersionInfo">
-                <strong>Versión actual</strong>
-                <span>Cargando...</span>
-            </div>
-            <div class="settings-actions-grid">
-                <button class="settings-action-btn" id="checkUpdatesBtn" type="button">
-                    <i data-lucide="refresh-cw" style="width: 14px;"></i> Comprobar
-                </button>
-                <button class="settings-action-btn" id="showChangelogBtn" type="button">
-                    <i data-lucide="history" style="width: 14px;"></i> Changelog
-                </button>
-            </div>
-        </div>
+        
+        <div class="setting-item" id="settingLocalChip"><span>Ocultar Aviso Local</span><div class="switch" id="toggleLocalChip"></div></div>
     </div>
 
     <script>
@@ -1158,10 +767,10 @@ const hiddenApp = { name: 'Neo GameCenter', icon: 'Gamepad2', url: 'games.html' 
         const clock = document.getElementById('clock');
         const exitZenBtn = document.getElementById('exitZenBtn');
 
+        // LÓGICA DE CLICS EN VERSIÓN Y MODALES
         let versionClicks = 0;
         let warningTimer = null;
 
-        // Detector para acceder a la Carpeta Oculta (5 Clics en la versión)
         document.getElementById('versionTag').onclick = (e) => {
             versionClicks++;
             if(versionClicks === 5) {
@@ -1170,11 +779,11 @@ const hiddenApp = { name: 'Neo GameCenter', icon: 'Gamepad2', url: 'games.html' 
             }
         };
 
-        /* --- CONTROL DEL RELOJ (CRONÓMETRO, MODO ZEN Y LONG PRESS) --- */
+        // --- LÓGICA DE CONTROL DEL RELOJ (ZEN, CRONÓMETRO Y LONG PRESS) ---
         let clockPressTimer = null;
         let isChronometerMode = false;
         let chronoInterval = null;
-        let chronoTime = 0; 
+        let chronoTime = 0; // Décimas de segundo
 
         function formatChrono(time) {
             const minutes = Math.floor(time / 600);
@@ -1185,19 +794,19 @@ const hiddenApp = { name: 'Neo GameCenter', icon: 'Gamepad2', url: 'games.html' 
 
         // Clic normal sobre el reloj
         clock.onclick = () => {
-            if (!isChronometerMode) return; 
+            if (!isChronometerMode) return; // Si es la hora normal, ignorar clic simple
             
             if (chronoInterval) {
-                // Pausa
+                // Pausar
                 clearInterval(chronoInterval);
                 chronoInterval = null;
             } else {
-                // Si ya tiene tiempo y estaba pausado, se reinicia a cero
+                // Si ya tiene tiempo guardado y estaba en pausa, reinicia a cero
                 if (chronoTime > 0) {
                     chronoTime = 0;
                     clock.innerText = formatChrono(chronoTime);
                 } else {
-                    // Iniciar
+                    // Arrancar
                     chronoInterval = setInterval(() => {
                         chronoTime++;
                         clock.innerText = formatChrono(chronoTime);
@@ -1208,12 +817,12 @@ const hiddenApp = { name: 'Neo GameCenter', icon: 'Gamepad2', url: 'games.html' 
 
         // Doble clic para Modo Zen
         clock.ondblclick = () => {
-            if (isChronometerMode) return; 
+            if (isChronometerMode) return; // Bloquear si está en cronómetro
             body.classList.add('zen-mode');
             setPanel.classList.remove('active'); 
         };
 
-        // Long Press (Presión prolongada de 1.2s)
+        // Lógica de detección del Long Press (1.2 segundos)
         const startPress = (e) => {
             if (clockPressTimer) clearTimeout(clockPressTimer);
             clockPressTimer = setTimeout(toggleClockMode, 1200);
@@ -1231,7 +840,7 @@ const hiddenApp = { name: 'Neo GameCenter', icon: 'Gamepad2', url: 'games.html' 
             cancelPress();
 
             if (isChronometerMode) {
-                clock.style.color = '#FFD60A'; 
+                clock.style.color = '#FFD60A'; // Tono amarillo sutil informativo
                 chronoTime = 0;
                 clock.innerText = formatChrono(chronoTime);
                 document.getElementById('date').style.opacity = '0';
@@ -1248,6 +857,7 @@ const hiddenApp = { name: 'Neo GameCenter', icon: 'Gamepad2', url: 'games.html' 
             }
         }
 
+        // Listeners del Reloj (Soporte PC y Mobile)
         clock.addEventListener('mousedown', startPress);
         clock.addEventListener('mouseup', cancelPress);
         clock.addEventListener('mouseleave', cancelPress);
@@ -1259,81 +869,6 @@ const hiddenApp = { name: 'Neo GameCenter', icon: 'Gamepad2', url: 'games.html' 
             body.classList.remove('zen-mode');
         };
 
-        /* --- SISTEMA ADAPTABLE DE TOASTS (ESTILO ANDROID) --- */
-        let toastTimeout = null;
-        function showToast(message) {
-            const toast = document.getElementById('homescreenToast');
-            if (!toast) return;
-
-            toast.innerText = message;
-            toast.classList.add('show');
-
-            if (toastTimeout) clearTimeout(toastTimeout);
-            toastTimeout = setTimeout(() => {
-                toast.classList.remove('show');
-            }, 2500);
-        }
-
-        /* --- SISTEMA PERSISTENTE DE FAVORITOS --- */
-        function getFavorites() {
-            try {
-                return JSON.parse(localStorage.getItem('favorites')) || [];
-            } catch(e) {
-                return [];
-            }
-        }
-
-        function isFavorite(url) {
-            return getFavorites().includes(url);
-        }
-
-        function toggleFavorite(url, element) {
-            let favs = getFavorites();
-            const isActive = element.classList.toggle('active');
-
-            if (isActive) {
-                if (!favs.includes(url)) favs.push(url);
-                showToast('Añadido a favoritos ⭐');
-            } else {
-                favs = favs.filter(u => u !== url);
-                showToast('Eliminado de favoritos');
-            }
-            localStorage.setItem('favorites', JSON.stringify(favs));
-        }
-
-        function getFavoriteApps() {
-            const favUrls = getFavorites();
-            const allApps = [];
-            tools.forEach(f => f.apps.forEach(a => allApps.push(a)));
-            return allApps.filter(a => favUrls.includes(a.url));
-        }
-
-        function openFavoritesFolder() {
-            openFolder({ name: 'Favoritos', apps: getFavoriteApps() });
-        }
-
-        function renderMainGrid() {
-            const showFavs = localStorage.getItem('showFavFolder') !== 'false';
-            let gridHTML = "";
-            if (showFavs) {
-                 gridHTML += `
-                    <div class="tool-card" onclick="openFavoritesFolder()" style="animation-delay: 0s">
-                        <i data-lucide="star"></i>
-                        <span>Favoritos</span>
-                    </div>
-                `;
-            }
-            gridHTML += tools.map((t, i) => `
-                <div class="tool-card" onclick="openFolder(tools[${i}])" style="animation-delay:${(i + (showFavs ? 1 : 0)) * 0.05}s">
-                    <i data-lucide="${t.icon}"></i>
-                    <span>${t.name}</span>
-                </div>
-            `).join('');
-            grid.innerHTML = gridHTML;
-            if(window.lucide) lucide.createIcons();
-        }
-
-        /* --- SISTEMA DE MODALES Y CARPETAS ADAPTABLES --- */
         function openModal(id) {
             if(id === 'hiddenFolderModal') {
                 document.getElementById('hiddenAppArea').innerHTML = `
@@ -1368,40 +903,18 @@ const hiddenApp = { name: 'Neo GameCenter', icon: 'Gamepad2', url: 'games.html' 
             lucide.createIcons();
         }
 
-        // Abre una carpeta heredando el modo visual actual (Pill, Lista, Grid)
         function openFolder(folder) {
             document.getElementById('folderTitle').innerText = folder.name;
 
-            const folderApps = document.getElementById('folderApps');
-            const folderModal = document.getElementById('folderModal');
-            const currentLayout = localStorage.getItem('layoutMode') || 'pill';
-
-            // Limpieza de estados visuales del modal de carpetas
-            folderApps.className = '';
-            folderModal.classList.remove('grid-active');
-
-            if (currentLayout === 'list') {
-                folderApps.classList.add('list-mode');
-            } else if (currentLayout === 'grid') {
-                folderApps.classList.add('grid-mode');
-                folderModal.classList.add('grid-active');
-            }
-
-            // Inyección y comprobación de favoritos en las apps internas
-            folderApps.innerHTML = folder.apps.map(app => {
-                const favClass = isFavorite(app.url) ? 'active' : '';
-                return `
-                    <a href="${app.url}" class="tool-card">
-                        <i data-lucide="${app.icon}"></i>
-                        <span>${app.name}</span>
-                        <button class="star-btn ${favClass}" onclick="event.preventDefault(); toggleFavorite('${app.url}', this);">
-                            <i data-lucide="star"></i>
-                        </button>
-                    </a>
-                `;
-            }).join('');
+            document.getElementById('folderApps').innerHTML = folder.apps.map(app => `
+                <a href="${app.url}" class="tool-card">
+                    <i data-lucide="${app.icon}"></i>
+                    <span>${app.name}</span>
+                </a>
+            `).join('');
 
             lucide.createIcons();
+
             openModal('folderModal');
         }
 
@@ -1461,7 +974,6 @@ const hiddenApp = { name: 'Neo GameCenter', icon: 'Gamepad2', url: 'games.html' 
             openModal('hiddenFolderModal');
         }
 
-        /* --- CONTROL DEL BUSCADOR --- */
         function toggleSearch(open) {
             if(window.hasHubError) return;
             if(open) {
@@ -1515,29 +1027,11 @@ const hiddenApp = { name: 'Neo GameCenter', icon: 'Gamepad2', url: 'games.html' 
                 });
             });
 
-            let mathHtml = '';
-            if (val.trim() !== '' && /^[0-9+\-*/().\s]+$/.test(val) && /[+\-*/]/.test(val)) {
-                try {
-                    const result = new Function('return ' + val)();
-                    if (result !== undefined && !isNaN(result) && result !== Infinity) {
-                        mathHtml = `
-                            <div class="result-item" onclick="navigator.clipboard.writeText('${result}'); showToast('Resultado copiado al portapapeles');" style="cursor: pointer; background: rgba(52, 199, 89, 0.15); border: 1px solid rgba(52, 199, 89, 0.3);">
-                                <i data-lucide="calculator" style="margin-right:15px; width:18px; color: #34C759;"></i>
-                                <div>
-                                    <div style="color: #34C759; font-weight: bold;">${result}</div>
-                                    <small style="opacity:.7; color: #34C759;">Click para copiar</small>
-                                </div>
-                            </div>
-                        `;
-                    }
-                } catch(e) {}
-            }
-
             const filtered = allApps.filter(app =>
                 app.name.toLowerCase().includes(val.toLowerCase())
             );
 
-            document.getElementById('resultsArea').innerHTML = mathHtml + filtered.map((t, i) => `
+            document.getElementById('resultsArea').innerHTML = filtered.map((t, i) => `
                 <a href="${t.url}" class="result-item" style="animation: fadeInItem .4s var(--bezier) both ${i * .03}s">
                     <i data-lucide="${t.icon}" style="margin-right:15px; width:18px; opacity:.6;"></i>
                     <div>
@@ -1560,7 +1054,6 @@ const hiddenApp = { name: 'Neo GameCenter', icon: 'Gamepad2', url: 'games.html' 
             }
         };
 
-        /* --- FONDO ANIMADO DE PARTÍCULAS --- */
         let particles = [], animationId, canvas = document.getElementById('bgCanvas'), ctx = canvas.getContext('2d');
         function initParticles() {
             window.addEventListener('resize', () => { canvas.width = window.innerWidth; canvas.height = window.innerHeight; createParticles(); });
@@ -1593,7 +1086,7 @@ const hiddenApp = { name: 'Neo GameCenter', icon: 'Gamepad2', url: 'games.html' 
         }
 
         function updateClock() {
-            if (isChronometerMode) return; 
+            if (isChronometerMode) return; // No sobreescribir si el cronómetro está activo
             const n = new Date();
             document.getElementById('clock').innerText = n.toLocaleTimeString('es-ES', {hour:'2-digit', minute:'2-digit'});
             document.getElementById('date').innerText = n.toLocaleDateString('es-ES', {weekday:'long', day:'numeric', month:'long'});
@@ -1608,48 +1101,19 @@ const hiddenApp = { name: 'Neo GameCenter', icon: 'Gamepad2', url: 'games.html' 
             }
         }
 
-        /* --- CONTROL DINÁMICO DE LAYOUTS DE INTERFAZ (TRES MODOS) --- */
-        function setLayoutMode(mode) {
-            grid.classList.remove('list-mode', 'grid-mode');
-            
-            if (mode === 'list') {
-                grid.classList.add('list-mode');
-            } else if (mode === 'grid') {
-                grid.classList.add('grid-mode');
-            }
-            
-            localStorage.setItem('layoutMode', mode);
-            
-            // Refresca la selección activa en el selector visual de ajustes
-            document.querySelectorAll('.layout-opt').forEach(btn => {
-                if (btn.getAttribute('data-layout') === mode) {
-                    btn.classList.add('active');
-                } else {
-                    btn.classList.remove('active');
-                }
-            });
-        }
-
-        /* --- INICIALIZADOR DE INTERFAZ (INIT) --- */
         function init() {
             updateClock();
             if(window.hasHubError) return;
 
-            // Inyección de carpetas primarias en pantalla de inicio
-            renderMainGrid();
+            grid.innerHTML = tools.map((t, i) => `
+                <div class="tool-card" onclick="openFolder(tools[${i}])" style="animation-delay:${i * 0.05}s">
+                    <i data-lucide="${t.icon}"></i>
+                    <span>${t.name}</span>
+                </div>
+            `).join('');
+            lucide.createIcons();
             
-            const sFavFolder = document.getElementById('toggleFavFolder');
-            if(localStorage.getItem('showFavFolder') !== 'false' && sFavFolder) {
-                sFavFolder.classList.add('on');
-            }
-            if(sFavFolder) {
-                sFavFolder.onclick = () => {
-                    const act = sFavFolder.classList.toggle('on');
-                    localStorage.setItem('showFavFolder', act);
-                    renderMainGrid();
-                };
-            }
-            
+            const sList = document.getElementById('toggleList');
             const sBlur = document.getElementById('toggleBlur');
             const sBg = document.getElementById('toggleBg');
             const sDarkBg = document.getElementById('toggleDarkBg');
@@ -1659,7 +1123,6 @@ const hiddenApp = { name: 'Neo GameCenter', icon: 'Gamepad2', url: 'games.html' 
             const settingLocalChip = document.getElementById('settingLocalChip');
             const sLocalChip = document.getElementById('toggleLocalChip');
 
-            // Configuración del chip local según entorno de despliegue
             if (esLocal) {
                 if(settingLocalChip) settingLocalChip.style.display = 'flex';
                 
@@ -1686,20 +1149,7 @@ const hiddenApp = { name: 'Neo GameCenter', icon: 'Gamepad2', url: 'games.html' 
                 if(settingLocalChip) settingLocalChip.style.display = 'none';
             }
             
-            // Carga de distribución visual guardada
-            let savedLayout = localStorage.getItem('layoutMode');
-            if(!savedLayout) {
-                savedLayout = localStorage.getItem('list') === 'true' ? 'list' : 'pill';
-            }
-            setLayoutMode(savedLayout);
-
-            document.querySelectorAll('.layout-opt').forEach(btn => {
-                btn.onclick = (e) => {
-                    e.stopPropagation();
-                    setLayoutMode(btn.getAttribute('data-layout'));
-                };
-            });
-
+            if(localStorage.getItem('list') === 'true') { grid.classList.add('list-mode'); if(sList) sList.classList.add('on'); }
             if(localStorage.getItem('noblur') === 'true') { body.classList.add('no-blur'); if(sBlur) sBlur.classList.add('on'); }
             
             const isDarkActive = localStorage.getItem('darkbg') !== 'false';
@@ -1761,6 +1211,7 @@ const hiddenApp = { name: 'Neo GameCenter', icon: 'Gamepad2', url: 'games.html' 
             
             document.addEventListener('click', (e) => { if(setPanel && !setPanel.contains(e.target)) setPanel.classList.remove('active'); });
 
+            if(sList) sList.onclick = () => { localStorage.setItem('list', grid.classList.toggle('list-mode')); sList.classList.toggle('on'); };
             if(sBlur) sBlur.onclick = () => { localStorage.setItem('noblur', body.classList.toggle('no-blur')); sBlur.classList.toggle('on'); };
             
             if(sBg) sBg.onclick = () => { 
