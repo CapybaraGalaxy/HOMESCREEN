@@ -1,7 +1,9 @@
 {
-  "version": "0.9.9.18.2",
-  "date": "12 Julio 2026",
+  "version": "DEV v0.9.9.19",
+  "date": "15 Julio 2026",
   "changes": [
-    "Fixed some bugs in the update manager."
+    "Se ha arreglado un error con la carga de la tipografía ''outfit''.",
+    "Se ha añadido un creador de memes a la lista de aplicaciones.",
+
   ]
 }

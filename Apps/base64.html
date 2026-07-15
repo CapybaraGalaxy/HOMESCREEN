@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
-    <title>Conversor a Base64</title>
+    <title>Conversor a Base64 Pro</title>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700&display=swap" rel="stylesheet">
@@ -83,6 +83,7 @@
             align-items: center;
             justify-content: center;
             backdrop-filter: blur(var(--blur-val));
+            flex-shrink: 0;
         }
 
         .header-title-area h1 {
@@ -105,48 +106,6 @@
             color: var(--accent-blue);
         }
 
-        .folders-scroll-area {
-            display: flex;
-            gap: 10px;
-            overflow-x: auto;
-            padding: 4px 0 12px 0;
-            scrollbar-width: none;
-            -webkit-overflow-scrolling: touch;
-            flex-shrink: 0;
-        }
-        
-        .folders-scroll-area::-webkit-scrollbar { 
-            display: none; 
-        }
-
-        .pill-button {
-            background: var(--glass);
-            border: 1px solid var(--glass-border);
-            color: var(--text-muted);
-            padding: 8px 16px;
-            border-radius: 100px;
-            font-family: 'Outfit', sans-serif;
-            font-size: 14px;
-            font-weight: 500;
-            cursor: pointer;
-            white-space: nowrap;
-            transition: background 0.3s var(--bezier), color 0.3s var(--bezier), border-color 0.3s var(--bezier);
-            display: flex;
-            align-items: center;
-            gap: 6px;
-        }
-
-        .pill-button:hover, .pill-button.active {
-            background: var(--surface-hover);
-            color: var(--text-main);
-            border-color: rgba(255,255,255,0.2);
-        }
-
-        .pill-button.active {
-            background: rgba(255, 255, 255, 0.1);
-            border-color: rgba(255, 255, 255, 0.3);
-        }
-
         .main-content {
             flex: 1;
             overflow-y: auto;
@@ -158,25 +117,27 @@
             display: none;
         }
 
+        /* --- MEJORAS EN EL DROPZONE --- */
         .dropzone-container {
             background: var(--glass);
             border: 2px dashed var(--glass-border);
             border-radius: 20px;
-            padding: 32px;
+            padding: 32px 20px;
             text-align: center;
             cursor: pointer;
-            transition: border-color 0.3s var(--bezier), background 0.3s var(--bezier);
+            transition: border-color 0.3s var(--bezier), background 0.3s var(--bezier), transform 0.2s var(--bezier);
             margin-bottom: 20px;
             display: flex;
             flex-direction: column;
             align-items: center;
-            gap: 12px;
+            gap: 16px;
             position: relative;
         }
 
         .dropzone-container:hover, .dropzone-container.dragover {
             border-color: var(--accent-blue);
-            background: rgba(10, 132, 255, 0.05);
+            background: rgba(10, 132, 255, 0.08);
+            transform: scale(1.01);
         }
 
         .dropzone-container input[type="file"] {
@@ -184,19 +145,44 @@
             top: 0; left: 0; width: 100%; height: 100%;
             opacity: 0;
             cursor: pointer;
+            z-index: 2;
+        }
+
+        .format-icons-row {
+            display: flex;
+            gap: 12px;
+            color: var(--text-muted);
+            opacity: 0.8;
+        }
+
+        .format-icons-row i {
+            transition: color 0.3s ease, transform 0.3s ease;
+        }
+
+        .dropzone-container:hover .format-icons-row i {
+            color: var(--accent-blue);
+            transform: translateY(-2px);
         }
 
         .dropzone-title {
-            font-size: 15px;
+            font-size: 16px;
             color: var(--text-muted);
             font-weight: 400;
         }
 
         .dropzone-title strong {
             color: var(--text-main);
-            font-weight: 500;
+            font-weight: 600;
+        }
+        
+        .dropzone-subtitle {
+            font-size: 12px;
+            color: rgba(142, 142, 147, 0.7);
+            max-width: 80%;
+            line-height: 1.4;
         }
 
+        /* --- CUADRÍCULA Y TARJETAS --- */
         .items-grid {
             display: grid;
             grid-template-columns: 1fr;
@@ -219,6 +205,7 @@
             gap: 12px;
             transition: background 0.2s var(--bezier), border-color 0.2s var(--bezier);
             position: relative;
+            overflow: hidden;
         }
 
         .item-card:hover {
@@ -233,11 +220,18 @@
             object-fit: cover;
             background: #1c1c1e;
             border: 1px solid rgba(255,255,255,0.05);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            flex-shrink: 0;
         }
 
         .item-info {
             flex: 1;
             min-width: 0;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
         }
 
         .item-name {
@@ -252,10 +246,39 @@
         .item-meta {
             font-size: 12px;
             color: var(--text-muted);
-            margin-top: 2px;
+            margin-top: 4px;
             font-variant-numeric: tabular-nums;
         }
 
+        /* --- BARRAS DE PROGRESO --- */
+        .progress-track {
+            width: 100%;
+            height: 4px;
+            background: rgba(255,255,255,0.1);
+            border-radius: 4px;
+            margin-top: 6px;
+            overflow: hidden;
+        }
+
+        .progress-fill {
+            height: 100%;
+            background: var(--accent-blue);
+            width: 0%;
+            border-radius: 4px;
+            transition: width 0.1s linear;
+        }
+
+        @keyframes spin {
+            from { transform: rotate(0deg); }
+            to { transform: rotate(360deg); }
+        }
+
+        .icon-spin {
+            animation: spin 1s linear infinite;
+            color: var(--accent-blue);
+        }
+
+        /* --- BOTONES DE ACCIÓN --- */
         .item-actions {
             display: flex;
             gap: 4px;
@@ -285,6 +308,7 @@
             color: var(--accent-danger);
         }
 
+        /* --- MODAL Y OTROS ELEMENTOS --- */
         .search-fab-container {
             position: fixed;
             bottom: calc(env(safe-area-inset-bottom, 16px) + 20px);
@@ -293,7 +317,6 @@
             width: calc(100% - 48px);
             max-width: 400px;
             z-index: 999;
-            transition: width 0.3s var(--bezier);
         }
 
         .search-bar {
@@ -335,9 +358,7 @@
         }
 
         @media (min-width: 600px) {
-            .modal-overlay {
-                align-items: center;
-            }
+            .modal-overlay { align-items: center; }
         }
 
         .modal-overlay.active {
@@ -387,6 +408,10 @@
         .modal-title {
             font-size: 18px;
             font-weight: 600;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            max-width: 80%;
         }
 
         .modal-body {
@@ -395,39 +420,6 @@
             display: flex;
             flex-direction: column;
             gap: 16px;
-        }
-
-        .form-group {
-            display: flex;
-            flex-direction: column;
-            gap: 8px;
-        }
-
-        .form-label {
-            font-size: 13px;
-            font-weight: 500;
-            color: var(--text-muted);
-        }
-
-        .form-input {
-            background: rgba(255,255,255,0.04);
-            border: 1px solid var(--glass-border);
-            border-radius: 12px;
-            padding: 12px;
-            color: var(--text-main);
-            font-family: 'Outfit', sans-serif;
-            font-size: 14px;
-            outline: none;
-            transition: border-color 0.2s var(--bezier);
-        }
-
-        .form-input:focus {
-            border-color: rgba(255,255,255,0.2);
-        }
-
-        .form-input.error-shake {
-            animation: shake 0.3s ease-in-out;
-            border-color: var(--accent-danger) !important;
         }
 
         .textarea-output {
@@ -442,17 +434,6 @@
             height: 140px;
             outline: none;
             word-break: break-all;
-        }
-
-        .category-preview-box {
-            height: 60px;
-            border-radius: 14px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-weight: 600;
-            font-size: 14px;
-            transition: background 0.3s var(--bezier);
         }
 
         .btn-primary {
@@ -487,14 +468,58 @@
             gap: 12px;
         }
 
-        @keyframes shake {
-            0%, 100% { transform: translateX(0); }
-            20%, 60% { transform: translateX(-6px); }
-            40%, 80% { transform: translateX(6px); }
+        #viewer-preview-container {
+            width: 100%;
+            min-height: 160px;
+            max-height: 250px;
+            background: #09090b;
+            border-radius: 12px;
+            border: 1px solid var(--glass-border);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            overflow: hidden;
+            flex-direction: column;
+        }
+
+        #viewer-preview-container audio { width: 90%; }
+        #viewer-preview-container video { width: 100%; max-height: 250px; object-fit: contain; }
+        #viewer-preview-container img { width: 100%; height: 100%; object-fit: contain; }
+
+        /* --- TOAST NOTIFICATION --- */
+        .toast-notification {
+            position: fixed;
+            top: 20px;
+            left: 50%;
+            transform: translate(-50%, -20px);
+            background: var(--accent-success);
+            color: #000;
+            padding: 10px 20px;
+            border-radius: 100px;
+            font-weight: 600;
+            font-size: 14px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            opacity: 0;
+            pointer-events: none;
+            transition: opacity 0.3s var(--bezier), transform 0.3s var(--spring);
+            z-index: 2000;
+            box-shadow: 0 4px 20px rgba(52, 199, 89, 0.4);
+        }
+
+        .toast-notification.show {
+            opacity: 1;
+            transform: translate(-50%, 0);
         }
     </style>
 </head>
 <body>
+
+    <div class="toast-notification" id="toast">
+        <i data-lucide="check-circle-2" size="18"></i>
+        <span>¡Código copiado al portapapeles!</span>
+    </div>
 
     <div class="app-container" id="main-view">
         <header>
@@ -503,7 +528,7 @@
                     <i data-lucide="layers" size="20" style="color: var(--text-main);"></i>
                 </div>
                 <div class="header-title-area">
-                    <h1>Conversor Base64</h1>
+                    <h1>Base64 Studio</h1>
                     <span class="counter-badge" id="global-counter">0 elementos</span>
                 </div>
             </div>
@@ -511,12 +536,22 @@
 
         <main class="main-content">
             <div class="dropzone-container" id="dropzone">
-                <input type="file" id="file-input" accept="image/*" multiple>
-                <div class="app-icon-badge">
-                    <i data-lucide="upload-cloud" size="20" style="color: var(--accent-blue);"></i>
+                <input type="file" id="file-input" multiple>
+                
+                <div class="format-icons-row">
+                    <i data-lucide="image" size="28"></i>
+                    <i data-lucide="video" size="28"></i>
+                    <i data-lucide="music" size="28"></i>
+                    <i data-lucide="file-text" size="28"></i>
+                    <i data-lucide="file-archive" size="28"></i>
                 </div>
+
                 <div class="dropzone-title">
-                    Arrastra imágenes aquí o <strong>selecciona archivos</strong>
+                    Arrastra archivos aquí o <strong>explorar</strong>
+                </div>
+
+                <div class="dropzone-subtitle">
+                    Soporta: JPG, PNG, GIF, MP4, MP3, PDF, DOCX, ZIP, TXT, y cualquier otro formato (Límite sugerido: < 50MB para mejor rendimiento).
                 </div>
             </div>
 
@@ -528,7 +563,7 @@
     <div class="search-fab-container">
         <div class="search-bar">
             <i data-lucide="search" size="18" style="color: var(--text-muted);"></i>
-            <input type="text" class="search-input" id="search-input" placeholder="Buscar imágenes..." oninput="handleSearch()">
+            <input type="text" class="search-input" id="search-input" placeholder="Buscar archivos..." oninput="handleSearch()">
             <button class="action-btn" id="search-clear-btn" style="display: none;" onclick="clearSearch()">
                 <i data-lucide="x" size="16"></i>
             </button>
@@ -538,15 +573,16 @@
     <div class="modal-overlay" id="viewer-modal" onclick="closeActiveModalOnOverlay(event)">
         <div class="modal-sheet">
             <div class="modal-header">
-                <h3 class="modal-title" id="viewer-title">Detalles Base64</h3>
+                <h3 class="modal-title" id="viewer-title">Detalles</h3>
                 <button class="action-btn" onclick="closeActiveModal('viewer-modal')">
                     <i data-lucide="x" size="18"></i>
                 </button>
             </div>
             <div class="modal-body">
-                <img id="viewer-img-preview" src="" alt="Preview" style="width: 100%; height: 160px; object-fit: contain; background: #09090b; border-radius: 12px; border: 1px solid var(--glass-border);">
-                <div class="form-group">
-                    <label class="form-label">Código Base64 Estándar</label>
+                <div id="viewer-preview-container"></div>
+                
+                <div style="display: flex; flex-direction: column; gap: 8px;">
+                    <label style="font-size: 13px; font-weight: 500; color: var(--text-muted);">Código Base64</label>
                     <textarea class="textarea-output" id="base64-output" readonly></textarea>
                 </div>
                 <button class="btn-primary" onclick="copyBase64Content()">
@@ -557,23 +593,20 @@
     </div>
 
     <script>
-        // --- MOTOR DE ESTADO CENTRALIZADO ---
-        let appData = {
-            items: [],
-            searchQuery: ''
-        };
-
+        // --- ESTADOS Y DATOS ---
+        let appData = { items: [], searchQuery: '' };
+        let uploadingQueue = []; // Almacena archivos en proceso de lectura
         let activeModalsStack = [];
 
         // --- INICIALIZACIÓN ---
         window.onload = () => {
+            lucide.createIcons();
             const savedData = localStorage.getItem('purebase64_data');
             if (savedData) {
                 appData = JSON.parse(savedData);
                 if (!Array.isArray(appData.items)) appData.items = [];
                 appData.searchQuery = '';
             } else {
-                appData.items = [];
                 saveData();
             }
             renderApp();
@@ -593,7 +626,7 @@
             }
         }
 
-        // --- CONTROL DE MODALES (HISTORY API) ---
+        // --- MODALES Y NAVEGACIÓN ---
         function openModal(modalId) {
             document.getElementById('main-view').classList.add('backgrounded');
             document.getElementById(modalId).classList.add('active');
@@ -618,13 +651,17 @@
             if (activeModalsStack.length > 0) {
                 const topModalId = activeModalsStack.pop();
                 document.getElementById(topModalId).classList.remove('active');
+                
+                const mediaElements = document.querySelectorAll('#viewer-preview-container audio, #viewer-preview-container video');
+                mediaElements.forEach(media => media.pause());
+
                 if (activeModalsStack.length === 0) {
                     document.getElementById('main-view').classList.remove('backgrounded');
                 }
             }
         });
 
-        // --- MANEJO DE IMÁGENES & CONVERSIÓN ---
+        // --- MANEJO DE ARCHIVOS ASÍNCRONO ---
         function setupDragAndDrop() {
             const dropzone = document.getElementById('dropzone');
             const fileInput = document.getElementById('file-input');
@@ -633,39 +670,60 @@
                 e.preventDefault();
                 dropzone.classList.add('dragover');
             });
-
-            dropzone.addEventListener('dragleave', () => {
-                dropzone.classList.remove('dragover');
-            });
-
+            dropzone.addEventListener('dragleave', () => dropzone.classList.remove('dragover'));
             dropzone.addEventListener('drop', (e) => {
                 e.preventDefault();
                 dropzone.classList.remove('dragover');
                 handleFiles(e.dataTransfer.files);
             });
-
             fileInput.addEventListener('change', (e) => {
                 handleFiles(e.target.files);
+                fileInput.value = ''; // Limpiar input para permitir subir el mismo archivo de nuevo
             });
         }
 
         function handleFiles(files) {
             Array.from(files).forEach(file => {
-                if (!file.type.startsWith('image/')) return;
+                const tempId = 'upload-' + Date.now() + Math.random().toString(36).substring(2, 7);
+                const readableSize = formatBytes(file.size);
+                
+                // Añadir a la cola de subida y renderizar interfaz temporal
+                uploadingQueue.push({ id: tempId, name: file.name, size: readableSize, progress: 0 });
+                renderApp();
 
                 const reader = new FileReader();
+
+                // Actualizar barra de progreso
+                reader.onprogress = (event) => {
+                    if (event.lengthComputable) {
+                        const percent = Math.round((event.loaded / event.total) * 100);
+                        const progressElement = document.getElementById(`progress-fill-${tempId}`);
+                        const percentText = document.getElementById(`progress-text-${tempId}`);
+                        
+                        if (progressElement) progressElement.style.width = percent + '%';
+                        if (percentText) percentText.innerText = `Convirtiendo... ${percent}%`;
+                    }
+                };
+
+                // Finalizado
                 reader.onload = (event) => {
-                    const newItem = {
+                    // Quitar de la cola de subida
+                    uploadingQueue = uploadingQueue.filter(u => u.id !== tempId);
+                    
+                    // Guardar en items definitivos
+                    appData.items.unshift({
                         id: 'item-' + Date.now() + Math.random().toString(36).substr(2, 5),
                         name: file.name,
-                        size: formatBytes(file.size),
+                        size: readableSize,
+                        type: file.type || 'unknown',
                         base64: event.target.result,
                         timestamp: Date.now()
-                    };
-                    appData.items.unshift(newItem);
+                    });
+                    
                     saveData();
                     renderApp();
                 };
+
                 reader.readAsDataURL(file);
             });
         }
@@ -673,7 +731,7 @@
         function formatBytes(bytes) {
             if (bytes === 0) return '0 Bytes';
             const k = 1024;
-            const sizes = ['Bytes', 'KB', 'MB'];
+            const sizes = ['B', 'KB', 'MB', 'GB'];
             const i = Math.floor(Math.log(bytes) / Math.log(k));
             return parseFloat((bytes / Math.pow(k, i)).toFixed(1)) + ' ' + sizes[i];
         }
@@ -686,12 +744,8 @@
 
         // --- BUSCADOR ---
         function handleSearch() {
-            const query = document.getElementById('search-input').value.toLowerCase();
-            appData.searchQuery = query;
-            
-            const clearBtn = document.getElementById('search-clear-btn');
-            clearBtn.style.display = query ? 'flex' : 'none';
-            
+            appData.searchQuery = document.getElementById('search-input').value.toLowerCase();
+            document.getElementById('search-clear-btn').style.display = appData.searchQuery ? 'flex' : 'none';
             renderItemsOnly();
         }
 
@@ -702,92 +756,133 @@
             renderItemsOnly();
         }
 
-        // --- VISOR Y COPIADO ---
+        // --- VISOR Y TOAST ---
         let currentViewingBase64 = '';
+        
+        function getIconForFileType(type) {
+            if(type.startsWith('video/')) return 'video';
+            if(type.startsWith('audio/')) return 'music';
+            if(type.includes('pdf')) return 'file-text';
+            if(type.includes('zip') || type.includes('rar') || type.includes('tar') || type.includes('gzip')) return 'file-archive';
+            if(type.includes('text') || type.includes('document')) return 'file-text';
+            return 'file';
+        }
+
         function viewItemDetails(itemId) {
             const item = appData.items.find(i => i.id === itemId);
             if (!item) return;
 
             currentViewingBase64 = item.base64;
             document.getElementById('viewer-title').innerText = item.name;
-            document.getElementById('viewer-img-preview').src = item.base64;
             document.getElementById('base64-output').value = item.base64;
 
+            const previewContainer = document.getElementById('viewer-preview-container');
+            if (item.type.startsWith('image/')) {
+                previewContainer.innerHTML = `<img src="${item.base64}" alt="${item.name}">`;
+            } else if (item.type.startsWith('video/')) {
+                previewContainer.innerHTML = `<video src="${item.base64}" controls autoplay></video>`;
+            } else if (item.type.startsWith('audio/')) {
+                previewContainer.innerHTML = `<audio src="${item.base64}" controls autoplay></audio>`;
+            } else {
+                const icon = getIconForFileType(item.type);
+                previewContainer.innerHTML = `
+                    <i data-lucide="${icon}" size="48" style="color: var(--text-muted); margin-bottom: 12px;"></i>
+                    <span style="font-size: 13px; color: var(--text-muted);">Formato: ${item.type || 'Archivo desconocido'}</span>
+                `;
+            }
+
             openModal('viewer-modal');
+            lucide.createIcons();
+        }
+
+        function showToast() {
+            const toast = document.getElementById('toast');
+            toast.classList.add('show');
+            setTimeout(() => { toast.classList.remove('show'); }, 3000);
         }
 
         function copyBase64Content() {
             const textarea = document.getElementById('base64-output');
             textarea.select();
             navigator.clipboard.writeText(currentViewingBase64).then(() => {
-                const btn = document.querySelector('#viewer-modal .btn-primary');
-                const originalHtml = btn.innerHTML;
-                btn.innerHTML = `<i data-lucide="check" size="16"></i> ¡Copiado con éxito!`;
-                btn.style.backgroundColor = 'var(--accent-success)';
-                lucide.createIcons();
-                
-                setTimeout(() => {
-                    btn.innerHTML = originalHtml;
-                    btn.style.backgroundColor = 'var(--text-main)';
-                    lucide.createIcons();
-                }, 2000);
+                showToast(); // Llamada a la nueva notificación elegante
             });
         }
 
-        // --- RUTINAS DE RENDERIZADO UNIFICADAS ---
+        // --- RENDERIZADO ---
         function renderApp() {
             renderItemsOnly();
-            
-            // Actualizar contadores superiores
             const counter = document.getElementById('global-counter');
             counter.innerText = `${appData.items.length} ${appData.items.length === 1 ? 'elemento' : 'elementos'}`;
         }
 
         function renderItemsOnly() {
             const container = document.getElementById('items-container');
-            let filtered = [...appData.items];
+            let html = '';
 
+            // 1. Renderizar items en cola de subida (Loading state)
+            uploadingQueue.forEach(item => {
+                html += `
+                    <div class="item-card" style="border-color: var(--accent-blue);">
+                        <div class="item-preview">
+                            <i data-lucide="loader-2" size="24" class="icon-spin"></i>
+                        </div>
+                        <div class="item-info">
+                            <div class="item-name">${item.name}</div>
+                            <div class="item-meta" id="progress-text-${item.id}">Procesando... 0%</div>
+                            <div class="progress-track">
+                                <div class="progress-fill" id="progress-fill-${item.id}"></div>
+                            </div>
+                        </div>
+                    </div>
+                `;
+            });
+
+            // 2. Renderizar items guardados
+            let filtered = [...appData.items];
             if (appData.searchQuery) {
                 filtered = filtered.filter(item => item.name.toLowerCase().includes(appData.searchQuery));
             }
-
             filtered.sort((a, b) => (b.timestamp || 0) - (a.timestamp || 0));
 
-            if (filtered.length === 0) {
+            if (filtered.length === 0 && uploadingQueue.length === 0) {
                 container.innerHTML = `
                     <div class="empty-state" style="grid-column: 1 / -1;">
-                        <i data-lucide="image-off" size="32" style="color: var(--text-muted);"></i>
-                        <p>No hay elementos en el historial todavía</p>
+                        <i data-lucide="file-box" size="40" style="color: rgba(255,255,255,0.2);"></i>
+                        <p style="margin-top:8px;">No hay archivos procesados todavía</p>
                     </div>
                 `;
                 lucide.createIcons();
                 return;
             }
 
-            let html = '';
             filtered.forEach(item => {
-                const timestampText = item.timestamp
-                    ? new Date(item.timestamp).toLocaleString('es-ES', {
-                        day: '2-digit',
-                        month: 'short',
-                        year: 'numeric',
-                        hour: '2-digit',
-                        minute: '2-digit'
-                    })
-                    : 'Sin fecha';
+                let previewHtml = '';
+                if (item.type.startsWith('image/')) {
+                    previewHtml = `<img class="item-preview" src="${item.base64}" alt="" style="cursor: pointer;">`;
+                } else {
+                    const iconName = getIconForFileType(item.type);
+                    previewHtml = `
+                        <div class="item-preview" style="cursor: pointer;">
+                            <i data-lucide="${iconName}" size="24" style="color: var(--text-muted);"></i>
+                        </div>
+                    `;
+                }
 
                 html += `
                     <div class="item-card">
-                        <img class="item-preview" src="${item.base64}" alt="" onclick="viewItemDetails('${item.id}')" style="cursor: pointer;">
+                        <div onclick="viewItemDetails('${item.id}')" style="display:contents;">
+                            ${previewHtml}
+                        </div>
                         <div class="item-info" onclick="viewItemDetails('${item.id}')" style="cursor: pointer;">
                             <div class="item-name">${item.name}</div>
-                            <div class="item-meta">${item.size} • ${timestampText}</div>
+                            <div class="item-meta">${item.size} • Base64</div>
                         </div>
                         <div class="item-actions">
-                            <button class="action-btn" onclick="viewItemDetails('${item.id}')">
+                            <button class="action-btn" onclick="viewItemDetails('${item.id}')" title="Ver y Copiar">
                                 <i data-lucide="code" size="15"></i>
                             </button>
-                            <button class="action-btn danger" onclick="deleteItem('${item.id}')">
+                            <button class="action-btn danger" onclick="deleteItem('${item.id}')" title="Eliminar">
                                 <i data-lucide="trash-2" size="15"></i>
                             </button>
                         </div>
@@ -796,7 +891,7 @@
             });
 
             container.innerHTML = html;
-            lucide.createIcons();
+            lucide.createIcons(); // Recargar iconos después de modificar el DOM
         }
     </script>
 </body>

@@ -29,6 +29,10 @@ self.addEventListener("fetch", event => {
 
 
     const url = new URL(event.request.url);
+    const sameOrigin = url.origin === self.location.origin;
+    if (!sameOrigin) {
+        return;
+    }
 
 
     // HTML siempre actualizado
