@@ -1737,7 +1737,7 @@ const hiddenApp = { name: 'Neo GameCenter', icon: 'Gamepad2', url: 'games.html' 
                 checkUpdatesBtn.onclick = async (e) => {
                     e.stopPropagation();
                     checkUpdatesBtn.disabled = true;
-                    checkUpdatesBtn.innerHTML = '<span class="btn-label"><i data-lucide="loader-2" class="spinner"></i><span>Comprobando...</span></span>';
+                    checkUpdatesBtn.innerHTML = '<span class="btn-label"><i data-lucide="loader-2" class="spinner"></i><span></span></span>';
                     if(window.lucide) lucide.createIcons();
                     try {
                         await window.checkForUpdates({ showToast: true });
