@@ -261,7 +261,9 @@
             width: 48px;
             height: 48px;
             border-radius: 50%;
-            background: conic-gradient(var(--text-main) 0%, transparent 0%);
+            --hold-ring-color: var(--text-main);
+            --hold-ring-progress: 0%;
+            background: conic-gradient(var(--hold-ring-color) var(--hold-ring-progress), transparent 0%) !important;
             position: relative;
             display: flex;
             align-items: center;
@@ -977,7 +979,7 @@
                 const elapsed = Date.now() - startTime;
                 const percent = Math.min(100, (elapsed / duration) * 100);
                 
-                progressRing.style.background = `conic-gradient(var(--text-main) ${percent}%, transparent 0%)`;
+                progressRing.style.setProperty('--hold-ring-progress', `${percent}%`);
                 
                 if (percent >= 100) {
                     clearInterval(holdProgressInterval);
@@ -997,7 +999,7 @@
             
             // Resetear anillo después de la transición de opacidad
             setTimeout(() => {
-                progressRing.style.background = `conic-gradient(var(--text-main) 0%, transparent 0%)`;
+                progressRing.style.setProperty('--hold-ring-progress', '0%');
             }, 300);
         }
 
