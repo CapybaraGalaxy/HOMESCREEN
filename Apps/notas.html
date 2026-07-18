@@ -1,0 +1,1012 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+    <title>GlassNotes</title>
+    
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@200;300;400;500;600;700&display=swap" rel="stylesheet">
+    
+    <style>
+        /* --- DESIGN SYSTEM NEO-GLASS PURE DARK --- */
+        :root {
+            --bg: #000000;
+            --surface: #121212;
+            --surface-hover: #1c1c1e;
+            
+            --glass: rgba(15, 15, 15, 0.45);
+            --glass-border: rgba(255, 255, 255, 0.08);
+            --glass-deep: rgba(5, 5, 5, 0.88);
+            --blur-val: 30px;
+
+            --text-main: #FFFFFF;
+            --text-muted: #8E8E93;
+
+            --accent-danger: #FF453A;
+            --accent-success: #34C759;
+            --accent-blue: #0A84FF;
+
+            --bezier: cubic-bezier(0.16, 1, 0.3, 1);
+            --spring: cubic-bezier(0.34, 1.56, 0.64, 1);
+        }
+
+        /* Modo de Rendimiento (Sin Blur) */
+        body.perf-mode {
+            --blur-val: 0px !important;
+        }
+        body.perf-mode .modal-glass-backdrop,
+        body.perf-mode .search-fab-container,
+        body.perf-mode .note-card {
+            backdrop-filter: none !important;
+            -webkit-backdrop-filter: none !important;
+            background: #161616 !important;
+        }
+
+        * { 
+            box-sizing: border-box; 
+            margin: 0; 
+            padding: 0; 
+            -webkit-tap-highlight-color: transparent;
+        }
+        
+        body { 
+            background: var(--bg); 
+            color: var(--text-main); 
+            font-family: 'Outfit', sans-serif; 
+            min-height: 100dvh;
+            overflow-x: hidden;
+            -webkit-font-smoothing: antialiased;
+        }
+
+        #bg-layer { 
+            position: fixed; 
+            inset: 0; 
+            background-size: cover; 
+            background-position: center; 
+            z-index: -2; 
+            opacity: 0.25;
+            transition: opacity 0.8s var(--bezier); 
+        }
+        #bg-overlay { 
+            position: fixed; 
+            inset: 0; 
+            background: radial-gradient(circle at 50% 0%, rgba(255,255,255,0.02), var(--bg) 90%); 
+            z-index: -1; 
+        }
+
+        .app-container { 
+            max-width: 900px; 
+            margin: 0 auto; 
+            min-height: 100dvh;
+            padding: env(safe-area-inset-top) 24px calc(env(safe-area-inset-bottom) + 100px) 24px;
+            transition: transform 0.5s var(--bezier), filter 0.5s var(--bezier);
+        }
+        
+        .app-container.backgrounded {
+            transform: scale(0.96);
+            filter: blur(4px) brightness(0.6);
+            pointer-events: none;
+        }
+
+        /* --- CABECERA --- */
+        header { 
+            display: flex; 
+            flex-direction: column; 
+            gap: 20px; 
+            padding: 32px 0 16px 0;
+        }
+        .top-bar { 
+            display: flex; 
+            justify-content: space-between; 
+            align-items: center; 
+        }
+        
+        .logo-area { 
+            display: flex; 
+            align-items: center; 
+            gap: 12px; 
+        }
+        .app-icon-badge {
+            width: 38px;
+            height: 38px;
+            border-radius: 12px;
+            background: radial-gradient(circle at 50% 0%, rgba(255,255,255,0.1), rgba(255,255,255,0));
+            border: 1px solid var(--glass-border);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        .logo-title { 
+            font-weight: 500; 
+            font-size: 1.4rem; 
+            letter-spacing: -0.5px; 
+            display: flex;
+            align-items: baseline;
+            gap: 6px;
+        }
+        .counter-badge {
+            font-size: 0.85rem;
+            color: var(--text-muted);
+            font-variant-numeric: tabular-nums;
+        }
+
+        .header-actions {
+            display: flex;
+            gap: 8px;
+        }
+
+        .btn-header {
+            width: 36px;
+            height: 36px;
+            border-radius: 50%;
+            background: var(--glass);
+            border: 1px solid var(--glass-border);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            color: var(--text-muted);
+            transition: background 0.3s var(--bezier), color 0.3s var(--bezier), transform 0.2s var(--spring);
+        }
+        .btn-header:hover {
+            background: var(--surface-hover);
+            color: var(--text-main);
+            transform: scale(1.05);
+        }
+
+        /* --- GRID DE NOTAS --- */
+        .notes-grid {
+            display: grid; 
+            grid-template-columns: 1fr; 
+            gap: 16px;
+            margin-top: 12px;
+        }
+        @media (min-width: 600px) {
+            .notes-grid { grid-template-columns: repeat(2, 1fr); }
+        }
+
+        .note-card {
+            background: var(--glass); 
+            border: 1px solid var(--glass-border);
+            backdrop-filter: blur(var(--blur-val)); 
+            -webkit-backdrop-filter: blur(var(--blur-val));
+            border-radius: 24px;
+            padding: 24px; 
+            min-height: 180px; 
+            display: flex; 
+            flex-direction: column;
+            justify-content: space-between;
+            position: relative;
+            animation: cardIn 0.5s var(--bezier) both;
+            transition: transform 0.4s var(--bezier), border-color 0.4s var(--bezier), box-shadow 0.4s var(--bezier), opacity 0.3s var(--bezier);
+        }
+        .note-card:hover { 
+            transform: translateY(-4px); 
+            border-color: rgba(255,255,255,0.18); 
+            box-shadow: 0 12px 30px rgba(0,0,0,0.4);
+        }
+        
+        .note-card.pinned {
+            border-color: rgba(255,255,255,0.22);
+            background: linear-gradient(135deg, rgba(255,255,255,0.02) 0%, rgba(15,15,15,0.45) 100%);
+        }
+        .pin-badge-card {
+            position: absolute;
+            top: 24px;
+            right: 24px;
+            color: var(--text-main);
+            display: none;
+        }
+        .note-card.pinned .pin-badge-card { display: block; }
+
+        .card-body-preview { 
+            flex-grow: 1; 
+            font-size: 0.95rem; 
+            line-height: 1.5; 
+            word-wrap: break-word;
+            color: rgba(255, 255, 255, 0.85);
+            margin-bottom: 20px;
+            cursor: pointer;
+            white-space: pre-wrap;
+        }
+        
+        /* Formateo rápido visual para el preview simulado */
+        .preview-h1 { font-size: 1.25rem; font-weight: 600; color: #fff; display: block; margin-bottom: 4px; }
+        .preview-h2 { font-size: 1.1rem; font-weight: 600; color: #eee; display: block; margin-bottom: 4px; }
+        .preview-bullet { padding-left: 10px; border-left: 2px solid var(--text-muted); display: block; margin: 4px 0; color: #ccc; }
+        .preview-quote { font-style: italic; color: var(--text-muted); padding-left: 8px; border-left: 2px solid var(--accent-blue); }
+
+        .card-footer { 
+            display: flex; 
+            justify-content: space-between; 
+            align-items: center; 
+            border-top: 1px solid rgba(255,255,255,0.04); 
+            padding-top: 12px; 
+        }
+        .card-date { font-size: 0.8rem; color: var(--text-muted); font-weight: 300; }
+        .card-actions { display: flex; gap: 4px; }
+
+        .btn-action {
+            width: 28px; 
+            height: 28px; 
+            border-radius: 50%; 
+            border: none; 
+            background: transparent;
+            color: var(--text-muted); 
+            cursor: pointer; 
+            display: flex; 
+            align-items: center; 
+            justify-content: center;
+            transition: color 0.2s var(--bezier), background 0.2s var(--bezier);
+        }
+        .btn-action:hover { color: var(--text-main); background: rgba(255,255,255,0.08); }
+        .btn-action.active-pin { color: var(--text-main); }
+
+        /* --- BUSCADOR Y ENTRADA FLOTANTE --- */
+        .search-fab-container {
+            position: fixed;
+            bottom: 24px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: calc(100% - 48px);
+            max-width: 480px;
+            height: 54px;
+            background: rgba(20, 20, 20, 0.6);
+            backdrop-filter: blur(var(--blur-val));
+            -webkit-backdrop-filter: blur(var(--blur-val));
+            border: 1px solid var(--glass-border);
+            border-radius: 100px;
+            display: flex;
+            align-items: center;
+            padding: 0 8px;
+            box-shadow: 0 20px 40px rgba(0,0,0,0.6);
+            z-index: 90;
+            transition: border-color 0.3s var(--bezier), box-shadow 0.3s var(--bezier);
+        }
+        .search-fab-container:focus-within {
+            border-color: rgba(255, 255, 255, 0.25);
+        }
+        .search-fab-input {
+            flex-grow: 1;
+            background: transparent;
+            border: none;
+            outline: none;
+            color: var(--text-main);
+            font-family: 'Outfit';
+            font-size: 0.95rem;
+            padding: 0 8px;
+        }
+
+        .btn-add-note {
+            width: 38px;
+            height: 38px;
+            border-radius: 50%;
+            background: var(--text-main);
+            color: var(--bg);
+            border: none;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            transition: transform 0.3s var(--spring);
+        }
+        .btn-add-note:hover { transform: scale(1.05); }
+
+        /* --- MODALES Y HOJAS LATERALES (SLIDE-OVER) --- */
+        .modal-wrapper {
+            position: fixed;
+            inset: 0;
+            z-index: 1000;
+            display: flex;
+            justify-content: flex-end;
+            pointer-events: none;
+            visibility: hidden;
+            transition: visibility 0.4s var(--bezier);
+        }
+        .modal-wrapper.active {
+            pointer-events: auto;
+            visibility: visible;
+        }
+        
+        .modal-glass-backdrop {
+            position: fixed;
+            inset: 0;
+            background: rgba(0, 0, 0, 0.5);
+            backdrop-filter: blur(0px);
+            -webkit-backdrop-filter: blur(0px);
+            opacity: 0;
+            transition: opacity 0.4s var(--bezier), backdrop-filter 0.4s var(--bezier);
+            z-index: -1;
+        }
+        .modal-wrapper.active .modal-glass-backdrop {
+            opacity: 1;
+            backdrop-filter: blur(10px);
+            -webkit-backdrop-filter: blur(10px);
+        }
+
+        .modal-sheet {
+            width: 100%;
+            max-width: 580px;
+            height: 100dvh;
+            background: var(--glass-deep);
+            border-left: 1px solid var(--glass-border);
+            box-shadow: -20px 0 60px rgba(0,0,0,0.7);
+            padding: calc(env(safe-area-inset-top) + 24px) 24px calc(env(safe-area-inset-bottom) + 24px) 24px;
+            display: flex;
+            flex-direction: column;
+            transform: translateX(100%);
+            transition: transform 0.4s var(--bezier);
+        }
+        .modal-wrapper.active .modal-sheet {
+            transform: translateX(0);
+        }
+
+        .modal-sheet-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+        }
+        .modal-sheet-title {
+            font-size: 0.85rem;
+            color: var(--text-muted);
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        /* --- MOTOR DE EDICIÓN EN TIEMPO REAL (ESTILO NOTION) --- */
+        .notion-editor-container {
+            flex-grow: 1;
+            display: flex;
+            flex-direction: column;
+            position: relative;
+            overflow-y: auto;
+            padding-bottom: 60px;
+        }
+
+        /* Área editable nativa limpia */
+        .notion-textarea {
+            width: 100%;
+            height: 100%;
+            background: transparent;
+            border: none;
+            outline: none;
+            color: var(--text-main);
+            font-family: 'Outfit', sans-serif;
+            font-size: 1.1rem;
+            line-height: 1.6;
+            resize: none;
+            white-space: pre-wrap;
+            word-wrap: break-word;
+        }
+
+        /* Estilización en caliente basada en selectores internos simulados por CSS Dinámico */
+        .notion-textarea.notion-h1 { font-size: 1.8rem; font-weight: 700; color: #fff; }
+        .notion-textarea.notion-h2 { font-size: 1.4rem; font-weight: 600; color: #eee; }
+
+        /* BARRA NOTION: Inserción y Herramientas Rápidas */
+        .notion-toolbar {
+            display: flex;
+            gap: 6px;
+            background: rgba(25, 25, 25, 0.85);
+            border: 1px solid var(--glass-border);
+            padding: 6px;
+            border-radius: 14px;
+            position: absolute;
+            bottom: 16px;
+            left: 50%;
+            transform: translateX(-50%);
+            box-shadow: 0 10px 25px rgba(0,0,0,0.5);
+            z-index: 110;
+        }
+        .toolbar-btn {
+            background: transparent;
+            border: none;
+            color: var(--text-muted);
+            padding: 6px 10px;
+            border-radius: 8px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 4px;
+            font-family: 'Outfit';
+            font-size: 0.8rem;
+            font-weight: 500;
+            transition: color 0.2s, background 0.2s;
+        }
+        .toolbar-btn:hover {
+            color: var(--text-main);
+            background: rgba(255,255,255,0.08);
+        }
+
+        /* --- COMPONENTE AJUSTES & GUÍA MARKDOWN --- */
+        .settings-row {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 16px 0;
+            border-bottom: 1px solid rgba(255,255,255,0.05);
+        }
+        .settings-label {
+            display: flex;
+            flex-direction: column;
+            gap: 2px;
+        }
+        .settings-title { font-size: 0.95rem; font-weight: 500; }
+        .settings-desc { font-size: 0.8rem; color: var(--text-muted); }
+
+        /* Toggle Switch */
+        .switch {
+            position: relative;
+            display: inline-block;
+            width: 44px;
+            height: 24px;
+        }
+        .switch input { opacity: 0; width: 0; height: 0; }
+        .slider {
+            position: absolute; cursor: pointer; inset: 0;
+            background-color: rgba(255,255,255,0.1);
+            transition: .3s var(--bezier); border-radius: 24px;
+            border: 1px solid var(--glass-border);
+        }
+        .slider:before {
+            position: absolute; content: ""; height: 16px; width: 16px;
+            left: 3px; bottom: 3px; background-color: white;
+            transition: .3s var(--bezier); border-radius: 50%;
+        }
+        input:checked + .slider { background-color: var(--accent-blue); }
+        input:checked + .slider:before { transform: translateX(20px); }
+
+        /* Guía Markdown Grid */
+        .markdown-guide-scroller {
+            flex-grow: 1;
+            overflow-y: auto;
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+            padding-right: 4px;
+        }
+        .guide-item {
+            background: rgba(255,255,255,0.02);
+            border: 1px solid var(--glass-border);
+            border-radius: 12px;
+            padding: 12px;
+        }
+        .guide-syntax { font-family: monospace; color: var(--accent-blue); font-size: 0.9rem; }
+        .guide-desc { font-size: 0.85rem; color: var(--text-muted); margin-top: 2px; }
+
+        /* --- NOTIFICACIONES CRISTAL (TOAST) --- */
+        .beta-modal-wrapper {
+            position: fixed;
+            inset: 0;
+            z-index: 2000;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+            opacity: 0;
+            visibility: hidden;
+            transition: opacity 0.3s var(--bezier), visibility 0.3s var(--bezier);
+        }
+        .beta-modal-wrapper.active {
+            opacity: 1;
+            visibility: visible;
+        }
+        .beta-modal-backdrop {
+            position: absolute;
+            inset: 0;
+            background: rgba(3, 3, 5, 0.6);
+            backdrop-filter: blur(16px);
+            -webkit-backdrop-filter: blur(16px);
+        }
+        .beta-modal-card {
+            position: relative;
+            width: min(100%, 380px);
+            background: rgba(8, 8, 12, 0.95);
+            border: 1px solid var(--glass-border);
+            border-radius: 24px;
+            padding: 32px 24px;
+            text-align: center;
+            box-shadow: 0 20px 50px rgba(0, 0, 0, 0.55);
+        }
+        .beta-modal-icon {
+            width: 56px;
+            height: 56px;
+            margin: 0 auto 20px;
+            border-radius: 18px;
+            border: 1px solid var(--glass-border);
+            background: rgba(255, 255, 255, 0.03);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        .beta-modal-title {
+            font-size: 0.8rem;
+            font-weight: 700;
+            letter-spacing: 3px;
+            text-transform: uppercase;
+            color: var(--text-muted);
+            margin-bottom: 8px;
+        }
+        .beta-modal-text {
+            font-size: 0.9rem;
+            line-height: 1.6;
+            color: var(--text-muted);
+            margin-bottom: 24px;
+        }
+        .beta-modal-button {
+            width: 100%;
+            border: none;
+            border-radius: 12px;
+            padding: 14px;
+            background: var(--text-main);
+            color: var(--bg);
+            font-family: inherit;
+            font-size: 0.9rem;
+            font-weight: 600;
+            cursor: pointer;
+        }
+
+        .toast-notification {
+            position: fixed;
+            top: calc(env(safe-area-inset-top) + 20px);
+            left: 50%;
+            transform: translateX(-50%) translateY(-20px);
+            background: rgba(15, 15, 15, 0.9);
+            border: 1px solid var(--glass-border);
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+            padding: 10px 20px;
+            border-radius: 100px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            font-size: 0.9rem;
+            opacity: 0;
+            visibility: hidden;
+            transition: all 0.4s var(--bezier);
+            z-index: 2000;
+        }
+        .toast-notification.active {
+            opacity: 1;
+            visibility: visible;
+            transform: translateX(-50%) translateY(0);
+        }
+
+        /* --- SISTEMA DE ANIMACIONES (IN/OUT STABLE) --- */
+        @keyframes cardIn { 
+            from { opacity: 0; transform: translateY(14px) scale(0.98); } 
+            to { opacity: 1; transform: translateY(0) scale(1); } 
+        }
+        .card-out {
+            opacity: 0 !important;
+            transform: scale(0.9) translateY(-10px) !important;
+        }
+        @keyframes shake {
+            0%, 100% { transform: translateX(0); }
+            25% { transform: translateX(-4px); }
+            75% { transform: translateX(4px); }
+        }
+        .error-shake { animation: shake 0.3s var(--bezier) double; }
+    </style>
+</head>
+<body>
+
+    <div id="bg-layer"></div>
+    <div id="bg-overlay"></div>
+
+    <div class="app-container" id="main-view">
+        <header>
+            <div class="top-bar">
+                <div class="logo-area">
+                    <div class="app-icon-badge">
+                        <i data-lucide="layers" size="18" style="color: var(--text-main);"></i>
+                    </div>
+                    <h1 class="logo-title">GlassNotes <span class="counter-badge" id="global-counter">0</span></h1>
+                </div>
+                <div class="header-actions">
+                    <button class="btn-header" onclick="openModal('guide-modal-wrapper')" title="Guía Markdown"><i data-lucide="help-circle" size="16"></i></button>
+                    <button class="btn-header" onclick="openModal('settings-modal-wrapper')" title="Ajustes"><i data-lucide="sliders" size="16"></i></button>
+                    <label for="bg-file" class="btn-header" title="Cambiar Fondo"><i data-lucide="image" size="16"></i></label>
+                    <input type="file" id="bg-file" hidden accept="image/*" onchange="uploadWallpaper(this)">
+                </div>
+            </div>
+        </header>
+
+        <main class="notes-grid" id="notes-canvas"></main>
+    </div>
+
+    <div class="search-fab-container">
+        <div style="padding-left: 8px; color: var(--text-muted); display: flex;"><i data-lucide="search" size="18"></i></div>
+        <input type="text" class="search-fab-input" id="search-input" placeholder="Buscar notas..." oninput="filterNotes(this.value)">
+        <button class="clear-search-btn" id="clear-search" onclick="clearSearch()"><i data-lucide="x" size="16"></i></button>
+        <button class="btn-add-note" onclick="createNotionNote()" title="Nueva nota"><i data-lucide="plus" size="18"></i></button>
+    </div>
+
+    <div class="modal-wrapper" id="editor-modal-wrapper">
+        <div class="modal-glass-backdrop" onclick="closeActiveModal('editor-modal-wrapper')"></div>
+        <div class="modal-sheet">
+            <div class="modal-sheet-header">
+                <span class="modal-sheet-title" id="modal-date-tag">Editor</span>
+                <div style="display: flex; gap: 8px;">
+                    <button class="btn-action" id="modal-pin" onclick="togglePinFromModal()"><i data-lucide="pin" size="15"></i></button>
+                    <button class="btn-action" onclick="closeActiveModal('editor-modal-wrapper')"><i data-lucide="check" size="18" style="color: var(--accent-success);"></i></button>
+                </div>
+            </div>
+            
+            <div class="notion-editor-container" id="shake-container">
+                <textarea id="notion-core-engine" class="notion-textarea" placeholder="Escribe aquí... Usa # para Título, > para Citas, o botones inferiores" oninput="liveNotionEngine(this)"></textarea>
+                
+                <div class="notion-toolbar">
+                    <button class="toolbar-btn" onclick="insertNotionBlock('# ')"><i data-lucide="heading-1" size="13"></i> H1</button>
+                    <button class="toolbar-btn" onclick="insertNotionBlock('## ')"><i data-lucide="heading-2" size="13"></i> H2</button>
+                    <button class="toolbar-btn" onclick="insertNotionBlock('- ')"><i data-lucide="list" size="13"></i> Lista</button>
+                    <button class="toolbar-btn" onclick="insertNotionBlock('> ')"><i data-lucide="quote" size="13"></i> Cita</button>
+                    <button class="toolbar-btn" onclick="insertNotionBlock('\`\`\`\n\n\`\`\`')"><i data-lucide="code" size="13"></i> Code</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="modal-wrapper" id="settings-modal-wrapper">
+        <div class="modal-glass-backdrop" onclick="closeActiveModal('settings-modal-wrapper')"></div>
+        <div class="modal-sheet">
+            <div class="modal-sheet-header">
+                <span class="modal-sheet-title">Ajustes del Sistema</span>
+                <button class="btn-action" onclick="closeActiveModal('settings-modal-wrapper')"><i data-lucide="x" size="18"></i></button>
+            </div>
+            <div style="display: flex; flex-direction: column; gap: 8px;">
+                <div class="settings-row">
+                    <div class="settings-label">
+                        <span class="settings-title">Mejora de Rendimiento</span>
+                        <span class="settings-desc">Desactiva efectos difuminados avanzados (Blur)</span>
+                    </div>
+                    <label class="switch">
+                        <input type="checkbox" id="perf-toggle" onchange="togglePerformanceMode(this.checked)">
+                        <span class="slider"></span>
+                    </label>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="modal-wrapper" id="guide-modal-wrapper">
+        <div class="modal-glass-backdrop" onclick="closeActiveModal('guide-modal-wrapper')"></div>
+        <div class="modal-sheet">
+            <div class="modal-sheet-header">
+                <span class="modal-sheet-title">Códigos Markdown Soportados</span>
+                <button class="btn-action" onclick="closeActiveModal('guide-modal-wrapper')"><i data-lucide="x" size="18"></i></button>
+            </div>
+            <div class="markdown-guide-scroller">
+                <div class="guide-item"><div class="guide-syntax"># Título Principal</div><div class="guide-desc">Genera un encabezado de primer nivel estilo Notion.</div></div>
+                <div class="guide-item"><div class="guide-syntax">## Subtítulo</div><div class="guide-desc">Genera un encabezado secundario de sección.</div></div>
+                <div class="guide-item"><div class="guide-syntax">- Elemento de Lista</div><div class="guide-desc">Inserta una viñeta limpia alineada automáticamente.</div></div>
+                <div class="guide-item"><div class="guide-syntax">> Texto en cita</div><div class="guide-desc">Crea un bloque destacado con borde lateral de color.</div></div>
+                <div class="guide-item"><div class="guide-syntax">**Texto**</div><div class="guide-desc">Transforma las palabras a tipografía en negrita.</div></div>
+                <div class="guide-item"><div class="guide-syntax">`código en línea`</div><div class="guide-desc">Encapsula fragmentos cortos con tipografía monoespacio.</div></div>
+            </div>
+        </div>
+    </div>
+
+    <div class="beta-modal-wrapper" id="beta-warning-modal">
+        <div class="beta-modal-backdrop" onclick="closeBetaWarning()"></div>
+        <div class="beta-modal-card">
+            <div class="beta-modal-icon">
+                <i data-lucide="rocket" size="26" style="color: var(--accent-blue);"></i>
+            </div>
+            <div class="beta-modal-title">Fase Beta Temprana</div>
+            <p class="beta-modal-text">
+                GlassNotes sigue en fase de desarrollo y puede mostrar errores o cambios inesperados.
+            </p>
+            <button class="beta-modal-button" onclick="closeBetaWarning()">Entendido, Acceder</button>
+        </div>
+    </div>
+
+    <div class="toast-notification" id="toast-engine">
+        <i data-lucide="check-circle" size="16" style="color: var(--accent-success);"></i> 
+        <span id="toast-text"></span>
+    </div>
+
+    <script>
+        // --- BASE DE DATOS CENTRALIZADA INTERNA ---
+        let state = {
+            notes: [],
+            activeId: null,
+            searchQuery: ""
+        };
+
+        let activeModalsStack = [];
+
+        // --- ENTRADA E INICIALIZACIÓN DE LA APP ---
+        window.onload = () => {
+            loadDatabase();
+            loadConfigSettings();
+            
+            if(state.notes.length === 0) {
+                state.notes = [
+                    { id: 1690000000000, content: "# Nota Estilo Notion\nPrueba a escribir una línea nueva. El editor se adapta instantáneamente a tus comandos sin ventanas emergentes de previsualización.", pinned: true, date: "12 jul 2026" },
+                    { id: 1690000000001, content: "## Notas Rápidas\n- Recuerda revisar los ajustes.\n- Puedes subir imágenes ligeras de fondo.", pinned: false, date: "11 jul 2026" }
+                ];
+                saveDatabase();
+            }
+            renderApp();
+            openBetaWarning();
+        };
+
+        function openBetaWarning() {
+            const modal = document.getElementById('beta-warning-modal');
+            if(modal) modal.classList.add('active');
+        }
+
+        function closeBetaWarning() {
+            const modal = document.getElementById('beta-warning-modal');
+            if(modal) modal.classList.remove('active');
+        }
+
+        function loadDatabase() {
+            try {
+                const data = localStorage.getItem('glassnotes_v3_data');
+                if(data) state.notes = JSON.parse(data);
+            } catch(e) { triggerToast("Error de sincronización local"); }
+        }
+
+        function saveDatabase() {
+            localStorage.setItem('glassnotes_v3_data', JSON.stringify(state.notes));
+        }
+
+        function loadConfigSettings() {
+            const perf = localStorage.getItem('glassnotes_perf_mode') === "true";
+            document.getElementById('perf-toggle').checked = perf;
+            togglePerformanceMode(perf, false);
+
+            const wallpaper = localStorage.getItem('glassnotes_wp_v3');
+            if(wallpaper) document.getElementById('bg-layer').style.backgroundImage = `url(${wallpaper})`;
+        }
+
+        // --- SISTEMA DE RENDERIZADO REACTIVO DINÁMICO ---
+        function renderApp() {
+            const canvas = document.getElementById('notes-canvas');
+            document.getElementById('global-counter').innerText = state.notes.length;
+
+            canvas.innerHTML = '';
+
+            let dataFiltered = state.notes.filter(n => n.content.toLowerCase().includes(state.searchQuery.toLowerCase()));
+
+            // Ordenación estable: Fijados primero, seguidos por cronología de creación
+            dataFiltered.sort((a,b) => {
+                if(a.pinned === b.pinned) return b.id - a.id;
+                return a.pinned ? -1 : 1;
+            });
+
+            dataFiltered.forEach((note, index) => {
+                const card = document.createElement('div');
+                card.className = `note-card ${note.pinned ? 'pinned' : ''}`;
+                card.id = `card-${note.id}`;
+                card.style.setProperty('--delay', `${index * 0.02}s`);
+
+                // Parser ultra-rápido en vivo para la vista preliminar de tarjetas
+                card.innerHTML = `
+                    <div class="pin-badge-card"><i data-lucide="pin" size="13" style="fill:currentColor;"></i></div>
+                    <div class="card-body-preview" onclick="triggerEditMode(${note.id})">
+                        ${generateLivePreviewTokens(note.content)}
+                    </div>
+                    <div class="card-footer">
+                        <span class="card-date">${note.date}</span>
+                        <div class="card-actions">
+                            <button class="btn-action ${note.pinned ? 'active-pin' : ''}" onclick="togglePin(${note.id})"><i data-lucide="pin" size="13"></i></button>
+                            <button class="btn-action" onclick="deleteNote(${note.id})"><i data-lucide="trash-2" size="13"></i></button>
+                        </div>
+                    </div>
+                `;
+                canvas.appendChild(card);
+            });
+            lucide.createIcons();
+        }
+
+        // Simula la previsualización procesada en la tarjeta del Grid
+        function generateLivePreviewTokens(text) {
+            if(!text.trim()) return `<span style="color:var(--text-muted); font-style:italic;">Nota vacía...</span>`;
+            let lines = text.split('\n').slice(0, 4); // Limitar a 4 líneas en la tarjeta
+            return lines.map(line => {
+                if(line.startsWith('# ')) return `<span class="preview-h1">${line.replace('# ', '')}</span>`;
+                if(line.startsWith('## ')) return `<span class="preview-h2">${line.replace('## ', '')}</span>`;
+                if(line.startsWith('- ')) return `<span class="preview-bullet">${line.replace('- ', '')}</span>`;
+                if(line.startsWith('> ')) return `<span class="preview-quote">${line.replace('> ', '')}</span>`;
+                return `<span>${line}</span>`;
+            }).join('');
+        }
+
+        // --- LÓGICA DE EDICIÓN NATIVA HÍBRIDA (NOTION ENGINE) ---
+        function createNotionNote() {
+            const dateStr = new Intl.DateTimeFormat('es-ES', { day: '2-digit', month: 'short', year: 'numeric' }).format(new Date());
+            const newObj = {
+                id: Date.now(),
+                content: "",
+                pinned: false,
+                date: dateStr
+            };
+            state.notes.push(newObj);
+            state.activeId = newObj.id;
+
+            const tx = document.getElementById('notion-core-engine');
+            tx.value = "";
+            tx.className = "notion-textarea"; // Reset estilos dinámicos
+            document.getElementById('modal-date-tag').innerText = `Nueva Nota • ${dateStr}`;
+            updateModalPinVisuals(false);
+
+            openModal('editor-modal-wrapper');
+            tx.focus();
+        }
+
+        function triggerEditMode(id) {
+            const note = state.notes.find(n => n.id === id);
+            if(!note) return;
+            state.activeId = id;
+
+            const tx = document.getElementById('notion-core-engine');
+            tx.value = note.content;
+            document.getElementById('modal-date-tag').innerText = `Editando • ${note.date}`;
+            updateModalPinVisuals(note.pinned);
+            liveNotionEngine(tx); // Evalúa estilo al entrar
+
+            openModal('editor-modal-wrapper');
+            tx.focus();
+        }
+
+        // Analiza la primera línea en vivo para dar clases de renderizado dinámico (Estilo Notion)
+        function liveNotionEngine(textarea) {
+            const val = textarea.value;
+            textarea.className = "notion-textarea"; // Base clean
+            
+            if(val.startsWith('# ')) textarea.classList.add('notion-h1');
+            else if(val.startsWith('## ')) textarea.classList.add('notion-h2');
+
+            // Sincronización reactiva del estado intermedio
+            if(state.activeId) {
+                const target = state.notes.find(n => n.id === state.activeId);
+                if(target) {
+                    target.content = val;
+                    saveDatabase();
+                }
+            }
+        }
+
+        // Inserción de bloques automatizados desde la barra Notion inferior
+        function insertNotionBlock(syntax) {
+            const tx = document.getElementById('notion-core-engine');
+            const start = tx.selectionStart;
+            const end = tx.selectionEnd;
+            const text = tx.value;
+
+            tx.value = text.substring(0, start) + syntax + text.substring(end);
+            tx.selectionStart = tx.selectionEnd = start + syntax.length;
+            tx.focus();
+            liveNotionEngine(tx);
+        }
+
+        function togglePin(id) {
+            const note = state.notes.find(n => n.id === id);
+            if(note) {
+                note.pinned = !note.pinned;
+                saveDatabase();
+                renderApp();
+            }
+        }
+
+        function togglePinFromModal() {
+            if(!state.activeId) return;
+            const note = state.notes.find(n => n.id === state.activeId);
+            if(note) {
+                note.pinned = !note.pinned;
+                updateModalPinVisuals(note.pinned);
+                saveDatabase();
+            }
+        }
+
+        function updateModalPinVisuals(pinned) {
+            const btn = document.getElementById('modal-pin');
+            if(pinned) btn.classList.add('active-pin');
+            else btn.classList.remove('active-pin');
+        }
+
+        function deleteNote(id) {
+            const card = document.getElementById(`card-${id}`);
+            if(card) {
+                card.classList.add('card-out'); // Animación Out integrada
+                setTimeout(() => {
+                    state.notes = state.notes.filter(n => n.id !== id);
+                    saveDatabase();
+                    renderApp();
+                    triggerToast("Nota eliminada con éxito");
+                }, 300);
+            }
+        }
+
+        // --- SISTEMA PILA HISTORIAL (HISTORY API MODAL ENGINE) ---
+        function openModal(id) {
+            document.getElementById('main-view').classList.add('backgrounded');
+            document.getElementById(id).classList.add('active');
+            activeModalsStack.push(id);
+            window.history.pushState({ modalActive: id }, "");
+        }
+
+        function closeActiveModal(id) {
+            if(activeModalsStack.includes(id)) {
+                // Si el editor está activo e intentan dejarlo totalmente vacío, sacudimos la interfaz como validación visual
+                if(id === 'editor-modal-wrapper' && !document.getElementById('notion-core-engine').value.trim()) {
+                    const box = document.getElementById('shake-container');
+                    box.classList.add('error-shake');
+                    setTimeout(() => box.classList.remove('error-shake'), 300);
+                }
+                window.history.back();
+            }
+        }
+
+        window.addEventListener('popstate', () => {
+            if(activeModalsStack.length > 0) {
+                const targetId = activeModalsStack.pop();
+                document.getElementById(targetId).classList.remove('active');
+                if(activeModalsStack.length === 0) {
+                    document.getElementById('main-view').classList.remove('backgrounded');
+                }
+                state.activeId = null;
+                renderApp();
+            }
+        });
+
+        // --- FILTRADOS Y AJUSTES ---
+        function filterNotes(val) {
+            state.searchQuery = val;
+            const btn = document.getElementById('clear-search');
+            if(val.trim()) btn.classList.add('visible');
+            else btn.classList.remove('visible');
+            renderApp();
+        }
+
+        function clearSearch() {
+            document.getElementById('search-input').value = "";
+            state.searchQuery = "";
+            document.getElementById('clear-search').classList.remove('visible');
+            renderApp();
+        }
+
+        function togglePerformanceMode(checked, showToastNotification = true) {
+            if(checked) {
+                document.body.classList.add('perf-mode');
+                localStorage.setItem('glassnotes_perf_mode', "true");
+                if(showToastNotification) triggerToast("Rendimiento Máximo: Blur desactivado");
+            } else {
+                document.body.classList.remove('perf-mode');
+                localStorage.setItem('glassnotes_perf_mode', "false");
+                if(showToastNotification) triggerToast("Efectos visuales activados");
+            }
+        }
+
+        function uploadWallpaper(el) {
+            if(el.files && el.files[0]) {
+                const reader = new FileReader();
+                reader.onload = (e) => {
+                    try {
+                        localStorage.setItem('glassnotes_wp_v3', e.target.result);
+                        document.getElementById('bg-layer').style.backgroundImage = `url(${e.target.result})`;
+                        triggerToast("Fondo de escritorio modificado");
+                    } catch(err) {
+                        triggerToast("Imagen pesada, intenta con otra inferior a 2MB");
+                    }
+                };
+                reader.readAsDataURL(el.files[0]);
+            }
+        }
+
+        function triggerToast(text) {
+            const toast = document.getElementById('toast-engine');
+            document.getElementById('toast-text').innerText = text;
+            toast.classList.add('active');
+            setTimeout(() => toast.classList.remove('active'), 2500);
+        }
+    </script>
+</body>
+</html>

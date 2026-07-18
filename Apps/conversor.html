@@ -1,0 +1,1314 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+    <title>Conversor Universal Pro</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@200;300;400;500;600;700&display=swap" rel="stylesheet">
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <style>
+        :root {
+            --bg: #000000;
+            --surface: #0d0d0e;
+            --surface-hover: #161619;
+            
+            --glass: rgba(10, 10, 12, 0.7);
+            --glass-border: rgba(255, 255, 255, 0.08);
+            --blur-val: 32px;
+
+            --text-main: #FFFFFF;
+            --text-muted: #8E8E93;
+            --text-description: #a1a1a6;
+
+            --accent-danger: #FF453A;
+            --accent-success: #34C759;
+            --accent-glow: rgba(255, 255, 255, 0.03);
+
+            --bezier: cubic-bezier(0.16, 1, 0.3, 1);
+            --spring: cubic-bezier(0.34, 1.56, 0.64, 1);
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: 'Outfit', sans-serif;
+            -webkit-font-smoothing: antialiased;
+        }
+
+        body {
+            background-color: var(--bg);
+            color: var(--text-main);
+            overflow: hidden;
+            height: 100dvh;
+        }
+
+        .app-container {
+            height: 100dvh;
+            max-width: 900px;
+            margin: 0 auto;
+            padding: env(safe-area-inset-top) 24px calc(env(safe-area-inset-bottom) + 110px) 24px;
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+            will-change: transform, filter;
+        }
+
+        header {
+            display: flex;
+            align-items: center;
+            gap: 14px;
+            padding-top: 16px;
+            flex-shrink: 0;
+        }
+
+        .app-icon-badge {
+            width: 46px;
+            height: 46px;
+            border-radius: 14px;
+            background: radial-gradient(circle at center, rgba(255,255,255,0.1) 0%, rgba(0,0,0,0) 100%);
+            border: 1px solid var(--glass-border);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            backdrop-filter: blur(var(--blur-val));
+            box-shadow: 0 4px 20px rgba(0,0,0,0.4);
+        }
+
+        .header-title-area {
+            display: flex;
+            flex-direction: column;
+        }
+
+        h1 {
+            font-size: 20px;
+            font-weight: 600;
+            letter-spacing: -0.4px;
+        }
+
+        .unit-counter {
+            font-size: 12px;
+            color: var(--text-muted);
+            font-variant-numeric: tabular-nums;
+        }
+
+        .main-content {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            gap: 16px;
+            overflow-y: auto;
+            scrollbar-width: none;
+            padding-bottom: 24px;
+        }
+        .main-content::-webkit-scrollbar { display: none; }
+
+        .view-section {
+            display: none;
+            flex-direction: column;
+            gap: 16px;
+            width: 100%;
+            will-change: transform, opacity;
+        }
+
+        .view-section.active {
+            display: flex;
+            animation: slideUpFade 0.4s var(--bezier) forwards;
+        }
+
+        @keyframes slideUpFade {
+            from { opacity: 0; transform: translateY(16px); filter: blur(4px); }
+            to { opacity: 1; transform: translateY(0); filter: blur(0); }
+        }
+
+        /* SMART DETECTOR INPUT */
+        .smart-search-box {
+            background: var(--glass);
+            border: 1px solid var(--glass-border);
+            backdrop-filter: blur(var(--blur-val));
+            -webkit-backdrop-filter: blur(var(--blur-val));
+            border-radius: 20px;
+            padding: 8px 20px;
+            display: flex;
+            align-items: center;
+            gap: 14px;
+            transition: border-color 0.3s var(--bezier), box-shadow 0.3s var(--bezier);
+        }
+
+        .smart-search-box:focus-within {
+            border-color: rgba(255,255,255,0.22);
+            box-shadow: 0 0 25px rgba(255,255,255,0.03);
+        }
+
+        .smart-search-box input {
+            background: transparent;
+            border: none;
+            outline: none;
+            color: var(--text-main);
+            font-size: 16px;
+            width: 100%;
+            padding: 10px 0;
+        }
+
+        .smart-search-box input::placeholder {
+            color: var(--text-muted);
+        }
+
+        /* AUTO-DETECT RENDERS CON CHIPS ADAPTATIVOS */
+        .auto-results-card {
+            background: var(--surface);
+            border-radius: 24px;
+            padding: 24px;
+            border: 1px solid var(--glass-border);
+            display: flex;
+            flex-direction: column;
+            gap: 18px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.5);
+            animation: cardScaleIn 0.35s var(--spring);
+        }
+
+        @keyframes cardScaleIn {
+            from { transform: scale(0.97); opacity: 0; }
+            to { transform: scale(1); opacity: 1; }
+        }
+
+        .auto-matched-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-bottom: 1px solid var(--glass-border);
+            padding-bottom: 14px;
+        }
+
+        .auto-matched-header span {
+            font-size: 13px;
+            font-weight: 500;
+            color: var(--text-muted);
+            text-transform: uppercase;
+            letter-spacing: 0.6px;
+        }
+
+        /* GRID CON SOPORTE PARA DESCRIPCIONES EN FILAS */
+        .auto-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+            gap: 14px;
+        }
+
+        .auto-item {
+            background: rgba(255,255,255,0.015);
+            border: 1px solid rgba(255,255,255,0.04);
+            padding: 16px;
+            border-radius: 16px;
+            display: flex;
+            flex-direction: column;
+            gap: 6px;
+            min-width: 0;
+            transition: background 0.25s var(--bezier), border-color 0.25s var(--bezier), transform 0.25s var(--bezier);
+        }
+
+        .auto-item:hover {
+            background: rgba(255,255,255,0.035);
+            border-color: rgba(255,255,255,0.1);
+            transform: translateY(-2px);
+        }
+
+        .auto-item .val {
+            font-size: 18px;
+            font-weight: 600;
+            font-variant-numeric: tabular-nums;
+            color: var(--text-main);
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+        }
+
+        .auto-item .lbl {
+            font-size: 12px;
+            font-weight: 600;
+            color: var(--text-main);
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+
+        .auto-item .desc {
+            font-size: 11px;
+            color: var(--text-description);
+            line-height: 1.4;
+            margin-top: 2px;
+        }
+
+        /* CATEGORIES PILLS SCROLL */
+        .folders-scroll-area {
+            display: flex;
+            gap: 8px;
+            overflow-x: auto;
+            padding: 4px 0 8px 0;
+            scrollbar-width: none;
+            -webkit-overflow-scrolling: touch;
+            flex-shrink: 0;
+        }
+        .folders-scroll-area::-webkit-scrollbar { display: none; }
+
+        .tab-pill {
+            background: var(--surface);
+            border: 1px solid rgba(255,255,255,0.02);
+            color: var(--text-muted);
+            padding: 10px 18px;
+            border-radius: 24px;
+            font-size: 13px;
+            font-weight: 500;
+            cursor: pointer;
+            white-space: nowrap;
+            transition: color 0.25s var(--bezier), background-color 0.25s var(--bezier), transform 0.2s var(--bezier);
+        }
+
+        .tab-pill:hover {
+            background: var(--surface-hover);
+            color: var(--text-main);
+            transform: translateY(-1px);
+        }
+
+        .tab-pill:active { transform: scale(0.97); }
+
+        .tab-pill.active {
+            background: var(--text-main);
+            color: var(--bg);
+            font-weight: 600;
+            border-color: var(--text-main);
+        }
+
+        /* CONVERTER CARD ENGINE */
+        .converter-card {
+            background: var(--surface);
+            border-radius: 26px;
+            padding: 26px;
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+            border: 1px solid var(--glass-border);
+            box-shadow: 0 12px 40px rgba(0,0,0,0.6);
+        }
+
+        .conversion-engine {
+            display: grid;
+            grid-template-columns: 1fr;
+            gap: 16px;
+        }
+
+        @media (min-width: 680px) {
+            .conversion-engine {
+                grid-template-columns: 1fr auto 1fr;
+                align-items: center;
+            }
+        }
+
+        .io-group {
+            display: flex;
+            flex-direction: column;
+            gap: 14px;
+            background: rgba(255,255,255,0.012);
+            padding: 18px;
+            border-radius: 18px;
+            border: 1px solid rgba(255,255,255,0.03);
+            position: relative;
+            transition: border-color 0.3s var(--bezier), background-color 0.3s var(--bezier);
+        }
+
+        .io-group:focus-within {
+            border-color: rgba(255,255,255,0.1);
+            background: rgba(255,255,255,0.02);
+        }
+
+        .input-row {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 8px;
+        }
+
+        .io-group input {
+            background: transparent;
+            border: none;
+            outline: none;
+            color: var(--text-main);
+            font-size: 28px;
+            font-weight: 500;
+            width: 100%;
+            font-variant-numeric: tabular-nums;
+        }
+
+        .copy-btn {
+            background: transparent;
+            border: none;
+            color: var(--text-muted);
+            cursor: pointer;
+            padding: 8px;
+            border-radius: 10px;
+            transition: color 0.2s var(--bezier), background-color 0.2s var(--bezier), transform 0.2s var(--bezier);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .copy-btn:hover {
+            color: var(--text-main);
+            background: rgba(255,255,255,0.06);
+        }
+        .copy-btn:active { transform: scale(0.9); }
+
+        .selector-wrapper { position: relative; }
+
+        .custom-select {
+            background: rgba(255,255,255,0.03);
+            border: 1px solid var(--glass-border);
+            color: var(--text-main);
+            padding: 11px 16px;
+            border-radius: 12px;
+            font-size: 14px;
+            cursor: pointer;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            transition: background-color 0.2s var(--bezier), border-color 0.2s var(--bezier);
+        }
+
+        .custom-select:hover {
+            background: rgba(255,255,255,0.06);
+            border-color: rgba(255,255,255,0.15);
+        }
+
+        .select-dropdown {
+            position: absolute;
+            top: 100%;
+            left: 0;
+            right: 0;
+            background: #141416;
+            border: 1px solid var(--glass-border);
+            border-radius: 16px;
+            margin-top: 8px;
+            max-height: 280px;
+            overflow-y: auto;
+            z-index: 100;
+            display: none;
+            box-shadow: 0 20px 45px rgba(0,0,0,0.85);
+            backdrop-filter: blur(var(--blur-val));
+            -webkit-backdrop-filter: blur(var(--blur-val));
+            animation: menuFadeIn 0.25s var(--bezier);
+        }
+
+        @keyframes menuFadeIn {
+            from { opacity: 0; transform: translateY(-4px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .select-dropdown.show { display: block; }
+
+        .dropdown-search {
+            position: sticky;
+            top: 0;
+            background: #141416;
+            padding: 10px;
+            border-bottom: 1px solid var(--glass-border);
+            z-index: 2;
+        }
+
+        .dropdown-search input {
+            width: 100%;
+            background: rgba(0,0,0,0.6);
+            border: 1px solid var(--glass-border);
+            border-radius: 10px;
+            padding: 10px 12px;
+            color: var(--text-main);
+            font-size: 13px;
+            outline: none;
+        }
+
+        .dropdown-options-list { display: flex; flex-direction: column; }
+
+        .dropdown-option {
+            padding: 12px 16px;
+            cursor: pointer;
+            border-bottom: 1px solid rgba(255,255,255,0.02);
+            transition: all 0.15s var(--bezier);
+        }
+
+        .dropdown-option .opt-title {
+            font-size: 14px;
+            font-weight: 500;
+            color: var(--text-muted);
+            display: block;
+            margin-bottom: 2px;
+        }
+
+        .dropdown-option .opt-desc {
+            font-size: 11px;
+            color: rgba(255, 255, 255, 0.4);
+            line-height: 1.3;
+            display: block;
+        }
+
+        .dropdown-option:hover, .dropdown-option.selected {
+            background: rgba(255,255,255,0.06);
+        }
+        
+        .dropdown-option:hover .opt-title, .dropdown-option.selected .opt-title {
+            color: var(--text-main);
+        }
+
+        .swap-button-container {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .swap-btn {
+            background: var(--surface-hover);
+            border: 1px solid var(--glass-border);
+            width: 46px;
+            height: 46px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            color: var(--text-main);
+            transition: transform 0.35s var(--spring), background-color 0.2s var(--bezier);
+        }
+
+        .swap-btn:hover { background: rgba(255,255,255,0.05); transform: rotate(180deg); }
+
+        /* ADVANCED HUMAN SCALE BOX */
+        .human-scale-box {
+            background: rgba(52, 199, 89, 0.02);
+            border: 1px solid rgba(52, 199, 89, 0.14);
+            border-radius: 18px;
+            padding: 16px 18px;
+            display: flex;
+            align-items: flex-start;
+            gap: 12px;
+            animation: springIn 0.4s var(--spring);
+        }
+
+        @keyframes springIn {
+            from { transform: translateY(4px); opacity: 0; }
+            to { transform: translateY(0); opacity: 1; }
+        }
+
+        .human-scale-box.hidden { display: none; }
+
+        .human-scale-content h3 {
+            font-size: 12px;
+            font-weight: 600;
+            color: var(--accent-success);
+            margin-bottom: 3px;
+            text-transform: uppercase;
+            letter-spacing: 0.7px;
+        }
+
+        .human-scale-content p {
+            font-size: 14px;
+            color: rgba(255,255,255,0.88);
+            line-height: 1.5;
+        }
+
+        /* HISTORY SECTION */
+        .history-list { display: flex; flex-direction: column; gap: 10px; }
+
+        .history-item {
+            background: var(--surface);
+            border: 1px solid var(--glass-border);
+            padding: 16px 20px;
+            border-radius: 18px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            cursor: pointer;
+            transition: background-color 0.2s var(--bezier), transform 0.2s var(--bezier);
+        }
+
+        .history-item:hover { background: var(--surface-hover); transform: translateY(-1px); }
+        .history-item:active { transform: scale(0.99); }
+        .history-item .query { font-size: 15px; font-weight: 500; letter-spacing: -0.1px; }
+        .history-item .cat {
+            font-size: 11px;
+            color: var(--text-muted);
+            background: rgba(255,255,255,0.05);
+            padding: 4px 10px;
+            border-radius: 12px;
+            font-weight: 500;
+        }
+
+        .empty-state {
+            color: var(--text-muted);
+            text-align: center;
+            padding: 54px 24px;
+            font-size: 14px;
+            line-height: 1.55;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 10px;
+        }
+
+        /* ERGONOMIC GLASS DOCK */
+        .bottom-nav-dock {
+            position: fixed;
+            bottom: 26px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: calc(100% - 48px);
+            max-width: 390px;
+            background: rgba(14, 14, 16, 0.45);
+            border: 1px solid var(--glass-border);
+            backdrop-filter: blur(40px);
+            -webkit-backdrop-filter: blur(40px);
+            border-radius: 28px;
+            padding: 8px;
+            display: flex;
+            justify-content: space-around;
+            align-items: center;
+            z-index: 200;
+            box-shadow: 0 20px 50px rgba(0,0,0,0.9);
+            transition: width 0.3s var(--bezier), max-width 0.3s var(--bezier);
+        }
+
+        .nav-item {
+            background: transparent;
+            border: none;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            gap: 4px;
+            color: var(--text-muted);
+            cursor: pointer;
+            position: relative;
+            padding: 8px;
+            width: 82px;
+            transition: color 0.25s var(--bezier);
+        }
+
+        .nav-item .icon-wrapper {
+            position: relative;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            width: 100%;
+            height: 24px;
+            z-index: 2;
+            transition: transform 0.25s var(--spring);
+        }
+
+        .nav-item span {
+            font-size: 11px;
+            font-weight: 500;
+            letter-spacing: 0.2px;
+            z-index: 2;
+        }
+
+        .nav-item .pill-indicator {
+            position: absolute;
+            top: 0;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            background: rgba(255, 255, 255, 0.07);
+            border-radius: 20px;
+            opacity: 0;
+            transform: scaleX(0.4);
+            transition: opacity 0.25s var(--bezier), transform 0.25s var(--spring);
+            z-index: 1;
+        }
+
+        .nav-item.active { color: var(--text-main); }
+        .nav-item.active .pill-indicator { opacity: 1; transform: scaleX(1); }
+        .nav-item.active .icon-wrapper { transform: translateY(-2px); }
+
+        /* DESKTOP SIDE DOCK POSITIONING */
+        @media (min-width: 1080px) {
+            .bottom-nav-dock {
+                position: fixed;
+                top: 50%;
+                bottom: auto;
+                left: auto;
+                right: 48px;
+                transform: translateY(-50%);
+                width: 90px;
+                max-width: 90px;
+                flex-direction: column;
+                gap: 14px;
+                padding: 26px 6px;
+                border-radius: 32px;
+            }
+            .nav-item { width: 100%; height: 72px; }
+            .nav-item .pill-indicator {
+                left: 2px; right: 2px; top: 0; bottom: 0;
+                transform: scaleY(0.4);
+            }
+            .nav-item.active .pill-indicator { transform: scaleY(1); }
+            .nav-item.active .icon-wrapper { transform: scale(1.1); }
+        }
+
+        .error-shake { animation: shakeEngine 0.35s var(--bezier) forwards; border-color: var(--accent-danger) !important; }
+        .success-flash { border-color: var(--accent-success) !important; box-shadow: 0 0 20px rgba(52, 199, 89, 0.3) !important; }
+
+        @keyframes shakeEngine {
+            0%, 100% { transform: translateX(0); }
+            20%, 60% { transform: translateX(-6px); }
+            40%, 80% { transform: translateX(6px); }
+        }
+
+        .value-update-anim { animation: valuePushEngine 0.4s var(--bezier); }
+        @keyframes valuePushEngine {
+            0% { opacity: 0.3; transform: scale(0.985) translateY(-2px); filter: blur(1px); }
+            100% { opacity: 1; transform: scale(1) translateY(0); filter: blur(0); }
+        }
+    </style>
+</head>
+<body>
+
+    <div class="app-container" id="main-view">
+        <header>
+            <div class="app-icon-badge">
+                <i id="header-icon" data-lucide="zap" size="20" style="color: var(--text-main);"></i>
+            </div>
+            <div class="header-title-area">
+                <h1 id="app-title-text">Detector Inteligente</h1>
+                <span class="unit-counter" id="total-units-badge">Cargando unidades del sistema...</span>
+            </div>
+        </header>
+
+        <main class="main-content">
+            
+            <section class="view-section active" id="view-auto">
+                <div class="smart-search-box" id="main-search-container">
+                    <i data-lucide="search" size="18" style="color: var(--text-muted);"></i>
+                    <input type="text" id="smart-input" placeholder="Escribe cantidad y unidad (ej. '5000 mah', '100 ly', '80 l')">
+                </div>
+                <div id="auto-results-render">
+                    <div class="empty-state">
+                        <i data-lucide="sparkles" size="32" style="color: var(--text-muted); opacity: 0.4;"></i>
+                        <p>Escribe una cantidad junto con su unidad arriba.<br>El sistema identificará la categoría automáticamente y te mostrará todas sus equivalencias con ejemplos de su uso real.</p>
+                    </div>
+                </div>
+            </section>
+
+            <section class="view-section" id="view-converter">
+                <div class="folders-scroll-area" id="categories-tabs"></div>
+
+                <div class="converter-card">
+                    <div class="conversion-engine">
+                        <div class="io-group" id="group-source">
+                            <div class="input-row">
+                                <input type="number" id="source-value" value="1" step="any">
+                            </div>
+                            <div class="selector-wrapper">
+                                <div class="custom-select" id="source-select-trigger" onclick="toggleDropdown('source')">
+                                    <span id="source-select-label">Seleccionar</span>
+                                    <i data-lucide="chevron-down" size="14"></i>
+                                </div>
+                                <div class="select-dropdown" id="source-dropdown">
+                                    <div class="dropdown-search">
+                                        <input type="text" id="source-search" placeholder="Filtrar unidades..." oninput="filterOptions('source')">
+                                    </div>
+                                    <div class="dropdown-options-list" id="source-options"></div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="swap-button-container">
+                            <button class="swap-btn" onclick="swapUnits()">
+                                <i data-lucide="arrow-left-right" size="16"></i>
+                            </button>
+                        </div>
+
+                        <div class="io-group" id="group-target">
+                            <div class="input-row">
+                                <input type="text" id="target-value" readonly>
+                                <button class="copy-btn" onclick="copyTargetResult()" title="Copiar resultado">
+                                    <i data-lucide="copy" size="16"></i>
+                                </button>
+                            </div>
+                            <div class="selector-wrapper">
+                                <div class="custom-select" id="target-select-trigger" onclick="toggleDropdown('target')">
+                                    <span id="target-select-label">Seleccionar</span>
+                                    <i data-lucide="chevron-down" size="14"></i>
+                                </div>
+                                <div class="select-dropdown" id="target-dropdown">
+                                    <div class="dropdown-search">
+                                        <input type="text" id="target-search" placeholder="Filtrar unidades..." oninput="filterOptions('target')">
+                                    </div>
+                                    <div class="dropdown-options-list" id="target-options"></div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="human-scale-box hidden" id="human-scale-container">
+                        <i data-lucide="info" size="16" style="color: var(--accent-success); flex-shrink: 0; margin-top: 1px;"></i>
+                        <div class="human-scale-content">
+                            <h3>Como referencia...</h3>
+                            <p id="human-scale-text"></p>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <section class="view-section" id="view-history">
+                <div class="history-list" id="history-items-container"></div>
+            </section>
+
+        </main>
+    </div>
+
+    <nav class="bottom-nav-dock">
+        <button class="nav-item active" onclick="switchMainView('auto', this)">
+            <div class="pill-indicator"></div>
+            <div class="icon-wrapper"><i data-lucide="zap" size="18"></i></div>
+            <span>Auto</span>
+        </button>
+        <button class="nav-item" onclick="switchMainView('converter', this)">
+            <div class="pill-indicator"></div>
+            <div class="icon-wrapper"><i data-lucide="sliders" size="18"></i></div>
+            <span>Conversor</span>
+        </button>
+        <button class="nav-item" onclick="switchMainView('history', this)">
+            <div class="pill-indicator"></div>
+            <div class="icon-wrapper"><i data-lucide="history" size="18"></i></div>
+            <span>Historial</span>
+        </button>
+    </nav>
+
+    <script>
+        // DATASET EXTENDIDO CON DICCIONARIO SEMÁNTICO DE USOS REALES
+        const dataset = {
+            datos: {
+                label: "Datos e Internet",
+                base: "b",
+                units: {
+                    b: { name: "Bits (b)", desc: "Unidad mínima. Usada para medir ancho de banda y velocidad de redes de internet.", toBase: v => v, fromBase: v => v },
+                    B: { name: "Bytes (B)", desc: "Grupo de 8 bits. Unidad estándar para representar un carácter de texto en computación.", toBase: v => v * 8, fromBase: v => v / 8 },
+                    KB: { name: "Kilobytes (KB)", desc: "1,000 bytes. Común en archivos pequeños como documentos de texto ligeros.", toBase: v => v * 8e3, fromBase: v => v / 8e3 },
+                    MB: { name: "Megabytes (MB)", desc: "1 millón de bytes. Usado para medir canciones MP3 e imágenes digitales comprimidas.", toBase: v => v * 8e6, fromBase: v => v / 8e6 },
+                    GB: { name: "Gigabytes (GB)", desc: "1,000 millones de bytes. Estándar para valorar RAM, apps pesadas y películas HD.", toBase: v => v * 8e9, fromBase: v => v / 8e9 },
+                    TB: { name: "Terabytes (TB)", desc: "1 billón de bytes. Empleado en discos duros externos y almacenamiento en la nube.", toBase: v => v * 8e12, fromBase: v => v / 8e12 },
+                    PB: { name: "Petabytes (PB)", desc: "Mil billones de bytes. Almacenamiento masivo empresarial y centros de datos de Google/Netflix.", toBase: v => v * 8e15, fromBase: v => v / 8e15 },
+                    KiB: { name: "Kibibytes (KiB)", desc: "1,024 bytes. Unidad binaria exacta muy utilizada en sistemas operativos e ingeniería informática.", toBase: v => v * 8 * 1024, fromBase: v => v / (8 * 1024) },
+                    MiB: { name: "Mebibytes (MiB)", desc: "1,024 KiB. Expresión exacta binaria de tamaño de software en bajo nivel informático.", toBase: v => v * 8 * 1024**2, fromBase: v => v / (8 * 1024**2) },
+                    GiB: { name: "Gibibytes (GiB)", desc: "1,024 MiB. Capacidad binaria exacta usada por sistemas para leer memoria física real.", toBase: v => v * 8 * 1024**3, fromBase: v => v / (8 * 1024**3) },
+                    TiB: { name: "Tebibytes (TiB)", desc: "1,024 GiB. Espacio en sistemas de archivos a gran escala de servidores UNIX.", toBase: v => v * 8 * 1024**4, fromBase: v => v / (8 * 1024**4) }
+                },
+                benchmarks: [
+                    { value: 3.35e7, text: "🎵 El tamaño aproximado de una canción estándar en calidad de audio premium." },
+                    { value: 1.71e10, text: "🎥 Alrededor de una película en Full HD 1080p en streaming comprimido." },
+                    { value: 2.14e11, text: "📱 Capacidad de almacenamiento típica de un smartphone moderno de gama media." },
+                    { value: 1.28e11, text: "☁️ Espacio base de almacenamiento gratuito que ofrece Google Drive." }
+                ],
+                regex: /(?<val>\d+(?:\.\d+)?)\s*(bytes?|b|kb|mb|gb|tb|pb|kib|mib|gib|tib)/i,
+                regexMap: { b:'b', byte:'B', bytes:'B', kb:'KB', mb:'MB', gb:'GB', tb:'TB', pb:'PB', kib:'KiB', mib:'MiB', gib:'GiB', tib:'TiB' }
+            },
+            energia: {
+                label: "Energía y Electricidad",
+                base: "J",
+                units: {
+                    J: { name: "Julios (J)", desc: "Unidad del SI. Energía necesaria para levantar un objeto pequeño un metro vertical.", toBase: v => v, fromBase: v => v },
+                    cal: { name: "Calorías (cal)", desc: "Energía para elevar 1°C un gramo de agua. Usada en química fina.", toBase: v => v * 4.184, fromBase: v => v / 4.184 },
+                    kcal: { name: "Kilocalorías (kcal)", desc: "Las famosas 'calorías' de los alimentos. Miden el aporte energético nutricional.", toBase: v => v * 4184, fromBase: v => v / 4184 },
+                    Wh: { name: "Vatios-hora (Wh)", desc: "Energía eléctrica consumida por un dispositivo de 1W durante una hora entera.", toBase: v => v * 3600, fromBase: v => v / 3600 },
+                    kWh: { name: "Kilovatios-hora (kWh)", desc: "1,000 Wh. Unidad estándar global de las compañías eléctricas para cobrar tu factura de luz.", toBase: v => v * 3.6e6, fromBase: v => v / 3.6e6 },
+                    mAh37: { name: "mAh (a 3.7V)", desc: "Mide la carga eléctrica total de las baterías de smartphones y powerbanks comerciales.", toBase: v => v * 13.32, fromBase: v => v / 13.32 },
+                    Ah37: { name: "Ah (a 3.7V)", desc: "Capacidad de almacenamiento eléctrico de baterías grandes (motos, autos compactos).", toBase: v => v * 13320, fromBase: v => v / 13320 },
+                    BTU: { name: "BTU", toBase: v => v * 1055.06, fromBase: v => v / 1055.06, desc: "Mide la capacidad de enfriamiento o calefacción de aires acondicionados y calderas." }
+                },
+                benchmarks: [
+                    { value: 66600, text: "🔋 La capacidad completa de la batería de un smartphone moderno estándar de 5000 mAh." },
+                    { value: 8.36e6, text: "🍔 El valor energético aproximado de un almuerzo rápido o hamburguesa completa." },
+                    { value: 3.6e6 * 300, text: "⚡ El consumo eléctrico mensual estimado de un hogar pequeño." }
+                ],
+                regex: /(?<val>\d+(?:\.\d+)?)\s*(j|cal|kcal|wh|kwh|mah|ah|btu)/i,
+                regexMap: { j:'J', cal:'cal', kcal:'kcal', wh:'Wh', kwh:'kWh', mah:'mAh37', ah:'Ah37', btu:'BTU' }
+            },
+            longitud: {
+                label: "Longitud y Distancia",
+                base: "m",
+                units: {
+                    nm: { name: "Nanómetros (nm)", desc: "Escala atómica. Utilizada para medir el grosor de transistores en microchips informáticos.", toBase: v => v * 1e-9, fromBase: v => v / 1e-9 },
+                    um: { name: "Micras (µm)", desc: "Escala celular. Útil para medir bacterias, polvo fino y el grosor de un cabello humano.", toBase: v => v * 1e-6, fromBase: v => v / 1e-6 },
+                    mm: { name: "Milímetros (mm)", desc: "Métricas de alta precisión artesanal, ingeniería mecánica ligera y lluvia caída.", toBase: v => v * 0.001, fromBase: v => v / 0.001 },
+                    cm: { name: "Centímetros (cm)", desc: "Unidad cotidiana del diseño textil, carpintería, y medición de dimensiones personales.", toBase: v => v * 0.01, fromBase: v => v / 0.01 },
+                    m: { name: "Metros (m)", desc: "Unidad base del SI. Utilizada universalmente para dimensiones de arquitectura y urbanismo.", toBase: v => v, fromBase: v => v },
+                    km: { name: "Kilómetros (km)", desc: "Métrica geográfica estándar para distancias entre ciudades y rutas viales por carretera.", toBase: v => v * 1000, fromBase: v => v / 1000 },
+                    in: { name: "Pulgadas (in)", desc: "Sistema anglosajón. Utilizado mundialmente para las diagonales de pantallas de TV y smartphones.", toBase: v => v * 0.0254, fromBase: v => v / 0.0254 },
+                    ft: { name: "Pies (ft)", desc: "Unidad anglosajona que domina la aviación global para indicar la altitud de los aviones.", toBase: v => v * 0.3048, fromBase: v => v / 0.3048 },
+                    yd: { name: "Yardas (yd)", desc: "Empleado en deportes anglosajones como el fútbol americano y en terrenos de golf.", toBase: v => v * 0.9144, fromBase: v => v / 0.9144 },
+                    mi: { name: "Millas (mi)", desc: "Métrica estándar vial en EE.UU y Reino Unido para distancias geográficas y límites de velocidad.", toBase: v => v * 1609.344, fromBase: v => v / 1609.344 },
+                    nmi: { name: "Millas Náuticas", desc: "Equivale a un minuto de arco de meridiano terrestre. Estándar mundial en navegación marítima y aérea.", toBase: v => v * 1852, fromBase: v => v / 1852 },
+                    ly: { name: "Años Luz (ly)", desc: "Distancia que recorre la luz en un año. Usada para medir separaciones entre estrellas lejanas.", toBase: v => v * 9.461e15, fromBase: v => v / 9.461e15 },
+                    au: { name: "Unidades Astronómicas (AU)", desc: "Distancia media de la Tierra al Sol. Ideal para medir distancias dentro de nuestro Sistema Solar.", toBase: v => v * 1.496e11, fromBase: v => v / 1.496e11 }
+                },
+                benchmarks: [
+                    { value: 1.8, text: "🧍 La estatura promedio de un jugador profesional de fútbol." },
+                    { value: 8848, text: "🏔️ La altitud cumbre del Monte Everest, la montaña más alta del planeta." },
+                    { value: 40075000, text: "🌍 La longitud total de la circunferencia de la línea ecuatorial terrestre." }
+                ],
+                regex: /(?<val>\d+(?:\.\d+)?)\s*(nm|um|mm|cm|m|km|in|ft|yd|mi|nmi|ly|au)/i,
+                regexMap: { nm:'nm', um:'um', mm:'mm', cm:'cm', m:'m', km:'km', in:'in', ft:'ft', yd:'yd', mi:'mi', nmi:'nmi', ly:'ly', au:'au' }
+            },
+            masa: {
+                label: "Masa y Peso",
+                base: "g",
+                units: {
+                    mg: { name: "Miligramos (mg)", desc: "Unidad analítica muy sensible. Utilizada en la dosificación exacta de fármacos y compuestos químicos.", toBase: v => v * 0.001, fromBase: v => v / 0.001 },
+                    g: { name: "Gramos (g)", desc: "Usada en cocina para ingredientes, especias y en el pesaje de objetos de oficina o joyería fina.", toBase: v => v, fromBase: v => v },
+                    kg: { name: "Kilogramos (kg)", desc: "Métrica estándar para el peso corporal de seres vivos, alimentos comerciales a granel e industria ligera.", toBase: v => v * 1000, fromBase: v => v / 1000 },
+                    t: { name: "Toneladas Métricas (t)", desc: "1,000 kg. Se emplea en transporte de mercancías pesadas, barcos de carga e industria minera.", toBase: v => v * 1e6, fromBase: v => v / 1e6 },
+                    oz: { name: "Onzas (oz)", desc: "Sistema imperial. Se conserva en cocina anglosajona y para pesar paquetes de envíos postales.", toBase: v => v * 28.3495, fromBase: v => v / 28.3495 },
+                    lb: { name: "Libras (lb)", desc: "Métrica de masa común en EE.UU para alimentos, pesas de gimnasio y presión antropomórfica.", toBase: v => v * 453.592, fromBase: v => v / 453.592 },
+                    st: { name: "Stones (st)", desc: "Unidad tradicional británica usada casi exclusivamente para referirse al peso corporal de personas.", toBase: v => v * 6350.29, fromBase: v => v / 6350.29 },
+                    ct: { name: "Quilates (ct)", desc: "200 miligramos. Unidad oficial e inamovible para medir de manera exacta el peso de gemas y diamantes.", toBase: v => v * 0.2, fromBase: v => v / 0.2 }
+                },
+                benchmarks: [
+                    { value: 200, text: "📱 El peso promedio aproximado de un teléfono inteligente estándar." },
+                    { value: 1200000, text: "🚗 El peso estructural intermedio de un coche urbano pequeño." },
+                    { value: 5e6, text: "🐘 El peso masivo estimado de un elefante africano adulto." }
+                ],
+                regex: /(?<val>\d+(?:\.\d+)?)\s*(mg|g|kg|t|toneladas|oz|lb|libras|st|ct)/i,
+                regexMap: { mg:'mg', g:'g', kg:'kg', t:'t', toneladas:'t', oz:'oz', lb:'lb', libras:'lb', st:'st', ct:'ct' }
+            },
+            tiempo: {
+                label: "Tiempo",
+                base: "s",
+                units: {
+                    ms: { name: "Milisegundos (ms)", desc: "Milésima de segundo. Mide la latencia en videojuegos (ping), ráfagas de cámaras y tiempos de cómputo.", toBase: v => v * 0.001, fromBase: v => v / 0.001 },
+                    s: { name: "Segundos (s)", desc: "Unidad fundamental del tiempo. Usada en ritmos cardíacos, cronómetros y física fundamental.", toBase: v => v, fromBase: v => v },
+                    min: { name: "Minutos (min)", desc: "60 segundos. Estándar para medir la duración de canciones, llamadas y pausas comerciales.", toBase: v => v * 60, fromBase: v => v / 60 },
+                    h: { name: "Horas (h)", desc: "Medida del tiempo laboral diario, trayectos de viaje interurbanos y películas de cine.", toBase: v => v * 3600, fromBase: v => v / 3600 },
+                    d: { name: "Días (d)", desc: "Ciclo completo de rotación terrestre. Estándar para plazos de entrega logísticos y ciclos biológicos.", toBase: v => v * 86400, fromBase: v => v / 86400 },
+                    wk: { name: "Semanas", desc: "Ciclo de 7 días. Estándar organizativo de calendarios laborales, académicos y de planificación urbana.", toBase: v => v * 604800, fromBase: v => v / 604800 },
+                    mo: { name: "Meses (Promedio)", desc: "Unidad cíclica económica. Usada para suscripciones, facturas recurrentes y gestaciones.", toBase: v => v * 2.63e6, fromBase: v => v / 2.63e6 },
+                    yr: { name: "Años (yr)", desc: "Órbita solar completa de la Tierra. Mide la edad humana, contratos a largo plazo e hitos históricos.", toBase: v => v * 3.156e7, fromBase: v => v / 3.156e7 },
+                    dec: { name: "Décadas", desc: "Periodo de 10 años. Utilizado para agrupar modas, eras artísticas, musicales y tendencias culturales.", toBase: v => v * 3.156e8, fromBase: v => v / 3.156e8 },
+                    cen: { name: "Siglos", desc: "Periodo de 100 años. Usado para dividir macrohistoria, evoluciones de civilizaciones y eras geológicas modernas.", toBase: v => v * 3.156e9, fromBase: v => v / 3.156e9 }
+                },
+                benchmarks: [
+                    { value: 5400, text: "⚽ La duración reglamentaria total de un partido de fútbol (90 minutos)." },
+                    { value: 3.156e7, text: "🌍 El periodo exacto que requiere el planeta Tierra para completar su órbita solar." }
+                ],
+                regex: /(?<val>\d+(?:\.\d+)?)\s*(ms|s|min|h|horas|d|dias|semanas|meses|anos|decadas|siglos)/i,
+                regexMap: { ms:'ms', s:'s', min:'min', h:'h', horas:'h', d:'d', dias:'d', semanas:'wk', meses:'mo', anos:'yr', decadas:'dec', siglos:'cen' }
+            },
+            temperatura: {
+                label: "Temperatura",
+                base: "C",
+                units: {
+                    C: { name: "Celsius (°C)", desc: "Métrica climatológica y médica oficial en la mayor parte del planeta. Basada en el agua.", toBase: v => v, fromBase: v => v },
+                    F: { name: "Fahrenheit (°F)", desc: "Escala termométrica oficial en los Estados Unidos. Utilizada en meteorología y cocina estadounidense.", toBase: v => (v - 32) * 5/9, fromBase: v => (v * 9/5) + 32 },
+                    K: { name: "Kelvin (K)", desc: "Unidad absoluta usada en la ciencia, física termodinámica y astrofísica. Comienza en el cero absoluto.", toBase: v => v - 273.15, fromBase: v => v + 273.15 }
+                },
+                benchmarks: [
+                    { value: 37, text: "🌡️ La temperatura óptima corporal interna de un ser humano saludable." },
+                    { value: 100, text: "💧 El umbral crítico de ebullición del agua destilada al nivel del mar." },
+                    { value: 0, text: "❄️ Punto de fusión y congelación exacto del agua pura." }
+                ],
+                regex: /(?<val>-?\d+(?:\.\d+)?)\s*(c|f|k|°c|°f)/i,
+                regexMap: { c:'C', '°c':'C', f:'F', '°f':'F', k:'K' }
+            },
+            volumen: {
+                label: "Volumen y Cocina",
+                base: "ml",
+                units: {
+                    ml: { name: "Mililitros (ml)", desc: "Capacidad fina. Utilizada en envases de perfumes, viales medicinales e ingredientes líquidos líquidos.", toBase: v => v, fromBase: v => v },
+                    L: { name: "Litros (L)", desc: "Métrica estándar mundial de hidratación, envases de bebidas, botellas de leche y garrafas comerciales.", toBase: v => v * 1000, fromBase: v => v / 1000 },
+                    m3: { name: "Metros Cúbicos (m³)", desc: "1,000 litros. Empleado en el cobro del suministro público de agua residencial y almacenamiento logístico industrial.", toBase: v => v * 1e6, fromBase: v => v / 1e6 },
+                    gal: { name: "Galones (US)", desc: "Métrica de combustibles y pinturas en EE.UU y ciertos países de Latinoamérica.", toBase: v => v * 3785.41, fromBase: v => v / 3785.41 },
+                    qt: { name: "Cuartos (qt)", desc: "Aproximadamente un litro. Empleado para aceites de motor automotrices y lácteos anglosajones.", toBase: v => v * 946.35, fromBase: v => v / 946.35 },
+                    pt: { name: "Pintas (pt)", desc: "Unidad icónica utilizada internacionalmente para servir cerveza tirada de barril en bares.", toBase: v => v * 473.17, fromBase: v => v / 473.17 },
+                    cup: { name: "Tazas (cup)", desc: "Unidad tradicional de referencia en repostería internacional para harina, leche y azúcar.", toBase: v => v * 240, fromBase: v => v / 240 },
+                    tbsp: { name: "Cucharadas (tbsp)", desc: "Medida estándar en recetas culinarias. Equivale a unos 15 mililitros de volumen.", toBase: v => v * 15, fromBase: v => v / 15 },
+                    tsp: { name: "Cucharaditas (tsp)", desc: "Medida pequeña para ingredientes potentes como extractos, sal, bicarbonato o levadura química en polvo.", toBase: v => v * 5, fromBase: v => v / 5 },
+                    floz: { name: "Onzas Líquidas (fl oz)", desc: "Unidad común para especificar el volumen neto de latas de refrescos de marcas globales.", toBase: v => v * 29.57, fromBase: v => v / 29.57 }
+                },
+                benchmarks: [
+                    { value: 330, text: "🥤 El volumen de almacenamiento clásico de una lata de refresco." },
+                    { value: 50000, text: "🚗 La capacidad estándar aproximada del tanque de combustible de un vehículo utilitario." },
+                    { value: 2500000, text: "🏊 El volumen de agua masivo requerido para llenar una piscina olímpica." }
+                ],
+                regex: /(?<val>\d+(?:\.\d+)?)\s*(ml|l|litros|m3|gal|qt|pt|cup|tazas|tbsp|tsp|floz)/i,
+                regexMap: { ml:'ml', l:'L', litros:'L', m3:'m3', gal:'gal', qt:'qt', pt:'pt', cup:'cup', tazas:'cup', tbsp:'tbsp', tsp:'tsp', floz:'floz' }
+            },
+            velocidad: {
+                label: "Velocidad y Presión",
+                base: "m/s",
+                units: {
+                    "m/s": { name: "Metros por Segundo (m/s)", desc: "Unidad científica de velocidad en el SI. Base para cálculos de cinemática y física teórica.", toBase: v => v, fromBase: v => v },
+                    "km/h": { name: "Kilómetros por Hora (km/h)", desc: "Velocidad cotidiana global. Usada en velocímetros de automóviles y señalización vial.", toBase: v => v / 3.6, fromBase: v => v * 3.6 },
+                    "mph": { name: "Millas por Hora (mph)", desc: "Unidad de velocidad vial nativa de EE.UU, Reino Unido y las islas del Caribe.", toBase: v => v * 0.44704, fromBase: v => v / 0.44704 },
+                    "kn": { name: "Nudos (kn)", desc: "Métrica estándar náutica y aérea mundial para rastrear la velocidad de barcos, aviones y corrientes de viento.", toBase: v => v * 0.51444, fromBase: v => v / 0.51444 },
+                    "mach": { name: "Mach (Vel. Sonido)", desc: "Mide velocidades en aviación militar supersónica y astronáutica en relación al sonido local.", toBase: v => v * 343, fromBase: v => v / 343 },
+                    "Pa": { name: "Pascales (Pa)", desc: "Unidad de presión del SI. Muy pequeña. Usada en meteorología fina y estudios acústicos.", toBase: v => v * 0.00001, fromBase: v => v * 100000 },
+                    "bar": { name: "Bar", desc: "Aproximadamente la presión atmosférica terrestre. Usada en buceo y en sistemas hidráulicos industriales.", toBase: v => v, fromBase: v => v },
+                    "psi": { name: "PSI", desc: "Libras por pulgada cuadrada. Estándar de inflado para neumáticos vehiculares y compresores domésticos.", toBase: v => v * 0.06894, fromBase: v => v / 0.06894 },
+                    "atm": { name: "Atmósferas (atm)", desc: "La presión del aire al nivel del mar. Referencia en neumática, química general y estudios submarinos.", toBase: v => v * 1.01325, fromBase: v => v / 1.01325 }
+                },
+                benchmarks: [
+                    { value: 33.33, text: "🏎️ El límite máximo legal de velocidad permitido en autovías de alta velocidad (120 km/h)." },
+                    { value: 343, text: "✈️ La velocidad crítica de Mach 1 donde se rompe la barrera del sonido en condiciones normales." },
+                    { value: 2.2, text: "🛞 La presión típica de inflado recomendada para un neumático de coche común (~32 PSI)." }
+                ],
+                regex: /(?<val>\d+(?:\.\d+)?)\s*(m\/s|km\/h|kmh|mph|kn|nudos|mach|pa|bar|psi|atm)/i,
+                regexMap: { 'm/s':'m/s', kmh:'km/h', 'km/h':'km/h', mph:'mph', kn:'kn', nudos:'kn', mach:'mach', pa:'Pa', bar:'bar', psi:'psi', atm:'atm' }
+            },
+            curiosas: {
+                label: "Unidades Curiosas y Antiguas",
+                base: "m_ref",
+                units: {
+                    legua: { name: "Leguas Castellanas", desc: "Distancia histórica que una persona o caballo caminaba habitualmente durante una hora regular.", toBase: v => v * 5572.7, fromBase: v => v / 5572.7 },
+                    codo: { name: "Codos Históricos", desc: "Métrica antigua basada en la distancia anatómica entre la punta del codo y el extremo del dedo medio.", toBase: v => v * 0.418, fromBase: v => v / 0.418 },
+                    estadio: { name: "Estadios Griegos", desc: "Métrica clásica de longitud de la Antigua Grecia, famosa por determinar el tamaño de sus recintos deportivos.", toBase: v => v * 174.12, fromBase: v => v / 174.12 },
+                    palmo: { name: "Palmos Tradicionales", desc: "Medida artesanal intuitiva que evalúa la distancia máxima entre el pulgar y el meñique extendidos.", toBase: v => v * 0.208, fromBase: v => v / 0.208 },
+                    fanega: { name: "Fanegas de Superficie", desc: "Unidad agraria tradicional que calculaba la cantidad de tierra laborable necesaria para sembrar una fanega de trigo entero.", toBase: v => v * 6459.6, fromBase: v => v / 6459.6 }
+                },
+                benchmarks: [
+                    { value: 5572.7, text: "🐎 La distancia promedio que un caballo fuerte podía marchar al paso durante una hora." },
+                    { value: 0.418, text: "📐 La longitud medida desde el codo humano articulado hasta la punta del dedo medio." }
+                ],
+                regex: /(?<val>\d+(?:\.\d+)?)\s*(leguas|codos|estadios|palmos|fanegas)/i,
+                regexMap: { leguas:'legua', codos:'codo', estadios:'estadio', palmos:'palmo', fanegas:'fanega' }
+            }
+        };
+
+        let currentActiveSection = 'auto';
+        let currentCategory = 'datos';
+        let state = { sourceUnit: 'b', targetUnit: 'B', sourceValue: 1 };
+        let localHistory = [];
+
+        window.onload = () => {
+            loadLocalStorageData();
+            countTotalUnits();
+            renderTabs();
+            switchCategory(currentCategory);
+            setupInputListeners();
+            switchMainView('auto', document.querySelector('.nav-item'));
+        };
+
+        function loadLocalStorageData() {
+            try {
+                const data = localStorage.getItem('neo_conv_history_v2');
+                if (data) localHistory = JSON.parse(data);
+            } catch(e) { localHistory = []; }
+        }
+
+        function saveHistoryToLocal(queryStr, categoryLabel) {
+            localHistory = localHistory.filter(h => h.query !== queryStr);
+            localHistory.unshift({ query: queryStr, cat: categoryLabel });
+            if (localHistory.length > 8) localHistory.pop();
+            localStorage.setItem('neo_conv_history_v2', JSON.stringify(localHistory));
+        }
+
+        function countTotalUnits() {
+            let total = 0;
+            for (let cat in dataset) total += Object.keys(dataset[cat].units).length;
+            document.getElementById('total-units-badge').innerText = `${total} unidades disponibles`;
+        }
+
+        function switchMainView(viewId, element) {
+            currentActiveSection = viewId;
+            document.querySelectorAll('.view-section').forEach(s => s.classList.remove('active'));
+            document.querySelectorAll('.nav-item').forEach(i => i.classList.remove('active'));
+            
+            document.getElementById(`view-${viewId}`).classList.add('active');
+            if (element) element.classList.add('active');
+
+            const titleMap = { auto: 'Detector Inteligente', converter: 'Conversor', history: 'Consultas Recientes' };
+            const iconMap = { auto: 'zap', converter: 'sliders', history: 'history' };
+            
+            document.getElementById('app-title-text').innerText = titleMap[viewId];
+            const iconElement = document.getElementById('header-icon');
+            iconElement.setAttribute('data-lucide', iconMap[viewId]);
+            lucide.createIcons();
+
+            if (viewId === 'history') renderHistorySection();
+        }
+
+        function setupInputListeners() {
+            document.getElementById('source-value').addEventListener('input', (e) => {
+                state.sourceValue = parseFloat(e.target.value) || 0;
+                calculateConversion(true);
+            });
+            document.getElementById('smart-input').addEventListener('input', handleSmartSearch);
+        }
+
+        function renderTabs() {
+            const container = document.getElementById('categories-tabs');
+            container.innerHTML = '';
+            for (let key in dataset) {
+                const btn = document.createElement('button');
+                btn.className = `tab-pill ${key === currentCategory ? 'active' : ''}`;
+                btn.innerText = dataset[key].label;
+                btn.onclick = () => switchCategory(key);
+                container.appendChild(btn);
+            }
+        }
+
+        function switchCategory(catKey) {
+            currentCategory = catKey;
+            const keys = Object.keys(dataset[catKey].units);
+            state.sourceUnit = keys[0];
+            state.targetUnit = keys[1] || keys[0];
+            
+            renderTabs();
+            buildDropdownOptions('source');
+            buildDropdownOptions('target');
+            updateSelectLabels();
+            calculateConversion(false);
+        }
+
+        function buildDropdownOptions(type) {
+            const list = document.getElementById(`${type}-options`);
+            list.innerHTML = '';
+            const units = dataset[currentCategory].units;
+            
+            for (let code in units) {
+                const opt = document.createElement('div');
+                opt.className = `dropdown-option ${code === state[`${type}Unit`] ? 'selected' : ''}`;
+                opt.innerHTML = `
+                    <span class="opt-title">${units[code].name}</span>
+                    <span class="opt-desc">${units[code].desc || "Sin descripción disponible."}</span>
+                `;
+                opt.onclick = () => selectOption(type, code);
+                list.appendChild(opt);
+            }
+        }
+
+        function toggleDropdown(type) {
+            const targetDrop = document.getElementById(`${type}-dropdown`);
+            const isOpen = targetDrop.classList.contains('show');
+            closeAllDropdowns();
+            if (!isOpen) {
+                targetDrop.classList.add('show');
+                document.getElementById(`${type}-search`).focus();
+            }
+        }
+
+        function closeAllDropdowns() {
+            document.querySelectorAll('.select-dropdown').forEach(d => d.classList.remove('show'));
+        }
+
+        function filterOptions(type) {
+            const query = document.getElementById(`${type}-search`).value.toLowerCase();
+            const options = document.getElementById(`${type}-options`).querySelectorAll('.dropdown-option');
+            options.forEach(opt => {
+                opt.style.display = opt.innerText.toLowerCase().includes(query) ? 'block' : 'none';
+            });
+        }
+
+        function selectOption(type, code) {
+            state[`${type}Unit`] = code;
+            updateSelectLabels();
+            closeAllDropdowns();
+            buildDropdownOptions('source');
+            buildDropdownOptions('target');
+            calculateConversion(true);
+        }
+
+        function updateSelectLabels() {
+            document.getElementById('source-select-label').innerText = dataset[currentCategory].units[state.sourceUnit].name;
+            document.getElementById('target-select-label').innerText = dataset[currentCategory].units[state.targetUnit].name;
+        }
+
+        function swapUnits() {
+            const temp = state.sourceUnit;
+            state.sourceUnit = state.targetUnit;
+            state.targetUnit = temp;
+            
+            const curTarget = parseFloat(document.getElementById('target-value').value) || 0;
+            state.sourceValue = curTarget;
+            document.getElementById('source-value').value = curTarget;
+
+            updateSelectLabels();
+            buildDropdownOptions('source');
+            buildDropdownOptions('target');
+            calculateConversion(true);
+        }
+
+        function formatNumberPrecisely(num) {
+            if (num === 0) return "0";
+            const absNum = Math.abs(num);
+            if (absNum < 1e-5 || absNum > 1e8) {
+                return num.toExponential(5);
+            }
+            return parseFloat(num.toFixed(6)).toString();
+        }
+
+        function calculateConversion(triggerAnim = false) {
+            const cat = dataset[currentCategory];
+            const baseValue = cat.units[state.sourceUnit].toBase(state.sourceValue);
+            const finalValue = cat.units[state.targetUnit].fromBase(baseValue);
+
+            const targetInput = document.getElementById('target-value');
+            targetInput.value = formatNumberPrecisely(finalValue);
+
+            if (triggerAnim) {
+                targetInput.classList.remove('value-update-anim');
+                void targetInput.offsetWidth;
+                targetInput.classList.add('value-update-anim');
+            }
+
+            evaluateBenchmarks(baseValue);
+        }
+
+        function evaluateBenchmarks(baseValue) {
+            const cat = dataset[currentCategory];
+            const container = document.getElementById('human-scale-container');
+            const textElement = document.getElementById('human-scale-text');
+
+            if (!cat.benchmarks || cat.benchmarks.length === 0) {
+                container.classList.add('hidden');
+                return;
+            }
+
+            let closest = null;
+            let minDiffRatio = Infinity;
+            let finalPercentage = 100;
+
+            cat.benchmarks.forEach(bm => {
+                const diff = Math.abs(baseValue - bm.value);
+                const ratio = diff / bm.value;
+
+                if (ratio < minDiffRatio && ratio <= 0.6) { 
+                    minDiffRatio = ratio;
+                    closest = bm;
+                    finalPercentage = Math.round((baseValue / bm.value) * 100);
+                }
+            });
+
+            if (closest) {
+                if (finalPercentage === 100) {
+                    textElement.innerText = closest.text;
+                } else {
+                    textElement.innerText = `Representa aproximadamente el ${finalPercentage}% de la siguiente métrica real: ${closest.text.replace(/^[^\s]+\s*/, '')}`;
+                }
+                container.classList.remove('hidden');
+            } else {
+                container.classList.add('hidden');
+            }
+        }
+
+        function handleSmartSearch() {
+            const rawStr = document.getElementById('smart-input').value.trim();
+            const renderArea = document.getElementById('auto-results-render');
+            
+            if (!rawStr) {
+                renderArea.innerHTML = `
+                    <div class="empty-state">
+                        <i data-lucide="sparkles" size="32" style="color: var(--text-muted); opacity: 0.4;"></i>
+                        <p>Escribe una cantidad junto con su unidad arriba.<br>El sistema identificará la categoría automáticamente y te mostrará todas sus equivalencias con ejemplos de su uso real.</p>
+                    </div>`;
+                lucide.createIcons();
+                return;
+            }
+
+            let foundCategory = null;
+            let parsedVal = 0;
+            let detectedUnitKey = '';
+
+            for (let catKey in dataset) {
+                const cat = dataset[catKey];
+                const match = rawStr.match(cat.regex);
+                if (match && match.groups && match.groups.val) {
+                    parsedVal = parseFloat(match.groups.val);
+                    const unitStr = match[2].toLowerCase();
+                    detectedUnitKey = cat.regexMap[unitStr];
+                    if (detectedUnitKey) {
+                        foundCategory = catKey;
+                        break;
+                    }
+                }
+            }
+
+            if (foundCategory) {
+                const cat = dataset[foundCategory];
+                const baseValue = cat.units[detectedUnitKey].toBase(parsedVal);
+                
+                saveHistoryToLocal(rawStr, cat.label);
+
+                let html = `
+                    <div class="auto-results-card">
+                        <div class="auto-matched-header">
+                            <span>Categoría: <strong>${cat.label}</strong></span>
+                            <i data-lucide="check-circle-2" size="15" style="color: var(--accent-success);"></i>
+                        </div>
+                        <div class="auto-grid">
+                `;
+
+                for (let code in cat.units) {
+                    const computed = cat.units[code].fromBase(baseValue);
+                    html += `
+                        <div class="auto-item">
+                            <span class="val">${formatNumberPrecisely(computed)}</span>
+                            <span class="lbl">${cat.units[code].name}</span>
+                            <span class="desc">${cat.units[code].desc || "Sin descripción asignada."}</span>
+                        </div>
+                    `;
+                }
+
+                html += `</div></div>`;
+                renderArea.innerHTML = html;
+                lucide.createIcons();
+            }
+        }
+
+        function renderHistorySection() {
+            const container = document.getElementById('history-items-container');
+            if (localHistory.length === 0) {
+                container.innerHTML = `
+                    <div class="empty-state">
+                        <i data-lucide="folder-open" size="26" style="color: var(--text-muted); opacity: 0.4;"></i>
+                        <p>Aún no tienes búsquedas guardadas en el historial.</p>
+                    </div>`;
+                lucide.createIcons();
+                return;
+            }
+
+            container.innerHTML = '';
+            localHistory.forEach(item => {
+                const div = document.createElement('div');
+                div.className = 'history-item';
+                div.innerHTML = `
+                    <span class="query">"${item.query}"</span>
+                    <span class="cat">${item.cat}</span>
+                `;
+                div.onclick = () => {
+                    switchMainView('auto', document.querySelector('.nav-item'));
+                    document.getElementById('smart-input').value = item.query;
+                    handleSmartSearch();
+                };
+                container.appendChild(div);
+            });
+        }
+
+        function copyTargetResult() {
+            const targetInput = document.getElementById('target-value');
+            const targetUnitLabel = dataset[currentCategory].units[state.targetUnit].name;
+            const fullText = `${targetInput.value} ${targetUnitLabel}`;
+
+            navigator.clipboard.writeText(fullText).then(() => {
+                const wrapper = document.getElementById('group-target');
+                wrapper.classList.add('success-flash');
+                setTimeout(() => wrapper.classList.remove('success-flash'), 400);
+            }).catch(() => {
+                const wrapper = document.getElementById('group-target');
+                wrapper.classList.add('error-shake');
+                setTimeout(() => wrapper.classList.remove('error-shake'), 300);
+            });
+        }
+    </script>
+    <script>
+        lucide.createIcons();
+    </script>
+</body>
+</html>

@@ -1,0 +1,488 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+    <title>Material You // Cyber-Glass Hub</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@200;300;400;500;600;700&display=swap" rel="stylesheet">
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <style>
+        /* 1. FUNDAMENTOS VISUALES (TOKENS DE DISEÑO COHERENTES) */
+        :root {
+            /* === PALETA MATERIAL YOU REINJECTADA === */
+            --md-sys-color-primary: rgb(181, 196, 255);
+            --md-sys-color-surface-tint: rgb(181, 196, 255);
+            --md-sys-color-on-primary: rgb(28, 45, 97);
+            --md-sys-color-primary-container: rgb(52, 68, 121);
+            --md-sys-color-on-primary-container: rgb(220, 225, 255);
+            --md-sys-color-secondary: rgb(193, 197, 221);
+            --md-sys-color-on-secondary: rgb(43, 48, 66);
+            --md-sys-color-secondary-container: rgb(65, 70, 89);
+            --md-sys-color-on-secondary-container: rgb(222, 225, 249);
+            --md-sys-color-tertiary: rgb(227, 186, 219);
+            --md-sys-color-on-tertiary: rgb(67, 39, 64);
+            --md-sys-color-tertiary-container: rgb(91, 61, 87);
+            --md-sys-color-on-tertiary-container: rgb(255, 215, 246);
+            --md-sys-color-error: rgb(255, 180, 171);
+            --md-sys-color-on-error: rgb(105, 0, 5);
+            --md-sys-color-error-container: rgb(147, 0, 10);
+            --md-sys-color-on-error-container: rgb(255, 218, 214);
+            --md-sys-color-background: rgb(18, 19, 24);
+            --md-sys-color-surface: rgb(18, 19, 24);
+            --md-sys-color-on-surface: rgb(227, 225, 233);
+            --md-sys-color-surface-variant: rgb(69, 70, 79);
+            --md-sys-color-on-surface-variant: rgb(198, 198, 208);
+            --md-sys-color-outline: rgb(143, 144, 154);
+            --md-sys-color-outline-variant: rgb(69, 70, 79);
+            --md-sys-color-shadow: rgb(0, 0, 0);
+            --md-sys-color-scrim: rgb(0, 0, 0);
+            --md-sys-color-inverse-surface: rgb(227, 225, 233);
+            --md-sys-color-inverse-on-surface: rgb(47, 48, 54);
+            --md-sys-color-inverse-primary: rgb(76, 92, 146);
+            --md-sys-color-primary-fixed: rgb(220, 225, 255);
+            --md-sys-color-on-primary-fixed: rgb(2, 23, 75);
+            --md-sys-color-primary-fixed-dim: rgb(181, 196, 255);
+            --md-sys-color-on-primary-fixed-variant: rgb(52, 68, 121);
+            --md-sys-color-secondary-fixed: rgb(222, 225, 249);
+            --md-sys-color-on-secondary-fixed: rgb(22, 27, 44);
+            --md-sys-color-secondary-fixed-dim: rgb(193, 197, 221);
+            --md-sys-color-on-secondary-fixed-variant: rgb(65, 70, 89);
+            --md-sys-color-tertiary-fixed: rgb(255, 215, 246);
+            --md-sys-color-on-tertiary-fixed: rgb(44, 18, 42);
+            --md-sys-color-tertiary-fixed-dim: rgb(227, 186, 219);
+            --md-sys-color-on-tertiary-fixed-variant: rgb(91, 61, 87);
+            --md-sys-color-surface-dim: rgb(18, 19, 24);
+            --md-sys-color-surface-bright: rgb(56, 57, 63);
+            --md-sys-color-surface-container-lowest: rgb(13, 14, 19);
+            --md-sys-color-surface-container-low: rgb(26, 27, 33);
+            --md-sys-color-surface-container: rgb(30, 31, 37);
+            --md-sys-color-surface-container-high: rgb(41, 42, 47);
+            --md-sys-color-surface-container-highest: rgb(52, 52, 58);
+
+            /* === VARIABLES ESTRUCTURALES CYBER-GLASS === */
+            --bg: #000000;
+            --surface: #121212;
+            --surface-hover: #1e1e1e;
+            --border: rgba(255, 255, 255, 0.1);
+
+            --glass: rgba(28, 28, 30, 0.7);
+            --glass-bright: rgba(255, 255, 255, 0.08);
+            --glass-border: rgba(255, 255, 255, 0.12);
+
+            --text-main: #FFFFFF;
+            --text-muted: #8E8E93;
+
+            --accent: #6c5ce7;
+            --accent-cyan: #00e5ff;
+            --accent-success: #34C759;
+            --accent-danger: #FF453A;
+
+            /* Animaciones Táctiles UX */
+            --spring: cubic-bezier(0.34, 1.56, 0.64, 1);
+            --gentle: cubic-bezier(0.2, 0.8, 0.2, 1);
+            --bezier: cubic-bezier(0.19, 1, 0.22, 1);
+        }
+
+        /* 2. ARQUITECTURA DE INTERFAZ Y ENFOQUE SPA */
+        * {
+            box-sizing: border-box;
+            margin: 0; padding: 0;
+            font-family: 'Outfit', sans-serif;
+            -webkit-tap-highlight-color: transparent;
+            user-select: none;
+            -webkit-user-select: none;
+        }
+
+        body {
+            background-color: var(--bg);
+            color: var(--text-main);
+            min-height: 100dvh;
+            height: 100dvh;
+            overflow: hidden;
+            padding: env(safe-area-inset-top) 20px calc(env(safe-area-inset-bottom) + 20px) 20px;
+            max-width: 480px;
+            margin: 0 auto;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .app-scroll-container {
+            flex: 1;
+            overflow-y: auto;
+            padding-bottom: 40px;
+            scrollbar-width: none;
+        }
+        .app-scroll-container::-webkit-scrollbar { display: none; }
+
+        header { padding: 30px 0 10px 0; }
+        header h1 { font-size: 1.8rem; font-weight: 700; letter-spacing: -0.5px; color: var(--text-main); }
+        header p { font-size: 0.85rem; color: var(--text-muted); margin-top: 6px; line-height: 1.4; font-weight: 300; }
+        header b { font-weight: 600; color: var(--accent-cyan); }
+
+        .category-section { margin-top: 24px; }
+        .category-title { font-size: 0.75rem; text-transform: uppercase; letter-spacing: 0.15em; color: var(--text-muted); margin-bottom: 12px; font-weight: 600; padding-left: 4px; }
+
+        .tokens-list { display: flex; flex-direction: column; gap: 10px; }
+        
+        .token-row {
+            background: var(--glass);
+            backdrop-filter: blur(40px);
+            -webkit-backdrop-filter: blur(40px);
+            border: 1px solid var(--glass-border);
+            border-radius: 20px;
+            padding: 14px 18px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            cursor: pointer;
+            transition: transform 0.3s var(--spring), background-color 0.3s var(--bezier), border-color 0.2s var(--bezier);
+        }
+        .token-row:active { transform: scale(0.97); background: var(--surface-hover); }
+        
+        .token-row.copied-flash {
+            border-color: var(--accent-cyan) !important;
+            background: rgba(0, 229, 255, 0.1);
+            transform: scale(1.02);
+        }
+
+        .token-left { display: flex; align-items: center; gap: 16px; overflow: hidden; }
+        
+        .color-preview { 
+            width: 38px; 
+            height: 38px; 
+            border-radius: 14px; 
+            flex-shrink: 0; 
+            border: 1px solid rgba(255, 255, 255, 0.2); 
+            box-shadow: 0 4px 12px rgba(0,0,0,0.4);
+        }
+        
+        .token-info h4 { font-size: 0.9rem; font-weight: 500; color: var(--text-main); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+        .token-info p { font-size: 0.8rem; color: var(--text-muted); font-family: monospace; margin-top: 2px; }
+
+        .row-action-indicator { color: var(--text-muted); display: flex; align-items: center; }
+
+        /* Toast */
+        .toast-copied {
+            position: fixed;
+            bottom: 40px; left: 50%; transform: translate3d(-50%, 30px, 0) scale(0.9);
+            background: var(--text-main);
+            color: var(--bg);
+            padding: 12px 26px; border-radius: 100px; font-size: 0.85rem; font-weight: 600;
+            z-index: 100; opacity: 0; visibility: hidden;
+            transition: transform 0.5s var(--spring), opacity 0.2s, visibility 0.5s;
+            box-shadow: 0 24px 60px rgba(0, 0, 0, 0.8);
+            pointer-events: none;
+        }
+        .toast-copied.show { transform: translate3d(-50%, 0, 0) scale(1); opacity: 1; visibility: visible; }
+
+        /* Bottom Sheet */
+        .sheet-backdrop { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.7); z-index: 50; opacity: 0; visibility: hidden; transition: opacity 0.3s var(--gentle); }
+        .sheet-backdrop.active { opacity: 1; visibility: visible; }
+
+        .guide-sheet {
+            position: fixed; bottom: 0; left: 50%; width: 100%; max-width: 480px;
+            background: var(--glass);
+            backdrop-filter: blur(40px);
+            -webkit-backdrop-filter: blur(40px);
+            border-top-left-radius: 32px; border-top-right-radius: 32px;
+            padding: 24px 24px calc(env(safe-area-inset-bottom) + 24px) 24px;
+            z-index: 60; transform: translate3d(-50%, 100%, 0);
+            transition: transform 0.4s var(--gentle);
+            border-top: 1px solid var(--glass-border);
+            box-shadow: 0 -10px 40px rgba(0,0,0,0.5);
+        }
+        @media (max-width: 480px) { .guide-sheet { left: 0; transform: translate3d(0, 100%, 0); } }
+        .guide-sheet.active { transform: translate3d(-50%, 0, 0); }
+        @media (max-width: 480px) { .guide-sheet.active { transform: translate3d(0, 0, 0); } }
+
+        .sheet-handle { width: 40px; height: 4px; background: var(--glass-border); border-radius: 100px; margin: -10px auto 25px auto; }
+        .sheet-header { display: flex; align-items: center; gap: 16px; margin-bottom: 20px; }
+        .sheet-header-info h3 { font-size: 1.15rem; font-weight: 600; color: var(--text-main); }
+        .sheet-header-info p { font-size: 0.85rem; color: var(--accent-cyan); font-family: monospace; font-weight: 500; margin-top: 2px; }
+
+        .guide-card { background: rgba(255,255,255,0.03); padding: 16px; border-radius: 20px; border: 1px solid var(--glass-border); margin-bottom: 20px; }
+        .guide-card h5 { font-size: 0.75rem; text-transform: uppercase; color: var(--text-muted); margin-bottom: 6px; font-weight: 600; letter-spacing: 1px; }
+        .guide-card p { font-size: 0.88rem; line-height: 1.5; color: var(--text-muted); font-weight: 300; }
+
+        /* Preview Sandbox */
+        .live-preview-box {
+            background: rgba(0, 0, 0, 0.3);
+            border: 1px dashed var(--glass-border);
+            border-radius: 20px; padding: 18px;
+            display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 10px;
+        }
+        .live-preview-box span { font-size: 0.7rem; text-transform: uppercase; color: var(--text-muted); font-weight: 600; letter-spacing: 0.1em;}
+        
+        .dynamic-demo-btn {
+            border: none; padding: 12px 32px; border-radius: 100px; font-size: 0.9rem; font-weight: 600;
+            display: flex; align-items: center; gap: 8px; box-shadow: 0 10px 30px rgba(0,0,0,0.3);
+            transition: transform 0.2s var(--spring);
+        }
+        .dynamic-demo-btn:active { transform: scale(0.95); }
+
+        .sheet-actions { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-top: 20px; }
+        .btn-sheet {
+            background: var(--text-main); color: var(--bg);
+            border: none; padding: 14px; border-radius: 100px; font-weight: 600; font-size: 0.85rem;
+            cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 8px;
+            transition: background-color 0.2s, transform 0.2s var(--spring);
+            box-shadow: 0 10px 25px rgba(0,0,0,0.3);
+        }
+        .btn-sheet:active { transform: scale(0.96); }
+        .btn-sheet.secondary-btn { background: var(--glass-bright); color: var(--text-main); border: 1px solid var(--glass-border); }
+        .btn-sheet.secondary-btn:active { background: rgba(255,255,255,0.15); }
+    </style>
+</head>
+<body>
+
+    <header>
+        <h1>Material You // Glass Hub</h1>
+        <p>⚡ <b>Pulsación larga:</b> Copia el HEX directo a portapapeles.<br>👆 <b>Un toque rápido:</b> Abre análisis de la guía semántica.</p>
+    </header>
+
+    <div class="app-scroll-container">
+        <main id="hub-content"></main>
+    </div>
+
+    <div class="toast-copied" id="global-toast">¡Copiado!</div>
+
+    <div class="sheet-backdrop" id="backdrop" onclick="closeGuide()"></div>
+    <div class="guide-sheet" id="guide-sheet">
+        <div class="sheet-handle"></div>
+        <div class="sheet-header">
+            <div class="color-preview" id="sheet-preview"></div>
+            <div class="sheet-header-info">
+                <h3 id="sheet-title">Nombre</h3>
+                <p id="sheet-hex">#HEX</p>
+            </div>
+        </div>
+        
+        <div class="guide-card">
+            <h5>Uso Semántico Estándar</h5>
+            <p id="sheet-desc">Instrucciones...</p>
+        </div>
+
+        <div class="live-preview-box">
+            <span>Previsualización Dinámica</span>
+            <button class="dynamic-demo-btn" id="live-demo-button">
+                <i data-lucide="sparkles" style="width:16px; height:16px;"></i> Componente UI
+            </button>
+        </div>
+
+        <div class="sheet-actions">
+            <button class="btn-sheet secondary-btn" id="btn-copy-rgb">Copiar RGB</button>
+            <button class="btn-sheet" id="btn-copy-hex">Copiar HEX</button>
+        </div>
+    </div>
+
+    <script>
+        function rgbToHex(rgbStr) {
+            const values = rgbStr.replace(/[rgb()]/g, '').split(/[\s,]+/);
+            return "#" + ((1 << 24) + (parseInt(values[0],10) << 16) + (parseInt(values[1],10) << 8) + parseInt(values[2],10)).toString(16).slice(1).toUpperCase();
+        }
+
+        const PALETTE_DATA = [
+            {
+                category: "Sistema Primario (Acción)",
+                tokens: [
+                    { name: "--md-sys-color-primary", val: "rgb(181, 196, 255)", on: "var(--md-sys-color-on-primary)", desc: "Color principal de la app. Usado en componentes interactivos críticos, estados activos y disparadores de acción." },
+                    { name: "--md-sys-color-surface-tint", val: "rgb(181, 196, 255)", on: "var(--md-sys-color-on-primary)", desc: "Tinte aplicado a las superficies para indicar elevaciones tonales basadas en el tema primario." },
+                    { name: "--md-sys-color-on-primary", val: "rgb(28, 45, 97)", on: "var(--md-sys-color-primary)", desc: "Color de contraste estricto para elements colocados directamente sobre fondos de color Primary." },
+                    { name: "--md-sys-color-primary-container", val: "rgb(52, 68, 121)", on: "var(--md-sys-color-on-primary-container)", desc: "Contenedores que requieren atención intermedia. Perfecto para celdas seleccionadas o destacados." },
+                    { name: "--md-sys-color-on-primary-container", val: "rgb(220, 225, 255)", on: "var(--md-sys-color-primary-container)", desc: "Texto o iconos diseñados para ir de forma segura dentro de contenedores primarios." }
+                ]
+            },
+            {
+                category: "Sistemas Secundarios y Terciarios",
+                tokens: [
+                    { name: "--md-sys-color-secondary", val: "rgb(193, 197, 221)", on: "var(--md-sys-color-on-secondary)", desc: "Matiz de menor intensidad para chips de filtro, barras secundarias o toggles inactivos." },
+                    { name: "--md-sys-color-on-secondary", val: "rgb(43, 48, 66)", on: "var(--md-sys-color-secondary)", desc: "Contraste de lectura obligatoria para elementos sobre fondos secundarios." },
+                    { name: "--md-sys-color-secondary-container", val: "rgb(65, 70, 89)", on: "var(--md-sys-color-on-secondary-container)", desc: "Bloques de menor nivel jerárquico como fondos de ítems inactivos." },
+                    { name: "--md-sys-color-on-secondary-container", val: "rgb(222, 225, 249)", on: "var(--md-sys-color-secondary-container)", desc: "Texto e iconografía optimizada para contenedores secundarios." },
+                    { name: "--md-sys-color-tertiary", val: "rgb(227, 186, 219)", on: "var(--md-sys-color-on-tertiary)", desc: "Acento complementario alternativo para equilibrar balances visuales o estados analíticos." },
+                    { name: "--md-sys-color-on-tertiary", val: "rgb(67, 39, 64)", on: "var(--md-sys-color-tertiary)", desc: "Elementos de texto o glifos posicionados sobre fondos terciarios." },
+                    { name: "--md-sys-color-tertiary-container", val: "rgb(91, 61, 87)", on: "var(--md-sys-color-on-tertiary-container)", desc: "Superficies contenedoras asociadas a la paleta terciaria." },
+                    { name: "--md-sys-color-on-tertiary-container", val: "rgb(255, 215, 246)", on: "var(--md-sys-color-tertiary-container)", desc: "Lectura interna segura dentro de un contenedor terciario." }
+                ]
+            },
+            {
+                category: "Superficies y Estructura Base",
+                tokens: [
+                    { name: "--md-sys-color-background", val: "rgb(18, 19, 24)", on: "var(--md-sys-color-on-background)", desc: "Lienzo de fondo absoluto de la interfaz sobre el cual corren los scrolls." },
+                    { name: "--md-sys-color-on-background", val: "rgb(227, 225, 233)", on: "var(--md-sys-color-background)", desc: "Color de texto primordial para todo el cuerpo base de la aplicación." },
+                    { name: "--md-sys-color-surface", val: "rgb(18, 19, 24)", on: "var(--md-sys-color-on-surface)", desc: "Lienzo estructural para componentes masivos o paneles laterales." },
+                    { name: "--md-sys-color-on-surface", val: "rgb(227, 225, 233)", on: "var(--md-sys-color-surface)", desc: "Tipografía genérica para títulos posicionados sobre superficies fijas." },
+                    { name: "--md-sys-color-surface-dim", val: "rgb(18, 19, 24)", on: "var(--md-sys-color-on-surface)", desc: "Atenuación extra de superficie para layouts que exigen mínima fatiga visual." },
+                    { name: "--md-sys-color-surface-bright", val: "rgb(56, 57, 63)", on: "var(--md-sys-color-on-surface)", desc: "Brillo controlado en superficies para paneles de control flotantes destacados." }
+                ]
+            },
+            {
+                category: "Contenedores de Elevación M3",
+                tokens: [
+                    { name: "--md-sys-color-surface-container-lowest", val: "rgb(13, 14, 19)", on: "var(--md-sys-color-on-surface)", desc: "Genera la máxima profundidad base. Utilizado habitualmente para barras fijas de navegación inferior." },
+                    { name: "--md-sys-color-surface-container-low", val: "rgb(26, 27, 33)", on: "var(--md-sys-color-on-surface)", desc: "El estándar recomendado por el equipo de diseño de Android para celdas y feeds de contenido dinámico." },
+                    { name: "--md-sys-color-surface-container", val: "rgb(30, 31, 37)", on: "var(--md-sys-color-on-surface)", desc: "Elevación central intermedia ideal para hojas modales, menús flotantes y diálogos de configuración." },
+                    { name: "--md-sys-color-surface-container-high", val: "rgb(41, 42, 47)", on: "var(--md-sys-color-on-surface)", desc: "Contenedor de realce para aislar configuraciones críticas o alertas informativas del usuario." },
+                    { name: "--md-sys-color-surface-container-highest", val: "rgb(52, 52, 58)", on: "var(--md-sys-color-on-surface)", desc: "Nivel superior de brillo en superficies para inputs activos o subpaneles informativos prioritarios." }
+                ]
+            },
+            {
+                category: "Bordes, Contornos y Variantes",
+                tokens: [
+                    { name: "--md-sys-color-surface-variant", val: "rgb(69, 70, 79)", on: "var(--md-sys-color-on-surface-variant)", desc: "Superficie de contraste alternativo para celdas complementarias estables." },
+                    { name: "--md-sys-color-on-surface-variant", val: "rgb(198, 198, 208)", on: "var(--md-sys-color-surface-variant)", desc: "Color ideal para textos atenuados de baja jerarquía: marcas de tiempo, subtítulos secundarios o placeholders." },
+                    { name: "--md-sys-color-outline", val: "rgb(143, 144, 154)", on: "var(--md-sys-color-surface)", desc: "Bordes principales de campos de formulario e indicadores de división de alta visibilidad." },
+                    { name: "--md-sys-color-outline-variant", val: "rgb(69, 70, 79)", on: "var(--md-sys-color-surface)", desc: "Líneas divisorias suaves ideales para no sobrecargar visualmente el diseño oscuro." }
+                ]
+            },
+            {
+                category: "Inversiones de Capas y Efectos",
+                tokens: [
+                    { name: "--md-sys-color-inverse-surface", val: "rgb(227, 225, 233)", on: "var(--md-sys-color-inverse-on-surface)", desc: "Lienzo claro invertido de emergencia. Exclusivo para generar alto contraste en alertas (Snackbars)." },
+                    { name: "--md-sys-color-inverse-on-surface", val: "rgb(47, 48, 54)", on: "var(--md-sys-color-inverse-surface)", desc: "Texto oscuro para ser legible encima de la superficie invertida." },
+                    { name: "--md-sys-color-inverse-primary", val: "rgb(76, 92, 146)", on: "var(--md-sys-color-inverse-surface)", desc: "Tono primario adaptado para funcionar sobre esquemas de color claros." },
+                    { name: "--md-sys-color-shadow", val: "rgb(0, 0, 0)", on: "transparent", desc: "Color neutro absoluto para cálculos físicos de proyección de sombras tridimensionales." },
+                    { name: "--md-sys-color-scrim", val: "rgb(0, 0, 0)", on: "transparent", desc: "Fondo de bloqueo opaco que oscurece el layout cuando un menú modal entra a la jerarquía." }
+                ]
+            },
+            {
+                category: "Gama Material Fixed Tokens",
+                tokens: [
+                    { name: "--md-sys-color-primary-fixed", val: "rgb(220, 225, 255)", on: "var(--md-sys-color-on-primary-fixed)", desc: "Tono estático inmune al cambio de tema global claro u oscuro." },
+                    { name: "--md-sys-color-on-primary-fixed", val: "rgb(2, 23, 75)", on: "var(--md-sys-color-primary-fixed)", desc: "Texto adaptado sobre el contenedor Primary Fixed." },
+                    { name: "--md-sys-color-primary-fixed-dim", val: "rgb(181, 196, 255)", on: "var(--md-sys-color-on-primary-fixed-variant)", desc: "Variante matizada de menor intensidad lumínica del primario fijo." },
+                    { name: "--md-sys-color-on-primary-fixed-variant", val: "rgb(52, 68, 121)", on: "var(--md-sys-color-primary-fixed-dim)", desc: "Texto complementario alternativo para la variante Fixed Dim." },
+                    { name: "--md-sys-color-secondary-fixed", val: "rgb(222, 225, 249)", on: "var(--md-sys-color-on-secondary-fixed)", desc: "Tono secundario estático inmune al cambio de tema del sistema." },
+                    { name: "--md-sys-color-on-secondary-fixed", val: "rgb(22, 27, 44)", on: "var(--md-sys-color-secondary-fixed)", desc: "Contenido tipográfico seguro sobre Secondary Fixed." },
+                    { name: "--md-sys-color-secondary-fixed-dim", val: "rgb(193, 197, 221)", on: "var(--md-sys-color-on-secondary-fixed-variant)", desc: "Variante suavizada del secundario fijo." },
+                    { name: "--md-sys-color-on-secondary-fixed-variant", val: "rgb(65, 70, 89)", on: "var(--md-sys-color-secondary-fixed-dim)", desc: "Texto complementario de lectura para secundario fijo." },
+                    { name: "--md-sys-color-tertiary-fixed", val: "rgb(255, 215, 246)", on: "var(--md-sys-color-on-tertiary-fixed)", desc: "Tono terciario estático independiente del tema del terminal." },
+                    { name: "--md-sys-color-on-tertiary-fixed", val: "rgb(44, 18, 42)", on: "var(--md-sys-color-tertiary-fixed)", desc: "Texto para el terciario estático." },
+                    { name: "--md-sys-color-tertiary-fixed-dim", val: "rgb(227, 186, 219)", on: "var(--md-sys-color-on-tertiary-fixed-variant)", desc: "Variante reducida del terciario estático." },
+                    { name: "--md-sys-color-on-tertiary-fixed-variant", val: "rgb(91, 61, 87)", on: "var(--md-sys-color-tertiary-fixed-dim)", desc: "Texto para la variante de realce del terciario estático." }
+                ]
+            },
+            {
+                category: "Alertas y Errores Críticos",
+                tokens: [
+                    { name: "--md-sys-color-error", val: "rgb(255, 180, 171)", on: "var(--md-sys-color-on-error)", desc: "Color destructivo de peligro inmediato. Aplicable en campos de texto inválidos, fallos graves o flujos de borrado." },
+                    { name: "--md-sys-color-on-error", val: "rgb(105, 0, 5)", on: "var(--md-sys-color-error)", desc: "Texto de alto contraste diseñado sobre los bloques del color Error." },
+                    { name: "--md-sys-color-error-container", val: "rgb(147, 0, 10)", on: "var(--md-sys-color-on-error-container)", desc: "Contenedor de fondo opaco para advertencias de fallos en celdas de configuración de sistema." },
+                    { name: "--md-sys-color-on-error-container", val: "rgb(255, 218, 214)", on: "var(--md-sys-color-error-container)", desc: "Lectura complementaria dentro de contenedores de fallos." }
+                ]
+            }
+        ];
+
+        // GENERACIÓN DEL CONTENIDO DEL HUB
+        const mainHub = document.getElementById('hub-content');
+        mainHub.innerHTML = PALETTE_DATA.map(sec => `
+            <div class="category-section">
+                <div class="category-title">${sec.category}</div>
+                <div class="tokens-list">
+                    ${sec.tokens.map(t => {
+                        const hex = rgbToHex(t.val);
+                        return `
+                            <div class="token-row" 
+                                 id="row-${t.name}"
+                                 data-hex="${hex}"
+                                 data-token="${t.name}"
+                                 data-desc="${t.desc}"
+                                 data-on="${t.on}">
+                                <div class="token-left">
+                                    <div class="color-preview" style="background-color: var(${t.name})"></div>
+                                    <div class="token-info">
+                                        <h4>${t.name.replace('--md-sys-color-', '')}</h4>
+                                        <p>${hex}</p>
+                                    </div>
+                                </div>
+                                <div class="row-action-indicator">
+                                    <i data-lucide="copy" style="width:16px; height:16px;"></i>
+                                </div>
+                            </div>
+                        `;
+                    }).join('')}
+                </div>
+            </div>
+        `).join('');
+
+        lucide.createIcons();
+
+        // MOTOR DE SELECCIÓN TÁCTIL SEGURO
+        let preventClick = false;
+
+        document.querySelectorAll('.token-row').forEach(row => {
+            row.addEventListener('click', () => {
+                if (preventClick) {
+                    preventClick = false;
+                    return;
+                }
+                const token = row.getAttribute('data-token');
+                const hex = row.getAttribute('data-hex');
+                const desc = row.getAttribute('data-desc');
+                const onColor = row.getAttribute('data-on');
+                openGuide(token, hex, desc, onColor);
+            });
+
+            row.addEventListener('contextmenu', (e) => {
+                e.preventDefault(); 
+                preventClick = true; 
+                
+                const hex = row.getAttribute('data-hex');
+                
+                navigator.clipboard.writeText(hex).then(() => {
+                    row.classList.add('copied-flash');
+                    showToast(`HEX ${hex} Copiado directamente`);
+                    if (navigator.vibrate) navigator.vibrate(30);
+                    
+                    setTimeout(() => {
+                        row.classList.remove('copied-flash');
+                    }, 300);
+                }).catch(err => console.error("Error en portapapeles:", err));
+            });
+        });
+
+        // CONTROL DEL BOTTOM SHEET INTERACTIVO
+        function openGuide(token, hex, desc, onColor) {
+            const row = document.getElementById(`row-${token}`);
+            const rawRGB = row.querySelector('.token-left .color-preview').style.backgroundColor;
+
+            document.getElementById('sheet-title').textContent = token.replace('--md-sys-color-', '');
+            document.getElementById('sheet-hex').textContent = hex;
+            document.getElementById('sheet-desc').textContent = desc;
+            document.getElementById('sheet-preview').style.backgroundColor = `var(${token})`;
+
+            // Sandbox del botón adaptado al estilo Cyber-Pill
+            const demoBtn = document.getElementById('live-demo-button');
+            demoBtn.style.backgroundColor = `var(${token})`;
+            demoBtn.style.color = onColor.startsWith('var') ? onColor : `var(${token})`;
+
+            document.getElementById('btn-copy-hex').setAttribute('onclick', `copyManual('${hex}')`);
+            document.getElementById('btn-copy-rgb').setAttribute('onclick', `copyManual('${rawRGB}')`);
+
+            document.getElementById('backdrop').classList.add('active');
+            document.getElementById('guide-sheet').classList.add('active');
+        }
+
+        function closeGuide() {
+            document.getElementById('backdrop').classList.remove('active');
+            document.getElementById('guide-sheet').classList.remove('active');
+        }
+
+        function copyManual(str) {
+            navigator.clipboard.writeText(str).then(() => {
+                showToast(`Copiado: ${str}`);
+                closeGuide();
+            });
+        }
+
+        function showToast(msg) {
+            const toast = document.getElementById('global-toast');
+            toast.textContent = msg;
+            toast.classList.add('show');
+            setTimeout(() => toast.classList.remove('show'), 1800);
+        }
+    </script>
+</body>
+</html>

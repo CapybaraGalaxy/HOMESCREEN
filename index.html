@@ -907,7 +907,7 @@
     </div>
 
     <div class="custom-modal" id="hiddenFolderModal">
-        <div class="modal-title"><i data-lucide="folder-lock" style="color: #FFD60A;"></i> Carpeta Oculta</div>
+        <div class="modal-title"><i data-lucide="folder-lock" style="color: #FFD60A;"></i> Carpetas Ocultas</div>
         <p class="modal-text">Estás a punto de acceder a una carpeta oculta.</p>
         <div style="margin-bottom: 25px; display: flex; justify-content: center;" id="hiddenAppArea"></div>
         <div class="modal-buttons">
@@ -968,10 +968,12 @@ const tools = [
             { name: 'Calculadora de dinero', icon: 'Coins', url: 'Apps/dinero.html' },
             { name: 'Calculadora tiempo de descarga', icon: 'Download', url: 'Apps/calculadora-descarga.html' },
             { name: 'Medidas', icon: 'Ruler', url: 'Apps/medidas.html' },
-            { name: 'Contador', icon: 'ListOrdered', url: 'Apps/counter.html' },
             { name: 'Visualizador de progreso', icon: 'Loader2', url: 'Apps/progreso.html' },
             { name: 'Cuenta atras', icon: 'clock-4', url: 'Apps/countdown.html' },
-            { name: 'Duolingo Tools', icon: 'BrickWallFire', url: 'Apps/duolingo.html' }
+            { name: 'Conversor de unidades', icon: 'Arrow-Left-Right', url: 'Apps/conversor.html' },
+            { name: 'Duolingo Tools', icon: 'Brick-Wall-Fire', url: 'Apps/duolingo.html' },
+            { name: 'Contador', icon: 'List-Ordered', url: 'Apps/counter.html' },
+            { name: 'Generador de código QR', icon: 'Qr-Code', url: 'Apps/qr.html' }
         ]
     },
     {
@@ -980,7 +982,8 @@ const tools = [
         folder: true,
         apps: [
             { name: 'Calendario [BETA]', icon: 'Calendar', url: 'Apps/calendario.html' },
-            { name: 'Kanban', icon: 'KanbanSquare', url: 'Apps/kanban.html' }
+            { name: 'Kanban', icon: 'Kanban-Square', url: 'Apps/kanban.html' },
+            { name: 'Notas', icon: 'Sticky-Notes', url: 'Apps/notas.html' }
         ]
     },
     {
@@ -989,15 +992,15 @@ const tools = [
         folder: true,
         apps: [
             { name: 'Typer', icon: 'Keyboard', url: 'Apps/typing.html' },
-            { name: 'Fancy Text', icon: 'LetterText', url: 'Apps/text.html' },
-            { name: 'Combos', icon: 'PencilSparkles', url: 'Apps/combos.html' },
             { name: 'Símbolos', icon: 'Images', url: 'Apps/symbols.html' },
             { name: 'Comparador de Texto', icon: 'split', url: 'Apps/comparador.html' },
             { name: 'Contador de Palabras', icon: 'binary', url: 'Apps/contador-palabras.html' },
             { name: 'Conversor a Base64', icon: 'upload-cloud', url: 'Apps/img-base64.html' },
             { name: 'Limpiador de textos', icon: 'sparkles', url: 'Apps/limpia-textos.html' },
             { name: 'Mayúsculas - minúsculas', icon: 'case-sensitive', url: 'Apps/mayus-minus.html' },
-            { name: 'Generador Lorem Ipsum', icon: 'Newspaper', url: 'Apps/lorem-ipsum.html' }
+            { name: 'Generador Lorem Ipsum', icon: 'Newspaper', url: 'Apps/lorem-ipsum.html' },
+            { name: 'Fancy Text', icon: 'Letter-Text', url: 'Apps/text.html' },
+            { name: 'Combos', icon: 'Pencil-Sparkles', url: 'Apps/combos.html' }
         ]
     },
     {
@@ -1015,7 +1018,7 @@ const tools = [
         folder: true,
         apps: [
             { name: 'CraftPalette', icon: 'Command', url: 'Apps/craftpalette.html' },
-            { name: 'Mod compatibility checker', icon: 'ListCheck', url: 'Apps/modchecker.html' }
+            { name: 'Mod compatibility checker', icon: 'List-Check', url: 'Apps/modchecker.html' }
         ]
     },
     {
@@ -1023,8 +1026,9 @@ const tools = [
         icon: 'Settings2',
         folder: true,
         apps: [
-            { name: 'App maker', icon: 'ColumnsSettings', url: 'Apps/appmaker.html' },
-            { name: 'Galería de iconos', icon: 'LayoutList', url: 'Apps/icontest.html' }
+            { name: 'Material You', icon: 'palette', url: 'Apps/material-you' },
+            { name: 'Galería de iconos', icon: 'Layout-List', url: 'Apps/icontest.html' },
+            { name: 'App maker', icon: 'Columns-Settings', url: 'Apps/appmaker.html' }
         ]
     }
 ];
@@ -1144,6 +1148,9 @@ const hiddenApp = { name: 'Neo GameCenter', icon: 'Gamepad2', url: 'games.html' 
                 </button>
                 <button class="settings-action-btn" id="showChangelogBtn" type="button">
                     <i data-lucide="history" style="width: 14px;"></i> Changelog
+                </button>
+                <button class="settings-action-btn" id="showChangelogBtn" type="button">
+                    <i data-lucide="Badge-Info" style="width: 14px;"></i> Información
                 </button>
             </div>
         </div>
@@ -1357,7 +1364,9 @@ const hiddenApp = { name: 'Neo GameCenter', icon: 'Gamepad2', url: 'games.html' 
 
             const versionInfo = await window.getVersionInfo?.();
             const version = versionInfo?.version || 'Sin versión';
-            const changes = Array.isArray(versionInfo?.changes) && versionInfo.changes.length ? versionInfo.changes : ['No hay cambios registrados.'];
+            const changes = Array.isArray(versionInfo?.changes) && versionInfo.changes.length ? versionInfo.changes : [
+                `No se han encontrado cambios. Puede ser un error, revisa tu conexión o intenta más tarde. Obtén la última versión disponible en <a href="https://github.com/CapybaraGalaxy/HOMESCREEN" target="_blank" rel="noopener noreferrer" style="color: #8ab4f8; text-decoration: none;">GITHUB</a>.`
+            ];
             const date = versionInfo?.date ? ` · ${versionInfo.date}` : '';
 
             changelogBox.innerHTML = `

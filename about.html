@@ -1,0 +1,738 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+    <title>Acerca del Homescreen</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@200;300;400;500;600;700&display=swap" rel="stylesheet">
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <style>
+        :root {
+            --bg: #000000;
+            --surface: #121212;
+            --surface-hover: #1c1c1e;
+            --glass: rgba(15, 15, 15, 0.4);
+            --glass-border: rgba(255, 255, 255, 0.08);
+            --blur-val: 30px;
+            --text-main: #FFFFFF;
+            --text-muted: #8E8E93;
+            --accent-danger: #FF453A;
+            --accent-success: #34C759;
+            --accent-glow: rgba(255, 255, 255, 0.15);
+            --bezier: cubic-bezier(0.16, 1, 0.3, 1);
+            --spring: cubic-bezier(0.34, 1.56, 0.64, 1);
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            user-select: none;
+        }
+
+        body {
+            background-color: var(--bg);
+            color: var(--text-main);
+            font-family: 'Outfit', sans-serif;
+            overflow-x: hidden;
+            overflow-y: auto;
+        }
+
+        #particles-bg {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: 1;
+            pointer-events: none;
+        }
+
+        .app-container {
+            position: relative;
+            z-index: 2;
+            max-width: 900px;
+            margin: 0 auto;
+            min-height: 100dvh;
+            padding: env(safe-area-inset-top) 24px calc(env(safe-area-inset-bottom) + 32px) 24px;
+            display: flex;
+            flex-direction: column;
+            gap: 40px;
+        }
+
+        /* Cabecera Tipo Startup */
+        header {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            text-align: center;
+            padding-top: 60px;
+            gap: 16px;
+            animation: fadeInHero 1.2s var(--bezier) forwards;
+        }
+
+        .app-icon-badge {
+            width: 72px;
+            height: 72px;
+            border-radius: 22px;
+            background: radial-gradient(circle at center, rgba(255,255,255,0.12) 0%, rgba(0,0,0,0) 80%);
+            border: 1px solid var(--glass-border);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5), inset 0 1px 2px rgba(255,255,255,0.2);
+            transition: transform 0.5s var(--spring);
+        }
+
+        .app-icon-badge:hover {
+            transform: scale(1.08) rotate(5deg);
+        }
+
+        h1 {
+            font-size: 2.5rem;
+            font-weight: 700;
+            letter-spacing: -0.03em;
+            background: linear-gradient(180deg, #FFFFFF 0%, #A2A2A7 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            line-height: 1.2;
+        }
+
+        /* Efecto de palabra cambiante */
+        .dynamic-title-container {
+            font-size: 1.4rem;
+            font-weight: 400;
+            color: var(--text-muted);
+            margin-top: 4px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 6px;
+            height: 30px;
+        }
+
+        .dynamic-word {
+            color: var(--text-main);
+            font-weight: 600;
+            border-right: 2px solid var(--text-main);
+            padding-right: 4px;
+            white-space: nowrap;
+            animation: blinkCursor 0.8s step-end infinite;
+        }
+
+        .version-tag {
+            font-variant-numeric: tabular-nums;
+            font-size: 0.85rem;
+            font-weight: 500;
+            padding: 4px 12px;
+            border-radius: 100px;
+            background: var(--glass);
+            border: 1px solid var(--glass-border);
+            color: var(--text-muted);
+            backdrop-filter: blur(var(--blur-val));
+            -webkit-backdrop-filter: blur(var(--blur-val));
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            margin-top: 8px;
+        }
+
+        .version-tag .pulse-dot {
+            width: 6px;
+            height: 6px;
+            background-color: var(--accent-success);
+            border-radius: 50%;
+            box-shadow: 0 0 8px var(--accent-success);
+            animation: pulseGlow 2s infinite ease-in-out;
+        }
+
+        /* Carrusel Infinito */
+        .carousel-container {
+            width: 100%;
+            overflow: hidden;
+            position: relative;
+            padding: 10px 0;
+            opacity: 0;
+            animation: scaleInCards 0.8s var(--bezier) 0.1s forwards;
+        }
+
+        .carousel-container::before,
+        .carousel-container::after {
+            content: "";
+            position: absolute;
+            top: 0;
+            width: 100px;
+            height: 100%;
+            z-index: 3;
+            pointer-events: none;
+        }
+
+        .carousel-container::before {
+            left: 0;
+            background: linear-gradient(to right, var(--bg) 0%, transparent 100%);
+        }
+
+        .carousel-container::after {
+            right: 0;
+            background: linear-gradient(to left, var(--bg) 0%, transparent 100%);
+        }
+
+        .carousel-track {
+            display: flex;
+            gap: 16px;
+            width: max-content;
+            animation: scrollInfinite 120s linear infinite;
+        }
+
+        .carousel-track:hover {
+            animation-play-state: paused;
+        }
+
+        .carousel-item {
+            background: var(--glass);
+            border: 1px solid var(--glass-border);
+            padding: 12px 20px;
+            border-radius: 100px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            color: var(--text-main);
+            font-size: 0.9rem;
+            font-weight: 500;
+            backdrop-filter: blur(var(--blur-val));
+            -webkit-backdrop-filter: blur(var(--blur-val));
+            transition: background 0.3s var(--bezier), border-color 0.3s var(--bezier);
+        }
+
+        .carousel-item:hover {
+            background: var(--surface-hover);
+            border-color: rgba(255,255,255,0.2);
+        }
+
+        /* Grid de Métricas */
+        .metrics-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 16px;
+            opacity: 0;
+            animation: scaleInCards 0.8s var(--bezier) 0.2s forwards;
+        }
+
+        .metric-card {
+            background: var(--glass);
+            border: 1px solid var(--glass-border);
+            border-radius: 16px;
+            padding: 20px;
+            text-align: center;
+            backdrop-filter: blur(var(--blur-val));
+            -webkit-backdrop-filter: blur(var(--blur-val));
+            transition: background 0.3s var(--bezier), transform 0.3s var(--bezier);
+        }
+
+        .metric-card:hover {
+            background: var(--surface-hover);
+            transform: translateY(-4px);
+        }
+
+        .metric-value {
+            font-size: 2rem;
+            font-weight: 600;
+            font-variant-numeric: tabular-nums;
+            margin-bottom: 4px;
+            letter-spacing: -0.02em;
+        }
+
+        .metric-label {
+            font-size: 0.8rem;
+            color: var(--text-muted);
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+        }
+
+        /* Secciones Principales */
+        .section-box {
+            background: var(--glass);
+            border: 1px solid var(--glass-border);
+            border-radius: 20px;
+            padding: 28px;
+            backdrop-filter: blur(var(--blur-val));
+            -webkit-backdrop-filter: blur(var(--blur-val));
+            opacity: 0;
+            animation: scaleInCards 0.8s var(--bezier) 0.4s forwards;
+        }
+
+        .section-title {
+            font-size: 1.2rem;
+            font-weight: 600;
+            margin-bottom: 20px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            letter-spacing: -0.01em;
+        }
+
+        /* Atajos y Características */
+        .features-list {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 16px;
+        }
+
+        .feature-item {
+            display: flex;
+            gap: 12px;
+            align-items: flex-start;
+        }
+
+        .feature-icon-wrapper {
+            color: var(--text-muted);
+            padding-top: 2px;
+        }
+
+        .feature-text h4 {
+            font-size: 0.95rem;
+            font-weight: 500;
+            margin-bottom: 2px;
+        }
+
+        .feature-text p {
+            font-size: 0.85rem;
+            color: var(--text-muted);
+            line-height: 1.4;
+        }
+
+        kbd {
+            background: var(--surface-hover);
+            border: 1px solid rgba(255,255,255,0.15);
+            border-radius: 5px;
+            padding: 1px 5px;
+            font-family: inherit;
+            font-size: 0.75rem;
+            font-weight: 600;
+            color: var(--text-main);
+        }
+
+        /* Registro de Cambios */
+        .changelog-flow {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+            max-height: 400px;
+            overflow-y: auto;
+            padding-right: 4px;
+            scrollbar-width: thin;
+            scrollbar-color: var(--glass-border) transparent;
+        }
+
+        .changelog-flow::-webkit-scrollbar {
+            width: 4px;
+        }
+        .changelog-flow::-webkit-scrollbar-thumb {
+            background: var(--glass-border);
+            border-radius: 10px;
+        }
+
+        .change-item {
+            padding: 12px 16px;
+            border-radius: 10px;
+            background: rgba(255,255,255,0.02);
+            border-left: 2px solid var(--glass-border);
+            font-size: 0.9rem;
+            line-height: 1.5;
+            color: #E5E5EA;
+            transition: border-color 0.3s var(--bezier), background 0.3s var(--bezier);
+        }
+
+        .change-item:hover {
+            border-left-color: var(--text-main);
+            background: rgba(255,255,255,0.04);
+        }
+
+        .change-header-separator {
+            font-weight: 600;
+            color: var(--text-main);
+            padding-top: 10px;
+            border-left: none !important;
+            background: transparent !important;
+            font-size: 1rem;
+        }
+
+        /* Botón de Retorno */
+        .back-action-container {
+            display: flex;
+            justify-content: center;
+            opacity: 0;
+            animation: scaleInCards 0.8s var(--bezier) 0.6s forwards;
+        }
+
+        .btn-back {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            background: var(--text-main);
+            color: var(--bg);
+            border: none;
+            padding: 12px 24px;
+            border-radius: 100px;
+            font-family: 'Outfit', sans-serif;
+            font-size: 0.95rem;
+            font-weight: 500;
+            cursor: pointer;
+            transition: transform 0.3s var(--spring), opacity 0.2s ease;
+        }
+
+        .btn-back:hover {
+            transform: scale(1.04);
+        }
+
+        .btn-back:active {
+            transform: scale(0.98);
+        }
+
+        /* Animaciones */
+        @keyframes fadeInHero {
+            from { opacity: 0; transform: translateY(30px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        @keyframes scaleInCards {
+            from { opacity: 0; transform: translateY(20px) scale(0.98); }
+            to { opacity: 1; transform: translateY(0) scale(1); }
+        }
+
+        @keyframes pulseGlow {
+            0%, 100% { opacity: 0.6; transform: scale(1); }
+            50% { opacity: 1; transform: scale(1.2); }
+        }
+
+        @keyframes blinkCursor {
+            from, to { border-color: transparent }
+            50% { border-color: var(--text-main); }
+        }
+
+        @keyframes scrollInfinite {
+            0% { transform: translateX(0); }
+            100% { transform: translateX(calc(-50% - 8px)); }
+        }
+
+        @media(max-width: 768px) {
+            .metrics-grid {
+                grid-template-columns: 1fr;
+            }
+            .features-list {
+                grid-template-columns: 1fr;
+            }
+            h1 {
+                font-size: 2rem;
+            }
+            .dynamic-title-container {
+                font-size: 1.1rem;
+            }
+        }
+    </style>
+</head>
+<body>
+
+    <canvas id="particles-bg"></canvas>
+
+    <div class="app-container" id="main-view">
+        <header>
+            <div class="app-icon-badge">
+                <i data-lucide="layers" size="28" style="color: var(--text-main);"></i>
+            </div>
+            <div>
+                <h1>Acerca del Homescreen</h1>
+                <div class="dynamic-title-container">
+                    Tu <i>homescreen</i> <span class="dynamic-word" id="changing-word"></span>
+                </div>
+                <div class="version-tag" id="version-badge">
+                    <span class="pulse-dot"></span>
+                    <span id="version-text">Cargando v...</span>
+                </div>
+            </div>
+        </header>
+
+        <div class="carousel-container">
+            <div class="carousel-track" id="tools-carousel">
+                </div>
+        </div>
+
+        <section class="metrics-grid">
+            <div class="metric-card">
+                <div class="metric-value">100%</div>
+                <div class="metric-label">Local & Offline</div>
+            </div>
+            <div class="metric-card">
+                <div class="metric-value" style="font-size:1.8rem; padding-top:4px;">PWA</div>
+                <div class="metric-label">Instalable Full</div>
+            </div>
+            <div class="metric-card">
+                <div class="metric-value">0%</div>
+                <div class="metric-label">Rastreadores</div>
+            </div>
+        </section>
+
+        <section class="section-box">
+            <h3 class="section-title">
+                <i data-lucide="zap" size="18"></i> Filosofía & Capacidades
+            </h3>
+            <div class="features-list">
+                <div class="feature-item">
+                    <div class="feature-icon-wrapper"><i data-lucide="wifi-off" size="18"></i></div>
+                    <div class="feature-text">
+                        <h4>Persistencia & Caché</h4>
+                        <p>Diseñado para guardarse en la caché del navegador. Puedes utilizar el homescreen completamente offline y descargar los archivos de manera nativa. Una vez guardado en caché, el homescreen funcionará sin conexión. y podrás acceder a él en cualquier momento. Cuando te reconectes, el contenido se actualizará automáticamente.</p>
+                    </div>
+                </div>
+                <div class="feature-item">
+                    <div class="feature-icon-wrapper"><i data-lucide="terminal" size="18"></i></div>
+                    <div class="feature-text">
+                        <h4>Buscador Inteligente</h4>
+                        <p>Accede de inmediato desde cualquier pantalla principal mediante la combinación <kbd>Ctrl</kbd> + <kbd>K</kbd>. Puedes realizar operaciones matemáticas simples directamente desde la barra de búsqueda. Solo tienes que escribir la expresión matemática.</p>
+                    </div>
+                </div>
+                <div class="feature-item">
+                    <div class="feature-icon-wrapper"><i data-lucide="sliders" size="18"></i></div>
+                    <div class="feature-text">
+                        <h4>Personalización extrema</h4>
+                        <p>Optimizado para teléfonos, tablets y ordenadores. Puedes personalizar cada aspecto, desde el layout, hasta el blur o diferentes funciones como la carpeta de favoritos. Soporta extensiones de fondo transparente como <code>ZEN INTERNET</code> (solo tienes que desactivar la opción de fondo). Además puedes desactivar totalmente el blur y los efectos visuales del fondo para el mejor rendimiento en dispositivos lentos o móviles.</p>
+                    </div>
+                </div>
+                <div class="feature-item">
+                    <div class="feature-icon-wrapper"><i data-lucide="shield-alert" size="18"></i></div>
+                    <div class="feature-text">
+                        <h4>Safe-Engine Interno</h4>
+                        <p>El homescreen cuenta con un motor de seguridad que bloque la app si algo falla. Además te indica que parte falló para que puedas reportarla.</p>
+                    </div>
+                </div>
+                <div class="feature-item">
+                    <div class="feature-icon-wrapper"><i data-lucide="smile" size="18"></i></div>
+                    <div class="feature-text">
+                        <h4>Origen Personal</h4>
+                        <p>Construí esta app originalmente para uso propio, pero me alegra saber que te es útil :). Puedes sugerir mejoras o reportar problemas a través de GitHub.</p>
+                    </div>
+                </div>
+                <div class="feature-item">
+                    <div class="feature-icon-wrapper"><i data-lucide="eye-off" size="18"></i></div>
+                    <div class="feature-text">
+                        <h4>Privacidad Absoluta</h4>
+                        <p>No se recopila ningún tipo de dato personal, analítico ni telemétrico. Todo el procesamiento y almacenamiento ocurre estrictamente dentro de tu dispositivo.</p>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <section class="section-box">
+            <h3 class="section-title" style="justify-content: space-between;">
+                <span style="display:flex; align-items:center; gap:10px;">
+                    <i data-lucide="history" size="18"></i> Historial de Cambios
+                </span>
+                <span id="version-date" style="font-size:0.8rem; color:var(--text-muted); font-weight:400;">---</span>
+            </h3>
+            <div class="changelog-flow" id="changelog-container">
+                <div style="color:var(--text-muted); font-size:0.9rem;">Buscando actualizaciones críticas de version.json...</div>
+            </div>
+        </section>
+
+        <div class="back-action-container">
+            <button class="btn-back" onclick="window.location.href='index.html'">
+                <i data-lucide="Arrow-Right-Circle" size="16"></i>
+                Ir al Homescreen
+            </button>
+        </div>
+    </div>
+
+    <script>
+// Array de herramientas con sus iconos oficiales de Lucide
+const toolsData = [
+    // Utilidades
+    { name: "Calculadora de dinero", icon: "coins" },
+    { name: "Calculadora tiempo de descarga", icon: "download" },
+    { name: "Medidas", icon: "ruler" },
+    { name: "Visualizador de progreso", icon: "loader" },
+    { name: "Cuenta atrás", icon: "timer" },
+    { name: "Conversor de unidades", icon: "arrow-left-right" },
+    { name: "Duolingo Tools", icon: "flame" },
+    { name: "Contador", icon: "plus-circle" },
+    { name: "Generador de código QR", icon: "qr-code" },
+
+    // Productividad
+    { name: "Calendario [BETA]", icon: "calendar" },
+    { name: "Kanban", icon: "kanban" },
+    { name: "Notas", icon: "file-text" },
+
+    // Texto y símbolos
+    { name: "Typer", icon: "keyboard" },
+    { name: "Símbolos", icon: "image" },
+    { name: "Comparador de Texto", icon: "columns" },
+    { name: "Contador de Palabras", icon: "binary" },
+    { name: "Conversor a Base64", icon: "upload-cloud" },
+    { name: "Limpiador de textos", icon: "sparkles" },
+    { name: "Mayúsculas - minúsculas", icon: "case-sensitive" },
+    { name: "Generador Lorem Ipsum", icon: "newspaper" },
+    { name: "Fancy Text", icon: "type" },
+    { name: "Combos", icon: "wand" },
+
+    // Entretenimiento y Randomizers
+    { name: "Ruleta aleatoria", icon: "help-circle" },
+    { name: "Creador de memes", icon: "image" },
+
+    // MC
+    { name: "CraftPalette", icon: "palette" },
+    { name: "Mod compatibility checker", icon: "shield-check" },
+
+    // Sistema
+    { name: "Material You", icon: "palette" },
+    { name: "Galería de iconos", icon: "eye" },
+    { name: "App maker", icon: "cpu" },
+
+    // Aplicación oculta fusionada
+    { name: "Neo GameCenter", icon: "gamepad-2" }
+];
+
+        // Inicializar Carrusel Infinito
+        function buildCarousel() {
+            const track = document.getElementById('tools-carousel');
+            // Duplicamos el set completo para simular el loop infinito transparente
+            const doubleTools = [...toolsData, ...toolsData];
+            
+            track.innerHTML = doubleTools.map(tool => `
+                <div class="carousel-item">
+                    <i data-lucide="${tool.icon}" size="16"></i>
+                    <span>${tool.name}</span>
+                </div>
+            `).join('');
+        }
+
+        // Lógica de Títulos Dinámicos de Startup (Efecto máquina de escribir)
+        const phrases = ["para productividad.", "perfecto.", "para el día a día.", "para crear.", "para diseñar.", "para organizar.", "para desarrollar.", "para automatizar.", "para optimizar.", "para descubrir.","moderno.","perfecto."];
+        let phraseIdx = 0;
+        let charIdx = 0;
+        let isDeleting = false;
+        const targetEl = document.getElementById('changing-word');
+
+        function typeEffect() {
+            const currentPhrase = phrases[phraseIdx];
+            
+            if (isDeleting) {
+                targetEl.textContent = currentPhrase.substring(0, charIdx - 1);
+                charIdx--;
+            } else {
+                targetEl.textContent = currentPhrase.substring(0, charIdx + 1);
+                charIdx++;
+            }
+
+            let typeSpeed = isDeleting ? 40 : 80;
+
+            if (!isDeleting && charIdx === currentPhrase.length) {
+                typeSpeed = 1800; // Pausa al completar la palabra
+                isDeleting = true;
+            } else if (isDeleting && charIdx === 0) {
+                isDeleting = false;
+                phraseIdx = (phraseIdx + 1) % phrases.length;
+                typeSpeed = 400; // Pausa corta antes de escribir la siguiente
+            }
+
+            setTimeout(typeEffect, typeSpeed);
+        }
+
+        // Canvas de Partículas
+        const canvas = document.getElementById('particles-bg');
+        const ctx = canvas.getContext('2d');
+        let particles = [];
+
+        function resizeCanvas() {
+            canvas.width = window.innerWidth;
+            canvas.height = window.innerHeight;
+        }
+        window.addEventListener('resize', resizeCanvas);
+        resizeCanvas();
+
+        class Particle {
+            constructor() { this.reset(); }
+            reset() {
+                this.x = Math.random() * canvas.width;
+                this.y = Math.random() * canvas.height;
+                this.size = Math.random() * 1.5 + 0.5;
+                this.speedY = Math.random() * -0.3 - 0.1;
+                this.opacity = Math.random() * 0.4 + 0.1;
+            }
+            update() {
+                this.y += this.speedY;
+                if (this.y < 0) this.reset();
+            }
+            draw() {
+                ctx.fillStyle = `rgba(255, 255, 255, ${this.opacity})`;
+                ctx.beginPath();
+                ctx.arc(this.x, this.y, this.size, 0, Math.PI * 2);
+                ctx.fill();
+            }
+        }
+
+        function initParticles() {
+            particles = [];
+            const count = Math.min(Math.floor(window.innerWidth / 15), 60);
+            for(let i=0; i<count; i++) particles.push(new Particle());
+        }
+        initParticles();
+
+        function animateParticles() {
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+            particles.forEach(p => { p.update(); p.draw(); });
+            requestAnimationFrame(animateParticles);
+        }
+        animateParticles();
+
+        // Obtención dinámica del version.json
+        async function fetchChangelog() {
+            const container = document.getElementById('changelog-container');
+            const versionText = document.getElementById('version-text');
+            const versionDate = document.getElementById('version-date');
+
+            const isLocalEnv = window.location.protocol === 'file:' || window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1';
+            const fallbackMessage = `No se han encontrado cambios. Puede ser un error, revisa tu conexión o intenta más tarde. Obtén la última versión disponible en <a href="https://github.com/CapybaraGalaxy/HOMESCREEN" target="_blank" rel="noopener noreferrer" style="color: #8ab4f8; text-decoration: none;">GITHUB</a>.`;
+
+            if (isLocalEnv) {
+                versionText.textContent = 'Versión local';
+                versionDate.textContent = 'Modo local';
+                container.innerHTML = `<div style="color:var(--text-muted); font-size:0.9rem; line-height:1.6;">${fallbackMessage}</div>`;
+                return;
+            }
+
+            try {
+                const response = await fetch('./version.json');
+                if (!response.ok) throw new Error();
+                const data = await response.json();
+                
+                versionText.textContent = `v${data.version}`;
+                versionDate.textContent = data.date;
+
+                container.innerHTML = '';
+                data.changes.forEach(change => {
+                    const div = document.createElement('div');
+                    if (change.startsWith('✦') || change.startsWith('🚀') || change.includes('Novedades de')) {
+                        div.className = 'change-item change-header-separator';
+                    } else {
+                        div.className = 'change-item';
+                    }
+                    div.textContent = change;
+                    container.appendChild(div);
+                });
+            } catch (error) {
+                versionText.textContent = 'Versión local';
+                versionDate.textContent = 'Modo local';
+                container.innerHTML = `<div style="color:var(--text-muted); font-size:0.9rem; line-height:1.6;">${fallbackMessage}</div>`;
+            }
+        }
+
+        window.onload = () => {
+            buildCarousel();
+            fetchChangelog();
+            setTimeout(typeEffect, 600);
+            lucide.createIcons();
+        };
+    </script>
+</body>
+</html>
