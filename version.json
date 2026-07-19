@@ -1,7 +1,9 @@
 {
-  "version": "1.1",
-  "date": "18 de Julio 2026",
+  "version": "1.1.1",
+  "date": "19 de Julio 2026",
   "changes": [
+    "Se corrigió un fallo visual al seleccionar apps en teléfonos.",
+    "✦ Novedades de 1.1",
     "Se añadió la app Conversor de Unidades, que permite convertir entre diferentes unidades de medida de manera rápida y sencilla.",
     "Se añadió la app QR, que te permite generar códigos QR personalizados para compartir información de manera rápida y eficiente.",
     "Se añadió la app GlassNotes en BETA, que te permite tomar notas rápidas y organizarlas de manera visual y atractiva.",

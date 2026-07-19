@@ -150,7 +150,7 @@
             transition: font-size 0.6s var(--bezier), letter-spacing 0.6s var(--bezier), color 0.6s var(--bezier), opacity 0.3s ease;
         }
 
-        /* ==========================================
+/* ==========================================
            3. CONTENEDORES Y TARJETAS DE APLICACIONES
            ========================================== */
         
@@ -245,7 +245,7 @@
             overflow: hidden;
         }
 
-        /* Tarjeta base de application */
+        /* Tarjeta base de aplicación */
         .tool-card {
             display: flex;
             align-items: center;
@@ -258,14 +258,36 @@
             border-radius: 50px;
             text-decoration: none;
             color: var(--text-main);
-            transition: all 0.4s var(--bezier);
+            transition: all 0.3s var(--bezier); /* Reducido a 0.3s para mayor respuesta táctil */
             animation: fadeInItem 0.6s var(--bezier) both;
             flex-shrink: 0; 
             cursor: pointer;
             position: relative;
         }
-        .tool-card:hover { background: #fff; color: #000; transform: translateY(-4px); }
-        .tool-card:active { transform: scale(0.96); }
+
+        /* EFECTOS SÓLO PARA DISPOSITIVOS CON RATÓN (PC) */
+        @media (hover: hover) {
+            .tool-card:hover { 
+                background: #fff; 
+                color: #000; 
+                transform: translateY(-4px); 
+            }
+            .tool-card:hover .star-btn {
+                color: rgba(0, 0, 0, 0.35) !important;
+            }
+            .tool-card:hover .star-btn.active {
+                color: #E6A100 !important;
+            }
+            .tool-card:hover .star-btn:hover {
+                color: #CC8E00 !important;
+            }
+        }
+
+        /* EFECTO DE PULSACIÓN EN MÓVILES (O PC AL HACER CLIC) */
+        .tool-card:active { 
+            transform: scale(0.95); 
+            background: rgba(255, 255, 255, 0.15); /* Feedback sutil al presionar en móvil sin romper el diseño */
+        }
         
         .tool-card i, .tool-card svg { 
             display: inline-flex;
@@ -302,17 +324,7 @@
         .tool-card .star-btn.active {
             color: #FFD60A !important;
         }
-        /* Prevención de conflicto de contraste al pasar el ratón (tarjeta se vuelve blanca) */
-        .tool-card:hover .star-btn {
-            color: rgba(0, 0, 0, 0.35) !important;
-        }
-        .tool-card:hover .star-btn.active {
-            color: #E6A100 !important; /* Dorado oscuro visible sobre blanco */
-        }
-        .tool-card:hover .star-btn:hover {
-            color: #CC8E00 !important;
-        }
-
+        
         /* Error de Sintaxis (Mapeado visualmente) */
         .error-card {
             display: flex;
@@ -903,7 +915,7 @@
         <div><strong>VERSIÓN LOCAL</strong> <span>· Ir a web</span></div>
     </a>
 
-    <div class="version-tag" id="versionTag">1.1</div>
+    <div class="version-tag" id="versionTag">1.1.1</div>
 
     <div class="ui-layer">
         <header class="header">
