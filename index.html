@@ -14,16 +14,15 @@
            1. VARIABLES GLOBALES Y CONFIGURACIÓN BASE
            ========================================== */
         :root {
-            --bg: #121212; /* Color de fondo por defecto (Negro claro) */
+            --bg: #121212; 
             --text-main: #ffffff;
             --text-muted: #888888;
             --glass: rgba(15, 15, 15, 0.281);
             --glass-border: rgba(255, 255, 255, 0.1);
             --bezier: cubic-bezier(0.16, 1, 0.3, 1);
-            --blur-val: 30px; /* Nivel del efecto esmerilado (Glassmorphism) */
+            --blur-val: 30px; 
         }
 
-        /* Desactivación de Blur (Mejora de rendimiento para dispositivos lentos) */
         body.no-blur { --blur-val: 0px; }
         body.no-blur .overlay, 
         body.no-blur .search-panel, 
@@ -53,7 +52,6 @@
             transition: background-color 0.4s var(--bezier);
         }
 
-        /* Canvas para el fondo de partículas */
         #bgCanvas {
             position: fixed;
             top: 0; left: 0;
@@ -65,11 +63,6 @@
         }
         body.bg-active #bgCanvas { opacity: 0.6; }
 
-        /* ==========================================
-           2. COMPONENTES DE INTERFAZ (CHIPS Y TAGS)
-           ========================================== */
-        
-        /* Chip indicador de Versión Local */
         .local-chip {
             position: fixed;
             top: 25px;
@@ -97,7 +90,6 @@
         .local-chip strong { font-weight: 500; }
         .local-chip span { color: var(--text-muted); }
 
-        /* Etiqueta de versión (Esquina inferior izquierda) */
         .version-tag {
             position: fixed;
             bottom: 15px;
@@ -121,7 +113,6 @@
             width: 100%;
         }
 
-        /* Cabecera con Reloj y Fecha */
         .header {
             margin-top: 10vh;
             margin-bottom: 5vh;
@@ -150,11 +141,9 @@
             transition: font-size 0.6s var(--bezier), letter-spacing 0.6s var(--bezier), color 0.6s var(--bezier), opacity 0.3s ease;
         }
 
-/* ==========================================
+        /* ==========================================
            3. CONTENEDORES Y TARJETAS DE APLICACIONES
            ========================================== */
-        
-        /* Contenedor con scroll controlado contra desbordamientos */
         .scroll-wrapper {
             width: 100%;
             max-height: 52vh; 
@@ -164,21 +153,11 @@
             scrollbar-color: rgba(255, 255, 255, 0.12) transparent;
             transition: opacity 0.4s var(--bezier), transform 0.4s var(--bezier);
         }
-        .scroll-wrapper::-webkit-scrollbar {
-            width: 6px;
-        }
-        .scroll-wrapper::-webkit-scrollbar-track {
-            background: transparent;
-        }
-        .scroll-wrapper::-webkit-scrollbar-thumb {
-            background: rgba(255, 255, 255, 0.12);
-            border-radius: 10px;
-        }
-        .scroll-wrapper::-webkit-scrollbar-thumb:hover {
-            background: rgba(255, 255, 255, 0.25);
-        }
+        .scroll-wrapper::-webkit-scrollbar { width: 6px; }
+        .scroll-wrapper::-webkit-scrollbar-track { background: transparent; }
+        .scroll-wrapper::-webkit-scrollbar-thumb { background: rgba(255, 255, 255, 0.12); border-radius: 10px; }
+        .scroll-wrapper::-webkit-scrollbar-thumb:hover { background: rgba(255, 255, 255, 0.25); }
 
-        /* Contenedor por defecto de aplicaciones (Modo Pill / Burbuja) */
         .tools-container {
             width: 100%;
             max-width: 800px;
@@ -191,7 +170,6 @@
             transition: transform 0.5s var(--bezier);
         }
         
-        /* MODO LISTA */
         .tools-container.list-mode { 
             flex-direction: column; 
             align-items: center; 
@@ -207,7 +185,6 @@
             padding: 14px 24px;
         }
 
-        /* MODO CUADRÍCULA */
         .tools-container.grid-mode {
             display: grid;
             grid-template-columns: repeat(auto-fill, minmax(110px, 1fr));
@@ -245,7 +222,6 @@
             overflow: hidden;
         }
 
-        /* Tarjeta base de aplicación */
         .tool-card {
             display: flex;
             align-items: center;
@@ -258,14 +234,14 @@
             border-radius: 50px;
             text-decoration: none;
             color: var(--text-main);
-            transition: all 0.3s var(--bezier); /* Reducido a 0.3s para mayor respuesta táctil */
+            transition: all 0.3s var(--bezier); 
             animation: fadeInItem 0.6s var(--bezier) both;
             flex-shrink: 0; 
             cursor: pointer;
             position: relative;
         }
 
-        /* EFECTOS SÓLO PARA DISPOSITIVOS CON RATÓN (PC) */
+        /* EFECTOS COHESIVOS EXCLUSIVOS PARA DISPOSITIVOS CON RATÓN (PC) */
         @media (hover: hover) {
             .tool-card:hover { 
                 background: #fff; 
@@ -283,10 +259,10 @@
             }
         }
 
-        /* EFECTO DE PULSACIÓN EN MÓVILES (O PC AL HACER CLIC) */
+        /* EFECTO DE TOQUE EN MÓVILES (EVITA HOVER PEGAJOSO) */
         .tool-card:active { 
             transform: scale(0.95); 
-            background: rgba(255, 255, 255, 0.15); /* Feedback sutil al presionar en móvil sin romper el diseño */
+            background: rgba(255, 255, 255, 0.15); 
         }
         
         .tool-card i, .tool-card svg { 
@@ -324,8 +300,7 @@
         .tool-card .star-btn.active {
             color: #FFD60A !important;
         }
-        
-        /* Error de Sintaxis (Mapeado visualmente) */
+
         .error-card {
             display: flex;
             flex-direction: column;
@@ -345,9 +320,6 @@
         .error-card span { font-size: 0.95rem; font-weight: 400; line-height: 1.4; }
         .error-card small { color: rgba(255, 255, 255, 0.6); font-family: monospace; font-size: 0.8rem; margin-top: 5px; display: block; background: rgba(0,0,0,0.2); padding: 5px 10px; border-radius: 6px; }
 
-        /* ==========================================
-           5. CAJA DE BÚSQUEDA FLOTANTE
-           ========================================== */
         .search-wrapper {
             position: fixed;
             bottom: 40px;
@@ -391,12 +363,8 @@
         .result-item:hover, .result-item.keyboard-active { background: rgba(255,255,255,0.08); transform: translateX(8px); }
         .result-item.keyboard-active { background: rgba(255,255,255,0.15) !important; }
 
-        /* Botón de Ajustes (Engranaje) */
         .settings-btn { position: fixed; bottom: 25px; right: 25px; background: var(--glass); border: 1px solid var(--glass-border); width: 45px; height: 45px; border-radius: 50%; display: flex; align-items: center; justify-content: center; cursor: pointer; z-index: 110; transition: all 0.4s var(--bezier); }
         
-        /* ==========================================
-           6. PANEL DE CONFIGURACIÓN LATERAL
-           ========================================== */
         .settings-panel { 
             position: fixed; 
             bottom: 85px; 
@@ -419,13 +387,8 @@
             flex-direction: column;
             gap: 18px;
         }
-        .settings-panel::-webkit-scrollbar {
-            width: 4px;
-        }
-        .settings-panel::-webkit-scrollbar-thumb {
-            background: rgba(255, 255, 255, 0.15);
-            border-radius: 4px;
-        }
+        .settings-panel::-webkit-scrollbar { width: 4px; }
+        .settings-panel::-webkit-scrollbar-thumb { background: rgba(255, 255, 255, 0.15); border-radius: 4px; }
         .settings-panel.active { transform: scale(1) translateY(0); opacity: 1; pointer-events: auto; }
         
         .settings-header {
@@ -458,35 +421,17 @@
             border: 1px solid rgba(255, 255, 255, 0.04);
             transition: background 0.3s;
         }
-        .setting-item-row:hover {
-            background: rgba(255, 255, 255, 0.05);
-        }
+        .setting-item-row:hover { background: rgba(255, 255, 255, 0.05); }
         .setting-item-meta {
             display: flex;
             align-items: center;
             gap: 12px;
             flex: 1;
         }
-        .setting-item-meta i, .setting-item-meta svg {
-            width: 18px;
-            height: 18px;
-            color: var(--text-muted);
-            flex-shrink: 0;
-        }
-        .setting-label {
-            font-size: 0.9rem;
-            font-weight: 400;
-            display: block;
-            color: var(--text-main);
-        }
-        .setting-desc {
-            font-size: 0.72rem;
-            color: var(--text-muted);
-            display: block;
-            margin-top: 2px;
-        }
+        .setting-item-meta i, .setting-item-meta svg { width: 18px; height: 18px; color: var(--text-muted); flex-shrink: 0; }
+        .setting-label { font-size: 0.9rem; font-weight: 400; display: block; color: var(--text-main); }
+        .setting-desc { font-size: 0.72rem; color: var(--text-muted); display: block; margin-top: 2px; }
 
-        /* Selector Segmentado de Layout (Pill, Lista, Grid) */
         .layout-selector {
             display: grid;
             grid-template-columns: repeat(3, 1fr);
@@ -509,16 +454,9 @@
             transition: all 0.3s var(--bezier);
             font-family: 'Outfit', sans-serif;
         }
-        .layout-opt i, .layout-opt svg {
-            width: 16px;
-            height: 16px;
-        }
-        .layout-opt span {
-            font-size: 0.78rem;
-        }
-        .layout-opt:hover {
-            color: var(--text-main);
-        }
+        .layout-opt i, .layout-opt svg { width: 16px; height: 16px; }
+        .layout-opt span { font-size: 0.78rem; }
+        .layout-opt:hover { color: var(--text-main); }
         .layout-opt.active {
             background: rgba(255, 255, 255, 0.15);
             color: var(--text-main);
@@ -549,10 +487,7 @@
         }
         .settings-action-btn:hover { background: rgba(255,255,255,0.12); transform: translateY(-1px); }
         .settings-action-btn:disabled { opacity: 0.6; cursor: wait; }
-        .settings-action-btn .spinner {
-            display: inline-flex;
-            animation: spin 0.9s linear infinite;
-        }
+        .settings-action-btn .spinner { display: inline-flex; animation: spin 0.9s linear infinite; }
         .settings-info {
             padding: 10px 12px;
             border-radius: 14px;
@@ -573,10 +508,10 @@
         #homescreenToast {
             position: fixed;
             left: 50%;
-            bottom: 105px; /* Elevado para no colisionar con elementos inferiores */
+            bottom: 105px; 
             transform: translateX(-50%) translateY(12px);
-            background: rgba(255, 255, 255, 0.95); /* Fondo claro plano semi-transparente estilo Android */
-            color: #121212; /* Texto oscuro de gran legibilidad */
+            background: rgba(255, 255, 255, 0.95); 
+            color: #121212; 
             padding: 12px 24px;
             border-radius: 999px;
             z-index: 9999;
@@ -586,13 +521,13 @@
             box-shadow: 0 10px 30px rgba(0,0,0,0.3);
             font-size: 0.9rem;
             font-weight: 500;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
         }
-        #homescreenToast.show {
-            opacity: 1;
-            transform: translateX(-50%) translateY(0);
-        }
+        #homescreenToast i, #homescreenToast svg { width: 16px; height: 16px; }
+        #homescreenToast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
 
-        /* Switches estilizados */
         .switch { width: 40px; height: 22px; background: #333; border-radius: 20px; position: relative; cursor: pointer; transition: 0.3s; flex-shrink: 0; }
         .switch::after { content:''; position:absolute; width:18px; height:18px; background:#fff; border-radius:50%; top:2px; left:2px; transition:0.3s var(--bezier); }
         .switch.on { background: #34C759; }
@@ -601,9 +536,6 @@
         .overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.6); backdrop-filter: blur(15px); opacity: 0; pointer-events: none; transition: 0.5s; z-index: 90; }
         .overlay.active { opacity: 1; pointer-events: auto; }
 
-        /* ==========================================
-           8. CONFIGURACIONES DE MODO ZEN
-           ========================================== */
         .exit-zen-btn {
             position: fixed;
             bottom: 25px;
@@ -629,59 +561,18 @@
         body.zen-mode .settings-btn,
         body.zen-mode .settings-panel,
         body.zen-mode .version-tag,
-        body.zen-mode .local-chip {
-            opacity: 0 !important;
-            pointer-events: none !important;
-        }
-        
-        body.zen-mode .scroll-wrapper {
-            transform: translateY(20px);
-        }
-
-        body.zen-mode .header {
-            transform: translateY(18vh); 
-        }
-        body.zen-mode .clock {
-            font-size: 8.5rem;
-            letter-spacing: -4px;
-        }
-        body.zen-mode .date {
-            font-size: 1rem;
-            letter-spacing: 6px;
-            color: rgba(255, 255, 255, 0.7);
-        }
-
-        body.zen-mode .search-panel {
-            width: 110px; 
-            height: 38px; 
-            border-radius: 19px;
-        }
-
-        body.zen-mode .search-header {
-            min-height: 38px;
-            padding: 0 12px;
-        }
-
-        body.zen-mode .chip-placeholder span {
-            font-size: 0.8rem;
-        }
-        body.zen-mode .chip-placeholder small {
-            display: none; 
-        }
-
-        body.zen-mode .exit-zen-btn {
-            opacity: 1;
-            pointer-events: auto;
-            transform: scale(1);
-        }
-
-        body.zen-mode .search-panel.expanded {
-            width: 90%; max-width: 500px; height: 400px;
-            border-radius: 28px; transform: translateY(-15vh);
-        }
-        body.zen-mode .search-panel.expanded .search-header {
-            min-height: 48px;
-        }
+        body.zen-mode .local-chip { opacity: 0 !important; pointer-events: none !important; }
+        body.zen-mode .scroll-wrapper { transform: translateY(20px); }
+        body.zen-mode .header { transform: translateY(18vh); }
+        body.zen-mode .clock { font-size: 8.5rem; letter-spacing: -4px; }
+        body.zen-mode .date { font-size: 1rem; letter-spacing: 6px; color: rgba(255, 255, 255, 0.7); }
+        body.zen-mode .search-panel { width: 110px; height: 38px; border-radius: 19px; }
+        body.zen-mode .search-header { min-height: 38px; padding: 0 12px; }
+        body.zen-mode .chip-placeholder span { font-size: 0.8rem; }
+        body.zen-mode .chip-placeholder small { display: none; }
+        body.zen-mode .exit-zen-btn { opacity: 1; pointer-events: auto; transform: scale(1); }
+        body.zen-mode .search-panel.expanded { width: 90%; max-width: 500px; height: 400px; border-radius: 28px; transform: translateY(-15vh); }
+        body.zen-mode .search-panel.expanded .search-header { min-height: 48px; }
 
         /* ==========================================
            9. MODALES ADAPTABLES (SISTEMA EVOLUCIONADO)
@@ -691,7 +582,7 @@
             top: 50%; left: 50%;
             transform: translate(-50%, -50%) scale(0.9);
             width: 90%; 
-            max-width: 450px; /* Reducido a 450px de la v0.9.9.20 */
+            max-width: 450px; 
             max-height: 85vh; 
             background: rgba(20, 20, 20, 0.85);
             backdrop-filter: blur(var(--blur-val));
@@ -707,20 +598,11 @@
             flex-direction: column;
         }
         
-        /* Expansión dinámica del modal si está la vista de carpeta en cuadrícula */
-        #folderModal.grid-active {
-            max-width: 600px;
-        }
-
-        .custom-modal.active {
-            transform: translate(-50%, -50%) scale(1);
-            opacity: 1;
-            pointer-events: auto;
-        }
+        #folderModal.grid-active { max-width: 600px; }
+        .custom-modal.active { transform: translate(-50%, -50%) scale(1); opacity: 1; pointer-events: auto; }
         .modal-title { font-size: 1.3rem; font-weight: 500; margin-bottom: 15px; display: flex; align-items: center; justify-content: center; gap: 10px; flex-shrink: 0; }
         .modal-text { font-size: 0.95rem; color: var(--text-muted); line-height: 1.5; margin-bottom: 20px; text-align: center; flex-shrink: 0; }
         
-        /* Contenedor interno para Carpetas con Modos Adaptativos */
         #folderApps {
             display: flex;
             flex-wrap: wrap;
@@ -731,22 +613,16 @@
             max-height: 45vh; 
             padding: 10px 4px;
         }
-        #folderApps::-webkit-scrollbar {
-            width: 4px;
-        }
-        #folderApps::-webkit-scrollbar-thumb {
-            background: rgba(255, 255, 255, 0.15);
-            border-radius: 4px;
-        }
+        #folderApps::-webkit-scrollbar { width: 4px; }
+        #folderApps::-webkit-scrollbar-thumb { background: rgba(255, 255, 255, 0.15); border-radius: 4px; }
 
-        /* MODOS DE CARPETA DINÁMICOS */
         #folderApps.list-mode {
             flex-direction: column;
             align-items: center;
             flex-wrap: nowrap;
-            justify-content: flex-start; /* Alinea al principio para evitar el recorte superior */
-            padding-top: 15px;           /* Añade un espacio de seguridad arriba */
-            padding-bottom: 15px;        /* Añade un espacio de seguridad abajo */
+            justify-content: flex-start; 
+            padding-top: 15px;           
+            padding-bottom: 15px;        
         }
         #folderApps.list-mode .tool-card {
             width: 100%;
@@ -775,10 +651,7 @@
             gap: 8px;
         }
         #folderApps.grid-mode .tool-card i, 
-        #folderApps.grid-mode .tool-card svg {
-            width: 28px !important;
-            height: 28px !important;
-        }
+        #folderApps.grid-mode .tool-card svg { width: 28px !important; height: 28px !important; }
         #folderApps.grid-mode .tool-card span {
             font-size: 0.8rem;
             line-height: 1.2;
@@ -788,13 +661,7 @@
             -webkit-box-orient: vertical;
             overflow: hidden;
         }
-        /* Ajuste de botón estrella en vista cuadrícula dentro de carpeta */
-        #folderApps.grid-mode .tool-card .star-btn {
-            position: absolute;
-            top: 6px;
-            right: 6px;
-            margin: 0;
-        }
+        #folderApps.grid-mode .tool-card .star-btn { position: absolute; top: 6px; right: 6px; margin: 0; }
 
         .modal-buttons { display: flex; gap: 12px; justify-content: center; flex-shrink: 0; }
         .modal-btn {
@@ -815,15 +682,11 @@
         @keyframes slideUp { from { opacity: 0; transform: translateY(30px); } to { opacity: 1; transform: translateY(0); } }
         @keyframes clockScale { from { transform: scale(1.15); opacity: 0; filter: blur(10px); } to { transform: scale(1); opacity: 1; filter: blur(0); } }
 
-        /* ==========================================
-           10. BANNER DE ACTUALIZACIÓN
-           ========================================== */
-        /* UPDATE BANNER */
         #updateBanner {
             position: fixed;
             left: 50%;
             bottom: 28px;
-            transform: translateX(-50%) translateY(40px); /* Reducimos el desplazamiento vertical pesado */
+            transform: translateX(-50%) translateY(40px); 
             background: var(--glass);
             backdrop-filter: blur(var(--blur-val));
             border: 1px solid var(--glass-border);
@@ -834,46 +697,136 @@
             max-width: 90%;
             transition: .45s var(--bezier);
             box-shadow: 0 20px 60px rgba(0,0,0,.45);
-            
-            /* NUEVAS LÍNEAS PARA OCULTARLO */
             opacity: 0;
             pointer-events: none;
         }
 
-        #updateBanner.show {
-            transform: translateX(-50%) translateY(0);
-            
-            /* NUEVAS LÍNEAS PARA MOSTRARLO */
-            opacity: 1;
-            pointer-events: auto;
-        }
-        .update-title {
-            font-weight: 500;
-            font-size: 1rem;
-            margin-bottom: 6px;
-        }
+        #updateBanner.show { transform: translateX(-50%) translateY(0); opacity: 1; pointer-events: auto; }
+        .update-title { font-weight: 500; font-size: 1rem; margin-bottom: 6px; }
+        .update-text { font-size: .88rem; color: var(--text-muted); margin-bottom: 14px; }
+        #updateNow { border: none; background: white; color: black; padding: 10px 18px; border-radius: 999px; cursor: pointer; font-family: Outfit; font-size: .9rem; transition: .25s; }
+        #updateNow:hover { transform: scale(1.05); }
+        /* ==========================================
+   ANIMACIONES COHESIVAS PARA EL BUSCADOR
+   ========================================== */
+.result-item {
+    display: flex;
+    align-items: center;
+    padding: 14px 18px;
+    border-radius: 20px;
+    text-decoration: none;
+    color: var(--text-main);
+    margin-bottom: 5px;
+    transition: transform 0.3s var(--bezier), opacity 0.3s var(--bezier), margin 0.3s var(--bezier), padding 0.3s var(--bezier), height 0.3s var(--bezier);
+    opacity: 1;
+    transform: scale(1) translateY(0);
+    height: auto;
+    overflow: hidden;
+}
 
-        .update-text {
-            font-size: .88rem;
-            color: var(--text-muted);
-            margin-bottom: 14px;
-        }
+.result-item.search-hidden {
+    opacity: 0;
+    transform: scale(0.92) translateY(-5px);
+    padding-top: 0 !important;
+    padding-bottom: 0 !important;
+    margin-bottom: 0 !important;
+    height: 0 !important;
+    pointer-events: none;
+}
 
-        #updateNow {
-            border: none;
-            background: white;
-            color: black;
-            padding: 10px 18px;
-            border-radius: 999px;
-            cursor: pointer;
-            font-family: Outfit;
-            font-size: .9rem;
-            transition: .25s;
-        }
+.result-item.search-enter {
+    animation: fadeInItem 0.4s var(--bezier) both;
+}
 
-        #updateNow:hover {
-            transform: scale(1.05);
-        }
+/* ==========================================
+   DROPDOWN CUSTOMIZADO (ESTILO GENERAL)
+   ========================================== */
+.custom-dropdown {
+    position: relative;
+    width: 100%;
+    max-width: 200px;
+    font-family: 'Outfit', sans-serif;
+    user-select: none;
+    z-index: 105;
+}
+
+.dropdown-select {
+    background: var(--glass);
+    border: 1px solid var(--glass-border);
+    color: var(--text-main);
+    padding: 10px 16px;
+    border-radius: 14px;
+    cursor: pointer;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    font-size: 0.9rem;
+    transition: all 0.3s var(--bezier);
+    backdrop-filter: blur(var(--blur-val));
+}
+
+.dropdown-select:hover {
+    background: rgba(255, 255, 255, 0.05);
+    border-color: rgba(255, 255, 255, 0.2);
+}
+
+.dropdown-select i, .dropdown-select svg {
+    width: 16px;
+    height: 16px;
+    transition: transform 0.3s var(--bezier);
+}
+
+.custom-dropdown.active .dropdown-select i,
+.custom-dropdown.active .dropdown-select svg {
+    transform: rotate(180deg);
+}
+
+.dropdown-options {
+    position: absolute;
+    top: calc(100% + 6px);
+    left: 0;
+    width: 100%;
+    background: rgba(20, 20, 20, 0.95);
+    backdrop-filter: blur(25px);
+    border: 1px solid var(--glass-border);
+    border-radius: 14px;
+    box-shadow: 0 15px 35px rgba(0, 0, 0, 0.5);
+    opacity: 0;
+    pointer-events: none;
+    transform: translateY(10px) scale(0.95);
+    transition: all 0.3s var(--bezier);
+    overflow: hidden;
+    padding: 5px;
+}
+
+.custom-dropdown.active .dropdown-options {
+    opacity: 1;
+    pointer-events: auto;
+    transform: translateY(0) scale(1);
+}
+
+.dropdown-option {
+    padding: 10px 14px;
+    color: var(--text-muted);
+    border-radius: 10px;
+    cursor: pointer;
+    font-size: 0.88rem;
+    transition: all 0.2s ease;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.dropdown-option:hover {
+    background: rgba(255, 255, 255, 0.08);
+    color: var(--text-main);
+}
+
+.dropdown-option.selected {
+    background: rgba(255, 255, 255, 0.15);
+    color: var(--text-main);
+    font-weight: 500;
+}
     </style>
     
     <script>
@@ -915,7 +868,7 @@
         <div><strong>VERSIÓN LOCAL</strong> <span>· Ir a web</span></div>
     </a>
 
-    <div class="version-tag" id="versionTag">1.1.1</div>
+    <div class="version-tag" id="versionTag">1.2.1</div>
 
     <div class="ui-layer">
         <header class="header">
@@ -930,7 +883,7 @@
     <div class="custom-modal" id="hiddenFolderModal">
         <div class="modal-title"><i data-lucide="folder-lock" style="color: #FFD60A;"></i> Carpetas Ocultas</div>
         <p class="modal-text">Estás a punto de acceder a una carpeta oculta.</p>
-        <div style="margin-bottom: 25px; display: flex; justify-content: center;" id="hiddenAppArea"></div>
+        <div style="margin-bottom: 25px; display: flex; flex-wrap: wrap; justify-content: center; gap: 12px;" id="hiddenAppArea"></div>
         <div class="modal-buttons">
             <button class="modal-btn secondary" onclick="closeModal('hiddenFolderModal')">Cerrar</button>
         </div>
@@ -952,13 +905,9 @@
             <i data-lucide="folder-open"></i>
             <span id="folderTitle">Carpeta</span>
         </div>
-
         <div id="folderApps"></div>
-
         <div class="modal-buttons">
-            <button class="modal-btn secondary" onclick="closeModal('folderModal')">
-                Cerrar
-            </button>
+            <button class="modal-btn secondary" onclick="closeModal('folderModal')">Cerrar</button>
         </div>
     </div>
 
@@ -994,7 +943,8 @@ const tools = [
             { name: 'Conversor de unidades', icon: 'Arrow-Left-Right', url: 'Apps/conversor.html' },
             { name: 'Duolingo Tools', icon: 'Brick-Wall-Fire', url: 'Apps/duolingo.html' },
             { name: 'Contador', icon: 'List-Ordered', url: 'Apps/counter.html' },
-            { name: 'Generador de código QR', icon: 'Qr-Code', url: 'Apps/qr.html' }
+            { name: 'Generador de código QR', icon: 'Qr-Code', url: 'Apps/qr.html' },
+            { name: 'Bocetos', icon: 'Pencil-Line', url: 'Apps/bocetos.html' }
         ]
     },
     {
@@ -1030,7 +980,8 @@ const tools = [
         folder: true,
         apps: [
             { name: 'Ruleta aleatoria', icon: 'Ferris-Wheel', url: 'Apps/aleatorio.html' },
-            { name: 'Creador de memes', icon: 'Laugh', url: 'Apps/meme.html' }
+            { name: 'Creador de memes', icon: 'Laugh', url: 'Apps/meme.html' },
+            { name: 'Creador de Tierlist', icon: 'list-ordered', url: 'Apps/tierlist.html' }
         ]
     },
     {
@@ -1055,6 +1006,364 @@ const tools = [
 ];
 
 const hiddenApp = { name: 'Neo GameCenter', icon: 'Gamepad2', url: 'games.html' };
+const hiddenApps = [hiddenApp];
+
+const appKeywords = {
+    'Apps/dinero.html': [
+        'dinero', 'moneda', 'efectivo', 'finanzas', 'presupuesto', 'gastos', 'ingresos', 'calculadora', 'cuenta', 'ahorrar',
+        'billetes', 'plata', 'money', 'cash', 'finance', 'budget', 'divisas', 'costos', 'economia', 'contabilidad',
+        'saldo', 'inversion', 'calculo', 'precio', 'pago', 'caja', 'banco', 'centavos', 'euros', 'dolares'
+    ],
+    'Apps/calculadora-descarga.html': [
+        'descarga', 'velocidad', 'tiempo', 'internet', 'red', 'megabits', 'megabytes', 'giga', 'fibra', 'wifi',
+        'download', 'speed', 'time', 'calculo', 'estimacion', 'archivo', 'peso', 'bajar', 'transferencia', 'ancho de banda',
+        'mbps', 'kbps', 'latency', 'conexion', 'duracion', 'espera', 'torrent', 'stream', 'loader', 'network'
+    ],
+    'Apps/medidas.html': [
+        'medidas', 'regla', 'dimension', 'tamaño', 'longitud', 'escala', 'centimetros', 'milimetros', 'pulgadas', 'metros',
+        'ruler', 'measure', 'size', 'ancho', 'alto', 'profundidad', 'proporcion', 'distancia', 'calibrar', 'pantalla',
+        'pixeles', 'geometria', 'trazado', 'dibujo', 'linea', 'herramienta', 'metric', 'inches', 'cm', 'mm'
+    ],
+    'Apps/progreso.html': [
+        'progreso', 'visualizador', 'porcentaje', 'barra', 'carga', 'estado', 'avance', 'loading', 'progress', 'bar',
+        'tracker', 'metas', 'objetivos', 'completado', 'proceso', 'seguimiento', 'porciento', 'status', 'indicador', 'grafico',
+        'animacion', 'pasos', 'fases', 'etapas', 'monitoreo', 'rendimiento', 'logro', 'tareas', 'actualizacion', 'porcentual'
+    ],
+    'Apps/countdown.html': [
+        'cuenta atras', 'temporizador', 'reloj', 'cronometro', 'tiempo', 'alarma', 'timer', 'countdown', 'segundos', 'minutos',
+        'horas', 'dias', 'plazo', 'limite', 'evento', 'fecha', 'recordatorio', 'espera', 'avisador', 'alerta',
+        'reversa', 'final', 'duracion', 'intervalo', 'lapso', 'stopwatch', 'clock', 'timebox', 'deadline', 'vencimiento'
+    ],
+    'Apps/conversor.html': [
+        'conversor', 'convertir', 'unidades', 'unidades de medida', 'unidades de peso', 'unidades de longitud', 'volumen', 'masa', 'temperatura', 'celsius',
+        'fahrenheit', 'kilos', 'libras', 'gramos', 'kilometros', 'millas', 'litros', 'galones', 'conversion', 'transformar',
+        'equivalencia', 'calculo', 'sistema metrico', 'imperial', 'escala', 'magnitud', 'fisica', 'valores', 'unidades de tiempo', 'unidades de velocidad'
+    ],
+    'Apps/duolingo.html': [
+        'duolingo', 'idiomas', 'aprender', 'ingles', 'vocabulario', 'racha', 'streak', 'practica', 'estudio', 'lecciones',
+        'herramientas', 'idioma', 'languages', 'learn', 'english', 'traduccion', 'pronunciacion', 'gramatica', 'ejercicios', 'fluidez',
+        'palabras', 'frases', 'hablar', 'escuchar', 'leer', 'escribir', 'xp', 'niveles', 'bho', 'owl'
+    ],
+    'Apps/counter.html': [
+        'contador', 'contar', 'clicks', 'pulsador', 'numeros', 'incrementar', 'decrementar', 'conteo', 'inventario', 'asistencia',
+        'personas', 'cosas', 'objetos', 'sumar', 'restar', 'clicker', 'counter', 'tally', 'registro', 'lista',
+        'secuencia', 'cantidad', 'total', 'marcador', 'puntuacion', 'puntos', 'digital', 'manual', 'unidades', 'cifras'
+    ],
+    'Apps/qr.html': [
+        'qr', 'codigo', 'generador', 'escanear', 'enlace', 'link', 'url', 'barras', 'code', 'qrcode',
+        'crear', 'diseño', 'matriz', 'texto', 'compartir', 'imagen', 'descargar', 'vector', 'informacion', 'lectura',
+        'escaner', 'digital', 'rapido', 'acceso', 'tarjeta', 'wifi', 'contacto', 'vcard', 'creador', 'generar'
+    ],
+    'Apps/bocetos.html': [
+        'bocetos', 'dibujo', 'bosquejo', 'esbozo', 'ideas', 'pintar', 'ilustrar', 'diseño', 'lienzo', 'lapiz',
+        'trazos', 'arte', 'creativo', 'block', 'cuaderno', 'libreta', 'digital', 'pad', 'colorear', 'acuarela',
+        'sombreado', 'textura', 'base', 'plantilla', 'modelo', 'concepto', 'practicar', 'diario', 'anime', 'sketch'
+    ],
+    'Apps/calendario.html': [
+        'calendario', 'fechas', 'meses', 'dias', 'semanas', 'año', 'agenda', 'citas', 'eventos', 'reuniones',
+        'organizacion', 'planificador', 'recordatorios', 'planear', 'gestion', 'tiempo', 'horario', 'alerta', 'notificacion', 'beta',
+        'calendar', 'schedule', 'planner', 'events', 'tasks', 'tareas', 'cronograma', 'eficiencia', 'productividad', 'rutina'
+    ],
+    'Apps/kanban.html': [
+        'kanban', 'tablero', 'tareas', 'proyectos', 'organizacion', 'flujo', 'trello', 'pendientes', 'proceso', 'hecho',
+        'tarjetas', 'productividad', 'gestion', 'equipo', 'metodologia', 'agile', 'scrum', 'board', 'tasks', 'todo',
+        'doing', 'done', 'columna', 'seguimiento', 'planificacion', 'eficiencia', 'flujo de trabajo', 'prioridades', 'asignar', 'estatus'
+    ],
+    'Apps/notas.html': [
+        'notas', 'bloc', 'escribir', 'apuntes', 'texto', 'recordar', 'ideas', 'postit', 'sticky', 'libreta',
+        'cuaderno', 'guardar', 'informacion', 'borrador', 'edicion', 'editor', 'notes', 'notepad', 'memo', 'listas',
+        'recordatorios', 'pensamientos', 'rapido', 'almacenar', 'organizar', 'contenido', 'papel', 'digital', 'crear', 'historial'
+    ],
+    'Apps/typing.html': [
+        'mecanografía', 'typer', 'escribir', 'teclado', 'typing', 'velocidad', 'precision', 'pulsaciones', 'wpm', 'ppm',
+        'test', 'prueba', 'practica', 'entrenamiento', 'letras', 'dedos', 'agilidad', 'juego', 'texto', 'copiar',
+        'rapidez', 'errores', 'caracteres', 'ejercicio', 'aprender', 'keyboard', 'speedtest', 'keybr', 'typewriter', 'palabras'
+    ],
+    'Apps/symbols.html': [
+        'simbolos', 'letras', 'emoji', 'signos', 'caracteres', 'especiales', 'iconos', 'emoticonos', 'unicode', 'fuentes',
+        'tipografia', 'copiar', 'pegar', 'decoracion', 'texto', 'symbols', 'chars', 'ascii', 'glifos', 'matematicos',
+        'flechas', 'estrellas', 'corazones', 'raros', 'teclado', 'lenguaje', 'herramienta', 'lista', 'catalogo', 'diseño'
+    ],
+    'Apps/comparador.html': [
+        'comparador', 'texto', 'diferencias', 'diff', 'cambios', 'versiones', 'cotejar', 'revisar', 'plagio', 'similitud',
+        'original', 'copia', 'lineas', 'palabras', 'modificado', 'corregido', 'editor', 'herramienta', 'analisis', 'contrastar',
+        'paralelo', 'split', 'compare', 'text', 'match', 'desviacion', 'coincidencia', 'revision', 'verificar', 'archivo'
+    ],
+    'Apps/contador-palabras.html': [
+        'contador', 'palabras', 'caracteres', 'letras', 'texto', 'lineas', 'parrafos', 'conteo', 'longitud', 'limite',
+        'redaccion', 'ensayo', 'articulos', 'blog', 'seo', 'words', 'counter', 'characters', 'spaces', 'espacios',
+        'analisis', 'estadisticas', 'lectura', 'tiempo', 'frases', 'vocales', 'consonantes', 'gramatica', 'escribir', 'documento'
+    ],
+    'Apps/img-base64.html': [
+        'conversor', 'base64', 'imagen', 'codificar', 'decodificar', 'encoder', 'decoder', 'b64', 'texto', 'codigo',
+        'datos', 'dataurl', 'src', 'html', 'css', 'desarrollo', 'web', 'archivo', 'bytes', 'string',
+        'convertir', 'encriptar', 'binario', 'upload', 'cloud', 'programacion', 'formato', 'asset', 'optimizar', 'transformar'
+    ],
+    'Apps/limpia-textos.html': [
+        'limpiador', 'textos', 'formato', 'espacios', 'saltos', 'limpiar', 'depurar', 'corregir', 'reemplazar', 'quitar',
+        'eliminar', 'html', 'etiquetas', 'caracteres extraños', 'cleaner', 'text', 'format', 'trim', 'regex', 'purificar',
+        'ordenar', 'normalizar', 'lineas vacias', 'acentos', 'tabulaciones', 'simbolos', 'edicion', 'utilidad', 'texto plano', 'sparkles'
+    ],
+    'Apps/mayus-minus.html': [
+        'mayúsculas', 'minúsculas', 'convertir', 'texto', 'cambiar', 'capitalizar', 'letra', 'alternar', 'case', 'sensitive',
+        'uppercase', 'lowercase', 'invertir', 'oracion', 'titulo', 'formato', 'edicion', 'herramienta', 'modificar', 'escribir',
+        'transformar', 'parrafo', 'fuente', 'tipografia', 'limpiar', 'procesar', 'utilidad', 'automatizar', 'rapido', 'corregir'
+    ],
+    'Apps/lorem-ipsum.html': [
+        'lorem ipsum', 'generador', 'texto', 'relleno', 'dummy', 'text', 'placeholder', 'diseño', 'maquetacion', 'parrafos',
+        'palabras', 'latin', 'falso', 'crear', 'desarrollo', 'web', 'mockup', 'prototipo', 'plantilla', 'imprenta',
+        'editorial', 'grafico', 'interfaz', 'ui', 'ux', 'ejemplo', 'copiar', 'lineas', 'aleatorio', 'newspaper'
+    ],
+    'Apps/text.html': [
+        'fancy text', 'fuentes', 'letras', 'bonitas', 'estilos', 'decoracion', 'nicknames', 'apodos', 'juegos', 'redes sociales',
+        'instagram', 'tiktok', 'bio', 'personalizar', 'texto', 'cool', 'fonts', 'generator', 'generador', 'letras raras',
+        'unicode', 'cursiva', 'negrita', 'grotlesco', 'diseño', 'copiar', 'pegar', 'perfil', 'aesthetic', 'conversor'
+    ],
+    'Apps/combos.html': [
+        'combos', 'combinaciones', 'mezclar', 'texto', 'listas', 'permutaciones', 'generador', 'unir', 'concatenar', 'creador',
+        'herramienta', 'palabras', 'ideas', 'nombres', 'llaves', 'fuerza bruta', 'combinar', 'datos', 'matriz', 'variables',
+        'lineas', 'patrones', 'juntar', 'enlaces', 'urls', 'fórmulas', 'marketing', 'keywords', 'asociar', 'cruzar'
+    ],
+    'Apps/aleatorio.html': [
+        'ruleta', 'aleatoria', 'azar', 'suerte', 'sorteo', 'random', 'decidir', 'opciones', 'elegir', 'giro',
+        'rueda', 'ganador', 'nombres', 'juego', 'entretenimiento', 'rifa', 'toma de decisiones', 'casual', 'wheel', 'spinner',
+        'lucky', 'numeros', 'lista', 'personalizada', 'probabilidad', 'destino', 'diversion', 'ruleta de la suerte', 'alternativas', 'sacar'
+    ],
+    'Apps/meme.html': [
+        'meme', 'creador', 'generador', 'memes', 'imagenes', 'laugh', 'humor', 'chiste', 'risa', 'divertido',
+        'gracioso', 'texto', 'plantillas', 'templates', 'diseñar', 'editar', 'foto', 'personalizar', 'crear', 'momazos',
+        'momo', 'editor de fotos', 'redes sociales', 'compartir', 'descargar', 'comedia', 'ironia', 'sarcasmo', 'sticker', 'viral'
+    ],
+    'Apps/tierlist.html': [
+        'tierlist', 'ranking', 'clasificar', 'niveles', 'categorias', 'top', 'lista', 'creador', 'calificar', 'votar',
+        'favoritos', 'comparar', 'mejor', 'peor', 'personajes', 'juegos', 'anime', 'plantilla', 'personalizar', 'ordenar',
+        's', 'a', 'b', 'c', 'd', 'e', 'f', 'tier', 'list', 'ranking maker'
+    ],
+    'Apps/craftpalette.html': [
+        'minecraft', 'craftpalette', 'paleta', 'bloques', 'construccion', 'diseño', 'colores', 'combinar', 'texturas', 'builder',
+        'blocks', 'palette', 'mc', 'creativo', 'arquitectura', 'gama', 'tonos', 'esquema', 'herramienta', 'guia',
+        'ideas', 'juego', 'crafting', 'pixel art', 'degradados', 'armonia', 'visual', 'bloques minecraft', 'planificador', 'estilo'
+    ],
+    'Apps/modchecker.html': [
+        'minecraft', 'mods', 'compatibilidad', 'checker', 'verificar', 'errores', 'crash', 'forge', 'fabric', 'quilt',
+        'versiones', 'list', 'check', 'mc', 'modding', 'java', 'analisis', 'dependencias', 'conflictos', 'optifine',
+        'plugins', 'servidor', 'cliente', 'actualizacion', 'soporte', 'diagnostico', 'herramienta', 'juego', 'modpack', 'compatibles'
+    ],
+    'Apps/material-you': [
+        'material you', 'palette', 'colores', 'diseño', 'android', 'google', 'interfaz', 'ui', 'ux', 'personalizacion',
+        'temas', 'dinamico', 'hex', 'rgb', 'paleta de colores', 'estilo', 'sistema', 'css', 'variables', 'desarrollo',
+        'generador', 'armonia', 'monet', 'wallpaper', 'extractor', 'diseñador', 'tokens', 'configuracion', 'visual', 'apariencia'
+    ],
+    'Apps/icontest.html': [
+        'iconos', 'galeria', 'lucide', 'font awesome', 'svg', 'vectores', 'imagenes', 'test', 'visualizador', 'catalogo',
+        'interfaz', 'ui', 'diseño', 'desarrollo web', 'layout', 'list', 'buscador', 'libreria', 'assets', 'simbolos',
+        'graficos', 'herramienta', 'frontend', 'clases', 'nombres', 'muestrario', 'revisar', 'pantalla', 'iconography', 'pack'
+    ],
+    'Apps/appmaker.html': [
+        'app maker', 'creador', 'aplicaciones', 'desarrollo', 'no code', 'constructor', 'builder', 'diseño', 'interfaz', 'herramientas',
+        'settings', 'prototipo', 'crear app', 'software', 'codigo', 'componentes', 'paneles', 'vistas', 'configuracion', 'personalizar',
+        'sistema', 'maquetador', 'drag and drop', 'entorno', 'ide', 'proyecto', 'editor', 'generador', 'utilidad', 'web app'
+    ],
+    'games.html': [
+        'juegos', 'gamecenter', 'neo', 'videojuegos', 'entretenimiento', 'arcade', 'consola', 'gamepad', 'gamer', 'diversion',
+        'ocio', 'play', 'gaming', 'retro', 'casual', 'oculto', 'hidden', 'hub', 'plataforma', 'catalogo',
+        'coleccion', 'online', 'browser games', 'minijuegos', 'partidas', 'puntuacion', 'records', 'habilidad', 'estrategia', 'accion'
+    ]
+};
+
+
+        // Variable global para rastrear el índice seleccionado en la navegación por teclado del buscador
+        let currentSearchIndex = -1;
+
+        // 1. POBLAR EL CONTENEDOR DE BUSQUEDA POR ÚNICA VEZ AL CARGAR
+        function buildPersistentSearchDOM() {
+            const resultsArea = document.getElementById('resultsArea') || document.querySelector('.results-area');
+            if (!resultsArea) return;
+
+            resultsArea.innerHTML = ''; // Limpiamos una única vez
+
+            // Insertamos todas las apps normales de los grupos organizados en 'tools'
+            tools.forEach(category => {
+                if (category.apps) {
+                    category.apps.forEach(app => {
+                        createSearchItemElement(resultsArea, app);
+                    });
+                }
+            });
+
+            // Insertamos también las apps ocultas de 'hiddenApps'
+            if (typeof hiddenApps !== 'undefined') {
+                hiddenApps.forEach(app => {
+                    createSearchItemElement(resultsArea, app);
+                });
+            }
+
+            // Volvemos a procesar los iconos creados mediante Lucide
+            if (window.lucide) lucide.createIcons();
+        }
+
+        function createSearchItemElement(container, app) {
+            const item = document.createElement('a');
+            item.href = app.url;
+            item.className = 'result-item search-hidden'; // Nacen ocultos
+            
+            // LA CORRECCIÓN ESTÁ AQUÍ: Se eliminó el .toLowerCase() del atributo 'data-url'
+            item.setAttribute('data-url', app.url); 
+            
+            item.setAttribute('data-name', app.name.toLowerCase());
+            item.innerHTML = `
+                <i data-lucide="${app.icon || 'link'}"></i>
+                <span style="margin-left:12px;">${app.name}</span>
+            `;
+            container.appendChild(item);
+        }
+
+        // 2. FUNCIÓN DE FILTRADO SUAVE (Sustituye por completo a tu lógica anterior de búsqueda)
+        function filterSearchPersistent(searchTerm) {
+            const query = searchTerm.toLowerCase().trim();
+            const items = document.querySelectorAll('.results-area .result-item:not(.dynamic-item)');
+            const resultsArea = document.getElementById('resultsArea');
+            
+            // Eliminar items dinámicos (mates y web) al teclear para re-generarlos
+            document.querySelectorAll('.dynamic-item').forEach(el => el.remove());
+
+            // Reseteamos el foco de navegación por teclado al escribir
+            currentSearchIndex = -1;
+            activeResultIndex = -1; // Sincronizado
+
+            if (query === '') {
+                // Si borra el texto, aplicamos transición de salida masiva
+                items.forEach(item => {
+                    item.classList.add('search-hidden');
+                    item.classList.remove('keyboard-active');
+                });
+                return;
+            }
+
+            items.forEach(item => {
+                const url = item.getAttribute('data-url');
+                const name = item.getAttribute('data-name');
+                const keywords = appKeywords[url] || appKeywords[url.replace(/^\//, '')] || [];
+
+                // Comprobamos coincidencias
+                const matchesQuery = name.includes(query) || keywords.some(kw => kw.toLowerCase().includes(query));
+
+                if (matchesQuery) {
+                    // Entra suavemente quitando la clase que reduce el espacio visual a cero
+                    item.classList.remove('search-hidden');
+                } else {
+                    // Sale suavemente añadiendo la clase
+                    item.classList.add('search-hidden');
+                    item.classList.remove('keyboard-active');
+                }
+            });
+
+            if (/^[0-9+\-*/().\s]+$/.test(query) && /[+\-*/]/.test(query)) {
+                try {
+                    const result = new Function('return ' + query)();
+                    if (result !== undefined && !isNaN(result) && result !== Infinity) {
+                        const mathEl = document.createElement('div');
+                        mathEl.className = 'result-item dynamic-item search-enter';
+                        mathEl.style.cssText = 'cursor: pointer; background: rgba(52, 199, 89, 0.15); border: 1px solid rgba(52, 199, 89, 0.3);';
+                        mathEl.onclick = () => { navigator.clipboard.writeText(result); showToast('Resultado copiado', 'check'); };
+                        mathEl.innerHTML = `
+                            <i data-lucide="calculator" style="margin-right:15px; width:18px; color: #34C759;"></i>
+                            <div>
+                                <div style="color: #34C759; font-weight: bold;">${result}</div>
+                                <small style="opacity:.7; color: #34C759;">Click para copiar</small>
+                            </div>
+                        `;
+                        resultsArea.prepend(mathEl);
+                    }
+                } catch(e) {}
+            }
+
+            const webEl = document.createElement('a');
+            webEl.href = getSearchEngineUrl() + encodeURIComponent(query);
+            webEl.className = 'result-item dynamic-item search-enter web-search-item';
+            webEl.style.cssText = 'background: rgba(255,255,255,0.03); border-top: 1px solid rgba(255,255,255,0.05);';
+            webEl.innerHTML = `
+                <i data-lucide="globe" style="margin-right:15px; width:18px; color: var(--text-muted);"></i>
+                <div>
+                    <div>Buscar "${query}" en ${getSearchEngineName()}</div>
+                    <small style="opacity:.5">Shift + Enter directo</small>
+                </div>
+            `;
+            resultsArea.appendChild(webEl);
+            if(window.lucide) lucide.createIcons();
+        }
+
+        // 3. INICIALIZADOR COMPLETO DE LA LÓGICA DEL DROPDOWN CUSTOM DE BUSCADORES
+        function initSearchEngineDropdown() {
+            const dropdown = document.getElementById('searchEngineDropdown');
+            if (!dropdown) return;
+
+            const select = dropdown.querySelector('.dropdown-select');
+            const selectedText = document.getElementById('currentSearchEngine');
+            const options = dropdown.querySelectorAll('.dropdown-option');
+
+            const savedEngine = localStorage.getItem('searchEngine') || 'google'; 
+            
+            options.forEach(opt => {
+                if (opt.getAttribute('data-value') === savedEngine) {
+                    options.forEach(o => o.classList.remove('selected'));
+                    opt.classList.add('selected');
+                    selectedText.innerText = opt.innerText;
+                }
+            });
+
+            // Abrir o cerrar el dropdown customizado al hacer click
+            select.addEventListener('click', (e) => {
+                e.stopPropagation();
+                dropdown.classList.toggle('active');
+            });
+
+            // Procesar la selección del motor de búsqueda
+            options.forEach(option => {
+                option.addEventListener('click', (e) => {
+                    e.stopPropagation();
+                    const value = option.getAttribute('data-value');
+                    const label = option.innerText;
+
+                    options.forEach(o => o.classList.remove('selected'));
+                    option.classList.add('selected');
+                    selectedText.innerText = label;
+                    dropdown.classList.remove('active');
+
+                    // Guardamos la configuración de forma persistente en el navegador
+                    localStorage.setItem('searchEngine', value);
+                    
+                    // Si tienes la función de Toasts de Homescreen NEO, lanzamos el aviso
+                    if (window.showToast) {
+                        showToast(`Buscador cambiado a ${label}`, 'search');
+                    } else {
+                        console.log(`Buscador cambiado a: ${label}`);
+                    }
+                });
+            });
+
+            // Cerrar el menú si el usuario clickea fuera de la zona del dropdown
+            document.addEventListener('click', () => {
+                dropdown.classList.remove('active');
+            });
+        }
+
+        // 4. ACOPLAMIENTO EN EL PROCESO DE CARGA DE TU ARCHIVO
+        document.addEventListener('DOMContentLoaded', () => {
+            // Construir estructura persistente del buscador
+            buildPersistentSearchDOM();
+            
+            // Inicializar dropdown customizado
+            initSearchEngineDropdown();
+
+            // Enlazamos al input nativo de tu Search Panel
+            const searchInput = document.querySelector('.search-input');
+            if (searchInput) {
+                searchInput.addEventListener('input', (e) => {
+                    filterSearchPersistent(e.target.value);
+                });
+            }
+        });
     </script>
 
     <div class="search-wrapper">
@@ -1109,6 +1418,27 @@ const hiddenApp = { name: 'Neo GameCenter', icon: 'Gamepad2', url: 'games.html' 
             </div>
         </div>
 
+<div class="setting-item-row">
+    <div class="setting-item-meta">
+        <i data-lucide="search"></i>
+        <div>
+            <span class="setting-label">Buscador predeterminado</span>
+            <span class="setting-desc">Motor para realizar consultas</span>
+        </div>
+    </div>
+    <div class="custom-dropdown" id="searchEngineDropdown">
+        <div class="dropdown-select">
+            <span id="currentSearchEngine">Google</span>
+            <i data-lucide="chevron-down"></i>
+        </div>
+        <div class="dropdown-options">
+            <div class="dropdown-option selected" data-value="google">Google</div>
+            <div class="dropdown-option" data-value="bing">Bing</div>
+            <div class="dropdown-option" data-value="duckduckgo">DuckDuckGo</div>
+            <div class="dropdown-option" data-value="yahoo">Yahoo</div>
+        </div>
+    </div>
+</div>
         <div class="settings-section">
             <span class="settings-section-title">Efectos Visuales</span>
             
@@ -1201,20 +1531,29 @@ const hiddenApp = { name: 'Neo GameCenter', icon: 'Gamepad2', url: 'games.html' 
 
         let versionClicks = 0;
         let warningTimer = null;
-        let activeResultIndex = -1; // Índice de navegación del buscador (Mejora 1)
+        let activeResultIndex = -1; 
+        let draggedUrl = null;
+        let isDraggingFromFavorites = false;
+        let pendingGameUrl = '';
 
-        // Funciones auxiliares para Arrastrar y Soltar (Mejora 4)
-        function handleAppDragStart(e, url) {
+        function handleAppDragStart(e, url, fromFavorites = false) {
             e.dataTransfer.setData('text/plain', url);
-            const dz = document.getElementById('globalFavDropZone');
-            if(dz) dz.style.top = '20px';
+            draggedUrl = url;
+            isDraggingFromFavorites = fromFavorites;
+            
+            const title = document.getElementById('folderTitle')?.innerText;
+            if (title !== 'Favoritos' && !fromFavorites) {
+                const dz = document.getElementById('globalFavDropZone');
+                if(dz) dz.style.top = '20px';
+            }
         }
         function handleAppDragEnd(e) {
             const dz = document.getElementById('globalFavDropZone');
             if(dz) dz.style.top = '-70px';
+            draggedUrl = null;
+            isDraggingFromFavorites = false;
         }
 
-        // Detector para acceder a la Carpeta Oculta (5 Clics en la versión)
         document.getElementById('versionTag').onclick = (e) => {
             versionClicks++;
             if(versionClicks === 5) {
@@ -1223,7 +1562,7 @@ const hiddenApp = { name: 'Neo GameCenter', icon: 'Gamepad2', url: 'games.html' 
             }
         };
 
-        /* --- CONTROL DEL RELOJ (CRONÓMETRO, MODO ZEN Y LONG PRESS) --- */
+        /* --- CONTROL DEL RELOJ --- */
         let clockPressTimer = null;
         let isChronometerMode = false;
         let chronoInterval = null;
@@ -1236,21 +1575,16 @@ const hiddenApp = { name: 'Neo GameCenter', icon: 'Gamepad2', url: 'games.html' 
             return `${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}.${tenths}`;
         }
 
-        // Clic normal sobre el reloj
         clock.onclick = () => {
             if (!isChronometerMode) return; 
-            
             if (chronoInterval) {
-                // Pausa
                 clearInterval(chronoInterval);
                 chronoInterval = null;
             } else {
-                // Si ya tiene tiempo y estaba pausado, se reinicia a cero
                 if (chronoTime > 0) {
                     chronoTime = 0;
                     clock.innerText = formatChrono(chronoTime);
                 } else {
-                    // Iniciar
                     chronoInterval = setInterval(() => {
                         chronoTime++;
                         clock.innerText = formatChrono(chronoTime);
@@ -1259,14 +1593,12 @@ const hiddenApp = { name: 'Neo GameCenter', icon: 'Gamepad2', url: 'games.html' 
             }
         };
 
-        // Doble clic para Modo Zen
         clock.ondblclick = () => {
             if (isChronometerMode) return; 
             body.classList.add('zen-mode');
             setPanel.classList.remove('active'); 
         };
 
-        // Long Press (Presión prolongada de 1.2s)
         const startPress = (e) => {
             if (clockPressTimer) clearTimeout(clockPressTimer);
             clockPressTimer = setTimeout(toggleClockMode, 1200);
@@ -1308,18 +1640,17 @@ const hiddenApp = { name: 'Neo GameCenter', icon: 'Gamepad2', url: 'games.html' 
         clock.addEventListener('touchend', cancelPress);
         clock.addEventListener('touchmove', cancelPress);
 
-        exitZenBtn.onclick = () => {
-            body.classList.remove('zen-mode');
-        };
+        exitZenBtn.onclick = () => { body.classList.remove('zen-mode'); };
 
-        /* --- SISTEMA ADAPTABLE DE TOASTS (ESTILO ANDROID) --- */
+        /* --- NOTIFICACIONES SNACKBAR CON ICONOS LUCIDE --- */
         let toastTimeout = null;
-        function showToast(message) {
+        function showToast(message, iconName = 'info') {
             const toast = document.getElementById('homescreenToast');
             if (!toast) return;
 
-            toast.innerText = message;
+            toast.innerHTML = `<i data-lucide="${iconName}"></i><span>${message}</span>`;
             toast.classList.add('show');
+            if (window.lucide) lucide.createIcons();
 
             if (toastTimeout) clearTimeout(toastTimeout);
             toastTimeout = setTimeout(() => {
@@ -1329,16 +1660,10 @@ const hiddenApp = { name: 'Neo GameCenter', icon: 'Gamepad2', url: 'games.html' 
 
         /* --- SISTEMA PERSISTENTE DE FAVORITOS --- */
         function getFavorites() {
-            try {
-                return JSON.parse(localStorage.getItem('favorites')) || [];
-            } catch(e) {
-                return [];
-            }
+            try { return JSON.parse(localStorage.getItem('favorites')) || []; } catch(e) { return []; }
         }
 
-        function isFavorite(url) {
-            return getFavorites().includes(url);
-        }
+        function isFavorite(url) { return getFavorites().includes(url); }
 
         function toggleFavorite(url, element) {
             let favs = getFavorites();
@@ -1346,10 +1671,10 @@ const hiddenApp = { name: 'Neo GameCenter', icon: 'Gamepad2', url: 'games.html' 
 
             if (isActive) {
                 if (!favs.includes(url)) favs.push(url);
-                showToast('Añadido a favoritos ⭐');
+                showToast('Añadido a favoritos', 'star');
             } else {
                 favs = favs.filter(u => u !== url);
-                showToast('Eliminado de favoritos');
+                showToast('Eliminado de favoritos', 'star-off');
             }
             localStorage.setItem('favorites', JSON.stringify(favs));
         }
@@ -1386,14 +1711,14 @@ const hiddenApp = { name: 'Neo GameCenter', icon: 'Gamepad2', url: 'games.html' 
             if(window.lucide) lucide.createIcons();
         }
 
-        /* --- SISTEMA DE MODALES Y CARPETAS ADAPTABLES --- */
+        /* --- SINOPSIS DE MODALES Y CARPETAS --- */
         function openModal(id) {
             if(id === 'hiddenFolderModal') {
-                document.getElementById('hiddenAppArea').innerHTML = `
-                    <div class="tool-card" onclick="triggerGameWarning()">
-                        <i data-lucide="${hiddenApp.icon}"></i><span>${hiddenApp.name}</span>
+                document.getElementById('hiddenAppArea').innerHTML = hiddenApps.map(app => `
+                    <div class="tool-card" onclick="triggerGameWarning('${app.url}')">
+                        <i data-lucide="${app.icon}"></i><span>${app.name}</span>
                     </div>
-                `;
+                `).join('');
                 lucide.createIcons();
             }
             overlay.classList.add('active');
@@ -1410,7 +1735,7 @@ const hiddenApp = { name: 'Neo GameCenter', icon: 'Gamepad2', url: 'games.html' 
             const versionInfo = await window.getVersionInfo?.();
             const version = versionInfo?.version || 'Sin versión';
             const changes = Array.isArray(versionInfo?.changes) && versionInfo.changes.length ? versionInfo.changes : [
-                `No se han encontrado cambios. Puede ser un error, revisa tu conexión o intenta más tarde. Obtén la última versión disponible en <a href="https://github.com/CapybaraGalaxy/HOMESCREEN" target="_blank" rel="noopener noreferrer" style="color: #8ab4f8; text-decoration: none;">GITHUB</a>.`
+                `Obtén la última versión disponible en <a href="https://github.com/CapybaraGalaxy/HOMESCREEN" target="_blank" rel="noopener noreferrer" style="color: #8ab4f8; text-decoration: none;">GITHUB</a>.`
             ];
             const date = versionInfo?.date ? ` · ${versionInfo.date}` : '';
 
@@ -1423,7 +1748,6 @@ const hiddenApp = { name: 'Neo GameCenter', icon: 'Gamepad2', url: 'games.html' 
             lucide.createIcons();
         }
 
-        // Abre una carpeta heredando el modo visual actual (Pill, Lista, Grid)
         function openFolder(folder) {
             document.getElementById('folderTitle').innerText = folder.name;
 
@@ -1431,7 +1755,6 @@ const hiddenApp = { name: 'Neo GameCenter', icon: 'Gamepad2', url: 'games.html' 
             const folderModal = document.getElementById('folderModal');
             const currentLayout = localStorage.getItem('layoutMode') || 'pill';
 
-            // Limpieza de estados visuales del modal de carpetas
             folderApps.className = '';
             folderModal.classList.remove('grid-active');
 
@@ -1442,14 +1765,17 @@ const hiddenApp = { name: 'Neo GameCenter', icon: 'Gamepad2', url: 'games.html' 
                 folderModal.classList.add('grid-active');
             }
 
-            // Inyección y comprobación de favoritos con soporte Draggable (Mejora 4)
-            folderApps.innerHTML = folder.apps.map(app => {
+            const isFavFolder = folder.name === 'Favoritos';
+
+            folderApps.innerHTML = folder.apps.map((app, index) => {
                 const favClass = isFavorite(app.url) ? 'active' : '';
                 return `
-                    <a href="${app.url}" class="tool-card" draggable="true" ondragstart="handleAppDragStart(event, '${app.url}')" ondragend="handleAppDragEnd(event)">
+                    <a href="${app.url}" class="tool-card" draggable="true" 
+                       ondragstart="handleAppDragStart(event, '${app.url}', ${isFavFolder})" 
+                       ondragend="handleAppDragEnd(event)" data-url="${app.url}">
                         <i data-lucide="${app.icon}"></i>
                         <span>${app.name}</span>
-                        <button class="star-btn ${favClass}" onclick="event.preventDefault(); toggleFavorite('${app.url}', this);">
+                        <button class="star-btn ${favClass}" onclick="event.preventDefault(); event.stopPropagation(); toggleFavorite('${app.url}', this);">
                             <i data-lucide="star"></i>
                         </button>
                     </a>
@@ -1459,6 +1785,46 @@ const hiddenApp = { name: 'Neo GameCenter', icon: 'Gamepad2', url: 'games.html' 
             lucide.createIcons();
             openModal('folderModal');
         }
+
+        // Eventos dragover/drop nativos optimizados para reordenar y sacar de favoritos deslizando fuera
+        const fa = document.getElementById('folderApps');
+        fa.addEventListener('dragover', (e) => {
+            if (!isDraggingFromFavorites) return;
+            e.preventDefault();
+            const targetCard = e.target.closest('.tool-card');
+            if (targetCard && targetCard.parentElement === fa) {
+                const bounding = targetCard.getBoundingClientRect();
+                const offset = e.clientY - bounding.top - bounding.height / 2;
+                if (offset > 0) {
+                    targetCard.after(document.querySelector(`[data-url="${draggedUrl}"]`));
+                } else {
+                    targetCard.before(document.querySelector(`[data-url="${draggedUrl}"]`));
+                }
+            }
+        });
+
+        fa.addEventListener('drop', (e) => {
+            if (!isDraggingFromFavorites) return;
+            e.preventDefault();
+            const cards = fa.querySelectorAll('.tool-card');
+            const newFavs = Array.from(cards).map(c => c.getAttribute('data-url'));
+            localStorage.setItem('favorites', JSON.stringify(newFavs));
+            showToast('Orden de favoritos actualizado', 'layers');
+        });
+
+        const fm = document.getElementById('folderModal');
+        fm.addEventListener('dragover', (e) => { if (isDraggingFromFavorites) e.preventDefault(); });
+        fm.addEventListener('drop', (e) => {
+            if (!isDraggingFromFavorites) return;
+            if (!e.target.closest('#folderApps')) {
+                e.preventDefault();
+                let favs = getFavorites();
+                favs = favs.filter(u => u !== draggedUrl);
+                localStorage.setItem('favorites', JSON.stringify(favs));
+                showToast('Eliminado de favoritos', 'star-off');
+                openFavoritesFolder();
+            }
+        });
 
         function closeModal(id) {
             document.getElementById(id).classList.remove('active');
@@ -1471,9 +1837,7 @@ const hiddenApp = { name: 'Neo GameCenter', icon: 'Gamepad2', url: 'games.html' 
         async function refreshSettingsVersionInfo() {
             const settingsVersionInfo = document.getElementById('settingsVersionInfo');
             if (!settingsVersionInfo) return;
-
             settingsVersionInfo.innerHTML = '<strong>Versión actual</strong><span>Cargando...</span>';
-
             try {
                 const info = await window.getVersionInfo?.();
                 const versionLabel = info?.version ? `v${info.version}` : 'Sin datos';
@@ -1484,7 +1848,8 @@ const hiddenApp = { name: 'Neo GameCenter', icon: 'Gamepad2', url: 'games.html' 
             }
         }
 
-        function triggerGameWarning() {
+        function triggerGameWarning(url) {
+            pendingGameUrl = url;
             document.getElementById('hiddenFolderModal').classList.remove('active');
             openModal('warningModal');
             
@@ -1502,21 +1867,28 @@ const hiddenApp = { name: 'Neo GameCenter', icon: 'Gamepad2', url: 'games.html' 
                     clearInterval(warningTimer);
                     continueBtn.disabled = false;
                     continueBtn.innerText = "Continuar";
-                    continueBtn.onclick = () => {
-                        window.location.href = hiddenApp.url;
-                    };
+                    continueBtn.onclick = () => { window.location.href = pendingGameUrl; };
                 } else {
                     continueBtn.innerText = `Continuar (${secondsLeft}s)`;
                 }
             }, 1000);
         }
 
-        function goBackFromWarning() {
-            closeModal('warningModal');
-            openModal('hiddenFolderModal');
+        /* --- MOTOR DE BÚSQUEDA INTEGRADO (KEYWORDS Y RÁPIDO) --- */
+        function getSearchEngineUrl() {
+            const engine = localStorage.getItem('searchEngine') || 'google';
+            switch(engine) {
+                case 'bing': return 'https://www.bing.com/search?q=';
+                case 'duckduckgo': return 'https://duckduckgo.com/?q=';
+                case 'startpage': return 'https://www.startpage.com/do/search?query=';
+                default: return 'https://www.google.com/search?q=';
+            }
+        }
+        function getSearchEngineName() {
+            const engine = localStorage.getItem('searchEngine') || 'google';
+            return engine.charAt(0).toUpperCase() + engine.slice(1);
         }
 
-        /* --- CONTROL DEL BUSCADOR --- */
         function toggleSearch(open) {
             if(window.hasHubError) return;
             if(open) {
@@ -1524,16 +1896,13 @@ const hiddenApp = { name: 'Neo GameCenter', icon: 'Gamepad2', url: 'games.html' 
                 overlay.classList.add('active');
                 history.pushState({ searchOpen: true }, "");
                 setTimeout(() => searchInput.focus(), 200);
-                renderResults("");
+                if(typeof filterSearchPersistent === 'function') filterSearchPersistent("");
             } else {
                 searchPanel.classList.remove('expanded');
-                if(!document.querySelector('.custom-modal.active')) {
-                    overlay.classList.remove('active');
-                }
+                if(!document.querySelector('.custom-modal.active')) overlay.classList.remove('active');
                 searchInput.value = "";
-                if (history.state && history.state.searchOpen) {
-                    history.back();
-                }
+                if(typeof filterSearchPersistent === 'function') filterSearchPersistent(""); 
+                if (history.state && history.state.searchOpen) history.back();
             }
         }
 
@@ -1546,79 +1915,27 @@ const hiddenApp = { name: 'Neo GameCenter', icon: 'Gamepad2', url: 'games.html' 
         });
 
         document.getElementById('trigger').onclick = () => toggleSearch(true);
-        
         overlay.onclick = () => { 
             toggleSearch(false); 
-            document.querySelectorAll('.custom-modal').forEach(m => {
-                if(m.classList.contains('active')) closeModal(m.id);
-            });
+            document.querySelectorAll('.custom-modal').forEach(m => { if(m.classList.contains('active')) closeModal(m.id); });
         };
         
-        searchInput.oninput = (e) => renderResults(e.target.value);
-
-        function renderResults(val) {
-            if(window.hasHubError) return;
-            activeResultIndex = -1; // Reset de navegación por teclado al escribir (Mejora 1)
-
-            const allApps = [];
-
-            tools.forEach(folder => {
-                folder.apps.forEach(app => {
-                    allApps.push({
-                        ...app,
-                        folderName: folder.name
-                    });
-                });
-            });
-
-            let mathHtml = '';
-            if (val.trim() !== '' && /^[0-9+\-*/().\s]+$/.test(val) && /[+\-*/]/.test(val)) {
-                try {
-                    const result = new Function('return ' + val)();
-                    if (result !== undefined && !isNaN(result) && result !== Infinity) {
-                        mathHtml = `
-                            <div class="result-item" onclick="navigator.clipboard.writeText('${result}'); showToast('Resultado copiado al portapapeles');" style="cursor: pointer; background: rgba(52, 199, 89, 0.15); border: 1px solid rgba(52, 199, 89, 0.3);">
-                                <i data-lucide="calculator" style="margin-right:15px; width:18px; color: #34C759;"></i>
-                                <div>
-                                    <div style="color: #34C759; font-weight: bold;">${result}</div>
-                                    <small style="opacity:.7; color: #34C759;">Click para copiar</small>
-                                </div>
-                            </div>
-                        `;
-                    }
-                } catch(e) {}
-            }
-
-            const filtered = allApps.filter(app =>
-                app.name.toLowerCase().includes(val.toLowerCase())
-            );
-
-            // Se añade soporte Draggable también a los resultados (Mejora 4)
-            document.getElementById('resultsArea').innerHTML = mathHtml + filtered.map((t, i) => `
-                <a href="${t.url}" class="result-item" draggable="true" ondragstart="handleAppDragStart(event, '${t.url}')" ondragend="handleAppDragEnd(event)" style="animation: fadeInItem .4s var(--bezier) both ${i * .03}s">
-                    <i data-lucide="${t.icon}" style="margin-right:15px; width:18px; opacity:.6;"></i>
-                    <div>
-                        <div>${t.name}</div>
-                        <small style="opacity:.5">${t.folderName}</small>
-                    </div>
-                </a>
-            `).join('');
-
-            lucide.createIcons();
-        }
-
         window.onkeydown = (e) => {
             if((e.ctrlKey || e.metaKey) && e.key === 'k') { e.preventDefault(); toggleSearch(true); }
             if(e.key === 'Escape') {
                 toggleSearch(false);
-                document.querySelectorAll('.custom-modal').forEach(m => {
-                    if(m.classList.contains('active')) closeModal(m.id);
-                });
+                document.querySelectorAll('.custom-modal').forEach(m => { if(m.classList.contains('active')) closeModal(m.id); });
             }
 
-            // Lógica de Selección por Teclado (Mejora 1)
             if (searchPanel.classList.contains('expanded')) {
-                const items = document.querySelectorAll('#resultsArea .result-item');
+                const query = searchInput.value;
+                if (e.key === 'Enter' && e.shiftKey && query.trim() !== '') {
+                    e.preventDefault();
+                    window.location.href = getSearchEngineUrl() + encodeURIComponent(query);
+                    return;
+                }
+
+                const items = document.querySelectorAll('#resultsArea .result-item:not(.search-hidden)');
                 if (items.length > 0) {
                     if (e.key === 'ArrowDown') {
                         e.preventDefault();
@@ -1687,32 +2004,15 @@ const hiddenApp = { name: 'Neo GameCenter', icon: 'Gamepad2', url: 'games.html' 
         setInterval(updateClock, 1000);
 
         function setBgColor(isDark) {
-            if (isDark) {
-                document.documentElement.style.setProperty('--bg', '#121212');
-            } else {
-                document.documentElement.style.setProperty('--bg', '#ffffff00');
-            }
+            if (isDark) { document.documentElement.style.setProperty('--bg', '#121212'); } else { document.documentElement.style.setProperty('--bg', '#ffffff00'); }
         }
 
-        /* --- CONTROL DINÁMICO DE LAYOUTS DE INTERFAZ (TRES MODOS) --- */
         function setLayoutMode(mode) {
             grid.classList.remove('list-mode', 'grid-mode');
-            
-            if (mode === 'list') {
-                grid.classList.add('list-mode');
-            } else if (mode === 'grid') {
-                grid.classList.add('grid-mode');
-            }
-            
+            if (mode === 'list') { grid.classList.add('list-mode'); } else if (mode === 'grid') { grid.classList.add('grid-mode'); }
             localStorage.setItem('layoutMode', mode);
-            
-            // Refresca la selección activa en el selector visual de ajustes
             document.querySelectorAll('.layout-opt').forEach(btn => {
-                if (btn.getAttribute('data-layout') === mode) {
-                    btn.classList.add('active');
-                } else {
-                    btn.classList.remove('active');
-                }
+                if (btn.getAttribute('data-layout') === mode) { btn.classList.add('active'); } else { btn.classList.remove('active'); }
             });
         }
 
@@ -1720,19 +2020,24 @@ const hiddenApp = { name: 'Neo GameCenter', icon: 'Gamepad2', url: 'games.html' 
         function init() {
             updateClock();
             if(window.hasHubError) return;
-
-            // Inyección de carpetas primarias en pantalla de inicio
             renderMainGrid();
             
             const sFavFolder = document.getElementById('toggleFavFolder');
-            if(localStorage.getItem('showFavFolder') !== 'false' && sFavFolder) {
-                sFavFolder.classList.add('on');
-            }
+            if(localStorage.getItem('showFavFolder') !== 'false' && sFavFolder) sFavFolder.classList.add('on');
             if(sFavFolder) {
                 sFavFolder.onclick = () => {
                     const act = sFavFolder.classList.toggle('on');
                     localStorage.setItem('showFavFolder', act);
                     renderMainGrid();
+                };
+            }
+
+            const seSelect = document.getElementById('searchEngineSelect');
+            if (seSelect) {
+                seSelect.value = localStorage.getItem('searchEngine') || 'google';
+                seSelect.onchange = () => {
+                    localStorage.setItem('searchEngine', seSelect.value);
+                    showToast(`Búsqueda cambiada a ${getSearchEngineName()}`, 'search');
                 };
             }
             
@@ -1745,26 +2050,15 @@ const hiddenApp = { name: 'Neo GameCenter', icon: 'Gamepad2', url: 'games.html' 
             const settingLocalChip = document.getElementById('settingLocalChip');
             const sLocalChip = document.getElementById('toggleLocalChip');
 
-            // Configuración del chip local según entorno de despliegue
             if (esLocal) {
                 if(settingLocalChip) settingLocalChip.style.display = 'flex';
-                
                 const hideChip = localStorage.getItem('hideLocalChip') === 'true';
-                if (hideChip) {
-                    if(sLocalChip) sLocalChip.classList.add('on');
-                } else {
-                    if(localChip) localChip.style.display = 'flex';
-                }
-
+                if (hideChip) { if(sLocalChip) sLocalChip.classList.add('on'); } else { if(localChip) localChip.style.display = 'flex'; }
                 if(sLocalChip) {
                     sLocalChip.onclick = () => {
                         const act = sLocalChip.classList.toggle('on');
                         localStorage.setItem('hideLocalChip', act);
-                        if(act) {
-                            localChip.style.display = 'none';
-                        } else {
-                            localChip.style.display = 'flex';
-                        }
+                        if(act) { localChip.style.display = 'none'; } else { localChip.style.display = 'flex'; }
                     };
                 }
             } else {
@@ -1772,52 +2066,36 @@ const hiddenApp = { name: 'Neo GameCenter', icon: 'Gamepad2', url: 'games.html' 
                 if(settingLocalChip) settingLocalChip.style.display = 'none';
             }
             
-            // Carga de distribución visual guardada
-            let savedLayout = localStorage.getItem('layoutMode');
-            if(!savedLayout) {
-                savedLayout = localStorage.getItem('list') === 'true' ? 'list' : 'pill';
-            }
+            let savedLayout = localStorage.getItem('layoutMode') || 'pill';
             setLayoutMode(savedLayout);
 
             document.querySelectorAll('.layout-opt').forEach(btn => {
-                btn.onclick = (e) => {
-                    e.stopPropagation();
-                    setLayoutMode(btn.getAttribute('data-layout'));
-                };
+                btn.onclick = (e) => { e.stopPropagation(); setLayoutMode(btn.getAttribute('data-layout')); };
             });
 
             if(localStorage.getItem('noblur') === 'true') { body.classList.add('no-blur'); if(sBlur) sBlur.classList.add('on'); }
-            
             const isDarkActive = localStorage.getItem('darkbg') !== 'false';
             const isBgActive = localStorage.getItem('bg') === 'true';
 
             setBgColor(isDarkActive);
             if(isDarkActive && sDarkBg) sDarkBg.classList.add('on');
-
-            if(isBgActive) { 
-                body.classList.add('bg-active'); 
-                if(sBg) sBg.classList.add('on'); 
-                initParticles(); 
-            }
+            if(isBgActive) { body.classList.add('bg-active'); if(sBg) sBg.classList.add('on'); initParticles(); }
 
             const setBtn = document.getElementById('setBtn');
             const checkUpdatesBtn = document.getElementById('checkUpdatesBtn');
             const showChangelogBtn = document.getElementById('showChangelogBtn');
             const settingsVersionInfo = document.getElementById('settingsVersionInfo');
+            
             if(setBtn) {
                 setBtn.onclick = async (e) => {
                     e.stopPropagation();
                     const willOpen = !setPanel.classList.contains('active');
                     setPanel.classList.toggle('active');
-                    if (willOpen && window.getVersionInfo) {
-                        await refreshSettingsVersionInfo();
-                    }
+                    if (willOpen && window.getVersionInfo) await refreshSettingsVersionInfo();
                 };
             }
 
-            if(setPanel) {
-                setPanel.addEventListener('click', (e) => { e.stopPropagation(); });
-            }
+            if(setPanel) setPanel.addEventListener('click', (e) => { e.stopPropagation(); });
 
             if(checkUpdatesBtn && window.checkForUpdates) {
                 checkUpdatesBtn.onclick = async (e) => {
@@ -1825,58 +2103,38 @@ const hiddenApp = { name: 'Neo GameCenter', icon: 'Gamepad2', url: 'games.html' 
                     checkUpdatesBtn.disabled = true;
                     checkUpdatesBtn.innerHTML = '<span class="btn-label"><i data-lucide="loader-2" class="spinner"></i><span></span></span>';
                     if(window.lucide) lucide.createIcons();
-                    try {
-                        await window.checkForUpdates({ showToast: true });
-                    } finally {
+                    try { await window.checkForUpdates({ showToast: true }); } finally {
                         checkUpdatesBtn.disabled = false;
                         checkUpdatesBtn.innerHTML = '<i data-lucide="refresh-cw" style="width: 14px;"></i> Comprobar';
-if(window.lucide) lucide.createIcons();
+                        if(window.lucide) lucide.createIcons();
                     }
                 };
             }
 
-            if(showChangelogBtn) {
-                showChangelogBtn.onclick = (e) => {
-                    e.stopPropagation();
-                    showChangelogModal();
-                };
-            }
+            if(showChangelogBtn) showChangelogBtn.onclick = (e) => { e.stopPropagation(); showChangelogModal(); };
+            if(settingsVersionInfo && window.getVersionInfo) refreshSettingsVersionInfo();
 
-            if(settingsVersionInfo && window.getVersionInfo) {
-                refreshSettingsVersionInfo();
-            }
-
-            // Eventos para Exportar e Importar Ajustes (Mejora 2)
             const exportBtn = document.getElementById('exportSettingsBtn');
             if (exportBtn) {
                 exportBtn.onclick = (e) => {
                     e.stopPropagation();
-                    const keys = ['favorites', 'layoutMode', 'showFavFolder', 'bg', 'darkbg', 'noblur', 'hideLocalChip'];
+                    const keys = ['favorites', 'layoutMode', 'showFavFolder', 'bg', 'darkbg', 'noblur', 'hideLocalChip', 'searchEngine'];
                     const config = {};
-                    keys.forEach(k => {
-                        const val = localStorage.getItem(k);
-                        if (val !== null) config[k] = val;
-                    });
+                    keys.forEach(k => { const val = localStorage.getItem(k); if (val !== null) config[k] = val; });
                     const blob = new Blob([JSON.stringify(config, null, 2)], { type: 'application/json' });
                     const url = URL.createObjectURL(blob);
                     const a = document.createElement('a');
-                    a.href = url;
-                    a.download = 'homescreen-config.json';
-                    document.body.appendChild(a);
-                    a.click();
-                    document.body.removeChild(a);
+                    a.href = url; a.download = 'homescreen-config.json';
+                    document.body.appendChild(a); a.click(); document.body.removeChild(a);
                     URL.revokeObjectURL(url);
-                    showToast('Configuración exportada con éxito 💾');
+                    showToast('Configuración exportada con éxito', 'download');
                 };
             }
 
             const importBtn = document.getElementById('importSettingsBtn');
             const importFile = document.getElementById('importSettingsFile');
             if (importBtn && importFile) {
-                importBtn.onclick = (e) => {
-                    e.stopPropagation();
-                    importFile.click();
-                };
+                importBtn.onclick = (e) => { e.stopPropagation(); importFile.click(); };
                 importFile.onchange = (e) => {
                     const file = e.target.files[0];
                     if (!file) return;
@@ -1884,29 +2142,19 @@ if(window.lucide) lucide.createIcons();
                     reader.onload = (evt) => {
                         try {
                             const config = JSON.parse(evt.target.result);
-                            Object.keys(config).forEach(k => {
-                                localStorage.setItem(k, config[k]);
-                            });
-                            showToast('Configuración importada con éxito 🔄');
+                            Object.keys(config).forEach(k => { localStorage.setItem(k, config[k]); });
+                            showToast('Configuración importada con éxito', 'refresh-cw');
                             setTimeout(() => { location.reload(); }, 1200);
-                        } catch (err) {
-                            showToast('Error al importar el archivo JSON ❌');
-                        }
+                        } catch (err) { showToast('Error al importar el archivo JSON', 'alert-circle'); }
                     };
                     reader.readAsText(file);
                 };
             }
 
-            // Configuración de los eventos para la zona Drop de Favoritos (Mejora 4)
             const dz = document.getElementById('globalFavDropZone');
             if (dz) {
-                dz.addEventListener('dragover', (e) => {
-                    e.preventDefault();
-                    dz.style.background = 'rgba(255, 214, 10, 0.3)';
-                });
-                dz.addEventListener('dragleave', () => {
-                    dz.style.background = 'rgba(255, 214, 10, 0.15)';
-                });
+                dz.addEventListener('dragover', (e) => { e.preventDefault(); dz.style.background = 'rgba(255, 214, 10, 0.3)'; });
+                dz.addEventListener('dragleave', () => { dz.style.background = 'rgba(255, 214, 10, 0.15)'; });
                 dz.addEventListener('drop', (e) => {
                     e.preventDefault();
                     dz.style.background = 'rgba(255, 214, 10, 0.15)';
@@ -1917,49 +2165,33 @@ if(window.lucide) lucide.createIcons();
                         if (!favs.includes(url)) {
                             favs.push(url);
                             localStorage.setItem('favorites', JSON.stringify(favs));
-                            showToast('Añadido a favoritos ⭐');
+                            showToast('Añadido a favoritos', 'star');
                             
-                            // Refrescar dinámicamente la carpeta abierta si corresponde
                             const folderModal = document.getElementById('folderModal');
                             if (folderModal && folderModal.classList.contains('active')) {
                                 const title = document.getElementById('folderTitle').innerText;
-                                if (title === 'Favoritos') {
-                                    openFavoritesFolder();
-                                } else {
+                                if (title === 'Favoritos') { openFavoritesFolder(); } else {
                                     const foundFolder = tools.find(f => f.name === title);
                                     if (foundFolder) openFolder(foundFolder);
                                 }
                             }
-                        } else {
-                            showToast('Ya está en favoritos ⭐');
-                        }
+                        } else { showToast('Ya está en favoritos', 'star'); }
                     }
                     dz.style.top = '-70px';
                 });
             }
             
             document.addEventListener('click', (e) => { if(setPanel && !setPanel.contains(e.target)) setPanel.classList.remove('active'); });
-
             if(sBlur) sBlur.onclick = () => { localStorage.setItem('noblur', body.classList.toggle('no-blur')); sBlur.classList.toggle('on'); };
-            
-            if(sBg) sBg.onclick = () => { 
-                const act = body.classList.toggle('bg-active'); 
-                sBg.classList.toggle('on'); 
-                localStorage.setItem('bg', act);
-                
-                if(act) {
-                    initParticles();
-                } else {
-                    cancelAnimationFrame(animationId);
-                    ctx.clearRect(0, 0, canvas.width, canvas.height);
-                }
-            };
-
-            if(sDarkBg) sDarkBg.onclick = () => {
-                const act = sDarkBg.classList.toggle('on');
-                localStorage.setItem('darkbg', act);
-                setBgColor(act);
-            };
+            if(sBg) {
+                sBg.onclick = () => { 
+                    const act = body.classList.toggle('bg-active'); 
+                    sBg.classList.toggle('on'); 
+                    localStorage.setItem('bg', act);
+                    if(act) { initParticles(); } else { cancelAnimationFrame(animationId); ctx.clearRect(0, 0, canvas.width, canvas.height); }
+                };
+            }
+            if(sDarkBg) sDarkBg.onclick = () => { const act = sDarkBg.classList.toggle('on'); localStorage.setItem('darkbg', act); setBgColor(act); };
         }
 
         window.onload = init;

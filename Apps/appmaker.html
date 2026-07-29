@@ -288,6 +288,22 @@
             margin-top: 2px;
         }
 
+        .app-item-tags {
+            display: flex;
+            gap: 4px;
+            margin-top: 4px;
+            flex-wrap: wrap;
+        }
+
+        .app-tag-badge {
+            font-size: 9px;
+            background: rgba(255,255,255,0.06);
+            color: var(--text-muted);
+            padding: 1px 6px;
+            border-radius: 4px;
+            border: 1px solid rgba(255,255,255,0.04);
+        }
+
         .app-item-actions {
             display: flex;
             gap: 4px;
@@ -485,7 +501,6 @@
             margin-bottom: 8px;
         }
 
-        /* FIX CRÍTICO: Estilos añadidos para corregir las cajas de texto (inputs) */
         .form-group input[type="text"],
         .form-control {
             width: 100%;
@@ -633,7 +648,6 @@
 
         .btn-secondary:hover { background: rgba(255,255,255,0.12); }
 
-        /* JSON Export modal design */
         .json-pre {
             background: rgba(0,0,0,0.5);
             border: 1px solid var(--glass-border);
@@ -647,7 +661,6 @@
             white-space: pre-wrap;
         }
 
-        /* Shake & Error validation style */
         .error-shake {
             animation: shake 0.3s ease-in-out;
             border-color: var(--accent-danger) !important;
@@ -695,11 +708,9 @@
             </div>
         </header>
 
-        <div class="folders-scroll-area" id="category-pills">
-            </div>
+        <div class="folders-scroll-area" id="category-pills"></div>
 
-        <main class="main-content" id="list-render-zone">
-            </main>
+        <main class="main-content" id="list-render-zone"></main>
     </div>
 
     <div class="fab-search-container" id="search-wrapper">
@@ -707,7 +718,7 @@
             <div class="search-icon-trigger">
                 <i data-lucide="search" size="18" id="search-icon-node"></i>
             </div>
-            <input type="text" class="fab-search-input" id="search-input" placeholder="Buscar aplicaciones..." oninput="handleSearch(this.value)">
+            <input type="text" class="fab-search-input" id="search-input" placeholder="Buscar apps o keywords..." oninput="handleSearch(this.value)">
             <button class="search-clear-btn" id="search-clear" onclick="clearSearch(event)">
                 <i data-lucide="x" size="16"></i>
             </button>
@@ -770,9 +781,12 @@
                 <input type="text" class="form-input" id="app-url" placeholder="Ej. Apps/medidas.html o https://..." oninput="updateAppPreview()">
             </div>
             <div class="form-group">
+                <label class="form-label">Keywords / Etiquetas (separadas por comas)</label>
+                <input type="text" class="form-input" id="app-keywords" placeholder="Ej. calculadora, dinero, finanzas" oninput="updateAppPreview()">
+            </div>
+            <div class="form-group">
                 <label class="form-label">Asignación de Carpeta Destino</label>
-                <select class="form-select" id="app-folder-select">
-                    </select>
+                <select class="form-select" id="app-folder-select"></select>
             </div>
             <div class="form-group">
                 <div class="toggle-container" onclick="toggleHiddenState(event)">
@@ -787,8 +801,7 @@
                 </div>
             </div>
             <label class="form-label">Previsualización de tarjeta activa</label>
-            <div class="preview-box" id="app-preview-box">
-                </div>
+            <div class="preview-box" id="app-preview-box"></div>
         </div>
         <div class="modal-footer">
             <button class="btn-secondary" onclick="closeActiveModal('appModal')">Cancelar</button>
@@ -824,7 +837,7 @@
         <div class="modal-body">
             <div class="form-group">
                 <label class="form-label">Pega aquí tu código JavaScript</label>
-                <textarea class="form-control" id="import-json-input" placeholder="const tools = [...]; const hiddenApps = [...];" style="min-height: 250px; font-family: monospace; font-size: 12px; resize: vertical;"></textarea>
+                <textarea class="form-control" id="import-json-input" placeholder="const tools = [...]; const hiddenApp = {...}; const appKeywords = {...};" style="min-height: 250px; font-family: monospace; font-size: 12px; resize: vertical;"></textarea>
             </div>
             <div class="preview-box" style="margin-top: 16px;">
                 <span style="font-size: 12px; color: var(--text-muted);">Se reemplazarán todos tus datos actuales con los importados.</span>
@@ -837,7 +850,6 @@
     </div>
 
     <script>
-        // CORE RUNTIME STATE SYSTEM MANAGER 
         let appData = {
             tools: [],
             hiddenApps: []
@@ -874,11 +886,11 @@
                     icon: 'Folder',
                     folder: true,
                     apps: [
-                        { name: 'Progreso', icon: 'Loader2', url: 'Apps/progreso.html' },
-                        { name: 'Galería de iconos', icon: 'GalleryHorizontal', url: 'Apps/icontest.html' },
-                        { name: 'Calculadora de dinero', icon: 'Coins', url: 'Apps/dinero.html' },
-                        { name: 'Calculadora tiempo de descarga', icon: 'Download', url: 'Apps/calculadora-descarga.html' },
-                        { name: 'Medidas', icon: 'Ruler', url: 'Apps/medidas.html' }
+                        { name: 'Progreso', icon: 'Loader2', url: 'Apps/progreso.html', keywords: ['progreso', 'estado', 'carga'] },
+                        { name: 'Galería de iconos', icon: 'GalleryHorizontal', url: 'Apps/icontest.html', keywords: ['iconos', 'lucide', 'galeria'] },
+                        { name: 'Calculadora de dinero', icon: 'Coins', url: 'Apps/dinero.html', keywords: ['dinero', 'calculadora', 'finanzas'] },
+                        { name: 'Calculadora tiempo de descarga', icon: 'Download', url: 'Apps/calculadora-descarga.html', keywords: ['descarga', 'tiempo', 'red'] },
+                        { name: 'Medidas', icon: 'Ruler', url: 'Apps/medidas.html', keywords: ['medidas', 'regla', 'dimensiones'] }
                     ]
                 },
                 {
@@ -886,7 +898,7 @@
                     icon: 'Folder',
                     folder: true,
                     apps: [
-                        { name: 'Mod compatibility checker', icon: 'ListCheck', url: 'Apps/modchecker.html' }
+                        { name: 'Mod compatibility checker', icon: 'ListCheck', url: 'Apps/modchecker.html', keywords: ['mod', 'minecraft', 'checker'] }
                     ]
                 },
                 {
@@ -894,7 +906,7 @@
                     icon: 'Folder',
                     folder: true,
                     apps: [
-                        { name: 'CraftPalette', icon: 'Command', url: 'Apps/craftpalette.html' }
+                        { name: 'CraftPalette', icon: 'Command', url: 'Apps/craftpalette.html', keywords: ['minecraft', 'paleta', 'craft'] }
                     ]
                 },
                 {
@@ -902,12 +914,12 @@
                     icon: 'Folder',
                     folder: true,
                     apps: [
-                        { name: 'Calendario [BETA]', icon: 'Calendar', url: 'Apps/calendario.html' }
+                        { name: 'Calendario [BETA]', icon: 'Calendar', url: 'Apps/calendario.html', keywords: ['calendario', 'fechas', 'agenda'] }
                     ]
                 }
             ];
             appData.hiddenApps = [
-                { name: 'Neo GameCenter', icon: 'Gamepad2', url: 'games.html' }
+                { name: 'Neo GameCenter', icon: 'Gamepad2', url: 'games.html', keywords: ['juegos', 'gamecenter', 'ocio'] }
             ];
             saveData();
         }
@@ -916,7 +928,6 @@
             localStorage.setItem('NEO_APPMANAGER_STATE', JSON.stringify(appData));
         }
 
-        // HISTORY API MODAL NAV STACK CORE
         function openModal(modalId) {
             document.getElementById('main-view').classList.add('backgrounded');
             document.getElementById('modal-layer-mount').style.display = 'block';
@@ -935,6 +946,7 @@
                 document.getElementById('app-name').value = "";
                 document.getElementById('app-icon').value = "";
                 document.getElementById('app-url').value = "";
+                document.getElementById('app-keywords').value = "";
                 document.getElementById('app-hidden-flag').checked = false;
                 toggleHiddenFormState();
                 updateAppPreview();
@@ -981,7 +993,6 @@
             });
         }
 
-        // FLOATING SEARCH PATTERN CONTROLS
         function activateSearch(event) {
             const bar = document.getElementById('search-bar');
             if(!bar.classList.contains('expanded')) {
@@ -1025,52 +1036,49 @@
             input.focus();
         }
 
-        // PREVIEW SYNCHRONIZATIONS FORM ENGINE
- function updateFolderPreview() {
-    const name = document.getElementById('folder-name').value.trim() || 'Carpeta';
-    let icon = document.getElementById('folder-icon').value.trim() || 'folder';
-    
-    const previewPill = document.getElementById('folder-preview-pill');
-    if (previewPill) {
-        // Forzamos la creación del nodo i con el atributo correcto antes de pasarle el text
-        previewPill.innerHTML = `<i data-lucide="${sanitizeIconName(icon)}"></i> <span id="folder-preview-text">${name}</span>`;
-        // Ejecución inmediata de Lucide dirigida únicamente al contenedor de preview
-        lucide.createIcons({
-            attrs: {
-                class: 'lucide-icon'
-            },
-            nameAttr: 'data-lucide',
-            root: previewPill
-        });
-    }
-}
+        function updateFolderPreview() {
+            const name = document.getElementById('folder-name').value.trim() || 'Carpeta';
+            let icon = document.getElementById('folder-icon').value.trim() || 'folder';
+            
+            const previewPill = document.getElementById('folder-preview-pill');
+            if (previewPill) {
+                previewPill.innerHTML = `<i data-lucide="${sanitizeIconName(icon)}"></i> <span id="folder-preview-text">${name}</span>`;
+                lucide.createIcons({
+                    attrs: { class: 'lucide-icon' },
+                    nameAttr: 'data-lucide',
+                    root: previewPill
+                });
+            }
+        }
 
-function updateAppPreview() {
-    const name = document.getElementById('app-name').value.trim() || 'Nombre de la App';
-    const icon = document.getElementById('app-icon').value.trim() || 'box';
-    const url = document.getElementById('app-url').value.trim() || 'Apps/ruta-ejemplo.html';
-    
-    const box = document.getElementById('app-preview-box');
-    if (box) {
-        box.innerHTML = `
-            <div class="app-item-card" style="backdrop-filter:none; background:rgba(255,255,255,0.05)">
-                <div class="app-item-info">
-                    <div class="app-item-icon-box" id="app-preview-icon-container">
-                        <i data-lucide="${sanitizeIconName(icon)}" size="16"></i>
+        function updateAppPreview() {
+            const name = document.getElementById('app-name').value.trim() || 'Nombre de la App';
+            const icon = document.getElementById('app-icon').value.trim() || 'box';
+            const url = document.getElementById('app-url').value.trim() || 'Apps/ruta-ejemplo.html';
+            const keywordsRaw = document.getElementById('app-keywords').value.trim();
+            const keywordsArr = keywordsRaw ? keywordsRaw.split(',').map(k => k.trim()).filter(k => k) : [];
+            
+            let tagsHtml = keywordsArr.map(k => `<span class="app-tag-badge">${k}</span>`).join('');
+
+            const box = document.getElementById('app-preview-box');
+            if (box) {
+                box.innerHTML = `
+                    <div class="app-item-card" style="backdrop-filter:none; background:rgba(255,255,255,0.05)">
+                        <div class="app-item-info">
+                            <div class="app-item-icon-box">
+                                <i data-lucide="${sanitizeIconName(icon)}" size="16"></i>
+                            </div>
+                            <div class="app-item-details">
+                                <div class="app-item-name">${name}</div>
+                                <div class="app-item-url">${url}</div>
+                                ${tagsHtml ? `<div class="app-item-tags">${tagsHtml}</div>` : ''}
+                            </div>
+                        </div>
                     </div>
-                    <div class="app-item-details">
-                        <div class="app-item-name">${name}</div>
-                        <div class="app-item-url">${url}</div>
-                    </div>
-                </div>
-            </div>
-        `;
-        // Ejecución dirigida al contenedor de la app
-        lucide.createIcons({
-            root: box
-        });
-    }
-}
+                `;
+                lucide.createIcons({ root: box });
+            }
+        }
 
         function toggleHiddenState(e) {
             if(e.target.tagName !== 'INPUT') {
@@ -1105,7 +1113,6 @@ function updateAppPreview() {
             return res || 'box';
         }
 
-        // VALIDATION ERROR FORM CONTROL SHAKE EFFECT
         function triggerFormGroupError(inputId) {
             const element = document.getElementById(inputId);
             element.classList.add('error-shake');
@@ -1114,7 +1121,6 @@ function updateAppPreview() {
             }, 300);
         }
 
-        // DATA ACTIONS SAVE HANDLERS
         function saveFolder() {
             const nameInput = document.getElementById('folder-name');
             const iconInput = document.getElementById('folder-icon');
@@ -1124,12 +1130,10 @@ function updateAppPreview() {
             if(!iconInput.value.trim()) { triggerFormGroupError('folder-icon'); return; }
 
             if(editIdxVal !== '') {
-                // Edit mode operation
                 const idx = parseInt(editIdxVal);
                 appData.tools[idx].name = nameInput.value.trim();
                 appData.tools[idx].icon = iconInput.value.trim();
             } else {
-                // Create Mode Operation
                 appData.tools.push({
                     name: nameInput.value.trim(),
                     icon: iconInput.value.trim(),
@@ -1147,6 +1151,7 @@ function updateAppPreview() {
             const nameInput = document.getElementById('app-name');
             const iconInput = document.getElementById('app-icon');
             const urlInput = document.getElementById('app-url');
+            const keywordsInput = document.getElementById('app-keywords');
             const isHidden = document.getElementById('app-hidden-flag').checked;
             const targetFolderIdx = parseInt(document.getElementById('app-folder-select').value);
             
@@ -1157,13 +1162,17 @@ function updateAppPreview() {
             if(!iconInput.value.trim()) { triggerFormGroupError('app-icon'); return; }
             if(!urlInput.value.trim()) { triggerFormGroupError('app-url'); return; }
 
+            const keywordsArray = keywordsInput.value.trim() 
+                ? keywordsInput.value.split(',').map(k => k.trim()).filter(k => k.length > 0) 
+                : [];
+
             const payloadInstance = {
                 name: nameInput.value.trim(),
                 icon: iconInput.value.trim(),
-                url: urlInput.value.trim()
+                url: urlInput.value.trim(),
+                keywords: keywordsArray
             };
 
-            // Remove previous version entity trace if dynamic updating
             if(editAppIdxVal !== '') {
                 const oldIdx = parseInt(editAppIdxVal);
                 if(editAppFolderIdxVal === 'hidden') {
@@ -1174,14 +1183,12 @@ function updateAppPreview() {
                 }
             }
 
-            // Route execution drop in destination arrays
             if(isHidden) {
                 appData.hiddenApps.push(payloadInstance);
             } else {
                 if (!isNaN(targetFolderIdx) && appData.tools[targetFolderIdx]) {
                     appData.tools[targetFolderIdx].apps.push(payloadInstance);
                 } else {
-                    // Fallback create folder context safely if empty
                     if(appData.tools.length === 0) {
                         appData.tools.push({ name: 'General', icon: 'Folder', folder: true, apps: [] });
                     }
@@ -1195,7 +1202,6 @@ function updateAppPreview() {
             renderApp();
         }
 
-        // MANAGE ENTITIES REMOVAL OPERATIONS
         function deleteFolder(idx, event) {
             event.stopPropagation();
             if(confirm(`¿Estás seguro de que deseas eliminar la carpeta "${appData.tools[idx].name}" y todas sus apps internas?`)) {
@@ -1222,7 +1228,6 @@ function updateAppPreview() {
             }
         }
 
-        // TRIGGER INLINE EDIT MODES FILLERS
         function openEditFolder(idx, event) {
             event.stopPropagation();
             const folder = appData.tools[idx];
@@ -1246,6 +1251,7 @@ function updateAppPreview() {
             document.getElementById('app-name').value = app.name;
             document.getElementById('app-icon').value = app.icon;
             document.getElementById('app-url').value = app.url;
+            document.getElementById('app-keywords').value = Array.isArray(app.keywords) ? app.keywords.join(', ') : '';
             
             const isHidden = (folderIndex === 'hidden');
             document.getElementById('app-hidden-flag').checked = isHidden;
@@ -1258,7 +1264,6 @@ function updateAppPreview() {
             updateAppPreview();
         }
 
-        // RE-RENDER INTEGRATED LAYOUT ROUTINE CONTROL SYSTEM
         function renderApp() {
             renderMetadataCounter();
             renderPillCategoryContainer();
@@ -1316,17 +1321,19 @@ function updateAppPreview() {
             const targetContent = document.getElementById('list-render-zone');
             let contentAccumulator = '';
 
-            // Folder and apps filtering engine pipeline match
             if (currentFilterFolder === 'ALL' || typeof currentFilterFolder === 'number') {
                 appData.tools.forEach((folder, fIdx) => {
                     if (currentFilterFolder !== 'ALL' && currentFilterFolder !== fIdx) return;
 
-                    // Search condition verification pipeline map filter
-                    let matchApps = folder.apps.filter(a => a.name.toLowerCase().includes(globalSearchQuery) || a.url.toLowerCase().includes(globalSearchQuery));
+                    let matchApps = folder.apps.filter(a => {
+                        const nameMatch = a.name.toLowerCase().includes(globalSearchQuery);
+                        const urlMatch = a.url.toLowerCase().includes(globalSearchQuery);
+                        const keywordMatch = Array.isArray(a.keywords) && a.keywords.some(k => k.toLowerCase().includes(globalSearchQuery));
+                        return nameMatch || urlMatch || keywordMatch;
+                    });
                     
                     if (globalSearchQuery && matchApps.length === 0 && !folder.name.toLowerCase().includes(globalSearchQuery)) return;
                     if (!globalSearchQuery && folder.apps.length === 0) {
-                        // Display empty structural block representation maps
                         contentAccumulator += buildFolderSectionWrapper(folder, fIdx, `<div style="grid-column: 1/-1; font-size:13px; color:var(--text-muted); padding:10px 4px;">Carpeta vacía</div>`);
                         return;
                     }
@@ -1334,7 +1341,7 @@ function updateAppPreview() {
                     let gridItemsCardsHtml = '';
                     const collectionToUse = globalSearchQuery ? matchApps : folder.apps;
 
-                    collectionToUse.forEach((app, aIdx) => {
+                    collectionToUse.forEach((app) => {
                         let dynamicTrueIndex = folder.apps.indexOf(app);
                         gridItemsCardsHtml += buildAppItemCardMarkup(app, fIdx, dynamicTrueIndex);
                     });
@@ -1345,16 +1352,20 @@ function updateAppPreview() {
                 });
             }
 
-            // Hidden individual array components system map layer filter context
             if (currentFilterFolder === 'ALL' || currentFilterFolder === 'HIDDEN_LAYER') {
-                let matchedHidden = appData.hiddenApps.filter(a => a.name.toLowerCase().includes(globalSearchQuery) || a.url.toLowerCase().includes(globalSearchQuery));
+                let matchedHidden = appData.hiddenApps.filter(a => {
+                    const nameMatch = a.name.toLowerCase().includes(globalSearchQuery);
+                    const urlMatch = a.url.toLowerCase().includes(globalSearchQuery);
+                    const keywordMatch = Array.isArray(a.keywords) && a.keywords.some(k => k.toLowerCase().includes(globalSearchQuery));
+                    return nameMatch || urlMatch || keywordMatch;
+                });
                 
                 if (appData.hiddenApps.length > 0 && (matchedHidden.length > 0 || (!globalSearchQuery && currentFilterFolder === 'HIDDEN_LAYER'))) {
                     let hFolderMock = { name: 'Aplicaciones Ocultas (HiddenApps)', icon: 'EyeOff' };
                     let gridItemsCardsHtml = '';
                     const collectionToUse = globalSearchQuery ? matchedHidden : appData.hiddenApps;
 
-                    collectionToUse.forEach((app, aIdx) => {
+                    collectionToUse.forEach((app) => {
                         let dynamicTrueIndex = appData.hiddenApps.indexOf(app);
                         gridItemsCardsHtml += buildAppItemCardMarkup(app, 'hidden', dynamicTrueIndex);
                     });
@@ -1444,12 +1455,8 @@ function updateAppPreview() {
         function handleDragLeave(event) {
             const card = event.target.closest('.app-item-card');
             const section = event.target.closest('.section-block');
-            if (card) {
-                card.classList.remove('drag-over');
-            }
-            if (section) {
-                section.classList.remove('drag-over');
-            }
+            if (card) card.classList.remove('drag-over');
+            if (section) section.classList.remove('drag-over');
         }
 
         function handleDragEnd() {
@@ -1522,6 +1529,11 @@ function updateAppPreview() {
         }
 
         function buildAppItemCardMarkup(app, fIdx, aIdx) {
+            let tagsHtml = '';
+            if (Array.isArray(app.keywords) && app.keywords.length > 0) {
+                tagsHtml = `<div class="app-item-tags">` + app.keywords.map(k => `<span class="app-tag-badge">${k}</span>`).join('') + `</div>`;
+            }
+
             return `
                 <div class="app-item-card" draggable="true" data-folder-index="${fIdx}" data-app-index="${aIdx}">
                     <div class="app-item-info">
@@ -1531,6 +1543,7 @@ function updateAppPreview() {
                         <div class="app-item-details">
                             <div class="app-item-name">${app.name}</div>
                             <div class="app-item-url">${app.url}</div>
+                            ${tagsHtml}
                         </div>
                     </div>
                     <div class="app-item-actions">
@@ -1541,10 +1554,9 @@ function updateAppPreview() {
             `;
         }
 
-        // COMPILING DATA EXPORT GENERATOR MODULE 
         function openExportModal() {
-            // Reconstruct the requested exact native layout specification rules array representation 
             let codeStringifiedOutput = `const tools = [\n`;
+            let extractedKeywords = {};
             
             appData.tools.forEach((folder, idx) => {
                 codeStringifiedOutput += `    {\n`;
@@ -1554,7 +1566,10 @@ function updateAppPreview() {
                 codeStringifiedOutput += `        apps: [\n`;
                 
                 folder.apps.forEach((app, aIdx) => {
-                    codeStringifiedOutput += `            { name: '${app.name}', icon: '${app.icon}', url: '${app.url}' }${aIdx === folder.apps.length - 1 ? '' : ','}\n`;
+                    codeStringifiedOutput += `            { name: '${app.name.replace(/'/g, "\\'")}', icon: '${app.icon}', url: '${app.url}' }${aIdx === folder.apps.length - 1 ? '' : ','}\n`;
+                    if (Array.isArray(app.keywords) && app.keywords.length > 0) {
+                        extractedKeywords[app.url] = app.keywords;
+                    }
                 });
                 
                 codeStringifiedOutput += `        ]\n`;
@@ -1565,16 +1580,40 @@ function updateAppPreview() {
             if(appData.hiddenApps.length > 0) {
                 if(appData.hiddenApps.length === 1) {
                     let h = appData.hiddenApps[0];
-                    codeStringifiedOutput += `const hiddenApp = { name: '${h.name}', icon: '${h.icon}', url: '${h.url}' };`;
+                    codeStringifiedOutput += `const hiddenApp = { name: '${h.name.replace(/'/g, "\\'")}', icon: '${h.icon}', url: '${h.url}' };\n`;
+                    codeStringifiedOutput += `const hiddenApps = [hiddenApp];\n\n`;
+                    if (Array.isArray(h.keywords) && h.keywords.length > 0) {
+                        extractedKeywords[h.url] = h.keywords;
+                    }
                 } else {
                     codeStringifiedOutput += `const hiddenApps = [\n`;
                     appData.hiddenApps.forEach((h, hIdx) => {
-                        codeStringifiedOutput += `    { name: '${h.name}', icon: '${h.icon}', url: '${h.url}' }${hIdx === appData.hiddenApps.length - 1 ? '' : ','}\n`;
+                        codeStringifiedOutput += `    { name: '${h.name.replace(/'/g, "\\'")}', icon: '${h.icon}', url: '${h.url}' }${hIdx === appData.hiddenApps.length - 1 ? '' : ','}\n`;
+                        if (Array.isArray(h.keywords) && h.keywords.length > 0) {
+                            extractedKeywords[h.url] = h.keywords;
+                        }
                     });
-                    codeStringifiedOutput += `];`;
+                    codeStringifiedOutput += `];\n`;
+                    codeStringifiedOutput += `const hiddenApp = hiddenApps[0];\n\n`;
                 }
             } else {
-                codeStringifiedOutput += `const hiddenApp = null;`;
+                codeStringifiedOutput += `const hiddenApp = null;\nconst hiddenApps = [];\n\n`;
+            }
+
+            const kwKeys = Object.keys(extractedKeywords);
+            if(kwKeys.length > 0) {
+                codeStringifiedOutput += `const appKeywords = {\n`;
+                kwKeys.forEach((url, kIdx) => {
+                    codeStringifiedOutput += `    '${url}': [\n`;
+                    const kwArray = extractedKeywords[url];
+                    for (let i = 0; i < kwArray.length; i += 10) {
+                        const chunk = kwArray.slice(i, i + 10);
+                        const chunkStr = chunk.map(k => `'${k.replace(/'/g, "\\'")}'`).join(', ');
+                        codeStringifiedOutput += `        ${chunkStr}${i + 10 < kwArray.length ? ',' : ''}\n`;
+                    }
+                    codeStringifiedOutput += `    ]${kIdx === kwKeys.length - 1 ? '' : ','}\n`;
+                });
+                codeStringifiedOutput += `};\n`;
             }
 
             document.getElementById('json-output-area').innerText = codeStringifiedOutput;
@@ -1604,13 +1643,28 @@ function updateAppPreview() {
             try {
                 const parsedData = parseImportPayload(input);
 
+                const attachKeywords = (app) => {
+                    if (parsedData.appKeywords && parsedData.appKeywords[app.url]) {
+                        app.keywords = parsedData.appKeywords[app.url];
+                    } else {
+                        app.keywords = [];
+                    }
+                };
+
                 if (Array.isArray(parsedData.tools) && parsedData.tools.length > 0) {
+                    parsedData.tools.forEach(folder => {
+                        if (Array.isArray(folder.apps)) {
+                            folder.apps.forEach(attachKeywords);
+                        }
+                    });
                     appData.tools = parsedData.tools;
                 }
 
                 if (Array.isArray(parsedData.hiddenApps) && parsedData.hiddenApps.length > 0) {
+                    parsedData.hiddenApps.forEach(attachKeywords);
                     appData.hiddenApps = parsedData.hiddenApps;
                 } else if (parsedData.hiddenApp) {
+                    attachKeywords(parsedData.hiddenApp);
                     appData.hiddenApps = [parsedData.hiddenApp];
                 } else {
                     appData.hiddenApps = [];
@@ -1631,10 +1685,12 @@ function updateAppPreview() {
         }
 
         function parseImportPayload(input) {
-            const normalizedInput = input.replace(/\b(?:const|let|var)\s+(tools|hiddenApps|hiddenApp)\s*=/g, '$1 =');
+            // Se inyecta appKeywords en el bloque evaluado
+            const normalizedInput = input.replace(/\b(?:const|let|var)\s+(tools|hiddenApps|hiddenApp|appKeywords)\s*=/g, '$1 =');
             let tools;
             let hiddenApps;
             let hiddenApp;
+            let appKeywords;
 
             (function() {
                 eval(normalizedInput);
@@ -1643,7 +1699,8 @@ function updateAppPreview() {
             return {
                 tools: Array.isArray(tools) ? tools : undefined,
                 hiddenApps: Array.isArray(hiddenApps) ? hiddenApps : undefined,
-                hiddenApp: hiddenApp && typeof hiddenApp === 'object' ? hiddenApp : undefined
+                hiddenApp: hiddenApp && typeof hiddenApp === 'object' ? hiddenApp : undefined,
+                appKeywords: appKeywords && typeof appKeywords === 'object' ? appKeywords : {}
             };
         }
     </script>
