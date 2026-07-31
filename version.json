@@ -1,20 +1,17 @@
 {
-  "version": "1.2.1",
-  "date": "29 de Julio 2026",
+  "version": "1.3",
+  "date": "30 de Julio 2026",
   "changes": [
-    "Se añadieron Keywords, que permiten encontrar apps más rápido y de forma más precisa. (Ejemplo: 'ruleta' o 'sorteo' para la app Ruleta Aleatoria).",
-    "Se añadió la app Tier List que per mite crear listas de clasificación personalizadas y exportarlas como imagen.",
-    "Se añadió Bocetos, una app para dibujar rápidamente tus ideas"
-    "✦ Novedades de 1.0",
-    "🚀 Lanzamiento Oficial v1.0: ¡La suite definitiva de herramientas ya está aquí, totalmente estable y optimizada!",
-    "🛠️ Catálogo Completo de Apps: Utilidades de texto avanzadas, Ruleta aleatoria para sorteos y utilidades de desarrollo (App Maker y visor Lucide).",
-    "📱 Nueva Interfaz Adaptable: Cambia al instante entre tres modos de visualización (Burbuja, Lista o Cuadrícula) desde ajustes. ¡Las carpetas heredan tu diseño automáticamente!",
-    "⚡ Modo Anti-Fatiga (Sin Blur): Desactiva el desenfoque 'glassmorphism' para usar colores planos y sólidos oscuros. ¡Ideal para conseguir el máximo rendimiento en cualquier dispositivo!",
-    "🔋 Modo Oscuro Puro: Activa la opción de fondo negro absoluto (#121212) para ahorrar batería en pantallas OLED/AMOLED y descansar tu vista.",
-    "✨ Canvas de Partículas Interactivas: Disfruta de un fondo animado de partículas flotantes que reacciona a tu pantalla (con interruptor de apagado en ajustes).",
-    "⏱️ Reloj Central de 3 Estados: Haz un clic normal para entrar al 'Modo Zen' (reloj gigante sin distracciones) o mantén pulsado (>500ms) para activar el cronómetro de alta precisión.",
-    "⭐ Carpeta de Favoritos Persistente: Añade una estrella a tus apps preferidas para guardarlas localmente mediante localStorage y agrúpalas en una categoría dinámica.",
-    "🔍 Buscador Inteligente (Ctrl + K): Encuentra cualquier app al vuelo y realiza operaciones matemáticas de forma segura en la barra de búsqueda para copiar el resultado con un clic.",
-    "🛡️ Sistema Seguro (Safe-Engine): Incorpora un capturador visual de errores de código para evitar pantallas en blanco y un detector de entorno local offline con redirección web."
-  ]
+    "✦ Novedades de 1.3",
+    "🚀 Homescreen NEO v1.3: Una actualización centrada en la experiencia de uso, con más personalización, automatización y una interfaz mucho más inteligente.",
+    "🧠 Dock Inteligente: Se ha añadido un dock dinámico que aprende de tu uso y muestra automáticamente las aplicaciones que más utilizas.",
+    "🎵 Sonidos e Interacción Háptica: Activa efectos de sonido y vibración para conseguir una experiencia mucho más inmersiva y cercana a una aplicación nativa.",
+    "⭐ Sistema de Favoritos Renovado: Añade aplicaciones a Favoritos con un solo toque o arrástralas directamente para organizarlas de forma más rápida.",
+    "📂 Carpetas Mucho Más Potentes: Las carpetas respetan automáticamente tu modo de visualización (Burbuja, Lista o Cuadrícula) y cuentan con mejores animaciones y navegación.",
+    "🔎 Buscador Mejorado: Animaciones completamente renovadas, resultados más rápidos y una búsqueda mucho más fluida entre todas las aplicaciones.",
+    "🛠️ Nuevas Herramientas: Se incorporan nuevas utilidades como Bocetos, Generador de Memes, Quiz Studio, Rosco, CraftPalette y muchas mejoras en las aplicaciones existentes.",
+    "🎨 Interfaz Refinada: Decenas de pequeños ajustes visuales, nuevas transiciones, mejores modales, panel de ajustes rediseñado y una experiencia mucho más consistente.",
+    "⚡ Mayor Rendimiento: Optimizaciones generales del código, mejor respuesta de la interfaz, reducción de pequeños bloqueos y animaciones más suaves.",
+    "🛡️ Más Estabilidad: Corregidos numerosos errores internos y mejorado el sistema de detección de fallos para ofrecer una experiencia mucho más fiable."
+]
 }

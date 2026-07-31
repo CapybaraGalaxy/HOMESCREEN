@@ -1,0 +1,734 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+    <title>Juego de Memoria Pro</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@200;300;400;500;600;700&display=swap" rel="stylesheet">
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <style>
+        :root {
+            --bg: #000000;
+            --surface: #121212;
+            --surface-hover: #1c1c1e;
+            
+            --glass: rgba(18, 18, 20, 0.75);
+            --glass-border: rgba(255, 255, 255, 0.1);
+
+            --text-main: #FFFFFF;
+            --text-muted: #8E8E93;
+
+            --accent-danger: #FF453A;
+            --accent-success: #34C759;
+            --accent-primary: #0A84FF;
+
+            --bezier: cubic-bezier(0.16, 1, 0.3, 1);
+            --spring: cubic-bezier(0.34, 1.56, 0.64, 1);
+            --bouncy: cubic-bezier(0.68, -0.55, 0.265, 1.55);
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: 'Outfit', sans-serif;
+            -webkit-tap-highlight-color: transparent;
+            user-select: none;
+        }
+
+        body {
+            background-color: var(--bg);
+            color: var(--text-main);
+            height: 100dvh;
+            width: 100vw;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            overflow: hidden;
+        }
+
+        .app-container {
+            width: 100%;
+            max-width: 850px;
+            height: 100dvh;
+            max-height: 100dvh;
+            display: flex;
+            flex-direction: column;
+            padding: 16px 20px;
+            background: var(--bg);
+            box-sizing: border-box;
+        }
+
+        header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding-bottom: 12px;
+            border-bottom: 1px solid var(--glass-border);
+            flex-shrink: 0;
+        }
+
+        .header-left {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .app-icon-badge {
+            width: 36px;
+            height: 36px;
+            border-radius: 10px;
+            background: radial-gradient(circle, rgba(10,132,255,0.2) 0%, rgba(255,255,255,0.02) 100%);
+            border: 1px solid var(--glass-border);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .app-title {
+            font-size: 1.1rem;
+            font-weight: 600;
+        }
+
+        .stats-group {
+            display: flex;
+            gap: 14px;
+            font-size: 0.85rem;
+            color: var(--text-muted);
+            font-variant-numeric: tabular-nums;
+            font-weight: 500;
+        }
+
+        .stats-counter.pulse {
+            transform: scale(1.15);
+            color: var(--text-main);
+            transition: transform 0.2s var(--spring);
+        }
+
+        .main-content {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+            padding-top: 10px;
+            min-height: 0; /* Clave para el ajuste flex vertical */
+            overflow: hidden;
+        }
+
+        .folders-scroll-area {
+            display: flex;
+            gap: 8px;
+            overflow-x: auto;
+            scrollbar-width: none;
+            flex-shrink: 0;
+        }
+        .folders-scroll-area::-webkit-scrollbar { display: none; }
+
+        .pill {
+            background: var(--surface);
+            border: 1px solid var(--glass-border);
+            color: var(--text-muted);
+            padding: 6px 14px;
+            border-radius: 100px;
+            font-size: 0.8rem;
+            font-weight: 500;
+            cursor: pointer;
+            white-space: nowrap;
+            transition: all 0.2s var(--bezier);
+        }
+
+        .pill:hover {
+            color: var(--text-main);
+            background: var(--surface-hover);
+        }
+
+        .pill.active {
+            background: var(--text-main);
+            color: var(--bg);
+            border-color: var(--text-main);
+        }
+
+        .config-section {
+            display: flex;
+            flex-direction: column;
+            gap: 4px;
+            flex-shrink: 0;
+        }
+
+        .config-label {
+            font-size: 0.7rem;
+            color: var(--text-muted);
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+        }
+
+        .difficulty-selector {
+            display: grid;
+            grid-template-columns: repeat(5, 1fr);
+            gap: 6px;
+        }
+
+        .diff-btn {
+            background: var(--surface);
+            border: 1px solid var(--glass-border);
+            color: var(--text-muted);
+            padding: 6px 4px;
+            border-radius: 8px;
+            font-size: 0.75rem;
+            font-weight: 500;
+            cursor: pointer;
+            text-align: center;
+            transition: all 0.2s var(--bezier);
+        }
+
+        .diff-btn.active {
+            background: rgba(10, 132, 255, 0.18);
+            border-color: var(--accent-primary);
+            color: var(--accent-primary);
+        }
+
+        .btn-primary {
+            background: var(--text-main);
+            color: var(--bg);
+            border: none;
+            padding: 10px 20px;
+            border-radius: 12px;
+            font-weight: 600;
+            font-size: 0.85rem;
+            cursor: pointer;
+            transition: transform 0.2s var(--spring), opacity 0.2s;
+            width: 100%;
+            flex-shrink: 0;
+        }
+
+        .btn-primary:active { transform: scale(0.97); }
+
+        /* CONTENEDOR DEL TABLERO */
+        .game-grid-wrapper {
+            flex: 1;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            min-height: 0;
+            width: 100%;
+            overflow: hidden;
+        }
+
+        .game-grid {
+            display: grid;
+            gap: 8px;
+            width: 100%;
+            height: 100%;
+            max-height: 100%;
+            justify-content: center;
+            align-content: center;
+        }
+
+        .card {
+            aspect-ratio: 1;
+            perspective: 1000px;
+            cursor: pointer;
+            position: relative;
+            width: 100%;
+            height: 100%;
+            /* Ajuste de escala dinámico según alto/ancho */
+            max-width: min(110px, 12vh);
+            max-height: min(110px, 12vh);
+            margin: auto;
+        }
+
+        .card-inner {
+            position: relative;
+            width: 100%;
+            height: 100%;
+            text-align: center;
+            transition: transform 0.4s var(--bouncy);
+            transform-style: preserve-3d;
+        }
+
+        .card.flipped .card-inner {
+            transform: rotateY(180deg);
+        }
+
+        .card-front, .card-back {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            -webkit-backface-visibility: hidden;
+            backface-visibility: hidden;
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border: 1px solid var(--glass-border);
+        }
+
+        .card-front {
+            background: var(--surface);
+            color: var(--text-muted);
+            font-size: clamp(0.9rem, 2vh, 1.3rem);
+            font-weight: 600;
+            transition: background 0.2s, border-color 0.2s;
+        }
+
+        .card:hover .card-front {
+            background: var(--surface-hover);
+            border-color: rgba(255,255,255,0.2);
+        }
+
+        .card-back {
+            background: rgba(255, 255, 255, 0.08);
+            transform: rotateY(180deg);
+            font-size: clamp(1.2rem, 3.5vh, 2rem);
+        }
+
+        .card.matched .card-back {
+            background: rgba(52, 199, 89, 0.18);
+            border-color: var(--accent-success);
+            animation: matchBounce 0.5s var(--bouncy);
+        }
+
+        .card.shake .card-inner {
+            animation: shakeError 0.4s var(--bouncy);
+        }
+
+        .card.shake .card-back {
+            border-color: var(--accent-danger);
+            background: rgba(255, 69, 58, 0.18);
+        }
+
+        @keyframes matchBounce {
+            0% { transform: rotateY(180deg) scale(1); }
+            50% { transform: rotateY(180deg) scale(1.12); }
+            100% { transform: rotateY(180deg) scale(1); }
+        }
+
+        @keyframes shakeError {
+            0%, 100% { transform: rotateY(180deg) translateX(0); }
+            25% { transform: rotateY(180deg) translateX(-5px); }
+            75% { transform: rotateY(180deg) translateX(5px); }
+        }
+
+        /* OVERLAY VICTORIA */
+        .win-overlay {
+            position: fixed;
+            inset: 0;
+            background: rgba(0,0,0,0.85);
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 100;
+            opacity: 0;
+            pointer-events: none;
+            transition: opacity 0.3s var(--bezier);
+        }
+
+        .win-overlay.active {
+            opacity: 1;
+            pointer-events: auto;
+        }
+
+        .win-card {
+            background: var(--surface);
+            border: 1px solid var(--glass-border);
+            padding: 24px;
+            border-radius: 20px;
+            text-align: center;
+            width: 90%;
+            max-width: 300px;
+            display: flex;
+            flex-direction: column;
+            gap: 14px;
+            transform: scale(0.8);
+            transition: transform 0.4s var(--bouncy);
+        }
+
+        .win-overlay.active .win-card { transform: scale(1); }
+
+        canvas#confetti-canvas {
+            position: fixed;
+            inset: 0;
+            pointer-events: none;
+            z-index: 101;
+        }
+
+        @media(min-width: 650px) {
+            .app-container {
+                height: 92dvh;
+                max-height: 850px;
+                border: 1px solid var(--glass-border);
+                border-radius: 24px;
+                box-shadow: 0 20px 40px rgba(0,0,0,0.8);
+                padding: 20px 28px;
+            }
+        }
+    </style>
+</head>
+<body>
+
+    <div class="app-container">
+        <header>
+            <div class="header-left">
+                <div class="app-icon-badge">
+                    <i data-lucide="brain" size="18" style="color: var(--accent-primary);"></i>
+                </div>
+                <h1 class="app-title">Memoria Pro</h1>
+            </div>
+            <div class="stats-group">
+                <span id="timer-display">⏱️ 00:00</span>
+                <span id="score-counter">Intentos: 0</span>
+            </div>
+        </header>
+
+        <main class="main-content">
+            <div class="config-section">
+                <span class="config-label">Categoría</span>
+                <div class="folders-scroll-area" id="categories-container"></div>
+            </div>
+
+            <div class="config-section">
+                <span class="config-label">Dificultad</span>
+                <div class="difficulty-selector" id="difficulties-container">
+                    <button class="diff-btn active" data-diff="easy">4x2</button>
+                    <button class="diff-btn" data-diff="medium">4x3</button>
+                    <button class="diff-btn" data-diff="hard">4x4</button>
+                    <button class="diff-btn" data-diff="expert">5x4</button>
+                    <button class="diff-btn" data-diff="master">6x4</button>
+                </div>
+            </div>
+
+            <button class="btn-primary" id="start-btn">Iniciar Partida</button>
+
+            <div class="game-grid-wrapper">
+                <div class="game-grid" id="game-grid"></div>
+            </div>
+        </main>
+    </div>
+
+    <div class="win-overlay" id="win-overlay">
+        <div class="win-card">
+            <h2 style="font-size: 1.4rem; font-weight: 700;">¡Victoria! 🎉</h2>
+            <p id="win-stats-text" style="color: var(--text-muted); font-size: 0.85rem; line-height: 1.4;"></p>
+            <button class="btn-primary" id="restart-btn">Jugar Otra Vez</button>
+        </div>
+    </div>
+
+    <canvas id="confetti-canvas"></canvas>
+
+    <script>
+        let audioCtx = null;
+        function playSound(type) {
+            if (!audioCtx) audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+            if (audioCtx.state === 'suspended') audioCtx.resume();
+
+            const now = audioCtx.currentTime;
+            const osc = audioCtx.createOscillator();
+            const gain = audioCtx.createGain();
+            osc.connect(gain);
+            gain.connect(audioCtx.destination);
+
+            if (type === 'flip') {
+                osc.type = 'sine';
+                osc.frequency.setValueAtTime(400, now);
+                osc.frequency.exponentialRampToValueAtTime(800, now + 0.08);
+                gain.gain.setValueAtTime(0.15, now);
+                gain.gain.linearRampToValueAtTime(0.01, now + 0.08);
+                osc.start(now);
+                osc.stop(now + 0.08);
+            } else if (type === 'match') {
+                osc.type = 'triangle';
+                osc.frequency.setValueAtTime(523.25, now);
+                osc.frequency.setValueAtTime(659.25, now + 0.08);
+                gain.gain.setValueAtTime(0.2, now);
+                gain.gain.linearRampToValueAtTime(0.01, now + 0.25);
+                osc.start(now);
+                osc.stop(now + 0.25);
+            } else if (type === 'error') {
+                osc.type = 'sawtooth';
+                osc.frequency.setValueAtTime(180, now);
+                osc.frequency.linearRampToValueAtTime(110, now + 0.2);
+                gain.gain.setValueAtTime(0.15, now);
+                gain.gain.linearRampToValueAtTime(0.01, now + 0.2);
+                osc.start(now);
+                osc.stop(now + 0.2);
+            } else if (type === 'win') {
+                [523.25, 659.25, 783.99, 1046.50].forEach((freq, idx) => {
+                    const subOsc = audioCtx.createOscillator();
+                    const subGain = audioCtx.createGain();
+                    subOsc.type = 'triangle';
+                    subOsc.frequency.setValueAtTime(freq, now + idx * 0.09);
+                    subGain.gain.setValueAtTime(0.2, now + idx * 0.09);
+                    subGain.gain.linearRampToValueAtTime(0.01, now + idx * 0.09 + 0.3);
+                    subOsc.connect(subGain);
+                    subGain.connect(audioCtx.destination);
+                    subOsc.start(now + idx * 0.09);
+                    subOsc.stop(now + idx * 0.09 + 0.3);
+                });
+            }
+        }
+
+        const CATEGORIES = [
+            { id: 'animals', name: '🐶 Animales', emojis: ['🐶', '🐱', '🦊', '🐼', '🦁', '🐯', '🐰', '🐨', '🐵', '🐮', '🐷', '🐸'] },
+            { id: 'food', name: '🍕 Comida', emojis: ['🍕', '🍔', '🌮', '🍣', '🍩', '🍪', '🍉', '🍓', '🥑', '🥞', '🍿', '🍧'] },
+            { id: 'travel', name: '🚀 Viajes', emojis: ['🚀', '🌍', '🚗', '✈️', '⛵', '🗽', '🗼', '🏝️', '🚲', '🚁', '🏰', '🛸'] },
+            { id: 'sports', name: '⚽ Deportes', emojis: ['⚽', '🏀', '🎾', '🏈', '⚾', '🏐', ' bowling', '🛹', '🥊', '🏓', '🏉', '🥌'] },
+            { id: 'tech', name: '📱 Tech', emojis: ['📱', '💻', '🖱️', '💾', '💿', '⌨️', '🖨️', '🔋', '🔌', '📷', '💡', '🎧'] },
+            { id: 'fantasy', name: '🧙‍♂️ Fantasía', emojis: ['🧙‍♂️', '🦄', '🐉', '🧚‍♀️', '🏰', '⚔️', '🔮', '👑', '🛡️', '🧪', '📜', '🧞‍♂️'] }
+        ];
+
+        const DIFFICULTIES = {
+            easy: { rows: 2, cols: 4, pairs: 4 },
+            medium: { rows: 3, cols: 4, pairs: 6 },
+            hard: { rows: 4, cols: 4, pairs: 8 },
+            expert: { rows: 4, cols: 5, pairs: 10 },
+            master: { rows: 4, cols: 6, pairs: 12 }
+        };
+
+        let appData = {
+            selectedCategory: 'animals',
+            selectedDifficulty: 'easy',
+            attempts: 0,
+            matches: 0,
+            cards: [],
+            flippedCards: [],
+            isChecking: false,
+            isPlaying: false,
+            seconds: 0,
+            timerId: null
+        };
+
+        function initApp() {
+            renderCategories();
+            setupEventListeners();
+            lucide.createIcons();
+            startGame();
+        }
+
+        function renderCategories() {
+            const container = document.getElementById('categories-container');
+            container.innerHTML = CATEGORIES.map(cat => `
+                <button class="pill ${appData.selectedCategory === cat.id ? 'active' : ''}" data-category="${cat.id}">
+                    ${cat.name}
+                </button>
+            `).join('');
+
+            container.querySelectorAll('.pill').forEach(btn => {
+                btn.addEventListener('click', (e) => {
+                    appData.selectedCategory = e.target.dataset.category;
+                    renderCategories();
+                });
+            });
+        }
+
+        function setupEventListeners() {
+            document.querySelectorAll('.diff-btn').forEach(btn => {
+                btn.addEventListener('click', (e) => {
+                    document.querySelectorAll('.diff-btn').forEach(b => b.classList.remove('active'));
+                    e.target.classList.add('active');
+                    appData.selectedDifficulty = e.target.dataset.diff;
+                });
+            });
+
+            document.getElementById('start-btn').addEventListener('click', startGame);
+            document.getElementById('restart-btn').addEventListener('click', () => {
+                document.getElementById('win-overlay').classList.remove('active');
+                startGame();
+            });
+        }
+
+        function startTimer() {
+            stopTimer();
+            appData.seconds = 0;
+            updateTimerDisplay();
+            appData.timerId = setInterval(() => {
+                appData.seconds++;
+                updateTimerDisplay();
+            }, 1000);
+        }
+
+        function stopTimer() {
+            if (appData.timerId) clearInterval(appData.timerId);
+        }
+
+        function updateTimerDisplay() {
+            const mins = String(Math.floor(appData.seconds / 60)).padStart(2, '0');
+            const secs = String(appData.seconds % 60).padStart(2, '0');
+            document.getElementById('timer-display').innerText = `⏱️ ${mins}:${secs}`;
+        }
+
+        function secureShuffle(array) {
+            let currentIndex = array.length, randomIndex;
+            while (currentIndex !== 0) {
+                randomIndex = Math.floor(Math.random() * currentIndex);
+                currentIndex--;
+                [array[currentIndex], array[randomIndex]] = [array[randomIndex], array[currentIndex]];
+            }
+            return array;
+        }
+
+        function startGame() {
+            appData.attempts = 0;
+            appData.matches = 0;
+            appData.flippedCards = [];
+            appData.isChecking = false;
+            appData.isPlaying = true;
+
+            updateCounterDisplay();
+            startTimer();
+
+            const diff = DIFFICULTIES[appData.selectedDifficulty];
+            const cat = CATEGORIES.find(c => c.id === appData.selectedCategory);
+
+            let selectedEmojis = secureShuffle([...cat.emojis]).slice(0, diff.pairs);
+            let deckRaw = [...selectedEmojis, ...selectedEmojis];
+            let shuffledDeck = secureShuffle(deckRaw);
+
+            appData.cards = shuffledDeck.map((emoji, index) => ({
+                id: index,
+                emoji,
+                flipped: false,
+                matched: false
+            }));
+
+            renderGrid();
+        }
+
+        function renderGrid() {
+            const grid = document.getElementById('game-grid');
+            const diff = DIFFICULTIES[appData.selectedDifficulty];
+
+            grid.style.gridTemplateColumns = `repeat(${diff.cols}, minmax(0, 1fr))`;
+            grid.style.gridTemplateRows = `repeat(${diff.rows}, minmax(0, 1fr))`;
+
+            grid.innerHTML = appData.cards.map(card => `
+                <div class="card" data-id="${card.id}">
+                    <div class="card-inner">
+                        <div class="card-front">?</div>
+                        <div class="card-back">${card.emoji}</div>
+                    </div>
+                </div>
+            `).join('');
+
+            grid.querySelectorAll('.card').forEach(cardEl => {
+                cardEl.addEventListener('click', () => {
+                    handleCardClick(parseInt(cardEl.dataset.id), cardEl);
+                });
+            });
+        }
+
+        function handleCardClick(id, cardEl) {
+            if (!appData.isPlaying || appData.isChecking) return;
+
+            const card = appData.cards.find(c => c.id === id);
+            if (!card || card.flipped || card.matched) return;
+
+            card.flipped = true;
+            cardEl.classList.add('flipped');
+            playSound('flip');
+            appData.flippedCards.push({ card, el: cardEl });
+
+            if (appData.flippedCards.length === 2) {
+                appData.attempts++;
+                updateCounterDisplay();
+                appData.isChecking = true;
+
+                const [c1, c2] = appData.flippedCards;
+
+                if (c1.card.emoji === c2.card.emoji) {
+                    c1.card.matched = true;
+                    c2.card.matched = true;
+                    setTimeout(() => {
+                        c1.el.classList.add('matched');
+                        c2.el.classList.add('matched');
+                        playSound('match');
+                        appData.flippedCards = [];
+                        appData.isChecking = false;
+
+                        appData.matches++;
+                        const diff = DIFFICULTIES[appData.selectedDifficulty];
+                        if (appData.matches === diff.pairs) endGame();
+                    }, 300);
+
+                } else {
+                    setTimeout(() => {
+                        c1.el.classList.add('shake');
+                        c2.el.classList.add('shake');
+                        playSound('error');
+                    }, 300);
+
+                    setTimeout(() => {
+                        c1.card.flipped = false;
+                        c2.card.flipped = false;
+                        c1.el.classList.remove('flipped', 'shake');
+                        c2.el.classList.remove('flipped', 'shake');
+                        appData.flippedCards = [];
+                        appData.isChecking = false;
+                    }, 900);
+                }
+            }
+        }
+
+        function updateCounterDisplay() {
+            const counter = document.getElementById('score-counter');
+            counter.textContent = `Intentos: ${appData.attempts}`;
+            counter.classList.add('pulse');
+            setTimeout(() => counter.classList.remove('pulse'), 200);
+        }
+
+        function endGame() {
+            stopTimer();
+            appData.isPlaying = false;
+            playSound('win');
+
+            const mins = String(Math.floor(appData.seconds / 60)).padStart(2, '0');
+            const secs = String(appData.seconds % 60).padStart(2, '0');
+
+            document.getElementById('win-stats-text').innerHTML = `
+                Completado en <strong>${appData.attempts} intentos</strong><br>
+                Tiempo final: <strong>${mins}:${secs}</strong>
+            `;
+
+            triggerConfetti();
+            document.getElementById('win-overlay').classList.add('active');
+        }
+
+        function triggerConfetti() {
+            const canvas = document.getElementById('confetti-canvas');
+            const ctx = canvas.getContext('2d');
+            canvas.width = window.innerWidth;
+            canvas.height = window.innerHeight;
+
+            const particles = Array.from({ length: 70 }, () => ({
+                x: Math.random() * canvas.width,
+                y: Math.random() * canvas.height - canvas.height,
+                size: Math.random() * 8 + 4,
+                color: ['#0A84FF', '#34C759', '#FF9F0A', '#FF453A', '#BF5AF2'][Math.floor(Math.random() * 5)],
+                speedY: Math.random() * 3 + 2,
+                speedX: Math.random() * 2 - 1
+            }));
+
+            function render() {
+                ctx.clearRect(0, 0, canvas.width, canvas.height);
+                particles.forEach(p => {
+                    p.y += p.speedY;
+                    p.x += p.speedX;
+                    ctx.fillStyle = p.color;
+                    ctx.fillRect(p.x, p.y, p.size, p.size);
+                });
+
+                if (particles.some(p => p.y < canvas.height)) {
+                    requestAnimationFrame(render);
+                }
+            }
+            render();
+        }
+
+        window.onload = initApp;
+    </script>
+</body>
+</html>

@@ -17,7 +17,8 @@ body.no-blur .search-panel,
 body.no-blur .settings-panel, 
 body.no-blur .tool-card, 
 body.no-blur .local-chip, 
-body.no-blur .custom-modal { 
+body.no-blur .custom-modal,
+body.no-blur .dock-container { 
     backdrop-filter: none !important; 
     background: #111 !important; 
 }
@@ -50,6 +51,7 @@ body {
     transition: opacity 1s var(--bezier);
 }
 body.bg-active #bgCanvas { opacity: 0.6; }
+
 
 .local-chip {
     position: fixed;
@@ -108,7 +110,28 @@ body.bg-active #bgCanvas { opacity: 0.6; }
     animation: slideUp 0.8s var(--bezier);
     transition: transform 0.6s var(--bezier);
     will-change: transform;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
 }
+
+/* ESTADO BATERÍA */
+.battery-status {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 6px;
+    font-size: 0.85rem;
+    color: var(--text-muted);
+    margin-top: 12px;
+    padding: 4px 12px;
+    background: rgba(255,255,255,0.05);
+    border-radius: 20px;
+    transition: opacity 0.3s ease;
+}
+.battery-status i { width: 16px; height: 16px; }
+body.zen-mode .battery-status { opacity: 0; pointer-events: none; }
+
 .clock { 
     font-size: 6rem; 
     font-weight: 200; 
@@ -222,11 +245,20 @@ body.bg-active #bgCanvas { opacity: 0.6; }
     border-radius: 50px;
     text-decoration: none;
     color: var(--text-main);
-    transition: all 0.3s var(--bezier); 
+    /* Mejorado con curva spring */
+    transition: transform 0.4s cubic-bezier(0.34, 1.56, 0.64, 1), background 0.3s, border-color 0.3s, box-shadow 0.3s;
     animation: fadeInItem 0.6s var(--bezier) both;
     flex-shrink: 0; 
     cursor: pointer;
     position: relative;
+}
+
+/* Clase de selección para la navegación por teclado */
+.tool-card.keyboard-active {
+    background: rgba(255,255,255,0.15);
+    transform: translateY(-2px);
+    border-color: rgba(255,255,255,0.3);
+    box-shadow: 0 4px 15px rgba(255,255,255,0.1);
 }
 
 /* EFECTOS COHESIVOS EXCLUSIVOS PARA DISPOSITIVOS CON RATÓN (PC) */
@@ -234,7 +266,8 @@ body.bg-active #bgCanvas { opacity: 0.6; }
     .tool-card:hover { 
         background: #fff; 
         color: #000; 
-        transform: translateY(-4px); 
+        transform: scale(1.05) translateY(-4px); 
+        box-shadow: 0 8px 20px rgba(255,255,255,0.2);
     }
     .tool-card:hover .star-btn {
         color: rgba(0, 0, 0, 0.35) !important;
@@ -247,7 +280,7 @@ body.bg-active #bgCanvas { opacity: 0.6; }
     }
 }
 
-/* EFECTO DE TOQUE EN MÓVILES (EVITA HOVER PEGAJOSO) */
+/* EFECTO DE TOQUE EN MÓVILES */
 .tool-card:active { 
     transform: scale(0.95); 
     background: rgba(255, 255, 255, 0.15); 
@@ -276,7 +309,7 @@ body.bg-active #bgCanvas { opacity: 0.6; }
     justify-content: center;
     padding: 4px;
     border-radius: 50%;
-    transition: all 0.3s var(--bezier);
+    transition: all 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
     margin-left: auto;
     z-index: 5;
     outline: none;
@@ -308,17 +341,59 @@ body.bg-active #bgCanvas { opacity: 0.6; }
 .error-card span { font-size: 0.95rem; font-weight: 400; line-height: 1.4; }
 .error-card small { color: rgba(255, 255, 255, 0.6); font-family: monospace; font-size: 0.8rem; margin-top: 5px; display: block; background: rgba(0,0,0,0.2); padding: 5px 10px; border-radius: 6px; }
 
-.search-wrapper {
+/* ==========================================
+   NUEVO UI INFERIOR: BUSCADOR + DOCK
+   ========================================== */
+.bottom-ui-wrapper {
     position: fixed;
     bottom: 40px;
-    left: 50%;
-    transform: translateX(-50%);
-    z-index: 100;
+    left: 0;
     width: 100%;
     display: flex;
     justify-content: center;
+    align-items: flex-end;
+    gap: 12px;
+    z-index: 100;
+    pointer-events: none; /* Deja pasar clicks al lienzo */
     transition: bottom 0.5s var(--bezier);
 }
+.bottom-ui-wrapper > * { 
+    pointer-events: auto; 
+}
+
+/* DOCK PÍLDORA INFERIOR */
+.dock-container {
+    height: 48px; /* Iguala altura con panel de busqueda */
+    padding: 0 10px;
+    background: var(--glass);
+    backdrop-filter: blur(var(--blur-val));
+    border: 1px solid var(--glass-border);
+    border-radius: 24px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    transition: all 0.5s var(--bezier);
+    box-shadow: 0 20px 50px rgba(0,0,0,0.5);
+}
+
+body.search-open .dock-container {
+    opacity: 0;
+    transform: translateY(20px);
+    pointer-events: none;
+}
+
+.dock-container .tool-card {
+    width: 36px;
+    height: 36px;
+    padding: 0;
+    border-radius: 50%;
+    justify-content: center;
+    margin: 0;
+}
+.dock-container .tool-card i { margin: 0; width: 18px; height: 18px; }
+.dock-container .tool-card span, 
+.dock-container .tool-card .star-btn { display: none; }
+
 
 .search-panel {
     width: 160px; height: 48px;
@@ -330,11 +405,17 @@ body.bg-active #bgCanvas { opacity: 0.6; }
     overflow: hidden;
     display: flex; flex-direction: column;
     box-shadow: 0 20px 50px rgba(0,0,0,0.5);
+    transform-origin: bottom center;
 }
 
 .search-panel.expanded {
+    position: fixed;
+    bottom: 15vh;
+    left: 50%;
+    transform: translateX(-50%);
     width: 90%; max-width: 500px; height: 400px;
-    border-radius: 28px; transform: translateY(-15vh);
+    border-radius: 28px;
+    z-index: 110;
 }
 
 .search-header { display: flex; align-items: center; justify-content: center; padding: 0 20px; min-height: 48px; cursor: pointer; transition: min-height 0.5s var(--bezier); }
@@ -347,9 +428,6 @@ body.bg-active #bgCanvas { opacity: 0.6; }
 .results-area { padding: 10px; overflow-y: auto; opacity: 0; flex: 1; transition: opacity 0.3s; }
 .search-panel.expanded .results-area { opacity: 1; transition-delay: 0.2s; }
 
-.result-item { display: flex; align-items: center; padding: 14px 18px; border-radius: 20px; text-decoration: none; color: var(--text-main); margin-bottom: 5px; transition: 0.3s; }
-.result-item:hover, .result-item.keyboard-active { background: rgba(255,255,255,0.08); transform: translateX(8px); }
-.result-item.keyboard-active { background: rgba(255,255,255,0.15) !important; }
 
 .settings-btn { position: fixed; bottom: 25px; right: 25px; background: var(--glass); border: 1px solid var(--glass-border); width: 45px; height: 45px; border-radius: 50%; display: flex; align-items: center; justify-content: center; cursor: pointer; z-index: 110; transition: all 0.4s var(--bezier); }
 
@@ -559,8 +637,9 @@ body.zen-mode .search-header { min-height: 38px; padding: 0 12px; }
 body.zen-mode .chip-placeholder span { font-size: 0.8rem; }
 body.zen-mode .chip-placeholder small { display: none; }
 body.zen-mode .exit-zen-btn { opacity: 1; pointer-events: auto; transform: scale(1); }
-body.zen-mode .search-panel.expanded { width: 90%; max-width: 500px; height: 400px; border-radius: 28px; transform: translateY(-15vh); }
+body.zen-mode .search-panel.expanded { width: 90%; max-width: 500px; height: 400px; border-radius: 28px; position: fixed; bottom: 15vh; left: 50%; transform: translateX(-50%); }
 body.zen-mode .search-panel.expanded .search-header { min-height: 48px; }
+body.zen-mode .dock-container { display: none !important; }
 
 /* ==========================================
    9. MODALES ADAPTABLES (SISTEMA EVOLUCIONADO)
@@ -706,7 +785,7 @@ body.zen-mode .search-panel.expanded .search-header { min-height: 48px; }
     text-decoration: none;
     color: var(--text-main);
     margin-bottom: 5px;
-    transition: transform 0.3s var(--bezier), opacity 0.3s var(--bezier), margin 0.3s var(--bezier), padding 0.3s var(--bezier), height 0.3s var(--bezier);
+    transition: transform 0.3s cubic-bezier(0.34, 1.56, 0.64, 1), opacity 0.3s var(--bezier), margin 0.3s var(--bezier), padding 0.3s var(--bezier), height 0.3s var(--bezier);
     opacity: 1;
     transform: scale(1) translateY(0);
     height: auto;
@@ -726,6 +805,8 @@ body.zen-mode .search-panel.expanded .search-header { min-height: 48px; }
 .result-item.search-enter {
     animation: fadeInItem 0.4s var(--bezier) both;
 }
+.result-item:hover, .result-item.keyboard-active { background: rgba(255,255,255,0.08); transform: translateX(8px); }
+.result-item.keyboard-active { background: rgba(255,255,255,0.15) !important; }
 
 /* ==========================================
    DROPDOWN CUSTOMIZADO (ESTILO GENERAL)

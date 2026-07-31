@@ -1,0 +1,1001 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+    <title>Juego del Rosco</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <style>
+        :root {
+            --bg: #000000;
+            --surface: #121212;
+            --surface-hover: #1c1c1e;
+            
+            --glass: rgba(15, 15, 15, 0.6);
+            --glass-border: rgba(255, 255, 255, 0.08);
+            --blur-val: 30px;
+
+            --text-main: #FFFFFF;
+            --text-muted: #8E8E93;
+
+            --accent-danger: #FF453A;
+            --accent-success: #34C759;
+            --accent-blue: #0A84FF;
+            --accent-warning: #FFD60A;
+
+            --bezier: cubic-bezier(0.16, 1, 0.3, 1);
+            --spring: cubic-bezier(0.34, 1.76, 0.64, 1);
+            
+            --rosco-size: 240px;
+            --letter-size: 26px;
+        }
+
+        @media (min-height: 650px) {
+            :root {
+                --rosco-size: 280px;
+                --letter-size: 30px;
+            }
+        }
+
+        @media (min-width: 768px) and (min-height: 800px) {
+            :root {
+                --rosco-size: 440px;
+                --letter-size: 40px;
+            }
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            -webkit-tap-highlight-color: transparent;
+        }
+
+        body {
+            background-color: var(--bg);
+            color: var(--text-main);
+            font-family: 'Outfit', sans-serif;
+            min-height: 100dvh;
+            overflow: hidden;
+        }
+
+        .app-container {
+            height: 100dvh;
+            padding: env(safe-area-inset-top) 16px calc(env(safe-area-inset-bottom) + 8px) 16px;
+            max-width: 660px;
+            margin: 0 auto;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+            gap: 8px;
+            transition: filter 0.4s var(--bezier);
+        }
+
+        .app-container.backgrounded {
+            filter: blur(12px) brightness(0.3);
+            pointer-events: none;
+        }
+
+        header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 8px 0;
+            border-bottom: 1px solid var(--glass-border);
+            flex-shrink: 0;
+        }
+
+        .header-title {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .app-icon-badge {
+            width: 34px;
+            height: 34px;
+            border-radius: 10px;
+            background: radial-gradient(circle at center, rgba(255,255,255,0.1) 0%, rgba(0,0,0,0) 100%);
+            border: 1px solid var(--glass-border);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        h1 {
+            font-size: 18px;
+            font-weight: 600;
+            letter-spacing: -0.5px;
+        }
+
+        .stats-badge-group {
+            display: flex;
+            gap: 6px;
+        }
+
+        .stat-badge {
+            background: var(--glass);
+            border: 1px solid var(--glass-border);
+            backdrop-filter: blur(var(--blur-val));
+            -webkit-backdrop-filter: blur(var(--blur-val));
+            padding: 4px 10px;
+            border-radius: 20px;
+            font-size: 13px;
+            font-weight: 500;
+            font-variant-numeric: tabular-nums;
+            display: flex;
+            align-items: center;
+            gap: 4px;
+            transition: transform 0.3s var(--spring);
+        }
+
+        .stat-badge.pop-active {
+            transform: scale(1.25);
+        }
+
+        .stat-badge.success { color: var(--accent-success); }
+        .stat-badge.danger { color: var(--accent-danger); }
+        .stat-badge.timer { color: var(--accent-warning); }
+
+        .main-content {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            min-height: 0; 
+        }
+
+        .setup-card {
+            width: 100%;
+            background: var(--glass);
+            border: 1px solid var(--glass-border);
+            backdrop-filter: blur(var(--blur-val));
+            -webkit-backdrop-filter: blur(var(--blur-val));
+            border-radius: 24px;
+            padding: 24px;
+            text-align: center;
+            display: flex;
+            flex-direction: column;
+            gap: 14px;
+            animation: cardEntrance 0.6s var(--spring) forwards;
+        }
+
+        @keyframes cardEntrance {
+            from { transform: scale(0.85) translateY(30px); opacity: 0; }
+            to { transform: scale(1) translateY(0); opacity: 1; }
+        }
+
+        .file-dropzone {
+            border: 2px dashed var(--glass-border);
+            border-radius: 16px;
+            padding: 24px 16px;
+            cursor: pointer;
+            transition: background 0.2s var(--bezier), border-color 0.2s var(--bezier);
+        }
+
+        .file-dropzone input { display: none; }
+
+        .tools-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 8px;
+            margin-top: 4px;
+        }
+
+        .btn {
+            background: var(--text-main);
+            color: var(--bg);
+            border: none;
+            padding: 12px 20px;
+            border-radius: 14px;
+            font-size: 14px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: transform 0.2s var(--spring), background-color 0.2s var(--bezier);
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 6px;
+        }
+
+        .btn:active { transform: scale(0.94); }
+        .btn-secondary {
+            background: var(--surface);
+            color: var(--text-main);
+            border: 1px solid var(--glass-border);
+        }
+        .btn-secondary:hover { background: var(--surface-hover); }
+
+        .game-layout {
+            display: none;
+            width: 100%;
+            height: 100%;
+            flex-direction: column;
+            align-items: center;
+            justify-content: space-between;
+        }
+
+        .rosco-wrapper {
+            position: relative;
+            width: var(--rosco-size);
+            height: var(--rosco-size);
+            margin: auto 0;
+            flex-shrink: 0;
+            animation: ringPop 0.7s var(--spring) forwards;
+        }
+
+        @keyframes ringPop {
+            from { transform: scale(0.5) rotate(-30deg); opacity: 0; }
+            to { transform: scale(1) rotate(0); opacity: 1; }
+        }
+
+        .rosco-circle {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            border-radius: 50%;
+        }
+
+        .letter-node {
+            position: absolute;
+            width: var(--letter-size);
+            height: var(--letter-size);
+            left: 50%;
+            top: 50%;
+            transform: translate(-50%, -50%);
+            border-radius: 50%;
+            background: var(--surface);
+            border: 1px solid var(--glass-border);
+            color: var(--text-main);
+            font-size: calc(var(--letter-size) * 0.45);
+            font-weight: 700;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: background-color 0.3s var(--bezier), transform 0.4s var(--spring), box-shadow 0.3s var(--bezier);
+            will-change: transform, left, top;
+        }
+
+        .letter-node.active {
+            background: var(--accent-blue);
+            box-shadow: 0 0 16px rgba(10, 132, 255, 0.6);
+            transform: translate(-50%, -50%) scale(1.3);
+            z-index: 2;
+        }
+
+        .letter-node.success { 
+            background: var(--accent-success); 
+            border-color: transparent;
+            transform: translate(-50%, -50%) scale(1.05);
+        }
+        .letter-node.danger { 
+            background: var(--accent-danger); 
+            border-color: transparent;
+            transform: translate(-50%, -50%) scale(1.05);
+        }
+
+        .rosco-center {
+            position: absolute;
+            left: 50%;
+            top: 50%;
+            transform: translate(-50%, -50%);
+            width: 55%;
+            height: 55%;
+            background: radial-gradient(circle, rgba(18,18,18,0.6) 0%, rgba(0,0,0,0.8) 100%);
+            border-radius: 50%;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            pointer-events: none;
+        }
+
+        .center-timer {
+            font-size: calc(var(--rosco-size) * 0.12);
+            font-weight: 700;
+            font-variant-numeric: tabular-nums;
+            line-height: 1;
+        }
+
+        .center-letter {
+            font-size: 15px;
+            color: var(--text-muted);
+            font-weight: 500;
+        }
+
+        .dashboard-panel {
+            width: 100%;
+            background: var(--glass);
+            border: 1px solid var(--glass-border);
+            backdrop-filter: blur(var(--blur-val));
+            -webkit-backdrop-filter: blur(var(--blur-val));
+            border-radius: 20px;
+            padding: 12px;
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+            flex-shrink: 0;
+            margin-bottom: env(safe-area-inset-bottom);
+        }
+
+        .panel-top-bar {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-bottom: 1px solid rgba(255,255,255,0.05);
+            padding-bottom: 6px;
+        }
+
+        .definition-prefix {
+            font-size: 11px;
+            text-transform: uppercase;
+            font-weight: 700;
+            color: var(--accent-blue);
+        }
+
+        .joker-group {
+            display: flex;
+            gap: 4px;
+        }
+
+        .btn-joker {
+            background: rgba(255, 255, 255, 0.04);
+            border: 1px solid var(--glass-border);
+            color: var(--text-main);
+            padding: 4px 8px;
+            border-radius: 6px;
+            font-size: 11px;
+            font-weight: 500;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 3px;
+            transition: all 0.2s var(--bezier);
+        }
+
+        .btn-joker:disabled {
+            opacity: 0.2;
+            cursor: not-allowed;
+            border-color: transparent;
+            background: rgba(255, 255, 255, 0.01);
+            color: var(--text-muted);
+        }
+
+        .definition-box {
+            min-height: 50px;
+            max-height: 75px;
+            overflow-y: auto;
+            display: flex;
+            flex-direction: column;
+            justify-content: flex-start;
+        }
+
+        .definition-text {
+            font-size: 13.5px;
+            line-height: 1.3;
+            color: #f5f5f7;
+        }
+
+        .hint-badge-zone {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 4px;
+            margin-top: 4px;
+        }
+
+        .hint-badge {
+            font-size: 11px;
+            background: rgba(255, 214, 10, 0.15);
+            color: var(--accent-warning);
+            border: 1px solid rgba(255, 214, 10, 0.25);
+            padding: 2px 6px;
+            border-radius: 4px;
+            font-weight: 600;
+            font-variant-numeric: tabular-nums;
+        }
+
+        .game-form-wrapper {
+            display: flex;
+            gap: 6px;
+            width: 100%;
+        }
+
+        .text-input {
+            flex: 1;
+            background: var(--surface);
+            border: 1px solid var(--glass-border);
+            border-radius: 12px;
+            padding: 10px 14px;
+            color: var(--text-main);
+            font-family: inherit;
+            font-size: 16px;
+            outline: none;
+            transition: border-color 0.2s var(--bezier);
+        }
+
+        .text-input:focus { border-color: rgba(255,255,255,0.25); }
+
+        .modal-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: 100;
+            background: rgba(0,0,0,0.5);
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 16px;
+            opacity: 0;
+            pointer-events: none;
+            transition: opacity 0.3s var(--bezier);
+        }
+
+        .modal-overlay.active { opacity: 1; pointer-events: auto; }
+
+        .modal-content {
+            background: #161617;
+            border: 1px solid rgba(255,255,255,0.1);
+            border-radius: 24px;
+            width: 100%;
+            max-width: 400px;
+            padding: 20px;
+            transform: scale(0.85);
+            transition: transform 0.4s var(--spring);
+            display: flex;
+            flex-direction: column;
+            gap: 14px;
+        }
+
+        .modal-overlay.active .modal-content { transform: scale(1); }
+
+        .error-shake {
+            animation: shake 0.35s var(--spring);
+            border-color: var(--accent-danger) !important;
+        }
+
+        @keyframes shake {
+            0%, 100% { transform: translateX(0); }
+            20%, 60% { transform: translateX(-6px); }
+            40%, 80% { transform: translateX(6px); }
+        }
+
+        .results-list {
+            max-height: 150px;
+            overflow-y: auto;
+            display: flex;
+            flex-direction: column;
+            gap: 4px;
+        }
+
+        .result-item {
+            display: flex;
+            justify-content: space-between;
+            font-size: 13px;
+            padding-bottom: 4px;
+            border-bottom: 1px solid rgba(255,255,255,0.05);
+        }
+
+        .hidden { display: none !important; }
+    </style>
+</head>
+<body>
+
+    <div class="app-container" id="main-view">
+        <header>
+            <div class="header-title">
+                <div class="app-icon-badge">
+                    <i data-lucide="help-circle" size="18" style="color: var(--text-main);"></i>
+                </div>
+                <h1 id="app-title">El Rosco</h1>
+            </div>
+            <div class="stats-badge-group">
+                <div class="stat-badge success" id="badge-ok"><i data-lucide="check" size="12"></i><span id="score-success">0</span></div>
+                <div class="stat-badge danger" id="badge-ko"><i data-lucide="x" size="12"></i><span id="score-danger">0</span></div>
+                <div class="stat-badge timer"><i data-lucide="clock" size="12"></i><span id="global-timer">150</span></div>
+            </div>
+        </header>
+
+        <main class="main-content">
+            <div id="setup-container" class="setup-card">
+                <h2 style="font-size: 16px; font-weight: 500;">Configura tu partida</h2>
+                
+                <div class="file-dropzone" id="dropzone">
+                    <i data-lucide="upload-cloud" size="26" style="color: var(--text-muted); margin-bottom: 4px;"></i>
+                    <p style="font-size: 13px; color: var(--text-muted);">Sube tu archivo JSON o pégalo aquí</p>
+                    <input type="file" id="file-input" accept=".json">
+                </div>
+
+                <div style="display: flex; gap: 8px;">
+                    <button class="btn" id="btn-paste-json" style="flex: 1;"><i data-lucide="clipboard" size="16"></i> Pegar JSON</button>
+                    <button class="btn btn-secondary" id="btn-demo" style="flex: 1;">Rosco Demo</button>
+                </div>
+
+                <div class="tools-grid">
+                    <button class="btn btn-secondary" id="btn-copy-prompt" style="font-size:12px;"><i data-lucide="terminal" size="13"></i>Copiar Prompt IA</button>
+                    <button class="btn btn-secondary" id="btn-download-tpl" style="font-size:12px;"><i data-lucide="download" size="13"></i>Bajar Plantilla</button>
+                </div>
+            </div>
+
+            <div id="game-container" class="game-layout">
+                <div class="rosco-wrapper">
+                    <div class="rosco-circle" id="rosco-nodes-container"></div>
+                    <div class="rosco-center">
+                        <div class="center-timer" id="center-countdown">150</div>
+                        <div class="center-letter" id="center-letter-focused">-</div>
+                    </div>
+                </div>
+
+                <div class="dashboard-panel">
+                    <div class="panel-top-bar">
+                        <div class="definition-prefix" id="def-prefix">Con la A</div>
+                        <div class="joker-group">
+                            <button class="btn-joker" id="joker-50"><i data-lucide="split" size="11"></i> 50:50</button>
+                            <button class="btn-joker" id="joker-skip"><i data-lucide="info" size="11"></i> Pista</button>
+                        </div>
+                    </div>
+
+                    <div class="definition-box">
+                        <div class="definition-text" id="def-text">Cargando definición...</div>
+                        <div class="hint-badge-zone" id="hint-zone"></div>
+                    </div>
+
+                    <form class="game-form-wrapper" id="game-submission-form" onsubmit="return false;">
+                        <input type="text" class="text-input" id="answer-input" placeholder="Escribe tu respuesta..." autocomplete="off" spellcheck="false" enterkeyhint="send">
+                        <button type="button" class="btn btn-secondary" id="btn-pasapalabra">Pasapalabra</button>
+                        <button type="submit" class="btn" id="btn-submit">Enviar</button>
+                    </form>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <div class="modal-overlay" id="modal-endgame">
+        <div class="modal-content">
+            <div class="modal-header" style="display:flex; justify-content:space-between; align-items:center;">
+                <h3 style="font-size:16px; font-weight:600;">Partida Finalizada</h3>
+                <i data-lucide="award" size="20" style="color: var(--accent-warning);"></i>
+            </div>
+            <p style="font-size: 13px; color: var(--text-muted);" id="endgame-reason">-</p>
+            
+            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px;">
+                <div style="background: var(--surface); padding: 10px; border-radius: 12px; text-align: center;">
+                    <span style="font-size: 11px; color: var(--text-muted);">Aciertos</span>
+                    <div style="font-size: 20px; font-weight: 700; color: var(--accent-success);" id="final-success">0</div>
+                </div>
+                <div style="background: var(--surface); padding: 10px; border-radius: 12px; text-align: center;">
+                    <span style="font-size: 11px; color: var(--text-muted);">Errores</span>
+                    <div style="font-size: 20px; font-weight: 700; color: var(--accent-danger);" id="final-danger">0</div>
+                </div>
+            </div>
+
+            <div class="results-list" id="endgame-details"></div>
+            <button class="btn" id="btn-restart" style="width: 100%;">Volver a Creación</button>
+        </div>
+    </div>
+
+    <script>
+        const AudioEngine = {
+            ctx: null,
+            init() { if (!this.ctx) this.ctx = new (window.AudioContext || window.webkitAudioContext)(); },
+            play(type) {
+                this.init(); if (!this.ctx) return;
+                const osc = this.ctx.createOscillator();
+                const gain = this.ctx.createGain();
+                osc.connect(gain); gain.connect(this.ctx.destination);
+                const now = this.ctx.currentTime;
+                if (type === 'success') {
+                    osc.frequency.setValueAtTime(523.25, now); osc.frequency.setValueAtTime(659.25, now + 0.06);
+                    gain.gain.setValueAtTime(0.15, now); gain.gain.exponentialRampToValueAtTime(0.01, now + 0.2);
+                    osc.start(now); osc.stop(now + 0.2);
+                } else if (type === 'danger') {
+                    osc.frequency.setValueAtTime(160, now); osc.frequency.linearRampToValueAtTime(100, now + 0.18);
+                    gain.gain.setValueAtTime(0.2, now); gain.gain.exponentialRampToValueAtTime(0.01, now + 0.18);
+                    osc.start(now); osc.stop(now + 0.18);
+                } else if (type === 'pasapalabra') {
+                    osc.frequency.setValueAtTime(380, now); gain.gain.setValueAtTime(0.08, now);
+                    gain.gain.exponentialRampToValueAtTime(0.01, now + 0.08);
+                    osc.start(now); osc.stop(now + 0.08);
+                }
+            }
+        };
+
+        let appData = {
+            config: { totalTime: 150 },
+            game: { questions: [], currentIndex: 0, timeLeft: 150, status: 'setup', jokers: { half: true, skip: true } }
+        };
+
+        const DEMO_ROSCO = [
+            { "letter": "A", "type": "con", "definition": "País más grande de América del Sur, cuya capital es Buenos Aires.", "answer": "Argentina", "alternative": "" },
+            { "letter": "B", "type": "con", "definition": "Elemento químico cuyo símbolo es B y número atómico es 5.", "answer": "Boro", "alternative": "" },
+            { "letter": "C", "type": "con", "definition": "Capital de Francia, famosa por la Torre Eiffel.", "answer": "Paris", "alternative": "París" },
+            { "letter": "D", "type": "con", "definition": "Moneda oficial utilizada en Estados Unidos y otros países.", "answer": "Dolar", "alternative": "Dólar" },
+            { "letter": "E", "type": "con", "definition": "Continente conocido tradicionalmente como el 'viejo continente'.", "answer": "Europa", "alternative": "" },
+            { "letter": "F", "type": "con", "definition": "Científico que descubrió la penicilina.", "answer": "Fleming", "alternative": "" },
+            { "letter": "G", "type": "con", "definition": "Fuerza de atracción mutua que experimentan los cuerpos por su masa.", "answer": "Gravedad", "alternative": "" },
+            { "letter": "H", "type": "con", "definition": "Gas noble de número atómico 2, el segundo elemento más ligero del universo.", "answer": "Helio", "alternative": "" },
+            { "letter": "I", "type": "con", "definition": "Océano que se encuentra al sur de Asia y al este de África.", "answer": "Indico", "alternative": "Índico" },
+            { "letter": "J", "type": "con", "definition": "Planeta más grande del sistema solar.", "answer": "Jupiter", "alternative": "Júpiter" },
+            { "letter": "K", "type": "con", "definition": "Unidad básica de masa en el Sistema Internacional de Unidades.", "answer": "Kilogramo", "alternative": "" },
+            { "letter": "L", "type": "con", "definition": "Único satélite natural de la Tierra.", "answer": "Luna", "alternative": "" },
+            { "letter": "M", "type": "con", "definition": "Cuarto planeta del sistema solar, conocido como el planeta rojo.", "answer": "Marte", "alternative": "" },
+            { "letter": "N", "type": "con", "definition": "Autor de la teoría de la gravitación universal y las leyes de la dinámica.", "answer": "Newton", "alternative": "" },
+            { "letter": "O", "type": "con", "definition": "Gas esencial para la respiración de la mayoría de los seres vivos.", "answer": "Oxigeno", "alternative": "Oxígeno" },
+            { "letter": "P", "type": "con", "definition": "Pintor malagueño considerado uno de los mayores artistas del siglo XX y cofundador del cubismo.", "answer": "Picasso", "alternative": "" },
+            { "letter": "Q", "type": "con", "definition": "Capital de Ecuador, situada en la cordillera de los Andes.", "answer": "Quito", "alternative": "" },
+            { "letter": "R", "type": "con", "definition": "Órgano principal del sistema excretor encargado de filtrar la sangre y producir la orina.", "answer": "Rinon", "alternative": "Riñón" },
+            { "letter": "S", "type": "con", "definition": "Estrella masiva en el centro de nuestro sistema solar.", "answer": "Sol", "alternative": "" },
+            { "letter": "T", "type": "con", "definition": "Tercer planeta del sistema solar en orden de distancia al Sol.", "answer": "Tierra", "alternative": "" },
+            { "letter": "U", "type": "con", "definition": "Séptimo planeta del sistema solar, un gigante helado.", "answer": "Urano", "alternative": "" },
+            { "letter": "V", "type": "con", "definition": "Segundo planeta del sistema solar, el objeto más brillante en el cielo nocturno después de la Luna.", "answer": "Venus", "alternative": "" },
+            { "letter": "W", "type": "con", "definition": "Físico alemán que formuló la teoría de la relatividad.", "answer": "Einstein", "alternative": "" },
+            { "letter": "X", "type": "contiene", "definition": "Instrumento musical de percusión formado por láminas de madera ordenadas según su tamaño.", "answer": "Xilofono", "alternative": "Xilófono" },
+            { "letter": "Y", "type": "con", "definition": "País asiático cuya capital es Saná.", "answer": "Yemen", "alternative": "" },
+            { "letter": "Z", "type": "con", "definition": "Naturalista británico autor de la teoría de la evolución por selección natural.", "answer": "Darwin", "alternative": "" }
+        ];
+
+        const PROMPT_IA = `Actúa como un diseñador experto de juegos de palabras. Genera un archivo JSON para una app de rosco estructurado como una lista de objetos. El juego debe contener mínimo 15 letras del abecedario. Cada objeto debe seguir este formato estricto:
+[
+  { "letter": "A", "type": "con", "definition": "Descripción o pista clara aquí", "answer": "palabra", "alternative": "sinónimo opcional" }
+]
+Asegúrate de que "type" sea "con" (si empieza por esa letra) o "contiene" (si la incluye dentro). Devuelve únicamente el array JSON válido sin bloques markdown decorativos.`;
+
+        const TEMPLATE_JSON = [
+            { "letter": "A", "type": "con", "definition": "Primera letra del abecedario.", "answer": "azul", "alternative": "asombroso" },
+            { "letter": "B", "type": "con", "definition": "Estructura flotante para navegar por el agua.", "answer": "barco" }
+        ];
+
+        let countdownInterval = null;
+        let activeModalsStack = [];
+        let resizeRafId = null;
+
+        function openModal(modalId) {
+            document.getElementById('main-view').classList.add('backgrounded');
+            document.getElementById(modalId).classList.add('active');
+            activeModalsStack.push(modalId);
+            window.history.pushState({ modalId: modalId }, "");
+        }
+
+        window.addEventListener('popstate', () => {
+            if (activeModalsStack.length > 0) {
+                const topModalId = activeModalsStack.pop();
+                document.getElementById(topModalId).classList.remove('active');
+                if (activeModalsStack.length === 0) document.getElementById('main-view').classList.remove('backgrounded');
+            }
+        });
+
+        function parseAndLoadJSON(jsonString) {
+            try {
+                // Remove Markdown decorators if present
+                const cleanText = jsonString.replace(/```json/g, '').replace(/```/g, '').trim();
+                const json = JSON.parse(cleanText);
+                if (Array.isArray(json) && json.length > 0 && json[0].letter) {
+                    loadRoscoEngine(json);
+                    return true;
+                }
+            } catch (e) {
+                console.error(e);
+            }
+            triggerShake(document.getElementById('dropzone'));
+            return false;
+        }
+
+        function initDOM() {
+            document.getElementById('btn-demo').onclick = () => loadRoscoEngine(DEMO_ROSCO);
+            
+            document.getElementById('btn-paste-json').onclick = async () => {
+                try {
+                    const text = await navigator.clipboard.readText();
+                    if (text) parseAndLoadJSON(text);
+                } catch (err) {
+                    alert("No se pudo acceder al portapapeles. Asegúrate de otorgar los permisos necesarios.");
+                }
+            };
+
+            document.getElementById('btn-copy-prompt').onclick = () => {
+                navigator.clipboard.writeText(PROMPT_IA);
+                const originalText = document.getElementById('btn-copy-prompt').innerHTML;
+                document.getElementById('btn-copy-prompt').innerText = "¡Copiado!";
+                setTimeout(() => { document.getElementById('btn-copy-prompt').innerHTML = originalText; }, 2000);
+            };
+
+            document.getElementById('btn-download-tpl').onclick = () => {
+                const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(TEMPLATE_JSON, null, 2));
+                const downloadAnchor = document.createElement('a');
+                downloadAnchor.setAttribute("href", dataStr);
+                downloadAnchor.setAttribute("download", "plantilla_rosco.json");
+                document.body.appendChild(downloadAnchor);
+                downloadAnchor.click();
+                downloadAnchor.remove();
+            };
+            
+            const fileInput = document.getElementById('file-input');
+            const dropzone = document.getElementById('dropzone');
+            dropzone.onclick = () => fileInput.click();
+            dropzone.ondragover = (e) => e.preventDefault();
+            dropzone.ondrop = (e) => { e.preventDefault(); if (e.dataTransfer.files.length) handleFile(e.dataTransfer.files[0]); };
+            fileInput.onchange = (e) => { if (e.target.files.length) handleFile(e.target.files[0]); };
+
+            // Global paste support anywhere on the screen during setup
+            document.addEventListener('paste', (e) => {
+                if (appData.game.status === 'setup') {
+                    const pastedData = (e.clipboardData || window.clipboardData).getData('text');
+                    if (pastedData) parseAndLoadJSON(pastedData);
+                }
+            });
+
+            const submissionForm = document.getElementById('game-submission-form');
+            const answerInput = document.getElementById('answer-input');
+
+            submissionForm.onsubmit = (e) => { 
+                e.preventDefault(); 
+                if (answerInput.value.trim() === '') {
+                    pasapalabra();
+                } else {
+                    checkAnswer(); 
+                }
+            };
+
+            answerInput.addEventListener('keydown', (e) => {
+                if (e.key === ' ' && answerInput.value.trim() === '') {
+                    e.preventDefault();
+                    pasapalabra();
+                }
+            });
+
+            document.getElementById('btn-pasapalabra').onclick = pasapalabra;
+            document.getElementById('joker-50').onclick = useJokerHalf;
+            document.getElementById('joker-skip').onclick = useJokerPista;
+            document.getElementById('btn-restart').onclick = () => { window.history.back(); resetToSetup(); };
+        }
+
+        function handleFile(file) {
+            const reader = new FileReader();
+            reader.onload = (e) => parseAndLoadJSON(e.target.result);
+            reader.readAsText(file);
+        }
+
+        function triggerShake(element) {
+            element.classList.add('error-shake');
+            setTimeout(() => element.classList.remove('error-shake'), 350);
+        }
+
+        function flashBadge(id) {
+            const badge = document.getElementById(id);
+            badge.classList.add('pop-active');
+            setTimeout(() => badge.classList.remove('pop-active'), 300);
+        }
+
+        function normalizeText(text) {
+            return text.trim().toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "");
+        }
+
+        function loadRoscoEngine(questionsArray) {
+            appData.game.questions = questionsArray.map(q => ({ 
+                ...q, 
+                state: 'pending', 
+                userAnswer: null,
+                usedJokerHalf: false,
+                usedJokerPista: false
+            }));
+            appData.game.currentIndex = 0;
+            appData.game.timeLeft = appData.config.totalTime;
+            appData.game.status = 'playing';
+            appData.game.jokers = { half: true, skip: true };
+
+            document.getElementById('setup-container').classList.add('hidden');
+            document.getElementById('game-container').style.display = 'flex';
+
+            buildRoscoRingDom();
+            renderRoscoRingPositions();
+            updateDashboard();
+            startTimer();
+            forceInputFocus();
+        }
+
+        function buildRoscoRingDom() {
+            const container = document.getElementById('rosco-nodes-container');
+            if(!container) return;
+            container.innerHTML = '';
+            
+            appData.game.questions.forEach((item, index) => {
+                const node = document.createElement('div');
+                node.className = `letter-node pending`;
+                node.id = `node-${index}`;
+                node.innerText = item.letter.toUpperCase();
+                container.appendChild(node);
+            });
+        }
+
+        function renderRoscoRingPositions() {
+            const items = appData.game.questions;
+            if (!items.length) return;
+            const radius = window.innerWidth < 768 ? (window.innerHeight < 650 ? 95 : 120) : 190;
+
+            items.forEach((_, index) => {
+                const node = document.getElementById(`node-${index}`);
+                if (!node) return;
+                const angle = (index / items.length) * 2 * Math.PI - Math.PI / 2;
+                const x = radius * Math.cos(angle);
+                const y = radius * Math.sin(angle);
+                node.style.left = '50%';
+                node.style.top = '50%';
+                node.style.transform = `translate(-50%, -50%) translate(${x}px, ${y}px) ${index === appData.game.currentIndex ? 'scale(1.3)' : ''}`;
+            });
+        }
+
+        function updateDashboard() {
+            const game = appData.game;
+            const currentIdx = game.currentIndex;
+
+            document.getElementById('score-success').innerText = game.questions.filter(q => q.state === 'success').length;
+            document.getElementById('score-danger').innerText = game.questions.filter(q => q.state === 'danger').length;
+
+            if (game.status !== 'playing' || currentIdx === null) return;
+            const currentQuestion = game.questions[currentIdx];
+
+            document.getElementById('center-letter-focused').innerText = currentQuestion.letter.toUpperCase();
+            document.getElementById('def-prefix').innerText = `${currentQuestion.type === 'con' ? 'Con la' : 'Contiene la'} ${currentQuestion.letter.toUpperCase()}`;
+            document.getElementById('def-text').innerText = currentQuestion.definition;
+
+            const hintZone = document.getElementById('hint-zone');
+            hintZone.innerHTML = '';
+            
+            if (currentQuestion.usedJokerHalf) {
+                const maskedWord = currentQuestion.answer.split('').map((char, index) => {
+                    if (char === ' ') return ' ';
+                    return index % 2 === 0 ? char.toUpperCase() : '•';
+                }).join('');
+                hintZone.innerHTML += `<span class="hint-badge">Revelado: ${maskedWord}</span>`;
+            }
+            if (currentQuestion.usedJokerPista) {
+                hintZone.innerHTML += `<span class="hint-badge">Longitud: ${currentQuestion.answer.length} letras</span>`;
+            }
+
+            document.getElementById('joker-50').disabled = !game.jokers.half;
+            document.getElementById('joker-skip').disabled = !game.jokers.skip;
+
+            game.questions.forEach((q, i) => {
+                const el = document.getElementById(`node-${i}`);
+                if (el) {
+                    el.className = `letter-node ${q.state} ${i === currentIdx ? 'active' : ''}`;
+                }
+            });
+            
+            renderRoscoRingPositions();
+        }
+
+        function forceInputFocus() {
+            const input = document.getElementById('answer-input');
+            setTimeout(() => { input.focus(); }, 40);
+        }
+
+        function startTimer() {
+            clearInterval(countdownInterval);
+            countdownInterval = setInterval(() => {
+                appData.game.timeLeft--;
+                document.getElementById('global-timer').innerText = appData.game.timeLeft;
+                document.getElementById('center-countdown').innerText = appData.game.timeLeft;
+                if (appData.game.timeLeft <= 0) endGame('Tiempo agotado');
+            }, 1000);
+        }
+
+        function nextPendingIndex() {
+            const game = appData.game;
+            let checkIdx = (game.currentIndex + 1) % game.questions.length;
+            for (let i = 0; i < game.questions.length; i++) {
+                if (game.questions[checkIdx].state === 'pending') return checkIdx;
+                checkIdx = (checkIdx + 1) % game.questions.length;
+            }
+            return null;
+        }
+
+        function pasapalabra() {
+            AudioEngine.play('pasapalabra');
+            const nextIdx = nextPendingIndex();
+            if (nextIdx !== null) {
+                appData.game.currentIndex = nextIdx;
+                document.getElementById('answer-input').value = '';
+                updateDashboard();
+            }
+            forceInputFocus();
+        }
+
+        function checkAnswer() {
+            const inputElement = document.getElementById('answer-input');
+            const rawUserAnswer = inputElement.value;
+            const cleanUserAnswer = normalizeText(rawUserAnswer);
+
+            if (!cleanUserAnswer) {
+                triggerShake(inputElement);
+                return;
+            }
+
+            const currentQuestion = appData.game.questions[appData.game.currentIndex];
+            let isCorrect = (cleanUserAnswer === normalizeText(currentQuestion.answer)) || 
+                            (currentQuestion.alternative && cleanUserAnswer === normalizeText(currentQuestion.alternative));
+
+            currentQuestion.userAnswer = rawUserAnswer;
+            currentQuestion.state = isCorrect ? 'success' : 'danger';
+            
+            AudioEngine.play(isCorrect ? 'success' : 'danger');
+            flashBadge(isCorrect ? 'badge-ok' : 'badge-ko');
+
+            inputElement.value = '';
+            const nextIdx = nextPendingIndex();
+
+            if (nextIdx !== null) {
+                appData.game.currentIndex = nextIdx;
+                updateDashboard();
+                forceInputFocus();
+            } else {
+                endGame('Has completado el rosco');
+            }
+        }
+
+        function useJokerHalf() {
+            if (!appData.game.jokers.half) return;
+            appData.game.jokers.half = false;
+            appData.game.questions[appData.game.currentIndex].usedJokerHalf = true;
+            updateDashboard();
+            forceInputFocus();
+        }
+
+        function useJokerPista() {
+            if (!appData.game.jokers.skip) return;
+            appData.game.jokers.skip = false;
+            appData.game.questions[appData.game.currentIndex].usedJokerPista = true;
+            updateDashboard();
+            forceInputFocus();
+        }
+
+        function endGame(reason) {
+            clearInterval(countdownInterval);
+            appData.game.status = 'ended';
+            document.getElementById('endgame-reason').innerText = reason;
+            
+            document.getElementById('final-success').innerText = appData.game.questions.filter(q => q.state === 'success').length;
+            document.getElementById('final-danger').innerText = appData.game.questions.filter(q => q.state === 'danger').length;
+
+            const detailsContainer = document.getElementById('endgame-details');
+            detailsContainer.innerHTML = '';
+            appData.game.questions.forEach(q => {
+                const row = document.createElement('div');
+                row.className = 'result-item';
+                const color = q.state === 'success' ? 'var(--accent-success)' : (q.state === 'danger' ? 'var(--accent-danger)' : 'var(--text-muted)');
+                row.innerHTML = `
+                    <div><strong style="color:${color}">${q.letter.toUpperCase()}</strong>: <em>${q.answer}</em></div>
+                    <div style="color: var(--text-muted); font-size:11px;">Tuya: ${q.userAnswer || '-'}</div>
+                `;
+                detailsContainer.appendChild(row);
+            });
+            openModal('modal-endgame');
+        }
+
+        function resetToSetup() {
+            document.getElementById('game-container').style.display = 'none';
+            document.getElementById('setup-container').classList.remove('hidden');
+            document.getElementById('score-success').innerText = '0';
+            document.getElementById('score-danger').innerText = '0';
+            document.getElementById('global-timer').innerText = appData.config.totalTime;
+            appData.game.status = 'setup';
+        }
+
+        window.onload = () => { 
+            initDOM(); 
+            lucide.createIcons(); 
+            window.addEventListener('resize', () => {
+                cancelAnimationFrame(resizeRafId);
+                resizeRafId = requestAnimationFrame(renderRoscoRingPositions);
+            }); 
+        };
+    </script>
+</body>
+</html>

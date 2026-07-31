@@ -1,0 +1,944 @@
+<!DOCTYPE html>
+<html lang="es">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+    <title>Guías y Consejos</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@200;300;400;500;600;700&display=swap"
+        rel="stylesheet">
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <style>
+        :root {
+            --bg: #000000;
+            --surface: #121212;
+            --surface-hover: #1c1c1e;
+
+            --glass: rgba(15, 15, 15, 0.6);
+            --glass-border: rgba(255, 255, 255, 0.08);
+            --blur-val: 30px;
+
+            --text-main: #FFFFFF;
+            --text-muted: #8E8E93;
+
+            --accent-danger: #FF453A;
+            --accent-success: #34C759;
+            --accent-primary: #0A84FF;
+
+            --bezier: cubic-bezier(0.16, 1, 0.3, 1);
+            --spring: cubic-bezier(0.34, 1.56, 0.64, 1);
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: 'Outfit', sans-serif;
+            font-variant-numeric: tabular-nums;
+            -webkit-font-smoothing: antialiased;
+        }
+
+        body {
+            background-color: var(--bg);
+            color: var(--text-main);
+            overflow-x: hidden;
+        }
+
+        .app-container {
+            max-width: 900px;
+            height: 100dvh;
+            margin: 0 auto;
+            display: flex;
+            flex-direction: column;
+            padding: env(safe-area-inset-top) 24px calc(env(safe-area-inset-bottom) + 16px) 24px;
+            position: relative;
+        }
+
+        /* Cabecera */
+        header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 16px 0;
+            border-bottom: 1px solid var(--glass-border);
+            margin-bottom: 16px;
+        }
+
+        .header-left {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .app-icon-badge {
+            width: 40px;
+            height: 40px;
+            border-radius: 12px;
+            background: radial-gradient(circle, rgba(255, 255, 255, 0.08) 0%, rgba(255, 255, 255, 0.02) 100%);
+            border: 1px solid var(--glass-border);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .app-title-group h1 {
+            font-size: 1.1rem;
+            font-weight: 600;
+            letter-spacing: -0.01em;
+        }
+
+        .article-counter {
+            font-size: 0.8rem;
+            color: var(--text-muted);
+            font-weight: 400;
+            transition: transform 0.3s var(--spring);
+        }
+
+        .article-counter.pulse {
+            transform: scale(1.1);
+            color: var(--accent-primary);
+        }
+
+        /* Buscador Inteligente */
+        .search-container {
+            position: relative;
+            margin-bottom: 16px;
+        }
+
+        .search-input {
+            width: 100%;
+            background: var(--surface);
+            border: 1px solid var(--glass-border);
+            border-radius: 14px;
+            padding: 12px 16px 12px 42px;
+            color: var(--text-main);
+            font-size: 0.95rem;
+            outline: none;
+            transition: border-color 0.2s ease, background 0.2s ease, transform 0.2s var(--bezier);
+        }
+
+        .search-input:focus {
+            border-color: rgba(255, 255, 255, 0.2);
+            background: var(--surface-hover);
+            transform: scale(1.01);
+        }
+
+        .search-icon {
+            position: absolute;
+            left: 14px;
+            top: 50%;
+            transform: translateY(-50%);
+            color: var(--text-muted);
+            pointer-events: none;
+            transition: color 0.2s ease;
+        }
+
+        .search-input:focus~.search-icon {
+            color: var(--accent-primary);
+        }
+
+        /* Píldoras de Categorías */
+        .folders-scroll-area {
+            display: flex;
+            gap: 8px;
+            overflow-x: auto;
+            padding: 4px 0 12px 0;
+            scrollbar-width: none;
+            -webkit-overflow-scrolling: touch;
+            margin-bottom: 8px;
+        }
+
+        .folders-scroll-area::-webkit-scrollbar {
+            display: none;
+        }
+
+        .category-pill {
+            background: var(--surface);
+            border: 1px solid var(--glass-border);
+            border-radius: 100px;
+            padding: 8px 16px;
+            font-size: 0.85rem;
+            color: var(--text-muted);
+            cursor: pointer;
+            white-space: nowrap;
+            transition: all 0.3s var(--spring);
+            user-select: none;
+        }
+
+        .category-pill:hover {
+            background: var(--surface-hover);
+            color: var(--text-main);
+        }
+
+        .category-pill.active {
+            background: var(--text-main);
+            color: var(--bg);
+            border-color: var(--text-main);
+            font-weight: 500;
+            transform: scale(1.03);
+        }
+
+        /* Listado de Artículos en Cuadrícula Correcta */
+        @keyframes fadeInUp {
+            from {
+                opacity: 0;
+                transform: translateY(15px);
+            }
+
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .main-content {
+            flex: 1;
+            overflow-y: auto;
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 16px;
+            align-content: start;
+            padding-bottom: 24px;
+            scrollbar-width: thin;
+            scrollbar-color: var(--glass-border) transparent;
+            transition: opacity 0.15s ease;
+        }
+
+        .main-content.fade-out {
+            opacity: 0;
+        }
+
+        .main-content::-webkit-scrollbar {
+            width: 4px;
+        }
+
+        .main-content::-webkit-scrollbar-thumb {
+            background: var(--glass-border);
+            border-radius: 4px;
+        }
+
+        .article-card {
+            background: var(--surface);
+            border: 1px solid var(--glass-border);
+            border-radius: 16px;
+            padding: 24px 22px;
+            cursor: pointer;
+            transition: transform 0.25s var(--bezier), background 0.2s ease, border-color 0.2s ease, box-shadow 0.25s ease;
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+            animation: fadeInUp 0.4s var(--bezier) backwards;
+            height: 100%;
+        }
+
+        .article-card:hover {
+            background: var(--surface-hover);
+            border-color: rgba(255, 255, 255, 0.15);
+            transform: scale(0.98);
+            box-shadow: 0 12px 30px rgba(0, 0, 0, 0.6);
+        }
+
+        .article-card-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .article-badge {
+            font-size: 0.75rem;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            color: var(--text-muted);
+            background: rgba(255, 255, 255, 0.04);
+            padding: 4px 8px;
+            border-radius: 6px;
+            border: 1px solid var(--glass-border);
+        }
+
+        .article-time {
+            font-size: 0.75rem;
+            color: var(--text-muted);
+        }
+
+        .article-card h3 {
+            font-size: 1.05rem;
+            font-weight: 500;
+            color: var(--text-main);
+            letter-spacing: -0.01em;
+            line-height: 1.3;
+        }
+
+        .article-card p {
+            font-size: 0.88rem;
+            color: var(--text-muted);
+            line-height: 1.45;
+            display: -webkit-box;
+            -webkit-line-clamp: 3;
+            -webkit-box-orient: vertical;
+            overflow: hidden;
+        }
+
+        /* Barra de Progreso de Lectura */
+        .reading-progress-container {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 3px;
+            background: transparent;
+            z-index: 101;
+        }
+
+        .reading-progress-bar {
+            height: 100%;
+            background: var(--accent-primary);
+            width: 0%;
+            transition: width 0.1s linear;
+        }
+
+        /* Vista de Lector (Modal Overlay) */
+        .reader-modal {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100vw;
+            height: 100dvh;
+            background: var(--bg);
+            z-index: 100;
+            display: flex;
+            flex-direction: column;
+            opacity: 0;
+            transform: scale(0.98) translateY(10px);
+            pointer-events: none;
+            transition: opacity 0.3s var(--bezier), transform 0.3s var(--bezier);
+        }
+
+        .reader-modal.active {
+            opacity: 1;
+            transform: scale(1) translateY(0);
+            pointer-events: auto;
+        }
+
+        .reader-header {
+            max-width: 900px;
+            width: 100%;
+            margin: 0 auto;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 20px 24px;
+            border-bottom: 1px solid var(--glass-border);
+            background: rgba(0, 0, 0, 0.8);
+            backdrop-filter: blur(var(--blur-val));
+            -webkit-backdrop-filter: blur(var(--blur-val));
+        }
+
+        .back-btn {
+            background: var(--surface);
+            border: 1px solid var(--glass-border);
+            color: var(--text-main);
+            border-radius: 10px;
+            padding: 8px 14px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            cursor: pointer;
+            font-size: 0.9rem;
+            transition: background 0.2s ease, transform 0.2s ease;
+        }
+
+        .back-btn:hover {
+            background: var(--surface-hover);
+            transform: scale(1.02);
+        }
+
+        .reader-body-container {
+            flex: 1;
+            overflow-y: auto;
+            padding: 32px 24px;
+            display: flex;
+            justify-content: center;
+            scroll-behavior: smooth;
+        }
+
+        .reader-content {
+            max-width: 700px;
+            width: 100%;
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+        }
+
+        .reader-content h2 {
+            font-size: 1.8rem;
+            font-weight: 600;
+            letter-spacing: -0.02em;
+            line-height: 1.2;
+        }
+
+        .reader-meta-info {
+            display: flex;
+            gap: 12px;
+            align-items: center;
+            font-size: 0.85rem;
+            color: var(--text-muted);
+            border-bottom: 1px solid var(--glass-border);
+            padding-bottom: 16px;
+        }
+
+        /* Contenido enriquecido de Artículos */
+        .article-body {
+            font-size: 1.05rem;
+            line-height: 1.6;
+            color: #D1D1D6;
+            display: flex;
+            flex-direction: column;
+            gap: 16px;
+        }
+
+        .article-body p {
+            margin-bottom: 8px;
+        }
+
+        .article-body h3 {
+            font-size: 1.3rem;
+            color: var(--text-main);
+            margin-top: 12px;
+            font-weight: 500;
+        }
+
+        .article-body img {
+            width: 100%;
+            border-radius: 12px;
+            margin: 12px 0;
+            border: 1px solid var(--glass-border);
+            object-fit: cover;
+            max-height: 380px;
+            background: var(--surface);
+            transition: transform 0.3s ease;
+        }
+
+        .article-body img:hover {
+            transform: scale(1.02);
+        }
+
+        /* Estilo para combinaciones de teclado <kbd> */
+        kbd {
+            background: rgba(255, 255, 255, 0.1);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            border-bottom-width: 2px;
+            border-radius: 6px;
+            padding: 3px 8px;
+            font-family: 'Outfit', monospace;
+            font-size: 0.85rem;
+            color: var(--text-main);
+            box-shadow: 0 1px 2px rgba(0, 0, 0, 0.3);
+            display: inline-block;
+            margin: 0 2px;
+        }
+
+        /* Estado Vacío */
+        .empty-state {
+            grid-column: span 2;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            padding: 60px 20px;
+            text-align: center;
+            color: var(--text-muted);
+            gap: 12px;
+        }
+
+        .empty-state i {
+            color: var(--text-muted);
+            opacity: 0.4;
+        }
+
+        @media(max-width: 768px) {
+            .main-content {
+                grid-template-columns: 1fr;
+            }
+
+            .empty-state {
+                grid-column: span 1;
+            }
+        }
+    </style>
+</head>
+
+<body>
+
+    <div class="reading-progress-container">
+        <div class="reading-progress-bar" id="reading-progress-bar"></div>
+    </div>
+
+    <div class="app-container" id="main-view">
+        <header>
+            <div class="header-left">
+                <div class="app-icon-badge">
+                    <i data-lucide="lightbulb" size="20" style="color: var(--text-main);"></i>
+                </div>
+                <div class="app-title-group">
+                    <h1>Centro de Consejos</h1>
+                </div>
+            </div>
+            <div class="article-counter" id="article-counter">0 guías</div>
+        </header>
+
+        <div class="search-container">
+            <input type="text" class="search-input" id="search-input"
+                placeholder="Buscar guías, atajos o tutoriales...">
+            <i data-lucide="search" size="18" class="search-icon"></i>
+        </div>
+
+        <div class="folders-scroll-area" id="categories-container"></div>
+
+        <main class="main-content" id="articles-list"></main>
+    </div>
+
+    <div class="reader-modal" id="reader-modal">
+        <div class="reader-header">
+            <button class="back-btn" onclick="closeArticleModal()">
+                <i data-lucide="arrow-left" size="18"></i>
+                <span>Volver</span>
+            </button>
+            <div id="modal-category-badge" class="article-badge">Categoría</div>
+        </div>
+        <div class="reader-body-container" id="reader-body-container">
+            <div class="reader-content" id="reader-content-inner"></div>
+        </div>
+    </div>
+
+    <script>
+const DEFAULT_ARTICLES = [
+{
+id: 'art-01',
+title: 'Primeros pasos en Homescreen',
+category: 'Tutorial',
+summary: 'Guía rápida para conocer la interfaz y empezar a usar tus herramientas desde el primer segundo.',
+date: '31 Jul 2026',
+content: `<p>Bienvenido a <strong>Homescreen</strong>. Vamos directo al grano: esta aplicación organiza tus herramientas
+    favoritas, carpetas y accesos directos en una interfaz limpia y minimalista.</p>
+<p style="text-align:center;opacity:.65;margin:20px 0;"> ⬇️ Sigue bajando para descubrir más... </p> <img
+    src="https://i.imgur.com/m4TQdVI.png" alt="Homescreen" style="width:100%;border-radius:12px;margin:15px 0;">
+<h3>Cómo usar las carpetas</h3>
+<p>Haz clic en cualquier categoría del escritorio para desplegar sus aplicaciones. Puedes navegar de forma
+    fluida sin recargar la página, solo tienes que tocar en el botón de <kbd>Cerrar</kbd> en la parte de abajo de la carpeta, usar la tecla <kbd>esc</kbd>, tocar fuera o usar el gesto de volver en dispositivos móviles.</p>
+    <img
+    src="https://i.imgur.com/vilBQBP.png" alt="Homescreen" style="width:100%;border-radius:12px;margin:15px 0;">
+<hr>
+<p><strong>Consejo:</strong> Esta es una de las funciones menos conocidas de Homescreen: Puedes arrastrar cualquier aplicación a
+    la zona superior para fijarla en tus favoritos instantáneamente.</p>
+<h3>Atajos clave</h3>
+<p>Usa <kbd>Ctrl</kbd> + <kbd>K</kbd> para abrir el buscador global en cualquier momento. Todavía queda una parte muy
+    útil del artículo.<br> <br> También puedes usar <kbd>Ctrl</kbd> + <kbd>F</kbd> o <kbd>Ctrl</kbd> +
+    <kbd>espacio</kbd> para abrir el menu de búsqueda.</p>
+<h3>Conclusión</h3>
+<p>Explora las categorías y adapta el escritorio a tu ritmo diario sin complicaciones. Puedes explorar el resto de artículos para aprender más o empezar ya a usar Homescreen NEO.</p>`
+},
+{
+id: 'art-02',
+title: 'Domina el Buscador Inteligente',
+category: 'Descubre',
+summary: 'Aprende a buscar aplicaciones, hacer cálculos y navegar con comandos rápidos.',
+date: '30 Jul 2026',
+content: `<p>El buscador de <strong>Homescreen</strong> sirve para mucho más que buscar nombres de apps. Escribe
+    directamente para filtrar herramientas o resolver dudas al vuelo.</p>
+<p style="text-align:center;opacity:.65;margin:20px 0;"> ⬇️ Sigue bajando para descubrir más funciones... </p> <img
+    src="https://i.imgur.com/KSmcuv8.png" alt="Buscador" style="width:100%;border-radius:12px;margin:15px 0;">
+<h3>Calculadora en la barra</h3>
+<p>Escribe operaciones matemáticas directamente en el buscador (como <kbd>50 * 4</kbd>) y obtén el resultado al instante
+    sin abrir ninguna app externa.</p>
+<h3>Búsqueda en la web</h3>
+<p>Además de buscar entre tus aplicaciones y realizar operaciones matemáticas, puedes buscar en internet desde tu barra de búsqueda.<br> Para ello presiona <kbd>Shift</kbd> + <kbd>Enter</kbd> o haz clic en el botón de Buscar. Desde <strong>Ajustes</strong> puedes cambiar el motor de búsqueda entre Google, Bing, DuckDuckGo y Yahoo (¡más próximamente!).</p>
+<img
+    src="https://i.imgur.com/MLmXa5U.png" alt="Buscador" style="width:100%;border-radius:12px;margin:15px 0;">
+    <hr>
+<p><strong>Consejo:</strong> Cuando haces una búsqueda, Homescreen no solo busca apps por su nombre exacto, cada app tiene varias keywords que la hacen aparecer. Es una función de las más útiles pero que más invisibles son.</p>
+<h3>Conclusión</h3>
+<p>Ahorra clics usando siempre el buscador global.</p>`
+},
+{
+  id: 'art-03',
+  title: 'Personaliza tu experiencia al 100%',
+  category: 'Personalización',
+  summary: 'Ajusta el aspecto visual, accesos, sonido, vibración y avisos desde un solo panel.',
+  date: '30 Jul 2026',
+  content: `<p>Configura <strong>Homescreen</strong> según tus gustos y necesidades desde el panel de Ajustes.</p>
+<p style="text-align:center;opacity:.65;margin:20px 0;"> ⬇️ Sigue bajando para descubrir más... </p>
+<img src="https://i.imgur.com/f1lD7p2.png" alt="Ajustes de Personalización" style="width:100%;border-radius:12px;margin:15px 0;">
+<h3>Interfaz y visualización</h3>
+<p>Cambia el modo de visualización entre <strong>Pill</strong>, <strong>Lista</strong> y <strong>Cuadrícula</strong>. Además, puedes activar o desactivar el efecto de <strong>Blur</strong> (desenfoque) para mejorar el rendimiento, activar partículas en el fondo o elegir si prefieres mostrar o ocultar la carpeta de favoritos, el dock o la barra de aplicaciones recientes.</p>
+<img src="https://i.imgur.com/tkcA5uu.png" alt="Modos de visualización" style="width:100%;border-radius:12px;margin:15px 0;">
+<hr>
+<h3>Reloj, Háptica y Sonido</h3>
+<p>Muestra el <strong>Porcentaje de Batería</strong> justo debajo del reloj principal, activa los <strong>Efectos de Sonido</strong> para recibir retroalimentación sutil al interactuar con la UI y activa la <strong>Vibración Háptica</strong> en móviles al tocar las tarjetas.</p>
+<hr>
+<p><strong>Consejo:</strong> Si estás usando la versión local HTML, puedes activar la opción <strong>Ocultar Aviso Local</strong> para no mostrar el chip web en la pantalla.</p>
+<h3>Conclusión</h3>
+<p>Adapta cada aspecto visual y de rendimiento a tu gusto personal.</p>`
+},
+{
+  id: 'art-05',
+  title: 'Atajos de teclado imprescindibles',
+  category: 'Funciones Ocultas',
+  summary: 'Aprende los mejores atajos para navegar a máxima velocidad.',
+  date: '30 Jul 2026',
+  content: `<p>Navega a toda velocidad por la interfaz sin necesidad de tocar el ratón.</p>
+<p style="text-align:center;opacity:.65;margin:20px 0;"> ⬇️ Sigue bajando para descubrir más... </p>
+<img src="https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcRfJjBFG2St5Fw1S3KDuC38fjoclQ_v63yrZZExWFnsA7UlFpPNivJZBV4&s=10" alt="Atajos de teclado" style="width:100%;border-radius:12px;margin:15px 0;">
+<h3>Navegación fluida</h3>
+<p>Puedes moverte entre aplicaciones y elementos usando las <strong>flechitas de dirección</strong> (<kbd>←</kbd> <kbd>↑</kbd> <kbd>→</kbd> <kbd>↓</kbd>) y presionar <kbd>Enter</kbd> para abrir. Para cerrar carpetas o salir de cualquier menú presiona la tecla <kbd>Esc</kbd>.</p>
+<img src="https://static.vecteezy.com/system/resources/previews/006/059/930/non_2x/pc-keyboard-arrow-keys-linear-icon-isolated-on-white-background-free-vector.jpg" alt="Navegación con flechas" style="width:100%;border-radius:12px;margin:15px 0;">
+<hr>
+<p><strong>Consejo:</strong> Presiona <kbd>Ctrl</kbd> + <kbd>K</kbd> desde cualquier lugar para desplegar el buscador global instantáneamente.</p>
+<h3>Conclusión</h3>
+<p>El teclado es la forma más rápida de moverte por Homescreen.</p>`
+},
+{
+  id: 'art-06',
+  title: 'Trabaja sin distracciones con el Modo Zen',
+  category: 'Productividad',
+  summary: 'Activa vistas limpias para concentrarte al máximo en tus tareas.',
+  date: '30 Jul 2026',
+  content: `<p>Entra en un entorno totalmente despejado para concentrarte sin elementos innecesarios en pantalla.</p>
+<p style="text-align:center;opacity:.65;margin:20px 0;"> ⬇️ Sigue bajando para descubrir más... </p>
+<img src="https://i.imgur.com/CVsXJCR.png" alt="Modo Zen" style="width:100%;border-radius:12px;margin:15px 0;">
+<h3>Cómo activar y salir</h3>
+<p>Para activar el Modo Zen solo tienes que <strong>mantener presionada la hora</strong>. Para desactivarlo y volver a la vista normal, haz clic en el botón situado en la <strong>esquina inferior derecha</strong>.</p>
+<hr>
+<h3>Conclusión</h3>
+<p>Mantén el enfoque en lo importante con un solo toque.</p>`
+},
+{
+  id: 'art-07',
+  title: 'Soporte de transparencias y fondos',
+  category: 'Personalización',
+  summary: 'Compatibilidad con extensiones de fondo transparente en tu navegador.',
+  date: '30 Jul 2026',
+  content: `<p>Homescreen está preparado para integrarse perfectamente con navegadores con soporte de fondos transparentes.</p>
+<p style="text-align:center;opacity:.65;margin:20px 0;"> ⬇️ Sigue bajando para descubrir más... </p>
+<img src="https://i.imgur.com/uDg9lYq.png" alt="Fondo Transparente" style="width:100%;border-radius:12px;margin:15px 0;">
+<h3>Compatibilidad y extensiones</h3>
+<p>Existe soporte nativo para extensiones de fondo transparente en navegadores como <strong>Zen Internet</strong>. Si desactivas la opción OLED, se aplicará un fondo blanco en caso de no contar con extensiones de transparencia activas.</p>
+<hr>
+<h3>Conclusión</h3>
+<p>Integra la estética de tu navegador directamente con la interfaz.</p>`
+},
+{
+  id: 'art-08',
+  title: 'Utilidades de texto rápidas',
+  category: 'PC',
+  summary: 'Limpia, cuenta y formatea textos en segundos.',
+  date: '30 Jul 2026',
+  content: `<p>Usa las herramientas integradas para eliminar formatos molestos y limpiar tus textos al instante.</p>
+<p style="text-align:center;opacity:.65;margin:20px 0;"> ⬇️ Sigue bajando para descubrir más... </p>
+<img src="https://i.imgur.com/uDRxu5U.png" alt="Utilidades de Texto" style="width:100%;border-radius:12px;margin:15px 0;">
+<h3>Limpieza de formatos</h3>
+<p>Puedes acceder a la herramienta directamente desde <a href="Apps/limpia-textos.html">este enlace de aquí</a> o desde la carpeta de <strong>Texto y Símbolos</strong> para pegar texto copiado de internet y eliminar etiquetas o saltos innecesarios.</p>
+<hr>
+<p><strong>Consejo:</strong> Todo el procesamiento ocurre de forma local en tu navegador.</p>
+<h3>Conclusión</h3>
+<p>Ahorra tiempo en tareas repetitivas de edición.</p>`
+},
+{
+  id: 'art-09',
+  title: 'Usa Homescreen en tu móvil o tablet',
+  category: 'Móvil',
+  summary: 'Ajusta el rendimiento táctil y el estilo visual según tu dispositivo.',
+  date: '30 Jul 2026',
+  content: `<p>La interfaz se adapta fluidamente a cualquier dispositivo móvil o tablet.</p>
+<p style="text-align:center;opacity:.65;margin:20px 0;"> ⬇️ Sigue bajando para descubrir más... </p>
+<img src="https://i.imgur.com/nUQfJsF.png" alt="Homescreen en Móvil" style="width:100%;border-radius:12px;margin:15px 0;">
+<h3>Optimización y modos de vista</h3>
+<p>Si notas lentitud en tu dispositivo móvil, puedes <strong>desactivar el blur</strong> en los Ajustes para que la interfaz vaya mucho más fluida. Además, puedes elegir libremente la vista entre modos <strong>Pill</strong>, <strong>Lista</strong> o <strong>Cuadrícula</strong> según tu preferencia táctil.</p>
+<hr>
+<h3>Conclusión</h3>
+<p>Máxima fluidez y adaptabilidad en la palma de tu mano.</p>`
+},
+{
+  id: 'art-10',
+  title: 'Gestiona tus datos y copias locales',
+  category: 'Configuración',
+  summary: 'Aprende cómo se guardan tus preferencias en el navegador.',
+  date: '30 Jul 2026',
+  content: `<p>Tus estadísticas y ajustes se almacenan de forma segura en el almacenamiento local (<kbd>localStorage</kbd>) de tu dispositivo.</p>
+<p style="text-align:center;opacity:.65;margin:20px 0;"> ⬇️ Sigue bajando para descubrir más... </p>
+<img src="https://meta-q.cdn.bubble.io/f1733233352108x975683178854142200/screen-shot-2021-11-19-at-50354-pm-16373163870261083123253.webp" alt="Gestión de Datos" style="width:100%;border-radius:12px;margin:15px 0;">
+<h3>Almacenamiento seguro</h3>
+<p>No se envían datos personales a servidores externos, garantizando total privacidad sobre tus accesos y preferencias.</p>
+<hr>
+<h3>Conclusión</h3>
+<p>Control total sobre tus datos de configuración.</p>`
+},
+{
+  id: 'art-11',
+  title: 'Organiza proyectos con el tablero Kanban',
+  category: 'Productividad',
+  summary: 'Estructura tus tareas pendientes de forma visual y sencilla.',
+  date: '30 Jul 2026',
+  content: `<p>Usa el tablero Kanban integrado para dividir tus proyectos en columnas de trabajo activo y completado.</p>
+<p style="text-align:center;opacity:.65;margin:20px 0;"> ⬇️ Sigue bajando para descubrir más... </p>
+<img src="https://i.imgur.com/JewIu5k.png" alt="Tablero Kanban" style="width:100%;border-radius:12px;margin:15px 0;">
+<h3>Acceso directo</h3>
+<p>Puedes abrir tu panel Kanban desde <a href="Apps/kanban.html">Apps/kanban.html</a> para arrastrar tarjetas y organizar tus tareas diarias rápidamente.</p>
+<hr>
+<h3>Conclusión</h3>
+<p>Visualizar tu trabajo acelera la finalización de proyectos.</p>`
+},
+{
+  id: 'art-12',
+  title: 'Ruletas y randomizers para decidir rápido',
+  category: 'Descubre',
+  summary: 'Usa ruletas aleatorias para romper la indecisión en tus descansos.',
+  date: '30 Jul 2026',
+  content: `<p>¿No te decides entre varias opciones? Introduce tus alternativas en la ruleta aleatoria y deja que el azar decida por ti.</p>
+<p style="text-align:center;opacity:.65;margin:20px 0;"> ⬇️ Sigue bajando para descubrir más... </p>
+<img src="https://i.imgur.com/XpKoGx8.png" alt="Ruleta de Decisión" style="width:100%;border-radius:12px;margin:15px 0;">
+<h3>Acceso rápido</h3>
+<p>Entra en la app desde <a href="Apps/aleatorio.html">este enlace</a> o desde la carpeta <strong>Entretenimiento y Randomizers</strong> para realizar selecciones aleatorias en pausas o decisiones rápidas.</p>
+<hr>
+<h3>Conclusión</h3>
+<p>Despeja la mente y decide sin perder tiempo.</p>`
+},
+{
+  id: 'art-13',
+  title: 'Gestor de comandos con Craftpalette',
+  category: 'PC',
+  summary: 'Organiza tus servidores, mundos y comandos de Minecraft.',
+  date: '30 Jul 2026',
+  content: `<p>Craftpalette es la herramienta diseñada para guardar y gestionar comandos fácilmente.</p>
+<p style="text-align:center;opacity:.65;margin:20px 0;"> ⬇️ Sigue bajando para descubrir más... </p>
+<img src="https://i.imgur.com/rFO2vLU.png" alt="Gestor Craftpalette" style="width:100%;border-radius:12px;margin:15px 0;">
+<h3>Gestión de mundos y servidores</h3>
+<p>Crea registros de tus servidores o mundos dentro de la aplicación, añade tus comandos frecuentemente usados, asígnales un nombre descriptivo y configura los permisos necesarios para ejecutarlos sin complicaciones.</p>
+<hr>
+<h3>Conclusión</h3>
+<p>Todos tus comandos importantes siempre a mano y estructurados.</p>`
+},
+{
+  id: 'art-14',
+  title: 'Cómo recibir actualizaciones de Homescreen',
+  category: 'Actualizaciones',
+  summary: 'Mantén tu sistema al día mediante actualizaciones automáticas o repositorios en local.',
+  date: '30 Jul 2026',
+  content: `<p>Asegúrate de contar siempre con las últimas funciones y correcciones de rendimiento.</p>
+<p style="text-align:center;opacity:.65;margin:20px 0;"> ⬇️ Sigue bajando para descubrir más... </p>
+<img src="https://media.licdn.com/dms/image/v2/D4E12AQH34SZ2PiGDQQ/article-cover_image-shrink_600_2000/article-cover_image-shrink_600_2000/0/1674456040620?e=2147483647&v=beta&t=0ccB_o8duxEtoRacfOmVC0CsTlypUWmoqg-k9jttfKU" alt="Sistema de Actualizaciones" style="width:100%;border-radius:12px;margin:15px 0;">
+<h3>Métodos de actualización</h3>
+<p>Puedes recibir las novedades de dos formas: mediante <strong>actualizaciones automáticas en la web</strong> o descargando/clonando los cambios directamente desde <strong>GitHub</strong> si estás ejecutando el proyecto en local.</p>
+<hr>
+<h3>Conclusión</h3>
+<p>Disfruta de las mejoras constantes sin perder tus configuraciones.</p>`
+}
+];
+        let appData = {
+            articles: [],
+            currentCategory: 'Todos',
+            searchQuery: ''
+        };
+
+        let currentActiveArticle = null;
+        let isModalOpen = false;
+
+        function getReadingStats(html) {
+            const text = html.replace(/<[^>]+>/g, " ");
+            const words = text.trim().split(/\s+/).filter(Boolean).length;
+            const minutes = Math.max(1, Math.ceil(words / 220));
+            return {
+                words,
+                minutes,
+                readTime: `${minutes} min lectura`
+            };
+        }
+
+        function initApp() {
+            // Lectura directa de DEFAULT_ARTICLES sin caché ni localStorage
+            let baseArticles = DEFAULT_ARTICLES;
+
+            appData.articles = baseArticles.map(article => {
+                const stats = getReadingStats(article.content);
+                return {
+                    ...article,
+                    readTime: stats.readTime,
+                    words: stats.words,
+                    minutes: stats.minutes
+                };
+            });
+
+            setupEventListeners();
+            renderApp();
+        }
+
+        function setupEventListeners() {
+            const searchInput = document.getElementById('search-input');
+            searchInput.addEventListener('input', (e) => {
+                const query = e.target.value.trim().toLowerCase();
+                const listContainer = document.getElementById('articles-list');
+
+                listContainer.classList.add('fade-out');
+                setTimeout(() => {
+                    appData.searchQuery = query;
+                    renderArticlesList();
+                    listContainer.classList.remove('fade-out');
+                }, 150);
+            });
+
+            window.addEventListener('keydown', (e) => {
+                if ((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === 'k') {
+                    e.preventDefault();
+                    searchInput.focus();
+                }
+                if (e.key === 'Escape') {
+                    closeArticleModal();
+                }
+            });
+
+            const readerBody = document.getElementById('reader-body-container');
+            readerBody.addEventListener('scroll', () => {
+                const scrollTop = readerBody.scrollTop;
+                const scrollHeight = readerBody.scrollHeight - readerBody.clientHeight;
+                const scrollPercent = scrollHeight > 0 ? (scrollTop / scrollHeight) * 100 : 0;
+
+                document.getElementById('reading-progress-bar').style.width = scrollPercent + '%';
+
+                if (currentActiveArticle) {
+                    const remainingMins = Math.max(0, Math.ceil(currentActiveArticle.minutes * (1 - scrollPercent / 100)));
+                    const timeElem = document.getElementById('modal-remaining-time');
+                    if (timeElem) {
+                        timeElem.textContent = remainingMins === 0 ? 'Finalizado' : `${remainingMins} min restantes`;
+                    }
+                }
+            });
+        }
+
+        function renderApp() {
+            renderCategories();
+            renderArticlesList();
+            updateCounter();
+            refreshIcons();
+        }
+
+        function refreshIcons() {
+            if (window.lucide) {
+                lucide.createIcons();
+            }
+        }
+
+        function renderCategories() {
+            const container = document.getElementById('categories-container');
+            const categories = ['Todos', ...new Set(appData.articles.map(a => a.category))];
+
+            container.innerHTML = categories.map(cat => `
+                <div class="category-pill ${appData.currentCategory === cat ? 'active' : ''}" onclick="selectCategory('${cat}')">
+                    ${cat}
+                </div>
+            `).join('');
+        }
+
+        function selectCategory(cat) {
+            appData.currentCategory = cat;
+            renderApp();
+        }
+
+        function renderArticlesList() {
+            const listContainer = document.getElementById('articles-list');
+
+            const filtered = appData.articles.filter(article => {
+                const matchesCategory = appData.currentCategory === 'Todos' || article.category === appData.currentCategory;
+                const plainContent = article.content.replace(/<[^>]+>/g, "").toLowerCase();
+                const matchesSearch = article.title.toLowerCase().includes(appData.searchQuery) ||
+                    article.summary.toLowerCase().includes(appData.searchQuery) ||
+                    plainContent.includes(appData.searchQuery);
+                return matchesCategory && matchesSearch;
+            });
+
+            if (filtered.length === 0) {
+                listContainer.innerHTML = `
+                    <div class="empty-state">
+                        <i data-lucide="folder-search" size="48"></i>
+                        <p>No se encontraron guías que coincidan con tu búsqueda.</p>
+                    </div>
+                `;
+                refreshIcons();
+                return;
+            }
+
+            listContainer.innerHTML = filtered.map((article, index) => `
+                <div class="article-card" style="animation-delay: ${index * 40}ms;" onclick="openArticle('${article.id}')">
+                    <div class="article-card-header">
+                        <span class="article-badge">${article.category}</span>
+                        <span class="article-time">${article.minutes} min · ${article.words} palabras</span>
+                    </div>
+                    <h3>${article.title}</h3>
+                    <p>${article.summary}</p>
+                </div>
+            `).join('');
+
+            refreshIcons();
+        }
+
+        function updateCounter() {
+            const counter = document.getElementById('article-counter');
+            const count = appData.articles.length;
+            counter.textContent = `${count} ${count === 1 ? 'guía' : 'guías'}`;
+            counter.classList.add('pulse');
+            setTimeout(() => counter.classList.remove('pulse'), 300);
+        }
+
+        function openArticle(id) {
+            const article = appData.articles.find(a => a.id === id);
+            if (!article) return;
+
+            currentActiveArticle = article;
+
+            document.getElementById('modal-category-badge').textContent = article.category;
+            document.getElementById('reader-content-inner').innerHTML = `
+                <h2>${article.title}</h2>
+                <div class="reader-meta-info">
+                    <span><i data-lucide="calendar" size="14"></i> ${article.date}</span>
+                    <span>•</span>
+                    <span><i data-lucide="clock" size="14"></i> ${article.readTime}</span>
+                    <span>•</span>
+                    <span id="modal-remaining-time">${article.minutes} min restantes</span>
+                </div>
+                <div class="article-body">
+                    ${article.content}
+                </div>
+            `;
+
+            document.getElementById('reader-modal').classList.add('active');
+
+            if (!isModalOpen) {
+                window.history.pushState({ modalOpen: true }, "");
+                isModalOpen = true;
+            }
+
+            document.getElementById('reader-body-container').scrollTop = 0;
+            document.getElementById('reading-progress-bar').style.width = '0%';
+
+            refreshIcons();
+        }
+
+        function closeArticleModal() {
+            if (isModalOpen) {
+                window.history.back();
+            }
+        }
+
+        window.addEventListener('popstate', () => {
+            const modal = document.getElementById('reader-modal');
+            if (modal.classList.contains('active')) {
+                modal.classList.remove('active');
+                isModalOpen = false;
+            }
+        });
+
+        window.onload = initApp;
+    </script>
+</body>
+
+</html>

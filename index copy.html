@@ -9,6 +9,7 @@
     <meta name="theme-color" content="#121212">
     <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@200;400;500&display=swap" rel="stylesheet">
     <script src="https://unpkg.com/lucide@latest"></script>
+    
     <link rel="stylesheet" href="styles.css">
     
     <script>
@@ -50,13 +51,12 @@
         <div><strong>VERSIÓN LOCAL</strong> <span>· Ir a web</span></div>
     </a>
 
-    <div class="version-tag" id="versionTag">1.3</div>
+    <div class="version-tag" id="versionTag">1.2.1</div>
 
     <div class="ui-layer">
         <header class="header">
             <div class="clock" id="clock">00:00</div>
             <div class="date" id="date">--</div>
-            <div id="batteryStatus" class="battery-status" style="display:none;"><i data-lucide="battery"></i> <span>--%</span></div>
         </header>
         <div class="scroll-wrapper">
             <div class="tools-container" id="toolsGrid"></div>
@@ -164,11 +164,7 @@ const tools = [
         apps: [
             { name: 'Ruleta aleatoria', icon: 'Ferris-Wheel', url: 'Apps/aleatorio.html' },
             { name: 'Creador de memes', icon: 'Laugh', url: 'Apps/meme.html' },
-            { name: 'Creador de Tierlist', icon: 'list-ordered', url: 'Apps/tierlist.html' },
-            { name: 'Estudio de Ritmos', icon: 'music', url: 'Apps/estudio-ritmos' },
-            { name: 'Quiz Studio', icon: 'brain-circuit', url: 'Apps/quiz-studio.html' },
-            { name: 'Rosco', icon: 'help-circle', url: 'Apps/rosco.html' },
-            { name: 'Memory (temporalmente)', icon: 'brain', url: 'Games/memory.html' }
+            { name: 'Creador de Tierlist', icon: 'list-ordered', url: 'Apps/tierlist.html' }
         ]
     },
     {
@@ -187,8 +183,7 @@ const tools = [
         apps: [
             { name: 'Material You', icon: 'palette', url: 'Apps/material-you' },
             { name: 'Galería de iconos', icon: 'Layout-List', url: 'Apps/icontest.html' },
-            { name: 'App maker', icon: 'Columns-Settings', url: 'Apps/appmaker.html' },
-            { name: 'Consejos', icon: 'lightbulb', url: 'Apps/consejos.html' }
+            { name: 'App maker', icon: 'Columns-Settings', url: 'Apps/appmaker.html' }
         ]
     }
 ];
@@ -327,21 +322,6 @@ const appKeywords = {
         'favoritos', 'comparar', 'mejor', 'peor', 'personajes', 'juegos', 'anime', 'plantilla', 'personalizar', 'ordenar',
         's', 'a', 'b', 'c', 'd', 'e', 'f', 'tier', 'list', 'ranking maker'
     ],
-    'Apps/estudio-ritmos': [
-        'piano', 'ritmos', 'música', 'tutorial', 'guía', 'ayuda', 'soporte', 'aprender', 'notas', 'acordes',
-        'teclado', 'partitura', 'tempo', 'metrónomo', 'grabar', 'componer', 'melodía', 'solución', 'error', 'ajustes',
-        'configurar', 'clases', 'escalas', 'audio', 'pistas', 'MIDI', 'instrumentos', 'práctica', 'paso a paso', 'lecciones'
-    ],
-    'Apps/quiz-studio.html': [
-        'quiz', 'trivias', 'cuestionarios', 'preguntas', 'respuestas', 'crear', 'tutorial', 'guía', 'ayuda', 'soporte',
-        'aprender', 'puntuación', 'temporizador', 'evaluación', 'diseñar', 'compartir', 'resultados', 'solución', 'error', 'ajustes',
-        'configurar', 'banco de preguntas', 'multijugador', 'estadísticas', 'plantillas', 'opción múltiple', 'puntos', 'juego', 'paso a paso', 'lecciones'
-    ],
-    'Apps/rosco.html': [
-        'rosco', 'pasapalabra', 'letras', 'definiciones', 'juego', 'crear', 'tutorial', 'guía', 'ayuda', 'soporte',
-        'aprender', 'abecedario', 'temporizador', 'aciertos', 'errores', 'puntuación', 'diccionario', 'configurar', 'ajustes', 'solución',
-        'banco de palabras', 'rueda', 'paso a paso', 'reglas', 'modos de juego', 'multijugador', 'retos', 'tiempo', 'puntos', 'lecciones'
-    ],
     'Apps/craftpalette.html': [
         'minecraft', 'craftpalette', 'paleta', 'bloques', 'construccion', 'diseño', 'colores', 'combinar', 'texturas', 'builder',
         'blocks', 'palette', 'mc', 'creativo', 'arquitectura', 'gama', 'tonos', 'esquema', 'herramienta', 'guia',
@@ -367,11 +347,6 @@ const appKeywords = {
         'settings', 'prototipo', 'crear app', 'software', 'codigo', 'componentes', 'paneles', 'vistas', 'configuracion', 'personalizar',
         'sistema', 'maquetador', 'drag and drop', 'entorno', 'ide', 'proyecto', 'editor', 'generador', 'utilidad', 'web app'
     ],
-    'Apps/consejos.html': [
-        'ayuda', 'soporte', 'tutorial', 'guia', 'consejos', 'preguntas frecuentes', 'faq', 'solucion', 'error', 'configurar',
-        'aprender', 'manual', 'paso a paso', 'pantalla de inicio', 'ajustes', 'restaurar', 'copia de seguridad', 'problemas', 'actualizacion', 'comunidad',
-        'trucos', 'primeros pasos', 'personalizar', 'interfaz', 'widgets', 'iconos', 'herramientas', 'soporte tecnico', 'funciones', 'inicio rapido'
-    ],
     'games.html': [
         'juegos', 'gamecenter', 'neo', 'videojuegos', 'entretenimiento', 'arcade', 'consola', 'gamepad', 'gamer', 'diversion',
         'ocio', 'play', 'gaming', 'retro', 'casual', 'oculto', 'hidden', 'hub', 'plataforma', 'catalogo',
@@ -380,133 +355,71 @@ const appKeywords = {
 };
 
 
+        // Variable global para rastrear el índice seleccionado en la navegación por teclado del buscador
         let currentSearchIndex = -1;
-        let activeFolderIndex = -1; 
-        let activeGridIndex = -1; 
-        
-        /* --- NUEVO: SISTEMA DE AUDIO WEB API --- */
-        let audioCtx = null;
-        function playSound(type) {
-            if (localStorage.getItem('sounds') !== 'true') return;
-            if (!audioCtx) audioCtx = new (window.AudioContext || window.webkitAudioContext)();
-            if (audioCtx.state === 'suspended') audioCtx.resume();
-            
-            const osc = audioCtx.createOscillator();
-            const gain = audioCtx.createGain();
-            osc.connect(gain);
-            gain.connect(audioCtx.destination);
-            
-            if (type === 'click') { 
-                osc.type = 'sine'; 
-                osc.frequency.setValueAtTime(600, audioCtx.currentTime); 
-                gain.gain.setValueAtTime(0.05, audioCtx.currentTime); 
-                gain.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + 0.1); 
-                osc.start(); 
-                osc.stop(audioCtx.currentTime + 0.1); 
-            } else if (type === 'open') { 
-                osc.type = 'triangle'; 
-                osc.frequency.setValueAtTime(300, audioCtx.currentTime); 
-                osc.frequency.exponentialRampToValueAtTime(600, audioCtx.currentTime + 0.15); 
-                gain.gain.setValueAtTime(0.05, audioCtx.currentTime); 
-                gain.gain.linearRampToValueAtTime(0, audioCtx.currentTime + 0.15); 
-                osc.start(); 
-                osc.stop(audioCtx.currentTime + 0.15); 
-            }
-        }
 
-        /* --- NUEVO: VIBRACIÓN HÁPTICA --- */
-        function triggerHaptic(duration = 15) {
-            if (localStorage.getItem('haptics') === 'true' && navigator.vibrate) {
-                navigator.vibrate(duration);
-            }
-        }
-
-        /* --- NUEVO: TRACKING DE APPS Y DOCK --- */
-        function trackAppUsage(url) {
-            let stats = JSON.parse(localStorage.getItem('appUsageStats') || '{}');
-            stats[url] = (stats[url] || 0) + 1;
-            localStorage.setItem('appUsageStats', JSON.stringify(stats));
-            renderDock();
-        }
-
-        function handleAppClick(event, url) {
-            triggerHaptic(20);
-            playSound('click');
-            trackAppUsage(url);
-            // No hacemos event.preventDefault() para que el enlace abra nativamente
-        }
-
-        function getTopApps(limit = 4) {
-            let stats = JSON.parse(localStorage.getItem('appUsageStats') || '{}');
-            const allApps = [];
-            tools.forEach(cat => cat.apps && allApps.push(...cat.apps));
-            if (typeof hiddenApps !== 'undefined') allApps.push(...hiddenApps);
-
-            const sortedUrls = Object.keys(stats).sort((a,b) => stats[b] - stats[a]);
-            const topApps = [];
-            for (let url of sortedUrls) {
-                const app = allApps.find(a => a.url === url);
-                if (app && topApps.length < limit) topApps.push(app);
-            }
-            return topApps;
-        }
-
-        function renderDock() {
-            const dock = document.getElementById('dockContainer');
-            if (!dock) return;
-            if (localStorage.getItem('showDock') !== 'true') {
-                dock.style.display = 'none';
-                return;
-            }
-            const topApps = getTopApps(5);
-            if (topApps.length === 0) {
-                dock.style.display = 'none';
-                return;
-            }
-            dock.style.display = 'flex';
-            dock.innerHTML = topApps.map(app => `
-                <a href="${app.url}" class="tool-card" onclick="handleAppClick(event, '${app.url}')" title="${app.name}">
-                    <i data-lucide="${app.icon}"></i>
-                </a>
-            `).join('');
-            if (window.lucide) lucide.createIcons();
-        }
-
+        // 1. POBLAR EL CONTENEDOR DE BUSQUEDA POR ÚNICA VEZ AL CARGAR
         function buildPersistentSearchDOM() {
             const resultsArea = document.getElementById('resultsArea') || document.querySelector('.results-area');
             if (!resultsArea) return;
-            resultsArea.innerHTML = '';
+
+            resultsArea.innerHTML = ''; // Limpiamos una única vez
+
+            // Insertamos todas las apps normales de los grupos organizados en 'tools'
             tools.forEach(category => {
-                if (category.apps) { category.apps.forEach(app => { createSearchItemElement(resultsArea, app); }); }
+                if (category.apps) {
+                    category.apps.forEach(app => {
+                        createSearchItemElement(resultsArea, app);
+                    });
+                }
             });
+
+            // Insertamos también las apps ocultas de 'hiddenApps'
             if (typeof hiddenApps !== 'undefined') {
-                hiddenApps.forEach(app => { createSearchItemElement(resultsArea, app); });
+                hiddenApps.forEach(app => {
+                    createSearchItemElement(resultsArea, app);
+                });
             }
+
+            // Volvemos a procesar los iconos creados mediante Lucide
             if (window.lucide) lucide.createIcons();
         }
 
         function createSearchItemElement(container, app) {
             const item = document.createElement('a');
             item.href = app.url;
-            item.className = 'result-item search-hidden'; 
+            item.className = 'result-item search-hidden'; // Nacen ocultos
+            
+            // LA CORRECCIÓN ESTÁ AQUÍ: Se eliminó el .toLowerCase() del atributo 'data-url'
             item.setAttribute('data-url', app.url); 
+            
             item.setAttribute('data-name', app.name.toLowerCase());
-            item.onclick = (e) => handleAppClick(e, app.url);
-            item.innerHTML = `<i data-lucide="${app.icon || 'link'}"></i><span style="margin-left:12px;">${app.name}</span>`;
+            item.innerHTML = `
+                <i data-lucide="${app.icon || 'link'}"></i>
+                <span style="margin-left:12px;">${app.name}</span>
+            `;
             container.appendChild(item);
         }
 
+        // 2. FUNCIÓN DE FILTRADO SUAVE (Sustituye por completo a tu lógica anterior de búsqueda)
         function filterSearchPersistent(searchTerm) {
             const query = searchTerm.toLowerCase().trim();
             const items = document.querySelectorAll('.results-area .result-item:not(.dynamic-item)');
             const resultsArea = document.getElementById('resultsArea');
             
+            // Eliminar items dinámicos (mates y web) al teclear para re-generarlos
             document.querySelectorAll('.dynamic-item').forEach(el => el.remove());
+
+            // Reseteamos el foco de navegación por teclado al escribir
             currentSearchIndex = -1;
-            activeResultIndex = -1; 
+            activeResultIndex = -1; // Sincronizado
 
             if (query === '') {
-                items.forEach(item => { item.classList.add('search-hidden'); item.classList.remove('keyboard-active'); });
+                // Si borra el texto, aplicamos transición de salida masiva
+                items.forEach(item => {
+                    item.classList.add('search-hidden');
+                    item.classList.remove('keyboard-active');
+                });
                 return;
             }
 
@@ -514,9 +427,18 @@ const appKeywords = {
                 const url = item.getAttribute('data-url');
                 const name = item.getAttribute('data-name');
                 const keywords = appKeywords[url] || appKeywords[url.replace(/^\//, '')] || [];
+
+                // Comprobamos coincidencias
                 const matchesQuery = name.includes(query) || keywords.some(kw => kw.toLowerCase().includes(query));
-                if (matchesQuery) { item.classList.remove('search-hidden'); } 
-                else { item.classList.add('search-hidden'); item.classList.remove('keyboard-active'); }
+
+                if (matchesQuery) {
+                    // Entra suavemente quitando la clase que reduce el espacio visual a cero
+                    item.classList.remove('search-hidden');
+                } else {
+                    // Sale suavemente añadiendo la clase
+                    item.classList.add('search-hidden');
+                    item.classList.remove('keyboard-active');
+                }
             });
 
             if (/^[0-9+\-*/().\s]+$/.test(query) && /[+\-*/]/.test(query)) {
@@ -526,11 +448,14 @@ const appKeywords = {
                         const mathEl = document.createElement('div');
                         mathEl.className = 'result-item dynamic-item search-enter';
                         mathEl.style.cssText = 'cursor: pointer; background: rgba(52, 199, 89, 0.15); border: 1px solid rgba(52, 199, 89, 0.3);';
-                        mathEl.onclick = () => { 
-                            playSound('click'); triggerHaptic();
-                            navigator.clipboard.writeText(result); showToast('Resultado copiado', 'check'); 
-                        };
-                        mathEl.innerHTML = `<i data-lucide="calculator" style="margin-right:15px; width:18px; color: #34C759;"></i><div><div style="color: #34C759; font-weight: bold;">${result}</div><small style="opacity:.7; color: #34C759;">Click para copiar</small></div>`;
+                        mathEl.onclick = () => { navigator.clipboard.writeText(result); showToast('Resultado copiado', 'check'); };
+                        mathEl.innerHTML = `
+                            <i data-lucide="calculator" style="margin-right:15px; width:18px; color: #34C759;"></i>
+                            <div>
+                                <div style="color: #34C759; font-weight: bold;">${result}</div>
+                                <small style="opacity:.7; color: #34C759;">Click para copiar</small>
+                            </div>
+                        `;
                         resultsArea.prepend(mathEl);
                     }
                 } catch(e) {}
@@ -540,28 +465,26 @@ const appKeywords = {
             webEl.href = getSearchEngineUrl() + encodeURIComponent(query);
             webEl.className = 'result-item dynamic-item search-enter web-search-item';
             webEl.style.cssText = 'background: rgba(255,255,255,0.03); border-top: 1px solid rgba(255,255,255,0.05);';
-            webEl.innerHTML = `<i data-lucide="globe" style="margin-right:15px; width:18px; color: var(--text-muted);"></i><div><div>Buscar "${query}" en ${getSearchEngineName()}</div><small style="opacity:.5">Shift + Enter directo</small></div>`;
+            webEl.innerHTML = `
+                <i data-lucide="globe" style="margin-right:15px; width:18px; color: var(--text-muted);"></i>
+                <div>
+                    <div>Buscar "${query}" en ${getSearchEngineName()}</div>
+                    <small style="opacity:.5">Shift + Enter directo</small>
+                </div>
+            `;
             resultsArea.appendChild(webEl);
-            
             if(window.lucide) lucide.createIcons();
-
-            // Autoselección en PC para el primer resultado del buscador
-            const isPC = window.matchMedia("(pointer: fine)").matches;
-            if (isPC && query !== '') {
-                const visibleItems = document.querySelectorAll('#resultsArea .result-item:not(.search-hidden)');
-                if (visibleItems.length > 0) {
-                    activeResultIndex = 0;
-                    visibleItems[0].classList.add('keyboard-active');
-                }
-            }
         }
 
+        // 3. INICIALIZADOR COMPLETO DE LA LÓGICA DEL DROPDOWN CUSTOM DE BUSCADORES
         function initSearchEngineDropdown() {
             const dropdown = document.getElementById('searchEngineDropdown');
             if (!dropdown) return;
+
             const select = dropdown.querySelector('.dropdown-select');
             const selectedText = document.getElementById('currentSearchEngine');
             const options = dropdown.querySelectorAll('.dropdown-option');
+
             const savedEngine = localStorage.getItem('searchEngine') || 'google'; 
             
             options.forEach(opt => {
@@ -572,36 +495,61 @@ const appKeywords = {
                 }
             });
 
-            select.addEventListener('click', (e) => { e.stopPropagation(); playSound('click'); dropdown.classList.toggle('active'); });
+            // Abrir o cerrar el dropdown customizado al hacer click
+            select.addEventListener('click', (e) => {
+                e.stopPropagation();
+                dropdown.classList.toggle('active');
+            });
 
+            // Procesar la selección del motor de búsqueda
             options.forEach(option => {
                 option.addEventListener('click', (e) => {
                     e.stopPropagation();
-                    playSound('click');
                     const value = option.getAttribute('data-value');
                     const label = option.innerText;
+
                     options.forEach(o => o.classList.remove('selected'));
                     option.classList.add('selected');
                     selectedText.innerText = label;
                     dropdown.classList.remove('active');
+
+                    // Guardamos la configuración de forma persistente en el navegador
                     localStorage.setItem('searchEngine', value);
-                    if (window.showToast) { showToast(`Buscador cambiado a ${label}`, 'search'); }
+                    
+                    // Si tienes la función de Toasts de Homescreen NEO, lanzamos el aviso
+                    if (window.showToast) {
+                        showToast(`Buscador cambiado a ${label}`, 'search');
+                    } else {
+                        console.log(`Buscador cambiado a: ${label}`);
+                    }
                 });
             });
-            document.addEventListener('click', () => { dropdown.classList.remove('active'); });
+
+            // Cerrar el menú si el usuario clickea fuera de la zona del dropdown
+            document.addEventListener('click', () => {
+                dropdown.classList.remove('active');
+            });
         }
 
+        // 4. ACOPLAMIENTO EN EL PROCESO DE CARGA DE TU ARCHIVO
         document.addEventListener('DOMContentLoaded', () => {
+            // Construir estructura persistente del buscador
             buildPersistentSearchDOM();
+            
+            // Inicializar dropdown customizado
             initSearchEngineDropdown();
-            renderDock(); 
+
+            // Enlazamos al input nativo de tu Search Panel
             const searchInput = document.querySelector('.search-input');
-            if (searchInput) { searchInput.addEventListener('input', (e) => { filterSearchPersistent(e.target.value); }); }
+            if (searchInput) {
+                searchInput.addEventListener('input', (e) => {
+                    filterSearchPersistent(e.target.value);
+                });
+            }
         });
     </script>
 
-    <div class="bottom-ui-wrapper">
-        <div id="dockContainer" class="dock-container" style="display: none;"></div>
+    <div class="search-wrapper">
         <div class="search-panel" id="searchPanel">
             <div class="search-header" id="trigger">
                 <div class="chip-placeholder">
@@ -621,75 +569,103 @@ const appKeywords = {
             <h3 style="margin: 0; font-weight: 500; display: flex; align-items: center; gap: 8px;">
                 <i data-lucide="sliders-horizontal" style="width: 18px; height: 18px;"></i> Ajustes
             </h3>
-            <span style="cursor: pointer; opacity: 0.5;" onclick="playSound('click'); document.getElementById('setPanel').classList.remove('active')">&times;</span>
+            <span style="cursor: pointer; opacity: 0.5;" onclick="document.getElementById('setPanel').classList.remove('active')">&times;</span>
         </div>
 
         <div class="settings-section">
             <span class="settings-section-title">Diseño de Interfaz</span>
             <div class="layout-selector">
-                <button class="layout-opt" data-layout="pill"><i data-lucide="shapes"></i><span>Pill</span></button>
-                <button class="layout-opt" data-layout="list"><i data-lucide="list"></i><span>Lista</span></button>
-                <button class="layout-opt" data-layout="grid"><i data-lucide="grid"></i><span>Cuadrícula</span></button>
+                <button class="layout-opt" data-layout="pill">
+                    <i data-lucide="shapes"></i>
+                    <span>Pill</span>
+                </button>
+                <button class="layout-opt" data-layout="list">
+                    <i data-lucide="list"></i>
+                    <span>Lista</span>
+                </button>
+                <button class="layout-opt" data-layout="grid">
+                    <i data-lucide="grid"></i>
+                    <span>Cuadrícula</span>
+                </button>
             </div>
             
             <div class="setting-item-row" style="margin-top: 12px;">
-                <div class="setting-item-meta"><i data-lucide="star"></i><div><span class="setting-label">Carpeta Favoritos</span><span class="setting-desc">Atajo de favoritos en inicio</span></div></div>
+                <div class="setting-item-meta">
+                    <i data-lucide="star"></i>
+                    <div>
+                        <span class="setting-label">Carpeta Favoritos</span>
+                        <span class="setting-desc">Mostrar atajo de favoritos en inicio</span>
+                    </div>
+                </div>
                 <div class="switch" id="toggleFavFolder"></div>
             </div>
-            
-            <div class="setting-item-row">
-                <div class="setting-item-meta"><i data-lucide="layout-dashboard"></i><div><span class="setting-label">Dock Inferior</span><span class="setting-desc">Fijar 5 apps más usadas</span></div></div>
-                <div class="switch" id="toggleDock"></div>
-            </div>
-            <div class="setting-item-row">
-                <div class="setting-item-meta"><i data-lucide="flame"></i><div><span class="setting-label">Carpeta Recientes</span><span class="setting-desc">Mostrar apps más usadas</span></div></div>
-                <div class="switch" id="toggleRecentFolder"></div>
-            </div>
         </div>
 
-        <div class="setting-item-row">
-            <div class="setting-item-meta"><i data-lucide="search"></i><div><span class="setting-label">Buscador predeterminado</span><span class="setting-desc">Motor para realizar consultas</span></div></div>
-            <div class="custom-dropdown" id="searchEngineDropdown">
-                <div class="dropdown-select"><span id="currentSearchEngine">Google</span><i data-lucide="chevron-down"></i></div>
-                <div class="dropdown-options">
-                    <div class="dropdown-option selected" data-value="google">Google</div>
-                    <div class="dropdown-option" data-value="bing">Bing</div>
-                    <div class="dropdown-option" data-value="duckduckgo">DuckDuckGo</div>
-                    <div class="dropdown-option" data-value="yahoo">Yahoo</div>
-                </div>
-            </div>
+<div class="setting-item-row">
+    <div class="setting-item-meta">
+        <i data-lucide="search"></i>
+        <div>
+            <span class="setting-label">Buscador predeterminado</span>
+            <span class="setting-desc">Motor para realizar consultas</span>
         </div>
-
+    </div>
+    <div class="custom-dropdown" id="searchEngineDropdown">
+        <div class="dropdown-select">
+            <span id="currentSearchEngine">Google</span>
+            <i data-lucide="chevron-down"></i>
+        </div>
+        <div class="dropdown-options">
+            <div class="dropdown-option selected" data-value="google">Google</div>
+            <div class="dropdown-option" data-value="bing">Bing</div>
+            <div class="dropdown-option" data-value="duckduckgo">DuckDuckGo</div>
+            <div class="dropdown-option" data-value="yahoo">Yahoo</div>
+        </div>
+    </div>
+</div>
         <div class="settings-section">
-            <span class="settings-section-title">Efectos y Hardware</span>
+            <span class="settings-section-title">Efectos Visuales</span>
             
             <div class="setting-item-row">
-                <div class="setting-item-meta"><i data-lucide="battery"></i><div><span class="setting-label">Mostrar Batería</span><span class="setting-desc">Porcentaje bajo el reloj</span></div></div>
-                <div class="switch" id="toggleBattery"></div>
-            </div>
-            <div class="setting-item-row">
-                <div class="setting-item-meta"><i data-lucide="volume-2"></i><div><span class="setting-label">Efectos de Sonido</span><span class="setting-desc">Retroalimentación sutil de UI</span></div></div>
-                <div class="switch" id="toggleSounds"></div>
-            </div>
-            <div class="setting-item-row">
-                <div class="setting-item-meta"><i data-lucide="smartphone"></i><div><span class="setting-label">Vibración Háptica</span><span class="setting-desc">Al tocar tarjetas (Móviles)</span></div></div>
-                <div class="switch" id="toggleHaptics"></div>
-            </div>
-
-            <div class="setting-item-row" style="margin-top:10px;">
-                <div class="setting-item-meta"><i data-lucide="sparkles"></i><div><span class="setting-label">Fondo Animado</span><span class="setting-desc">Partículas interactivas flotando</span></div></div>
+                <div class="setting-item-meta">
+                    <i data-lucide="sparkles"></i>
+                    <div>
+                        <span class="setting-label">Fondo Animado</span>
+                        <span class="setting-desc">Partículas interactivas flotando</span>
+                    </div>
+                </div>
                 <div class="switch" id="toggleBg"></div>
             </div>
+
             <div class="setting-item-row">
-                <div class="setting-item-meta"><i data-lucide="moon"></i><div><span class="setting-label">Fondo Negro</span><span class="setting-desc">Negro AMOLED para ahorrar</span></div></div>
+                <div class="setting-item-meta">
+                    <i data-lucide="moon"></i>
+                    <div>
+                        <span class="setting-label">Fondo Negro</span>
+                        <span class="setting-desc">Negro AMOLED puro para ahorrar energía</span>
+                    </div>
+                </div>
                 <div class="switch" id="toggleDarkBg"></div>
             </div>
+
             <div class="setting-item-row">
-                <div class="setting-item-meta"><i data-lucide="droplet"></i><div><span class="setting-label">Desactivar Blur</span><span class="setting-desc">Mejora el rendimiento</span></div></div>
+                <div class="setting-item-meta">
+                    <i data-lucide="droplet"></i>
+                    <div>
+                        <span class="setting-label">Desactivar Blur</span>
+                        <span class="setting-desc">Mejora el rendimiento en PC/móviles lentos</span>
+                    </div>
+                </div>
                 <div class="switch" id="toggleBlur"></div>
             </div>
+
             <div class="setting-item-row" id="settingLocalChip">
-                <div class="setting-item-meta"><i data-lucide="alert-circle"></i><div><span class="setting-label">Ocultar Aviso Local</span><span class="setting-desc">No mostrar chip web</span></div></div>
+                <div class="setting-item-meta">
+                    <i data-lucide="alert-circle"></i>
+                    <div>
+                        <span class="setting-label">Ocultar Aviso Local</span>
+                        <span class="setting-desc">No mostrar chip de versión web</span>
+                    </div>
+                </div>
                 <div class="switch" id="toggleLocalChip"></div>
             </div>
         </div>
@@ -697,18 +673,32 @@ const appKeywords = {
         <div class="settings-section">
             <span class="settings-section-title">Sistema</span>
             <div class="settings-info" id="settingsVersionInfo">
-                <strong>Versión actual</strong><span>Cargando...</span>
+                <strong>Versión actual</strong>
+                <span>Cargando...</span>
             </div>
+            
             <div class="settings-actions-grid" style="margin-bottom: 8px;">
-                <button class="settings-action-btn" id="exportSettingsBtn" type="button"><i data-lucide="download" style="width: 14px;"></i> Exportar</button>
-                <button class="settings-action-btn" id="importSettingsBtn" type="button"><i data-lucide="upload" style="width: 14px;"></i> Importar</button>
+                <button class="settings-action-btn" id="exportSettingsBtn" type="button">
+                    <i data-lucide="download" style="width: 14px;"></i> Exportar
+                </button>
+                <button class="settings-action-btn" id="importSettingsBtn" type="button">
+                    <i data-lucide="upload" style="width: 14px;"></i> Importar
+                </button>
                 <input type="file" id="importSettingsFile" accept=".json" style="display: none;">
             </div>
+
             <div class="settings-actions-grid">
-                <button class="settings-action-btn" id="checkUpdatesBtn" type="button"><i data-lucide="refresh-cw" style="width: 14px;"></i> Comprobar</button>
-                <button class="settings-action-btn" id="showChangelogBtn" type="button"><i data-lucide="history" style="width: 14px;"></i> Changelog</button>
+                <button class="settings-action-btn" id="checkUpdatesBtn" type="button">
+                    <i data-lucide="refresh-cw" style="width: 14px;"></i> Comprobar
+                </button>
+                <button class="settings-action-btn" id="showChangelogBtn" type="button">
+                    <i data-lucide="history" style="width: 14px;"></i> Changelog
+                </button>
             </div>
-            <button class="settings-action-btn" id="showAboutBtn" type="button" onclick="window.location.href='about.html'" style="width: 100%; margin-top: 8px;"><i data-lucide="badge-info" style="width: 14px;"></i> Información</button>
+            
+            <button class="settings-action-btn" id="showAboutBtn" type="button" onclick="window.location.href='about.html'" style="width: 100%; margin-top: 8px;">
+                <i data-lucide="badge-info" style="width: 14px;"></i> Información
+            </button>
         </div>
     </div>
 
@@ -724,6 +714,7 @@ const appKeywords = {
 
         let versionClicks = 0;
         let warningTimer = null;
+        let activeResultIndex = -1; 
         let draggedUrl = null;
         let isDraggingFromFavorites = false;
         let pendingGameUrl = '';
@@ -732,6 +723,7 @@ const appKeywords = {
             e.dataTransfer.setData('text/plain', url);
             draggedUrl = url;
             isDraggingFromFavorites = fromFavorites;
+            
             const title = document.getElementById('folderTitle')?.innerText;
             if (title !== 'Favoritos' && !fromFavorites) {
                 const dz = document.getElementById('globalFavDropZone');
@@ -747,7 +739,10 @@ const appKeywords = {
 
         document.getElementById('versionTag').onclick = (e) => {
             versionClicks++;
-            if(versionClicks === 5) { versionClicks = 0; openModal('hiddenFolderModal'); }
+            if(versionClicks === 5) {
+                versionClicks = 0; 
+                openModal('hiddenFolderModal');
+            }
         };
 
         /* --- CONTROL DEL RELOJ --- */
@@ -773,7 +768,10 @@ const appKeywords = {
                     chronoTime = 0;
                     clock.innerText = formatChrono(chronoTime);
                 } else {
-                    chronoInterval = setInterval(() => { chronoTime++; clock.innerText = formatChrono(chronoTime); }, 100);
+                    chronoInterval = setInterval(() => {
+                        chronoTime++;
+                        clock.innerText = formatChrono(chronoTime);
+                    }, 100);
                 }
             }
         };
@@ -784,52 +782,76 @@ const appKeywords = {
             setPanel.classList.remove('active'); 
         };
 
-        const startPress = (e) => { if (clockPressTimer) clearTimeout(clockPressTimer); clockPressTimer = setTimeout(toggleClockMode, 1200); };
-        const cancelPress = () => { if (clockPressTimer) { clearTimeout(clockPressTimer); clockPressTimer = null; } };
+        const startPress = (e) => {
+            if (clockPressTimer) clearTimeout(clockPressTimer);
+            clockPressTimer = setTimeout(toggleClockMode, 1200);
+        };
+
+        const cancelPress = () => {
+            if (clockPressTimer) {
+                clearTimeout(clockPressTimer);
+                clockPressTimer = null;
+            }
+        };
 
         function toggleClockMode() {
             isChronometerMode = !isChronometerMode;
             cancelPress();
-            triggerHaptic(30); playSound('click');
+
             if (isChronometerMode) {
                 clock.style.color = '#FFD60A'; 
-                chronoTime = 0; clock.innerText = formatChrono(chronoTime);
+                chronoTime = 0;
+                clock.innerText = formatChrono(chronoTime);
                 document.getElementById('date').style.opacity = '0';
                 document.getElementById('date').style.pointerEvents = 'none';
             } else {
                 clock.style.color = '';
-                if (chronoInterval) { clearInterval(chronoInterval); chronoInterval = null; }
+                if (chronoInterval) {
+                    clearInterval(chronoInterval);
+                    chronoInterval = null;
+                }
                 document.getElementById('date').style.opacity = '';
                 document.getElementById('date').style.pointerEvents = '';
                 updateClock();
             }
         }
 
-        clock.addEventListener('mousedown', startPress); clock.addEventListener('mouseup', cancelPress); clock.addEventListener('mouseleave', cancelPress);
-        clock.addEventListener('touchstart', startPress, { passive: true }); clock.addEventListener('touchend', cancelPress); clock.addEventListener('touchmove', cancelPress);
+        clock.addEventListener('mousedown', startPress);
+        clock.addEventListener('mouseup', cancelPress);
+        clock.addEventListener('mouseleave', cancelPress);
+        clock.addEventListener('touchstart', startPress, { passive: true });
+        clock.addEventListener('touchend', cancelPress);
+        clock.addEventListener('touchmove', cancelPress);
 
-        exitZenBtn.onclick = () => { triggerHaptic(); playSound('click'); body.classList.remove('zen-mode'); };
+        exitZenBtn.onclick = () => { body.classList.remove('zen-mode'); };
 
-        /* --- NOTIFICACIONES --- */
+        /* --- NOTIFICACIONES SNACKBAR CON ICONOS LUCIDE --- */
         let toastTimeout = null;
         function showToast(message, iconName = 'info') {
             const toast = document.getElementById('homescreenToast');
             if (!toast) return;
+
             toast.innerHTML = `<i data-lucide="${iconName}"></i><span>${message}</span>`;
             toast.classList.add('show');
             if (window.lucide) lucide.createIcons();
+
             if (toastTimeout) clearTimeout(toastTimeout);
-            toastTimeout = setTimeout(() => { toast.classList.remove('show'); }, 2500);
+            toastTimeout = setTimeout(() => {
+                toast.classList.remove('show');
+            }, 2500);
         }
 
         /* --- SISTEMA PERSISTENTE DE FAVORITOS --- */
-        function getFavorites() { try { return JSON.parse(localStorage.getItem('favorites')) || []; } catch(e) { return []; } }
+        function getFavorites() {
+            try { return JSON.parse(localStorage.getItem('favorites')) || []; } catch(e) { return []; }
+        }
+
         function isFavorite(url) { return getFavorites().includes(url); }
 
         function toggleFavorite(url, element) {
-            triggerHaptic(); playSound('click');
             let favs = getFavorites();
             const isActive = element.classList.toggle('active');
+
             if (isActive) {
                 if (!favs.includes(url)) favs.push(url);
                 showToast('Añadido a favoritos', 'star');
@@ -847,25 +869,23 @@ const appKeywords = {
             return allApps.filter(a => favUrls.includes(a.url));
         }
 
-        function openFavoritesFolder() { openFolder({ name: 'Favoritos', apps: getFavoriteApps() }); }
+        function openFavoritesFolder() {
+            openFolder({ name: 'Favoritos', apps: getFavoriteApps() });
+        }
 
         function renderMainGrid() {
             const showFavs = localStorage.getItem('showFavFolder') !== 'false';
-            const showRecent = localStorage.getItem('showRecentFolder') === 'true'; 
-            
             let gridHTML = "";
-            activeGridIndex = -1; // Resetear índice de selección de cuadrícula principal
-
             if (showFavs) {
-                 gridHTML += `<div class="tool-card" onclick="playSound('click'); openFavoritesFolder()" style="animation-delay: 0s"><i data-lucide="star"></i><span>Favoritos</span></div>`;
+                 gridHTML += `
+                    <div class="tool-card" onclick="openFavoritesFolder()" style="animation-delay: 0s">
+                        <i data-lucide="star"></i>
+                        <span>Favoritos</span>
+                    </div>
+                `;
             }
-            
-            if (showRecent) {
-                 gridHTML += `<div class="tool-card" onclick='playSound("click"); openFolder({name: "Más usadas", apps: getTopApps(8)})' style="animation-delay: 0.02s"><i data-lucide="flame"></i><span>Más usadas</span></div>`;
-            }
-
             gridHTML += tools.map((t, i) => `
-                <div class="tool-card" onclick="playSound('click'); openFolder(tools[${i}])" style="animation-delay:${(i + (showFavs ? 1 : 0) + (showRecent ? 1 : 0)) * 0.05}s">
+                <div class="tool-card" onclick="openFolder(tools[${i}])" style="animation-delay:${(i + (showFavs ? 1 : 0)) * 0.05}s">
                     <i data-lucide="${t.icon}"></i>
                     <span>${t.name}</span>
                 </div>
@@ -876,7 +896,6 @@ const appKeywords = {
 
         /* --- SINOPSIS DE MODALES Y CARPETAS --- */
         function openModal(id) {
-            playSound('open');
             if(id === 'hiddenFolderModal') {
                 document.getElementById('hiddenAppArea').innerHTML = hiddenApps.map(app => `
                     <div class="tool-card" onclick="triggerGameWarning('${app.url}')">
@@ -890,17 +909,19 @@ const appKeywords = {
         }
 
         async function showChangelogModal() {
-            playSound('click');
             const changelogBox = document.getElementById('changelogContent');
             if (!changelogBox) return;
+
             changelogBox.innerHTML = '<div style="color: var(--text-muted);">Cargando changelog...</div>';
             openModal('changelogModal');
+
             const versionInfo = await window.getVersionInfo?.();
             const version = versionInfo?.version || 'Sin versión';
             const changes = Array.isArray(versionInfo?.changes) && versionInfo.changes.length ? versionInfo.changes : [
                 `Obtén la última versión disponible en <a href="https://github.com/CapybaraGalaxy/HOMESCREEN" target="_blank" rel="noopener noreferrer" style="color: #8ab4f8; text-decoration: none;">GITHUB</a>.`
             ];
             const date = versionInfo?.date ? ` · ${versionInfo.date}` : '';
+
             changelogBox.innerHTML = `
                 <div style="margin-bottom: 10px; color: var(--text-main); font-weight: 500;">${version}${date}</div>
                 <div style="display:flex; flex-direction:column; gap:8px;">
@@ -911,8 +932,8 @@ const appKeywords = {
         }
 
         function openFolder(folder) {
-            playSound('open');
             document.getElementById('folderTitle').innerText = folder.name;
+
             const folderApps = document.getElementById('folderApps');
             const folderModal = document.getElementById('folderModal');
             const currentLayout = localStorage.getItem('layoutMode') || 'pill';
@@ -920,16 +941,19 @@ const appKeywords = {
             folderApps.className = '';
             folderModal.classList.remove('grid-active');
 
-            if (currentLayout === 'list') { folderApps.classList.add('list-mode'); } 
-            else if (currentLayout === 'grid') { folderApps.classList.add('grid-mode'); folderModal.classList.add('grid-active'); }
+            if (currentLayout === 'list') {
+                folderApps.classList.add('list-mode');
+            } else if (currentLayout === 'grid') {
+                folderApps.classList.add('grid-mode');
+                folderModal.classList.add('grid-active');
+            }
 
-            const isFavFolder = folder.name === 'Favoritos' || folder.name === 'Más usadas';
+            const isFavFolder = folder.name === 'Favoritos';
 
             folderApps.innerHTML = folder.apps.map((app, index) => {
                 const favClass = isFavorite(app.url) ? 'active' : '';
                 return `
                     <a href="${app.url}" class="tool-card" draggable="true" 
-                       onclick="handleAppClick(event, '${app.url}')"
                        ondragstart="handleAppDragStart(event, '${app.url}', ${isFavFolder})" 
                        ondragend="handleAppDragEnd(event)" data-url="${app.url}">
                         <i data-lucide="${app.icon}"></i>
@@ -942,13 +966,10 @@ const appKeywords = {
             }).join('');
 
             lucide.createIcons();
-            
-            // Reiniciar índice de autoselección para carpetas (no selecciona por defecto)
-            activeFolderIndex = -1;
-
             openModal('folderModal');
         }
 
+        // Eventos dragover/drop nativos optimizados para reordenar y sacar de favoritos deslizando fuera
         const fa = document.getElementById('folderApps');
         fa.addEventListener('dragover', (e) => {
             if (!isDraggingFromFavorites) return;
@@ -957,8 +978,11 @@ const appKeywords = {
             if (targetCard && targetCard.parentElement === fa) {
                 const bounding = targetCard.getBoundingClientRect();
                 const offset = e.clientY - bounding.top - bounding.height / 2;
-                if (offset > 0) { targetCard.after(document.querySelector(`[data-url="${draggedUrl}"]`)); } 
-                else { targetCard.before(document.querySelector(`[data-url="${draggedUrl}"]`)); }
+                if (offset > 0) {
+                    targetCard.after(document.querySelector(`[data-url="${draggedUrl}"]`));
+                } else {
+                    targetCard.before(document.querySelector(`[data-url="${draggedUrl}"]`));
+                }
             }
         });
 
@@ -986,7 +1010,6 @@ const appKeywords = {
         });
 
         function closeModal(id) {
-            playSound('click');
             document.getElementById(id).classList.remove('active');
             if(!document.querySelector('.custom-modal.active') && !searchPanel.classList.contains('expanded')) {
                 overlay.classList.remove('active');
@@ -1003,7 +1026,9 @@ const appKeywords = {
                 const versionLabel = info?.version ? `v${info.version}` : 'Sin datos';
                 const dateLabel = info?.date ? ` · ${info.date}` : '';
                 settingsVersionInfo.innerHTML = `<strong>Versión actual</strong><span>${versionLabel}${dateLabel}</span>`;
-            } catch (error) { settingsVersionInfo.innerHTML = '<strong>Versión actual</strong><span>No disponible</span>'; }
+            } catch (error) {
+                settingsVersionInfo.innerHTML = '<strong>Versión actual</strong><span>No disponible</span>';
+            }
         }
 
         function triggerGameWarning(url) {
@@ -1013,26 +1038,32 @@ const appKeywords = {
             
             const continueBtn = document.getElementById('continueBtn');
             continueBtn.disabled = true;
+            
             let secondsLeft = 10;
             continueBtn.innerText = `Continuar (${secondsLeft}s)`;
 
             if(warningTimer) clearInterval(warningTimer);
+            
             warningTimer = setInterval(() => {
                 secondsLeft--;
                 if(secondsLeft <= 0) {
-                    clearInterval(warningTimer); continueBtn.disabled = false; continueBtn.innerText = "Continuar";
-                    continueBtn.onclick = () => { handleAppClick(null, pendingGameUrl); window.location.href = pendingGameUrl; };
-                } else { continueBtn.innerText = `Continuar (${secondsLeft}s)`; }
+                    clearInterval(warningTimer);
+                    continueBtn.disabled = false;
+                    continueBtn.innerText = "Continuar";
+                    continueBtn.onclick = () => { window.location.href = pendingGameUrl; };
+                } else {
+                    continueBtn.innerText = `Continuar (${secondsLeft}s)`;
+                }
             }, 1000);
         }
 
-        /* --- MOTOR DE BÚSQUEDA INTEGRADO --- */
+        /* --- MOTOR DE BÚSQUEDA INTEGRADO (KEYWORDS Y RÁPIDO) --- */
         function getSearchEngineUrl() {
             const engine = localStorage.getItem('searchEngine') || 'google';
             switch(engine) {
                 case 'bing': return 'https://www.bing.com/search?q=';
                 case 'duckduckgo': return 'https://duckduckgo.com/?q=';
-                case 'yahoo': return 'https://search.yahoo.com/search?p=';
+                case 'startpage': return 'https://www.startpage.com/do/search?query=';
                 default: return 'https://www.google.com/search?q=';
             }
         }
@@ -1044,16 +1075,13 @@ const appKeywords = {
         function toggleSearch(open) {
             if(window.hasHubError) return;
             if(open) {
-                playSound('open'); triggerHaptic();
                 searchPanel.classList.add('expanded');
                 overlay.classList.add('active');
-                body.classList.add('search-open');
                 history.pushState({ searchOpen: true }, "");
                 setTimeout(() => searchInput.focus(), 200);
                 if(typeof filterSearchPersistent === 'function') filterSearchPersistent("");
             } else {
                 searchPanel.classList.remove('expanded');
-                body.classList.remove('search-open');
                 if(!document.querySelector('.custom-modal.active')) overlay.classList.remove('active');
                 searchInput.value = "";
                 if(typeof filterSearchPersistent === 'function') filterSearchPersistent(""); 
@@ -1062,8 +1090,7 @@ const appKeywords = {
         }
 
         window.addEventListener('popstate', () => {
-            searchPanel.classList.remove('expanded'); 
-            body.classList.remove('search-open');
+            searchPanel.classList.remove('expanded');
             overlay.classList.remove('active');
             if(setPanel) setPanel.classList.remove('active');
             document.querySelectorAll('.custom-modal').forEach(m => m.classList.remove('active'));
@@ -1077,68 +1104,20 @@ const appKeywords = {
         };
         
         window.onkeydown = (e) => {
-            // Atajo Buscador
-            if((e.ctrlKey || e.metaKey) && e.key === ' ') { e.preventDefault(); toggleSearch(true); }
             if((e.ctrlKey || e.metaKey) && e.key === 'k') { e.preventDefault(); toggleSearch(true); }
-            if((e.ctrlKey || e.metaKey) && e.key === 'f') { e.preventDefault(); toggleSearch(true); }
-            
-            // Cerrar
             if(e.key === 'Escape') {
                 toggleSearch(false);
                 document.querySelectorAll('.custom-modal').forEach(m => { if(m.classList.contains('active')) closeModal(m.id); });
             }
 
-            // Atajos Dock Inferior (Ctrl + 1 a 5)
-            if ((e.ctrlKey || e.metaKey) && e.key >= '1' && e.key <= '5') {
-                e.preventDefault();
-                const num = parseInt(e.key);
-                const dockContainer = document.getElementById('dockContainer');
-                if (dockContainer && dockContainer.style.display !== 'none') {
-                    const dockApps = dockContainer.querySelectorAll('.tool-card');
-                    if (dockApps[num - 1]) {
-                        dockApps[num - 1].click();
-                    }
-                }
-            }
-
-            const folderModal = document.getElementById('folderModal');
-            
-            // Navegación dentro de Carpetas
-            if (folderModal && folderModal.classList.contains('active')) {
-                const cards = document.querySelectorAll('#folderApps .tool-card');
-                if (cards.length > 0) {
-                    if (e.key === 'ArrowRight' || e.key === 'ArrowDown') {
-                        e.preventDefault();
-                        if (activeFolderIndex < cards.length - 1) {
-                            if (activeFolderIndex >= 0 && cards[activeFolderIndex]) cards[activeFolderIndex].classList.remove('keyboard-active');
-                            activeFolderIndex++;
-                            cards[activeFolderIndex].classList.add('keyboard-active');
-                            cards[activeFolderIndex].scrollIntoView({ block: 'nearest' });
-                        }
-                    } else if (e.key === 'ArrowLeft' || e.key === 'ArrowUp') {
-                        e.preventDefault();
-                        if (activeFolderIndex > 0) {
-                            if (cards[activeFolderIndex]) cards[activeFolderIndex].classList.remove('keyboard-active');
-                            activeFolderIndex--;
-                            cards[activeFolderIndex].classList.add('keyboard-active');
-                            cards[activeFolderIndex].scrollIntoView({ block: 'nearest' });
-                        }
-                    } else if (e.key === 'Enter') {
-                        if (activeFolderIndex >= 0 && cards[activeFolderIndex]) {
-                            e.preventDefault();
-                            cards[activeFolderIndex].click();
-                        }
-                    }
-                }
-            }
-            // Navegación en el Buscador
-            else if (searchPanel.classList.contains('expanded')) {
+            if (searchPanel.classList.contains('expanded')) {
                 const query = searchInput.value;
                 if (e.key === 'Enter' && e.shiftKey && query.trim() !== '') {
                     e.preventDefault();
                     window.location.href = getSearchEngineUrl() + encodeURIComponent(query);
                     return;
                 }
+
                 const items = document.querySelectorAll('#resultsArea .result-item:not(.search-hidden)');
                 if (items.length > 0) {
                     if (e.key === 'ArrowDown') {
@@ -1161,34 +1140,6 @@ const appKeywords = {
                         if (activeResultIndex >= 0 && items[activeResultIndex]) {
                             e.preventDefault();
                             items[activeResultIndex].click();
-                        }
-                    }
-                }
-            }
-            // Navegación en el Homescreen (Rejilla de inicio)
-            else if (!document.querySelector('.custom-modal.active')) {
-                const cards = document.querySelectorAll('#toolsGrid .tool-card');
-                if (cards.length > 0) {
-                    if (e.key === 'ArrowRight' || e.key === 'ArrowDown') {
-                        e.preventDefault();
-                        if (activeGridIndex < cards.length - 1) {
-                            if (activeGridIndex >= 0 && cards[activeGridIndex]) cards[activeGridIndex].classList.remove('keyboard-active');
-                            activeGridIndex++;
-                            cards[activeGridIndex].classList.add('keyboard-active');
-                            cards[activeGridIndex].scrollIntoView({ block: 'nearest', behavior: 'smooth' });
-                        }
-                    } else if (e.key === 'ArrowLeft' || e.key === 'ArrowUp') {
-                        e.preventDefault();
-                        if (activeGridIndex > 0) {
-                            if (cards[activeGridIndex]) cards[activeGridIndex].classList.remove('keyboard-active');
-                            activeGridIndex--;
-                            cards[activeGridIndex].classList.add('keyboard-active');
-                            cards[activeGridIndex].scrollIntoView({ block: 'nearest', behavior: 'smooth' });
-                        }
-                    } else if (e.key === 'Enter') {
-                        if (activeGridIndex >= 0 && cards[activeGridIndex]) {
-                            e.preventDefault();
-                            cards[activeGridIndex].click();
                         }
                     }
                 }
@@ -1227,21 +1178,6 @@ const appKeywords = {
             }
         }
 
-        /* --- API DE BATERÍA --- */
-        async function updateBatteryAPI() {
-            if (navigator.getBattery) {
-                try {
-                    const battery = await navigator.getBattery();
-                    const span = document.querySelector('#batteryStatus span');
-                    const updateLevel = () => { if(span) span.innerText = Math.round(battery.level * 100) + '%'; };
-                    updateLevel();
-                    battery.addEventListener('levelchange', updateLevel);
-                } catch(e) { document.getElementById('batteryStatus').style.display = 'none'; }
-            } else {
-                document.getElementById('batteryStatus').style.display = 'none'; 
-            }
-        }
-
         function updateClock() {
             if (isChronometerMode) return; 
             const n = new Date();
@@ -1269,34 +1205,25 @@ const appKeywords = {
             if(window.hasHubError) return;
             renderMainGrid();
             
-            // Integración de Toggles Genérica
-            const setupToggle = (id, localStorageKey, callback, defaultVal = 'false') => {
-                const el = document.getElementById(id);
-                if (!el) return;
-                const stored = localStorage.getItem(localStorageKey) || defaultVal;
-                if (stored === 'true') el.classList.add('on');
-                el.onclick = () => {
-                    playSound('click'); triggerHaptic();
-                    const act = el.classList.toggle('on');
-                    localStorage.setItem(localStorageKey, act);
-                    if (callback) callback(act);
+            const sFavFolder = document.getElementById('toggleFavFolder');
+            if(localStorage.getItem('showFavFolder') !== 'false' && sFavFolder) sFavFolder.classList.add('on');
+            if(sFavFolder) {
+                sFavFolder.onclick = () => {
+                    const act = sFavFolder.classList.toggle('on');
+                    localStorage.setItem('showFavFolder', act);
+                    renderMainGrid();
                 };
-                return stored === 'true';
-            };
+            }
 
-            setupToggle('toggleFavFolder', 'showFavFolder', renderMainGrid, 'true');
-            setupToggle('toggleRecentFolder', 'showRecentFolder', renderMainGrid, 'false');
-            setupToggle('toggleDock', 'showDock', renderDock, 'false');
-            setupToggle('toggleSounds', 'sounds', null, 'false');
-            setupToggle('toggleHaptics', 'haptics', null, 'false');
+            const seSelect = document.getElementById('searchEngineSelect');
+            if (seSelect) {
+                seSelect.value = localStorage.getItem('searchEngine') || 'google';
+                seSelect.onchange = () => {
+                    localStorage.setItem('searchEngine', seSelect.value);
+                    showToast(`Búsqueda cambiada a ${getSearchEngineName()}`, 'search');
+                };
+            }
             
-            const batteryEnabled = setupToggle('toggleBattery', 'showBattery', (act) => {
-                const batEl = document.getElementById('batteryStatus');
-                batEl.style.display = act ? 'inline-flex' : 'none';
-                if(act) updateBatteryAPI();
-            }, 'false');
-            if (batteryEnabled) { document.getElementById('batteryStatus').style.display = 'inline-flex'; updateBatteryAPI(); }
-
             const sBlur = document.getElementById('toggleBlur');
             const sBg = document.getElementById('toggleBg');
             const sDarkBg = document.getElementById('toggleDarkBg');
@@ -1312,7 +1239,6 @@ const appKeywords = {
                 if (hideChip) { if(sLocalChip) sLocalChip.classList.add('on'); } else { if(localChip) localChip.style.display = 'flex'; }
                 if(sLocalChip) {
                     sLocalChip.onclick = () => {
-                        playSound('click'); triggerHaptic();
                         const act = sLocalChip.classList.toggle('on');
                         localStorage.setItem('hideLocalChip', act);
                         if(act) { localChip.style.display = 'none'; } else { localChip.style.display = 'flex'; }
@@ -1327,7 +1253,7 @@ const appKeywords = {
             setLayoutMode(savedLayout);
 
             document.querySelectorAll('.layout-opt').forEach(btn => {
-                btn.onclick = (e) => { e.stopPropagation(); playSound('click'); triggerHaptic(); setLayoutMode(btn.getAttribute('data-layout')); };
+                btn.onclick = (e) => { e.stopPropagation(); setLayoutMode(btn.getAttribute('data-layout')); };
             });
 
             if(localStorage.getItem('noblur') === 'true') { body.classList.add('no-blur'); if(sBlur) sBlur.classList.add('on'); }
@@ -1346,7 +1272,6 @@ const appKeywords = {
             if(setBtn) {
                 setBtn.onclick = async (e) => {
                     e.stopPropagation();
-                    playSound('click'); triggerHaptic();
                     const willOpen = !setPanel.classList.contains('active');
                     setPanel.classList.toggle('active');
                     if (willOpen && window.getVersionInfo) await refreshSettingsVersionInfo();
@@ -1357,7 +1282,7 @@ const appKeywords = {
 
             if(checkUpdatesBtn && window.checkForUpdates) {
                 checkUpdatesBtn.onclick = async (e) => {
-                    e.stopPropagation(); playSound('click'); triggerHaptic();
+                    e.stopPropagation();
                     checkUpdatesBtn.disabled = true;
                     checkUpdatesBtn.innerHTML = '<span class="btn-label"><i data-lucide="loader-2" class="spinner"></i><span></span></span>';
                     if(window.lucide) lucide.createIcons();
@@ -1375,8 +1300,8 @@ const appKeywords = {
             const exportBtn = document.getElementById('exportSettingsBtn');
             if (exportBtn) {
                 exportBtn.onclick = (e) => {
-                    e.stopPropagation(); playSound('click');
-                    const keys = ['favorites', 'layoutMode', 'showFavFolder', 'bg', 'darkbg', 'noblur', 'hideLocalChip', 'searchEngine', 'appUsageStats', 'showDock', 'showRecentFolder', 'showBattery', 'sounds', 'haptics'];
+                    e.stopPropagation();
+                    const keys = ['favorites', 'layoutMode', 'showFavFolder', 'bg', 'darkbg', 'noblur', 'hideLocalChip', 'searchEngine'];
                     const config = {};
                     keys.forEach(k => { const val = localStorage.getItem(k); if (val !== null) config[k] = val; });
                     const blob = new Blob([JSON.stringify(config, null, 2)], { type: 'application/json' });
@@ -1385,14 +1310,14 @@ const appKeywords = {
                     a.href = url; a.download = 'homescreen-config.json';
                     document.body.appendChild(a); a.click(); document.body.removeChild(a);
                     URL.revokeObjectURL(url);
-                    showToast('Configuración exportada', 'download');
+                    showToast('Configuración exportada con éxito', 'download');
                 };
             }
 
             const importBtn = document.getElementById('importSettingsBtn');
             const importFile = document.getElementById('importSettingsFile');
             if (importBtn && importFile) {
-                importBtn.onclick = (e) => { e.stopPropagation(); playSound('click'); importFile.click(); };
+                importBtn.onclick = (e) => { e.stopPropagation(); importFile.click(); };
                 importFile.onchange = (e) => {
                     const file = e.target.files[0];
                     if (!file) return;
@@ -1401,9 +1326,9 @@ const appKeywords = {
                         try {
                             const config = JSON.parse(evt.target.result);
                             Object.keys(config).forEach(k => { localStorage.setItem(k, config[k]); });
-                            showToast('Configuración importada', 'refresh-cw');
+                            showToast('Configuración importada con éxito', 'refresh-cw');
                             setTimeout(() => { location.reload(); }, 1200);
-                        } catch (err) { showToast('Error al importar el JSON', 'alert-circle'); }
+                        } catch (err) { showToast('Error al importar el archivo JSON', 'alert-circle'); }
                     };
                     reader.readAsText(file);
                 };
@@ -1415,7 +1340,6 @@ const appKeywords = {
                 dz.addEventListener('dragleave', () => { dz.style.background = 'rgba(255, 214, 10, 0.15)'; });
                 dz.addEventListener('drop', (e) => {
                     e.preventDefault();
-                    triggerHaptic(30); playSound('click');
                     dz.style.background = 'rgba(255, 214, 10, 0.15)';
                     const url = e.dataTransfer.getData('text/plain');
                     if (url) {
@@ -1425,6 +1349,7 @@ const appKeywords = {
                             favs.push(url);
                             localStorage.setItem('favorites', JSON.stringify(favs));
                             showToast('Añadido a favoritos', 'star');
+                            
                             const folderModal = document.getElementById('folderModal');
                             if (folderModal && folderModal.classList.contains('active')) {
                                 const title = document.getElementById('folderTitle').innerText;
@@ -1440,18 +1365,16 @@ const appKeywords = {
             }
             
             document.addEventListener('click', (e) => { if(setPanel && !setPanel.contains(e.target)) setPanel.classList.remove('active'); });
-            
-            if(sBlur) sBlur.onclick = () => { playSound('click'); triggerHaptic(); localStorage.setItem('noblur', body.classList.toggle('no-blur')); sBlur.classList.toggle('on'); };
+            if(sBlur) sBlur.onclick = () => { localStorage.setItem('noblur', body.classList.toggle('no-blur')); sBlur.classList.toggle('on'); };
             if(sBg) {
                 sBg.onclick = () => { 
-                    playSound('click'); triggerHaptic();
                     const act = body.classList.toggle('bg-active'); 
                     sBg.classList.toggle('on'); 
                     localStorage.setItem('bg', act);
                     if(act) { initParticles(); } else { cancelAnimationFrame(animationId); ctx.clearRect(0, 0, canvas.width, canvas.height); }
                 };
             }
-            if(sDarkBg) sDarkBg.onclick = () => { playSound('click'); triggerHaptic(); const act = sDarkBg.classList.toggle('on'); localStorage.setItem('darkbg', act); setBgColor(act); };
+            if(sDarkBg) sDarkBg.onclick = () => { const act = sDarkBg.classList.toggle('on'); localStorage.setItem('darkbg', act); setBgColor(act); };
         }
 
         window.onload = init;
