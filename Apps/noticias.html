@@ -1,0 +1,933 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+    <title>Creador de Posts de Noticias</title>
+    
+    <!-- Tipografía Outfit y Fira Code -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Fira+Code:wght@400;500&family=Outfit:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    
+    <!-- Librerías de Iconos y Captura -->
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+    
+    <style>
+        :root {
+            /* Paleta Cromática Orgánica y Oscura */
+            --bg: #000000;
+            --surface: #121212;
+            --surface-hover: #1c1c1e;
+            
+            /* Configuración Neo-Glass Pure */
+            --glass: rgba(18, 18, 18, 0.6);
+            --glass-card: rgba(255, 255, 255, 0.03);
+            --glass-border: rgba(255, 255, 255, 0.08);
+            --blur-val: 30px;
+
+            /* Jerarquía Textual */
+            --text-main: #FFFFFF;
+            --text-muted: #8E8E93;
+
+            /* Estados y Acentos de Sistema */
+            --accent-primary: #6366F1;
+            --accent-primary-hover: #4F46E5;
+            --accent-danger: #FF453A;
+            --accent-success: #34C759;
+
+            /* Físicas de Animación Progresivas */
+            --bezier: cubic-bezier(0.16, 1, 0.3, 1);
+            --spring: cubic-bezier(0.34, 1.56, 0.64, 1);
+        }
+
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+
+        ::-webkit-scrollbar { width: 5px; height: 5px; }
+        ::-webkit-scrollbar-track { background: transparent; }
+        ::-webkit-scrollbar-thumb { background: rgba(255, 255, 255, 0.15); border-radius: 10px; }
+        ::-webkit-scrollbar-thumb:hover { background: rgba(255, 255, 255, 0.25); }
+
+        body {
+            font-family: 'Outfit', -apple-system, BlinkMacSystemFont, sans-serif;
+            background-color: var(--bg);
+            color: var(--text-main);
+            height: 100dvh;
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+            -webkit-tap-highlight-color: transparent;
+        }
+
+        /* HEADER & BADGE */
+        header {
+            height: 64px;
+            background: var(--glass);
+            backdrop-filter: blur(var(--blur-val));
+            -webkit-backdrop-filter: blur(var(--blur-val));
+            border-bottom: 1px solid var(--glass-border);
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: env(safe-area-inset-top) 20px 0 20px;
+            flex-shrink: 0;
+            z-index: 10;
+        }
+
+        .logo {
+            font-weight: 700;
+            font-size: 1.05rem;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            color: var(--text-main);
+            letter-spacing: -0.01em;
+        }
+
+        .app-icon-badge {
+            width: 36px;
+            height: 36px;
+            border-radius: 10px;
+            background: radial-gradient(circle at 30% 30%, rgba(255, 255, 255, 0.12), rgba(255, 255, 255, 0.02));
+            border: 1px solid var(--glass-border);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.15);
+        }
+
+        .header-actions { display: flex; gap: 8px; }
+
+        .btn {
+            background: var(--surface);
+            color: var(--text-main);
+            border: 1px solid var(--glass-border);
+            padding: 8px 14px;
+            border-radius: 10px;
+            font-family: inherit;
+            font-size: 0.85rem;
+            font-weight: 500;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            transition: all 0.2s var(--bezier);
+        }
+
+        .btn:hover {
+            background: var(--surface-hover);
+            border-color: rgba(255, 255, 255, 0.15);
+        }
+
+        .btn:active { transform: scale(0.96); }
+
+        .btn.primary {
+            background: var(--accent-primary);
+            color: #ffffff;
+            border-color: var(--accent-primary);
+            box-shadow: 0 4px 12px rgba(99, 102, 241, 0.25);
+        }
+
+        .btn.primary:hover {
+            background: var(--accent-primary-hover);
+            border-color: var(--accent-primary-hover);
+        }
+
+        .btn-icon {
+            padding: 8px;
+            border-radius: 50%;
+        }
+
+        main { display: flex; flex: 1; position: relative; overflow: hidden; }
+
+        /* EDITOR PANEL */
+        #editor-panel {
+            width: 460px;
+            background-color: var(--bg);
+            border-right: 1px solid var(--glass-border);
+            display: flex;
+            flex-direction: column;
+            flex-shrink: 0;
+            z-index: 5;
+        }
+
+        .editor-toolbar {
+            padding: 14px 16px;
+            background: var(--surface);
+            border-bottom: 1px solid var(--glass-border);
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+        
+        .toolbar-row { display: flex; justify-content: space-between; gap: 10px; }
+
+        .select-group {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            background: var(--bg);
+            border: 1px solid var(--glass-border);
+            border-radius: 8px;
+            padding: 4px 12px;
+            flex: 1;
+            transition: border-color 0.2s var(--bezier);
+        }
+
+        .select-group:focus-within {
+            border-color: rgba(255, 255, 255, 0.25);
+        }
+
+        .select-group i { color: var(--text-muted); width: 16px; height: 16px; }
+
+        select {
+            background-color: transparent;
+            color: var(--text-main);
+            border: none;
+            padding: 6px 0;
+            outline: none;
+            font-family: inherit;
+            font-size: 0.825rem;
+            font-weight: 400;
+            flex: 1;
+            width: 100%;
+            cursor: pointer;
+        }
+
+        select option {
+            background-color: var(--surface);
+            color: var(--text-main);
+        }
+
+        .editor-container { 
+            flex: 1; 
+            display: flex; 
+            flex-direction: column; 
+            padding: 14px;
+            background-color: var(--bg);
+        }
+
+        #json-editor {
+            flex: 1;
+            width: 100%;
+            background-color: var(--surface);
+            color: #E2E8F0;
+            font-family: 'Fira Code', monospace;
+            font-size: 13px;
+            line-height: 1.6;
+            padding: 16px;
+            border: 1px solid var(--glass-border);
+            border-radius: 12px;
+            resize: none;
+            outline: none;
+            white-space: pre;
+            overflow: auto;
+            tab-size: 2;
+            transition: border-color 0.2s var(--bezier);
+        }
+
+        #json-editor:focus {
+            border-color: rgba(255, 255, 255, 0.2);
+        }
+
+        .editor-footer {
+            padding: 12px 16px;
+            background: var(--surface);
+            border-top: 1px solid var(--glass-border);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            font-size: 0.8rem;
+            font-variant-numeric: tabular-nums;
+        }
+
+        #status-indicator { display: flex; align-items: center; gap: 8px; }
+        .status-dot { width: 8px; height: 8px; border-radius: 50%; background-color: var(--accent-success); transition: background-color 0.3s var(--bezier); }
+        .status-dot.error { background-color: var(--accent-danger); }
+        .status-text { color: var(--text-muted); font-weight: 500; }
+        .status-text.error { color: var(--accent-danger); }
+
+        /* PREVIEW PANEL */
+        #preview-panel {
+            flex: 1;
+            background-color: var(--bg);
+            position: relative;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            overflow: auto;
+        }
+
+        .preview-controls {
+            position: absolute;
+            bottom: 24px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: var(--glass);
+            backdrop-filter: blur(var(--blur-val));
+            -webkit-backdrop-filter: blur(var(--blur-val));
+            border: 1px solid var(--glass-border);
+            padding: 4px;
+            border-radius: 100px;
+            display: flex;
+            align-items: center;
+            gap: 4px;
+            z-index: 10;
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.4);
+        }
+
+        .preview-controls .btn { 
+            border: none; 
+            background: transparent;
+            border-radius: 50%; 
+            width: 32px;
+            height: 32px;
+            padding: 0;
+            justify-content: center;
+            color: var(--text-muted); 
+        }
+
+        .preview-controls .btn:hover {
+            background: var(--surface-hover);
+            color: var(--text-main);
+        }
+
+        #zoom-level {
+            display: flex; align-items: center; justify-content: center;
+            width: 55px; font-size: 0.8rem; font-weight: 600;
+            font-variant-numeric: tabular-nums;
+            color: var(--text-main);
+        }
+
+        /* CANVAS */
+        #canvas-container {
+            display: flex; justify-content: center; align-items: center;
+            transform-origin: center center;
+            padding: 40px; 
+        }
+
+        #render-target {
+            position: relative;
+            background-color: #05070b;
+            overflow: hidden;
+            display: flex;
+            flex-direction: column;
+            box-shadow: 0 20px 50px rgba(0,0,0,0.6);
+        }
+
+        /* CARD COMPONENT */
+        .card-bg-layer {
+            position: absolute; top: 0; left: 0; right: 0; bottom: 0;
+            z-index: 1; pointer-events: none;
+        }
+        
+        .glass-panel {
+            position: relative;
+            background: linear-gradient(180deg, rgba(30,35,45,0.5) 0%, rgba(10,12,18,0.85) 100%);
+            border-radius: var(--card-radius, 40px);
+            border: 1px solid var(--card-border, rgba(255,255,255,0.1));
+            padding: var(--card-padding, 60px);
+            flex: 1; display: flex; flex-direction: column; z-index: 3; overflow: hidden;
+        }
+
+        .card-header { display: flex; justify-content: flex-end; margin-bottom: 24px; }
+        .page-number { font-size: 1.5rem; font-weight: 700; color: var(--card-text, #fff); opacity: 0.8; font-variant-numeric: tabular-nums; }
+
+        .hero-section { margin-bottom: 40px; display: flex; justify-content: center; align-items: center; }
+        .hero-image-wrapper { width: 100%; position: relative; border-radius: 24px; overflow: hidden; }
+        .hero-image { width: 100%; height: 100%; object-fit: cover; display: block; }
+        .hero-icon { color: var(--card-accent, #dcecff); width: var(--hero-icon-size, 120px); height: var(--hero-icon-size, 120px); }
+
+        .title-section { display: flex; gap: 16px; margin-bottom: 35px; }
+        .title-prefix { font-size: var(--title-size, 3.5rem); font-weight: 800; color: var(--card-accent, #6366f1); }
+        .main-title { font-size: var(--title-size, 3.5rem); font-weight: 800; color: var(--card-text, #ffffff); line-height: 1.15; }
+
+        .blocks-container { display: flex; flex-direction: column; gap: var(--block-gap, 35px); }
+        .block-item { display: flex; gap: 24px; position: relative; }
+        .block-item.has-divider { padding-bottom: var(--block-gap, 35px); border-bottom: 1px solid rgba(255,255,255,0.08); }
+
+        .block-icon-wrapper {
+            width: calc(var(--icon-size, 32px) + 32px);
+            height: calc(var(--icon-size, 32px) + 32px);
+            border-radius: 16px;
+            border: 1px solid rgba(255,255,255,0.15);
+            background: rgba(255,255,255,0.05);
+            display: flex; justify-content: center; align-items: center; flex-shrink: 0;
+        }
+        .block-icon-wrapper i { color: var(--card-text, #ffffff); width: var(--icon-size, 32px); height: var(--icon-size, 32px); }
+
+        .block-content { flex: 1; display: flex; flex-direction: column; gap: 8px; justify-content: center; }
+        .block-title { font-size: var(--body-title-size, 1.8rem); font-weight: 700; color: var(--card-text, #ffffff); }
+        .block-text { font-size: var(--body-text-size, 1.4rem); font-weight: 400; color: var(--card-muted, #94a3b8); line-height: 1.5; }
+
+        .tags-container { display: flex; flex-wrap: wrap; gap: 10px; margin-top: auto; padding-top: 20px; }
+        .tag-badge {
+            font-size: var(--tag-size, 1.2rem); font-weight: 600; color: var(--card-text, #fff);
+            background: rgba(255, 255, 255, 0.08); padding: 8px 16px; border-radius: 30px;
+        }
+
+        /* MODALS & TOAST */
+        .modal-overlay {
+            position: fixed; top: 0; left: 0; right: 0; bottom: 0;
+            background: rgba(0, 0, 0, 0.7);
+            backdrop-filter: blur(10px);
+            -webkit-backdrop-filter: blur(10px);
+            display: none; justify-content: center; align-items: center; z-index: 100;
+        }
+        .modal { 
+            background: var(--surface); 
+            border: 1px solid var(--glass-border); 
+            border-radius: 20px; 
+            padding: 24px; 
+            width: 360px; 
+            box-shadow: 0 20px 40px rgba(0,0,0,0.5);
+        }
+        .modal-title { font-size: 1.1rem; font-weight: 700; margin-bottom: 16px; color: var(--text-main); }
+        .form-group { margin-bottom: 16px; display: flex; flex-direction: column; gap: 8px; }
+        .form-group label { font-size: 0.8rem; color: var(--text-muted); font-weight: 500; }
+        .form-group input { 
+            background: var(--bg); 
+            border: 1px solid var(--glass-border); 
+            color: var(--text-main); 
+            padding: 10px; 
+            border-radius: 8px; 
+            outline: none; 
+            font-family: inherit;
+        }
+        .form-group input:focus { border-color: rgba(255, 255, 255, 0.25); }
+        .modal-actions { display: flex; justify-content: flex-end; gap: 10px; margin-top: 24px; }
+
+        #toast {
+            position: fixed; bottom: 80px; left: 50%; transform: translateX(-50%);
+            background: var(--glass); 
+            backdrop-filter: blur(var(--blur-val));
+            -webkit-backdrop-filter: blur(var(--blur-val));
+            border: 1px solid var(--glass-border);
+            color: var(--text-main); padding: 10px 20px; border-radius: 100px;
+            display: flex; align-items: center; gap: 10px; z-index: 200;
+            opacity: 0; pointer-events: none; transition: all 0.3s var(--bezier); font-size: 0.85rem; font-weight: 500;
+            box-shadow: 0 8px 24px rgba(0,0,0,0.4);
+        }
+        #toast.show { opacity: 1; transform: translateX(-50%) translateY(-5px); }
+
+        /* SHAKE ANIMATION FOR ERRORS */
+        .error-shake {
+            animation: shake 0.3s var(--spring) forwards;
+            border-color: var(--accent-danger) !important;
+        }
+
+        @keyframes shake {
+            0%, 100% { transform: translateX(0); }
+            20%, 60% { transform: translateX(-6px); }
+            40%, 80% { transform: translateX(6px); }
+        }
+
+        /* TABS MÓVILES */
+        .mobile-tabs {
+            display: none; 
+            background: var(--glass);
+            backdrop-filter: blur(var(--blur-val));
+            -webkit-backdrop-filter: blur(var(--blur-val));
+            border-top: 1px solid var(--glass-border); 
+            height: 60px;
+            flex-shrink: 0; z-index: 20;
+            padding-bottom: env(safe-area-inset-bottom);
+        }
+        .tab-btn {
+            flex: 1; display: flex; flex-direction: column; align-items: center;
+            justify-content: center; gap: 4px; background: transparent; border: none;
+            color: var(--text-muted); font-size: 0.725rem; font-weight: 500; cursor: pointer;
+            transition: color 0.2s var(--bezier);
+        }
+        .tab-btn.active { color: var(--accent-primary); }
+
+        @media (max-width: 900px) {
+            .mobile-tabs { display: flex; }
+            header { padding: 0 16px; }
+            .logo span { display: none; }
+            .header-actions .btn .btn-text { display: none; }
+            
+            #editor-panel, #preview-panel {
+                position: absolute; top: 0; left: 0; width: 100%; height: 100%;
+                border-right: none; display: none !important;
+            }
+            #editor-panel.active, #preview-panel.active {
+                display: flex !important;
+            }
+            
+            .editor-container { padding: 8px; }
+            #json-editor { border-radius: 8px; }
+            #toast { bottom: 80px; }
+        }
+    </style>
+</head>
+<body>
+
+    <header>
+        <div class="logo">
+            <div class="app-icon-badge">
+                <i data-lucide="newspaper" size="20" style="color: var(--text-main);"></i>
+            </div>
+            <span>Creador de Posts de Noticias  - <kbd>BETA</kbd></span>
+        </div>
+        <div class="header-actions">
+            <button class="btn" id="btn-import" title="Importar JSON">
+                <i data-lucide="upload" size="16"></i> <span class="btn-text">Importar</span>
+            </button>
+            <button class="btn" id="btn-save" title="Guardar JSON">
+                <i data-lucide="save" size="16"></i> <span class="btn-text">Guardar</span>
+            </button>
+            <button class="btn primary" id="btn-export" title="Exportar Imagen">
+                <i data-lucide="download" size="16"></i> <span class="btn-text">Exportar</span>
+            </button>
+        </div>
+    </header>
+
+    <main>
+        <aside id="editor-panel" class="active">
+            <div class="editor-toolbar">
+                <div class="toolbar-row">
+                    <div class="select-group">
+                        <i data-lucide="layout-template"></i>
+                        <select id="template-select">
+                            <option value="tech">Plantilla: AI / Tech</option>
+                            <option value="news">Plantilla: Actualidad</option>
+                            <option value="explainer">Plantilla: Explicación</option>
+                        </select>
+                    </div>
+                    <div class="select-group">
+                        <i data-lucide="crop"></i>
+                        <select id="format-select">
+                            <option value="1080x1350">4:5 (1080x1350)</option>
+                            <option value="1080x1080">1:1 (1080x1080)</option>
+                            <option value="1080x1920">9:16 (1080x1920)</option>
+                            <option value="custom">Personalizado...</option>
+                        </select>
+                    </div>
+                </div>
+                <div class="toolbar-row">
+                    <button class="btn" id="btn-format-json" style="flex: 1; justify-content: center;">
+                        <i data-lucide="code-2" size="16"></i> Formatear
+                    </button>
+                    <button class="btn" id="btn-copy-json" style="flex: 1; justify-content: center;">
+                        <i data-lucide="copy" size="16"></i> Copiar
+                    </button>
+                </div>
+            </div>
+            
+            <div class="editor-container">
+                <textarea id="json-editor" spellcheck="false"></textarea>
+            </div>
+
+            <div class="editor-footer">
+                <div id="status-indicator">
+                    <div class="status-dot"></div>
+                    <span class="status-text">JSON Válido</span>
+                </div>
+            </div>
+        </aside>
+
+        <section id="preview-panel">
+            <div id="canvas-container">
+                <div id="render-target"></div>
+            </div>
+
+            <div class="preview-controls">
+                <button class="btn btn-icon" id="btn-zoom-out"><i data-lucide="minus" size="16"></i></button>
+                <span id="zoom-level">100%</span>
+                <button class="btn btn-icon" id="btn-zoom-in"><i data-lucide="plus" size="16"></i></button>
+                <button class="btn btn-icon" id="btn-zoom-fit"><i data-lucide="maximize" size="16"></i></button>
+            </div>
+        </section>
+    </main>
+
+    <nav class="mobile-tabs">
+        <button class="tab-btn active" data-target="editor-panel">
+            <i data-lucide="code" size="18"></i> Editor
+        </button>
+        <button class="tab-btn" data-target="preview-panel">
+            <i data-lucide="image" size="18"></i> Previsualizar
+        </button>
+    </nav>
+
+    <div class="modal-overlay" id="modal-custom-format">
+        <div class="modal">
+            <h3 class="modal-title">Formato Personalizado</h3>
+            <div class="form-group">
+                <label>Ancho (px)</label>
+                <input type="number" id="custom-width" value="1080">
+            </div>
+            <div class="form-group">
+                <label>Alto (px)</label>
+                <input type="number" id="custom-height" value="1350">
+            </div>
+            <div class="modal-actions">
+                <button class="btn" id="btn-cancel-format">Cancelar</button>
+                <button class="btn primary" id="btn-apply-format">Aplicar</button>
+            </div>
+        </div>
+    </div>
+
+    <div id="toast">
+        <i data-lucide="check-circle-2" size="18" style="color: var(--accent-success);"></i>
+        <span id="toast-message">Mensaje</span>
+    </div>
+
+    <script>
+        const TEMPLATES = {
+            tech: {
+                "meta": { "page": "05 / 05" },
+                "canvas": { "width": 1080, "height": 1350, "background": "#05070b" },
+                "theme": {
+                    "accent": "#818cf8", "text": "#ffffff", "muted": "#94a3b8", "border": "rgba(255,255,255,0.12)",
+                    "glow": "rgba(129,140,248,0.15)", "radius": 40, "padding": 60, "titleSize": 56, "bodyTitleSize": 28,
+                    "bodyTextSize": 22, "blockGap": 35, "iconSize": 32, "heroIconSize": 120, "tagSize": 20
+                },
+                "hero": { "type": "image", "src": "https://images.unsplash.com/photo-1620641788421-7a1c342ea42e?q=80&w=1080&auto=format&fit=crop", "height": 380, "showGlow": true },
+                "title": { "prefix": ">", "text": "Pantallas brillantes que ahorran batería" },
+                "blocks": [
+                    { "icon": "bar-chart-3", "title": "El logro:", "text": "Científicos logran abaratar la fabricación de las pantallas del futuro (MicroLED).", "divider": true },
+                    { "icon": "sun", "title": "El beneficio:", "text": "Consumen una cuarta parte de energía y brillan bajo el sol.", "divider": true },
+                    { "icon": "heart", "title": "¿Por qué te importa?:", "text": "Tus próximos dispositivos costarán menos y la batería durará días.", "divider": false }
+                ],
+                "tags": ["#MicroLED", "#Hardware", "#Tech"]
+            },
+            news: {
+                "meta": { "page": "01 / 03" },
+                "canvas": { "width": 1080, "height": 1350, "background": "#0a0a0a" },
+                "theme": {
+                    "accent": "#ef4444", "text": "#ffffff", "muted": "#a3a3a3", "border": "rgba(255,255,255,0.08)",
+                    "glow": "rgba(239,68,68,0.12)", "radius": 24, "padding": 50, "titleSize": 60, "bodyTitleSize": 26,
+                    "bodyTextSize": 22, "blockGap": 30, "iconSize": 28, "heroIconSize": 120, "tagSize": 18
+                },
+                "hero": { "type": "image", "src": "https://images.unsplash.com/photo-1495020689067-958852a7765e?q=80&w=1080&auto=format&fit=crop", "height": 450, "showGlow": false },
+                "title": { "prefix": "", "text": "Última Hora: Nueva regulación digital" },
+                "blocks": [
+                    { "icon": "globe", "title": "Contexto", "text": "Aprobado el nuevo marco legal para servicios digitales.", "divider": true },
+                    { "icon": "shield-check", "title": "Impacto", "text": "Mayor transparencia en algoritmos y moderación.", "divider": false }
+                ],
+                "tags": ["#UltimaHora", "#Regulacion"]
+            },
+            explainer: {
+                "meta": { "page": "02 / 07" },
+                "canvas": { "width": 1080, "height": 1350, "background": "#0f172a" },
+                "theme": {
+                    "accent": "#38bdf8", "text": "#f8fafc", "muted": "#94a3b8", "border": "rgba(56,189,248,0.2)",
+                    "glow": "rgba(56,189,248,0.15)", "radius": 40, "padding": 60, "titleSize": 52, "bodyTitleSize": 24,
+                    "bodyTextSize": 20, "blockGap": 30, "iconSize": 34, "heroIconSize": 130, "tagSize": 18
+                },
+                "hero": { "type": "icon", "name": "brain", "height": 160, "showGlow": true },
+                "title": { "prefix": "¿", "text": "Qué es Machine Learning?" },
+                "blocks": [
+                    { "icon": "bot", "title": "Definición", "text": "Permite a las máquinas aprender sin ser programadas explícitamente.", "divider": true },
+                    { "icon": "cpu", "title": "El proceso", "text": "En lugar de reglas, le damos datos para encontrar patrones.", "divider": false }
+                ],
+                "tags": ["#MachineLearning", "#IA"]
+            }
+        };
+
+        const state = { data: null, zoom: 1 };
+        let renderTimeout;
+
+        const els = {
+            editor: document.getElementById('json-editor'),
+            target: document.getElementById('render-target'),
+            container: document.getElementById('canvas-container'),
+            statusDot: document.querySelector('.status-dot'),
+            statusText: document.querySelector('.status-text'),
+            templateSelect: document.getElementById('template-select'),
+            formatSelect: document.getElementById('format-select'),
+            zoomLevel: document.getElementById('zoom-level'),
+            toast: document.getElementById('toast'),
+            toastMsg: document.getElementById('toast-message'),
+            customModal: document.getElementById('modal-custom-format'),
+            customWidth: document.getElementById('custom-width'),
+            customHeight: document.getElementById('custom-height')
+        };
+
+        function triggerShake(element) {
+            element.classList.remove('error-shake');
+            void element.offsetWidth;
+            element.classList.add('error-shake');
+            setTimeout(() => element.classList.remove('error-shake'), 300);
+        }
+
+        function renderCard() {
+            if (!state.data) return;
+            const d = state.data;
+
+            els.target.style.width = `${d.canvas.width}px`;
+            els.target.style.height = `${d.canvas.height}px`;
+            els.target.style.backgroundColor = d.canvas.background || '#05070b';
+
+            const t = d.theme || {};
+            els.target.style.setProperty('--card-accent', t.accent || '#818cf8');
+            els.target.style.setProperty('--card-text', t.text || '#ffffff');
+            els.target.style.setProperty('--card-muted', t.muted || '#94a3b8');
+            els.target.style.setProperty('--card-border', t.border || 'rgba(255,255,255,0.12)');
+            els.target.style.setProperty('--card-radius', `${t.radius || 40}px`);
+            els.target.style.setProperty('--card-padding', `${t.padding || 60}px`);
+            els.target.style.setProperty('--title-size', `${t.titleSize || 56}px`);
+            els.target.style.setProperty('--body-title-size', `${t.bodyTitleSize || 28}px`);
+            els.target.style.setProperty('--body-text-size', `${t.bodyTextSize || 22}px`);
+            els.target.style.setProperty('--block-gap', `${t.blockGap || 35}px`);
+            els.target.style.setProperty('--icon-size', `${t.iconSize || 32}px`);
+            els.target.style.setProperty('--hero-icon-size', `${t.heroIconSize || 120}px`);
+            els.target.style.setProperty('--tag-size', `${t.tagSize || 20}px`);
+
+            const glowColor = t.glow || 'rgba(129,140,248,0.15)';
+
+            let html = `<div class="card-bg-layer" style="background: radial-gradient(circle at 50% -20%, ${glowColor} 0%, transparent 65%);"></div><div class="glass-panel">`;
+
+            if (d.meta?.page) html += `<div class="card-header"><div class="page-number">${d.meta.page}</div></div>`;
+            if (d.hero) {
+                const h = d.hero.height || 380;
+                if (d.hero.type === 'image' && d.hero.src) {
+                    html += `<div class="hero-section"><div class="hero-image-wrapper" style="height:${h}px;"><img src="${d.hero.src}" class="hero-image" crossorigin="anonymous"></div></div>`;
+                } else if (d.hero.type === 'icon' && d.hero.name) {
+                    html += `<div class="hero-section" style="height:${h}px;"><i data-lucide="${d.hero.name}" class="hero-icon"></i></div>`;
+                }
+            }
+            
+            if (d.title) {
+                html += `<div class="title-section">
+                    ${d.title.prefix ? `<div class="title-prefix">${d.title.prefix}</div>` : ''}
+                    <div class="main-title">${d.title.text || ''}</div>
+                </div>`;
+            }
+
+            if (d.blocks?.length > 0) {
+                html += `<div class="blocks-container">` + d.blocks.map(b => `
+                    <div class="block-item ${b.divider !== false ? 'has-divider' : ''}">
+                        ${b.icon ? `<div class="block-icon-wrapper"><i data-lucide="${b.icon}"></i></div>` : ''}
+                        <div class="block-content">
+                            ${b.title ? `<div class="block-title">${b.title}</div>` : ''}
+                            ${b.text ? `<div class="block-text">${b.text}</div>` : ''}
+                        </div>
+                    </div>`).join('') + `</div>`;
+            }
+
+            if (d.tags?.length > 0) {
+                html += `<div class="tags-container">` + d.tags.map(t => `<span class="tag-badge">${t.startsWith('#')?t:'#'+t}</span>`).join('') + `</div>`;
+            }
+
+            html += `</div>`; 
+
+            els.target.innerHTML = html;
+            lucide.createIcons({ root: els.target });
+            updateZoomDisplay();
+        }
+
+        function handleEditorInput() {
+            clearTimeout(renderTimeout);
+            renderTimeout = setTimeout(applyJSON, 250);
+        }
+
+        function applyJSON() {
+            try {
+                const raw = els.editor.value;
+                state.data = JSON.parse(raw);
+                setStatus(true);
+                renderCard();
+                syncFormatSelect();
+                localStorage.setItem('newscard_draft_v2', raw);
+            } catch (e) {
+                setStatus(false);
+                triggerShake(els.editor);
+            }
+        }
+
+        function setStatus(isValid) {
+            els.statusDot.className = `status-dot ${isValid ? '' : 'error'}`;
+            els.statusText.className = `status-text ${isValid ? '' : 'error'}`;
+            els.statusText.textContent = isValid ? 'JSON Válido' : 'Error de sintaxis';
+        }
+
+        function loadTemplate(id) {
+            els.editor.value = JSON.stringify(TEMPLATES[id] || TEMPLATES['tech'], null, 2);
+            applyJSON();
+            autoFitZoom();
+        }
+
+        function showToast(msg) {
+            els.toastMsg.textContent = msg;
+            els.toast.classList.add('show');
+            setTimeout(() => els.toast.classList.remove('show'), 2000);
+        }
+
+        function syncFormatSelect() {
+            if(!state.data?.canvas) return;
+            const val = `${state.data.canvas.width}x${state.data.canvas.height}`;
+            els.formatSelect.value = Array.from(els.formatSelect.options).some(o => o.value === val) ? val : 'custom';
+        }
+
+        function setZoom(val) {
+            state.zoom = Math.max(0.1, Math.min(val, 3));
+            updateZoomDisplay();
+        }
+
+        function updateZoomDisplay() {
+            els.zoomLevel.textContent = `${Math.round(state.zoom * 100)}%`;
+            els.target.style.transform = `scale(${state.zoom})`;
+        }
+
+        function autoFitZoom() {
+            if(!state.data) return;
+            const pW = els.container.clientWidth - 20, pH = els.container.clientHeight - 40;
+            if (pW > 0 && pH > 0) {
+                setZoom(Math.min(pW / state.data.canvas.width, pH / state.data.canvas.height, 1));
+            }
+        }
+
+        async function exportImage() {
+            if(!state.data) return;
+            showToast("Generando imagen...");
+            
+            const originalZoom = state.zoom;
+            els.target.style.transform = `scale(1)`;
+            
+            try {
+                const canvas = await html2canvas(els.target, {
+                    scale: 2,
+                    useCORS: true,
+                    backgroundColor: state.data.canvas.background || '#000000',
+                    logging: false
+                });
+
+                const link = document.createElement('a');
+                link.download = `newscard_${Date.now()}.png`;
+                link.href = canvas.toDataURL('image/png');
+                link.click();
+            } catch (err) {
+                showToast("Error al exportar");
+                triggerShake(document.getElementById('btn-export'));
+            } finally {
+                setZoom(originalZoom);
+            }
+        }
+
+        function handleFormatChange(e) {
+            const val = e.target.value;
+            if (val === 'custom') {
+                els.customModal.style.display = 'flex';
+            } else if (state.data && state.data.canvas) {
+                const [w, h] = val.split('x').map(Number);
+                state.data.canvas.width = w;
+                state.data.canvas.height = h;
+                els.editor.value = JSON.stringify(state.data, null, 2);
+                applyJSON();
+                autoFitZoom();
+            }
+        }
+
+        function init() {
+            lucide.createIcons();
+            
+            els.editor.addEventListener('input', handleEditorInput);
+            document.getElementById('btn-format-json').addEventListener('click', () => {
+                try { 
+                    els.editor.value = JSON.stringify(JSON.parse(els.editor.value), null, 2); 
+                    applyJSON(); 
+                } catch(e) {
+                    triggerShake(els.editor);
+                }
+            });
+
+            document.getElementById('btn-copy-json').addEventListener('click', () => {
+                navigator.clipboard.writeText(els.editor.value); 
+                showToast("Copiado al portapapeles");
+            });
+            
+            els.templateSelect.addEventListener('change', e => loadTemplate(e.target.value));
+            els.formatSelect.addEventListener('change', handleFormatChange);
+            
+            document.getElementById('btn-apply-format').addEventListener('click', () => {
+                const w = parseInt(els.customWidth.value, 10);
+                const h = parseInt(els.customHeight.value, 10);
+                if (w > 0 && h > 0 && state.data && state.data.canvas) {
+                    state.data.canvas.width = w;
+                    state.data.canvas.height = h;
+                    els.editor.value = JSON.stringify(state.data, null, 2);
+                    applyJSON();
+                    autoFitZoom();
+                    els.customModal.style.display = 'none';
+                } else {
+                    triggerShake(els.customModal.querySelector('.modal'));
+                }
+            });
+
+            document.getElementById('btn-cancel-format').addEventListener('click', () => {
+                els.customModal.style.display = 'none';
+                syncFormatSelect();
+            });
+
+            document.getElementById('btn-zoom-in').addEventListener('click', () => setZoom(state.zoom + 0.1));
+            document.getElementById('btn-zoom-out').addEventListener('click', () => setZoom(state.zoom - 0.1));
+            document.getElementById('btn-zoom-fit').addEventListener('click', autoFitZoom);
+
+            document.getElementById('btn-export').addEventListener('click', exportImage);
+            
+            document.getElementById('btn-save').addEventListener('click', () => {
+                const blob = new Blob([els.editor.value], { type: 'application/json' });
+                const a = document.createElement('a');
+                a.href = URL.createObjectURL(blob); 
+                a.download = `newscard.json`; 
+                a.click();
+                showToast("JSON guardado");
+            });
+
+            document.getElementById('btn-import').addEventListener('click', () => {
+                const input = document.createElement('input');
+                input.type = 'file';
+                input.accept = 'application/json';
+                input.onchange = e => {
+                    const file = e.target.files[0];
+                    if (file) {
+                        const reader = new FileReader();
+                        reader.onload = event => {
+                            els.editor.value = event.target.result;
+                            applyJSON();
+                            showToast("JSON importado");
+                        };
+                        reader.readAsText(file);
+                    }
+                };
+                input.click();
+            });
+
+            // TABS MÓVILES
+            document.querySelectorAll('.tab-btn').forEach(btn => {
+                btn.addEventListener('click', () => {
+                    document.querySelectorAll('.tab-btn').forEach(t => t.classList.remove('active'));
+                    btn.classList.add('active');
+                    
+                    const target = btn.getAttribute('data-target');
+                    const editor = document.getElementById('editor-panel');
+                    const preview = document.getElementById('preview-panel');
+
+                    if (target === 'editor-panel') {
+                        editor.classList.add('active');
+                        preview.classList.remove('active');
+                    } else {
+                        preview.classList.add('active');
+                        editor.classList.remove('active');
+                        autoFitZoom();
+                    }
+                });
+            });
+
+            const saved = localStorage.getItem('newscard_draft_v2');
+            if (saved) {
+                els.editor.value = saved;
+                applyJSON();
+            } else loadTemplate('tech');
+            
+            window.addEventListener('resize', autoFitZoom);
+            autoFitZoom();
+        }
+
+        document.addEventListener('DOMContentLoaded', init);
+    </script>
+</body>
+</html>

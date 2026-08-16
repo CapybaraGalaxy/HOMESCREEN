@@ -1,0 +1,610 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+    <title>Selector de Color</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@200;300;400;500;600;700&display=swap" rel="stylesheet">
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <style>
+        :root {
+            --bg: #000000;
+            --surface: #121212;
+            --surface-hover: #1c1c1e;
+            
+            --glass: rgba(15, 15, 15, 0.4);
+            --glass-border: rgba(255, 255, 255, 0.08);
+            --blur-val: 30px;
+
+            --text-main: #FFFFFF;
+            --text-muted: #8E8E93;
+
+            --accent-danger: #FF453A;
+            --accent-success: #34C759;
+            --accent-primary: #0A84FF;
+
+            --bezier: cubic-bezier(0.16, 1, 0.3, 1);
+            --spring: cubic-bezier(0.34, 1.56, 0.64, 1);
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: 'Outfit', sans-serif;
+            font-variant-numeric: tabular-nums;
+        }
+
+        body {
+            background-color: var(--bg);
+            color: var(--text-main);
+            min-height: 100dvh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            overflow-x: hidden;
+        }
+
+        .app-container {
+            width: 100%;
+            max-width: 900px;
+            height: 100dvh;
+            display: flex;
+            flex-direction: column;
+            padding: env(safe-area-inset-top) 24px calc(env(safe-area-inset-bottom) + 16px) 24px;
+            background: var(--bg);
+            overflow: hidden;
+        }
+
+        @media (min-width: 768px) {
+            .app-container {
+                height: 90vh;
+                border: 1px solid var(--glass-border);
+                border-radius: 24px;
+                background: var(--surface);
+                backdrop-filter: blur(var(--blur-val));
+                -webkit-backdrop-filter: blur(var(--blur-val));
+                box-shadow: 0 20px 40px rgba(0,0,0,0.8);
+            }
+        }
+
+        header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 16px 0;
+            border-bottom: 1px solid var(--glass-border);
+            margin-bottom: 12px;
+            flex-shrink: 0;
+        }
+
+        .header-left {
+            display: flex;
+            align-items: center;
+            gap: 14px;
+        }
+
+        .app-icon-badge {
+            width: 40px;
+            height: 40px;
+            border-radius: 12px;
+            background: radial-gradient(circle, rgba(255,255,255,0.08) 0%, rgba(255,255,255,0.02) 100%);
+            border: 1px solid var(--glass-border);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .app-title {
+            font-size: 1.1rem;
+            font-weight: 600;
+            letter-spacing: -0.01em;
+        }
+
+        .main-content {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+            overflow-y: auto;
+            scrollbar-width: none;
+            padding: 4px 0;
+            box-sizing: border-box;
+        }
+
+        .main-content::-webkit-scrollbar {
+            display: none;
+        }
+
+        .converter-grid {
+            display: grid;
+            grid-template-columns: 1fr;
+            gap: 12px;
+        }
+
+        @media (min-width: 768px) {
+            .converter-grid {
+                grid-template-columns: 1fr 1fr;
+            }
+        }
+
+        .panel {
+            background: var(--glass);
+            border: 1px solid var(--glass-border);
+            border-radius: 18px;
+            padding: 16px;
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+            backdrop-filter: blur(var(--blur-val));
+            -webkit-backdrop-filter: blur(var(--blur-val));
+            transition: border-color 0.3s var(--bezier);
+        }
+
+        .panel:focus-within {
+            border-color: rgba(255,255,255,0.2);
+        }
+
+        .panel-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            font-size: 0.85rem;
+            font-weight: 500;
+            color: var(--text-muted);
+        }
+
+        .color-preview-box {
+            width: 100%;
+            height: 60px;
+            border-radius: 12px;
+            border: 1px solid var(--glass-border);
+            transition: background-color 0.2s var(--bezier);
+            background-image: linear-gradient(45deg, #222 25%, transparent 25%), linear-gradient(-45deg, #222 25%, transparent 25%), linear-gradient(45deg, transparent 75%, #222 75%), linear-gradient(-45deg, transparent 75%, #222 75%);
+            background-size: 16px 16px;
+            background-position: 0 0, 0 8px, 8px -8px, -8px 0px;
+        }
+
+        .color-preview-inner {
+            width: 100%;
+            height: 100%;
+            border-radius: 11px;
+        }
+
+        .control-group {
+            display: flex;
+            flex-direction: column;
+            gap: 6px;
+        }
+
+        label {
+            font-size: 0.75rem;
+            color: var(--text-muted);
+        }
+
+        .wheel-container {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 10px;
+            background: var(--surface-hover);
+            padding: 12px;
+            border-radius: 12px;
+            border: 1px solid var(--glass-border);
+        }
+
+        canvas#color-wheel {
+            width: 180px;
+            height: 180px;
+            border-radius: 50%;
+            cursor: crosshair;
+            touch-action: none;
+        }
+
+        .alpha-slider-row {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            width: 100%;
+        }
+
+        .alpha-slider-row span {
+            font-size: 0.8rem;
+            width: 50px;
+            color: var(--text-muted);
+        }
+
+        .alpha-slider-row input[type="range"] {
+            flex: 1;
+            accent-color: var(--accent-primary);
+        }
+
+        .native-picker-row {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        input[type="color"] {
+            -webkit-appearance: none;
+            border: none;
+            width: 44px;
+            height: 44px;
+            border-radius: 10px;
+            cursor: pointer;
+            background: transparent;
+        }
+
+        input[type="color"]::-webkit-color-swatch-wrapper {
+            padding: 0;
+        }
+
+        input[type="color"]::-webkit-color-swatch {
+            border: 1px solid var(--glass-border);
+            border-radius: 10px;
+        }
+
+        .formats-grid {
+            display: grid;
+            grid-template-columns: 1fr;
+            gap: 8px;
+            max-height: 320px;
+            overflow-y: auto;
+            scrollbar-width: none;
+        }
+
+        .formats-grid::-webkit-scrollbar {
+            display: none;
+        }
+
+        @media (min-width: 480px) {
+            .formats-grid {
+                grid-template-columns: 1fr 1fr;
+            }
+        }
+
+        .format-item {
+            background: var(--surface-hover);
+            border: 1px solid var(--glass-border);
+            border-radius: 10px;
+            padding: 8px 12px;
+            display: flex;
+            flex-direction: column;
+            gap: 2px;
+            cursor: pointer;
+            transition: background 0.2s var(--bezier);
+        }
+
+        .format-item:hover {
+            background: rgba(255,255,255,0.06);
+        }
+
+        .format-label {
+            font-size: 0.7rem;
+            color: var(--text-muted);
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+        }
+
+        .format-value {
+            font-size: 0.85rem;
+            font-weight: 500;
+            font-family: monospace;
+            word-break: break-all;
+        }
+
+        @keyframes pulse-val {
+            0% { transform: scale(1); }
+            50% { transform: scale(1.08); }
+            100% { transform: scale(1); }
+        }
+
+        .pulse {
+            animation: pulse-val 0.3s var(--spring);
+        }
+    </style>
+</head>
+<body>
+
+    <div class="app-container" id="main-view">
+        <header>
+            <div class="header-left">
+                <div class="app-icon-badge">
+                    <i data-lucide="palette" size="20" style="color: var(--text-main);"></i>
+                </div>
+                <h1 class="app-title">Selector de Color</h1>
+            </div>
+            <div style="font-size: 0.8rem; color: var(--text-muted);" id="char-count">Activo</div>
+        </header>
+
+        <main class="main-content">
+            <div class="converter-grid">
+                <!-- Panel de Selección -->
+                <div class="panel">
+                    <div class="panel-header">
+                        <span>Métodos de Selección</span>
+                        <i data-lucide="sliders" size="16"></i>
+                    </div>
+
+                    <div class="color-preview-box">
+                        <div class="color-preview-inner" id="preview-inner"></div>
+                    </div>
+
+                    <div class="control-group">
+                        <label>Selector Nativos y Rápido</label>
+                        <div class="native-picker-row">
+                            <input type="color" id="native-color-picker" value="#0a84ff">
+                            <span style="font-size: 0.85rem; color: var(--text-main);">Paleta del sistema operativo</span>
+                        </div>
+                    </div>
+
+                    <div class="control-group">
+                        <label>Círculo Cromático Interactivo</label>
+                        <div class="wheel-container">
+                            <canvas id="color-wheel" width="200" height="200"></canvas>
+                            <div class="alpha-slider-row">
+                                <span>Alfa</span>
+                                <input type="range" id="alpha-range" min="0" max="1" step="0.01" value="1">
+                                <span id="alpha-val" style="width: 35px; text-align: right;">1.00</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Panel de Formatos -->
+                <div class="panel">
+                    <div class="panel-header">
+                        <span>Formatos de Color con Alfa (Clic para copiar)</span>
+                        <i data-lucide="copy" size="16"></i>
+                    </div>
+
+                    <div class="formats-grid" id="formats-container">
+                        <!-- Generados dinámicamente -->
+                    </div>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <script>
+        const previewInner = document.getElementById('preview-inner');
+        const nativePicker = document.getElementById('native-color-picker');
+        const colorWheel = document.getElementById('color-wheel');
+        const ctx = colorWheel.getContext('2d');
+        const alphaRange = document.getElementById('alpha-range');
+        const alphaVal = document.getElementById('alpha-val');
+        const formatsContainer = document.getElementById('formats-container');
+        const charCount = document.getElementById('char-count');
+
+        let currentColor = { r: 10, g: 132, b: 255, a: 1 };
+
+        function drawWheel() {
+            const width = colorWheel.width;
+            const height = colorWheel.height;
+            const radius = width / 2;
+            const imagedata = ctx.createImageData(width, height);
+            const data = imagedata.data;
+
+            for (let y = 0; y < height; y++) {
+                for (let x = 0; x < width; x++) {
+                    const dx = x - radius;
+                    const dy = y - radius;
+                    const distance = Math.sqrt(dx * dx + dy * dy);
+                    const index = (y * width + x) * 4;
+
+                    if (distance <= radius) {
+                        const angle = Math.atan2(dy, dx);
+                        let hue = (angle * 180 / Math.PI + 360) % 360;
+                        let saturation = distance / radius;
+                        let rgb = hsvToRgb(hue / 360, saturation, 1);
+
+                        data[index] = rgb.r;
+                        data[index + 1] = rgb.g;
+                        data[index + 2] = rgb.b;
+                        data[index + 3] = 255;
+                    } else {
+                        data[index + 3] = 0;
+                    }
+                }
+            }
+            ctx.putImageData(imagedata, 0, 0);
+        }
+
+        function updateFromRGB(r, g, b, a) {
+            currentColor = { r, g, b, a };
+            const hex = rgbToHex(r, g, b);
+            const hex8 = rgbToHex8(r, g, b, a);
+            previewInner.style.backgroundColor = `rgba(${r}, ${g}, ${b}, ${a})`;
+            nativePicker.value = hex;
+            alphaVal.value = a;
+            alphaRange.value = a;
+            alphaVal.textContent = Number(a).toFixed(2);
+
+            const hsv = rgbToHsv(r, g, b);
+            renderFormats(r, g, b, a, hex, hex8, hsv);
+        }
+
+        function rgbToHex(r, g, b) {
+            return "#" + [r, g, b].map(x => Math.round(x).toString(16).padStart(2, '0')).join('');
+        }
+
+        function rgbToHex8(r, g, b, a) {
+            const alphaHex = Math.round(a * 255).toString(16).padStart(2, '0');
+            return rgbToHex(r, g, b) + alphaHex;
+        }
+
+        function hexToRgb(hex) {
+            let sanitized = hex.replace(/^#/, '');
+            if (sanitized.length === 3) {
+                sanitized = sanitized.split('').map(c => c + c).join('');
+            }
+            const num = parseInt(sanitized, 16);
+            return {
+                r: (num >> 16) & 255,
+                g: (num >> 8) & 255,
+                b: num & 255
+            };
+        }
+
+        function rgbToHsv(r, g, b) {
+            r /= 255; g /= 255; b /= 255;
+            const max = Math.max(r, g, b), min = Math.min(r, g, b);
+            const d = max - min;
+            let h = 0;
+            const s = max === 0 ? 0 : d / max;
+            const v = max;
+
+            if (d !== 0) {
+                switch (max) {
+                    case r: h = (g - b) / d + (g < b ? 6 : 0); break;
+                    case g: h = (b - r) / d + 2; break;
+                    case b: h = (r - g) / d + 4; break;
+                }
+                h /= 6;
+            }
+            return { h: h * 360, s, v };
+        }
+
+        function hsvToRgb(h, s, v) {
+            let r, g, b;
+            const i = Math.floor(h * 6);
+            const f = h * 6 - i;
+            const p = v * (1 - s);
+            const q = v * (1 - f * s);
+            const t = v * (1 - (1 - f) * s);
+            switch (i % 6) {
+                case 0: r = v, g = t, b = p; break;
+                case 1: r = q, g = v, b = p; break;
+                case 2: r = p, g = v, b = t; break;
+                case 3: r = p, g = q, b = v; break;
+                case 4: r = t, g = p, b = v; break;
+                case 5: r = v, g = p, b = q; break;
+            }
+            return {
+                r: Math.round(r * 255),
+                g: Math.round(g * 255),
+                b: Math.round(b * 255)
+            };
+        }
+
+        function rgbToCmyk(r, g, b) {
+            let c = 1 - (r / 255);
+            let m = 1 - (g / 255);
+            let y = 1 - (b / 255);
+            let k = Math.min(c, Math.min(m, y));
+            if (k === 1) return { c: 0, m: 0, y: 0, k: 100 };
+            c = Math.round(((c - k) / (1 - k)) * 100);
+            m = Math.round(((m - k) / (1 - k)) * 100);
+            y = Math.round(((y - k) / (1 - k)) * 100);
+            k = Math.round(k * 100);
+            return { c, m, y, k };
+        }
+
+        function rgbToHsl(r, g, b) {
+            r /= 255; g /= 255; b /= 255;
+            const max = Math.max(r, g, b), min = Math.min(r, g, b);
+            let h, s, l = (max + min) / 2;
+            if (max === min) {
+                h = s = 0;
+            } else {
+                const d = max - min;
+                s = l > 0.5 ? d / (2 - max - min) : d / (max + min);
+                switch (max) {
+                    case r: h = (g - b) / d + (g < b ? 6 : 0); break;
+                    case g: h = (b - r) / d + 2; break;
+                    case b: h = (r - g) / d + 4; break;
+                }
+                h /= 6;
+            }
+            return { h: h * 360, s, l };
+        }
+
+        function renderFormats(r, g, b, a, hex, hex8, hsv) {
+            const cmyk = rgbToCmyk(r, g, b);
+            const hsl = rgbToHsl(r, g, b);
+            const scratchHVal = Math.round(hsv.h * (200 / 360));
+
+            const formats = [
+                { label: 'HEX', val: hex.toUpperCase() },
+                { label: 'HEX8 (con alfa)', val: hex8.toUpperCase() },
+                { label: 'RGB', val: `rgb(${r}, ${g}, ${b})` },
+                { label: 'RGBA', val: `rgba(${r}, ${g}, ${b}, ${Number(a).toFixed(2)})` },
+                { label: 'HSL', val: `hsl(${Math.round(hsl.h)}, ${Math.round(hsl.s * 100)}%, ${Math.round(hsl.l * 100)}%)` },
+                { label: 'HSLA', val: `hsla(${Math.round(hsl.h)}, ${Math.round(hsl.s * 100)}%, ${Math.round(hsl.l * 100)}%, ${Number(a).toFixed(2)})` },
+                { label: 'CMYK', val: `cmyk(${cmyk.c}%, ${cmyk.m}%, ${cmyk.y}%, ${cmyk.k}%)` },
+                { label: 'Scratch Edu', val: `Color: ${scratchHVal}, Sat: ${Math.round(hsv.s * 100)}, Brill: ${Math.round(hsv.v * 100)}` },
+                { label: 'Decimal (Int)', val: (r << 16 | g << 8 | b).toString() },
+                { label: 'CSS Custom Property', val: `--color: rgba(${r}, ${g}, ${b}, ${Number(a).toFixed(2)});` }
+            ];
+
+            formatsContainer.innerHTML = '';
+            formats.forEach(f => {
+                const div = document.createElement('div');
+                div.className = 'format-item';
+                div.innerHTML = `
+                    <span class="format-label">${f.label}</span>
+                    <span class="format-value">${f.val}</span>
+                `;
+                div.onclick = () => {
+                    navigator.clipboard.writeText(f.val);
+                    triggerPulse();
+                };
+                formatsContainer.appendChild(div);
+            });
+        }
+
+        function triggerPulse() {
+            charCount.classList.add('pulse');
+            charCount.textContent = "¡Copiado!";
+            setTimeout(() => {
+                charCount.classList.remove('pulse');
+                charCount.textContent = "Activo";
+            }, 800);
+        }
+
+        function handleWheelClick(e) {
+            const rect = colorWheel.getBoundingClientRect();
+            const x = e.clientX - rect.left;
+            const y = e.clientY - rect.top;
+            const radius = colorWheel.width / 2;
+            const dx = x - radius;
+            const dy = y - radius;
+            const distance = Math.sqrt(dx * dx + dy * dy);
+
+            if (distance <= radius) {
+                const angle = Math.atan2(dy, dx);
+                let hue = (angle * 180 / Math.PI + 360) % 360;
+                let saturation = distance / radius;
+                let rgb = hsvToRgb(hue / 360, saturation, 1);
+                updateFromRGB(rgb.r, rgb.g, rgb.b, currentColor.a);
+            }
+        }
+
+        let isDragging = false;
+        colorWheel.addEventListener('mousedown', (e) => { isDragging = true; handleWheelClick(e); });
+        window.addEventListener('mousemove', (e) => { if (isDragging) handleWheelClick(e); });
+        window.addEventListener('mouseup', () => { isDragging = false; });
+
+        colorWheel.addEventListener('touchstart', (e) => { isDragging = true; handleWheelClick(e.touches[0]); e.preventDefault(); });
+        window.addEventListener('touchmove', (e) => { if (isDragging) handleWheelClick(e.touches[0]); });
+        window.addEventListener('touchend', () => { isDragging = false; });
+
+        nativePicker.addEventListener('input', (e) => {
+            const rgb = hexToRgb(e.target.value);
+            updateFromRGB(rgb.r, rgb.g, rgb.b, currentColor.a);
+        });
+
+        alphaRange.addEventListener('input', (e) => {
+            updateFromRGB(currentColor.r, currentColor.g, currentColor.b, parseFloat(e.target.value));
+        });
+
+        window.onload = () => {
+            lucide.createIcons();
+            drawWheel();
+            updateFromRGB(10, 132, 255, 1);
+        };
+    </script>
+</body>
+</html>

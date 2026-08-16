@@ -1,0 +1,562 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+    <title>Conversor Morse</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@200;300;400;500;600;700&display=swap" rel="stylesheet">
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <style>
+        :root {
+            --bg: #000000;
+            --surface: #121212;
+            --surface-hover: #1c1c1e;
+            
+            --glass: rgba(15, 15, 15, 0.6);
+            --glass-border: rgba(255, 255, 255, 0.08);
+            --blur-val: 30px;
+
+            --text-main: #FFFFFF;
+            --text-muted: #8E8E93;
+
+            --accent-danger: #FF453A;
+            --accent-success: #34C759;
+            --accent-primary: #0A84FF;
+
+            --bezier: cubic-bezier(0.16, 1, 0.3, 1);
+            --spring: cubic-bezier(0.34, 1.56, 0.64, 1);
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: 'Outfit', sans-serif;
+            font-variant-numeric: tabular-nums;
+        }
+
+        body {
+            background-color: var(--bg);
+            color: var(--text-main);
+            min-height: 100dvh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            overflow-x: hidden;
+        }
+
+        .app-container {
+            width: 100%;
+            max-width: 900px;
+            height: 100dvh;
+            display: flex;
+            flex-direction: column;
+            padding: env(safe-area-inset-top) 24px calc(env(safe-area-inset-bottom) + 16px) 24px;
+            background: var(--bg);
+            overflow: hidden;
+        }
+
+        @media (min-width: 768px) {
+            .app-container {
+                height: 90vh;
+                border: 1px solid var(--glass-border);
+                border-radius: 24px;
+                background: var(--surface);
+                backdrop-filter: blur(var(--blur-val));
+                -webkit-backdrop-filter: blur(var(--blur-val));
+                box-shadow: 0 20px 40px rgba(0,0,0,0.8);
+            }
+        }
+
+        header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 16px 0;
+            border-bottom: 1px solid var(--glass-border);
+            margin-bottom: 12px;
+            flex-shrink: 0;
+        }
+
+        .header-left {
+            display: flex;
+            align-items: center;
+            gap: 14px;
+        }
+
+        .app-icon-badge {
+            width: 40px;
+            height: 40px;
+            border-radius: 12px;
+            background: radial-gradient(circle, rgba(255,255,255,0.08) 0%, rgba(255,255,255,0.02) 100%);
+            border: 1px solid var(--glass-border);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .app-title {
+            font-size: 1.1rem;
+            font-weight: 600;
+            letter-spacing: -0.01em;
+        }
+
+        .main-content {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+            overflow-y: auto;
+            scrollbar-width: none;
+            padding: 12px 12px 24px 12px;
+            box-sizing: border-box;
+        }
+
+        .main-content::-webkit-scrollbar {
+            display: none;
+        }
+
+        .converter-grid {
+            display: grid;
+            grid-template-columns: 1fr;
+            gap: 12px;
+            flex: 1;
+        }
+
+        @media (min-width: 768px) {
+            .converter-grid {
+                grid-template-columns: 1fr 1fr;
+            }
+        }
+
+        .panel {
+            background: var(--glass);
+            border: 1px solid var(--glass-border);
+            border-radius: 18px;
+            padding: 16px;
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+            backdrop-filter: blur(var(--blur-val));
+            -webkit-backdrop-filter: blur(var(--blur-val));
+            transition: border-color 0.3s var(--bezier), transform 0.3s var(--spring);
+            will-change: transform;
+            transform: scale(1);
+            transform-origin: center;
+        }
+
+        .panel:focus-within {
+            border-color: rgba(255,255,255,0.2);
+        }
+
+        .panel-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            font-size: 0.85rem;
+            font-weight: 500;
+            color: var(--text-muted);
+        }
+
+        textarea {
+            width: 100%;
+            flex: 1;
+            background: transparent;
+            border: none;
+            color: var(--text-main);
+            font-size: 1rem;
+            resize: none;
+            outline: none;
+            line-height: 1.5;
+            min-height: 90px;
+        }
+
+        textarea::placeholder {
+            color: var(--text-muted);
+            opacity: 0.5;
+        }
+
+        .panel-actions {
+            display: flex;
+            gap: 8px;
+            align-items: center;
+            justify-content: flex-end;
+            border-top: 1px solid var(--glass-border);
+            padding-top: 8px;
+        }
+
+        .btn {
+            background: var(--surface-hover);
+            border: 1px solid var(--glass-border);
+            color: var(--text-main);
+            padding: 8px 14px;
+            border-radius: 10px;
+            font-size: 0.85rem;
+            font-weight: 500;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            transition: transform 0.2s var(--spring), background 0.2s var(--bezier);
+        }
+
+        .btn:hover {
+            background: rgba(255,255,255,0.08);
+        }
+
+        .btn:active {
+            transform: scale(0.95);
+        }
+
+        .btn-primary {
+            background: var(--text-main);
+            color: var(--bg);
+            border: none;
+        }
+
+        .btn-primary:hover {
+            background: rgba(255,255,255,0.85);
+        }
+
+        .audio-controls {
+            display: flex;
+            gap: 10px;
+            align-items: center;
+            justify-content: center;
+            padding: 12px;
+            background: var(--glass);
+            border: 1px solid var(--glass-border);
+            border-radius: 16px;
+            flex-shrink: 0;
+        }
+
+        @keyframes pulse {
+            0% { transform: scale(1); opacity: 1; }
+            50% { transform: scale(1.02); opacity: 0.95; }
+            100% { transform: scale(1); opacity: 1; }
+        }
+
+        .playing {
+            animation: pulse 1s infinite var(--spring);
+            border-color: var(--accent-success) !important;
+        }
+    </style>
+</head>
+<body>
+
+    <div class="app-container" id="main-view">
+        <header>
+            <div class="header-left">
+                <div class="app-icon-badge">
+                    <i data-lucide="radio" size="20" style="color: var(--text-main);"></i>
+                </div>
+                <h1 class="app-title">Conversor Morse</h1>
+            </div>
+            <div style="font-size: 0.8rem; color: var(--text-muted);" id="char-count">0 caracteres</div>
+        </header>
+
+        <main class="main-content">
+            <div class="converter-grid">
+                <!-- Panel Texto -->
+                <div class="panel">
+                    <div class="panel-header">
+                        <span>Texto Normal</span>
+                        <i data-lucide="type" size="16"></i>
+                    </div>
+                    <textarea id="text-input" placeholder="Escribe texto aquí..."></textarea>
+                    <div class="panel-actions">
+                        <button class="btn" onclick="clearText('text')">
+                            <i data-lucide="trash-2" size="14"></i> Limpiar
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Panel Morse -->
+                <div class="panel" id="morse-panel">
+                    <div class="panel-header">
+                        <span>Código Morse</span>
+                        <i data-lucide="activity" size="16"></i>
+                    </div>
+                    <textarea id="morse-input" placeholder="Escribe morse con . y - aquí..."></textarea>
+                    <div class="panel-actions">
+                        <button class="btn" onclick="clearText('morse')">
+                            <i data-lucide="trash-2" size="14"></i> Limpiar
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Controles de Audio y Descarga -->
+            <div class="audio-controls" id="audio-controls">
+                <button class="btn btn-primary" id="play-btn" onclick="togglePlayMorse()">
+                    <i data-lucide="play" size="16"></i> Reproducir Morse
+                </button>
+                <button class="btn" id="download-btn" onclick="downloadMorseAudio()">
+                    <i data-lucide="download" size="16"></i> Descargar Audio WAV
+                </button>
+            </div>
+        </main>
+    </div>
+
+    <script>
+        const morseTable = {
+            'A': '.-', 'B': '-...', 'C': '-.-.', 'D': '-..', 'E': '.', 'F': '..-.',
+            'G': '--.', 'H': '....', 'I': '..', 'J': '.---', 'K': '-.-', 'L': '.-..',
+            'M': '--', 'N': '-.', 'O': '---', 'P': '.--.', 'Q': '--.-', 'R': '.-.',
+            'S': '...', 'T': '-', 'U': '..-', 'V': '...-', 'W': '.--', 'X': '-..-',
+            'Y': '-.--', 'Z': '--..', '0': '-----', '1': '.----', '2': '..---',
+            '3': '...--', '4': '....-', '5': '.....', '6': '-....', '7': '--...',
+            '8': '---..', '9': '----.', '.': '.-.-.-', ',': '--..--', '?': '..--..',
+            '\'': '.----.', '!': '-.-.--', '/': '-..-.', '(': '-.--.', ')': '-.--.-',
+            '&': '.-...', ':': '---...', ';': '-.-.-.', '=': '-...-', '+': '.-.-.',
+            '-': '-....-', '_': '..--.-', '"': '.-..-.', '$': '...-..-', '@': '.--.-.'
+        };
+
+        const reverseMorseTable = Object.fromEntries(
+            Object.entries(morseTable).map(([k, v]) => [v, k])
+        );
+
+        const textInput = document.getElementById('text-input');
+        const morseInput = document.getElementById('morse-input');
+        const charCount = document.getElementById('char-count');
+        const morsePanel = document.getElementById('morse-panel');
+        const playBtn = document.getElementById('play-btn');
+
+        let isUpdating = false;
+        let audioCtx = null;
+        let activeOscillator = null;
+        let isPlaying = false;
+        let stopPlaybackFlag = false;
+
+        textInput.addEventListener('input', () => {
+            if (isUpdating) return;
+            isUpdating = true;
+            const text = textInput.value.toUpperCase();
+            const morse = textToMorse(text);
+            morseInput.value = morse;
+            updateMeta(text.length);
+            isUpdating = false;
+        });
+
+        morseInput.addEventListener('input', () => {
+            if (isUpdating) return;
+            isUpdating = true;
+            const morse = morseInput.value;
+            const text = morseToText(morse);
+            textInput.value = text;
+            updateMeta(text.length);
+            isUpdating = false;
+        });
+
+        function textToMorse(text) {
+            return text.split('').map(char => {
+                if (char === ' ') return '/';
+                return morseTable[char] || char;
+            }).join(' ');
+        }
+
+        function morseToText(morse) {
+            return morse.split(' / ').map(word => {
+                return word.split(' ').map(symbol => {
+                    return reverseMorseTable[symbol] || '';
+                }).join('');
+            }).join(' ');
+        }
+
+        function updateMeta(len) {
+            charCount.textContent = `${len} caracteres`;
+        }
+
+        function clearText(type) {
+            if (type === 'text') {
+                textInput.value = '';
+                morseInput.value = '';
+            } else {
+                morseInput.value = '';
+                textInput.value = '';
+            }
+            updateMeta(0);
+            stopMorse();
+        }
+
+        function getAudioContext() {
+            if (!audioCtx) {
+                audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+            }
+            if (audioCtx.state === 'suspended') {
+                audioCtx.resume();
+            }
+            return audioCtx;
+        }
+
+        async function togglePlayMorse() {
+            if (isPlaying) {
+                stopMorse();
+                return;
+            }
+
+            const morse = morseInput.value.trim();
+            if (!morse) return;
+
+            isPlaying = true;
+            stopPlaybackFlag = false;
+            playBtn.innerHTML = `<i data-lucide="square" size="16"></i> Parar Morse`;
+            playBtn.classList.add('playing');
+            morsePanel.classList.add('playing');
+            lucide.createIcons();
+
+            const ctx = getAudioContext();
+            const dotDuration = 0.08;
+            const dashDuration = dotDuration * 3;
+            const symbolPause = dotDuration;
+            const letterPause = dotDuration * 3;
+            const wordPause = dotDuration * 7;
+
+            let time = ctx.currentTime + 0.05;
+
+            for (let i = 0; i < morse.length; i++) {
+                if (stopPlaybackFlag) break;
+                const char = morse[i];
+
+                if (char === '.') {
+                    time = playTone(ctx, time, dotDuration);
+                    time += symbolPause;
+                } else if (char === '-') {
+                    time = playTone(ctx, time, dashDuration);
+                    time += symbolPause;
+                } else if (char === ' ') {
+                    time += letterPause;
+                } else if (char === '/') {
+                    time += wordPause;
+                }
+            }
+
+            const totalDuration = (time - ctx.currentTime) * 1000;
+            setTimeout(() => {
+                if (isPlaying) stopMorse();
+            }, Math.max(0, totalDuration));
+        }
+
+        function playTone(ctx, startTime, duration) {
+            const osc = ctx.createOscillator();
+            const gain = ctx.createGain();
+
+            osc.type = 'sine';
+            osc.frequency.setValueAtTime(600, startTime);
+
+            gain.gain.setValueAtTime(0, startTime);
+            gain.gain.linearRampToValueAtTime(0.3, startTime + 0.01);
+            gain.gain.linearRampToValueAtTime(0, startTime + duration - 0.01);
+
+            osc.connect(gain);
+            gain.connect(ctx.destination);
+
+            osc.start(startTime);
+            osc.stop(startTime + duration);
+
+            return startTime + duration;
+        }
+
+        function stopMorse() {
+            stopPlaybackFlag = true;
+            isPlaying = false;
+            playBtn.innerHTML = `<i data-lucide="play" size="16"></i> Reproducir Morse`;
+            playBtn.classList.remove('playing');
+            morsePanel.classList.remove('playing');
+            lucide.createIcons();
+        }
+
+        function downloadMorseAudio() {
+            const morse = morseInput.value.trim();
+            if (!morse) return;
+
+            const sampleRate = 8000;
+            const dotDuration = 0.08;
+            const dashDuration = dotDuration * 3;
+            const symbolPause = dotDuration;
+            const letterPause = dotDuration * 3;
+            const wordPause = dotDuration * 7;
+
+            let totalSamples = 0;
+            const timings = [];
+
+            for (let i = 0; i < morse.length; i++) {
+                const char = morse[i];
+                if (char === '.') {
+                    timings.push({ type: 'tone', duration: dotDuration });
+                    timings.push({ type: 'pause', duration: symbolPause });
+                } else if (char === '-') {
+                    timings.push({ type: 'tone', duration: dashDuration });
+                    timings.push({ type: 'pause', duration: symbolPause });
+                } else if (char === ' ') {
+                    timings.push({ type: 'pause', duration: letterPause });
+                } else if (char === '/') {
+                    timings.push({ type: 'pause', duration: wordPause });
+                }
+            }
+
+            timings.forEach(t => totalSamples += Math.floor(t.duration * sampleRate));
+
+            const buffer = new ArrayBuffer(44 + totalSamples * 2);
+            const view = new DataView(buffer);
+
+            writeString(view, 0, 'RIFF');
+            view.setUint32(4, 36 + totalSamples * 2, true);
+            writeString(view, 8, 'WAVE');
+            writeString(view, 12, 'fmt ');
+            view.setUint32(16, 16, true);
+            view.setUint16(20, 1, true);
+            view.setUint16(22, 1, true);
+            view.setUint32(24, sampleRate, true);
+            view.setUint32(28, sampleRate * 2, true);
+            view.setUint16(32, 2, true);
+            view.setUint16(34, 16, true);
+            writeString(view, 36, 'data');
+            view.setUint32(40, totalSamples * 2, true);
+
+            let offset = 44;
+            const freq = 600;
+
+            timings.forEach(t => {
+                const numSamples = Math.floor(t.duration * sampleRate);
+                for (let i = 0; i < numSamples; i++) {
+                    let sample = 0;
+                    if (t.type === 'tone') {
+                        const time = i / sampleRate;
+                        let envelope = 1;
+                        if (i < 100) envelope = i / 100;
+                        if (numSamples - i < 100) envelope = (numSamples - i) / 100;
+                        sample = Math.sin(2 * Math.PI * freq * time) * 0.3 * envelope;
+                    }
+                    view.setInt16(offset, sample < 0 ? sample * 0x8000 : sample * 0x7FFF, true);
+                    offset += 2;
+                }
+            });
+
+            const blob = new Blob([view], { type: 'audio/wav' });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = 'codigo-morse.wav';
+            document.body.appendChild(a);
+            a.click();
+            document.body.removeChild(a);
+            URL.revokeObjectURL(url);
+        }
+
+        function writeString(view, offset, string) {
+            for (let i = 0; i < string.length; i++) {
+                view.setUint8(offset + i, string.charCodeAt(i));
+            }
+        }
+
+        window.onload = () => {
+            lucide.createIcons();
+            textInput.value = "SOS";
+            textInput.dispatchEvent(new Event('input'));
+        };
+    </script>
+</body>
+</html>

@@ -1,0 +1,622 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+    <title>Conversor de Zonas Horarias</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@200;300;400;500;600;700&display=swap" rel="stylesheet">
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <style>
+        :root {
+            --bg: #000000;
+            --surface: #121212;
+            --surface-hover: #1c1c1e;
+            
+            --glass: rgba(15, 15, 15, 0.6);
+            --glass-border: rgba(255, 255, 255, 0.08);
+            --blur-val: 30px;
+
+            --text-main: #FFFFFF;
+            --text-muted: #8E8E93;
+
+            --accent-danger: #FF453A;
+            --accent-success: #34C759;
+            --accent-primary: #0A84FF;
+
+            --bezier: cubic-bezier(0.16, 1, 0.3, 1);
+            --spring: cubic-bezier(0.34, 1.56, 0.64, 1);
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: 'Outfit', sans-serif;
+            font-variant-numeric: tabular-nums;
+        }
+
+        body {
+            background-color: var(--bg);
+            color: var(--text-main);
+            min-height: 100dvh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            overflow-x: hidden;
+        }
+
+        .app-container {
+            width: 100%;
+            max-width: 900px;
+            height: 100dvh;
+            display: flex;
+            flex-direction: column;
+            padding: env(safe-area-inset-top) 24px calc(env(safe-area-inset-bottom) + 16px) 24px;
+            background: var(--bg);
+            overflow: hidden;
+        }
+
+        @media (min-width: 768px) {
+            .app-container {
+                height: 90vh;
+                border: 1px solid var(--glass-border);
+                border-radius: 24px;
+                background: var(--surface);
+                backdrop-filter: blur(var(--blur-val));
+                -webkit-backdrop-filter: blur(var(--blur-val));
+                box-shadow: 0 20px 40px rgba(0,0,0,0.8);
+            }
+        }
+
+        header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 16px 0;
+            border-bottom: 1px solid var(--glass-border);
+            margin-bottom: 12px;
+            flex-shrink: 0;
+        }
+
+        .header-left {
+            display: flex;
+            align-items: center;
+            gap: 14px;
+        }
+
+        .app-icon-badge {
+            width: 40px;
+            height: 40px;
+            border-radius: 12px;
+            background: radial-gradient(circle, rgba(255,255,255,0.08) 0%, rgba(255,255,255,0.02) 100%);
+            border: 1px solid var(--glass-border);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .app-title {
+            font-size: 1.1rem;
+            font-weight: 600;
+            letter-spacing: -0.01em;
+        }
+
+        .main-content {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+            overflow-y: auto;
+            scrollbar-width: none;
+            padding: 4px 0;
+            box-sizing: border-box;
+        }
+
+        .main-content::-webkit-scrollbar {
+            display: none;
+        }
+
+        .converter-grid {
+            display: grid;
+            grid-template-columns: 1fr;
+            gap: 12px;
+        }
+
+        @media (min-width: 768px) {
+            .converter-grid {
+                grid-template-columns: 1fr 1fr;
+            }
+        }
+
+        .panel {
+            background: var(--glass);
+            border: 1px solid var(--glass-border);
+            border-radius: 18px;
+            padding: 16px;
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+            backdrop-filter: blur(var(--blur-val));
+            -webkit-backdrop-filter: blur(var(--blur-val));
+            transition: border-color 0.3s var(--bezier);
+        }
+
+        .panel:focus-within {
+            border-color: rgba(255,255,255,0.2);
+        }
+
+        .panel-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            font-size: 0.85rem;
+            font-weight: 500;
+            color: var(--text-muted);
+        }
+
+        .input-group {
+            display: flex;
+            flex-direction: column;
+            gap: 6px;
+        }
+
+        label {
+            font-size: 0.75rem;
+            color: var(--text-muted);
+        }
+
+        input, select {
+            width: 100%;
+            background: var(--surface-hover);
+            border: 1px solid var(--glass-border);
+            border-radius: 10px;
+            color: var(--text-main);
+            font-size: 1rem;
+            padding: 10px 12px;
+            outline: none;
+            transition: border-color 0.2s var(--bezier);
+        }
+
+        input:focus, select:focus {
+            border-color: var(--accent-primary);
+        }
+
+        select option {
+            background: var(--surface);
+            color: var(--text-main);
+        }
+
+        .output-display {
+            background: var(--surface-hover);
+            border: 1px solid var(--glass-border);
+            border-radius: 12px;
+            padding: 12px;
+            display: flex;
+            flex-direction: column;
+            gap: 4px;
+        }
+
+        .output-time {
+            font-size: 1.3rem;
+            font-weight: 600;
+            letter-spacing: -0.01em;
+        }
+
+        .output-date {
+            font-size: 0.8rem;
+            color: var(--text-muted);
+        }
+
+        .map-panel {
+            background: var(--glass);
+            border: 1px solid var(--glass-border);
+            border-radius: 18px;
+            padding: 16px;
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+            backdrop-filter: blur(var(--blur-val));
+        }
+
+        .world-map-container {
+            width: 100%;
+            height: 140px;
+            background: var(--surface-hover);
+            border: 1px solid var(--glass-border);
+            border-radius: 12px;
+            position: relative;
+            overflow: hidden;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .world-map-svg {
+            width: 100%;
+            height: 100%;
+            opacity: 0.25;
+        }
+
+        .time-pins {
+            position: absolute;
+            inset: 0;
+            display: flex;
+            justify-content: space-around;
+            align-items: center;
+            padding: 0 20px;
+        }
+
+        .pin-node {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 4px;
+            background: rgba(0,0,0,0.6);
+            padding: 8px 12px;
+            border-radius: 10px;
+            border: 1px solid var(--glass-border);
+            backdrop-filter: blur(10px);
+        }
+
+        .pin-label {
+            font-size: 0.7rem;
+            color: var(--text-muted);
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+        }
+
+        .pin-val {
+            font-size: 0.95rem;
+            font-weight: 600;
+        }
+
+        .panel-actions {
+            display: flex;
+            gap: 8px;
+            align-items: center;
+            justify-content: flex-end;
+            border-top: 1px solid var(--glass-border);
+            padding-top: 10px;
+        }
+
+        .btn {
+            background: var(--surface-hover);
+            border: 1px solid var(--glass-border);
+            color: var(--text-main);
+            padding: 8px 14px;
+            border-radius: 10px;
+            font-size: 0.85rem;
+            font-weight: 500;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            transition: transform 0.2s var(--spring), background 0.2s var(--bezier);
+            text-decoration: none;
+        }
+
+        .btn:hover {
+            background: rgba(255,255,255,0.08);
+        }
+
+        .btn:active {
+            transform: scale(0.95);
+        }
+
+        .btn-primary {
+            background: var(--accent-primary);
+            border-color: transparent;
+        }
+        .btn-primary:hover {
+            background: #0071e3;
+        }
+
+        @keyframes pulse-val {
+            0% { transform: scale(1); }
+            50% { transform: scale(1.08); }
+            100% { transform: scale(1); }
+        }
+
+        .pulse {
+            animation: pulse-val 0.3s var(--spring);
+        }
+    </style>
+</head>
+<body>
+
+    <div class="app-container" id="main-view">
+        <header>
+            <div class="header-left">
+                <div class="app-icon-badge">
+                    <i data-lucide="globe" size="20" style="color: var(--text-main);"></i>
+                </div>
+                <h1 class="app-title">Conversor de Zonas Horarias</h1>
+            </div>
+            <div style="font-size: 0.8rem; color: var(--text-muted);" id="char-count">Activo</div>
+        </header>
+
+        <main class="main-content">
+            <div class="converter-grid">
+                <!-- Origen y Zonas -->
+                <div class="panel">
+                    <div class="panel-header">
+                        <span>Configuración de Origen</span>
+                        <i data-lucide="clock" size="16"></i>
+                    </div>
+                    <div class="input-group">
+                        <label>Fecha y Hora de Origen</label>
+                        <input type="datetime-local" id="source-datetime">
+                    </div>
+                    <div class="input-group">
+                        <label>Zona Horaria de Origen (Detecta abreviaturas como CEST, EST...)</label>
+                        <input type="text" id="source-tz-input" placeholder="Ej. CEST, EST, Europe/Madrid, America/New_York">
+                    </div>
+                    <div class="input-group">
+                        <label>Zona Horaria de Destino</label>
+                        <select id="target-tz-select">
+                            <!-- Opciones rellenadas por JS -->
+                        </select>
+                    </div>
+                </div>
+
+                <!-- Resultados -->
+                <div class="panel">
+                    <div class="panel-header">
+                        <span>Resultados de Conversión</span>
+                        <i data-lucide="arrow-right-left" size="16"></i>
+                    </div>
+                    
+                    <div class="input-group">
+                        <label>Hora Local de tu Dispositivo</label>
+                        <div class="output-display">
+                            <div class="output-time" id="local-time-res">--:--</div>
+                            <div class="output-date" id="local-date-res">--</div>
+                        </div>
+                    </div>
+
+                    <div class="input-group">
+                        <label>Hora en Zona de Destino</label>
+                        <div class="output-display">
+                            <div class="output-time" id="target-time-res">--:--</div>
+                            <div class="output-date" id="target-date-res">--</div>
+                        </div>
+                    </div>
+
+                    <div class="panel-actions">
+                        <a id="calendar-btn" href="#" target="_blank" class="btn btn-primary">
+                            <i data-lucide="calendar-plus" size="14"></i> Crear Evento en Calendario
+                        </a>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Mapa Visual Interactivo Simplificado -->
+            <div class="map-panel">
+                <div class="panel-header">
+                    <span>Esquema Visual de Comparación</span>
+                    <i data-lucide="map" size="16"></i>
+                </div>
+                <div class="world-map-container">
+                    <svg class="world-map-svg" viewBox="0 0 1000 400" fill="currentColor">
+                        <path d="M150,100 Q200,50 300,100 T500,120 T700,90 T900,110 V300 H150 Z" opacity="0.15"/>
+                    </svg>
+                    <div class="time-pins">
+                        <div class="pin-node">
+                            <span class="pin-label" id="map-label-src">Origen</span>
+                            <span class="pin-val" id="map-val-src">--:--</span>
+                        </div>
+                        <div style="color: var(--text-muted); font-size: 1.2rem;">⇄</div>
+                        <div class="pin-node">
+                            <span class="pin-label" id="map-label-dst">Destino</span>
+                            <span class="pin-val" id="map-val-dst">--:--</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <script>
+        const sourceDatetime = document.getElementById('source-datetime');
+        const sourceTzInput = document.getElementById('source-tz-input');
+        const targetTzSelect = document.getElementById('target-tz-select');
+        
+        const localTimeRes = document.getElementById('local-time-res');
+        const localDateRes = document.getElementById('local-date-res');
+        const targetTimeRes = document.getElementById('target-time-res');
+        const targetDateRes = document.getElementById('target-date-res');
+        
+        const mapLabelSrc = document.getElementById('map-label-src');
+        const mapValSrc = document.getElementById('map-val-src');
+        const mapLabelDst = document.getElementById('map-label-dst');
+        const mapValDst = document.getElementById('map-val-dst');
+        const calendarBtn = document.getElementById('calendar-btn');
+        const charCount = document.getElementById('char-count');
+
+        // Mapeo común de abreviaturas a zonas IANA
+        const tzAbbrMap = {
+            'cest': 'Europe/Madrid',
+            'cet': 'Europe/Paris',
+            'bst': 'Europe/London',
+            'gmt': 'Etc/GMT',
+            'utc': 'UTC',
+            'est': 'America/New_York',
+            'edt': 'America/New_York',
+            'cst': 'America/Chicago',
+            'cdt': 'America/Chicago',
+            'mst': 'America/Denver',
+            'mdt': 'America/Denver',
+            'pst': 'America/Los_Angeles',
+            'pdt': 'America/Los_Angeles',
+            'jst': 'Asia/Tokyo',
+            'kst': 'Asia/Seoul',
+            'ist': 'Asia/Kolkata',
+            'aest': 'Australia/Sydney',
+            'art': 'America/Argentina/Buenos_Aires'
+        };
+
+        // Lista de zonas populares para el desplegable
+        const commonZones = [
+            'UTC',
+            'Europe/Madrid',
+            'Europe/London',
+            'Europe/Paris',
+            'Europe/Berlin',
+            'America/New_York',
+            'America/Chicago',
+            'America/Los_Angeles',
+            'America/Mexico_City',
+            'America/Argentina/Buenos_Aires',
+            'Asia/Tokyo',
+            'Asia/Shanghai',
+            'Asia/Dubai',
+            'Australia/Sydney'
+        ];
+
+        function initZones() {
+            targetTzSelect.innerHTML = '';
+            commonZones.forEach(zone => {
+                const opt = document.createElement('option');
+                opt.value = zone;
+                opt.textContent = zone;
+                if (zone === 'America/New_York') opt.selected = true;
+                targetTzSelect.appendChild(opt);
+            });
+        }
+
+        function getNowLocalISO() {
+            const now = new Date();
+            const pad = n => String(n).padStart(2, '0');
+            return `${now.getFullYear()}-${pad(now.getMonth() + 1)}-${pad(now.getDate())}T${pad(now.getHours())}:${pad(now.getMinutes())}`;
+        }
+
+        function resolveTimeZone(inputStr) {
+            if (!inputStr) return 'UTC';
+            const clean = inputStr.trim().toLowerCase();
+            if (tzAbbrMap[clean]) return tzAbbrMap[clean];
+            // Verificar si es una zona IANA válida probando con Intl
+            try {
+                Intl.DateTimeFormat(undefined, { timeZone: inputStr.trim() });
+                return inputStr.trim();
+            } catch (e) {
+                return 'UTC';
+            }
+        }
+
+        function convertTime() {
+            const dtVal = sourceDatetime.value;
+            const rawTzSrc = sourceTzInput.value;
+            const targetTz = targetTzSelect.value;
+
+            if (!dtVal) return;
+
+            const resolvedSrcTz = resolveTimeZone(rawTzSrc);
+
+            // Como los inputs datetime-local no traen zona, interpretamos la fecha ingresada como perteneciente a la zona horaria origen especificada.
+            // Para lograr esto con precisión en JS vanilla, construimos un objeto Date usando compensación o simulando el desfase.
+            
+            try {
+                // Parseamos componentes de la fecha local del input
+                const [datePart, timePart] = dtVal.split('T');
+                const [year, month, day] = datePart.split('-').map(Number);
+                const [hour, minute] = timePart.split(':').map(Number);
+
+                // Creamos una fecha UTC base y ajustamos según el desfase de la zona horaria origen
+                // Una forma robusta es buscar el offset de la zona origen para esa fecha exacta
+                const utcDateDummy = new Date(Date.UTC(year, month - 1, day, hour, minute, 0));
+                
+                // Obtenemos la hora que representa esa zona origen
+                const formatterSrc = new Intl.DateTimeFormat('en-US', {
+                    timeZone: resolvedSrcTz,
+                    year: 'numeric', month: 'numeric', day: 'numeric',
+                    hour: 'numeric', minute: 'numeric', second: 'numeric',
+                    hour12: false
+                });
+
+                // Estrategia de aproximación de timestamp absoluto
+                // Creamos un objeto Date local asumiendo que el input es UTC y calculamos la diferencia con la zona origen
+                let guessTimestamp = Date.UTC(year, month - 1, day, hour, minute, 0);
+                
+                // Refinamiento de offset iterativo o directo usando formato
+                const parts = formatterSrc.formatToParts(guessTimestamp);
+                let tzParts = {};
+                parts.forEach(p => tzParts[p.type] = p.value);
+                
+                let tzYear = parseInt(tzParts.year);
+                let tzMonth = parseInt(tzParts.month);
+                let tzDay = parseInt(tzParts.day);
+                let tzHour = parseInt(tzParts.hour || 0);
+                let tzMinute = parseInt(tzParts.minute || 0);
+
+                let tzAsUtc = Date.UTC(tzYear, tzMonth - 1, tzDay, tzHour, tzMinute, 0);
+                let diff = guessTimestamp - tzAsUtc;
+                let exactTimestamp = guessTimestamp + diff;
+
+                const targetDateObj = new Date(exactTimestamp);
+
+                // Formatos para despliegue
+                const optionsLocal = { dateStyle: 'full', timeStyle: 'medium' };
+                const optionsTarget = { timeZone: targetTz, dateStyle: 'full', timeStyle: 'medium' };
+                const optionsTargetShortTime = { timeZone: targetTz, hour: '2-digit', minute: '2-digit', hour12: false };
+                const optionsSrcShortTime = { timeZone: resolvedSrcTz, hour: '2-digit', minute: '2-digit', hour12: false };
+
+                // Mostrar Local del navegador
+                const localStrFull = new Intl.DateTimeFormat('es-ES', optionsLocal).format(targetDateObj);
+                localTimeRes.textContent = new Intl.DateTimeFormat('es-ES', { timeStyle: 'medium' }).format(targetDateObj);
+                localDateRes.textContent = new Intl.DateTimeFormat('es-ES', { dateStyle: 'full' }).format(targetDateObj);
+
+                // Mostrar Destino
+                const targetTimeStr = new Intl.DateTimeFormat('es-ES', optionsTargetShortTime).format(targetDateObj);
+                const targetDateStr = new Intl.DateTimeFormat('es-ES', { timeZone: targetTz, dateStyle: 'full' }).format(targetDateObj);
+                targetTimeRes.textContent = targetTimeStr;
+                targetDateRes.textContent = targetDateStr;
+
+                // Actualizar Mapa Visual
+                mapLabelSrc.textContent = rawTzSrc ? rawTzSrc.toUpperCase() : 'ORIGEN';
+                mapValSrc.textContent = new Intl.DateTimeFormat('es-ES', optionsSrcShortTime).format(targetDateObj);
+                mapLabelDst.textContent = targetTz.split('/')[1]?.replace('_', ' ') || targetTz;
+                mapValDst.textContent = targetTimeStr;
+
+                // Configurar enlace de Calendario (Google Calendar)
+                // Formato Google: yyyyMMddTHHmmssZ
+                const toGoogleUTC = (d) => {
+                    return d.toISOString().replace(/-|:|\.\d\d\d/g, '');
+                };
+                // Damos una duración de 1 hora por defecto al evento
+                const endDateObj = new Date(targetDateObj.getTime() + 60 * 60 * 1000);
+                const gStart = toGoogleUTC(targetDateObj);
+                const gEnd = toGoogleUTC(endDateObj);
+                const gUrl = `https://calendar.google.com/calendar/render?action=TEMPLATE&text=Evento+Programado&dates=${gStart}/${gEnd}&details=Generado+desde+Conversor+de+Zonas+Horarias`;
+                calendarBtn.href = gUrl;
+
+                triggerPulse();
+
+            } catch (e) {
+                console.error(e);
+            }
+        }
+
+        function triggerPulse() {
+            charCount.classList.add('pulse');
+            setTimeout(() => charCount.classList.remove('pulse'), 300);
+        }
+
+        // Eventos
+        sourceDatetime.addEventListener('input', convertTime);
+        sourceTzInput.addEventListener('input', convertTime);
+        targetTzSelect.addEventListener('change', convertTime);
+
+        window.onload = () => {
+            lucide.createIcons();
+            initZones();
+            sourceDatetime.value = getNowLocalISO();
+            // Detectar zona horaria actual del usuario de forma amigable para sugerir el origen
+            const detectedTz = Intl.DateTimeFormat().resolvedOptions().timeZone || 'Europe/Madrid';
+            sourceTzInput.value = detectedTz;
+            convertTime();
+        };
+    </script>
+</body>
+</html>

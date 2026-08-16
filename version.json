@@ -1,17 +1,13 @@
 {
-  "version": "1.3",
-  "date": "30 de Julio 2026",
+  "version": "1.4",
+  "date": "16 de Agosto 2026",
   "changes": [
-    "✦ Novedades de 1.3",
-    "🚀 Homescreen NEO v1.3: Una actualización centrada en la experiencia de uso, con más personalización, automatización y una interfaz mucho más inteligente.",
-    "🧠 Dock Inteligente: Se ha añadido un dock dinámico que aprende de tu uso y muestra automáticamente las aplicaciones que más utilizas.",
-    "🎵 Sonidos e Interacción Háptica: Activa efectos de sonido y vibración para conseguir una experiencia mucho más inmersiva y cercana a una aplicación nativa.",
-    "⭐ Sistema de Favoritos Renovado: Añade aplicaciones a Favoritos con un solo toque o arrástralas directamente para organizarlas de forma más rápida.",
-    "📂 Carpetas Mucho Más Potentes: Las carpetas respetan automáticamente tu modo de visualización (Burbuja, Lista o Cuadrícula) y cuentan con mejores animaciones y navegación.",
-    "🔎 Buscador Mejorado: Animaciones completamente renovadas, resultados más rápidos y una búsqueda mucho más fluida entre todas las aplicaciones.",
-    "🛠️ Nuevas Herramientas: Se incorporan nuevas utilidades como Bocetos, Generador de Memes, Quiz Studio, Rosco, CraftPalette y muchas mejoras en las aplicaciones existentes.",
-    "🎨 Interfaz Refinada: Decenas de pequeños ajustes visuales, nuevas transiciones, mejores modales, panel de ajustes rediseñado y una experiencia mucho más consistente.",
-    "⚡ Mayor Rendimiento: Optimizaciones generales del código, mejor respuesta de la interfaz, reducción de pequeños bloqueos y animaciones más suaves.",
-    "🛡️ Más Estabilidad: Corregidos numerosos errores internos y mejorado el sistema de detección de fallos para ofrecer una experiencia mucho más fiable."
+    "✦ Novedades de 1.4",
+    "Se añadieron varios traductores y conversores: Binario, Morse, Wingdins, Zonas horarias, Números a Números romanos y Números a pronunciación,",
+    "Se añadió una app de Texto a voz (TTS) con las voces del navegador.",
+    "Se añadió una app de Creador de Posts de Noticias.",
+    "Apps en BETA: Se añadió un editor de fotos experimental.",
+    "Se rediseño la app Material You para permitir la generación y guardado de paletas. La nueva ruta es Apps/Material-you-new.html. La antigua app aún es accesible mediante su antiguo enlace Apps/material-you.html. El acceso del Homescreen ahora redirige a la nueva versión.",
+    "Se añadió la app Labs, pero aún no es accesible mediante la interfaz."
 ]
 }

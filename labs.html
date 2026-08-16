@@ -1,0 +1,717 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Homescreen NEO - GP</title>
+    <link rel="icon" type="image/png" href="favicon.png">
+    <link rel="manifest" href="manifest.json">
+    <meta name="theme-color" content="#121212">
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@200;400;500&display=swap" rel="stylesheet">
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <link rel="stylesheet" href="styles.css">
+    
+    <script>
+        window.hasHubError = false;
+        function showHtmlError(message) {
+            window.hasHubError = true;
+            document.addEventListener("DOMContentLoaded", () => {
+                const gridContainer = document.getElementById('toolsGrid');
+                if (gridContainer) {
+                    gridContainer.innerHTML = `
+                        <div class="error-card">
+                            <i data-lucide="alert-triangle" style="width: 28px; height: 28px;"></i>
+                            <span>Se ha detectado un error de sintaxis al cargar tus aplicaciones. Revisar comas o corchetes.</span>
+                            <small>${message}</small>
+                        </div>
+                    `;
+                    if (window.lucide) lucide.createIcons();
+                }
+            });
+        }
+        window.onerror = function(msg, url, line) {
+            showHtmlError(`${msg} (Línea ${line})`);
+            return false;
+        };
+    </script>
+</head>
+<body id="mainBody">
+
+    <div id="globalFavDropZone" style="position: fixed; top: -70px; left: 50%; transform: translateX(-50%); width: 90%; max-width: 500px; height: 60px; background: rgba(255, 214, 10, 0.15); border: 2px dashed #FFD60A; backdrop-filter: blur(20px); border-radius: 20px; display: flex; align-items: center; justify-content: center; color: #FFD60A; font-weight: 500; z-index: 10000; transition: top 0.4s cubic-bezier(0.16, 1, 0.3, 1); gap: 10px;">
+        <i data-lucide="star" style="width: 20px; height: 20px;"></i>
+        <span>Arrastra aquí para añadir a Favoritos</span>
+    </div>
+
+    <canvas id="bgCanvas"></canvas>
+    <div class="overlay" id="overlay"></div>
+
+    <a href="https://capybaragalaxy.github.io/HOMESCREEN/" class="local-chip" id="localChip">
+        <i data-lucide="monitor-smartphone" style="width: 16px;"></i>
+        <div><strong>VERSIÓN LOCAL</strong> <span>· Ir a web</span></div>
+    </a>
+
+    <div class="version-tag" id="versionTag">1.4</div>
+
+    <div class="ui-layer">
+        <header class="header">
+            <div class="labs-indicator" style="display: flex; align-items: center; justify-content: center; gap: 6px; color: #0aff16; font-weight: 500; font-size: 14px; margin-bottom: 6px;">
+                <i data-lucide="flask-conical" style="width: 16px; height: 16px;"></i>
+                <span>LABS</span>
+            </div>
+            <div class="clock" id="clock">00:00</div>
+            <div class="date" id="date">--</div>
+        </header>
+        <div class="scroll-wrapper">
+            <div class="tools-container" id="toolsGrid"></div>
+        </div>
+    </div>
+
+    <div class="custom-modal" id="hiddenFolderModal">
+        <div class="modal-title"><i data-lucide="folder-lock" style="color: #0aff16;"></i> Carpetas Ocultas</div>
+        <p class="modal-text">Estás a punto de acceder a una carpeta oculta.</p>
+        <div style="margin-bottom: 25px; display: flex; flex-wrap: wrap; justify-content: center; gap: 12px;" id="hiddenAppArea"></div>
+        <div class="modal-buttons">
+            <button class="modal-btn secondary" onclick="closeModal('hiddenFolderModal')">Cerrar</button>
+        </div>
+    </div>
+
+    <div class="custom-modal" id="warningModal">
+        <div class="modal-title" style="color: #FF453A;"><i data-lucide="shield-alert"></i> Advertencia de uso</div>
+        <p class="modal-text">
+            Este catálogo de juegos es para su uso personal fuera del aula. El creador no apoya jugar videojuegos en clase o el trabajo. Si te encuentras ahí, deberías centrarte y hacer tus tareas.
+        </p>
+        <div class="modal-buttons">
+            <button class="modal-btn secondary" onclick="goBackFromWarning()">Volver</button>
+            <button class="modal-btn primary" id="continueBtn" disabled>Continuar (10s)</button>
+        </div>
+    </div>
+
+    <div class="custom-modal" id="folderModal">
+        <div class="modal-title">
+            <i data-lucide="folder-open"></i>
+            <span id="folderTitle">Carpeta</span>
+        </div>
+        <div id="folderApps"></div>
+        <div class="modal-buttons">
+            <button class="modal-btn secondary" onclick="closeModal('folderModal')">Cerrar</button>
+        </div>
+    </div>
+
+    <div class="custom-modal" id="changelogModal">
+        <div class="modal-title"><i data-lucide="history"></i> Changelog</div>
+        <div id="changelogContent" style="text-align:left; max-height:280px; overflow-y:auto; margin-bottom:20px;"></div>
+        <div class="modal-buttons">
+            <button class="modal-btn secondary" onclick="closeModal('changelogModal')">Cerrar</button>
+        </div>
+    </div>
+
+    <div id="homescreenToast">Toast Notification</div>
+
+    <div id="updateBanner">
+        <div class="update-title">Nueva versión disponible</div>
+        <div class="update-text">Se ha descargado una actualización en segundo plano.</div>
+        <button id="updateNow">Actualizar ahora</button>
+    </div>
+
+    <script>
+const tools = [
+    {
+        name: 'Labs',
+        icon: 'flask-conical',
+        folder: true,
+        apps: [
+            { name: 'About', icon: 'badge-info', url: '/about.html' }
+        ]
+    }
+];
+
+const hiddenApps = [];
+
+let activeFolderIndex = -1; 
+let activeGridIndex = -1; 
+
+function handleAppClick(event, url) {
+    // Registro de uso de la aplicación
+}
+    </script>
+
+    <div class="settings-btn" id="setBtn"><i data-lucide="settings" style="width: 20px;"></i></div>
+    
+    <div class="settings-panel" id="setPanel">
+        <div class="settings-header">
+            <h3 style="margin: 0; font-weight: 500; display: flex; align-items: center; gap: 8px;">
+                <i data-lucide="sliders-horizontal" style="width: 18px; height: 18px;"></i> Ajustes
+            </h3>
+            <span style="cursor: pointer; opacity: 0.5;" onclick="document.getElementById('setPanel').classList.remove('active')">&times;</span>
+        </div>
+
+        <div class="settings-section">
+            <span class="settings-section-title">Diseño de Interfaz</span>
+            <div class="layout-selector">
+                <button class="layout-opt" data-layout="pill"><i data-lucide="shapes"></i><span>Pill</span></button>
+                <button class="layout-opt" data-layout="list"><i data-lucide="list"></i><span>Lista</span></button>
+                <button class="layout-opt" data-layout="grid"><i data-lucide="grid"></i><span>Cuadrícula</span></button>
+            </div>
+            
+            <div class="setting-item-row" style="margin-top: 12px;">
+                <div class="setting-item-meta"><i data-lucide="star"></i><div><span class="setting-label">Carpeta Favoritos</span><span class="setting-desc">Atajo de favoritos en inicio</span></div></div>
+                <div class="switch" id="toggleFavFolder"></div>
+            </div>
+            
+            <div class="setting-item-row">
+                <div class="setting-item-meta"><i data-lucide="flame"></i><div><span class="setting-label">Carpeta Recientes</span><span class="setting-desc">Mostrar apps más usadas</span></div></div>
+                <div class="switch" id="toggleRecentFolder"></div>
+            </div>
+        </div>
+
+        <div class="settings-section">
+            <span class="settings-section-title">Efectos y Hardware</span>
+            
+            <div class="setting-item-row" style="margin-top:10px;">
+                <div class="setting-item-meta"><i data-lucide="sparkles"></i><div><span class="setting-label">Fondo Animado</span><span class="setting-desc">Partículas interactivas flotando</span></div></div>
+                <div class="switch" id="toggleBg"></div>
+            </div>
+            <div class="setting-item-row">
+                <div class="setting-item-meta"><i data-lucide="moon"></i><div><span class="setting-label">Fondo Negro</span><span class="setting-desc">Negro AMOLED para ahorrar</span></div></div>
+                <div class="switch" id="toggleDarkBg"></div>
+            </div>
+            <div class="setting-item-row">
+                <div class="setting-item-meta"><i data-lucide="droplet"></i><div><span class="setting-label">Desactivar Blur</span><span class="setting-desc">Mejora el rendimiento</span></div></div>
+                <div class="switch" id="toggleBlur"></div>
+            </div>
+            <div class="setting-item-row" id="settingLocalChip">
+                <div class="setting-item-meta"><i data-lucide="alert-circle"></i><div><span class="setting-label">Ocultar Aviso Local</span><span class="setting-desc">No mostrar chip web</span></div></div>
+                <div class="switch" id="toggleLocalChip"></div>
+            </div>
+        </div>
+
+        <div class="settings-section">
+            <span class="settings-section-title">Sistema</span>
+            <div class="settings-info" id="settingsVersionInfo">
+                <strong>Versión actual</strong><span>Cargando...</span>
+            </div>
+            <div class="settings-actions-grid" style="margin-bottom: 8px;">
+                <button class="settings-action-btn" id="exportSettingsBtn" type="button"><i data-lucide="download" style="width: 14px;"></i> Exportar</button>
+                <button class="settings-action-btn" id="importSettingsBtn" type="button"><i data-lucide="upload" style="width: 14px;"></i> Importar</button>
+                <input type="file" id="importSettingsFile" accept=".json" style="display: none;">
+            </div>
+            <div class="settings-actions-grid">
+                <button class="settings-action-btn" id="checkUpdatesBtn" type="button"><i data-lucide="refresh-cw" style="width: 14px;"></i> Comprobar</button>
+                <button class="settings-action-btn" id="showChangelogBtn" type="button"><i data-lucide="history" style="width: 14px;"></i> Changelog</button>
+            </div>
+            <button class="settings-action-btn" id="showAboutBtn" type="button" onclick="window.location.href='/about.html'" style="width: 100%; margin-top: 8px;"><i data-lucide="badge-info" style="width: 14px;"></i> Información</button>
+        </div>
+    </div>
+
+    <script>
+        const body = document.getElementById('mainBody');
+        const grid = document.getElementById('toolsGrid');
+        const overlay = document.getElementById('overlay');
+        const setPanel = document.getElementById('setPanel');
+        const clock = document.getElementById('clock');
+
+        let versionClicks = 0;
+        let warningTimer = null;
+        let draggedUrl = null;
+        let isDraggingFromFavorites = false;
+
+        function handleAppDragStart(e, url, fromFavorites = false) {
+            e.dataTransfer.setData('text/plain', url);
+            draggedUrl = url;
+            isDraggingFromFavorites = fromFavorites;
+            const title = document.getElementById('folderTitle')?.innerText;
+            if (title !== 'Favoritos' && !fromFavorites) {
+                const dz = document.getElementById('globalFavDropZone');
+                if(dz) dz.style.top = '20px';
+            }
+        }
+        function handleAppDragEnd(e) {
+            const dz = document.getElementById('globalFavDropZone');
+            if(dz) dz.style.top = '-70px';
+            draggedUrl = null;
+            isDraggingFromFavorites = false;
+        }
+
+        document.getElementById('versionTag').onclick = (e) => {
+            versionClicks++;
+            if(versionClicks === 5) { versionClicks = 0; openModal('hiddenFolderModal'); }
+        };
+
+        /* --- NOTIFICACIONES --- */
+        let toastTimeout = null;
+        function showToast(message, iconName = 'info') {
+            const toast = document.getElementById('homescreenToast');
+            if (!toast) return;
+            toast.innerHTML = `<i data-lucide="${iconName}"></i><span>${message}</span>`;
+            toast.classList.add('show');
+            if (window.lucide) lucide.createIcons();
+            if (toastTimeout) clearTimeout(toastTimeout);
+            toastTimeout = setTimeout(() => { toast.classList.remove('show'); }, 2500);
+        }
+
+        /* --- SISTEMA PERSISTENTE DE FAVORITOS --- */
+        function getFavorites() { try { return JSON.parse(localStorage.getItem('favorites')) || []; } catch(e) { return []; } }
+        function isFavorite(url) { return getFavorites().includes(url); }
+
+        function toggleFavorite(url, element) {
+            let favs = getFavorites();
+            const isActive = element.classList.toggle('active');
+            if (isActive) {
+                if (!favs.includes(url)) favs.push(url);
+                showToast('Añadido a favoritos', 'star');
+            } else {
+                favs = favs.filter(u => u !== url);
+                showToast('Eliminado de favoritos', 'star-off');
+            }
+            localStorage.setItem('favorites', JSON.stringify(favs));
+        }
+
+        function getFavoriteApps() {
+            const favUrls = getFavorites();
+            const allApps = [];
+            tools.forEach(f => f.apps.forEach(a => allApps.push(a)));
+            return allApps.filter(a => favUrls.includes(a.url));
+        }
+
+        function openFavoritesFolder() { openFolder({ name: 'Favoritos', apps: getFavoriteApps() }); }
+
+        function renderMainGrid() {
+            const showFavs = localStorage.getItem('showFavFolder') !== 'false';
+            const showRecent = localStorage.getItem('showRecentFolder') === 'true'; 
+            
+            let gridHTML = "";
+            activeGridIndex = -1;
+
+            if (showFavs) {
+                 gridHTML += `<div class="tool-card" onclick="openFavoritesFolder()" style="animation-delay: 0s"><i data-lucide="star"></i><span>Favoritos</span></div>`;
+            }
+
+            gridHTML += tools.map((t, i) => `
+                <div class="tool-card" onclick="openFolder(tools[${i}])" style="animation-delay:${(i + (showFavs ? 1 : 0) + (showRecent ? 1 : 0)) * 0.05}s">
+                    <i data-lucide="${t.icon}"></i>
+                    <span>${t.name}</span>
+                </div>
+            `).join('');
+            grid.innerHTML = gridHTML;
+            if(window.lucide) lucide.createIcons();
+        }
+
+        /* --- SINOPSIS DE MODALES Y CARPETAS --- */
+        function openModal(id) {
+            if(id === 'hiddenFolderModal') {
+                document.getElementById('hiddenAppArea').innerHTML = hiddenApps.map(app => `
+                    <div class="tool-card" onclick="window.location.href='${app.url}'">
+                        <i data-lucide="${app.icon}"></i><span>${app.name}</span>
+                    </div>
+                `).join('');
+                lucide.createIcons();
+            }
+            overlay.classList.add('active');
+            document.getElementById(id).classList.add('active');
+        }
+
+        async function showChangelogModal() {
+            const changelogBox = document.getElementById('changelogContent');
+            if (!changelogBox) return;
+            changelogBox.innerHTML = '<div style="color: var(--text-muted);">Cargando changelog...</div>';
+            openModal('changelogModal');
+            const versionInfo = await window.getVersionInfo?.();
+            const version = versionInfo?.version || 'Sin versión';
+            const changes = Array.isArray(versionInfo?.changes) && versionInfo.changes.length ? versionInfo.changes : [
+                `Obtén la última versión disponible en <a href="https://github.com/CapybaraGalaxy/HOMESCREEN" target="_blank" rel="noopener noreferrer" style="color: #8ab4f8; text-decoration: none;">GITHUB</a>.`
+            ];
+            const date = versionInfo?.date ? ` · ${versionInfo.date}` : '';
+            changelogBox.innerHTML = `
+                <div style="margin-bottom: 10px; color: var(--text-main); font-weight: 500;">${version}${date}</div>
+                <div style="display:flex; flex-direction:column; gap:8px;">
+                    ${changes.map(item => `<div style="padding:10px 12px; border-radius:12px; background: rgba(255,255,255,0.06); border: 1px solid rgba(255,255,255,0.08);">✓ ${item}</div>`).join('')}
+                </div>
+            `;
+            lucide.createIcons();
+        }
+
+        function openFolder(folder) {
+            document.getElementById('folderTitle').innerText = folder.name;
+            const folderApps = document.getElementById('folderApps');
+            const folderModal = document.getElementById('folderModal');
+            const currentLayout = localStorage.getItem('layoutMode') || 'pill';
+
+            folderApps.className = '';
+            folderModal.classList.remove('grid-active');
+
+            if (currentLayout === 'list') { folderApps.classList.add('list-mode'); } 
+            else if (currentLayout === 'grid') { folderApps.classList.add('grid-mode'); folderModal.classList.add('grid-active'); }
+
+            const isFavFolder = folder.name === 'Favoritos' || folder.name === 'Más usadas';
+
+            folderApps.innerHTML = folder.apps.map((app, index) => {
+                const favClass = isFavorite(app.url) ? 'active' : '';
+                return `
+                    <a href="${app.url}" class="tool-card" draggable="true" 
+                       ondragstart="handleAppDragStart(event, '${app.url}', ${isFavFolder})" 
+                       ondragend="handleAppDragEnd(event)" data-url="${app.url}">
+                        <i data-lucide="${app.icon}"></i>
+                        <span>${app.name}</span>
+                        <button class="star-btn ${favClass}" onclick="event.preventDefault(); event.stopPropagation(); toggleFavorite('${app.url}', this);">
+                            <i data-lucide="star"></i>
+                        </button>
+                    </a>
+                `;
+            }).join('');
+
+            lucide.createIcons();
+            activeFolderIndex = -1;
+            openModal('folderModal');
+        }
+
+        const fa = document.getElementById('folderApps');
+        fa.addEventListener('dragover', (e) => {
+            if (!isDraggingFromFavorites) return;
+            e.preventDefault();
+            const targetCard = e.target.closest('.tool-card');
+            if (targetCard && targetCard.parentElement === fa) {
+                const bounding = targetCard.getBoundingClientRect();
+                const offset = e.clientY - bounding.top - bounding.height / 2;
+                if (offset > 0) { targetCard.after(document.querySelector(`[data-url="${draggedUrl}"]`)); } 
+                else { targetCard.before(document.querySelector(`[data-url="${draggedUrl}"]`)); }
+            }
+        });
+
+        fa.addEventListener('drop', (e) => {
+            if (!isDraggingFromFavorites) return;
+            e.preventDefault();
+            const cards = fa.querySelectorAll('.tool-card');
+            const newFavs = Array.from(cards).map(c => c.getAttribute('data-url'));
+            localStorage.setItem('favorites', JSON.stringify(newFavs));
+            showToast('Orden de favoritos actualizado', 'layers');
+        });
+
+        const fm = document.getElementById('folderModal');
+        fm.addEventListener('dragover', (e) => { if (isDraggingFromFavorites) e.preventDefault(); });
+        fm.addEventListener('drop', (e) => {
+            if (!isDraggingFromFavorites) return;
+            if (!e.target.closest('#folderApps')) {
+                e.preventDefault();
+                let favs = getFavorites();
+                favs = favs.filter(u => u !== draggedUrl);
+                localStorage.setItem('favorites', JSON.stringify(favs));
+                showToast('Eliminado de favoritos', 'star-off');
+                openFavoritesFolder();
+            }
+        });
+
+        function closeModal(id) {
+            document.getElementById(id).classList.remove('active');
+            if(!document.querySelector('.custom-modal.active')) {
+                overlay.classList.remove('active');
+            }
+            if(warningTimer) clearInterval(warningTimer);
+        }
+
+        async function refreshSettingsVersionInfo() {
+            const settingsVersionInfo = document.getElementById('settingsVersionInfo');
+            if (!settingsVersionInfo) return;
+            settingsVersionInfo.innerHTML = '<strong>Versión actual</strong><span>Cargando...</span>';
+            try {
+                const info = await window.getVersionInfo?.();
+                const versionLabel = info?.version ? `v${info.version}` : 'Sin datos';
+                const dateLabel = info?.date ? ` · ${info.date}` : '';
+                settingsVersionInfo.innerHTML = `<strong>Versión actual</strong><span>${versionLabel}${dateLabel}</span>`;
+            } catch (error) { settingsVersionInfo.innerHTML = '<strong>Versión actual</strong><span>No disponible</span>'; }
+        }
+
+        window.onkeydown = (e) => {
+            if(e.key === 'Escape') {
+                document.querySelectorAll('.custom-modal').forEach(m => { if(m.classList.contains('active')) closeModal(m.id); });
+            }
+
+            const folderModal = document.getElementById('folderModal');
+            
+            if (folderModal && folderModal.classList.contains('active')) {
+                const cards = document.querySelectorAll('#folderApps .tool-card');
+                if (cards.length > 0) {
+                    if (e.key === 'ArrowRight' || e.key === 'ArrowDown') {
+                        e.preventDefault();
+                        if (activeFolderIndex < cards.length - 1) {
+                            if (activeFolderIndex >= 0 && cards[activeFolderIndex]) cards[activeFolderIndex].classList.remove('keyboard-active');
+                            activeFolderIndex++;
+                            cards[activeFolderIndex].classList.add('keyboard-active');
+                            cards[activeFolderIndex].scrollIntoView({ block: 'nearest' });
+                        }
+                    } else if (e.key === 'ArrowLeft' || e.key === 'ArrowUp') {
+                        e.preventDefault();
+                        if (activeFolderIndex > 0) {
+                            if (cards[activeFolderIndex]) cards[activeFolderIndex].classList.remove('keyboard-active');
+                            activeFolderIndex--;
+                            cards[activeFolderIndex].classList.add('keyboard-active');
+                            cards[activeFolderIndex].scrollIntoView({ block: 'nearest' });
+                        }
+                    } else if (e.key === 'Enter') {
+                        if (activeFolderIndex >= 0 && cards[activeFolderIndex]) {
+                            e.preventDefault();
+                            cards[activeFolderIndex].click();
+                        }
+                    }
+                }
+            }
+            else if (!document.querySelector('.custom-modal.active')) {
+                const cards = document.querySelectorAll('#toolsGrid .tool-card');
+                if (cards.length > 0) {
+                    if (e.key === 'ArrowRight' || e.key === 'ArrowDown') {
+                        e.preventDefault();
+                        if (activeGridIndex < cards.length - 1) {
+                            if (activeGridIndex >= 0 && cards[activeGridIndex]) cards[activeGridIndex].classList.remove('keyboard-active');
+                            activeGridIndex++;
+                            cards[activeGridIndex].classList.add('keyboard-active');
+                            cards[activeGridIndex].scrollIntoView({ block: 'nearest', behavior: 'smooth' });
+                        }
+                    } else if (e.key === 'ArrowLeft' || e.key === 'ArrowUp') {
+                        e.preventDefault();
+                        if (activeGridIndex > 0) {
+                            if (cards[activeGridIndex]) cards[activeGridIndex].classList.remove('keyboard-active');
+                            activeGridIndex--;
+                            cards[activeGridIndex].classList.add('keyboard-active');
+                            cards[activeGridIndex].scrollIntoView({ block: 'nearest', behavior: 'smooth' });
+                        }
+                    } else if (e.key === 'Enter') {
+                        if (activeGridIndex >= 0 && cards[activeGridIndex]) {
+                            e.preventDefault();
+                            cards[activeGridIndex].click();
+                        }
+                    }
+                }
+            }
+        };
+
+        /* --- FONDO ANIMADO DE PARTÍCULAS --- */
+        let particles = [], animationId, canvas = document.getElementById('bgCanvas'), ctx = canvas.getContext('2d');
+        function initParticles() {
+            window.addEventListener('resize', () => { canvas.width = window.innerWidth; canvas.height = window.innerHeight; createParticles(); });
+            canvas.width = window.innerWidth; canvas.height = window.innerHeight;
+            createParticles(); animate();
+        }
+        class Particle {
+            constructor() { this.x = Math.random() * canvas.width; this.y = Math.random() * canvas.height; this.size = Math.random() * 2; this.speedX = Math.random() * 0.4 - 0.2; this.speedY = Math.random() * 0.4 - 0.2; }
+            update() { this.x += this.speedX; this.y += this.speedY; if (this.x > canvas.width) this.x = 0; if (this.y > canvas.height) this.y = 0; }
+            draw() { ctx.fillStyle = 'rgba(255, 255, 255, 0.4)'; ctx.beginPath(); ctx.arc(this.x, this.y, this.size, 0, Math.PI * 2); ctx.fill(); }
+        }
+        function createParticles() { particles = []; for (let i = 0; i < 80; i++) particles.push(new Particle()); }
+        function animate() {
+            if(!body.classList.contains('bg-active')) return;
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+            particles.forEach(p => { p.update(); p.draw(); });
+            connect();
+            animationId = requestAnimationFrame(animate);
+        }
+        function connect() {
+            for (let a = 0; a < particles.length; a++) {
+                for (let b = a; b < particles.length; b++) {
+                    let dist = Math.sqrt((particles[a].x - particles[b].x)**2 + (particles[a].y - particles[b].y)**2);
+                    if (dist < 150) {
+                        ctx.strokeStyle = `rgba(255,255,255,${(1 - dist/150) * 0.1})`;
+                        ctx.beginPath(); ctx.moveTo(particles[a].x, particles[a].y); ctx.lineTo(particles[b].x, particles[b].y); ctx.stroke();
+                    }
+                }
+            }
+        }
+
+        function updateClock() {
+            const n = new Date();
+            document.getElementById('clock').innerText = n.toLocaleTimeString('es-ES', {hour:'2-digit', minute:'2-digit'});
+            document.getElementById('date').innerText = n.toLocaleDateString('es-ES', {weekday:'long', day:'numeric', month:'long'});
+        }
+        setInterval(updateClock, 1000);
+
+        function setBgColor(isDark) {
+            if (isDark) { document.documentElement.style.setProperty('--bg', '#121212'); } else { document.documentElement.style.setProperty('--bg', '#ffffff00'); }
+        }
+
+        function setLayoutMode(mode) {
+            grid.classList.remove('list-mode', 'grid-mode');
+            if (mode === 'list') { grid.classList.add('list-mode'); } else if (mode === 'grid') { grid.classList.add('grid-mode'); }
+            localStorage.setItem('layoutMode', mode);
+            document.querySelectorAll('.layout-opt').forEach(btn => {
+                if (btn.getAttribute('data-layout') === mode) { btn.classList.add('active'); } else { btn.classList.remove('active'); }
+            });
+        }
+
+        /* --- INICIALIZADOR DE INTERFAZ (INIT) --- */
+        function init() {
+            updateClock();
+            if(window.hasHubError) return;
+            renderMainGrid();
+            
+            const setupToggle = (id, localStorageKey, callback, defaultVal = 'false') => {
+                const el = document.getElementById(id);
+                if (!el) return;
+                const stored = localStorage.getItem(localStorageKey) || defaultVal;
+                if (stored === 'true') el.classList.add('on');
+                el.onclick = () => {
+                    const act = el.classList.toggle('on');
+                    localStorage.setItem(localStorageKey, act);
+                    if (callback) callback(act);
+                };
+                return stored === 'true';
+            };
+
+            setupToggle('toggleFavFolder', 'showFavFolder', renderMainGrid, 'true');
+            setupToggle('toggleRecentFolder', 'showRecentFolder', renderMainGrid, 'false');
+
+            const sBlur = document.getElementById('toggleBlur');
+            const sBg = document.getElementById('toggleBg');
+            const sDarkBg = document.getElementById('toggleDarkBg');
+            
+            const esLocal = window.location.protocol === 'file:' || window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1';
+            const localChip = document.getElementById('localChip');
+            const settingLocalChip = document.getElementById('settingLocalChip');
+            const sLocalChip = document.getElementById('toggleLocalChip');
+
+            if (esLocal) {
+                if(settingLocalChip) settingLocalChip.style.display = 'flex';
+                const hideChip = localStorage.getItem('hideLocalChip') === 'true';
+                if (hideChip) { if(sLocalChip) sLocalChip.classList.add('on'); } else { if(localChip) localChip.style.display = 'flex'; }
+                if(sLocalChip) {
+                    sLocalChip.onclick = () => {
+                        const act = sLocalChip.classList.toggle('on');
+                        localStorage.setItem('hideLocalChip', act);
+                        if(act) { localChip.style.display = 'none'; } else { localChip.style.display = 'flex'; }
+                    };
+                }
+            } else {
+                if(localChip) localChip.style.display = 'none';
+                if(settingLocalChip) settingLocalChip.style.display = 'none';
+            }
+            
+            let savedLayout = localStorage.getItem('layoutMode') || 'pill';
+            setLayoutMode(savedLayout);
+
+            document.querySelectorAll('.layout-opt').forEach(btn => {
+                btn.onclick = (e) => { e.stopPropagation(); setLayoutMode(btn.getAttribute('data-layout')); };
+            });
+
+            if(localStorage.getItem('noblur') === 'true') { body.classList.add('no-blur'); if(sBlur) sBlur.classList.add('on'); }
+            const isDarkActive = localStorage.getItem('darkbg') !== 'false';
+            const isBgActive = localStorage.getItem('bg') === 'true';
+
+            setBgColor(isDarkActive);
+            if(isDarkActive && sDarkBg) sDarkBg.classList.add('on');
+            if(isBgActive) { body.classList.add('bg-active'); if(sBg) sBg.classList.add('on'); initParticles(); }
+
+            const setBtn = document.getElementById('setBtn');
+            const checkUpdatesBtn = document.getElementById('checkUpdatesBtn');
+            const showChangelogBtn = document.getElementById('showChangelogBtn');
+            const settingsVersionInfo = document.getElementById('settingsVersionInfo');
+            
+            if(setBtn) {
+                setBtn.onclick = async (e) => {
+                    e.stopPropagation();
+                    const willOpen = !setPanel.classList.contains('active');
+                    setPanel.classList.toggle('active');
+                    if (willOpen && window.getVersionInfo) await refreshSettingsVersionInfo();
+                };
+            }
+
+            if(setPanel) setPanel.addEventListener('click', (e) => { e.stopPropagation(); });
+
+            if(checkUpdatesBtn && window.checkForUpdates) {
+                checkUpdatesBtn.onclick = async (e) => {
+                    e.stopPropagation();
+                    checkUpdatesBtn.disabled = true;
+                    checkUpdatesBtn.innerHTML = '<span class="btn-label"><i data-lucide="loader-2" class="spinner"></i><span></span></span>';
+                    if(window.lucide) lucide.createIcons();
+                    try { await window.checkForUpdates({ showToast: true }); } finally {
+                        checkUpdatesBtn.disabled = false;
+                        checkUpdatesBtn.innerHTML = '<i data-lucide="refresh-cw" style="width: 14px;"></i> Comprobar';
+                        if(window.lucide) lucide.createIcons();
+                    }
+                };
+            }
+
+            if(showChangelogBtn) showChangelogBtn.onclick = (e) => { e.stopPropagation(); showChangelogModal(); };
+            if(settingsVersionInfo && window.getVersionInfo) refreshSettingsVersionInfo();
+
+            const exportBtn = document.getElementById('exportSettingsBtn');
+            if (exportBtn) {
+                exportBtn.onclick = (e) => {
+                    e.stopPropagation();
+                    const keys = ['favorites', 'layoutMode', 'showFavFolder', 'bg', 'darkbg', 'noblur', 'hideLocalChip', 'showRecentFolder'];
+                    const config = {};
+                    keys.forEach(k => { const val = localStorage.getItem(k); if (val !== null) config[k] = val; });
+                    const blob = new Blob([JSON.stringify(config, null, 2)], { type: 'application/json' });
+                    const url = URL.createObjectURL(blob);
+                    const a = document.createElement('a');
+                    a.href = url; a.download = 'homescreen-config.json';
+                    document.body.appendChild(a); a.click(); document.body.removeChild(a);
+                    URL.revokeObjectURL(url);
+                    showToast('Configuración exportada', 'download');
+                };
+            }
+
+            const importBtn = document.getElementById('importSettingsBtn');
+            const importFile = document.getElementById('importSettingsFile');
+            if (importBtn && importFile) {
+                importBtn.onclick = (e) => { e.stopPropagation(); importFile.click(); };
+                importFile.onchange = (e) => {
+                    const file = e.target.files[0];
+                    if (!file) return;
+                    const reader = new FileReader();
+                    reader.onload = (evt) => {
+                        try {
+                            const config = JSON.parse(evt.target.result);
+                            Object.keys(config).forEach(k => { localStorage.setItem(k, config[k]); });
+                            showToast('Configuración importada', 'refresh-cw');
+                            setTimeout(() => { location.reload(); }, 1200);
+                        } catch (err) { showToast('Error al importar el JSON', 'alert-circle'); }
+                    };
+                    reader.readAsText(file);
+                };
+            }
+
+            const dz = document.getElementById('globalFavDropZone');
+            if (dz) {
+                dz.addEventListener('dragover', (e) => { e.preventDefault(); dz.style.background = 'rgba(255, 214, 10, 0.3)'; });
+                dz.addEventListener('dragleave', () => { dz.style.background = 'rgba(255, 214, 10, 0.15)'; });
+                dz.addEventListener('drop', (e) => {
+                    e.preventDefault();
+                    dz.style.background = 'rgba(255, 214, 10, 0.15)';
+                    const url = e.dataTransfer.getData('text/plain');
+                    if (url) {
+                        let favs = [];
+                        try { favs = JSON.parse(localStorage.getItem('favorites')) || []; } catch(err) {}
+                        if (!favs.includes(url)) {
+                            favs.push(url);
+                            localStorage.setItem('favorites', JSON.stringify(favs));
+                            showToast('Añadido a favoritos', 'star');
+                            const folderModal = document.getElementById('folderModal');
+                            if (folderModal && folderModal.classList.contains('active')) {
+                                const title = document.getElementById('folderTitle').innerText;
+                                if (title === 'Favoritos') { openFavoritesFolder(); } else {
+                                    const foundFolder = tools.find(f => f.name === title);
+                                    if (foundFolder) openFolder(foundFolder);
+                                }
+                            }
+                        } else { showToast('Ya está en favoritos', 'star'); }
+                    }
+                    dz.style.top = '-70px';
+                });
+            }
+            
+            document.addEventListener('click', (e) => { if(setPanel && !setPanel.contains(e.target)) setPanel.classList.remove('active'); });
+            
+            if(sBlur) sBlur.onclick = () => { localStorage.setItem('noblur', body.classList.toggle('no-blur')); sBlur.classList.toggle('on'); };
+            if(sBg) {
+                sBg.onclick = () => { 
+                    const act = body.classList.toggle('bg-active'); 
+                    sBg.classList.toggle('on'); 
+                    localStorage.setItem('bg', act);
+                    if(act) { initParticles(); } else { cancelAnimationFrame(animationId); ctx.clearRect(0, 0, canvas.width, canvas.height); }
+                };
+            }
+            if(sDarkBg) sDarkBg.onclick = () => { const act = sDarkBg.classList.toggle('on'); localStorage.setItem('darkbg', act); setBgColor(act); };
+        }
+
+        window.onload = init;
+    </script>
+    <script src="update-manager.js"></script>
+</body>
+</html>

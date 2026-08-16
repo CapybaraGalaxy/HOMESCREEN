@@ -1,0 +1,336 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+    <title>Traductor Wingdings</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@200;300;400;500;600;700&display=swap" rel="stylesheet">
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <style>
+        :root {
+            --bg: #000000;
+            --surface: #121212;
+            --surface-hover: #1c1c1e;
+            
+            --glass: rgba(15, 15, 15, 0.4);
+            --glass-border: rgba(255, 255, 255, 0.08);
+            --blur-val: 30px;
+
+            --text-main: #FFFFFF;
+            --text-muted: #8E8E93;
+
+            --accent-danger: #FF453A;
+            --accent-success: #34C759;
+
+            --bezier: cubic-bezier(0.16, 1, 0.3, 1);
+            --spring: cubic-bezier(0.34, 1.56, 0.64, 1);
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: 'Outfit', sans-serif;
+            font-variant-numeric: tabular-nums;
+        }
+
+        body {
+            background-color: var(--bg);
+            color: var(--text-main);
+            min-height: 100dvh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            overflow-x: hidden;
+        }
+
+        .app-container {
+            width: 100%;
+            max-width: 900px;
+            height: 100dvh;
+            display: flex;
+            flex-direction: column;
+            padding: env(safe-area-inset-top) 24px calc(env(safe-area-inset-bottom) + 16px) 24px;
+            background: var(--bg);
+            overflow: hidden;
+        }
+
+        @media (min-width: 768px) {
+            .app-container {
+                height: 90vh;
+                border: 1px solid var(--glass-border);
+                border-radius: 24px;
+                background: var(--surface);
+                backdrop-filter: blur(var(--blur-val));
+                -webkit-backdrop-filter: blur(var(--blur-val));
+                box-shadow: 0 20px 40px rgba(0,0,0,0.8);
+            }
+        }
+
+        header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 16px 0;
+            border-bottom: 1px solid var(--glass-border);
+            margin-bottom: 12px;
+            flex-shrink: 0;
+        }
+
+        .header-left {
+            display: flex;
+            align-items: center;
+            gap: 14px;
+        }
+
+        .app-icon-badge {
+            width: 40px;
+            height: 40px;
+            border-radius: 12px;
+            background: radial-gradient(circle, rgba(255,255,255,0.08) 0%, rgba(255,255,255,0.02) 100%);
+            border: 1px solid var(--glass-border);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .app-title {
+            font-size: 1.1rem;
+            font-weight: 600;
+            letter-spacing: -0.01em;
+        }
+
+        .main-content {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+            overflow-y: auto;
+            scrollbar-width: none;
+            padding: 4px 0;
+            box-sizing: border-box;
+        }
+
+        .main-content::-webkit-scrollbar {
+            display: none;
+        }
+
+        .converter-grid {
+            display: grid;
+            grid-template-columns: 1fr;
+            gap: 12px;
+            flex: 1;
+        }
+
+        @media (min-width: 768px) {
+            .converter-grid {
+                grid-template-columns: 1fr 1fr;
+            }
+        }
+
+        .panel {
+            background: var(--glass);
+            border: 1px solid var(--glass-border);
+            border-radius: 18px;
+            padding: 16px;
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+            backdrop-filter: blur(var(--blur-val));
+            -webkit-backdrop-filter: blur(var(--blur-val));
+            transition: border-color 0.3s var(--bezier), transform 0.3s var(--spring);
+            will-change: transform;
+            transform: scale(1);
+            transform-origin: center;
+            flex: 1;
+        }
+
+        .panel:focus-within {
+            border-color: rgba(255,255,255,0.2);
+        }
+
+        .panel-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            font-size: 0.85rem;
+            font-weight: 500;
+            color: var(--text-muted);
+        }
+
+        textarea {
+            width: 100%;
+            flex: 1;
+            background: transparent;
+            border: none;
+            color: var(--text-main);
+            font-size: 1.1rem;
+            resize: none;
+            outline: none;
+            line-height: 1.5;
+            min-height: 120px;
+        }
+
+        textarea::placeholder {
+            color: var(--text-muted);
+            opacity: 0.5;
+        }
+
+        .panel-actions {
+            display: flex;
+            gap: 8px;
+            align-items: center;
+            justify-content: flex-end;
+            border-top: 1px solid var(--glass-border);
+            padding-top: 8px;
+        }
+
+        .btn {
+            background: var(--surface-hover);
+            border: 1px solid var(--glass-border);
+            color: var(--text-main);
+            padding: 8px 14px;
+            border-radius: 10px;
+            font-size: 0.85rem;
+            font-weight: 500;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            transition: transform 0.2s var(--spring), background 0.2s var(--bezier);
+        }
+
+        .btn:hover {
+            background: rgba(255,255,255,0.08);
+        }
+
+        .btn:active {
+            transform: scale(0.95);
+        }
+
+        @keyframes pulse-val {
+            0% { transform: scale(1); }
+            50% { transform: scale(1.08); }
+            100% { transform: scale(1); }
+        }
+
+        .pulse {
+            animation: pulse-val 0.3s var(--spring);
+        }
+    </style>
+</head>
+<body>
+
+    <div class="app-container" id="main-view">
+        <header>
+            <div class="header-left">
+                <div class="app-icon-badge">
+                    <i data-lucide="sparkles" size="20" style="color: var(--text-main);"></i>
+                </div>
+                <h1 class="app-title">Traductor Wingdings</h1>
+            </div>
+            <div style="font-size: 0.8rem; color: var(--text-muted);" id="char-count">0 caracteres</div>
+        </header>
+
+        <main class="main-content">
+            <div class="converter-grid">
+                <!-- Panel Texto -->
+                <div class="panel">
+                    <div class="panel-header">
+                        <span>Texto Normal</span>
+                        <i data-lucide="type" size="16"></i>
+                    </div>
+                    <textarea id="text-input" placeholder="Escribe texto aquí..."></textarea>
+                    <div class="panel-actions">
+                        <button class="btn" onclick="clearText('text')">
+                            <i data-lucide="trash-2" size="14"></i> Limpiar
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Panel Unicode -->
+                <div class="panel">
+                    <div class="panel-header">
+                        <span>Wingdings / Unicode</span>
+                        <i data-lucide="eye" size="16"></i>
+                    </div>
+                    <textarea id="unicode-input" placeholder="Escribe o pega símbolos aquí..."></textarea>
+                    <div class="panel-actions">
+                        <button class="btn" onclick="clearText('unicode')">
+                            <i data-lucide="trash-2" size="14"></i> Limpiar
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <script>
+        const textInput = document.getElementById('text-input');
+        const unicodeInput = document.getElementById('unicode-input');
+        const charCount = document.getElementById('char-count');
+
+        let isUpdating = false;
+
+        const customMap = {
+            '1': '📂', '2': '📄', '3': '🗏', '4': '🗐', '5': '🗄', '6': '⌛', '7': '🖮', '8': '🖰', '9': '🖲', '0': '📁',
+            'a': '❑', 'b': '⬥', 'c': '⌧', 'd': '⬧', 'e': '⌂', 'f': '⌖', 'g': '⍜', 'h': '⍝', 'i': '⍞', 'j': '⍟',
+            'k': '⎈', 'l': '⎉', 'm': '⎊', 'n': '⎋', 'o': '⎌', 'p': '⎍', 'q': '⎎', 'r': '⎏', 's': '⎐', 't': '⎑',
+            'u': '⎒', 'v': '⎓', 'w': '⎔', 'x': '⎕', 'y': '⎖', 'z': '⎗',
+            'A': '✈', 'B': '🕈', 'C': '☜', 'D': '☼', 'E': '❄', 'F': '🕆', 'G': '✞', 'H': '🕈', 'I': '︎', 'J': '✌',
+            'K': '✍', 'L': '✎', 'M': '✏', 'N': '✂', 'O': '✉', 'P': '📁', 'Q': '📂', 'R': '🗂', 'S': '🗃', 'T': '🗄',
+            'U': '🗑', 'V': '🗒', 'W': '🗓', 'X': '📇', 'Y': '🗈', 'Z': '🗉',
+            ' ': ' '
+        };
+
+        const mapToText = Object.fromEntries(
+            Object.entries(customMap).map(([k, v]) => [v, k])
+        );
+
+        textInput.addEventListener('input', () => {
+            if (isUpdating) return;
+            isUpdating = true;
+            const text = textInput.value;
+            const translated = text.split('').map(char => customMap[char] || char).join('');
+            unicodeInput.value = translated;
+            updateMeta(text.length);
+            isUpdating = false;
+        });
+
+        unicodeInput.addEventListener('input', () => {
+            if (isUpdating) return;
+            isUpdating = true;
+            const translated = unicodeInput.value;
+            const text = translated.split('').map(char => mapToText[char] || char).join('');
+            textInput.value = text;
+            updateMeta(text.length);
+            isUpdating = false;
+        });
+
+        function updateMeta(len) {
+            charCount.textContent = `${len} caracteres`;
+            charCount.classList.add('pulse');
+            setTimeout(() => charCount.classList.remove('pulse'), 300);
+        }
+
+        function clearText(type) {
+            if (type === 'text') {
+                textInput.value = '';
+                unicodeInput.value = '';
+            } else {
+                unicodeInput.value = '';
+                textInput.value = '';
+            }
+            updateMeta(0);
+        }
+
+        window.onload = () => {
+            lucide.createIcons();
+            textInput.value = "";
+            textInput.dispatchEvent(new Event('input'));
+        };
+    </script>
+</body>
+</html>

@@ -1,0 +1,959 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+    <title>Material 3 Color Scheme Generator</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <style>
+        :root {
+            --bg: #0d0d0e;
+            --surface: #161618;
+            --surface-hover: #222225;
+            --surface-active: #2c2c30;
+            --glass-border: rgba(255, 255, 255, 0.08);
+            --text-main: #f2f2f5;
+            --text-muted: #8e8e93;
+            --accent-primary: #3b82f6;
+            --accent-danger: #ef4444;
+            --bezier: cubic-bezier(0.16, 1, 0.3, 1);
+        }
+
+        body {
+            font-family: 'Outfit', sans-serif;
+            background-color: var(--bg);
+            color: var(--text-main);
+            margin: 0;
+            padding: 0;
+            overflow-x: hidden;
+        }
+
+        .app-container {
+            max-width: 1040px;
+            margin: 0 auto;
+            min-height: 100dvh;
+            padding: 24px;
+            box-sizing: border-box;
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+        }
+
+        header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding-bottom: 16px;
+            border-bottom: 1px solid var(--glass-border);
+        }
+
+        .header-title-wrapper {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .app-icon {
+            width: 36px;
+            height: 36px;
+            border-radius: 10px;
+            background: var(--surface);
+            border: 1px solid var(--glass-border);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: var(--accent-primary);
+        }
+
+        h1 {
+            font-size: 1.1rem;
+            font-weight: 600;
+            margin: 0;
+        }
+
+        .subtitle {
+            font-size: 0.78rem;
+            color: var(--text-muted);
+            margin-top: 2px;
+        }
+
+        .token-counter {
+            font-size: 0.8rem;
+            color: var(--text-muted);
+            font-weight: 500;
+            background: var(--surface);
+            padding: 6px 12px;
+            border-radius: 20px;
+            border: 1px solid var(--glass-border);
+        }
+
+        /* --- Project Navigation Bar --- */
+        .projects-bar {
+            background: var(--surface);
+            border: 1px solid var(--glass-border);
+            border-radius: 16px;
+            padding: 12px 16px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 16px;
+            overflow-x: auto;
+        }
+
+        .projects-list {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            overflow-x: auto;
+            scrollbar-width: none;
+            padding-vertical: 2px;
+        }
+
+        .projects-list::-webkit-scrollbar {
+            display: none;
+        }
+
+        .project-chip {
+            background: var(--bg);
+            border: 1px solid var(--glass-border);
+            color: var(--text-muted);
+            padding: 6px 12px;
+            border-radius: 8px;
+            font-size: 0.82rem;
+            font-weight: 500;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            white-space: nowrap;
+            transition: all 0.2s var(--bezier);
+        }
+
+        .project-chip:hover {
+            background: var(--surface-hover);
+            color: var(--text-main);
+        }
+
+        .project-chip.active {
+            background: rgba(59, 130, 246, 0.15);
+            border-color: rgba(59, 130, 246, 0.4);
+            color: var(--text-main);
+        }
+
+        .project-chip .delete-btn {
+            opacity: 0.6;
+            padding: 2px;
+            border-radius: 4px;
+            display: inline-flex;
+        }
+
+        .project-chip .delete-btn:hover {
+            opacity: 1;
+            color: var(--accent-danger);
+            background: rgba(239, 68, 68, 0.2);
+        }
+
+        /* --- Controls Grid --- */
+        .card {
+            background: var(--surface);
+            border: 1px solid var(--glass-border);
+            padding: 20px;
+            border-radius: 16px;
+            display: flex;
+            flex-direction: column;
+            gap: 16px;
+        }
+
+        .controls-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+            gap: 16px;
+        }
+
+        .control {
+            display: flex;
+            flex-direction: column;
+            gap: 6px;
+            min-width: 0; /* Previene desbordamientos en grid flex */
+        }
+
+        label {
+            font-size: 0.72rem;
+            font-weight: 600;
+            color: var(--text-muted);
+            letter-spacing: 0.04em;
+            text-transform: uppercase;
+        }
+
+        input[type="color"] {
+            -webkit-appearance: none;
+            border: 1px solid var(--glass-border);
+            width: 100%;
+            height: 42px;
+            border-radius: 10px;
+            cursor: pointer;
+            background: var(--bg);
+            padding: 4px;
+            box-sizing: border-box;
+        }
+
+        input[type="color"]::-webkit-color-swatch {
+            border: none;
+            border-radius: 6px;
+        }
+
+        /* --- Custom Dropdown UI (Fixed Truncation & Overflow) --- */
+        .custom-select-container {
+            position: relative;
+            width: 100%;
+            min-width: 0;
+        }
+
+        .custom-select-trigger {
+            background: var(--bg);
+            color: var(--text-main);
+            height: 42px;
+            border-radius: 10px;
+            border: 1px solid var(--glass-border);
+            padding: 0 12px;
+            font-family: inherit;
+            font-size: 0.85rem;
+            font-weight: 500;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 8px;
+            transition: all 0.2s var(--bezier);
+            user-select: none;
+            box-sizing: border-box;
+            width: 100%;
+        }
+
+        .custom-select-trigger:hover {
+            border-color: rgba(255, 255, 255, 0.2);
+        }
+
+        .selected-text {
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            flex: 1;
+            min-width: 0;
+            text-align: left;
+        }
+
+        .custom-select-trigger i {
+            flex-shrink: 0;
+            transition: transform 0.2s var(--bezier);
+            color: var(--text-muted);
+        }
+
+        .custom-select-options {
+            position: absolute;
+            top: calc(100% + 6px);
+            left: 0;
+            right: 0;
+            background: #1c1c1f;
+            border: 1px solid var(--glass-border);
+            border-radius: 12px;
+            padding: 6px;
+            display: flex;
+            flex-direction: column;
+            gap: 2px;
+            z-index: 100;
+            box-shadow: 0 12px 32px rgba(0,0,0,0.6);
+            opacity: 0;
+            visibility: hidden;
+            transform: translateY(-6px);
+            transition: all 0.15s var(--bezier);
+            max-height: 240px;
+            overflow-y: auto;
+        }
+
+        .custom-select-container.open .custom-select-options {
+            opacity: 1;
+            visibility: visible;
+            transform: translateY(0);
+        }
+
+        .custom-select-container.open .custom-select-trigger i {
+            transform: rotate(180deg);
+        }
+
+        .custom-option {
+            padding: 8px 12px;
+            border-radius: 6px;
+            font-size: 0.83rem;
+            font-weight: 500;
+            cursor: pointer;
+            color: var(--text-muted);
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+
+        .custom-option:hover {
+            background: var(--surface-hover);
+            color: var(--text-main);
+        }
+
+        .custom-option.selected {
+            background: rgba(255, 255, 255, 0.08);
+            color: var(--text-main);
+            font-weight: 600;
+        }
+
+        .btn {
+            background: var(--bg);
+            color: var(--text-main);
+            height: 42px;
+            padding: 0 14px;
+            border-radius: 10px;
+            border: 1px solid var(--glass-border);
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            cursor: pointer;
+            font-family: inherit;
+            font-size: 0.83rem;
+            font-weight: 500;
+            transition: all 0.2s var(--bezier);
+            white-space: nowrap;
+            flex-shrink: 0;
+        }
+
+        .btn:hover {
+            background: var(--surface-hover);
+            border-color: rgba(255, 255, 255, 0.2);
+        }
+
+        .btn-primary {
+            background: var(--text-main);
+            color: var(--bg);
+            border: none;
+            font-weight: 600;
+        }
+
+        .btn-primary:hover {
+            background: #e4e4e8;
+        }
+
+        .mode-selector {
+            display: flex;
+            background: var(--bg);
+            border-radius: 10px;
+            padding: 3px;
+            gap: 3px;
+            border: 1px solid var(--glass-border);
+            height: 42px;
+            box-sizing: border-box;
+        }
+
+        .mode-btn {
+            flex: 1;
+            border: none;
+            background: transparent;
+            color: var(--text-muted);
+            border-radius: 7px;
+            cursor: pointer;
+            font-weight: 500;
+            font-size: 0.82rem;
+            transition: all 0.2s var(--bezier);
+            font-family: inherit;
+        }
+
+        .mode-btn.active {
+            background: var(--surface-hover);
+            color: var(--text-main);
+        }
+
+        .info-box {
+            background: rgba(255, 255, 255, 0.02);
+            border: 1px solid rgba(255, 255, 255, 0.05);
+            border-radius: 10px;
+            padding: 10px 14px;
+            font-size: 0.8rem;
+            color: var(--text-muted);
+            display: flex;
+            gap: 10px;
+            align-items: center;
+        }
+
+        .info-box i {
+            color: var(--accent-primary);
+            flex-shrink: 0;
+        }
+
+        /* --- Palette Output Grid --- */
+        .palette-container {
+            display: flex;
+            flex-direction: column;
+            gap: 24px;
+            padding-bottom: 40px;
+        }
+
+        .section-title {
+            font-size: 0.9rem;
+            font-weight: 600;
+            margin-bottom: 10px;
+            color: var(--text-main);
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .color-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+            gap: 10px;
+        }
+
+        .color-chip {
+            border-radius: 12px;
+            padding: 14px;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+            min-height: 96px;
+            cursor: pointer;
+            transition: transform 0.15s ease, box-shadow 0.15s ease;
+            box-sizing: border-box;
+            border: 1px solid rgba(255, 255, 255, 0.05);
+        }
+
+        .color-chip:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 20px rgba(0,0,0,0.4);
+        }
+
+        .chip-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            gap: 8px;
+        }
+
+        .chip-name {
+            font-size: 0.82rem;
+            font-weight: 600;
+        }
+
+        .chip-hex {
+            font-size: 0.75rem;
+            font-family: monospace;
+            opacity: 0.85;
+            text-transform: uppercase;
+            background: rgba(0, 0, 0, 0.2);
+            padding: 2px 6px;
+            border-radius: 4px;
+        }
+
+        .chip-desc {
+            font-size: 0.72rem;
+            opacity: 0.75;
+            margin-top: 8px;
+            line-height: 1.3;
+        }
+
+        #toast {
+            position: fixed;
+            bottom: 24px;
+            left: 50%;
+            transform: translateX(-50%) translateY(100px);
+            background: var(--surface-hover);
+            color: var(--text-main);
+            padding: 10px 20px;
+            border-radius: 30px;
+            font-size: 0.82rem;
+            font-weight: 500;
+            border: 1px solid var(--glass-border);
+            box-shadow: 0 10px 25px rgba(0,0,0,0.5);
+            transition: transform 0.25s var(--bezier);
+            z-index: 200;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        #toast.show {
+            transform: translateX(-50%) translateY(0);
+        }
+
+        input[type="file"] { display: none; }
+    </style>
+</head>
+<body>
+
+    <div class="app-container">
+        <header>
+            <div class="header-title-wrapper">
+                <div class="app-icon">
+                    <i data-lucide="palette" size="18"></i>
+                </div>
+                <div>
+                    <h1>Esquemas Material 3</h1>
+                    <div class="subtitle">Generador de tokens HCT / Material Color Utilities</div>
+                </div>
+            </div>
+            <div class="token-counter" id="token-count">0 tokens</div>
+        </header>
+
+        <!-- Project Management Bar -->
+        <div class="projects-bar">
+            <div class="projects-list" id="projects-list">
+                <!-- Project chips rendered via JS -->
+            </div>
+            <button class="btn btn-primary" id="btn-save-project">
+                <i data-lucide="plus" size="16"></i>
+                <span>Guardar Proyecto</span>
+            </button>
+        </div>
+
+        <main class="card">
+            <div class="controls-grid">
+                <div class="control">
+                    <label>Color Semilla</label>
+                    <input type="color" id="color-picker" value="#b5c4ff">
+                </div>
+
+                <div class="control">
+                    <label>Algoritmo de Color</label>
+                    <div class="custom-select-container" id="dropdown-variant">
+                        <div class="custom-select-trigger">
+                            <span class="selected-text">Tonal Spot (Estándar)</span>
+                            <i data-lucide="chevron-down" size="16"></i>
+                        </div>
+                        <div class="custom-select-options">
+                            <div class="custom-option selected" data-value="tonalSpot">Tonal Spot (Estándar)</div>
+                            <div class="custom-option" data-value="pure">Pure (Matiz directo)</div>
+                            <div class="custom-option" data-value="fidelity">Fidelity (Conservar croma)</div>
+                            <div class="custom-option" data-value="vibrant">Vibrant (Alta saturación)</div>
+                            <div class="custom-option" data-value="content">Content (Basado en imagen)</div>
+                            <div class="custom-option" data-value="expressive">Expressive (Variación de tono)</div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="control">
+                    <label>Extraer de Imagen</label>
+                    <label class="btn" for="image-picker">
+                        <i data-lucide="image" size="16"></i>
+                        <span>Cargar imagen</span>
+                    </label>
+                    <input type="file" id="image-picker" accept="image/*">
+                </div>
+
+                <div class="control">
+                    <label>Tema Base</label>
+                    <div class="mode-selector">
+                        <button class="mode-btn active" id="btn-dark">Oscuro</button>
+                        <button class="mode-btn" id="btn-light">Claro</button>
+                    </div>
+                </div>
+            </div>
+
+            <div class="info-box">
+                <i data-lucide="info" size="16"></i>
+                <span id="info-text">Tonal Spot: Ajusta la saturación a niveles neutros para garantizar la legibilidad en interfaces estandarizadas.</span>
+            </div>
+        </main>
+
+        <div class="palette-container" id="palette-container"></div>
+    </div>
+
+    <div id="toast">
+        <i data-lucide="check" size="16" style="color: #34c759;"></i>
+        <span id="toast-text">Copiado al portapapeles</span>
+    </div>
+
+    <script type="module">
+        import { 
+            argbFromHex, 
+            hexFromArgb, 
+            sourceColorFromImage,
+            Hct,
+            TonalPalette,
+            SchemeTonalSpot,
+            SchemeFidelity,
+            SchemeVibrant,
+            SchemeContent,
+            SchemeExpressive,
+            MaterialDynamicColors
+        } from 'https://cdn.jsdelivr.net/npm/@material/material-color-utilities@0.2.7/+esm';
+
+        const GP_PRESET = {
+            id: 'gp',
+            name: 'GP Preset',
+            seedHex: '#B5C4FF',
+            variant: 'tonalSpot',
+            tokens: {
+                primary: '#b5c4ff', onPrimary: '#1c2d61', primaryContainer: '#344479', onPrimaryContainer: '#dce1ff',
+                secondary: '#c1c5dd', onSecondary: '#2b3042', secondaryContainer: '#414659', onSecondaryContainer: '#dee1f9',
+                tertiary: '#e3badb', onTertiary: '#432740', tertiaryContainer: '#5b3d57', onTertiaryContainer: '#ffd7f6',
+                background: '#121318', onBackground: '#e3e1e9', surface: '#121318', onSurface: '#e3e1e9',
+                surfaceVariant: '#45464f', onSurfaceVariant: '#c6c6d0', outline: '#8f909a', outlineVariant: '#45464f',
+                error: '#ffb4ab', onError: '#690005', errorContainer: '#93000a', onErrorContainer: '#ffdad6'
+            }
+        };
+
+        const colorPicker = document.getElementById('color-picker');
+        const imagePicker = document.getElementById('image-picker');
+        const paletteContainer = document.getElementById('palette-container');
+        const btnDark = document.getElementById('btn-dark');
+        const btnLight = document.getElementById('btn-light');
+        const toast = document.getElementById('toast');
+        const toastText = document.getElementById('toast-text');
+        const tokenCountEl = document.getElementById('token-count');
+        const infoText = document.getElementById('info-text');
+        const btnSaveProject = document.getElementById('btn-save-project');
+        const projectsListEl = document.getElementById('projects-list');
+        const dropdownVariant = document.getElementById('dropdown-variant');
+
+        let currentMode = 'dark';
+        let currentSeedHex = '#B5C4FF';
+        let currentVariant = 'tonalSpot';
+        let activeProjectId = 'dynamic'; 
+
+        const variantDescriptions = {
+            tonalSpot: "Tonal Spot: Ajusta la saturación a niveles neutros para garantizar la legibilidad en interfaces estandarizadas.",
+            pure: "Pure: Genera paletas utilizando valores HCT directos del color de origen sin limitar el croma.",
+            fidelity: "Fidelity: Conserva la intensidad del croma original para reflejar con mayor precisión el color de marca.",
+            vibrant: "Vibrant: Eleva la saturación de los tonos primarios y secundarios para interfaces de alto contraste.",
+            content: "Content: Ajusta los valores para mantener coherencia cromática al extraer tonos desde imágenes.",
+            expressive: "Expressive: Modifica levemente los matices (hue) hacia colores adyacentes para una paleta dinámica."
+        };
+
+        const tokenGroups = [
+            { title: "Primary", tokens: ["primary", "onPrimary", "primaryContainer", "onPrimaryContainer", "inversePrimary"] },
+            { title: "Secondary", tokens: ["secondary", "onSecondary", "secondaryContainer", "onSecondaryContainer"] },
+            { title: "Tertiary", tokens: ["tertiary", "onTertiary", "tertiaryContainer", "onTertiaryContainer"] },
+            { title: "Error & Status", tokens: ["error", "onError", "errorContainer", "onErrorContainer"] },
+            { title: "Surfaces & Neutral", tokens: ["surface", "onSurface", "surfaceVariant", "onSurfaceVariant", "background", "onBackground", "surfaceDim", "surfaceBright", "surfaceContainer", "inverseSurface"] },
+            { title: "Utility & Outlines", tokens: ["outline", "outlineVariant", "shadow", "scrim"] }
+        ];
+
+        function showToast(msg) {
+            toastText.innerText = msg;
+            toast.classList.add('show');
+            setTimeout(() => toast.classList.remove('show'), 2000);
+        }
+
+        // Custom Dropdown Logic (Handled Cleanly)
+        function setupDropdown(dropdownEl, onSelect) {
+            const trigger = dropdownEl.querySelector('.custom-select-trigger');
+            
+            trigger.addEventListener('click', (e) => {
+                e.stopPropagation();
+                dropdownEl.classList.toggle('open');
+            });
+
+            dropdownEl.querySelectorAll('.custom-option').forEach(option => {
+                option.addEventListener('click', (e) => {
+                    e.stopPropagation();
+                    const val = option.getAttribute('data-value');
+                    const text = option.innerText;
+
+                    dropdownEl.querySelectorAll('.custom-option').forEach(o => o.classList.remove('selected'));
+                    option.classList.add('selected');
+                    dropdownEl.querySelector('.selected-text').innerText = text;
+                    dropdownEl.classList.remove('open');
+
+                    onSelect(val);
+                });
+            });
+        }
+
+        document.addEventListener('click', () => {
+            document.querySelectorAll('.custom-select-container').forEach(el => el.classList.remove('open'));
+        });
+
+        // Project Storage Helpers
+        function getSavedProjects() {
+            try { return JSON.parse(localStorage.getItem('m3_projects') || '[]'); }
+            catch (e) { return []; }
+        }
+
+        function saveProject(proj) {
+            const projects = getSavedProjects();
+            projects.push(proj);
+            localStorage.setItem('m3_projects', JSON.stringify(projects));
+        }
+
+        function deleteProject(id) {
+            let projects = getSavedProjects();
+            projects = projects.filter(p => p.id !== id);
+            localStorage.setItem('m3_projects', JSON.stringify(projects));
+            if (activeProjectId === id) activeProjectId = 'dynamic';
+            renderProjectsBar();
+            renderScheme();
+        }
+
+        function renderProjectsBar() {
+            const projects = getSavedProjects();
+            projectsListEl.innerHTML = '';
+
+            // Dynamic option
+            const dynamicChip = document.createElement('div');
+            dynamicChip.className = `project-chip ${activeProjectId === 'dynamic' ? 'active' : ''}`;
+            dynamicChip.innerHTML = `<i data-lucide="sparkles" size="14"></i> Dinámico`;
+            dynamicChip.onclick = () => {
+                activeProjectId = 'dynamic';
+                renderProjectsBar();
+                renderScheme();
+            };
+            projectsListEl.appendChild(dynamicChip);
+
+            // Preset option
+            const presetChip = document.createElement('div');
+            presetChip.className = `project-chip ${activeProjectId === 'gp' ? 'active' : ''}`;
+            presetChip.innerHTML = `<i data-lucide="bookmark" size="14"></i> ${GP_PRESET.name}`;
+            presetChip.onclick = () => {
+                activeProjectId = 'gp';
+                currentSeedHex = GP_PRESET.seedHex;
+                colorPicker.value = GP_PRESET.seedHex;
+                renderProjectsBar();
+                renderScheme();
+            };
+            projectsListEl.appendChild(presetChip);
+
+            // Saved Projects
+            projects.forEach(p => {
+                const chip = document.createElement('div');
+                chip.className = `project-chip ${activeProjectId === p.id ? 'active' : ''}`;
+                chip.innerHTML = `
+                    <span>${p.name}</span>
+                    <span class="delete-btn"><i data-lucide="x" size="12"></i></span>
+                `;
+
+                chip.querySelector('.delete-btn').onclick = (e) => {
+                    e.stopPropagation();
+                    deleteProject(p.id);
+                };
+
+                chip.onclick = () => {
+                    activeProjectId = p.id;
+                    currentSeedHex = p.seedHex;
+                    colorPicker.value = p.seedHex;
+                    currentVariant = p.variant;
+                    updateVariantDropdownLabel(p.variant);
+                    renderProjectsBar();
+                    renderScheme();
+                };
+
+                projectsListEl.appendChild(chip);
+            });
+
+            lucide.createIcons();
+        }
+
+        function updateVariantDropdownLabel(variantKey) {
+            const option = dropdownVariant.querySelector(`.custom-option[data-value="${variantKey}"]`);
+            if (option) {
+                dropdownVariant.querySelectorAll('.custom-option').forEach(o => o.classList.remove('selected'));
+                option.classList.add('selected');
+                dropdownVariant.querySelector('.selected-text').innerText = option.innerText;
+            }
+        }
+
+        btnSaveProject.addEventListener('click', () => {
+            const name = prompt("Nombre del proyecto:");
+            if (!name || !name.trim()) return;
+
+            const id = 'proj_' + Date.now();
+            const currentTokens = generateSchemeObject(currentSeedHex, currentVariant, currentMode === 'dark');
+
+            saveProject({
+                id,
+                name: name.trim(),
+                seedHex: currentSeedHex,
+                variant: currentVariant,
+                tokens: currentTokens
+            });
+
+            activeProjectId = id;
+            renderProjectsBar();
+            showToast("Proyecto guardado");
+        });
+
+        function generateSchemeObject(seedHex, variant, isDark) {
+            const argb = argbFromHex(seedHex);
+            const sourceHct = Hct.fromInt(argb);
+
+            if (variant === 'pure') {
+                const primaryPal = TonalPalette.fromHueAndChroma(sourceHct.hue, sourceHct.chroma);
+                const neutralPal = TonalPalette.fromHueAndChroma(sourceHct.hue, 4);
+                const getHex = (pal, tone) => hexFromArgb(pal.tone(tone));
+
+                return isDark ? {
+                    primary: getHex(primaryPal, 80), onPrimary: getHex(primaryPal, 20),
+                    primaryContainer: getHex(primaryPal, 30), onPrimaryContainer: getHex(primaryPal, 90),
+                    surface: getHex(neutralPal, 10), onSurface: getHex(neutralPal, 90),
+                    background: getHex(neutralPal, 6), onBackground: getHex(neutralPal, 90)
+                } : {
+                    primary: getHex(primaryPal, 40), onPrimary: getHex(primaryPal, 100),
+                    primaryContainer: getHex(primaryPal, 90), onPrimaryContainer: getHex(primaryPal, 10),
+                    surface: getHex(neutralPal, 98), onSurface: getHex(neutralPal, 10),
+                    background: getHex(neutralPal, 98), onBackground: getHex(neutralPal, 10)
+                };
+            }
+
+            let schemeObj;
+            if (variant === 'fidelity') schemeObj = new SchemeFidelity(sourceHct, isDark, 0.0);
+            else if (variant === 'vibrant') schemeObj = new SchemeVibrant(sourceHct, isDark, 0.0);
+            else if (variant === 'content') schemeObj = new SchemeContent(sourceHct, isDark, 0.0);
+            else if (variant === 'expressive') schemeObj = new SchemeExpressive(sourceHct, isDark, 0.0);
+            else schemeObj = new SchemeTonalSpot(sourceHct, isDark, 0.0);
+
+            const res = {};
+            const keys = [
+                'primary', 'onPrimary', 'primaryContainer', 'onPrimaryContainer', 'inversePrimary',
+                'secondary', 'onSecondary', 'secondaryContainer', 'onSecondaryContainer',
+                'tertiary', 'onTertiary', 'tertiaryContainer', 'onTertiaryContainer',
+                'error', 'onError', 'errorContainer', 'onErrorContainer',
+                'background', 'onBackground', 'surface', 'onSurface', 'surfaceVariant', 'onSurfaceVariant',
+                'surfaceDim', 'surfaceBright', 'surfaceContainer', 'inverseSurface', 'outline', 'outlineVariant', 'shadow', 'scrim'
+            ];
+
+            keys.forEach(k => {
+                if (MaterialDynamicColors[k]) {
+                    res[k] = hexFromArgb(MaterialDynamicColors[k].getArgb(schemeObj));
+                }
+            });
+
+            return res;
+        }
+
+        function renderScheme() {
+            let tokens;
+
+            if (activeProjectId === 'gp') {
+                tokens = GP_PRESET.tokens;
+                infoText.innerText = "Preset estático GP cargado.";
+            } else if (activeProjectId !== 'dynamic') {
+                const projects = getSavedProjects();
+                const proj = projects.find(p => p.id === activeProjectId);
+                tokens = proj ? proj.tokens : generateSchemeObject(currentSeedHex, currentVariant, currentMode === 'dark');
+                infoText.innerText = proj ? `Proyecto visual: ${proj.name}` : "";
+            } else {
+                tokens = generateSchemeObject(currentSeedHex, currentVariant, currentMode === 'dark');
+                infoText.innerText = variantDescriptions[currentVariant] || "";
+            }
+
+            paletteContainer.innerHTML = '';
+            let count = 0;
+
+            tokenGroups.forEach(group => {
+                const section = document.createElement('div');
+                const grid = document.createElement('div');
+                grid.className = 'color-grid';
+                let hasTokens = false;
+
+                group.tokens.forEach(key => {
+                    const hex = tokens[key];
+                    if (!hex) return;
+
+                    hasTokens = true;
+                    count++;
+                    const argb = argbFromHex(hex);
+                    const r = (argb >> 16) & 0xff;
+                    const g = (argb >> 8) & 0xff;
+                    const b = argb & 0xff;
+                    const isLight = ((0.299 * r + 0.587 * g + 0.114 * b) / 255) > 0.5;
+
+                    const chip = document.createElement('div');
+                    chip.className = 'color-chip';
+                    chip.style.backgroundColor = hex;
+                    chip.style.color = isLight ? '#000000' : '#ffffff';
+
+                    chip.innerHTML = `
+                        <div class="chip-header">
+                            <span class="chip-name">${key}</span>
+                            <span class="chip-hex">${hex}</span>
+                        </div>
+                    `;
+
+                    chip.onclick = () => {
+                        navigator.clipboard.writeText(hex);
+                        showToast(`Copiado ${key}`);
+                    };
+
+                    grid.appendChild(chip);
+                });
+
+                if (hasTokens) {
+                    const title = document.createElement('div');
+                    title.className = 'section-title';
+                    title.innerHTML = `<i data-lucide="layers" size="15"></i> ${group.title}`;
+                    section.appendChild(title);
+                    section.appendChild(grid);
+                    paletteContainer.appendChild(section);
+                }
+            });
+
+            tokenCountEl.innerText = `${count} tokens`;
+            lucide.createIcons();
+        }
+
+        // Event Listeners Setup
+        setupDropdown(dropdownVariant, (val) => {
+            currentVariant = val;
+            if (activeProjectId !== 'dynamic' && activeProjectId !== 'gp') {
+                activeProjectId = 'dynamic';
+                renderProjectsBar();
+            }
+            renderScheme();
+        });
+
+        colorPicker.addEventListener('input', (e) => {
+            currentSeedHex = e.target.value;
+            if (activeProjectId !== 'dynamic' && activeProjectId !== 'gp') {
+                activeProjectId = 'dynamic';
+                renderProjectsBar();
+            }
+            renderScheme();
+        });
+
+        imagePicker.addEventListener('change', async (e) => {
+            const file = e.target.files[0];
+            if (!file) return;
+
+            const img = new Image();
+            img.src = URL.createObjectURL(file);
+            img.onload = async () => {
+                const seedColor = await sourceColorFromImage(img);
+                currentSeedHex = hexFromArgb(seedColor);
+                colorPicker.value = currentSeedHex;
+                activeProjectId = 'dynamic';
+                renderProjectsBar();
+                renderScheme();
+            };
+        });
+
+        btnDark.onclick = () => {
+            currentMode = 'dark';
+            btnDark.classList.add('active');
+            btnLight.classList.remove('active');
+            renderScheme();
+        };
+
+        btnLight.onclick = () => {
+            currentMode = 'light';
+            btnLight.classList.add('active');
+            btnDark.classList.remove('active');
+            renderScheme();
+        };
+
+        // Init
+        renderProjectsBar();
+        renderScheme();
+    </script>
+</body>
+</html>

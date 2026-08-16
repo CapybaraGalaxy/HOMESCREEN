@@ -1,0 +1,1115 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+    <title>Editor de Imágenes Avanzado</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@200;300;400;500;600;700&display=swap" rel="stylesheet">
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <style>
+        :root {
+            --bg: #000000;
+            --surface: #121212;
+            --surface-hover: #1c1c1e;
+            --glass: rgba(15, 15, 15, 0.4);
+            --glass-border: rgba(255, 255, 255, 0.08);
+            --blur-val: 30px;
+            --text-main: #FFFFFF;
+            --text-muted: #8E8E93;
+            --accent-danger: #FF453A;
+            --accent-success: #34C759;
+            --bezier: cubic-bezier(0.16, 1, 0.3, 1);
+            --spring: cubic-bezier(0.34, 1.56, 0.64, 1);
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: 'Outfit', sans-serif;
+            font-variant-numeric: tabular-nums;
+        }
+
+        body {
+            background-color: var(--bg);
+            color: var(--text-main);
+            overflow-x: hidden;
+        }
+
+        .app-container {
+            max-width: 900px;
+            margin: 0 auto;
+            height: 100dvh;
+            display: flex;
+            flex-direction: column;
+            padding: env(safe-area-inset-top) 24px calc(env(safe-area-inset-bottom) + 16px) 24px;
+        }
+
+        header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 16px 0;
+            border-bottom: 1px solid var(--glass-border);
+            margin-bottom: 16px;
+        }
+
+        .header-left {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+        
+        .header-right {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .app-icon-badge {
+            width: 40px;
+            height: 40px;
+            border-radius: 12px;
+            background: radial-gradient(circle, rgba(255,255,255,0.1) 0%, rgba(18,18,18,0.8) 100%);
+            border: 1px solid var(--glass-border);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .app-title {
+            font-size: 1.1rem;
+            font-weight: 600;
+        }
+
+        .app-meta {
+            font-size: 0.85rem;
+            color: var(--text-muted);
+            transition: color 0.3s var(--bezier);
+        }
+
+        .app-meta.pulse {
+            color: var(--accent-success);
+        }
+
+        .folders-scroll-area {
+            display: flex;
+            gap: 10px;
+            overflow-x: auto;
+            padding: 4px 0 12px 0;
+            scrollbar-width: none;
+            -webkit-overflow-scrolling: touch;
+        }
+        .folders-scroll-area::-webkit-scrollbar { display: none; }
+
+        .pill {
+            background: var(--surface);
+            border: 1px solid var(--glass-border);
+            color: var(--text-muted);
+            padding: 8px 16px;
+            border-radius: 100px;
+            font-size: 0.85rem;
+            font-weight: 500;
+            white-space: nowrap;
+            cursor: pointer;
+            transition: all 0.2s var(--bezier);
+        }
+
+        .pill.active, .pill:hover {
+            background: var(--surface-hover);
+            color: var(--text-main);
+            border-color: rgba(255,255,255,0.2);
+        }
+
+        .main-content {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            gap: 16px;
+            overflow-y: auto;
+        }
+
+        .workspace {
+            flex: 1;
+            background: var(--surface);
+            border: 1px solid var(--glass-border);
+            border-radius: 16px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            position: relative;
+            overflow: hidden;
+            min-height: 280px;
+        }
+
+        .drop-zone {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 12px;
+            padding: 32px;
+            text-align: center;
+            cursor: pointer;
+            width: 100%;
+            height: 100%;
+            justify-content: center;
+            transition: all 0.3s var(--bezier);
+            border: 2px dashed transparent;
+            border-radius: 16px;
+        }
+        
+        .drop-zone.dragover {
+            background: rgba(255,255,255,0.05);
+            border-color: var(--text-muted);
+        }
+
+        .drop-zone p {
+            color: var(--text-muted);
+            font-size: 0.9rem;
+        }
+
+        .btn {
+            background: var(--text-main);
+            color: var(--bg);
+            border: none;
+            padding: 10px 20px;
+            border-radius: 100px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: transform 0.1s var(--spring), opacity 0.2s;
+        }
+
+        .btn:hover {
+            opacity: 0.9;
+        }
+
+        .btn:active {
+            transform: scale(0.96);
+        }
+
+        .btn-secondary {
+            background: var(--surface-hover);
+            color: var(--text-main);
+            border: 1px solid var(--glass-border);
+        }
+
+        canvas {
+            max-width: 100%;
+            max-height: 100%;
+            object-fit: contain;
+            display: none;
+        }
+
+        .tools-panel {
+            background: var(--surface);
+            border: 1px solid var(--glass-border);
+            border-radius: 16px;
+            padding: 16px;
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
+            gap: 10px;
+        }
+
+        .tool-card {
+            background: rgba(255,255,255,0.02);
+            border: 1px solid var(--glass-border);
+            border-radius: 12px;
+            padding: 12px;
+            display: flex;
+            flex-direction: column;
+            gap: 6px;
+            cursor: pointer;
+            transition: all 0.2s var(--bezier);
+        }
+
+        .tool-card:hover {
+            background: var(--surface-hover);
+            border-color: rgba(255,255,255,0.15);
+        }
+
+        .tool-card span {
+            font-size: 0.85rem;
+            font-weight: 500;
+        }
+
+        .tool-card p {
+            font-size: 0.75rem;
+            color: var(--text-muted);
+        }
+
+        .control-group {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+            background: var(--surface);
+            border: 1px solid var(--glass-border);
+            border-radius: 16px;
+            padding: 16px;
+        }
+
+        .control-row {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            font-size: 0.85rem;
+            color: var(--text-muted);
+        }
+
+        .control-row strong {
+            color: var(--text-main);
+        }
+
+        input[type="range"] {
+            width: 100%;
+            accent-color: var(--text-main);
+            background: var(--surface-hover);
+            height: 6px;
+            border-radius: 3px;
+            outline: none;
+        }
+
+        input[type="text"], input[type="number"], input[type="color"], select {
+            width: 100%;
+            padding: 10px;
+            background: var(--surface-hover);
+            border: 1px solid var(--glass-border);
+            color: var(--text-main);
+            border-radius: 8px;
+            outline: none;
+            font-size: 0.85rem;
+        }
+
+        .checkbox-row {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            font-size: 0.85rem;
+            cursor: pointer;
+        }
+
+        .palette-grid {
+            display: flex;
+            gap: 8px;
+            flex-wrap: wrap;
+            margin-top: 8px;
+        }
+
+        .palette-swatch {
+            width: 36px;
+            height: 36px;
+            border-radius: 8px;
+            border: 1px solid var(--glass-border);
+            cursor: pointer;
+            transition: transform 0.1s var(--spring);
+        }
+        .palette-swatch:hover {
+            transform: scale(1.1);
+        }
+
+        .error-shake {
+            animation: shake 0.3s var(--spring);
+            border-color: var(--accent-danger) !important;
+        }
+
+        @keyframes shake {
+            0%, 100% { transform: translateX(0); }
+            25% { transform: translateX(-6px); }
+            75% { transform: translateX(6px); }
+        }
+
+        .hidden {
+            display: none !important;
+        }
+
+        @media (min-width: 768px) {
+            .tools-panel {
+                grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
+            }
+        }
+    </style>
+</head>
+<body>
+
+    <div class="app-container" id="main-view">
+        <header>
+            <div class="header-left">
+                <div class="app-icon-badge">
+                    <i data-lucide="sliders" size="20" style="color: var(--text-main);"></i>
+                </div>
+                <div>
+                    <h1 class="app-title">Editor de Imágenes</h1>
+                    <div class="app-meta" id="img-meta">Sin imagen cargada</div>
+                </div>
+            </div>
+            <div class="header-right">
+                <button class="btn btn-secondary hidden" id="reset-btn" title="Restaurar Original"><i data-lucide="rotate-ccw" size="18"></i></button>
+                <button class="btn hidden" id="export-btn">Exportar</button>
+            </div>
+        </header>
+
+        <div class="folders-scroll-area" id="category-pills">
+            <div class="pill active" data-cat="all">Todas</div>
+            <div class="pill" data-cat="adjust">Color & Filtros</div>
+            <div class="pill" data-cat="transform">Geometría</div>
+            <div class="pill" data-cat="effects">Efectos & Utilidades</div>
+        </div>
+
+        <main class="main-content">
+            <div class="workspace" id="workspace">
+                <div class="drop-zone" id="drop-zone">
+                    <i data-lucide="image-plus" size="48" style="color: var(--text-muted);"></i>
+                    <p>Arrastra una o varias imágenes o haz clic para explorar</p>
+                    <button class="btn">Abrir Imágenes</button>
+                    <input type="file" id="file-input" accept="image/*" multiple class="hidden">
+                </div>
+                <canvas id="canvas"></canvas>
+            </div>
+
+            <!-- Panel de Herramientas -->
+            <div class="tools-panel" id="tools-panel">
+                <div class="tool-card" data-tool="crop" data-category="transform">
+                    <i data-lucide="crop" size="20"></i>
+                    <span>Recorte</span>
+                    <p>Selección manual</p>
+                </div>
+                <div class="tool-card" data-tool="rescale" data-category="transform">
+                    <i data-lucide="maximize-2" size="20"></i>
+                    <span>Escalado</span>
+                    <p>Ancho y alto</p>
+                </div>
+                <div class="tool-card" data-tool="compress-size" data-category="effects">
+                    <i data-lucide="hard-drive" size="20"></i>
+                    <span>Peso Objetivo</span>
+                    <p>Compresión exacta KB</p>
+                </div>
+                <div class="tool-card" data-tool="compress-slider" data-category="adjust">
+                    <i data-lucide="sliders" size="20"></i>
+                    <span>Calidad Dinámica</span>
+                    <p>Slider 0-100%</p>
+                </div>
+                <div class="tool-card" data-tool="chroma" data-category="effects">
+                    <i data-lucide="wand-2" size="20"></i>
+                    <span>Chroma Key</span>
+                    <p>Borrado por color</p>
+                </div>
+                <div class="tool-card" data-tool="flip" data-category="transform">
+                    <i data-lucide="flip-horizontal" size="20"></i>
+                    <span>Giro y Volteo</span>
+                    <p>90°, 180°, Espejo</p>
+                </div>
+                <div class="tool-card" data-tool="format" data-category="effects">
+                    <i data-lucide="file-code" size="20"></i>
+                    <span>Conversión Formato</span>
+                    <p>JPG, PNG, WEBP</p>
+                </div>
+                <div class="tool-card" data-tool="adjust" data-category="adjust">
+                    <i data-lucide="sun" size="20"></i>
+                    <span>Ajustes de Color</span>
+                    <p>Brillo, contraste, sepia</p>
+                </div>
+                <div class="tool-card" data-tool="watermark" data-category="effects">
+                    <i data-lucide="stamp" size="20"></i>
+                    <span>Marca de Agua</span>
+                    <p>Texto o imagen</p>
+                </div>
+                <div class="tool-card" data-tool="palette" data-category="adjust">
+                    <i data-lucide="palette" size="20"></i>
+                    <span>Paleta de Colores</span>
+                    <p>Extractor dominante</p>
+                </div>
+                <div class="tool-card" data-tool="exif" data-category="effects">
+                    <i data-lucide="shield-alert" size="20"></i>
+                    <span>EXIF Stripper</span>
+                    <p>Limpiar metadatos</p>
+                </div>
+                <div class="tool-card" data-tool="pixelate" data-category="effects">
+                    <i data-lucide="eye-off" size="20"></i>
+                    <span>Censura / Pixelado</span>
+                    <p>Difuminar zonas</p>
+                </div>
+                <div class="tool-card" data-tool="batch" data-category="effects">
+                    <i data-lucide="layers" size="20"></i>
+                    <span>Procesamiento Lote</span>
+                    <p>Redimensión masiva</p>
+                </div>
+                <div class="tool-card" data-tool="presets" data-category="transform">
+                    <i data-lucide="layout" size="20"></i>
+                    <span>Presets Sociales</span>
+                    <p>1:1, 16:9, 9:16, 4:5</p>
+                </div>
+            </div>
+
+            <!-- Controles Dinámicos -->
+            <div class="control-group hidden" id="dynamic-controls">
+                <div class="control-row">
+                    <strong id="active-tool-title">Herramienta</strong>
+                    <button class="btn btn-secondary" id="close-tool" style="padding: 4px 12px; font-size: 0.8rem;">Volver</button>
+                </div>
+                <div id="tool-content"></div>
+            </div>
+        </main>
+    </div>
+
+    <script>
+        lucide.createIcons();
+
+        const dropZone = document.getElementById('drop-zone');
+        const fileInput = document.getElementById('file-input');
+        const canvas = document.getElementById('canvas');
+        const ctx = canvas.getContext('2d');
+        const imgMeta = document.getElementById('img-meta');
+        const exportBtn = document.getElementById('export-btn');
+        const resetBtn = document.getElementById('reset-btn');
+        const toolsPanel = document.getElementById('tools-panel');
+        const dynamicControls = document.getElementById('dynamic-controls');
+        const activeToolTitle = document.getElementById('active-tool-title');
+        const toolContent = document.getElementById('tool-content');
+        const closeToolBtn = document.getElementById('close-tool');
+
+        let currentImage = null;       // Base image object
+        let originalCanvas = null;     // Unmodified canvas copy for resetting
+        let snapshotCanvas = null;     // Canvas copy for live filter previews
+        
+        let originalWidth = 0;
+        let originalHeight = 0;
+        let currentFile = null;
+        let batchFiles = [];
+        
+        // Settings globales de exportación
+        let globalExportFormat = 'image/png';
+        let globalExportQuality = 0.92;
+
+        // DRAG & DROP EVENT LISTENERS (Corregidos)
+        dropZone.addEventListener('dragover', (e) => {
+            e.preventDefault();
+            dropZone.classList.add('dragover');
+        });
+        
+        dropZone.addEventListener('dragleave', (e) => {
+            e.preventDefault();
+            dropZone.classList.remove('dragover');
+        });
+        
+        dropZone.addEventListener('drop', (e) => {
+            e.preventDefault();
+            dropZone.classList.remove('dragover');
+            if (e.dataTransfer.files.length > 0) {
+                handleFiles(e.dataTransfer.files);
+            }
+        });
+
+        dropZone.addEventListener('click', () => fileInput.click());
+        
+        fileInput.addEventListener('change', (e) => {
+            if (e.target.files.length > 0) {
+                handleFiles(e.target.files);
+            }
+        });
+
+        function handleFiles(files) {
+            batchFiles = Array.from(files);
+            currentFile = files[0];
+            loadImage(currentFile);
+        }
+
+        function loadImage(file) {
+            const reader = new FileReader();
+            reader.onload = (event) => {
+                const img = new Image();
+                img.onload = () => {
+                    currentImage = img;
+                    originalWidth = img.width;
+                    originalHeight = img.height;
+                    
+                    canvas.width = img.width;
+                    canvas.height = img.height;
+                    ctx.drawImage(img, 0, 0);
+                    
+                    // Save pristine copy for reset
+                    originalCanvas = document.createElement('canvas');
+                    originalCanvas.width = img.width;
+                    originalCanvas.height = img.height;
+                    originalCanvas.getContext('2d').drawImage(img, 0, 0);
+
+                    canvas.style.display = 'block';
+                    dropZone.style.display = 'none';
+                    exportBtn.classList.remove('hidden');
+                    resetBtn.classList.remove('hidden');
+                    
+                    updateMeta((file.size / 1024).toFixed(1));
+                    lucide.createIcons();
+                };
+                img.src = event.target.result;
+            };
+            reader.readAsDataURL(file);
+        }
+        
+        // Reset a la imagen original
+        resetBtn.addEventListener('click', () => {
+            if(!originalCanvas) return;
+            canvas.width = originalCanvas.width;
+            canvas.height = originalCanvas.height;
+            ctx.drawImage(originalCanvas, 0, 0);
+            updateMeta('Restaurado');
+        });
+
+        function updateMeta(sizeKb) {
+            imgMeta.textContent = `${canvas.width} × ${canvas.height} px • ${sizeKb} KB`;
+            imgMeta.classList.add('pulse');
+            setTimeout(() => imgMeta.classList.remove('pulse'), 400);
+        }
+        
+        // Guarda un estado temporal para los sliders en vivo
+        function takeSnapshot() {
+            snapshotCanvas = document.createElement('canvas');
+            snapshotCanvas.width = canvas.width;
+            snapshotCanvas.height = canvas.height;
+            snapshotCanvas.getContext('2d').drawImage(canvas, 0, 0);
+        }
+
+        // Categorías filtrado
+        document.querySelectorAll('.pill').forEach(pill => {
+            pill.addEventListener('click', () => {
+                document.querySelectorAll('.pill').forEach(p => p.classList.remove('active'));
+                pill.classList.add('active');
+                const cat = pill.getAttribute('data-cat');
+                document.querySelectorAll('.tool-card').forEach(card => {
+                    if (cat === 'all' || card.getAttribute('data-category') === cat) {
+                        card.style.display = 'flex';
+                    } else {
+                        card.style.display = 'none';
+                    }
+                });
+            });
+        });
+
+        // Herramientas
+        document.querySelectorAll('.tool-card').forEach(card => {
+            card.addEventListener('click', () => {
+                const tool = card.getAttribute('data-tool');
+                if (tool !== 'batch' && !currentImage) {
+                    shakeElement(card);
+                    return;
+                }
+                openTool(tool, card.querySelector('span').textContent);
+            });
+        });
+
+        function shakeElement(el) {
+            el.classList.add('error-shake');
+            setTimeout(() => el.classList.remove('error-shake'), 300);
+        }
+
+        function openTool(toolId, title) {
+            activeToolTitle.textContent = title;
+            toolsPanel.classList.add('hidden');
+            dynamicControls.classList.remove('hidden');
+            renderToolControls(toolId);
+        }
+
+        closeToolBtn.addEventListener('click', () => {
+            dynamicControls.classList.add('hidden');
+            toolsPanel.classList.remove('hidden');
+            
+            // Revert live preview if not applied (for adjust tool)
+            if (snapshotCanvas) {
+                ctx.clearRect(0, 0, canvas.width, canvas.height);
+                ctx.drawImage(snapshotCanvas, 0, 0);
+                snapshotCanvas = null;
+            }
+        });
+
+        function renderToolControls(toolId) {
+            toolContent.innerHTML = '';
+            
+            if (toolId === 'rescale') {
+                toolContent.innerHTML = `
+                    <div class="control-row"><span>Ancho (px)</span></div>
+                    <input type="number" id="res-w" value="${canvas.width}">
+                    <div class="control-row" style="margin-top:8px;"><span>Alto (px)</span></div>
+                    <input type="number" id="res-h" value="${canvas.height}">
+                    <label class="checkbox-row" style="margin-top:10px;"><input type="checkbox" id="lock-aspect" checked> Mantener proporción</label>
+                    <button class="btn" id="apply-rescale" style="margin-top:12px; width:100%;">Aplicar Redimensión</button>
+                `;
+                const wInput = document.getElementById('res-w');
+                const hInput = document.getElementById('res-h');
+                const lockAspect = document.getElementById('lock-aspect');
+
+                wInput.addEventListener('input', () => {
+                    if (lockAspect.checked && canvas.width) {
+                        const ratio = canvas.height / canvas.width;
+                        hInput.value = Math.round(wInput.value * ratio);
+                    }
+                });
+                
+                hInput.addEventListener('input', () => {
+                    if (lockAspect.checked && canvas.height) {
+                        const ratio = canvas.width / canvas.height;
+                        wInput.value = Math.round(hInput.value * ratio);
+                    }
+                });
+
+                document.getElementById('apply-rescale').addEventListener('click', () => {
+                    const w = parseInt(wInput.value);
+                    const h = parseInt(hInput.value);
+                    if (!w || !h) return;
+                    const tempCanvas = document.createElement('canvas');
+                    tempCanvas.width = w;
+                    tempCanvas.height = h;
+                    
+                    // Smooth scaling
+                    const tCtx = tempCanvas.getContext('2d');
+                    tCtx.imageSmoothingQuality = 'high';
+                    tCtx.drawImage(canvas, 0, 0, w, h);
+                    
+                    canvas.width = w;
+                    canvas.height = h;
+                    ctx.drawImage(tempCanvas, 0, 0);
+                    updateMeta('Escalado');
+                    closeToolBtn.click();
+                });
+            } else if (toolId === 'crop') {
+                toolContent.innerHTML = `
+                    <p style="font-size:0.85rem; color:var(--text-muted);">Indica el porcentaje de recorte desde los bordes.</p>
+                    <div class="control-row" style="margin-top:8px;"><span>Margen Horizontal (%)</span><strong id="crop-h-val">0%</strong></div>
+                    <input type="range" id="crop-h-slider" min="0" max="45" value="0">
+                    <div class="control-row" style="margin-top:8px;"><span>Margen Vertical (%)</span><strong id="crop-v-val">0%</strong></div>
+                    <input type="range" id="crop-v-slider" min="0" max="45" value="0">
+                    <button class="btn" id="apply-crop" style="margin-top:12px; width:100%;">Aplicar Recorte</button>
+                `;
+                
+                const hSlider = document.getElementById('crop-h-slider');
+                const vSlider = document.getElementById('crop-v-slider');
+                
+                hSlider.addEventListener('input', () => document.getElementById('crop-h-val').textContent = hSlider.value + '%');
+                vSlider.addEventListener('input', () => document.getElementById('crop-v-val').textContent = vSlider.value + '%');
+                
+                document.getElementById('apply-crop').addEventListener('click', () => {
+                    const hPct = parseInt(hSlider.value) / 100;
+                    const vPct = parseInt(vSlider.value) / 100;
+                    
+                    if (hPct === 0 && vPct === 0) {
+                        closeToolBtn.click();
+                        return;
+                    }
+                    
+                    const cw = canvas.width * (1 - hPct * 2);
+                    const ch = canvas.height * (1 - vPct * 2);
+                    const cx = canvas.width * hPct;
+                    const cy = canvas.height * vPct;
+
+                    const tempCanvas = document.createElement('canvas');
+                    tempCanvas.width = cw;
+                    tempCanvas.height = ch;
+                    tempCanvas.getContext('2d').drawImage(canvas, cx, cy, cw, ch, 0, 0, cw, ch);
+                    canvas.width = cw;
+                    canvas.height = ch;
+                    ctx.drawImage(tempCanvas, 0, 0);
+                    updateMeta('Recortado');
+                    closeToolBtn.click();
+                });
+            } else if (toolId === 'compress-slider') {
+                toolContent.innerHTML = `
+                    <p style="font-size:0.85rem; color:var(--text-muted);">Ajusta la calidad de compresión para exportación (JPG/WEBP).</p>
+                    <div class="control-row"><span>Calidad</span><strong id="quality-val">${Math.round(globalExportQuality*100)}%</strong></div>
+                    <input type="range" id="q-slider" min="1" max="100" value="${Math.round(globalExportQuality*100)}">
+                    <div class="control-row" style="margin-top:8px;"><span>Tamaño Estimado</span><strong id="est-size">-</strong></div>
+                    <button class="btn" id="apply-comp" style="margin-top:12px; width:100%;">Guardar Ajuste</button>
+                `;
+                const slider = document.getElementById('q-slider');
+                const qVal = document.getElementById('quality-val');
+                const estSize = document.getElementById('est-size');
+
+                const updateEstimate = () => {
+                    qVal.textContent = slider.value + '%';
+                    const q = slider.value / 100;
+                    // Format to estimate based on preference, fallback to jpeg
+                    const ext = globalExportFormat === 'image/png' ? 'image/jpeg' : globalExportFormat; 
+                    canvas.toBlob((blob) => {
+                        estSize.textContent = (blob.size / 1024).toFixed(1) + ' KB';
+                    }, ext, q);
+                };
+                slider.addEventListener('input', updateEstimate);
+                updateEstimate();
+
+                document.getElementById('apply-comp').addEventListener('click', () => {
+                    globalExportQuality = slider.value / 100;
+                    updateMeta(estSize.textContent.replace(' KB', ' (Est)'));
+                    closeToolBtn.click();
+                });
+            } else if (toolId === 'compress-size') {
+                toolContent.innerHTML = `
+                    <div class="control-row"><span>Peso Máximo Objetivo (KB)</span></div>
+                    <input type="number" id="target-kb" value="200">
+                    <button class="btn" id="apply-target-comp" style="margin-top:12px; width:100%;">Ajustar Calidad</button>
+                `;
+                document.getElementById('apply-target-comp').addEventListener('click', () => {
+                    const targetBytes = parseInt(document.getElementById('target-kb').value) * 1024;
+                    let low = 0.01, high = 1.0, bestQuality = 0.8;
+                    const checkFormat = globalExportFormat === 'image/png' ? 'image/jpeg' : globalExportFormat;
+                    
+                    canvas.toBlob((blob) => {
+                        if (blob.size <= targetBytes) {
+                            globalExportQuality = 0.95; // It already fits at high quality
+                            updateMeta((blob.size / 1024).toFixed(1));
+                            closeToolBtn.click();
+                            return;
+                        }
+                        
+                        // Busca binaria simplificada para ajustar calidad
+                        const searchQuality = (min, max, depth) => {
+                            if(depth === 0) {
+                                globalExportQuality = bestQuality;
+                                updateMeta('Ajustado');
+                                closeToolBtn.click();
+                                return;
+                            }
+                            let mid = (min + max) / 2;
+                            canvas.toBlob((b) => {
+                                if (b.size <= targetBytes) {
+                                    bestQuality = mid;
+                                    searchQuality(mid, max, depth - 1); // Tratar de subir calidad
+                                } else {
+                                    searchQuality(min, mid, depth - 1); // Bajar calidad
+                                }
+                            }, checkFormat, mid);
+                        };
+                        
+                        searchQuality(0.01, 1.0, 5);
+                        
+                    }, checkFormat, 0.9);
+                });
+            } else if (toolId === 'chroma') {
+                toolContent.innerHTML = `
+                    <div class="control-row"><span>Color a eliminar (Hex)</span></div>
+                    <input type="color" id="chroma-hex" value="#ffffff">
+                    <div class="control-row" style="margin-top:8px;"><span>Tolerancia (Umbral)</span><strong id="chroma-tol-val">30</strong></div>
+                    <input type="range" id="chroma-tol" min="0" max="255" value="30">
+                    <button class="btn" id="apply-chroma" style="margin-top:12px; width:100%;">Aplicar Chroma Key</button>
+                `;
+                const tolSlider = document.getElementById('chroma-tol');
+                tolSlider.addEventListener('input', () => document.getElementById('chroma-tol-val').textContent = tolSlider.value);
+                
+                document.getElementById('apply-chroma').addEventListener('click', () => {
+                    const hex = document.getElementById('chroma-hex').value;
+                    const tol = parseInt(document.getElementById('chroma-tol').value);
+                    const rTarget = parseInt(hex.slice(1,3), 16);
+                    const gTarget = parseInt(hex.slice(3,5), 16);
+                    const bTarget = parseInt(hex.slice(5,7), 16);
+
+                    const imgData = ctx.getImageData(0, 0, canvas.width, canvas.height);
+                    const data = imgData.data;
+                    
+                    for (let i = 0; i < data.length; i += 4) {
+                        const dr = data[i] - rTarget;
+                        const dg = data[i+1] - gTarget;
+                        const db = data[i+2] - bTarget;
+                        // Distancia euclidiana corregida para mejor precisión
+                        const distance = Math.sqrt(dr*dr + dg*dg + db*db);
+                        
+                        if (distance < tol) {
+                            data[i+3] = 0; // Transparencia
+                        }
+                    }
+                    ctx.putImageData(imgData, 0, 0);
+                    updateMeta('Chroma aplicado');
+                    closeToolBtn.click();
+                });
+            } else if (toolId === 'flip') {
+                toolContent.innerHTML = `
+                    <div style="display:flex; gap:10px;">
+                        <button class="btn btn-secondary" id="flip-h" style="flex:1;">Espejo H.</button>
+                        <button class="btn btn-secondary" id="flip-v" style="flex:1;">Espejo V.</button>
+                    </div>
+                    <button class="btn btn-secondary" id="rotate-90" style="margin-top:10px; width:100%;">Girar 90°</button>
+                    <button class="btn" id="apply-flip" style="margin-top:10px; width:100%;">Aceptar</button>
+                `;
+                
+                takeSnapshot();
+                
+                document.getElementById('flip-h').addEventListener('click', () => {
+                    const tempCanvas = document.createElement('canvas');
+                    tempCanvas.width = canvas.width;
+                    tempCanvas.height = canvas.height;
+                    const tCtx = tempCanvas.getContext('2d');
+                    tCtx.scale(-1, 1);
+                    tCtx.drawImage(canvas, -canvas.width, 0);
+                    ctx.clearRect(0,0, canvas.width, canvas.height);
+                    ctx.drawImage(tempCanvas, 0, 0);
+                });
+                
+                document.getElementById('flip-v').addEventListener('click', () => {
+                    const tempCanvas = document.createElement('canvas');
+                    tempCanvas.width = canvas.width;
+                    tempCanvas.height = canvas.height;
+                    const tCtx = tempCanvas.getContext('2d');
+                    tCtx.scale(1, -1);
+                    tCtx.drawImage(canvas, 0, -canvas.height);
+                    ctx.clearRect(0,0, canvas.width, canvas.height);
+                    ctx.drawImage(tempCanvas, 0, 0);
+                });
+                
+                document.getElementById('rotate-90').addEventListener('click', () => {
+                    const tempCanvas = document.createElement('canvas');
+                    tempCanvas.width = canvas.height;
+                    tempCanvas.height = canvas.width;
+                    const tCtx = tempCanvas.getContext('2d');
+                    tCtx.translate(tempCanvas.width / 2, tempCanvas.height / 2);
+                    tCtx.rotate(Math.PI / 2);
+                    tCtx.drawImage(canvas, -canvas.width / 2, -canvas.height / 2);
+                    
+                    canvas.width = tempCanvas.width;
+                    canvas.height = tempCanvas.height;
+                    ctx.drawImage(tempCanvas, 0, 0);
+                });
+                
+                document.getElementById('apply-flip').addEventListener('click', () => {
+                    snapshotCanvas = null; // Accept changes
+                    updateMeta('Transformado');
+                    closeToolBtn.click();
+                });
+                
+            } else if (toolId === 'format') {
+                toolContent.innerHTML = `
+                    <div class="control-row"><span>Formato de Exportación</span></div>
+                    <select id="export-format-sel">
+                        <option value="image/png" ${globalExportFormat === 'image/png' ? 'selected' : ''}>PNG (Transparencia)</option>
+                        <option value="image/jpeg" ${globalExportFormat === 'image/jpeg' ? 'selected' : ''}>JPG (Alta compatibilidad)</option>
+                        <option value="image/webp" ${globalExportFormat === 'image/webp' ? 'selected' : ''}>WEBP (Optimizado web)</option>
+                    </select>
+                    <p style="font-size:0.75rem; color:var(--text-muted); margin-top:8px;">Este formato se aplicará al presionar el botón Exportar principal.</p>
+                `;
+                document.getElementById('export-format-sel').addEventListener('change', (e) => {
+                    globalExportFormat = e.target.value;
+                });
+            } else if (toolId === 'adjust') {
+                toolContent.innerHTML = `
+                    <div class="control-row"><span>Brillo</span><strong id="val-b">100%</strong></div>
+                    <input type="range" id="adj-brightness" min="0" max="200" value="100">
+                    <div class="control-row" style="margin-top:6px;"><span>Contraste</span><strong id="val-c">100%</strong></div>
+                    <input type="range" id="adj-contrast" min="0" max="200" value="100">
+                    <div class="control-row" style="margin-top:6px;"><span>Saturación</span><strong id="val-s">100%</strong></div>
+                    <input type="range" id="adj-saturate" min="0" max="200" value="100">
+                    <button class="btn" id="apply-adjust" style="margin-top:12px; width:100%;">Fijar Ajustes</button>
+                `;
+                
+                takeSnapshot(); // Save baseline for live filtering
+                
+                const bSlider = document.getElementById('adj-brightness');
+                const cSlider = document.getElementById('adj-contrast');
+                const sSlider = document.getElementById('adj-saturate');
+                const updateFilters = () => {
+                    document.getElementById('val-b').textContent = bSlider.value + '%';
+                    document.getElementById('val-c').textContent = cSlider.value + '%';
+                    document.getElementById('val-s').textContent = sSlider.value + '%';
+                    
+                    // Aplicar sobre el snapshot, no de forma acumulativa
+                    ctx.clearRect(0, 0, canvas.width, canvas.height);
+                    ctx.filter = `brightness(${bSlider.value}%) contrast(${cSlider.value}%) saturate(${sSlider.value}%)`;
+                    ctx.drawImage(snapshotCanvas, 0, 0);
+                    ctx.filter = 'none'; // Reset filter
+                };
+
+                bSlider.addEventListener('input', updateFilters);
+                cSlider.addEventListener('input', updateFilters);
+                sSlider.addEventListener('input', updateFilters);
+
+                document.getElementById('apply-adjust').addEventListener('click', () => {
+                    snapshotCanvas = null; // Limpiar temp, hacer permanentes los cambios
+                    updateMeta('Ajustado');
+                    closeToolBtn.click();
+                });
+            } else if (toolId === 'watermark') {
+                toolContent.innerHTML = `
+                    <div class="control-row"><span>Texto de la Marca de Agua</span></div>
+                    <input type="text" id="wm-text" value="Neo-Glass Watermark">
+                    <div class="control-row" style="margin-top:8px;"><span>Opacidad</span></div>
+                    <input type="range" id="wm-opacity" min="10" max="100" value="50">
+                    <button class="btn" id="apply-wm" style="margin-top:12px; width:100%;">Insertar Marca</button>
+                `;
+                document.getElementById('apply-wm').addEventListener('click', () => {
+                    const text = document.getElementById('wm-text').value;
+                    const opacity = document.getElementById('wm-opacity').value / 100;
+                    ctx.save();
+                    ctx.globalAlpha = opacity;
+                    ctx.font = `${Math.max(16, canvas.width / 25)}px Outfit, sans-serif`;
+                    ctx.fillStyle = '#FFFFFF';
+                    ctx.shadowColor = 'rgba(0,0,0,0.8)';
+                    ctx.shadowBlur = 6;
+                    ctx.fillText(text, 30, canvas.height - 40);
+                    ctx.restore();
+                    updateMeta('Marcado');
+                    closeToolBtn.click();
+                });
+            } else if (toolId === 'palette') {
+                toolContent.innerHTML = `
+                    <p style="font-size:0.85rem; color:var(--text-muted); margin-bottom:8px;">Extrayendo colores dominantes (Haz clic para copiar):</p>
+                    <div class="palette-grid" id="palette-colors">
+                        <span style="font-size: 0.8rem; color: var(--text-muted)">Procesando...</span>
+                    </div>
+                `;
+                
+                // Real color extraction (Asynchronous to not block UI)
+                setTimeout(() => {
+                    const imgData = ctx.getImageData(0, 0, canvas.width, canvas.height).data;
+                    const colorMap = {};
+                    
+                    // Sample every 40th pixel to save processing time
+                    for (let i = 0; i < imgData.length; i += 160) {
+                        // Skip fully transparent pixels
+                        if(imgData[i+3] < 128) continue;
+                        
+                        // Round colors to group similar hues
+                        const r = Math.round(imgData[i] / 24) * 24;
+                        const g = Math.round(imgData[i+1] / 24) * 24;
+                        const b = Math.round(imgData[i+2] / 24) * 24;
+                        
+                        const rgb = `${r},${g},${b}`;
+                        colorMap[rgb] = (colorMap[rgb] || 0) + 1;
+                    }
+                    
+                    const toHex = (n) => parseInt(n).toString(16).padStart(2, '0');
+                    const sortedColors = Object.entries(colorMap)
+                                        .sort((a,b) => b[1] - a[1])
+                                        .slice(0, 6)
+                                        .map(e => {
+                                            const parts = e[0].split(',');
+                                            return `#${toHex(parts[0])}${toHex(parts[1])}${toHex(parts[2])}`;
+                                        });
+
+                    const paletteContainer = document.getElementById('palette-colors');
+                    paletteContainer.innerHTML = '';
+                    
+                    if(sortedColors.length === 0) {
+                        paletteContainer.innerHTML = '<span style="font-size: 0.8rem; color: var(--text-muted)">Imagen transparente/vacía.</span>';
+                    }
+                    
+                    sortedColors.forEach(hex => {
+                        const swatch = document.createElement('div');
+                        swatch.className = 'palette-swatch';
+                        swatch.style.backgroundColor = hex;
+                        swatch.title = `${hex} (Copiar)`;
+                        swatch.addEventListener('click', () => {
+                            navigator.clipboard.writeText(hex);
+                            swatch.style.transform = 'scale(0.8)';
+                            setTimeout(() => swatch.style.transform = 'scale(1)', 150);
+                        });
+                        paletteContainer.appendChild(swatch);
+                    });
+                }, 50);
+
+            } else if (toolId === 'exif') {
+                toolContent.innerHTML = `
+                    <p style="font-size:0.85rem; color:var(--text-muted);">Los datos EXIF (GPS, fecha, modelo de cámara) se eliminarán automáticamente al exportar la imagen a través de Canvas.</p>
+                    <button class="btn" id="apply-exif" style="margin-top:12px; width:100%;">Confirmar Seguridad</button>
+                `;
+                document.getElementById('apply-exif').addEventListener('click', () => {
+                    updateMeta('Metadatos Limpios');
+                    closeToolBtn.click();
+                });
+            } else if (toolId === 'pixelate') {
+                toolContent.innerHTML = `
+                    <p style="font-size:0.85rem; color:var(--text-muted);">Intensidad del difuminado de censura:</p>
+                    <input type="range" id="pix-intensity" min="2" max="30" value="10">
+                    <button class="btn" id="apply-pixelate" style="margin-top:12px; width:100%;">Aplicar Pixelado Global</button>
+                `;
+                
+                takeSnapshot();
+                const pSlider = document.getElementById('pix-intensity');
+                
+                // Live preview for pixelation
+                pSlider.addEventListener('change', () => {
+                    const blockSize = parseInt(pSlider.value);
+                    const w = canvas.width;
+                    const h = canvas.height;
+                    
+                    ctx.imageSmoothingEnabled = false;
+                    ctx.drawImage(snapshotCanvas, 0, 0, w / blockSize, h / blockSize);
+                    ctx.drawImage(canvas, 0, 0, w / blockSize, h / blockSize, 0, 0, w, h);
+                    ctx.imageSmoothingEnabled = true;
+                });
+                
+                document.getElementById('apply-pixelate').addEventListener('click', () => {
+                    snapshotCanvas = null;
+                    updateMeta('Censurado');
+                    closeToolBtn.click();
+                });
+            } else if (toolId === 'batch') {
+                toolContent.innerHTML = `
+                    <p style="font-size:0.85rem; color:var(--text-muted);">Archivos en cola para lote: <strong>${batchFiles.length}</strong> imágenes.</p>
+                    <div class="control-row" style="margin-top:8px;"><span>Redimensión Masiva Ancho (px)</span></div>
+                    <input type="number" id="batch-w" value="1200">
+                    <button class="btn" id="apply-batch" style="margin-top:12px; width:100%;">Exportar Lote (Demo)</button>
+                `;
+                document.getElementById('apply-batch').addEventListener('click', () => {
+                    alert("Función en demostración. Para exportar lotes reales se requiere empaquetado en ZIP que excede este visor HTML standalone.");
+                    closeToolBtn.click();
+                });
+            } else if (toolId === 'presets') {
+                toolContent.innerHTML = `
+                    <div style="display:flex; flex-direction:column; gap:8px;">
+                        <button class="btn btn-secondary" id="preset-1-1">Cuadrado (1:1)</button>
+                        <button class="btn btn-secondary" id="preset-16-9">Paisaje (16:9)</button>
+                        <button class="btn btn-secondary" id="preset-9-16">Historia / Reel (9:16)</button>
+                        <button class="btn btn-secondary" id="preset-4-5">Retrato Social (4:5)</button>
+                    </div>
+                `;
+                
+                // Preset corregido: AHORA RECORTA (Center Crop) en lugar de deformar
+                ['1-1', '16-9', '9-16', '4-5'].forEach(p => {
+                    const btn = document.getElementById(`preset-${p}`);
+                    if (btn) {
+                        btn.addEventListener('click', () => {
+                            let targetR = 1;
+                            if (p === '16-9') targetR = 16 / 9;
+                            if (p === '9-16') targetR = 9 / 16;
+                            if (p === '4-5') targetR = 4 / 5;
+
+                            const sourceR = canvas.width / canvas.height;
+                            let cw, ch, cx, cy;
+                            
+                            if (sourceR > targetR) {
+                                // Source is wider: match height, crop width
+                                ch = canvas.height;
+                                cw = canvas.height * targetR;
+                                cx = (canvas.width - cw) / 2;
+                                cy = 0;
+                            } else {
+                                // Source is taller: match width, crop height
+                                cw = canvas.width;
+                                ch = canvas.width / targetR;
+                                cx = 0;
+                                cy = (canvas.height - ch) / 2;
+                            }
+
+                            const tempCanvas = document.createElement('canvas');
+                            tempCanvas.width = cw;
+                            tempCanvas.height = ch;
+                            tempCanvas.getContext('2d').drawImage(canvas, cx, cy, cw, ch, 0, 0, cw, ch);
+                            
+                            canvas.width = cw;
+                            canvas.height = ch;
+                            ctx.drawImage(tempCanvas, 0, 0);
+                            
+                            updateMeta(`Preset ${p}`);
+                            closeToolBtn.click();
+                        });
+                    }
+                });
+            }
+            lucide.createIcons();
+        }
+
+        exportBtn.addEventListener('click', () => {
+            if (!currentImage) return;
+            const ext = globalExportFormat.split('/')[1];
+            const link = document.createElement('a');
+            link.download = `imagen-optimizada.${ext}`;
+            link.href = canvas.toDataURL(globalExportFormat, globalExportQuality);
+            link.click();
+        });
+    </script>
+</body>
+</html>

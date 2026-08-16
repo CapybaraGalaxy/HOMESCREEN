@@ -50,7 +50,7 @@
         <div><strong>VERSIÓN LOCAL</strong> <span>· Ir a web</span></div>
     </a>
 
-    <div class="version-tag" id="versionTag">1.3</div>
+    <div class="version-tag" id="versionTag">1.4</div>
 
     <div class="ui-layer">
         <header class="header">
@@ -123,11 +123,11 @@ const tools = [
             { name: 'Medidas', icon: 'Ruler', url: 'Apps/medidas.html' },
             { name: 'Visualizador de progreso', icon: 'Loader2', url: 'Apps/progreso.html' },
             { name: 'Cuenta atras', icon: 'clock-4', url: 'Apps/countdown.html' },
-            { name: 'Conversor de unidades', icon: 'Arrow-Left-Right', url: 'Apps/conversor.html' },
             { name: 'Duolingo Tools', icon: 'Brick-Wall-Fire', url: 'Apps/duolingo.html' },
             { name: 'Contador', icon: 'List-Ordered', url: 'Apps/counter.html' },
             { name: 'Generador de código QR', icon: 'Qr-Code', url: 'Apps/qr.html' },
-            { name: 'Bocetos', icon: 'Pencil-Line', url: 'Apps/bocetos.html' }
+            { name: 'Bocetos', icon: 'Pencil-Line', url: 'Apps/bocetos.html' },
+            { name: 'Selector de color', icon: 'pipette', url: 'Apps/color.html' }
         ]
     },
     {
@@ -142,14 +142,13 @@ const tools = [
     },
     {
         name: 'Texto y símbolos',
-        icon: 'TextSelect',
+        icon: 'Text_Select',
         folder: true,
         apps: [
             { name: 'Typer', icon: 'Keyboard', url: 'Apps/typing.html' },
             { name: 'Símbolos', icon: 'Images', url: 'Apps/symbols.html' },
             { name: 'Comparador de Texto', icon: 'split', url: 'Apps/comparador.html' },
             { name: 'Contador de Palabras', icon: 'binary', url: 'Apps/contador-palabras.html' },
-            { name: 'Conversor a Base64', icon: 'upload-cloud', url: 'Apps/img-base64.html' },
             { name: 'Limpiador de textos', icon: 'sparkles', url: 'Apps/limpia-textos.html' },
             { name: 'Mayúsculas - minúsculas', icon: 'case-sensitive', url: 'Apps/mayus-minus.html' },
             { name: 'Generador Lorem Ipsum', icon: 'Newspaper', url: 'Apps/lorem-ipsum.html' },
@@ -165,10 +164,12 @@ const tools = [
             { name: 'Ruleta aleatoria', icon: 'Ferris-Wheel', url: 'Apps/aleatorio.html' },
             { name: 'Creador de memes', icon: 'Laugh', url: 'Apps/meme.html' },
             { name: 'Creador de Tierlist', icon: 'list-ordered', url: 'Apps/tierlist.html' },
-            { name: 'Estudio de Ritmos', icon: 'music', url: 'Apps/estudio-ritmos.html' },
+            { name: 'Estudio de Ritmos', icon: 'music', url: 'Apps/estudio-ritmos' },
             { name: 'Quiz Studio', icon: 'brain-circuit', url: 'Apps/quiz-studio.html' },
             { name: 'Rosco', icon: 'help-circle', url: 'Apps/rosco.html' },
-            { name: 'Memory (temporalmente)', icon: 'brain', url: 'Games/memory.html' }
+            { name: 'Memory (temporalmente)', icon: 'brain', url: 'Games/memory.html' },
+            { name: 'Creador de Posts de Noticias', icon: 'newspaper', url: 'Apps/noticias.html' },
+            { name: 'Lector de Texto a Voz', icon: 'speech', url: 'Apps/tts.html' }
         ]
     },
     {
@@ -178,6 +179,20 @@ const tools = [
         apps: [
             { name: 'CraftPalette', icon: 'Command', url: 'Apps/craftpalette.html' },
             { name: 'Mod compatibility checker', icon: 'List-Check', url: 'Apps/modchecker.html' }
+        ]
+    },
+    {
+       name: 'Conversores y Traductores',
+        icon: 'Arrow-Left-Right',
+        folder: true,
+        apps: [
+            { name: 'Conversor de unidades', icon: 'Arrow-Left-Right', url: 'Apps/conversor.html' },
+            { name: 'Conversor a Base64', icon: 'upload-cloud', url: 'Apps/img-base64.html' },
+            { name: 'Traductor Wingdings', icon: 'sparkles', url: 'Apps/wingdings.html' },
+            { name: 'Conversor Binario', icon: 'binary', url: 'Apps/binario.html' },
+            { name: 'Conversor Morse', icon: 'radio', url: 'Apps/morse.html' },
+            { name: 'Conversor de Números Romanos', icon: 'hash', url: 'Apps/num-romanos.html' },
+            { name: 'Conversor de Números a Letras', icon: 'type', url: 'Apps/num-let.html' }
         ]
     },
     {
@@ -222,11 +237,6 @@ const appKeywords = {
         'horas', 'dias', 'plazo', 'limite', 'evento', 'fecha', 'recordatorio', 'espera', 'avisador', 'alerta',
         'reversa', 'final', 'duracion', 'intervalo', 'lapso', 'stopwatch', 'clock', 'timebox', 'deadline', 'vencimiento'
     ],
-    'Apps/conversor.html': [
-        'conversor', 'convertir', 'unidades', 'unidades de medida', 'unidades de peso', 'unidades de longitud', 'volumen', 'masa', 'temperatura', 'celsius',
-        'fahrenheit', 'kilos', 'libras', 'gramos', 'kilometros', 'millas', 'litros', 'galones', 'conversion', 'transformar',
-        'equivalencia', 'calculo', 'sistema metrico', 'imperial', 'escala', 'magnitud', 'fisica', 'valores', 'unidades de tiempo', 'unidades de velocidad'
-    ],
     'Apps/duolingo.html': [
         'duolingo', 'idiomas', 'aprender', 'ingles', 'vocabulario', 'racha', 'streak', 'practica', 'estudio', 'lecciones',
         'herramientas', 'idioma', 'languages', 'learn', 'english', 'traduccion', 'pronunciacion', 'gramatica', 'ejercicios', 'fluidez',
@@ -246,6 +256,12 @@ const appKeywords = {
         'bocetos', 'dibujo', 'bosquejo', 'esbozo', 'ideas', 'pintar', 'ilustrar', 'diseño', 'lienzo', 'lapiz',
         'trazos', 'arte', 'creativo', 'block', 'cuaderno', 'libreta', 'digital', 'pad', 'colorear', 'acuarela',
         'sombreado', 'textura', 'base', 'plantilla', 'modelo', 'concepto', 'practicar', 'diario', 'anime', 'sketch'
+    ],
+    'Apps/color.html': [
+        'color', 'selector', 'paleta', 'hexadecimal', 'RGB', 'HTML', 'CSS', 'diseño', 'web', 'diseño-gráfico',
+        'cuentagotas', 'RGBa', 'CMYK', 'HSL', 'códigos', 'herramientas', 'online', 'capturador', 'combinación', 'muestra',
+        'creador', 'paletas', 'matiz', 'saturación', 'brillo', 'tonalidad', 'generar', 'copiar', 'pegar', 'diseño-web',
+        'digital'
     ],
     'Apps/calendario.html': [
         'calendario', 'fechas', 'meses', 'dias', 'semanas', 'año', 'agenda', 'citas', 'eventos', 'reuniones',
@@ -281,11 +297,6 @@ const appKeywords = {
         'contador', 'palabras', 'caracteres', 'letras', 'texto', 'lineas', 'parrafos', 'conteo', 'longitud', 'limite',
         'redaccion', 'ensayo', 'articulos', 'blog', 'seo', 'words', 'counter', 'characters', 'spaces', 'espacios',
         'analisis', 'estadisticas', 'lectura', 'tiempo', 'frases', 'vocales', 'consonantes', 'gramatica', 'escribir', 'documento'
-    ],
-    'Apps/img-base64.html': [
-        'conversor', 'base64', 'imagen', 'codificar', 'decodificar', 'encoder', 'decoder', 'b64', 'texto', 'codigo',
-        'datos', 'dataurl', 'src', 'html', 'css', 'desarrollo', 'web', 'archivo', 'bytes', 'string',
-        'convertir', 'encriptar', 'binario', 'upload', 'cloud', 'programacion', 'formato', 'asset', 'optimizar', 'transformar'
     ],
     'Apps/limpia-textos.html': [
         'limpiador', 'textos', 'formato', 'espacios', 'saltos', 'limpiar', 'depurar', 'corregir', 'reemplazar', 'quitar',
@@ -342,6 +353,18 @@ const appKeywords = {
         'aprender', 'abecedario', 'temporizador', 'aciertos', 'errores', 'puntuación', 'diccionario', 'configurar', 'ajustes', 'solución',
         'banco de palabras', 'rueda', 'paso a paso', 'reglas', 'modos de juego', 'multijugador', 'retos', 'tiempo', 'puntos', 'lecciones'
     ],
+    'Apps/noticias.html': [
+        'noticias', 'creador', 'posts', 'redacción', 'artículos', 'prensa', 'blog', 'contenido', 'generador', 'periodismo',
+        'maquetación', 'titular', 'plantilla', 'edición', 'online', 'herramienta', 'publicar', 'difusión', 'medios', 'texto',
+        'diseño', 'redes-sociales', 'informativo', 'actualidad', 'escribir', 'formato', 'copiar', 'pegar', 'reportero', 'crónica',
+        'digital'
+    ],
+    'Apps/tts.html': [
+        'voz', 'texto', 'lector', 'audio', 'habla', 'narrador', 'locución', 'TTS', 'audio-lector', 'escuchar',
+        'pronunciación', 'online', 'herramienta', 'dictado', 'lectura', 'accesibilidad', 'mp3', 'convertir', 'artificial', 'sonido',
+        'entonación', 'reproducir', 'robot', 'sintetizador', 'automatizado', 'digital', 'generar', 'descargar', 'copiar', 'pegar',
+        'acento'
+    ],
     'Apps/craftpalette.html': [
         'minecraft', 'craftpalette', 'paleta', 'bloques', 'construccion', 'diseño', 'colores', 'combinar', 'texturas', 'builder',
         'blocks', 'palette', 'mc', 'creativo', 'arquitectura', 'gama', 'tonos', 'esquema', 'herramienta', 'guia',
@@ -372,12 +395,54 @@ const appKeywords = {
         'aprender', 'manual', 'paso a paso', 'pantalla de inicio', 'ajustes', 'restaurar', 'copia de seguridad', 'problemas', 'actualizacion', 'comunidad',
         'trucos', 'primeros pasos', 'personalizar', 'interfaz', 'widgets', 'iconos', 'herramientas', 'soporte tecnico', 'funciones', 'inicio rapido'
     ],
+    'Apps/conversor.html': [
+        'conversor', 'convertir', 'unidades', 'unidades de medida', 'unidades de peso', 'unidades de longitud', 'volumen', 'masa', 'temperatura', 'celsius',
+        'fahrenheit', 'kilos', 'libras', 'gramos', 'kilometros', 'millas', 'litros', 'galones', 'conversion', 'transformar',
+        'equivalencia', 'calculo', 'sistema metrico', 'imperial', 'escala', 'magnitud', 'fisica', 'valores', 'unidades de tiempo', 'unidades de velocidad'
+    ],
+    'Apps/img-base64.html': [
+        'conversor', 'base64', 'imagen', 'codificar', 'decodificar', 'encoder', 'decoder', 'b64', 'texto', 'codigo',
+        'datos', 'dataurl', 'src', 'html', 'css', 'desarrollo', 'web', 'archivo', 'bytes', 'string',
+        'convertir', 'encriptar', 'binario', 'upload', 'cloud', 'programacion', 'formato', 'asset', 'optimizar', 'transformar'
+    ],
+    'Apps/wingdings.html': [
+        'Wingdings', 'traductor', 'traducción', 'conversor', 'descifrar', 'interpretación', 'símbolos', 'tipografía', 'fuentes', 'dingbats',
+        'glifos', 'signos', 'caracteres', 'texto', 'visual', 'gráficos', 'alfabeto', 'codificación', 'unicode', 'microsoft',
+        'webdings', 'código', 'secretos', 'oculto', 'mensajes', 'online', 'herramienta', 'generador', 'copiar', 'pegar',
+        'idiomas'
+    ],
+    'Apps/binario.html': [
+        'binario', 'traductor', 'conversor', 'código', 'texto', 'decimal', 'hexadecimal', 'ascii', 'traducción', 'números',
+        'bytes', 'bits', 'computación', 'informática', 'online', 'herramienta', 'descifrar', 'codificación', 'sistema', 'lenguaje',
+        'calculadora', 'descodificador', 'generador', 'interpretar', 'matemáticas', 'base2', 'secreto', 'copiar', 'pegar', 'cifrado',
+        'aprender'
+    ],
+    'Apps/morse.html': [
+        'morse', 'traductor', 'código', 'conversor', 'texto', 'telegrafía', 'símbolos', 'sonidos', 'puntos', 'rayas',
+        'traducción', 'descifrar', 'mensajes', 'SOS', 'alfabeto', 'comunicación', 'online', 'herramienta', 'auditivo', 'visual',
+        'secreto', 'descodificar', 'codificación', 'señales', 'aprender', 'transmitir', 'generador', 'copiar', 'pegar', 'clásico',
+        'militar'
+    ],
+    'Apps/num-romanos.html': [
+        'romanos', 'números', 'conversor', 'traductor', 'numeración', 'arábigos', 'decimal', 'letras', 'historia', 'matemáticas',
+        'calculadora', 'equivalencia', 'aprender', 'texto', 'online', 'herramienta', 'descifrar', 'siglos', 'fechas', 'reloj',
+        'antiguo', 'clásico', 'transformar', 'descodificar', 'alfabeto', 'generador', 'copiar', 'pegar', 'escuela', 'reglas',
+        'sistema'
+    ],
+    'Apps/num-let.html': [
+        'letras', 'números', 'conversor', 'traductor', 'escritura', 'ortografía', 'texto', 'pronunciación', 'cheques', 'facturas',
+        'finanzas', 'ortográfico', 'cardinales', 'lenguaje', 'español', 'gramática', 'online', 'herramienta', 'transcribir', 'redactar',
+        'contabilidad', 'palabras', 'cantidad', 'millon', 'generar', 'copiar', 'pegar', 'escuela', 'aprendizaje', 'moneda',
+        'lectura'
+    ],
     'games.html': [
         'juegos', 'gamecenter', 'neo', 'videojuegos', 'entretenimiento', 'arcade', 'consola', 'gamepad', 'gamer', 'diversion',
         'ocio', 'play', 'gaming', 'retro', 'casual', 'oculto', 'hidden', 'hub', 'plataforma', 'catalogo',
         'coleccion', 'online', 'browser games', 'minijuegos', 'partidas', 'puntuacion', 'records', 'habilidad', 'estrategia', 'accion'
     ]
 };
+
+
 
 
         let currentSearchIndex = -1;
