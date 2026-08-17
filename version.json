@@ -1,9 +1,12 @@
 {
-  "version": "1.4",
-  "date": "16 de Agosto 2026",
+  "version": "1.4.1",
+  "date": "17 de Agosto 2026",
   "changes": [
-    "✦ Novedades de 1.4",
-    "Se añadieron varios traductores y conversores: Binario, Morse, Wingdins, Zonas horarias, Números a Números romanos y Números a pronunciación,",
+   "✦ Novedades de la versión 1.4.1",
+    "Se añadió otro acceso mediante Cloudflare (homescreen.guilleplayer.workers.dev)",
+    "Se corrigió un error que provocaba que la card no cambiara de color al seleccionarse al tener activada la opción Desactivar Blur.",
+    "✦ Novedades de la versión 1.4",
+    "Se añadieron varios traductores y conversores: Binario, Morse, Wingdins, Zonas horarias, Números a Números romanos y Números a pronunciación.",
     "Se añadió una app de Texto a voz (TTS) con las voces del navegador.",
     "Se añadió una app de Creador de Posts de Noticias.",
     "Apps en BETA: Se añadió un editor de fotos experimental.",

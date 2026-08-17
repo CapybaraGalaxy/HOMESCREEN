@@ -23,6 +23,29 @@ body.no-blur .dock-container {
     background: #111 !important; 
 }
 
+body.no-blur .tool-card {
+    background: rgba(17, 17, 17, 0.96) !important;
+    border-color: rgba(255,255,255,0.08);
+}
+
+body.no-blur .tool-card:hover,
+body.no-blur .tool-card.keyboard-active {
+    background: rgba(255,255,255,0.96) !important;
+    color: #111 !important;
+    border-color: rgba(255,255,255,0.4);
+    box-shadow: 0 8px 20px rgba(255,255,255,0.15);
+}
+
+body.no-blur .tool-card:hover .star-btn,
+body.no-blur .tool-card.keyboard-active .star-btn {
+    color: rgba(0,0,0,0.42) !important;
+}
+
+body.no-blur .tool-card:hover .star-btn.active,
+body.no-blur .tool-card.keyboard-active .star-btn.active {
+    color: #E6A100 !important;
+}
+
 * { 
     box-sizing: border-box; 
     -webkit-tap-highlight-color: transparent; 
@@ -259,6 +282,12 @@ body.zen-mode .battery-status { opacity: 0; pointer-events: none; }
     transform: translateY(-2px);
     border-color: rgba(255,255,255,0.3);
     box-shadow: 0 4px 15px rgba(255,255,255,0.1);
+}
+
+body.no-blur .tool-card.keyboard-active {
+    background: rgba(255,255,255,0.96) !important;
+    color: #111 !important;
+    border-color: rgba(255,255,255,0.45);
 }
 
 /* EFECTOS COHESIVOS EXCLUSIVOS PARA DISPOSITIVOS CON RATÓN (PC) */
