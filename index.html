@@ -58,6 +58,11 @@
             <div class="date" id="date">--</div>
             <div id="batteryStatus" class="battery-status" style="display:none;"><i data-lucide="battery"></i> <span>--%</span></div>
         </header>
+        
+        <div class="greeting-wrapper" id="greetingWrapper">
+            <div class="welcome-message" id="welcomeMessage"></div>
+        </div>
+
         <div class="scroll-wrapper">
             <div class="tools-container" id="toolsGrid"></div>
         </div>
@@ -104,12 +109,6 @@
 
     <div class="exit-zen-btn" id="exitZenBtn" title="Salir de Modo Zen"><i data-lucide="eye"></i></div>
     <div id="homescreenToast">Toast Notification</div>
-
-    <div id="updateBanner">
-        <div class="update-title">Nueva versión disponible</div>
-        <div class="update-text">Se ha descargado una actualización en segundo plano.</div>
-        <button id="updateNow">Actualizar ahora</button>
-    </div>
 
     <script>
 const tools = [
@@ -377,7 +376,7 @@ const appKeywords = {
     ],
     'Apps/material-you': [
         'material you', 'palette', 'colores', 'diseño', 'android', 'google', 'interfaz', 'ui', 'ux', 'personalizacion',
-        'temas', 'dinamico', 'hex', 'rgb', 'paleta de colores', 'estilo', 'sistema', 'css', 'variables', 'desarrollo',
+        'temas', 'dinamico', 'hex', 'rgb', 'paleta de colores', 'estilo', 'sistema', 'css', 'variables', 'desrollo',
         'generador', 'armonia', 'monet', 'wallpaper', 'extractor', 'diseñador', 'tokens', 'configuracion', 'visual', 'apariencia'
     ],
     'Apps/icontest.html': [
@@ -442,12 +441,141 @@ const appKeywords = {
     ]
 };
 
-
-
-
         let currentSearchIndex = -1;
         let activeFolderIndex = -1; 
         let activeGridIndex = -1; 
+        let currentPhraseTemplate = null;
+
+        function animateText(elementSelector, mode = 'blur') {
+            const container = document.querySelector(elementSelector);
+            if (!container) return;
+
+            const words = container.textContent.trim().split(/\s+/).filter(Boolean);
+            const fragment = document.createDocumentFragment();
+            const animationMode = mode === 'fade' ? 'fade' : 'blur';
+
+            words.forEach((word, index) => {
+                if (index > 0) fragment.append(' ');
+                const wordElement = document.createElement('span');
+                wordElement.className = `word ${animationMode}-in`;
+                wordElement.style.animationDelay = `${index * 0.08}s`;
+                wordElement.textContent = word;
+                fragment.append(wordElement);
+            });
+
+            container.replaceChildren(fragment);
+        }
+
+        function hideGreeting(mode = 'blur') {
+            const wrapper = document.querySelector('.greeting-wrapper');
+            const words = document.querySelectorAll('.greeting-wrapper .word');
+            if (!wrapper || wrapper.classList.contains('collapsed')) return;
+
+            const animationMode = mode === 'fade' ? 'fade' : 'blur';
+            words.forEach((word, index) => {
+                word.style.animationDelay = `${index * 0.05}s`;
+                word.className = `word ${animationMode}-out`;
+            });
+
+            const totalDuration = (words.length * 0.05) + 0.4;
+            if (window.greetingCollapseTimer) clearTimeout(window.greetingCollapseTimer);
+            window.greetingCollapseTimer = setTimeout(() => {
+                wrapper.classList.add('collapsed');
+            }, totalDuration * 1000);
+        }
+
+        /* --- SISTEMA DE BIENVENIDA Y SALUDOS --- */
+        function updateWelcomeMessage() {
+            const username = (localStorage.getItem('username') || 'Usuario').trim() || 'Usuario';
+            const hour = new Date().getHours();
+            
+            // Configuración fácil de añadir frases. Utiliza {user} para el nombre.
+const frases = {
+    manana: [
+        "Buenos días, {user}",
+        "¡Arriba, {user}!",
+        "A por todas hoy, {user}",
+        "Excelente mañana, {user}",
+        "Café en mano y a triunfar, {user}",
+        "El día apenas comienza, {user}",
+        "Energía al máximo, {user}",
+        "Nuevas metas te esperan, {user}",
+        "¿Cómo has dormido, {user}?",
+        "Que tengas una mañana increíble, {user}"
+    ],
+    tarde: [
+        "Buenas tardes, {user}",
+        "¿Cómo va la tarde, {user}?",
+        "Sigue así, {user}",
+        "Ya queda menos para la gloria, {user}",
+        "Mantén el ritmo, {user}",
+        "Medio día superado, a por el resto, {user}",
+        "La inspiración está en el aire, {user}",
+        "No aflojes el paso ahora, {user}",
+        "Excelente trabajo hasta ahora, {user}",
+        "Una pausa y seguimos, {user}"
+    ],
+    noche: [
+        "Buenas noches, {user}",
+        "Hora de relajarse, {user}",
+        "Descansa un poco, {user}",
+        "Qué noche tan tranquila, {user}",
+        "Apaga motores por hoy, {user}",
+        "Lo hiciste genial hoy, {user}",
+        "Recarga energías para mañana, {user}",
+        "Un merecido descanso, {user}",
+        "Disfruta de la paz nocturna, {user}",
+        "Sueña en grande, {user}"
+    ],
+    generales: [
+        "Hola de nuevo, {user}",
+        "¿Qué creamos hoy, {user}?",
+        "¿Cuál es el plan, {user}?",
+        "Bienvenido de vuelta, {user}",
+        "Me alegra verte, {user}",
+        "¿Listo para brillar, {user}?",
+        "El espacio es todo tuyo, {user}",
+        "Manos a la obra, {user}",
+        "¿Qué gran idea tienes hoy?, {user}",
+        "Siempre un gusto tenerte por aquí, {user}"
+    ]
+};
+
+            if (!currentPhraseTemplate) {
+                let frasesDelMomento = [];
+                if (hour >= 5 && hour < 12) frasesDelMomento = frases.manana;
+                else if (hour >= 12 && hour < 20) frasesDelMomento = frases.tarde;
+                else frasesDelMomento = frases.noche;
+
+                // Escogemos una aleatoria del momento del día
+                const fraseMomentoElegida = frasesDelMomento[Math.floor(Math.random() * frasesDelMomento.length)];
+                
+                // Mezclamos con las generales y elegimos una
+                const opcionesFinales = [...frases.generales, fraseMomentoElegida];
+                currentPhraseTemplate = opcionesFinales[Math.floor(Math.random() * opcionesFinales.length)];
+            }
+
+            const welcomeEl = document.getElementById('welcomeMessage');
+            const greetingWrapper = document.getElementById('greetingWrapper');
+            if (welcomeEl) {
+                if (greetingWrapper) greetingWrapper.classList.remove('collapsed');
+                // Reemplazamos {user} por el nombre configurado
+                welcomeEl.innerText = currentPhraseTemplate.replace(/\{user\}/g, username);
+                animateText('#welcomeMessage', localStorage.getItem('welcomeAnimation') || 'blur');
+                
+                // Reseteamos las clases de animación si cambia el estado
+                welcomeEl.classList.remove('hide');
+                
+                // Manejar la ocultación tras un temporizador si está activado
+                if (window.welcomeHideTimer) clearTimeout(window.welcomeHideTimer);
+                
+                if (localStorage.getItem('hideWelcome') === 'true') {
+                    window.welcomeHideTimer = setTimeout(() => {
+                        hideGreeting(localStorage.getItem('welcomeAnimation') || 'blur');
+                    }, 4000); // Se oculta tras 4 segundos
+                }
+            }
+        }
         
         /* --- NUEVO: SISTEMA DE AUDIO WEB API --- */
         let audioCtx = null;
@@ -691,6 +819,22 @@ const appKeywords = {
 
         <div class="settings-section">
             <span class="settings-section-title">Diseño de Interfaz</span>
+            <div class="setting-item-row">
+                <div class="setting-item-meta">
+                    <i data-lucide="user"></i>
+                    <div>
+                        <span class="setting-label">Nombre de Usuario</span>
+                        <span class="setting-desc">Personalizar saludo</span>
+                    </div>
+                </div>
+                <input type="text" id="usernameInput" placeholder="Usuario" style="background: rgba(255,255,255,0.08); border: 1px solid var(--glass-border); color: #fff; padding: 6px 12px; border-radius: 10px; font-family: 'Outfit'; font-size: 0.85rem; width: 110px; text-align: right; outline: none;">
+            </div>
+            
+            <div class="setting-item-row" style="margin-top: 12px; margin-bottom: 12px;">
+                <div class="setting-item-meta"><i data-lucide="eye-off"></i><div><span class="setting-label">Ocultar Saludo</span><span class="setting-desc">Desaparece en unos segundos</span></div></div>
+                <div class="switch" id="toggleHideWelcome"></div>
+            </div>
+
             <div class="layout-selector">
                 <button class="layout-opt" data-layout="pill"><i data-lucide="shapes"></i><span>Pill</span></button>
                 <button class="layout-opt" data-layout="list"><i data-lucide="list"></i><span>Lista</span></button>
@@ -1331,9 +1475,20 @@ const appKeywords = {
         /* --- INICIALIZADOR DE INTERFAZ (INIT) --- */
         function init() {
             updateClock();
+            updateWelcomeMessage();
             if(window.hasHubError) return;
             renderMainGrid();
             
+            // Configurar Nombre de Usuario desde Ajustes
+            const usernameInput = document.getElementById('usernameInput');
+            if (usernameInput) {
+                usernameInput.value = localStorage.getItem('username') || '';
+                usernameInput.addEventListener('input', (e) => {
+                    localStorage.setItem('username', e.target.value);
+                    updateWelcomeMessage();
+                });
+            }
+
             // Integración de Toggles Genérica
             const setupToggle = (id, localStorageKey, callback, defaultVal = 'false') => {
                 const el = document.getElementById(id);
@@ -1354,6 +1509,7 @@ const appKeywords = {
             setupToggle('toggleDock', 'showDock', renderDock, 'false');
             setupToggle('toggleSounds', 'sounds', null, 'false');
             setupToggle('toggleHaptics', 'haptics', null, 'false');
+            setupToggle('toggleHideWelcome', 'hideWelcome', () => updateWelcomeMessage(), 'false');
             
             const batteryEnabled = setupToggle('toggleBattery', 'showBattery', (act) => {
                 const batEl = document.getElementById('batteryStatus');
@@ -1441,7 +1597,7 @@ const appKeywords = {
             if (exportBtn) {
                 exportBtn.onclick = (e) => {
                     e.stopPropagation(); playSound('click');
-                    const keys = ['favorites', 'layoutMode', 'showFavFolder', 'bg', 'darkbg', 'noblur', 'hideLocalChip', 'searchEngine', 'appUsageStats', 'showDock', 'showRecentFolder', 'showBattery', 'sounds', 'haptics'];
+                    const keys = ['username', 'favorites', 'layoutMode', 'showFavFolder', 'bg', 'darkbg', 'noblur', 'hideLocalChip', 'searchEngine', 'appUsageStats', 'showDock', 'showRecentFolder', 'showBattery', 'sounds', 'haptics', 'hideWelcome'];
                     const config = {};
                     keys.forEach(k => { const val = localStorage.getItem(k); if (val !== null) config[k] = val; });
                     const blob = new Blob([JSON.stringify(config, null, 2)], { type: 'application/json' });

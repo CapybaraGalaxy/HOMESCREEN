@@ -42,6 +42,7 @@ async function showUpdateBanner(info = null) {
 
     const versionInfo = info || await getVersionInfo();
     const banner = document.createElement("div");
+    banner.className = "update-banner";
     banner.id = "updateBanner";
 
     banner.innerHTML = `
