@@ -12,6 +12,8 @@
   "Ahora se puede elegir la animación de las carpetas entre Zoom y Slide",
   "El dock ahora se muestra encima de la barra de búsqueda. Las animaciones del dock y barra de búsqueda se han mejorado.",
   "Ahora en el menu de exportación e importación se puede elegir entre subir archivo o pegar del portapapeles",
+  "Se actualizó el archivo manifest.json con nueva información del proyecto (descripción, idioma, categorías y accesos directos).",
+  "Se actualizó el icono de la app para que sea diferente al FAVICON.",
   "✦ Novedades de la versión 1.4.1",
   "Se añadió otro acceso mediante Cloudflare (homescreen.guilleplayer.workers.dev)",
   "Se corrigió un error que provocaba que la card no cambiara de color al seleccionarse al tener activada la opción Desactivar Blur.",
