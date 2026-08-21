@@ -1,5 +1,5 @@
 {
-  "version": "1.5.1",
+  "version": "1.5.1.2",
   "date": "21 de Agosto 2026",
   "changes": [
     "✦ Novedades de la versión 1.5.1",
@@ -10,7 +10,7 @@
   "Se corrigió la estructura del archivo manifest.json resolviendo un problema de sintaxis JSON que impedía la lectura correcta de la configuración en Android.",
   "Se agregó la propiedad \"purpose\": \"any maskable\" a los iconos en el manifest para mejorar la adaptación visual y compatibilidad del logo en la pantalla de inicio de Android.",
   "Rendimiento Offline:",
-  "Se optimizó la lista de recursos críticos (CORE) en el Service Worker para asegurar el correcto funcionamiento sin conexión de la app."
+  "Se optimizó la lista de recursos críticos (CORE) en el Service Worker para asegurar el correcto funcionamiento sin conexión de la app.",
     "✦ Novedades de la versión 1.5",
   "He añadido una frase de bienvenida que saluda al usuario, aparece al entrar, se puede activar y desactivar que la frase se quede fija o que desaparezca tras unos segundos, tu nombre también se puede cambiar. Además se puede elegir el efecto entre blur y fade",
   "Se ha añadido config.html: Un asistente de configuración pensado para nuevos usuarios que pretende ayudarles a personalizar la app la primera vez. Es accesible mediante un botón en ajustes, aunque aún estoy pensando como hacerlo más intuitivo para nuevos usuarios.",
