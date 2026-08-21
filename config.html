@@ -1,0 +1,863 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+    <title>Configuración - Homescreen NEO</title>
+    <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20width%3D%2224%22%20height%3D%2224%22%20viewBox%3D%220%200%2024%2024%22%20fill%3D%22none%22%20stroke%3D%22currentColor%22%20stroke-width%3D%222%22%20stroke-linecap%3D%22round%22%20stroke-linejoin%3D%22round%22%20class%3D%22lucide%20lucide-settings-icon%20lucide-settings%22%3E%3Cstyle%3E%20path%2C%20circle%2C%20rect%2C%20polygon%2C%20line%2C%20polyline%2C%20ellipse%20%7B%20stroke%3A%20%23000000%20!important%3B%20%7D%20%40media%20(prefers-color-scheme%3A%20dark)%20%7B%20path%2C%20circle%2C%20rect%2C%20polygon%2C%20line%2C%20polyline%2C%20ellipse%20%7B%20stroke%3A%20%23ffffff%20!important%3B%20%7D%20%7D%20%3C%2Fstyle%3E%3Cpath%20d%3D%22M9.671%204.136a2.34%202.34%200%200%201%204.659%200%202.34%202.34%200%200%200%203.319%201.915%202.34%202.34%200%200%201%202.33%204.033%202.34%202.34%200%200%200%200%203.831%202.34%202.34%200%200%201-2.33%204.033%202.34%202.34%200%200%200-3.319%201.915%202.34%202.34%200%200%201-4.659%200%202.34%202.34%200%200%200-3.32-1.915%202.34%202.34%200%200%201-2.33-4.033%202.34%202.34%200%200%200%200-3.831A2.34%202.34%200%200%201%206.35%206.051a2.34%202.34%200%200%200%203.319-1.915%22%2F%3E%3Ccircle%20cx%3D%2212%22%20cy%3D%2212%22%20r%3D%223%22%2F%3E%3C%2Fsvg%3E">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@200;300;400;500;600;700&display=swap" rel="stylesheet">
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <style>
+        :root {
+            --bg: #000000;
+            --surface: #0e0e11;
+            --surface-hover: #16161d;
+            --glass: rgba(18, 18, 24, 0.7);
+            --glass-border: rgba(255, 255, 255, 0.1);
+            --blur-val: 40px;
+            --text-main: #FFFFFF;
+            --text-muted: #8E8E93;
+            /* Reemplazado el amarillo por azul */
+            --accent: #007AFF;
+            --accent-glow: rgba(0, 122, 255, 0.25);
+            --accent-success: #34C759;
+            --bezier: cubic-bezier(0.16, 1, 0.3, 1);
+            --spring: cubic-bezier(0.34, 1.56, 0.64, 1);
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: 'Outfit', sans-serif;
+            -webkit-font-smoothing: antialiased;
+        }
+
+        body {
+            background-color: var(--bg);
+            color: var(--text-main);
+            min-height: 100dvh;
+            width: 100vw;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            overflow: hidden;
+        }
+
+        /* Ocupa toda la pantalla en PC y móviles */
+        .app-container {
+            width: 100vw;
+            height: 100dvh;
+            background: var(--surface);
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+            position: relative;
+            backdrop-filter: blur(var(--blur-val));
+            -webkit-backdrop-filter: blur(var(--blur-val));
+        }
+
+        /* Capa de Transición Cinemática Fullscreen */
+        .cinematic-overlay {
+            position: absolute;
+            inset: 0;
+            background: rgba(0, 0, 0, 0.92);
+            backdrop-filter: blur(50px);
+            -webkit-backdrop-filter: blur(50px);
+            z-index: 100;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            gap: 16px;
+            opacity: 0;
+            pointer-events: none;
+            transition: opacity 0.5s var(--bezier);
+        }
+
+        .cinematic-overlay.active {
+            opacity: 1;
+            pointer-events: auto;
+        }
+
+        .overlay-icon-box {
+            width: 150px;
+            height: 150px;
+            border-radius: 24px;
+            background: radial-gradient(circle, var(--accent-glow) 0%, rgba(0,0,0,0) 70%);
+            border: 0px solid var(--glass-border);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transform: scale(0.7) rotate(-10deg);
+            transition: transform 0.6s var(--spring);
+        }
+
+        .cinematic-overlay.active .overlay-icon-box {
+            transform: scale(5) rotate(0deg);
+        }
+
+        .overlay-icon-box i {
+            color: var(--accent);
+            width: 100px;
+            height: 100px;
+        }
+
+        .overlay-text {
+            font-size: 50px;
+            font-weight: 500;
+            letter-spacing: -0.5px;
+            color: var(--text-main);
+            transform: translateY(15px);
+            opacity: 0;
+            transition: all 0.5s var(--bezier) 0.1s;
+        }
+
+        .cinematic-overlay.active .overlay-text {
+            transform: translateY(0);
+            opacity: 1;
+        }
+
+        /* Contenido Principal por Fases */
+        .wizard-content {
+            flex: 1;
+            padding: 48px;
+            overflow-y: auto;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            position: relative;
+        }
+
+        .wizard-step {
+            display: none;
+            flex-direction: column;
+            gap: 24px;
+            width: 100%;
+            max-width: 720px;
+            opacity: 0;
+            transform: translateY(30px) scale(0.98);
+            transition: opacity 0.6s var(--bezier), transform 0.6s var(--bezier);
+        }
+
+        .wizard-step.active {
+            display: flex;
+            opacity: 1;
+            transform: translateY(0) scale(1);
+        }
+
+        .hero-title {
+            font-size: 42px;
+            font-weight: 300;
+            letter-spacing: -1.5px;
+            line-height: 1.15;
+            color: var(--text-main);
+        }
+
+        .hero-title span {
+            font-weight: 600;
+            color: var(--accent);
+        }
+
+        .welcome-title .welcome-word {
+            display: inline-block;
+            opacity: 0;
+            color: var(--text-main);
+            font-weight: 300;
+            filter: blur(12px);
+            transform: translateY(14px);
+            animation: welcomeWordIn 0.7s var(--bezier) forwards;
+        }
+
+        .welcome-title .welcome-accent {
+            color: var(--accent);
+            font-weight: 600;
+        }
+
+        .welcome-title .welcome-word:nth-child(1) { animation-delay: 0.08s; }
+        .welcome-title .welcome-word:nth-child(2) { animation-delay: 0.18s; }
+        .welcome-title .welcome-word:nth-child(3) { animation-delay: 0.28s; }
+
+        @keyframes welcomeWordIn {
+            from { opacity: 0; filter: blur(12px); transform: translateY(14px); }
+            to { opacity: 1; filter: blur(0); transform: translateY(0); }
+        }
+
+        @media (prefers-reduced-motion: reduce) {
+            .welcome-title .welcome-word {
+                animation: none;
+                opacity: 1;
+                filter: none;
+                transform: none;
+            }
+        }
+
+        .zen-desc {
+            color: var(--text-muted);
+            font-size: 18px;
+            line-height: 1.6;
+            font-weight: 300;
+        }
+
+        .zen-desc strong {
+            color: var(--text-main);
+            font-weight: 500;
+        }
+
+        /* Tarjeta Informativa tipo About */
+        .about-card {
+            background: var(--glass);
+            border: 1px solid var(--glass-border);
+            border-radius: 24px;
+            padding: 24px;
+            display: flex;
+            flex-direction: column;
+            gap: 16px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.3);
+            animation: fadeIn 0.8s var(--bezier);
+        }
+
+        .about-item {
+            display: flex;
+            align-items: flex-start;
+            gap: 16px;
+        }
+
+        .about-item i {
+            color: var(--accent);
+            margin-top: 3px;
+        }
+
+        /* Inputs y Elementos Interactivos */
+        .zen-input {
+            background: rgba(255, 255, 255, 0.04);
+            border: 1px solid var(--glass-border);
+            padding: 20px 24px;
+            border-radius: 20px;
+            color: var(--text-main);
+            font-size: 20px;
+            font-weight: 300;
+            outline: none;
+            transition: all 0.4s var(--bezier);
+            width: 100%;
+        }
+
+        .zen-input:focus {
+            border-color: var(--accent);
+            background: rgba(255, 255, 255, 0.07);
+            box-shadow: 0 0 30px var(--accent-glow);
+        }
+
+        /* Estilos Interactivos */
+        .style-options {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 16px;
+        }
+
+        @media(max-width: 600px) {
+            .style-options { grid-template-columns: 1fr; }
+            .wizard-content { padding: 24px; }
+            .hero-title { font-size: 32px; }
+        }
+
+        .style-card {
+            background: var(--glass);
+            border: 1px solid var(--glass-border);
+            border-radius: 20px;
+            padding: 20px 16px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 12px;
+            cursor: pointer;
+            transition: all 0.4s var(--bezier);
+            text-align: center;
+        }
+
+        .style-card:hover {
+            border-color: rgba(255,255,255,0.2);
+            background: var(--surface-hover);
+            transform: translateY(-4px);
+        }
+
+        .style-card.selected {
+            border-color: var(--accent);
+            background: var(--accent-glow);
+            box-shadow: 0 10px 25px rgba(0, 122, 255, 0.15);
+        }
+
+        .style-card span {
+            font-size: 15px;
+            font-weight: 500;
+        }
+
+        /* Selector de Buscador */
+        .search-engine-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 14px;
+        }
+
+        .engine-card {
+            background: var(--glass);
+            border: 1px solid var(--glass-border);
+            border-radius: 18px;
+            padding: 16px;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            cursor: pointer;
+            transition: all 0.3s var(--bezier);
+        }
+
+        .engine-card:hover {
+            background: var(--surface-hover);
+        }
+
+        .engine-card.selected {
+            border-color: var(--accent);
+            background: var(--accent-glow);
+        }
+
+        /* Grid de Configuración general (Filas) */
+        .settings-grid {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+            max-height: 400px;
+            overflow-y: auto;
+            padding-right: 6px;
+        }
+
+        .setting-row {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            background: rgba(255, 255, 255, 0.03);
+            border: 1px solid var(--glass-border);
+            padding: 16px 20px;
+            border-radius: 18px;
+            transition: all 0.3s var(--bezier);
+        }
+
+        .setting-row:hover {
+            background: rgba(255, 255, 255, 0.06);
+            transform: translateX(4px);
+        }
+
+        .setting-meta {
+            display: flex;
+            align-items: center;
+            gap: 16px;
+        }
+
+        .setting-meta i {
+            color: var(--text-muted);
+        }
+
+        .setting-title {
+            font-size: 16px;
+            font-weight: 500;
+        }
+
+        .setting-desc {
+            font-size: 13px;
+            color: var(--text-muted);
+            font-weight: 300;
+        }
+
+        .switch {
+            width: 52px;
+            height: 30px;
+            background: rgba(255, 255, 255, 0.15);
+            border-radius: 20px;
+            position: relative;
+            cursor: pointer;
+            transition: background 0.4s var(--bezier);
+            flex-shrink: 0;
+        }
+
+        .switch::after {
+            content: '';
+            position: absolute;
+            top: 3px;
+            left: 3px;
+            width: 24px;
+            height: 24px;
+            background: #fff;
+            border-radius: 50%;
+            transition: transform 0.4s var(--spring);
+        }
+
+        .switch.on {
+            background: var(--accent);
+        }
+
+        .switch.on::after {
+            transform: translateX(22px);
+            background: #fff;
+        }
+
+        /* Pantalla Final */
+        .success-badge-anim {
+            width: 80px;
+            height: 80px;
+            border-radius: 50%;
+            background: rgba(52, 199, 89, 0.15);
+            border: 1px solid rgba(52, 199, 89, 0.4);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin: 0 auto 10px auto;
+            animation: pulseSuccess 2s infinite var(--bezier);
+        }
+
+        @keyframes pulseSuccess {
+            0% { box-shadow: 0 0 0 0 rgba(52, 199, 89, 0.3); }
+            70% { box-shadow: 0 0 0 24px rgba(52, 199, 89, 0); }
+            100% { box-shadow: 0 0 0 0 rgba(52, 199, 89, 0); }
+        }
+
+        .success-badge-anim i {
+            color: var(--accent-success);
+            width: 36px;
+            height: 36px;
+        }
+
+        /* Footer Cinemático */
+        footer {
+            padding: 24px 48px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            border-top: 1px solid var(--glass-border);
+            background: rgba(14, 14, 17, 0.8);
+            backdrop-filter: blur(20px);
+        }
+
+        .btn {
+            background: rgba(255, 255, 255, 0.06);
+            border: 1px solid var(--glass-border);
+            color: var(--text-main);
+            padding: 16px 28px;
+            border-radius: 16px;
+            font-size: 16px;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.4s var(--bezier);
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            text-decoration: none;
+        }
+
+        .btn:hover {
+            background: rgba(255, 255, 255, 0.12);
+            transform: translateY(-2px);
+        }
+
+        .btn.primary {
+            background: var(--accent);
+            color: #fff;
+            border-color: transparent;
+            box-shadow: 0 4px 20px var(--accent-glow);
+        }
+
+        .btn.primary:hover {
+            background: #0062cc;
+            transform: translateY(-2px);
+        }
+    </style>
+</head>
+<body>
+
+    <div class="app-container">
+        <!-- Overlay Cinemático de Transición entre Fases -->
+        <div class="cinematic-overlay" id="cinematicOverlay">
+            <div class="overlay-icon-box">
+                <i id="overlayIcon" data-lucide="sparkles"></i>
+            </div>
+            <div class="overlay-text" id="overlayText">Cargando experiencia...</div>
+        </div>
+
+        <div class="wizard-content">
+            <!-- FASE 1: Bienvenida -->
+            <div class="wizard-step active" data-step="1" data-title="Bienvenida" data-icon="compass">
+                <h1 class="hero-title welcome-title"><span class="welcome-word">Bienvenido</span> <span class="welcome-word">a</span> <span class="welcome-word welcome-accent">Homescreen.</span></h1>
+                <p class="zen-desc"><strong>Homescreen reúne todas tus herramientas y utilidades en un <i></i>único lugar</i></strong> inteligente, fluido y sin distracciones.<br>Sin registros ni suscripciones, Homescreen es tu espacio personal de productividad.</p>
+            </div>
+
+            <!-- FASE 2: Información de la App (About) -->
+            <div class="wizard-step" data-step="2" data-title="Acerca de Homescreen" data-icon="info">
+                <h1 class="hero-title">¿Qué es <span>Homescreen</span>?</h1>
+                <p class="zen-desc">Antes de comenzar, descubre lo que hace especial a esta plataforma:</p>
+                <div class="about-card">
+                    <div class="about-item">
+                        <i data-lucide="shield-check"></i>
+                        <div>
+                            <strong>Privacidad Local:</strong> Todos tus datos de configuración, favoritos y preferencias se almacenan localmente en tu navegador.
+                        </div>
+                    </div>
+                    <div class="about-item">
+                        <i data-lucide="zap"></i>
+                        <div>
+                            <strong>Máxima Velocidad:</strong> Diseñado sin rastreadores ni cargas pesadas para un rendimiento instantáneo. Tienes control total sobre las opciones más demandantes.
+                        </div>
+                    </div>
+                    <div class="about-item">
+                        <i data-lucide="grid"></i>
+                        <div>
+                            <strong>Ecosistema de WebApps:</strong> Acceso rápido a herramientas, proyectos, juegos e utilidades desde un único panel centralizado. ¡Apps nuevas se añaden cada mes!
+                        </div>
+                    </div>
+                    <div class="about-item">
+                        <i data-lucide="wifi-off"></i>
+                        <div>
+                            <strong>Funciona sin conexión:</strong> Homescreen y sus utilidades funcionan incluso sin internet, siempre que hayas visitado previamente las páginas.
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- FASE 3: Nombre de usuario -->
+            <div class="wizard-step" data-step="3" data-title="Identidad" data-icon="user">
+                <h1 class="hero-title">¿Cómo te <span>llamas</span>?</h1>
+                <p class="zen-desc">Tu nombre <strong>NO</strong> se enviará a ningún servidor, solo se usará localmente para personalizar la interfaz.</p>
+                <input type="text" id="userNameInput" class="zen-input" placeholder="Tu nombre o apodo..." value="" autocomplete="off">
+            </div>
+
+            <!-- FASE 4: Diseño y Buscador -->
+            <div class="wizard-step" data-step="4" data-title="Diseño y Buscador" data-icon="layout-grid">
+                <h1 class="hero-title">Estilo de <span>Layout</span> y Buscador</h1>
+                <p class="zen-desc">Elige cómo quieres organizar tus aplicaciones y tu motor de búsqueda predeterminado.</p>
+                
+                <div class="style-options" id="styleOptions">
+                    <div class="style-card" data-style="pill" onclick="setStyle('pill')">
+                        <i data-lucide="shapes"></i>
+                        <span>Pill Fluid</span>
+                    </div>
+                    <div class="style-card selected" data-style="list" onclick="setStyle('list')">
+                        <i data-lucide="list"></i>
+                        <span>Lista Minimal</span>
+                    </div>
+                    <div class="style-card" data-style="grid" onclick="setStyle('grid')">
+                        <i data-lucide="grid"></i>
+                        <span>Cuadrícula</span>
+                    </div>
+                </div>
+
+                <p class="zen-desc" style="margin-top: 10px;">Motor de búsqueda predeterminado:</p>
+                <div class="search-engine-grid">
+                    <div class="engine-card" data-engine="google" onclick="setSearchEngine('google')">
+                        <i data-lucide="search"></i> Google
+                    </div>
+                    <div class="engine-card selected" data-engine="bing" onclick="setSearchEngine('bing')">
+                        <i data-lucide="globe"></i> Bing
+                    </div>
+                    <div class="engine-card" data-engine="duckduckgo" onclick="setSearchEngine('duckduckgo')">
+                        <i data-lucide="shield"></i> DuckDuckGo
+                    </div>
+                    <div class="engine-card" data-engine="ecosia" onclick="setSearchEngine('ecosia')">
+                        <i data-lucide="leaf"></i> Ecosia
+                    </div>
+                </div>
+            </div>
+
+            <!-- FASE 5: Visibilidad de Elementos del Dock y Carpetas -->
+            <div class="wizard-step" data-step="5" data-title="Carpetas y Dock" data-icon="folder">
+                <h1 class="hero-title">Visibilidad de <span>Navegación</span></h1>
+                <p class="zen-desc">Elige qué secciones y accesos rápidos estarán visibles en tu pantalla de inicio.</p>
+                
+                <div class="settings-grid">
+                    <div class="setting-row">
+                        <div class="setting-meta">
+                            <i data-lucide="star"></i>
+                            <div>
+                                <div class="setting-title">Carpeta de Favoritos</div>
+                                <div class="setting-desc">Muestra la carpeta con tus accesos directos guardados</div>
+                            </div>
+                        </div>
+                        <div class="switch" id="togShowFavFolder" onclick="toggleSwitch(this, 'showFavFolder')"></div>
+                    </div>
+
+                    <div class="setting-row">
+                        <div class="setting-meta">
+                            <i data-lucide="clock"></i>
+                            <div>
+                                <div class="setting-title">Carpeta de Recientes</div>
+                                <div class="setting-desc">Muestra la carpeta con tus apps abiertas recientemente</div>
+                            </div>
+                        </div>
+                        <div class="switch on" id="togShowRecentFolder" onclick="toggleSwitch(this, 'showRecentFolder')"></div>
+                    </div>
+
+                    <div class="setting-row">
+                        <div class="setting-meta">
+                            <i data-lucide="panel-bottom"></i>
+                            <div>
+                                <div class="setting-title">Mostrar Dock Inferior</div>
+                                <div class="setting-desc">Barra de navegación rápida flotante con tus 5 apps más usadas</div>
+                            </div>
+                        </div>
+                        <div class="switch" id="togShowDock" onclick="toggleSwitch(this, 'showDock')"></div>
+                    </div>
+
+                    <div class="setting-row">
+                        <div class="setting-meta">
+                            <i data-lucide="tag"></i>
+                            <div>
+                                <div class="setting-title">Ocultar Local Chip</div>
+                                <div class="setting-desc">Oculta la etiqueta de indicador de estado local (solo se aplica si no estás usando la versión web)</div>
+                            </div>
+                        </div>
+                        <div class="switch on" id="togHideLocalChip" onclick="toggleSwitch(this, 'hideLocalChip')"></div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- FASE 6: Apariencia y Fondo -->
+            <div class="wizard-step" data-step="6" data-title="Apariencia y Fondo" data-icon="moon">
+                <h1 class="hero-title">Atmósfera <span>Visual</span></h1>
+                <p class="zen-desc">Ajusta los fondos, efectos de desenfoque y animación de bienvenida.</p>
+                
+                <div class="settings-grid">
+                    <div class="setting-row">
+                        <div class="setting-meta">
+                            <i data-lucide="image"></i>
+                            <div>
+                                <div class="setting-title">Fondo Animado</div>
+                                <div class="setting-desc">Partículas interactivas flotando</div>
+                            </div>
+                        </div>
+                        <div class="switch on" id="togBg" onclick="toggleSwitch(this, 'bg')"></div>
+                    </div>
+
+                    <div class="setting-row">
+                        <div class="setting-meta">
+                            <i data-lucide="moon"></i>
+                            <div>
+                                <div class="setting-title">Fondo</div>
+                                <div class="setting-desc">⚠ No desactives esta opción salvo que tu navegador o extensión soporte webs con fondo transparente</div>
+                            </div>
+                        </div>
+                        <div class="switch on" id="togDarkbg" onclick="toggleSwitch(this, 'darkbg')"></div>
+                    </div>
+
+                    <div class="setting-row">
+                        <div class="setting-meta">
+                            <i data-lucide="eye-off"></i>
+                            <div>
+                                <div class="setting-title">Desactivar efectos de Desenfoque</div>
+                                <div class="setting-desc">Optimiza el rendimiento eliminando los efectos blur</div>
+                            </div>
+                        </div>
+                        <div class="switch on" id="togNoblur" onclick="toggleSwitch(this, 'noblur')"></div>
+                    </div>
+
+                    <div class="setting-row">
+                        <div class="setting-meta">
+                            <i data-lucide="sparkles"></i>
+                            <div>
+                                <div class="setting-title">Ocultar Animación de Bienvenida</div>
+                                <div class="setting-desc">Oculta el texto de bienvenida después de unos segundos</div>
+                            </div>
+                        </div>
+                        <div class="switch on" id="togHideWelcome" onclick="toggleSwitch(this, 'hideWelcome')"></div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- FASE 7: Sistema, Háptica y Sonido -->
+            <div class="wizard-step" data-step="7" data-title="Sistema y Háptica" data-icon="sliders">
+                <h1 class="hero-title">Hardware y <span>Sonido</span></h1>
+                <p class="zen-desc">Configura la retroalimentación háptica, sonidos e indicadores del sistema.</p>
+                
+                <div class="settings-grid">
+                    <div class="setting-row">
+                        <div class="setting-meta">
+                            <i data-lucide="battery"></i>
+                            <div>
+                                <div class="setting-title">Indicador de Batería</div>
+                                <div class="setting-desc">Muestra el estado de la batería en la barra superior (funciona en algunos navegadores móviles)</div>
+                            </div>
+                        </div>
+                        <div class="switch" id="togShowBattery" onclick="toggleSwitch(this, 'showBattery')"></div>
+                    </div>
+
+                    <div class="setting-row">
+                        <div class="setting-meta">
+                            <i data-lucide="volume-2"></i>
+                            <div>
+                                <div class="setting-title">Efectos de Sonido</div>
+                                <div class="setting-desc">Audio sutil de respuesta al interactuar</div>
+                            </div>
+                        </div>
+                        <div class="switch on" id="togSounds" onclick="toggleSwitch(this, 'sounds')"></div>
+                    </div>
+
+                    <div class="setting-row">
+                        <div class="setting-meta">
+                            <i data-lucide="smartphone"></i>
+                            <div>
+                                <div class="setting-title">Respuesta Háptica</div>
+                                <div class="setting-desc">Vibración táctil en dispositivos compatibles</div>
+                            </div>
+                        </div>
+                        <div class="switch" id="togHaptics" onclick="toggleSwitch(this, 'haptics')"></div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- FASE 8: Completado y Exportación de Config -->
+            <div class="wizard-step" data-step="8" data-title="Finalizado" data-icon="check-circle">
+                <div class="success-badge-anim">
+                    <i data-lucide="check"></i>
+                </div>
+                <h1 class="hero-title" style="text-align: center;">Configuración <span>Lista</span>.</h1>
+                <p class="zen-desc" style="text-align: center;">Tu archivo de configuración se ha generado listo con la estructura exacta de exportación compatible con tu ecosistema.</p>
+                
+                <div style="display: flex; gap: 12px; width: 100%; margin-top: 10px;">
+                    <button class="btn" style="flex: 1; justify-content: center;" onclick="copyConfigClipboard()">
+                        <i data-lucide="copy" style="width: 18px;"></i> Copiar Configuración
+                    </button>
+                    <button class="btn primary" style="flex: 1; justify-content: center;" onclick="downloadConfigFile()">
+                        <i data-lucide="download" style="width: 18px;"></i> Descargar configuración
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <footer>
+            <button class="btn" id="prevBtn" onclick="changeStep(-1)" style="visibility: hidden;">
+                <i data-lucide="arrow-left" style="width: 16px;"></i> Anterior
+            </button>
+            <div id="navRightContainer">
+                <button class="btn primary" id="nextBtn" onclick="changeStep(1)">
+                    Comenzar <i data-lucide="arrow-right" style="width: 16px;"></i>
+                </button>
+            </div>
+        </footer>
+    </div>
+
+    <script>
+        lucide.createIcons();
+
+        let currentStep = 1;
+        const totalSteps = 8;
+
+        function getStoredConfigValue(key, fallback) {
+            const value = localStorage.getItem(key);
+            return value === null ? fallback : value;
+        }
+
+        // Estructura compatible con la importación de Homescreen.
+        const configState = {
+            username: getStoredConfigValue('username', 'Usuario'),
+            favorites: getStoredConfigValue('favorites', '[]'),
+            layoutMode: getStoredConfigValue('layoutMode', 'pill'),
+            showFavFolder: getStoredConfigValue('showFavFolder', 'true'),
+            bg: getStoredConfigValue('bg', 'false'),
+            darkbg: getStoredConfigValue('darkbg', 'true'),
+            noblur: getStoredConfigValue('noblur', 'false'),
+            hideLocalChip: getStoredConfigValue('hideLocalChip', 'false'),
+            searchEngine: getStoredConfigValue('searchEngine', 'google'),
+            appUsageStats: getStoredConfigValue('appUsageStats', '{}'),
+            showDock: getStoredConfigValue('showDock', 'false'),
+            showRecentFolder: getStoredConfigValue('showRecentFolder', 'false'),
+            showBattery: getStoredConfigValue('showBattery', 'false'),
+            sounds: getStoredConfigValue('sounds', 'false'),
+            haptics: getStoredConfigValue('haptics', 'false'),
+            hideWelcome: getStoredConfigValue('hideWelcome', 'false'),
+            welcomeAnimation: getStoredConfigValue('welcomeAnimation', 'blur'),
+            folderAnimation: getStoredConfigValue('folderAnimation', 'slide')
+        };
+
+        const userNameInput = document.getElementById('userNameInput');
+        userNameInput.addEventListener('input', (e) => {
+            configState.username = e.target.value.trim() || "Usuario";
+        });
+
+        function setStyle(mode) {
+            configState.layoutMode = mode;
+            document.querySelectorAll('.style-card').forEach(c => c.classList.remove('selected'));
+            document.querySelector(`.style-card[data-style="${mode}"]`).classList.add('selected');
+        }
+
+        function setSearchEngine(engine) {
+            configState.searchEngine = engine;
+            document.querySelectorAll('.engine-card').forEach(c => c.classList.remove('selected'));
+            document.querySelector(`.engine-card[data-engine="${engine}"]`).classList.add('selected');
+        }
+
+        function toggleSwitch(el, key) {
+            el.classList.toggle('on');
+            const isOn = el.classList.contains('on');
+            configState[key] = isOn ? "true" : "false";
+        }
+
+        function changeStep(direction) {
+            const newStep = currentStep + direction;
+            if (newStep < 1 || newStep > totalSteps) return;
+
+            const nextStepEl = document.querySelector(`.wizard-step[data-step="${newStep}"]`);
+            const targetTitle = nextStepEl.getAttribute('data-title');
+            const targetIcon = nextStepEl.getAttribute('data-icon');
+
+            const overlay = document.getElementById('cinematicOverlay');
+            document.getElementById('overlayText').innerText = targetTitle;
+            document.getElementById('overlayIcon').setAttribute('data-lucide', targetIcon);
+            lucide.createIcons();
+
+            overlay.classList.add('active');
+
+            setTimeout(() => {
+                document.querySelector(`.wizard-step[data-step="${currentStep}"]`).classList.remove('active');
+                currentStep = newStep;
+                nextStepEl.classList.add('active');
+
+                document.getElementById('prevBtn').style.visibility = currentStep === 1 ? 'hidden' : 'visible';
+
+                const rightContainer = document.getElementById('navRightContainer');
+                if (currentStep === totalSteps) {
+                    rightContainer.innerHTML = `
+                        <div style="display: flex; gap: 10px;">
+                            <a href="Apps/consejos.html" class="btn"><i data-lucide="lightbulb" style="width: 16px;"></i> Consejos</a>
+                            <a href="index.html" class="btn primary">Visitar Homescreen <i data-lucide="arrow-right" style="width: 16px;"></i></a>
+                        </div>
+                    `;
+                } else {
+                    rightContainer.innerHTML = `<button class="btn primary" id="nextBtn" onclick="changeStep(1)">Siguiente <i data-lucide="arrow-right" style="width: 16px;"></i></button>`;
+                }
+                lucide.createIcons();
+
+                setTimeout(() => {
+                    overlay.classList.remove('active');
+                }, 300);
+
+            }, 400);
+        }
+
+        function downloadConfigFile() {
+            const blob = new Blob([JSON.stringify(configState, null, 2)], { type: 'application/json' });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = 'homescreen-config.json';
+            document.body.appendChild(a);
+            a.click();
+            document.body.removeChild(a);
+            URL.revokeObjectURL(url);
+        }
+
+        function copyConfigClipboard() {
+            navigator.clipboard.writeText(JSON.stringify(configState, null, 2)).then(() => {
+                alert('¡Configuración copiada al portapapeles!');
+            });
+        }
+    </script>
+</body>
+</html>

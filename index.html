@@ -50,7 +50,7 @@
         <div><strong>VERSIÓN LOCAL</strong> <span>· Ir a web</span></div>
     </a>
 
-    <div class="version-tag" id="versionTag">1.4.1</div>
+    <div class="version-tag" id="versionTag">1.5</div>
 
     <div class="ui-layer">
         <header class="header">
@@ -104,6 +104,35 @@
         <div id="changelogContent" style="text-align:left; max-height:280px; overflow-y:auto; margin-bottom:20px;"></div>
         <div class="modal-buttons">
             <button class="modal-btn secondary" onclick="closeModal('changelogModal')">Cerrar</button>
+        </div>
+    </div>
+
+    <div class="custom-modal paste-settings-modal" id="pasteSettingsModal">
+        <div class="modal-title"><i data-lucide="clipboard"></i> Pegar configuración</div>
+        <p class="modal-text">Pega aquí el JSON generado por la otra aplicación.</p>
+        <textarea id="pasteSettingsInput" spellcheck="false" placeholder="{ &quot;username&quot;: &quot;GP&quot;, ... }"></textarea>
+        <div class="modal-buttons">
+            <button class="modal-btn secondary" onclick="closeModal('pasteSettingsModal')">Cancelar</button>
+            <button class="modal-btn primary" id="applyPastedSettingsBtn">Importar</button>
+        </div>
+    </div>
+
+    <div class="custom-modal welcome-modal" id="firstRunModal">
+        <div class="modal-title"><i data-lucide="sparkles" style="color: #FFD60A;"></i> Bienvenido a Homescreen</div>
+        <p class="modal-text">Personaliza tu experiencia antes de empezar: elige tu nombre, diseño, efectos y preferencias.</p>
+        <div class="modal-buttons">
+            <button class="modal-btn secondary" id="skipSetupBtn">Usar ajustes por defecto</button>
+            <a class="modal-btn primary" id="openSetupBtn" href="config.html"><i data-lucide="settings"></i> Personalizar</a>
+        </div>
+        <p class="modal-note">También puedes importar un archivo de configuración desde Ajustes.</p>
+    </div>
+
+    <div class="custom-modal welcome-modal" id="privacyNoticeModal">
+        <div class="modal-title"><i data-lucide="shield-check" style="color: #34C759;"></i> Tu privacidad es local</div>
+        <p class="modal-text"><strong>HOMESCREEN NO RECOPILA NINGUNO DE TUS DATOS.</strong></p>
+        <p class="modal-text">Todo se procesa y se guarda localmente en tu navegador. No enviamos tus preferencias, favoritos ni datos personales a ningún servidor.</p>
+        <div class="modal-buttons">
+            <button class="modal-btn primary" id="privacyNoticeBtn">Entendido</button>
         </div>
     </div>
 
@@ -446,19 +475,25 @@ const appKeywords = {
         let activeGridIndex = -1; 
         let currentPhraseTemplate = null;
 
+        function getEffectiveWelcomeAnimation() {
+            const selectedMode = localStorage.getItem('welcomeAnimation') || 'blur';
+            return document.body.classList.contains('no-blur') ? 'fade' : selectedMode;
+        }
+
         function animateText(elementSelector, mode = 'blur') {
             const container = document.querySelector(elementSelector);
             if (!container) return;
 
             const words = container.textContent.trim().split(/\s+/).filter(Boolean);
             const fragment = document.createDocumentFragment();
-            const animationMode = mode === 'fade' ? 'fade' : 'blur';
+            const animationMode = document.body.classList.contains('no-blur') ? 'fade' : (mode === 'fade' ? 'fade' : 'blur');
 
             words.forEach((word, index) => {
                 if (index > 0) fragment.append(' ');
                 const wordElement = document.createElement('span');
                 wordElement.className = `word ${animationMode}-in`;
                 wordElement.style.animationDelay = `${index * 0.08}s`;
+                wordElement.style.filter = 'none';
                 wordElement.textContent = word;
                 fragment.append(wordElement);
             });
@@ -469,18 +504,31 @@ const appKeywords = {
         function hideGreeting(mode = 'blur') {
             const wrapper = document.querySelector('.greeting-wrapper');
             const words = document.querySelectorAll('.greeting-wrapper .word');
+            const welcomeEl = document.getElementById('welcomeMessage');
             if (!wrapper || wrapper.classList.contains('collapsed')) return;
 
-            const animationMode = mode === 'fade' ? 'fade' : 'blur';
+            const effectiveMode = document.body.classList.contains('no-blur') ? 'fade' : (mode === 'fade' ? 'fade' : 'blur');
+            wrapper.classList.remove('collapsed');
+            if (welcomeEl) {
+                welcomeEl.style.opacity = '1';
+                welcomeEl.style.filter = 'none';
+                welcomeEl.classList.remove('hide');
+            }
+
             words.forEach((word, index) => {
                 word.style.animationDelay = `${index * 0.05}s`;
-                word.className = `word ${animationMode}-out`;
+                word.style.filter = 'none';
+                word.className = `word ${effectiveMode}-out`;
             });
 
-            const totalDuration = (words.length * 0.05) + 0.4;
+            const totalDuration = (words.length * 0.05) + 0.45;
             if (window.greetingCollapseTimer) clearTimeout(window.greetingCollapseTimer);
             window.greetingCollapseTimer = setTimeout(() => {
                 wrapper.classList.add('collapsed');
+                if (welcomeEl) {
+                    welcomeEl.style.opacity = '0';
+                    welcomeEl.style.filter = 'none';
+                }
             }, totalDuration * 1000);
         }
 
@@ -559,9 +607,11 @@ const frases = {
             const greetingWrapper = document.getElementById('greetingWrapper');
             if (welcomeEl) {
                 if (greetingWrapper) greetingWrapper.classList.remove('collapsed');
+                welcomeEl.style.filter = 'none';
+                welcomeEl.style.opacity = '1';
                 // Reemplazamos {user} por el nombre configurado
                 welcomeEl.innerText = currentPhraseTemplate.replace(/\{user\}/g, username);
-                animateText('#welcomeMessage', localStorage.getItem('welcomeAnimation') || 'blur');
+                animateText('#welcomeMessage', getEffectiveWelcomeAnimation());
                 
                 // Reseteamos las clases de animación si cambia el estado
                 welcomeEl.classList.remove('hide');
@@ -571,7 +621,7 @@ const frases = {
                 
                 if (localStorage.getItem('hideWelcome') === 'true') {
                     window.welcomeHideTimer = setTimeout(() => {
-                        hideGreeting(localStorage.getItem('welcomeAnimation') || 'blur');
+                        hideGreeting(getEffectiveWelcomeAnimation());
                     }, 4000); // Se oculta tras 4 segundos
                 }
             }
@@ -689,12 +739,20 @@ const frases = {
             container.appendChild(item);
         }
 
+        function removeDynamicSearchItems() {
+            document.querySelectorAll('.results-area .dynamic-item').forEach(item => {
+                item.classList.remove('search-enter');
+                item.classList.add('search-exit');
+                setTimeout(() => item.remove(), 240);
+            });
+        }
+
         function filterSearchPersistent(searchTerm) {
             const query = searchTerm.toLowerCase().trim();
             const items = document.querySelectorAll('.results-area .result-item:not(.dynamic-item)');
             const resultsArea = document.getElementById('resultsArea');
             
-            document.querySelectorAll('.dynamic-item').forEach(el => el.remove());
+            removeDynamicSearchItems();
             currentSearchIndex = -1;
             activeResultIndex = -1; 
 
@@ -784,9 +842,88 @@ const frases = {
             document.addEventListener('click', () => { dropdown.classList.remove('active'); });
         }
 
+        function initWelcomeAnimationDropdown() {
+            const dropdown = document.getElementById('welcomeAnimationDropdown');
+            const selectedText = document.getElementById('currentWelcomeAnimation');
+            if (!dropdown || !selectedText) return;
+
+            const applySelection = (value) => {
+                const options = dropdown.querySelectorAll('.dropdown-option');
+                options.forEach(option => {
+                    const isSelected = option.getAttribute('data-value') === value;
+                    option.classList.toggle('selected', isSelected);
+                });
+                const label = value === 'fade' ? 'Fade' : 'Blur';
+                selectedText.innerText = label;
+                localStorage.setItem('welcomeAnimation', value);
+                updateWelcomeMessage();
+            };
+
+            const currentValue = localStorage.getItem('welcomeAnimation') || 'blur';
+            const option = dropdown.querySelector(`.dropdown-option[data-value="${currentValue}"]`);
+            if (option) option.classList.add('selected');
+            selectedText.innerText = currentValue === 'fade' ? 'Fade' : 'Blur';
+
+            dropdown.querySelectorAll('.dropdown-option').forEach(option => {
+                option.addEventListener('click', (e) => {
+                    e.stopPropagation();
+                    playSound('click');
+                    applySelection(option.getAttribute('data-value'));
+                    dropdown.classList.remove('active');
+                });
+            });
+
+            dropdown.querySelector('.dropdown-select').addEventListener('click', (e) => {
+                e.stopPropagation();
+                dropdown.classList.toggle('active');
+            });
+
+            document.addEventListener('click', () => dropdown.classList.remove('active'));
+        }
+
+        function setFolderAnimationMode(value) {
+            document.querySelectorAll('#folderModal, #hiddenFolderModal').forEach(folderModal => {
+                folderModal.classList.toggle('folder-zoom', value === 'zoom');
+                folderModal.classList.toggle('folder-slide', value !== 'zoom');
+            });
+        }
+
+        function initFolderAnimationDropdown() {
+            const dropdown = document.getElementById('folderAnimationDropdown');
+            const selectedText = document.getElementById('currentFolderAnimation');
+            if (!dropdown || !selectedText) return;
+
+            const applySelection = (value) => {
+                const selectedValue = value === 'zoom' ? 'zoom' : 'slide';
+                dropdown.querySelectorAll('.dropdown-option').forEach(option => {
+                    option.classList.toggle('selected', option.getAttribute('data-value') === selectedValue);
+                });
+                selectedText.innerText = selectedValue === 'zoom' ? 'Zoom' : 'Slide';
+                localStorage.setItem('folderAnimation', selectedValue);
+                setFolderAnimationMode(selectedValue);
+            };
+
+            applySelection(localStorage.getItem('folderAnimation') || 'slide');
+            dropdown.querySelectorAll('.dropdown-option').forEach(option => {
+                option.addEventListener('click', (e) => {
+                    e.stopPropagation();
+                    playSound('click');
+                    applySelection(option.getAttribute('data-value'));
+                    dropdown.classList.remove('active');
+                });
+            });
+            dropdown.querySelector('.dropdown-select').addEventListener('click', (e) => {
+                e.stopPropagation();
+                dropdown.classList.toggle('active');
+            });
+            document.addEventListener('click', () => dropdown.classList.remove('active'));
+        }
+
         document.addEventListener('DOMContentLoaded', () => {
             buildPersistentSearchDOM();
             initSearchEngineDropdown();
+            initWelcomeAnimationDropdown();
+            initFolderAnimationDropdown();
             renderDock(); 
             const searchInput = document.querySelector('.search-input');
             if (searchInput) { searchInput.addEventListener('input', (e) => { filterSearchPersistent(e.target.value); }); }
@@ -833,6 +970,28 @@ const frases = {
             <div class="setting-item-row" style="margin-top: 12px; margin-bottom: 12px;">
                 <div class="setting-item-meta"><i data-lucide="eye-off"></i><div><span class="setting-label">Ocultar Saludo</span><span class="setting-desc">Desaparece en unos segundos</span></div></div>
                 <div class="switch" id="toggleHideWelcome"></div>
+            </div>
+
+            <div class="setting-item-row" style="margin-bottom: 12px;">
+                <div class="setting-item-meta"><i data-lucide="sparkles"></i><div><span class="setting-label">Animación de bienvenida</span><span class="setting-desc">Efecto al aparecer y ocultarse</span></div></div>
+                <div class="custom-dropdown" id="welcomeAnimationDropdown">
+                    <div class="dropdown-select"><span id="currentWelcomeAnimation">Blur</span><i data-lucide="chevron-down"></i></div>
+                    <div class="dropdown-options">
+                        <div class="dropdown-option selected" data-value="blur">Blur</div>
+                        <div class="dropdown-option" data-value="fade">Fade</div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="setting-item-row" style="margin-bottom: 12px;">
+                <div class="setting-item-meta"><i data-lucide="scan"></i><div><span class="setting-label">Animación de carpetas</span><span class="setting-desc">Efecto al abrir y cerrar carpetas</span></div></div>
+                <div class="custom-dropdown" id="folderAnimationDropdown">
+                    <div class="dropdown-select"><span id="currentFolderAnimation">Slide</span><i data-lucide="chevron-down"></i></div>
+                    <div class="dropdown-options">
+                        <div class="dropdown-option selected" data-value="slide">Slide</div>
+                        <div class="dropdown-option" data-value="zoom">Zoom</div>
+                    </div>
+                </div>
             </div>
 
             <div class="layout-selector">
@@ -911,13 +1070,14 @@ const frases = {
             <div class="settings-actions-grid" style="margin-bottom: 8px;">
                 <button class="settings-action-btn" id="exportSettingsBtn" type="button"><i data-lucide="download" style="width: 14px;"></i> Exportar</button>
                 <button class="settings-action-btn" id="importSettingsBtn" type="button"><i data-lucide="upload" style="width: 14px;"></i> Importar</button>
-                <input type="file" id="importSettingsFile" accept=".json" style="display: none;">
+                <input type="file" id="importSettingsFile" accept=".json,.html,application/json,text/plain" style="display: none;">
             </div>
             <div class="settings-actions-grid">
                 <button class="settings-action-btn" id="checkUpdatesBtn" type="button"><i data-lucide="refresh-cw" style="width: 14px;"></i> Comprobar</button>
                 <button class="settings-action-btn" id="showChangelogBtn" type="button"><i data-lucide="history" style="width: 14px;"></i> Changelog</button>
             </div>
             <button class="settings-action-btn" id="showAboutBtn" type="button" onclick="window.location.href='about.html'" style="width: 100%; margin-top: 8px;"><i data-lucide="badge-info" style="width: 14px;"></i> Información</button>
+            <button class="settings-action-btn" id="gotoconfigBtn" type="button" onclick="window.location.href='config.html'" style="width: 100%; margin-top: 8px;"><i data-lucide="settings" style="width: 14px;"></i> Configuración inicial</button>
         </div>
     </div>
 
@@ -1472,6 +1632,10 @@ const frases = {
             });
         }
 
+        function markSetupComplete(choice) {
+            localStorage.setItem('homescreenSetupChoice', choice);
+        }
+
         /* --- INICIALIZADOR DE INTERFAZ (INIT) --- */
         function init() {
             updateClock();
@@ -1593,38 +1757,195 @@ const frases = {
             if(showChangelogBtn) showChangelogBtn.onclick = (e) => { e.stopPropagation(); showChangelogModal(); };
             if(settingsVersionInfo && window.getVersionInfo) refreshSettingsVersionInfo();
 
+            const settingsDefaults = {
+                username: 'Usuario',
+                favorites: '[]',
+                layoutMode: 'pill',
+                showFavFolder: 'true',
+                bg: 'false',
+                darkbg: 'true',
+                noblur: 'false',
+                hideLocalChip: 'false',
+                searchEngine: 'google',
+                appUsageStats: '{}',
+                showDock: 'false',
+                showRecentFolder: 'false',
+                showBattery: 'false',
+                sounds: 'false',
+                haptics: 'false',
+                hideWelcome: 'false',
+                welcomeAnimation: 'blur',
+                folderAnimation: 'slide'
+            };
+
+            const settingsKeys = Object.keys(settingsDefaults);
+
+            function serializeSettingsValue(key, value) {
+                if (key === 'favorites' || key === 'appUsageStats') {
+                    if (typeof value === 'string') {
+                        try { value = JSON.parse(value); } catch (error) { value = key === 'favorites' ? [] : {}; }
+                    }
+                    return JSON.stringify(value);
+                }
+                if (typeof value === 'boolean') return String(value);
+                return String(value ?? settingsDefaults[key]);
+            }
+
+            function getSettingsConfig() {
+                const config = {};
+                settingsKeys.forEach(key => {
+                    config[key] = serializeSettingsValue(key, localStorage.getItem(key) ?? settingsDefaults[key]);
+                });
+                return config;
+            }
+
+            function downloadSettingsJson() {
+                const json = JSON.stringify(getSettingsConfig(), null, 2);
+                const blob = new Blob([json], { type: 'application/json' });
+                const url = URL.createObjectURL(blob);
+                const a = document.createElement('a');
+                a.href = url; a.download = 'homescreen-config.json';
+                document.body.appendChild(a); a.click(); document.body.removeChild(a);
+                URL.revokeObjectURL(url);
+                showToast('Configuración exportada', 'download');
+            }
+
+            function copySettingsJson() {
+                const json = JSON.stringify(getSettingsConfig(), null, 2);
+                if (navigator.clipboard && navigator.clipboard.writeText) {
+                    navigator.clipboard.writeText(json).then(() => {
+                        showToast('JSON copiado al portapapeles', 'copy');
+                    }).catch(() => {
+                        fallbackCopyToClipboard(json);
+                    });
+                } else {
+                    fallbackCopyToClipboard(json);
+                }
+            }
+
+            function fallbackCopyToClipboard(value) {
+                const helper = document.createElement('textarea');
+                helper.value = value;
+                document.body.appendChild(helper);
+                helper.focus();
+                helper.select();
+                try { document.execCommand('copy'); showToast('JSON copiado al portapapeles', 'copy'); }
+                catch (err) { showToast('No se pudo copiar el JSON', 'alert-circle'); }
+                document.body.removeChild(helper);
+            }
+
+            function importSettingsFromJsonString(jsonString) {
+                try {
+                    const source = JSON.parse(jsonString);
+                    if (!source || typeof source !== 'object' || Array.isArray(source)) throw new Error('Formato inválido');
+
+                    const config = {};
+                    settingsKeys.forEach(key => {
+                        if (source[key] !== undefined) config[key] = serializeSettingsValue(key, source[key]);
+                    });
+
+                    if (config.favorites !== undefined) JSON.parse(config.favorites);
+                    if (config.appUsageStats !== undefined) JSON.parse(config.appUsageStats);
+
+                    Object.entries(config).forEach(([key, value]) => localStorage.setItem(key, value));
+                    markSetupComplete('import');
+                    showToast('Configuración importada', 'refresh-cw');
+                    setTimeout(() => { location.reload(); }, 1200);
+                } catch (err) {
+                    showToast('Error al importar el JSON', 'alert-circle');
+                }
+            }
+
+            function openPasteSettingsModal(prefill = '') {
+                const pasteModal = document.getElementById('pasteSettingsModal');
+                const pasteInput = document.getElementById('pasteSettingsInput');
+                if (!pasteModal || !pasteInput) return;
+                pasteInput.value = prefill;
+                openModal('pasteSettingsModal');
+                setTimeout(() => pasteInput.focus(), 100);
+            }
+
+            async function pasteSettingsFromClipboard() {
+                try {
+                    if (!navigator.clipboard?.readText) throw new Error('Clipboard API no disponible');
+                    const text = await navigator.clipboard.readText();
+                    if (!text.trim()) throw new Error('Portapapeles vacío');
+                    importSettingsFromJsonString(text);
+                } catch (error) {
+                    openPasteSettingsModal();
+                }
+            }
+
+            const applyPastedSettingsBtn = document.getElementById('applyPastedSettingsBtn');
+            if (applyPastedSettingsBtn) {
+                applyPastedSettingsBtn.onclick = () => {
+                    const pasteInput = document.getElementById('pasteSettingsInput');
+                    importSettingsFromJsonString(pasteInput?.value || '');
+                };
+            }
+
+            function createSettingsActionMenu(button, actions) {
+                const existing = document.querySelector('.settings-action-menu');
+                if (existing) existing.remove();
+
+                const menu = document.createElement('div');
+                menu.className = 'settings-action-menu';
+                actions.forEach(action => {
+                    const item = document.createElement('button');
+                    item.type = 'button';
+                    item.className = 'settings-action-option';
+                    item.innerHTML = `<i data-lucide="${action.icon}"></i><span>${action.label}</span>`;
+                    item.onclick = (e) => {
+                        e.stopPropagation();
+                        playSound('click');
+                        action.onClick();
+                        menu.remove();
+                    };
+                    menu.appendChild(item);
+                });
+
+                const rect = button.getBoundingClientRect();
+                menu.style.left = (rect.left + window.scrollX - 12) + 'px';
+                menu.style.top = (rect.bottom + window.scrollY + 8) + 'px';
+                document.body.appendChild(menu);
+                if (window.lucide) lucide.createIcons();
+                setTimeout(() => menu.classList.add('show'), 10);
+
+                document.addEventListener('click', function closeMenu(event) {
+                    if (!menu.contains(event.target) && event.target !== button) {
+                        menu.remove();
+                        document.removeEventListener('click', closeMenu);
+                    }
+                }, { once: true });
+            }
+
             const exportBtn = document.getElementById('exportSettingsBtn');
             if (exportBtn) {
                 exportBtn.onclick = (e) => {
                     e.stopPropagation(); playSound('click');
-                    const keys = ['username', 'favorites', 'layoutMode', 'showFavFolder', 'bg', 'darkbg', 'noblur', 'hideLocalChip', 'searchEngine', 'appUsageStats', 'showDock', 'showRecentFolder', 'showBattery', 'sounds', 'haptics', 'hideWelcome'];
-                    const config = {};
-                    keys.forEach(k => { const val = localStorage.getItem(k); if (val !== null) config[k] = val; });
-                    const blob = new Blob([JSON.stringify(config, null, 2)], { type: 'application/json' });
-                    const url = URL.createObjectURL(blob);
-                    const a = document.createElement('a');
-                    a.href = url; a.download = 'homescreen-config.json';
-                    document.body.appendChild(a); a.click(); document.body.removeChild(a);
-                    URL.revokeObjectURL(url);
-                    showToast('Configuración exportada', 'download');
+                    createSettingsActionMenu(exportBtn, [
+                        { label: 'Descargar JSON', icon: 'download', onClick: downloadSettingsJson },
+                        { label: 'Copiar al portapapeles', icon: 'copy', onClick: copySettingsJson }
+                    ]);
                 };
             }
 
             const importBtn = document.getElementById('importSettingsBtn');
             const importFile = document.getElementById('importSettingsFile');
             if (importBtn && importFile) {
-                importBtn.onclick = (e) => { e.stopPropagation(); playSound('click'); importFile.click(); };
+                importBtn.onclick = (e) => {
+                    e.stopPropagation(); playSound('click');
+                    createSettingsActionMenu(importBtn, [
+                        { label: 'Seleccionar archivo', icon: 'upload', onClick: () => importFile.click() },
+                        { label: 'Pegar desde portapapeles', icon: 'clipboard', onClick: pasteSettingsFromClipboard }
+                    ]);
+                };
                 importFile.onchange = (e) => {
                     const file = e.target.files[0];
                     if (!file) return;
                     const reader = new FileReader();
                     reader.onload = (evt) => {
-                        try {
-                            const config = JSON.parse(evt.target.result);
-                            Object.keys(config).forEach(k => { localStorage.setItem(k, config[k]); });
-                            showToast('Configuración importada', 'refresh-cw');
-                            setTimeout(() => { location.reload(); }, 1200);
-                        } catch (err) { showToast('Error al importar el JSON', 'alert-circle'); }
+                        importSettingsFromJsonString(evt.target.result);
                     };
                     reader.readAsText(file);
                 };
