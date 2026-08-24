@@ -1,5 +1,5 @@
 // Cambia este número cada vez que lances una nueva versión:
-const VERSION = "1.5.1.2";
+const VERSION = "1.5.1.3";
 const CACHE_NAME = `homescreen-v${VERSION}`;
 
 // Archivos esenciales para que la app cargue sin conexión
