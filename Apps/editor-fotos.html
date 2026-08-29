@@ -2,453 +2,220 @@
 <html lang="es">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
-    <title>Editor de Imágenes Avanzado</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+    <title>Editor de Imágenes PRO</title>
     <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20width%3D%2224%22%20height%3D%2224%22%20viewBox%3D%220%200%2024%2024%22%20fill%3D%22none%22%20stroke%3D%22currentColor%22%20stroke-width%3D%222%22%20stroke-linecap%3D%22round%22%20stroke-linejoin%3D%22round%22%20class%3D%22lucide%20lucide-image-icon%20lucide-image%22%3E%3Cstyle%3E%20path%2C%20circle%2C%20rect%2C%20polygon%2C%20line%2C%20polyline%2C%20ellipse%20%7B%20stroke%3A%20%23000000%20!important%3B%20%7D%20%40media%20(prefers-color-scheme%3A%20dark)%20%7B%20path%2C%20circle%2C%20rect%2C%20polygon%2C%20line%2C%20polyline%2C%20ellipse%20%7B%20stroke%3A%20%23ffffff%20!important%3B%20%7D%20%7D%20%3C%2Fstyle%3E%3Crect%20width%3D%2218%22%20height%3D%2218%22%20x%3D%223%22%20y%3D%223%22%20rx%3D%222%22%20ry%3D%222%22%2F%3E%3Ccircle%20cx%3D%229%22%20cy%3D%229%22%20r%3D%222%22%2F%3E%3Cpath%20d%3D%22m21%2015-3.086-3.086a2%202%200%200%200-2.828%200L6%2021%22%2F%3E%3C%2Fsvg%3E">
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@200;300;400;500;600;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600&display=swap" rel="stylesheet">
     <script src="https://unpkg.com/lucide@latest"></script>
     <style>
         :root {
-            --bg: #000000;
-            --surface: #121212;
-            --surface-hover: #1c1c1e;
-            --glass: rgba(15, 15, 15, 0.4);
-            --glass-border: rgba(255, 255, 255, 0.08);
-            --blur-val: 30px;
-            --text-main: #FFFFFF;
-            --text-muted: #8E8E93;
-            --accent-danger: #FF453A;
-            --accent-success: #34C759;
+            --bg: #000000; --surface: #121212; --surface-hover: #1c1c1e;
+            --glass: rgba(15, 15, 15, 0.4); --glass-border: rgba(255, 255, 255, 0.08);
+            --text-main: #FFFFFF; --text-muted: #8E8E93;
+            --accent: #0A84FF; --accent-hover: #007AFF;
+            --accent-danger: #FF453A; --accent-success: #34C759;
             --bezier: cubic-bezier(0.16, 1, 0.3, 1);
-            --spring: cubic-bezier(0.34, 1.56, 0.64, 1);
         }
 
-        * {
-            box-sizing: border-box;
-            margin: 0;
-            padding: 0;
-            font-family: 'Outfit', sans-serif;
-            font-variant-numeric: tabular-nums;
-        }
+        * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Outfit', sans-serif; -webkit-tap-highlight-color: transparent; }
+        body { background-color: var(--bg); color: var(--text-main); overflow: hidden; }
 
-        body {
-            background-color: var(--bg);
-            color: var(--text-main);
-            overflow-x: hidden;
-        }
-
-        .app-container {
-            max-width: 900px;
-            margin: 0 auto;
-            height: 100dvh;
-            display: flex;
-            flex-direction: column;
-            padding: env(safe-area-inset-top) 24px calc(env(safe-area-inset-bottom) + 16px) 24px;
-        }
-
-        header {
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-            padding: 16px 0;
-            border-bottom: 1px solid var(--glass-border);
-            margin-bottom: 16px;
-        }
-
-        .header-left {
-            display: flex;
-            align-items: center;
-            gap: 12px;
-        }
+        .app-container { max-width: 1200px; margin: 0 auto; height: 100dvh; display: flex; flex-direction: column; padding: env(safe-area-inset-top) 16px calc(env(safe-area-inset-bottom) + 16px) 16px; }
         
-        .header-right {
-            display: flex;
-            align-items: center;
-            gap: 10px;
-        }
+        header { display: flex; align-items: center; justify-content: space-between; padding: 12px 0; border-bottom: 1px solid var(--glass-border); margin-bottom: 12px; flex-shrink: 0; }
+        .header-left, .header-right { display: flex; align-items: center; gap: 8px; }
 
-        .app-icon-badge {
-            width: 40px;
-            height: 40px;
-            border-radius: 12px;
-            background: radial-gradient(circle, rgba(255,255,255,0.1) 0%, rgba(18,18,18,0.8) 100%);
-            border: 1px solid var(--glass-border);
-            display: flex;
-            align-items: center;
-            justify-content: center;
-        }
+        .app-icon-badge { width: 40px; height: 40px; border-radius: 12px; background: radial-gradient(circle, rgba(255,255,255,0.1) 0%, rgba(18,18,18,0.8) 100%); border: 1px solid var(--glass-border); display: flex; align-items: center; justify-content: center; }
+        .app-title { font-size: 1.1rem; font-weight: 600; }
+        .app-meta { font-size: 0.8rem; color: var(--text-muted); transition: color 0.3s; }
+        .app-meta.pulse { color: var(--accent-success); }
 
-        .app-title {
-            font-size: 1.1rem;
-            font-weight: 600;
-        }
-
-        .app-meta {
-            font-size: 0.85rem;
-            color: var(--text-muted);
-            transition: color 0.3s var(--bezier);
-        }
-
-        .app-meta.pulse {
-            color: var(--accent-success);
-        }
-
-        .folders-scroll-area {
-            display: flex;
-            gap: 10px;
-            overflow-x: auto;
-            padding: 4px 0 12px 0;
-            scrollbar-width: none;
-            -webkit-overflow-scrolling: touch;
-        }
+        .folders-scroll-area { display: flex; gap: 8px; overflow-x: auto; padding: 4px 0 12px 0; scrollbar-width: none; flex-shrink: 0; }
         .folders-scroll-area::-webkit-scrollbar { display: none; }
-
-        .pill {
-            background: var(--surface);
-            border: 1px solid var(--glass-border);
-            color: var(--text-muted);
-            padding: 8px 16px;
-            border-radius: 100px;
-            font-size: 0.85rem;
-            font-weight: 500;
-            white-space: nowrap;
-            cursor: pointer;
-            transition: all 0.2s var(--bezier);
-        }
-
-        .pill.active, .pill:hover {
-            background: var(--surface-hover);
-            color: var(--text-main);
-            border-color: rgba(255,255,255,0.2);
-        }
-
-        .main-content {
-            flex: 1;
-            display: flex;
-            flex-direction: column;
-            gap: 16px;
-            overflow-y: auto;
-        }
-
-        .workspace {
-            flex: 1;
-            background: var(--surface);
-            border: 1px solid var(--glass-border);
-            border-radius: 16px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            position: relative;
-            overflow: hidden;
-            min-height: 280px;
-        }
-
-        .drop-zone {
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            gap: 12px;
-            padding: 32px;
-            text-align: center;
-            cursor: pointer;
-            width: 100%;
-            height: 100%;
-            justify-content: center;
-            transition: all 0.3s var(--bezier);
-            border: 2px dashed transparent;
-            border-radius: 16px;
-        }
         
-        .drop-zone.dragover {
-            background: rgba(255,255,255,0.05);
-            border-color: var(--text-muted);
-        }
+        .pill { background: var(--surface); border: 1px solid var(--glass-border); color: var(--text-muted); padding: 8px 16px; border-radius: 100px; font-size: 0.85rem; cursor: pointer; transition: all 0.2s; white-space: nowrap; }
+        .pill.active, .pill:hover { background: var(--surface-hover); color: var(--text-main); border-color: rgba(255,255,255,0.2); }
 
-        .drop-zone p {
-            color: var(--text-muted);
-            font-size: 0.9rem;
-        }
+        .main-content { flex: 1; display: flex; flex-direction: column; gap: 16px; overflow: hidden; }
 
-        .btn {
-            background: var(--text-main);
-            color: var(--bg);
-            border: none;
-            padding: 10px 20px;
-            border-radius: 100px;
-            font-weight: 600;
-            cursor: pointer;
-            transition: transform 0.1s var(--spring), opacity 0.2s;
-        }
+        .workspace { flex: 1; background: var(--surface); border: 1px solid var(--glass-border); border-radius: 16px; display: flex; align-items: center; justify-content: center; position: relative; overflow: hidden; min-height: 40vh; }
+        
+        .drop-zone { display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 12px; padding: 24px; text-align: center; cursor: pointer; width: 100%; height: 100%; transition: all 0.3s; }
+        .drop-zone.dragover { background: rgba(255,255,255,0.05); }
+        .drop-zone p { color: var(--text-muted); font-size: 0.9rem; }
 
-        .btn:hover {
-            opacity: 0.9;
-        }
+        /* Contenedor relativo para posicionar el UI Overlay exactamente sobre el canvas visual */
+#canvas-container { 
+    position: relative; 
+    width: 100%; 
+    height: 100%; 
+    display: none; 
+    align-items: center; 
+    justify-content: center; 
+    padding: 16px; /* Evita que la foto pegue en los bordes de la pantalla */
+}
 
-        .btn:active {
-            transform: scale(0.96);
-        }
+#render-wrapper {
+    position: relative;
+    max-width: 100%;
+    max-height: 100%;
+    display: flex; /* Mantiene las proporciones estrictas */
+}
 
-        .btn-secondary {
-            background: var(--surface-hover);
-            color: var(--text-main);
-            border: 1px solid var(--glass-border);
-        }
+canvas { 
+    max-width: 100%; 
+    max-height: 100%; 
+    width: auto; 
+    height: auto; 
+    /* Hemos eliminado object-fit para que el navegador escale el elemento físicamente */
+    box-shadow: 0 4px 20px rgba(0,0,0,0.5); 
+}
 
-        canvas {
-            max-width: 100%;
-            max-height: 100%;
-            object-fit: contain;
-            display: none;
-        }
+#ui-overlay { 
+    position: absolute; 
+    top: 0; left: 0; 
+    width: 100%; height: 100%; 
+    pointer-events: none; 
+}
+        
+        /* Caja de Recorte Interactiva */
+        .crop-box { position: absolute; border: 2px dashed #FFF; box-shadow: 0 0 0 9999px rgba(0,0,0,0.6); display: none; pointer-events: auto; touch-action: none; cursor: move; }
+        .crop-handle { position: absolute; width: 16px; height: 16px; background: var(--accent); border: 2px solid #FFF; border-radius: 50%; }
+        .crop-handle.tl { top: -8px; left: -8px; cursor: nwse-resize; }
+        .crop-handle.tr { top: -8px; right: -8px; cursor: nesw-resize; }
+        .crop-handle.bl { bottom: -8px; left: -8px; cursor: nesw-resize; }
+        .crop-handle.br { bottom: -8px; right: -8px; cursor: nwse-resize; }
 
-        .tools-panel {
-            background: var(--surface);
-            border: 1px solid var(--glass-border);
-            border-radius: 16px;
-            padding: 16px;
-            display: grid;
-            grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
-            gap: 10px;
-        }
+        .btn { background: var(--text-main); color: var(--bg); border: none; padding: 10px 16px; border-radius: 100px; font-weight: 600; cursor: pointer; transition: transform 0.1s, opacity 0.2s; display: flex; align-items: center; justify-content: center; gap: 6px; font-size: 0.9rem; }
+        .btn:hover { opacity: 0.9; }
+        .btn:active { transform: scale(0.96); }
+        .btn:disabled { opacity: 0.5; cursor: not-allowed; }
+        .btn-icon { padding: 8px; border-radius: 12px; }
+        .btn-secondary { background: var(--surface-hover); color: var(--text-main); border: 1px solid var(--glass-border); }
+        .btn-accent { background: var(--accent); color: #FFF; }
 
-        .tool-card {
-            background: rgba(255,255,255,0.02);
-            border: 1px solid var(--glass-border);
-            border-radius: 12px;
-            padding: 12px;
-            display: flex;
-            flex-direction: column;
-            gap: 6px;
-            cursor: pointer;
-            transition: all 0.2s var(--bezier);
-        }
+        .tools-scroll-container { flex-shrink: 0; max-height: 45vh; overflow-y: auto; padding-bottom: 20px; }
+        .tools-panel { display: grid; grid-template-columns: repeat(2, 1fr); gap: 10px; }
+        
+        .tool-card { background: rgba(255,255,255,0.02); border: 1px solid var(--glass-border); border-radius: 12px; padding: 12px; display: flex; flex-direction: column; gap: 6px; cursor: pointer; transition: all 0.2s; }
+        .tool-card:hover { background: var(--surface-hover); border-color: rgba(255,255,255,0.2); }
+        .tool-card span { font-size: 0.9rem; font-weight: 500; }
+        .tool-card p { font-size: 0.75rem; color: var(--text-muted); line-height: 1.2; }
 
-        .tool-card:hover {
-            background: var(--surface-hover);
-            border-color: rgba(255,255,255,0.15);
-        }
+        .control-group { display: flex; flex-direction: column; gap: 12px; background: var(--surface); border: 1px solid var(--glass-border); border-radius: 16px; padding: 16px; }
+        .control-row { display: flex; justify-content: space-between; align-items: center; font-size: 0.85rem; color: var(--text-muted); }
+        .control-row strong { color: var(--text-main); }
 
-        .tool-card span {
-            font-size: 0.85rem;
-            font-weight: 500;
-        }
+        input[type="range"] { width: 100%; accent-color: var(--text-main); background: var(--surface-hover); height: 6px; border-radius: 3px; outline: none; margin: 8px 0; }
+        input[type="text"], input[type="number"], input[type="color"], select { width: 100%; padding: 10px; background: var(--surface-hover); border: 1px solid var(--glass-border); color: var(--text-main); border-radius: 8px; outline: none; font-size: 0.9rem; }
+        
+        .grid-options { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; }
+        .grid-options .btn { font-size: 0.75rem; padding: 8px 4px; }
 
-        .tool-card p {
-            font-size: 0.75rem;
-            color: var(--text-muted);
-        }
-
-        .control-group {
-            display: flex;
-            flex-direction: column;
-            gap: 12px;
-            background: var(--surface);
-            border: 1px solid var(--glass-border);
-            border-radius: 16px;
-            padding: 16px;
-        }
-
-        .control-row {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            font-size: 0.85rem;
-            color: var(--text-muted);
-        }
-
-        .control-row strong {
-            color: var(--text-main);
-        }
-
-        input[type="range"] {
-            width: 100%;
-            accent-color: var(--text-main);
-            background: var(--surface-hover);
-            height: 6px;
-            border-radius: 3px;
-            outline: none;
-        }
-
-        input[type="text"], input[type="number"], input[type="color"], select {
-            width: 100%;
-            padding: 10px;
-            background: var(--surface-hover);
-            border: 1px solid var(--glass-border);
-            color: var(--text-main);
-            border-radius: 8px;
-            outline: none;
-            font-size: 0.85rem;
-        }
-
-        .checkbox-row {
-            display: flex;
-            align-items: center;
-            gap: 10px;
-            font-size: 0.85rem;
-            cursor: pointer;
-        }
-
-        .palette-grid {
-            display: flex;
-            gap: 8px;
-            flex-wrap: wrap;
-            margin-top: 8px;
-        }
-
-        .palette-swatch {
-            width: 36px;
-            height: 36px;
-            border-radius: 8px;
-            border: 1px solid var(--glass-border);
-            cursor: pointer;
-            transition: transform 0.1s var(--spring);
-        }
-        .palette-swatch:hover {
-            transform: scale(1.1);
-        }
-
-        .error-shake {
-            animation: shake 0.3s var(--spring);
-            border-color: var(--accent-danger) !important;
-        }
-
-        @keyframes shake {
-            0%, 100% { transform: translateX(0); }
-            25% { transform: translateX(-6px); }
-            75% { transform: translateX(6px); }
-        }
-
-        .hidden {
-            display: none !important;
-        }
+        .hidden { display: none !important; }
+        .picker-cursor { cursor: crosshair !important; }
 
         @media (min-width: 768px) {
-            .tools-panel {
-                grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
-            }
+            .app-container { padding: 24px; }
+            .tools-panel { grid-template-columns: repeat(auto-fill, minmax(180px, 1fr)); }
+            .tools-scroll-container { max-height: 35vh; }
+            .main-content { flex-direction: row; }
+            .workspace { flex: 2; height: 100%; }
+            .tools-scroll-container { flex: 1; max-height: 100%; padding-right: 10px; overflow-y: auto; }
         }
     </style>
 </head>
 <body>
-
-    <div class="app-container" id="main-view">
+    <div class="app-container">
         <header>
             <div class="header-left">
-                <div class="app-icon-badge">
-                    <i data-lucide="image" size="20" style="color: var(--text-main);"></i>
-                </div>
+                <div class="app-icon-badge"><i data-lucide="image" size="20"></i></div>
                 <div>
-                    <h1 class="app-title">Editor de Imágenes</h1>
-                    <div class="app-meta" id="img-meta">Sin imagen cargada</div>
+                    <h1 class="app-title">Editor Visual PRO</h1>
+                    <div class="app-meta" id="img-meta">Ninguna imagen</div>
                 </div>
             </div>
             <div class="header-right">
-                <button class="btn btn-secondary hidden" id="reset-btn" title="Restaurar Original"><i data-lucide="rotate-ccw" size="18"></i></button>
-                <button class="btn hidden" id="export-btn">Exportar</button>
+                <button class="btn btn-secondary btn-icon hidden" id="undo-btn" title="Deshacer"><i data-lucide="undo-2" size="18"></i></button>
+                <button class="btn btn-secondary btn-icon hidden" id="reset-btn" title="Restaurar"><i data-lucide="rotate-ccw" size="18"></i></button>
+                <button class="btn hidden" id="export-btn"><i data-lucide="download" size="16"></i> Guardar</button>
             </div>
         </header>
 
         <div class="folders-scroll-area" id="category-pills">
             <div class="pill active" data-cat="all">Todas</div>
-            <div class="pill" data-cat="adjust">Color & Filtros</div>
+            <div class="pill" data-cat="adjust">Color & Luz</div>
             <div class="pill" data-cat="transform">Geometría</div>
-            <div class="pill" data-cat="effects">Efectos & Utilidades</div>
+            <div class="pill" data-cat="effects">Efectos Pro</div>
         </div>
 
         <main class="main-content">
-            <div class="workspace" id="workspace">
-                <div class="drop-zone" id="drop-zone">
-                    <i data-lucide="image-plus" size="48" style="color: var(--text-muted);"></i>
-                    <p>Arrastra una o varias imágenes o haz clic para explorar</p>
-                    <button class="btn">Abrir Imágenes</button>
-                    <input type="file" id="file-input" accept="image/*" multiple class="hidden">
-                </div>
-                <canvas id="canvas"></canvas>
-            </div>
-
-            <!-- Panel de Herramientas -->
-            <div class="tools-panel" id="tools-panel">
-                <div class="tool-card" data-tool="crop" data-category="transform">
-                    <i data-lucide="crop" size="20"></i>
-                    <span>Recorte</span>
-                    <p>Selección manual</p>
-                </div>
-                <div class="tool-card" data-tool="rescale" data-category="transform">
-                    <i data-lucide="maximize-2" size="20"></i>
-                    <span>Escalado</span>
-                    <p>Ancho y alto</p>
-                </div>
-                <div class="tool-card" data-tool="compress-size" data-category="effects">
-                    <i data-lucide="hard-drive" size="20"></i>
-                    <span>Peso Objetivo</span>
-                    <p>Compresión exacta KB</p>
-                </div>
-                <div class="tool-card" data-tool="compress-slider" data-category="adjust">
-                    <i data-lucide="sliders" size="20"></i>
-                    <span>Calidad Dinámica</span>
-                    <p>Slider 0-100%</p>
-                </div>
-                <div class="tool-card" data-tool="chroma" data-category="effects">
-                    <i data-lucide="wand-2" size="20"></i>
-                    <span>Chroma Key</span>
-                    <p>Borrado por color</p>
-                </div>
-                <div class="tool-card" data-tool="flip" data-category="transform">
-                    <i data-lucide="flip-horizontal" size="20"></i>
-                    <span>Giro y Volteo</span>
-                    <p>90°, 180°, Espejo</p>
-                </div>
-                <div class="tool-card" data-tool="format" data-category="effects">
-                    <i data-lucide="file-code" size="20"></i>
-                    <span>Conversión Formato</span>
-                    <p>JPG, PNG, WEBP</p>
-                </div>
-                <div class="tool-card" data-tool="adjust" data-category="adjust">
-                    <i data-lucide="sun" size="20"></i>
-                    <span>Ajustes de Color</span>
-                    <p>Brillo, contraste, sepia</p>
-                </div>
-                <div class="tool-card" data-tool="watermark" data-category="effects">
-                    <i data-lucide="stamp" size="20"></i>
-                    <span>Marca de Agua</span>
-                    <p>Texto o imagen</p>
-                </div>
-                <div class="tool-card" data-tool="palette" data-category="adjust">
-                    <i data-lucide="palette" size="20"></i>
-                    <span>Paleta de Colores</span>
-                    <p>Extractor dominante</p>
-                </div>
-                <div class="tool-card" data-tool="exif" data-category="effects">
-                    <i data-lucide="shield-alert" size="20"></i>
-                    <span>EXIF Stripper</span>
-                    <p>Limpiar metadatos</p>
-                </div>
-                <div class="tool-card" data-tool="pixelate" data-category="effects">
-                    <i data-lucide="eye-off" size="20"></i>
-                    <span>Censura / Pixelado</span>
-                    <p>Difuminar zonas</p>
-                </div>
-                <div class="tool-card" data-tool="batch" data-category="effects">
-                    <i data-lucide="layers" size="20"></i>
-                    <span>Procesamiento Lote</span>
-                    <p>Redimensión masiva</p>
-                </div>
-                <div class="tool-card" data-tool="presets" data-category="transform">
-                    <i data-lucide="layout" size="20"></i>
-                    <span>Presets Sociales</span>
-                    <p>1:1, 16:9, 9:16, 4:5</p>
+<div class="workspace" id="workspace">
+    <div class="drop-zone" id="drop-zone">
+        <i data-lucide="image-plus" size="48" style="color: var(--text-muted);"></i>
+        <p>Arrastra una imagen o haz clic para explorar</p>
+        <input type="file" id="file-input" accept="image/png, image/jpeg, image/webp" class="hidden">
+    </div>
+    
+    <div id="canvas-container">
+        <!-- Este wrapper asegura que la UI y el canvas midan exactamente lo mismo -->
+        <div id="render-wrapper">
+            <canvas id="canvas"></canvas>
+            <div id="ui-overlay">
+                <div class="crop-box" id="crop-box">
+                    <div class="crop-handle tl" data-handle="tl"></div>
+                    <div class="crop-handle tr" data-handle="tr"></div>
+                    <div class="crop-handle bl" data-handle="bl"></div>
+                    <div class="crop-handle br" data-handle="br"></div>
                 </div>
             </div>
+        </div>
+    </div>
+</div>
 
-            <!-- Controles Dinámicos -->
-            <div class="control-group hidden" id="dynamic-controls">
-                <div class="control-row">
-                    <strong id="active-tool-title">Herramienta</strong>
-                    <button class="btn btn-secondary" id="close-tool" style="padding: 4px 12px; font-size: 0.8rem;">Volver</button>
+            <div class="tools-scroll-container">
+                <div class="tools-panel" id="tools-panel">
+                    <div class="tool-card" data-tool="crop" data-category="transform">
+                        <i data-lucide="crop" size="20"></i><span>Recorte Libre</span><p>Interactúa en pantalla</p>
+                    </div>
+                    <div class="tool-card" data-tool="rescale" data-category="transform">
+                        <i data-lucide="maximize-2" size="20"></i><span>Redimensionar</span><p>Bloqueo de proporción</p>
+                    </div>
+                    <div class="tool-card" data-tool="compress" data-category="effects">
+                        <i data-lucide="file-archive" size="20"></i><span>Optimizar Peso</span><p>Preview en tiempo real</p>
+                    </div>
+                    <div class="tool-card" data-tool="chroma" data-category="effects">
+                        <i data-lucide="pipette" size="20"></i><span>Borrado Mágico</span><p>Cuentagotas interactivo</p>
+                    </div>
+                    <div class="tool-card" data-tool="flip" data-category="transform">
+                        <i data-lucide="rotate-3d" size="20"></i><span>Rotar / Voltear</span><p>Grados libres y espejos</p>
+                    </div>
+                    <div class="tool-card" data-tool="format" data-category="effects">
+                        <i data-lucide="file-code" size="20"></i><span>Formato Salida</span><p>JPG, PNG, WEBP</p>
+                    </div>
+                    <div class="tool-card" data-tool="adjust" data-category="adjust">
+                        <i data-lucide="sliders-horizontal" size="20"></i><span>Ajustes Pro</span><p>Brillo, Tono, Desenfoque...</p>
+                    </div>
+                    <div class="tool-card" data-tool="watermark" data-category="effects">
+                        <i data-lucide="stamp" size="20"></i><span>Marca de Agua</span><p>Posicionamiento exacto</p>
+                    </div>
+                    <div class="tool-card" data-tool="pixelate" data-category="effects">
+                        <i data-lucide="eye-off" size="20"></i><span>Censura / Pixel</span><p>Difuminado rápido</p>
+                    </div>
+                    <div class="tool-card" data-tool="presets" data-category="transform">
+                        <i data-lucide="layout" size="20"></i><span>Formatos Redes</span><p>Rellenar o Encajar</p>
+                    </div>
                 </div>
-                <div id="tool-content"></div>
+
+                <div class="control-group hidden" id="dynamic-controls">
+                    <div class="control-row">
+                        <strong id="active-tool-title">Herramienta</strong>
+                        <button class="btn btn-secondary btn-icon" id="close-tool" title="Cancelar"><i data-lucide="x" size="18"></i></button>
+                    </div>
+                    <div id="tool-content"></div>
+                </div>
             </div>
         </main>
     </div>
@@ -456,660 +223,574 @@
     <script>
         lucide.createIcons();
 
+        // Referencias DOM
         const dropZone = document.getElementById('drop-zone');
         const fileInput = document.getElementById('file-input');
+        const canvasContainer = document.getElementById('canvas-container');
         const canvas = document.getElementById('canvas');
-        const ctx = canvas.getContext('2d');
+        const ctx = canvas.getContext('2d', { willReadFrequently: true });
+        const uiOverlay = document.getElementById('ui-overlay');
         const imgMeta = document.getElementById('img-meta');
-        const exportBtn = document.getElementById('export-btn');
-        const resetBtn = document.getElementById('reset-btn');
+        
         const toolsPanel = document.getElementById('tools-panel');
         const dynamicControls = document.getElementById('dynamic-controls');
-        const activeToolTitle = document.getElementById('active-tool-title');
         const toolContent = document.getElementById('tool-content');
         const closeToolBtn = document.getElementById('close-tool');
-
-        let currentImage = null;       // Base image object
-        let originalCanvas = null;     // Unmodified canvas copy for resetting
-        let snapshotCanvas = null;     // Canvas copy for live filter previews
         
-        let originalWidth = 0;
-        let originalHeight = 0;
-        let currentFile = null;
-        let batchFiles = [];
+        // Estado Global
+        let originalCanvas = null; 
+        let snapshotCanvas = null; // Para previews no destructivas
+        let historyStack = []; 
+        let globalExportFormat = 'image/jpeg';
+        let globalExportQuality = 0.90;
+        let isRenderPending = false;
         
-        // Settings globales de exportación
-        let globalExportFormat = 'image/png';
-        let globalExportQuality = 0.92;
-
-        // DRAG & DROP EVENT LISTENERS (Corregidos)
-        dropZone.addEventListener('dragover', (e) => {
-            e.preventDefault();
-            dropZone.classList.add('dragover');
-        });
+        // Variables UI
+        let displayScale = 1; // Relación tamaño real vs tamaño CSS
         
-        dropZone.addEventListener('dragleave', (e) => {
-            e.preventDefault();
-            dropZone.classList.remove('dragover');
-        });
-        
-        dropZone.addEventListener('drop', (e) => {
-            e.preventDefault();
-            dropZone.classList.remove('dragover');
-            if (e.dataTransfer.files.length > 0) {
-                handleFiles(e.dataTransfer.files);
-            }
-        });
-
+        // Eventos Carga
         dropZone.addEventListener('click', () => fileInput.click());
-        
-        fileInput.addEventListener('change', (e) => {
-            if (e.target.files.length > 0) {
-                handleFiles(e.target.files);
-            }
-        });
+        dropZone.addEventListener('dragover', e => { e.preventDefault(); dropZone.classList.add('dragover'); });
+        dropZone.addEventListener('dragleave', e => { e.preventDefault(); dropZone.classList.remove('dragover'); });
+        dropZone.addEventListener('drop', e => { e.preventDefault(); dropZone.classList.remove('dragover'); if(e.dataTransfer.files[0]) processFile(e.dataTransfer.files[0]); });
+        fileInput.addEventListener('change', e => { if(e.target.files[0]) processFile(e.target.files[0]); });
 
-        function handleFiles(files) {
-            batchFiles = Array.from(files);
-            currentFile = files[0];
-            loadImage(currentFile);
+        function syncCanvasDisplaySize() {
+            if (!canvas.width || !canvas.height) return;
+
+            const wrapper = document.getElementById('render-wrapper');
+            const maxWidth = Math.max(1, canvasContainer.clientWidth - 32);
+            const maxHeight = Math.max(1, canvasContainer.clientHeight - 32);
+            const ratio = Math.min(maxWidth / canvas.width, maxHeight / canvas.height, 1);
+
+            const displayWidth = Math.max(1, Math.round(canvas.width * ratio));
+            const displayHeight = Math.max(1, Math.round(canvas.height * ratio));
+
+            canvas.style.width = `${displayWidth}px`;
+            canvas.style.height = `${displayHeight}px`;
+            wrapper.style.width = `${displayWidth}px`;
+            wrapper.style.height = `${displayHeight}px`;
+            updateDisplayScale();
         }
 
-        function loadImage(file) {
-            const reader = new FileReader();
-            reader.onload = (event) => {
-                const img = new Image();
-                img.onload = () => {
-                    currentImage = img;
-                    originalWidth = img.width;
-                    originalHeight = img.height;
-                    
-                    canvas.width = img.width;
-                    canvas.height = img.height;
-                    ctx.drawImage(img, 0, 0);
-                    
-                    // Save pristine copy for reset
-                    originalCanvas = document.createElement('canvas');
-                    originalCanvas.width = img.width;
-                    originalCanvas.height = img.height;
-                    originalCanvas.getContext('2d').drawImage(img, 0, 0);
+        function processFile(file) {
+            if (!file.type.startsWith('image/')) return alert("Sube una imagen válida.");
+            const img = new Image();
+            img.onload = () => {
+                canvas.width = img.width;
+                canvas.height = img.height;
 
-                    canvas.style.display = 'block';
-                    dropZone.style.display = 'none';
-                    exportBtn.classList.remove('hidden');
-                    resetBtn.classList.remove('hidden');
-                    
-                    updateMeta((file.size / 1024).toFixed(1));
-                    lucide.createIcons();
-                };
-                img.src = event.target.result;
+                canvas.style.width = 'auto';
+                canvas.style.height = 'auto';
+                canvas.style.maxWidth = '100%';
+                canvas.style.maxHeight = '100%';
+
+                ctx.drawImage(img, 0, 0);
+                
+                originalCanvas = document.createElement('canvas');
+                originalCanvas.width = img.width;
+                originalCanvas.height = img.height;
+                originalCanvas.getContext('2d').drawImage(img, 0, 0);
+
+                historyStack = [];
+                saveState();
+                
+                dropZone.style.display = 'none';
+                canvasContainer.style.display = 'flex';
+                document.getElementById('export-btn').classList.remove('hidden');
+                document.getElementById('reset-btn').classList.remove('hidden');
+                document.getElementById('undo-btn').classList.remove('hidden');
+                
+                syncCanvasDisplaySize();
+                updateMeta();
             };
-            reader.readAsDataURL(file);
+            img.src = URL.createObjectURL(file);
         }
-        
-        // Reset a la imagen original
-        resetBtn.addEventListener('click', () => {
-            if(!originalCanvas) return;
-            canvas.width = originalCanvas.width;
-            canvas.height = originalCanvas.height;
-            ctx.drawImage(originalCanvas, 0, 0);
-            updateMeta('Restaurado');
-        });
 
-        function updateMeta(sizeKb) {
-            imgMeta.textContent = `${canvas.width} × ${canvas.height} px • ${sizeKb} KB`;
-            imgMeta.classList.add('pulse');
-            setTimeout(() => imgMeta.classList.remove('pulse'), 400);
+        // --- SISTEMA CORE ---
+        function updateMeta(text) {
+            imgMeta.textContent = text || `${canvas.width} x ${canvas.height} px`;
+            imgMeta.classList.add('pulse'); setTimeout(() => imgMeta.classList.remove('pulse'), 400);
+            document.getElementById('undo-btn').disabled = historyStack.length <= 1;
         }
-        
-        // Guarda un estado temporal para los sliders en vivo
+
+        function saveState() {
+            if (historyStack.length >= 5) historyStack.shift();
+            historyStack.push(ctx.getImageData(0, 0, canvas.width, canvas.height));
+            updateMeta();
+        }
+
         function takeSnapshot() {
             snapshotCanvas = document.createElement('canvas');
-            snapshotCanvas.width = canvas.width;
-            snapshotCanvas.height = canvas.height;
+            snapshotCanvas.width = canvas.width; snapshotCanvas.height = canvas.height;
             snapshotCanvas.getContext('2d').drawImage(canvas, 0, 0);
         }
 
-        // Categorías filtrado
+        document.getElementById('undo-btn').addEventListener('click', () => {
+            if (historyStack.length > 1) {
+                historyStack.pop();
+                const state = historyStack[historyStack.length - 1];
+                canvas.width = state.width; canvas.height = state.height;
+                ctx.putImageData(state, 0, 0);
+                updateMeta('Deshecho'); updateDisplayScale();
+            }
+        });
+
+        document.getElementById('reset-btn').addEventListener('click', () => {
+            if(!originalCanvas) return;
+            canvas.width = originalCanvas.width; canvas.height = originalCanvas.height;
+            ctx.drawImage(originalCanvas, 0, 0);
+            saveState(); updateMeta('Restaurado'); updateDisplayScale();
+        });
+
+        window.addEventListener('resize', syncCanvasDisplaySize);
+        function updateDisplayScale() {
+            if (!canvas.width) return;
+            const rect = canvas.getBoundingClientRect();
+            const safeWidth = rect.width || canvas.width;
+            const safeHeight = rect.height || canvas.height;
+            displayScale = Math.min(canvas.width / Math.max(1, safeWidth), canvas.height / Math.max(1, safeHeight));
+        }
+
+        // --- NAVEGACIÓN HERRAMIENTAS ---
         document.querySelectorAll('.pill').forEach(pill => {
             pill.addEventListener('click', () => {
                 document.querySelectorAll('.pill').forEach(p => p.classList.remove('active'));
                 pill.classList.add('active');
                 const cat = pill.getAttribute('data-cat');
                 document.querySelectorAll('.tool-card').forEach(card => {
-                    if (cat === 'all' || card.getAttribute('data-category') === cat) {
-                        card.style.display = 'flex';
-                    } else {
-                        card.style.display = 'none';
-                    }
+                    card.style.display = (cat === 'all' || card.getAttribute('data-category') === cat) ? 'flex' : 'none';
                 });
             });
         });
 
-        // Herramientas
         document.querySelectorAll('.tool-card').forEach(card => {
             card.addEventListener('click', () => {
-                const tool = card.getAttribute('data-tool');
-                if (tool !== 'batch' && !currentImage) {
-                    shakeElement(card);
-                    return;
-                }
-                openTool(tool, card.querySelector('span').textContent);
+                if (!originalCanvas) return;
+                document.getElementById('active-tool-title').textContent = card.querySelector('span').textContent;
+                toolsPanel.classList.add('hidden'); dynamicControls.classList.remove('hidden');
+                updateDisplayScale();
+                renderTool(card.getAttribute('data-tool'));
             });
         });
 
-        function shakeElement(el) {
-            el.classList.add('error-shake');
-            setTimeout(() => el.classList.remove('error-shake'), 300);
-        }
-
-        function openTool(toolId, title) {
-            activeToolTitle.textContent = title;
-            toolsPanel.classList.add('hidden');
-            dynamicControls.classList.remove('hidden');
-            renderToolControls(toolId);
-        }
-
         closeToolBtn.addEventListener('click', () => {
-            dynamicControls.classList.add('hidden');
-            toolsPanel.classList.remove('hidden');
-            
-            // Revert live preview if not applied (for adjust tool)
-            if (snapshotCanvas) {
-                ctx.clearRect(0, 0, canvas.width, canvas.height);
-                ctx.drawImage(snapshotCanvas, 0, 0);
-                snapshotCanvas = null;
-            }
+            dynamicControls.classList.add('hidden'); toolsPanel.classList.remove('hidden');
+            if (snapshotCanvas) { ctx.clearRect(0, 0, canvas.width, canvas.height); ctx.drawImage(snapshotCanvas, 0, 0); snapshotCanvas = null; }
+            cleanupUI(); updateMeta();
         });
 
-        function renderToolControls(toolId) {
+        function cleanupUI() {
+            document.getElementById('crop-box').style.display = 'none';
+            canvasContainer.classList.remove('picker-cursor');
+            canvas.onclick = null;
+        }
+
+        // --- LÓGICA DE HERRAMIENTAS ---
+        function renderTool(toolId) {
             toolContent.innerHTML = '';
             
-            if (toolId === 'rescale') {
+            if (toolId === 'crop') {
+                // RECORTE INTERACTIVO
                 toolContent.innerHTML = `
+                    <p style="font-size:0.85rem; color:var(--text-muted); margin-bottom:12px;">Arrastra los bordes en la imagen para definir el área.</p>
+                    <button class="btn btn-accent" id="apply-crop" style="width:100%;">Aplicar Recorte</button>
+                `;
+                
+                const cropBox = document.getElementById('crop-box');
+                cropBox.style.display = 'block';
+                
+                const cRect = canvas.getBoundingClientRect();
+                let cb = { x: cRect.width*0.1, y: cRect.height*0.1, w: cRect.width*0.8, h: cRect.height*0.8 };
+                
+                const updateBoxCSS = () => {
+                    cropBox.style.left = `${cb.x}px`; cropBox.style.top = `${cb.y}px`;
+                    cropBox.style.width = `${cb.w}px`; cropBox.style.height = `${cb.h}px`;
+                };
+                updateBoxCSS();
+
+                let dragging = false; let resizeHandle = null; let startX, startY, startCb;
+
+                const startInteract = (e, handle) => {
+                    e.preventDefault();
+                    dragging = true; resizeHandle = handle;
+                    const touch = e.touches ? e.touches[0] : e;
+                    startX = touch.clientX; startY = touch.clientY;
+                    startCb = { ...cb };
+                };
+
+                const moveInteract = (e) => {
+                    if(!dragging) return;
+                    const touch = e.touches ? e.touches[0] : e;
+                    const dx = touch.clientX - startX; const dy = touch.clientY - startY;
+                    
+                    if (resizeHandle) {
+                        if(resizeHandle.includes('l')) { cb.x = startCb.x + dx; cb.w = startCb.w - dx; }
+                        if(resizeHandle.includes('r')) { cb.w = startCb.w + dx; }
+                        if(resizeHandle.includes('t')) { cb.y = startCb.y + dy; cb.h = startCb.h - dy; }
+                        if(resizeHandle.includes('b')) { cb.h = startCb.h + dy; }
+                    } else {
+                        cb.x = startCb.x + dx; cb.y = startCb.y + dy;
+                    }
+                    
+                    // Limites simples
+                    if(cb.x < 0) cb.x = 0; if(cb.y < 0) cb.y = 0;
+                    if(cb.x + cb.w > cRect.width) cb.w = cRect.width - cb.x;
+                    if(cb.y + cb.h > cRect.height) cb.h = cRect.height - cb.y;
+                    if(cb.w < 20) cb.w = 20; if(cb.h < 20) cb.h = 20;
+                    
+                    updateBoxCSS();
+                };
+
+                const stopInteract = () => { dragging = false; resizeHandle = null; };
+
+                cropBox.onmousedown = (e) => startInteract(e, null);
+                cropBox.ontouchstart = (e) => startInteract(e, null);
+                document.querySelectorAll('.crop-handle').forEach(h => {
+                    h.onmousedown = (e) => { e.stopPropagation(); startInteract(e, h.dataset.handle); };
+                    h.ontouchstart = (e) => { e.stopPropagation(); startInteract(e, h.dataset.handle); };
+                });
+                window.onmousemove = moveInteract; window.ontouchmove = moveInteract;
+                window.onmouseup = stopInteract; window.ontouchend = stopInteract;
+
+                document.getElementById('apply-crop').onclick = () => {
+                    // Limpiar eventos window
+                    window.onmousemove = null; window.onmouseup = null; window.ontouchmove = null; window.ontouchend = null;
+                    
+                    // Calcular medidas reales
+                    const realX = cb.x * displayScale; const realY = cb.y * displayScale;
+                    const realW = cb.w * displayScale; const realH = cb.h * displayScale;
+                    
+                    const temp = document.createElement('canvas');
+                    temp.width = realW; temp.height = realH;
+                    temp.getContext('2d').drawImage(canvas, realX, realY, realW, realH, 0, 0, realW, realH);
+                    canvas.width = realW; canvas.height = realH;
+                    ctx.drawImage(temp, 0, 0);
+                    
+                    saveState(); closeToolBtn.click();
+                };
+
+            } else if (toolId === 'rescale') {
+                toolContent.innerHTML = `
+                    <div class="grid-options" style="margin-bottom:12px;">
+                        <button class="btn btn-secondary" id="rs-50">Reducir 50%</button>
+                        <button class="btn btn-secondary" id="rs-25">Reducir 25%</button>
+                        <button class="btn btn-secondary" id="rs-1080">Max 1080p</button>
+                    </div>
                     <div class="control-row"><span>Ancho (px)</span></div>
                     <input type="number" id="res-w" value="${canvas.width}">
                     <div class="control-row" style="margin-top:8px;"><span>Alto (px)</span></div>
                     <input type="number" id="res-h" value="${canvas.height}">
-                    <label class="checkbox-row" style="margin-top:10px;"><input type="checkbox" id="lock-aspect" checked> Mantener proporción</label>
-                    <button class="btn" id="apply-rescale" style="margin-top:12px; width:100%;">Aplicar Redimensión</button>
+                    <label style="display:flex; align-items:center; gap:8px; font-size:0.85rem; margin-top:8px;">
+                        <input type="checkbox" id="res-lock" checked> Mantener proporción
+                    </label>
+                    <button class="btn" id="apply-rescale" style="margin-top:16px; width:100%;">Aplicar Tamaño</button>
                 `;
-                const wInput = document.getElementById('res-w');
-                const hInput = document.getElementById('res-h');
-                const lockAspect = document.getElementById('lock-aspect');
+                const w = document.getElementById('res-w'); const h = document.getElementById('res-h'); const lock = document.getElementById('res-lock');
+                const origRatio = canvas.width / canvas.height;
 
-                wInput.addEventListener('input', () => {
-                    if (lockAspect.checked && canvas.width) {
-                        const ratio = canvas.height / canvas.width;
-                        hInput.value = Math.round(wInput.value * ratio);
-                    }
-                });
-                
-                hInput.addEventListener('input', () => {
-                    if (lockAspect.checked && canvas.height) {
-                        const ratio = canvas.width / canvas.height;
-                        wInput.value = Math.round(hInput.value * ratio);
-                    }
-                });
+                w.oninput = () => { if(lock.checked) h.value = Math.round(w.value / origRatio); };
+                h.oninput = () => { if(lock.checked) w.value = Math.round(h.value * origRatio); };
 
-                document.getElementById('apply-rescale').addEventListener('click', () => {
-                    const w = parseInt(wInput.value);
-                    const h = parseInt(hInput.value);
-                    if (!w || !h) return;
-                    const tempCanvas = document.createElement('canvas');
-                    tempCanvas.width = w;
-                    tempCanvas.height = h;
-                    
-                    // Smooth scaling
-                    const tCtx = tempCanvas.getContext('2d');
-                    tCtx.imageSmoothingQuality = 'high';
-                    tCtx.drawImage(canvas, 0, 0, w, h);
-                    
-                    canvas.width = w;
-                    canvas.height = h;
-                    ctx.drawImage(tempCanvas, 0, 0);
-                    updateMeta('Escalado');
-                    closeToolBtn.click();
-                });
-            } else if (toolId === 'crop') {
-                toolContent.innerHTML = `
-                    <p style="font-size:0.85rem; color:var(--text-muted);">Indica el porcentaje de recorte desde los bordes.</p>
-                    <div class="control-row" style="margin-top:8px;"><span>Margen Horizontal (%)</span><strong id="crop-h-val">0%</strong></div>
-                    <input type="range" id="crop-h-slider" min="0" max="45" value="0">
-                    <div class="control-row" style="margin-top:8px;"><span>Margen Vertical (%)</span><strong id="crop-v-val">0%</strong></div>
-                    <input type="range" id="crop-v-slider" min="0" max="45" value="0">
-                    <button class="btn" id="apply-crop" style="margin-top:12px; width:100%;">Aplicar Recorte</button>
-                `;
-                
-                const hSlider = document.getElementById('crop-h-slider');
-                const vSlider = document.getElementById('crop-v-slider');
-                
-                hSlider.addEventListener('input', () => document.getElementById('crop-h-val').textContent = hSlider.value + '%');
-                vSlider.addEventListener('input', () => document.getElementById('crop-v-val').textContent = vSlider.value + '%');
-                
-                document.getElementById('apply-crop').addEventListener('click', () => {
-                    const hPct = parseInt(hSlider.value) / 100;
-                    const vPct = parseInt(vSlider.value) / 100;
-                    
-                    if (hPct === 0 && vPct === 0) {
-                        closeToolBtn.click();
-                        return;
-                    }
-                    
-                    const cw = canvas.width * (1 - hPct * 2);
-                    const ch = canvas.height * (1 - vPct * 2);
-                    const cx = canvas.width * hPct;
-                    const cy = canvas.height * vPct;
-
-                    const tempCanvas = document.createElement('canvas');
-                    tempCanvas.width = cw;
-                    tempCanvas.height = ch;
-                    tempCanvas.getContext('2d').drawImage(canvas, cx, cy, cw, ch, 0, 0, cw, ch);
-                    canvas.width = cw;
-                    canvas.height = ch;
-                    ctx.drawImage(tempCanvas, 0, 0);
-                    updateMeta('Recortado');
-                    closeToolBtn.click();
-                });
-            } else if (toolId === 'compress-slider') {
-                toolContent.innerHTML = `
-                    <p style="font-size:0.85rem; color:var(--text-muted);">Ajusta la calidad de compresión para exportación (JPG/WEBP).</p>
-                    <div class="control-row"><span>Calidad</span><strong id="quality-val">${Math.round(globalExportQuality*100)}%</strong></div>
-                    <input type="range" id="q-slider" min="1" max="100" value="${Math.round(globalExportQuality*100)}">
-                    <div class="control-row" style="margin-top:8px;"><span>Tamaño Estimado</span><strong id="est-size">-</strong></div>
-                    <button class="btn" id="apply-comp" style="margin-top:12px; width:100%;">Guardar Ajuste</button>
-                `;
-                const slider = document.getElementById('q-slider');
-                const qVal = document.getElementById('quality-val');
-                const estSize = document.getElementById('est-size');
-
-                const updateEstimate = () => {
-                    qVal.textContent = slider.value + '%';
-                    const q = slider.value / 100;
-                    // Format to estimate based on preference, fallback to jpeg
-                    const ext = globalExportFormat === 'image/png' ? 'image/jpeg' : globalExportFormat; 
-                    canvas.toBlob((blob) => {
-                        estSize.textContent = (blob.size / 1024).toFixed(1) + ' KB';
-                    }, ext, q);
+                const applySize = (newW, newH) => {
+                    const temp = document.createElement('canvas'); temp.width = newW; temp.height = newH;
+                    temp.getContext('2d').drawImage(canvas, 0, 0, newW, newH);
+                    canvas.width = newW; canvas.height = newH; ctx.drawImage(temp, 0, 0);
+                    saveState(); closeToolBtn.click();
                 };
-                slider.addEventListener('input', updateEstimate);
-                updateEstimate();
 
-                document.getElementById('apply-comp').addEventListener('click', () => {
-                    globalExportQuality = slider.value / 100;
-                    updateMeta(estSize.textContent.replace(' KB', ' (Est)'));
-                    closeToolBtn.click();
-                });
-            } else if (toolId === 'compress-size') {
-                toolContent.innerHTML = `
-                    <div class="control-row"><span>Peso Máximo Objetivo (KB)</span></div>
-                    <input type="number" id="target-kb" value="200">
-                    <button class="btn" id="apply-target-comp" style="margin-top:12px; width:100%;">Ajustar Calidad</button>
-                `;
-                document.getElementById('apply-target-comp').addEventListener('click', () => {
-                    const targetBytes = parseInt(document.getElementById('target-kb').value) * 1024;
-                    let low = 0.01, high = 1.0, bestQuality = 0.8;
-                    const checkFormat = globalExportFormat === 'image/png' ? 'image/jpeg' : globalExportFormat;
-                    
-                    canvas.toBlob((blob) => {
-                        if (blob.size <= targetBytes) {
-                            globalExportQuality = 0.95; // It already fits at high quality
-                            updateMeta((blob.size / 1024).toFixed(1));
-                            closeToolBtn.click();
-                            return;
-                        }
-                        
-                        // Busca binaria simplificada para ajustar calidad
-                        const searchQuality = (min, max, depth) => {
-                            if(depth === 0) {
-                                globalExportQuality = bestQuality;
-                                updateMeta('Ajustado');
-                                closeToolBtn.click();
-                                return;
-                            }
-                            let mid = (min + max) / 2;
-                            canvas.toBlob((b) => {
-                                if (b.size <= targetBytes) {
-                                    bestQuality = mid;
-                                    searchQuality(mid, max, depth - 1); // Tratar de subir calidad
-                                } else {
-                                    searchQuality(min, mid, depth - 1); // Bajar calidad
-                                }
-                            }, checkFormat, mid);
-                        };
-                        
-                        searchQuality(0.01, 1.0, 5);
-                        
-                    }, checkFormat, 0.9);
-                });
-            } else if (toolId === 'chroma') {
-                toolContent.innerHTML = `
-                    <div class="control-row"><span>Color a eliminar (Hex)</span></div>
-                    <input type="color" id="chroma-hex" value="#ffffff">
-                    <div class="control-row" style="margin-top:8px;"><span>Tolerancia (Umbral)</span><strong id="chroma-tol-val">30</strong></div>
-                    <input type="range" id="chroma-tol" min="0" max="255" value="30">
-                    <button class="btn" id="apply-chroma" style="margin-top:12px; width:100%;">Aplicar Chroma Key</button>
-                `;
-                const tolSlider = document.getElementById('chroma-tol');
-                tolSlider.addEventListener('input', () => document.getElementById('chroma-tol-val').textContent = tolSlider.value);
+                document.getElementById('rs-50').onclick = () => applySize(canvas.width/2, canvas.height/2);
+                document.getElementById('rs-25').onclick = () => applySize(canvas.width/4, canvas.height/4);
+                document.getElementById('rs-1080').onclick = () => {
+                    let nw = canvas.width, nh = canvas.height;
+                    if (nw > nh && nw > 1080) { nw = 1080; nh = 1080/origRatio; }
+                    else if (nh > 1080) { nh = 1080; nw = 1080*origRatio; }
+                    applySize(nw, nh);
+                };
                 
-                document.getElementById('apply-chroma').addEventListener('click', () => {
-                    const hex = document.getElementById('chroma-hex').value;
-                    const tol = parseInt(document.getElementById('chroma-tol').value);
-                    const rTarget = parseInt(hex.slice(1,3), 16);
-                    const gTarget = parseInt(hex.slice(3,5), 16);
-                    const bTarget = parseInt(hex.slice(5,7), 16);
+                document.getElementById('apply-rescale').onclick = () => applySize(parseInt(w.value), parseInt(h.value));
 
-                    const imgData = ctx.getImageData(0, 0, canvas.width, canvas.height);
-                    const data = imgData.data;
-                    
-                    for (let i = 0; i < data.length; i += 4) {
-                        const dr = data[i] - rTarget;
-                        const dg = data[i+1] - gTarget;
-                        const db = data[i+2] - bTarget;
-                        // Distancia euclidiana corregida para mejor precisión
-                        const distance = Math.sqrt(dr*dr + dg*dg + db*db);
-                        
-                        if (distance < tol) {
-                            data[i+3] = 0; // Transparencia
-                        }
-                    }
-                    ctx.putImageData(imgData, 0, 0);
-                    updateMeta('Chroma aplicado');
-                    closeToolBtn.click();
-                });
-            } else if (toolId === 'flip') {
+            } else if (toolId === 'compress') {
+                // PREVIEW EN VIVO DE COMPRESIÓN
                 toolContent.innerHTML = `
-                    <div style="display:flex; gap:10px;">
-                        <button class="btn btn-secondary" id="flip-h" style="flex:1;">Espejo H.</button>
-                        <button class="btn btn-secondary" id="flip-v" style="flex:1;">Espejo V.</button>
+                    <div class="control-row"><span>Calidad (JPG/WEBP)</span><strong id="q-val">${Math.round(globalExportQuality*100)}%</strong></div>
+                    <input type="range" id="q-slider" min="5" max="100" value="${Math.round(globalExportQuality*100)}">
+                    
+                    <div style="background:var(--bg); padding:12px; border-radius:12px; margin-top:12px; text-align:center;">
+                        <span style="font-size:0.8rem; color:var(--text-muted);">Tamaño Estimado:</span>
+                        <h2 id="size-est" style="margin:4px 0;">Calculando...</h2>
+                        <button class="btn btn-secondary" id="preview-comp" style="width:100%; margin-top:8px;">Previsualizar Calidad</button>
                     </div>
-                    <button class="btn btn-secondary" id="rotate-90" style="margin-top:10px; width:100%;">Girar 90°</button>
-                    <button class="btn" id="apply-flip" style="margin-top:10px; width:100%;">Aceptar</button>
+                    <button class="btn" id="apply-comp" style="margin-top:16px; width:100%;">Fijar para Exportar</button>
                 `;
                 
+                const slider = document.getElementById('q-slider');
+                const est = document.getElementById('size-est');
                 takeSnapshot();
-                
-                document.getElementById('flip-h').addEventListener('click', () => {
-                    const tempCanvas = document.createElement('canvas');
-                    tempCanvas.width = canvas.width;
-                    tempCanvas.height = canvas.height;
-                    const tCtx = tempCanvas.getContext('2d');
-                    tCtx.scale(-1, 1);
-                    tCtx.drawImage(canvas, -canvas.width, 0);
-                    ctx.clearRect(0,0, canvas.width, canvas.height);
-                    ctx.drawImage(tempCanvas, 0, 0);
-                });
-                
-                document.getElementById('flip-v').addEventListener('click', () => {
-                    const tempCanvas = document.createElement('canvas');
-                    tempCanvas.width = canvas.width;
-                    tempCanvas.height = canvas.height;
-                    const tCtx = tempCanvas.getContext('2d');
-                    tCtx.scale(1, -1);
-                    tCtx.drawImage(canvas, 0, -canvas.height);
-                    ctx.clearRect(0,0, canvas.width, canvas.height);
-                    ctx.drawImage(tempCanvas, 0, 0);
-                });
-                
-                document.getElementById('rotate-90').addEventListener('click', () => {
-                    const tempCanvas = document.createElement('canvas');
-                    tempCanvas.width = canvas.height;
-                    tempCanvas.height = canvas.width;
-                    const tCtx = tempCanvas.getContext('2d');
-                    tCtx.translate(tempCanvas.width / 2, tempCanvas.height / 2);
-                    tCtx.rotate(Math.PI / 2);
-                    tCtx.drawImage(canvas, -canvas.width / 2, -canvas.height / 2);
-                    
-                    canvas.width = tempCanvas.width;
-                    canvas.height = tempCanvas.height;
-                    ctx.drawImage(tempCanvas, 0, 0);
-                });
-                
-                document.getElementById('apply-flip').addEventListener('click', () => {
-                    snapshotCanvas = null; // Accept changes
-                    updateMeta('Transformado');
-                    closeToolBtn.click();
-                });
-                
-            } else if (toolId === 'format') {
+
+                const calcSize = () => {
+                    const q = slider.value / 100;
+                    document.getElementById('q-val').textContent = slider.value + '%';
+                    const format = globalExportFormat === 'image/png' ? 'image/jpeg' : globalExportFormat;
+                    snapshotCanvas.toBlob(blob => {
+                        est.textContent = (blob.size / 1024).toFixed(1) + ' KB';
+                    }, format, q);
+                };
+                slider.onchange = calcSize; calcSize(); // Solo al soltar para no saturar
+
+                document.getElementById('preview-comp').onmousedown = () => {
+                    const img = new Image();
+                    const format = globalExportFormat === 'image/png' ? 'image/jpeg' : globalExportFormat;
+                    img.onload = () => { ctx.clearRect(0,0,canvas.width,canvas.height); ctx.drawImage(img,0,0); };
+                    img.src = snapshotCanvas.toDataURL(format, slider.value / 100);
+                    document.getElementById('preview-comp').textContent = "Soltar para Original";
+                };
+                document.getElementById('preview-comp').onmouseup = () => {
+                    ctx.clearRect(0,0,canvas.width,canvas.height); ctx.drawImage(snapshotCanvas,0,0);
+                    document.getElementById('preview-comp').textContent = "Previsualizar Calidad";
+                };
+                document.getElementById('preview-comp').ontouchstart = document.getElementById('preview-comp').onmousedown;
+                document.getElementById('preview-comp').ontouchend = document.getElementById('preview-comp').onmouseup;
+
+                document.getElementById('apply-comp').onclick = () => {
+                    globalExportQuality = slider.value / 100;
+                    snapshotCanvas = null; updateMeta(); closeToolBtn.click();
+                };
+
+            } else if (toolId === 'chroma') {
+                // CUENTAGOTAS
                 toolContent.innerHTML = `
-                    <div class="control-row"><span>Formato de Exportación</span></div>
-                    <select id="export-format-sel">
-                        <option value="image/png" ${globalExportFormat === 'image/png' ? 'selected' : ''}>PNG (Transparencia)</option>
-                        <option value="image/jpeg" ${globalExportFormat === 'image/jpeg' ? 'selected' : ''}>JPG (Alta compatibilidad)</option>
-                        <option value="image/webp" ${globalExportFormat === 'image/webp' ? 'selected' : ''}>WEBP (Optimizado web)</option>
-                    </select>
-                    <p style="font-size:0.75rem; color:var(--text-muted); margin-top:8px;">Este formato se aplicará al presionar el botón Exportar principal.</p>
+                    <button class="btn btn-secondary" id="pick-color" style="width:100%; margin-bottom:12px;">
+                        <i data-lucide="pipette" size="16"></i> Clic para elegir color
+                    </button>
+                    <div class="control-row"><span>Color seleccionado</span><input type="color" id="ch-hex" value="#ffffff" style="width:40px; padding:0; border:none; height:24px;"></div>
+                    <div class="control-row" style="margin-top:12px;"><span>Tolerancia</span><strong id="ch-tol-val">40</strong></div>
+                    <input type="range" id="ch-tol" min="0" max="150" value="40">
+                    <button class="btn" id="apply-ch" style="margin-top:16px; width:100%;">Borrar Fondo</button>
                 `;
-                document.getElementById('export-format-sel').addEventListener('change', (e) => {
-                    globalExportFormat = e.target.value;
-                });
+                
+                const hexInput = document.getElementById('ch-hex');
+                document.getElementById('ch-tol').oninput = e => document.getElementById('ch-tol-val').textContent = e.target.value;
+
+                document.getElementById('pick-color').onclick = () => {
+                    canvasContainer.classList.add('picker-cursor');
+                    canvas.onclick = (e) => {
+                        const rect = canvas.getBoundingClientRect();
+                        const scaleX = canvas.width / rect.width; const scaleY = canvas.height / rect.height;
+                        const x = (e.clientX - rect.left) * scaleX; const y = (e.clientY - rect.top) * scaleY;
+                        
+                        const pixel = ctx.getImageData(x, y, 1, 1).data;
+                        const toHex = c => ("0" + c.toString(16)).slice(-2);
+                        hexInput.value = `#${toHex(pixel[0])}${toHex(pixel[1])}${toHex(pixel[2])}`;
+                        
+                        canvasContainer.classList.remove('picker-cursor'); canvas.onclick = null;
+                    };
+                };
+
+                document.getElementById('apply-ch').onclick = () => {
+                    const tol = parseInt(document.getElementById('ch-tol').value);
+                    const hex = hexInput.value;
+                    const rt = parseInt(hex.slice(1,3),16), gt = parseInt(hex.slice(3,5),16), bt = parseInt(hex.slice(5,7),16);
+                    
+                    const imgD = ctx.getImageData(0, 0, canvas.width, canvas.height); const d = imgD.data;
+                    for(let i=0; i<d.length; i+=4) {
+                        if(Math.abs(d[i]-rt)<=tol && Math.abs(d[i+1]-gt)<=tol && Math.abs(d[i+2]-bt)<=tol) d[i+3] = 0;
+                    }
+                    ctx.putImageData(imgD, 0, 0); globalExportFormat = 'image/png';
+                    saveState(); closeToolBtn.click();
+                };
+
             } else if (toolId === 'adjust') {
                 toolContent.innerHTML = `
-                    <div class="control-row"><span>Brillo</span><strong id="val-b">100%</strong></div>
-                    <input type="range" id="adj-brightness" min="0" max="200" value="100">
-                    <div class="control-row" style="margin-top:6px;"><span>Contraste</span><strong id="val-c">100%</strong></div>
-                    <input type="range" id="adj-contrast" min="0" max="200" value="100">
-                    <div class="control-row" style="margin-top:6px;"><span>Saturación</span><strong id="val-s">100%</strong></div>
-                    <input type="range" id="adj-saturate" min="0" max="200" value="100">
-                    <button class="btn" id="apply-adjust" style="margin-top:12px; width:100%;">Fijar Ajustes</button>
+                    <div class="control-row"><span>Brillo</span><strong id="v-b">100%</strong></div><input type="range" id="a-b" min="0" max="200" value="100">
+                    <div class="control-row"><span>Contraste</span><strong id="v-c">100%</strong></div><input type="range" id="a-c" min="0" max="200" value="100">
+                    <div class="control-row"><span>Saturación</span><strong id="v-s">100%</strong></div><input type="range" id="a-s" min="0" max="200" value="100">
+                    <div class="control-row"><span>Tono (Hue)</span><strong id="v-h">0°</strong></div><input type="range" id="a-h" min="0" max="360" value="0">
+                    <div class="control-row"><span>Desenfoque</span><strong id="v-bl">0px</strong></div><input type="range" id="a-bl" min="0" max="20" value="0">
+                    <button class="btn" id="apply-adj" style="margin-top:16px; width:100%;">Fijar Filtros</button>
                 `;
+                takeSnapshot();
+                const b=document.getElementById('a-b'), c=document.getElementById('a-c'), s=document.getElementById('a-s'), h=document.getElementById('a-h'), bl=document.getElementById('a-bl');
                 
-                takeSnapshot(); // Save baseline for live filtering
-                
-                const bSlider = document.getElementById('adj-brightness');
-                const cSlider = document.getElementById('adj-contrast');
-                const sSlider = document.getElementById('adj-saturate');
                 const updateFilters = () => {
-                    document.getElementById('val-b').textContent = bSlider.value + '%';
-                    document.getElementById('val-c').textContent = cSlider.value + '%';
-                    document.getElementById('val-s').textContent = sSlider.value + '%';
+                    if(isRenderPending) return; isRenderPending = true;
+                    document.getElementById('v-b').textContent = b.value+'%'; document.getElementById('v-c').textContent = c.value+'%';
+                    document.getElementById('v-s').textContent = s.value+'%'; document.getElementById('v-h').textContent = h.value+'°';
+                    document.getElementById('v-bl').textContent = bl.value+'px';
                     
-                    // Aplicar sobre el snapshot, no de forma acumulativa
-                    ctx.clearRect(0, 0, canvas.width, canvas.height);
-                    ctx.filter = `brightness(${bSlider.value}%) contrast(${cSlider.value}%) saturate(${sSlider.value}%)`;
-                    ctx.drawImage(snapshotCanvas, 0, 0);
-                    ctx.filter = 'none'; // Reset filter
-                };
-
-                bSlider.addEventListener('input', updateFilters);
-                cSlider.addEventListener('input', updateFilters);
-                sSlider.addEventListener('input', updateFilters);
-
-                document.getElementById('apply-adjust').addEventListener('click', () => {
-                    snapshotCanvas = null; // Limpiar temp, hacer permanentes los cambios
-                    updateMeta('Ajustado');
-                    closeToolBtn.click();
-                });
-            } else if (toolId === 'watermark') {
-                toolContent.innerHTML = `
-                    <div class="control-row"><span>Texto de la Marca de Agua</span></div>
-                    <input type="text" id="wm-text" value="Neo-Glass Watermark">
-                    <div class="control-row" style="margin-top:8px;"><span>Opacidad</span></div>
-                    <input type="range" id="wm-opacity" min="10" max="100" value="50">
-                    <button class="btn" id="apply-wm" style="margin-top:12px; width:100%;">Insertar Marca</button>
-                `;
-                document.getElementById('apply-wm').addEventListener('click', () => {
-                    const text = document.getElementById('wm-text').value;
-                    const opacity = document.getElementById('wm-opacity').value / 100;
-                    ctx.save();
-                    ctx.globalAlpha = opacity;
-                    ctx.font = `${Math.max(16, canvas.width / 25)}px Outfit, sans-serif`;
-                    ctx.fillStyle = '#FFFFFF';
-                    ctx.shadowColor = 'rgba(0,0,0,0.8)';
-                    ctx.shadowBlur = 6;
-                    ctx.fillText(text, 30, canvas.height - 40);
-                    ctx.restore();
-                    updateMeta('Marcado');
-                    closeToolBtn.click();
-                });
-            } else if (toolId === 'palette') {
-                toolContent.innerHTML = `
-                    <p style="font-size:0.85rem; color:var(--text-muted); margin-bottom:8px;">Extrayendo colores dominantes (Haz clic para copiar):</p>
-                    <div class="palette-grid" id="palette-colors">
-                        <span style="font-size: 0.8rem; color: var(--text-muted)">Procesando...</span>
-                    </div>
-                `;
-                
-                // Real color extraction (Asynchronous to not block UI)
-                setTimeout(() => {
-                    const imgData = ctx.getImageData(0, 0, canvas.width, canvas.height).data;
-                    const colorMap = {};
-                    
-                    // Sample every 40th pixel to save processing time
-                    for (let i = 0; i < imgData.length; i += 160) {
-                        // Skip fully transparent pixels
-                        if(imgData[i+3] < 128) continue;
-                        
-                        // Round colors to group similar hues
-                        const r = Math.round(imgData[i] / 24) * 24;
-                        const g = Math.round(imgData[i+1] / 24) * 24;
-                        const b = Math.round(imgData[i+2] / 24) * 24;
-                        
-                        const rgb = `${r},${g},${b}`;
-                        colorMap[rgb] = (colorMap[rgb] || 0) + 1;
-                    }
-                    
-                    const toHex = (n) => parseInt(n).toString(16).padStart(2, '0');
-                    const sortedColors = Object.entries(colorMap)
-                                        .sort((a,b) => b[1] - a[1])
-                                        .slice(0, 6)
-                                        .map(e => {
-                                            const parts = e[0].split(',');
-                                            return `#${toHex(parts[0])}${toHex(parts[1])}${toHex(parts[2])}`;
-                                        });
-
-                    const paletteContainer = document.getElementById('palette-colors');
-                    paletteContainer.innerHTML = '';
-                    
-                    if(sortedColors.length === 0) {
-                        paletteContainer.innerHTML = '<span style="font-size: 0.8rem; color: var(--text-muted)">Imagen transparente/vacía.</span>';
-                    }
-                    
-                    sortedColors.forEach(hex => {
-                        const swatch = document.createElement('div');
-                        swatch.className = 'palette-swatch';
-                        swatch.style.backgroundColor = hex;
-                        swatch.title = `${hex} (Copiar)`;
-                        swatch.addEventListener('click', () => {
-                            navigator.clipboard.writeText(hex);
-                            swatch.style.transform = 'scale(0.8)';
-                            setTimeout(() => swatch.style.transform = 'scale(1)', 150);
-                        });
-                        paletteContainer.appendChild(swatch);
+                    requestAnimationFrame(() => {
+                        ctx.clearRect(0,0,canvas.width,canvas.height);
+                        ctx.filter = `brightness(${b.value}%) contrast(${c.value}%) saturate(${s.value}%) hue-rotate(${h.value}deg) blur(${bl.value}px)`;
+                        ctx.drawImage(snapshotCanvas, 0, 0); ctx.filter = 'none';
+                        isRenderPending = false;
                     });
-                }, 50);
+                };
+                [b,c,s,h,bl].forEach(el => el.oninput = updateFilters);
 
-            } else if (toolId === 'exif') {
+                document.getElementById('apply-adj').onclick = () => { snapshotCanvas = null; saveState(); closeToolBtn.click(); };
+
+            } else if (toolId === 'flip') {
                 toolContent.innerHTML = `
-                    <p style="font-size:0.85rem; color:var(--text-muted);">Los datos EXIF (GPS, fecha, modelo de cámara) se eliminarán automáticamente al exportar la imagen a través de Canvas.</p>
-                    <button class="btn" id="apply-exif" style="margin-top:12px; width:100%;">Confirmar Seguridad</button>
-                `;
-                document.getElementById('apply-exif').addEventListener('click', () => {
-                    updateMeta('Metadatos Limpios');
-                    closeToolBtn.click();
-                });
-            } else if (toolId === 'pixelate') {
-                toolContent.innerHTML = `
-                    <p style="font-size:0.85rem; color:var(--text-muted);">Intensidad del difuminado de censura:</p>
-                    <input type="range" id="pix-intensity" min="2" max="30" value="10">
-                    <button class="btn" id="apply-pixelate" style="margin-top:12px; width:100%;">Aplicar Pixelado Global</button>
+                    <div class="grid-options" style="margin-bottom:12px;">
+                        <button class="btn btn-secondary" id="f-h">Espejo H</button>
+                        <button class="btn btn-secondary" id="f-v">Espejo V</button>
+                        <button class="btn btn-secondary" id="r-90">Girar 90°</button>
+                    </div>
+                    <div class="control-row"><span>Rotación Libre</span><strong id="v-rot">0°</strong></div>
+                    <input type="range" id="a-rot" min="-180" max="180" value="0">
+                    <button class="btn" id="apply-rot" style="margin-top:16px; width:100%;">Aplicar Transformación</button>
                 `;
                 
                 takeSnapshot();
-                const pSlider = document.getElementById('pix-intensity');
+                const aRot = document.getElementById('a-rot');
                 
-                // Live preview for pixelation
-                pSlider.addEventListener('change', () => {
-                    const blockSize = parseInt(pSlider.value);
-                    const w = canvas.width;
-                    const h = canvas.height;
+                aRot.oninput = () => {
+                    document.getElementById('v-rot').textContent = aRot.value + '°';
+                    const rad = aRot.value * Math.PI / 180;
+                    ctx.clearRect(0,0,canvas.width,canvas.height);
+                    ctx.save(); ctx.translate(canvas.width/2, canvas.height/2); ctx.rotate(rad);
+                    ctx.drawImage(snapshotCanvas, -canvas.width/2, -canvas.height/2); ctx.restore();
+                };
+
+                const fastTrans = (scaleX, scaleY, angle) => {
+                    const temp = document.createElement('canvas'); temp.width = angle? canvas.height : canvas.width; temp.height = angle? canvas.width : canvas.height;
+                    const tc = temp.getContext('2d');
+                    if(angle) { tc.translate(temp.width/2, temp.height/2); tc.rotate(angle); tc.drawImage(canvas, -canvas.width/2, -canvas.height/2); }
+                    else { tc.scale(scaleX, scaleY); tc.drawImage(canvas, scaleX<0?-canvas.width:0, scaleY<0?-canvas.height:0); }
                     
-                    ctx.imageSmoothingEnabled = false;
-                    ctx.drawImage(snapshotCanvas, 0, 0, w / blockSize, h / blockSize);
-                    ctx.drawImage(canvas, 0, 0, w / blockSize, h / blockSize, 0, 0, w, h);
-                    ctx.imageSmoothingEnabled = true;
-                });
+                    canvas.width = temp.width; canvas.height = temp.height; ctx.drawImage(temp, 0, 0);
+                    takeSnapshot(); aRot.value = 0; document.getElementById('v-rot').textContent = '0°';
+                };
+
+                document.getElementById('f-h').onclick = () => fastTrans(-1, 1, 0);
+                document.getElementById('f-v').onclick = () => fastTrans(1, -1, 0);
+                document.getElementById('r-90').onclick = () => fastTrans(1, 1, Math.PI/2);
                 
-                document.getElementById('apply-pixelate').addEventListener('click', () => {
-                    snapshotCanvas = null;
-                    updateMeta('Censurado');
-                    closeToolBtn.click();
-                });
-            } else if (toolId === 'batch') {
+                document.getElementById('apply-rot').onclick = () => { snapshotCanvas = null; saveState(); closeToolBtn.click(); };
+
+            } else if (toolId === 'watermark') {
                 toolContent.innerHTML = `
-                    <p style="font-size:0.85rem; color:var(--text-muted);">Archivos en cola para lote: <strong>${batchFiles.length}</strong> imágenes.</p>
-                    <div class="control-row" style="margin-top:8px;"><span>Redimensión Masiva Ancho (px)</span></div>
-                    <input type="number" id="batch-w" value="1200">
-                    <button class="btn" id="apply-batch" style="margin-top:12px; width:100%;">Exportar Lote (Demo)</button>
+                    <div class="control-row"><span>Texto</span></div><input type="text" id="wm-t" value="© Mi Foto">
+                    <div class="grid-options" style="margin-top:8px;">
+                        <input type="color" id="wm-c" value="#ffffff" style="height:36px; padding:2px;">
+                        <select id="wm-pos" style="grid-column: span 2; padding: 4px;">
+                            <option value="br">Abajo - Derecha</option>
+                            <option value="bl">Abajo - Izquierda</option>
+                            <option value="tr">Arriba - Derecha</option>
+                            <option value="tl">Arriba - Izquierda</option>
+                            <option value="cc">Centro</option>
+                        </select>
+                    </div>
+                    <button class="btn" id="apply-wm" style="margin-top:16px; width:100%;">Estampar Marca</button>
                 `;
-                document.getElementById('apply-batch').addEventListener('click', () => {
-                    alert("Función en demostración. Para exportar lotes reales se requiere empaquetado en ZIP que excede este visor HTML standalone.");
-                    closeToolBtn.click();
-                });
+                
+                document.getElementById('apply-wm').onclick = () => {
+                    const text = document.getElementById('wm-t').value;
+                    const pos = document.getElementById('wm-pos').value;
+                    
+                    ctx.save();
+                    const fontSize = Math.max(20, canvas.width / 25);
+                    ctx.font = `600 ${fontSize}px Outfit, sans-serif`;
+                    ctx.fillStyle = document.getElementById('wm-c').value;
+                    ctx.shadowColor = 'rgba(0,0,0,0.8)'; ctx.shadowBlur = 8;
+                    
+                    const padding = fontSize;
+                    let x, y;
+                    ctx.textBaseline = "top";
+                    const tw = ctx.measureText(text).width;
+
+                    if(pos.includes('l')) x = padding; else if(pos.includes('r')) x = canvas.width - tw - padding; else x = (canvas.width - tw)/2;
+                    if(pos.includes('t')) y = padding; else if(pos.includes('b')) y = canvas.height - fontSize - padding; else y = (canvas.height - fontSize)/2;
+
+                    ctx.globalAlpha = 0.8; ctx.fillText(text, x, y); ctx.restore();
+                    saveState(); closeToolBtn.click();
+                };
+
+            } else if (toolId === 'pixelate') {
+                toolContent.innerHTML = `
+                    <div class="control-row"><span>Intensidad Bloque</span><strong id="v-px">10px</strong></div>
+                    <input type="range" id="a-px" min="2" max="50" value="10">
+                    <button class="btn" id="apply-px" style="margin-top:16px; width:100%;">Aplicar Global</button>
+                `;
+                takeSnapshot();
+                const px = document.getElementById('a-px');
+                px.oninput = () => {
+                    document.getElementById('v-px').textContent = px.value+'px';
+                    const s = parseInt(px.value);
+                    ctx.imageSmoothingEnabled = false;
+                    ctx.drawImage(snapshotCanvas, 0, 0, canvas.width/s, canvas.height/s);
+                    ctx.drawImage(canvas, 0, 0, canvas.width/s, canvas.height/s, 0, 0, canvas.width, canvas.height);
+                    ctx.imageSmoothingEnabled = true;
+                };
+                document.getElementById('apply-px').onclick = () => { snapshotCanvas = null; saveState(); closeToolBtn.click(); };
+
             } else if (toolId === 'presets') {
                 toolContent.innerHTML = `
-                    <div style="display:flex; flex-direction:column; gap:8px;">
-                        <button class="btn btn-secondary" id="preset-1-1">Cuadrado (1:1)</button>
-                        <button class="btn btn-secondary" id="preset-16-9">Paisaje (16:9)</button>
-                        <button class="btn btn-secondary" id="preset-9-16">Historia / Reel (9:16)</button>
-                        <button class="btn btn-secondary" id="preset-4-5">Retrato Social (4:5)</button>
+                    <div class="control-row" style="margin-bottom:8px;"><span>Modo de ajuste</span></div>
+                    <select id="pr-mode" style="margin-bottom:12px;">
+                        <option value="fill">Recortar y Llenar (Fill)</option>
+                        <option value="fit">Encajar con Bordes (Fit)</option>
+                    </select>
+                    <div class="grid-options">
+                        <button class="btn btn-secondary" onclick="applyPreset(1/1)">1:1 Post</button>
+                        <button class="btn btn-secondary" onclick="applyPreset(16/9)">16:9 Video</button>
+                        <button class="btn btn-secondary" onclick="applyPreset(9/16)">9:16 Reel</button>
+                        <button class="btn btn-secondary" onclick="applyPreset(4/5)" style="grid-column: span 3;">4:5 Retrato</button>
                     </div>
                 `;
-                
-                // Preset corregido: AHORA RECORTA (Center Crop) en lugar de deformar
-                ['1-1', '16-9', '9-16', '4-5'].forEach(p => {
-                    const btn = document.getElementById(`preset-${p}`);
-                    if (btn) {
-                        btn.addEventListener('click', () => {
-                            let targetR = 1;
-                            if (p === '16-9') targetR = 16 / 9;
-                            if (p === '9-16') targetR = 9 / 16;
-                            if (p === '4-5') targetR = 4 / 5;
+                window.applyPreset = (targetRatio) => {
+                    const mode = document.getElementById('pr-mode').value;
+                    const srcRatio = canvas.width / canvas.height;
+                    let nw, nh, dx=0, dy=0, sx=0, sy=0, sw=canvas.width, sh=canvas.height;
 
-                            const sourceR = canvas.width / canvas.height;
-                            let cw, ch, cx, cy;
-                            
-                            if (sourceR > targetR) {
-                                // Source is wider: match height, crop width
-                                ch = canvas.height;
-                                cw = canvas.height * targetR;
-                                cx = (canvas.width - cw) / 2;
-                                cy = 0;
-                            } else {
-                                // Source is taller: match width, crop height
-                                cw = canvas.width;
-                                ch = canvas.width / targetR;
-                                cx = 0;
-                                cy = (canvas.height - ch) / 2;
-                            }
-
-                            const tempCanvas = document.createElement('canvas');
-                            tempCanvas.width = cw;
-                            tempCanvas.height = ch;
-                            tempCanvas.getContext('2d').drawImage(canvas, cx, cy, cw, ch, 0, 0, cw, ch);
-                            
-                            canvas.width = cw;
-                            canvas.height = ch;
-                            ctx.drawImage(tempCanvas, 0, 0);
-                            
-                            updateMeta(`Preset ${p}`);
-                            closeToolBtn.click();
-                        });
+                    if (mode === 'fill') {
+                        // Recorta lo que sobra
+                        if (srcRatio > targetRatio) { nh = canvas.height; nw = nh * targetRatio; sx = (canvas.width - nw)/2; sw = nw; }
+                        else { nw = canvas.width; nh = nw / targetRatio; sy = (canvas.height - nh)/2; sh = nh; }
+                        const temp = document.createElement('canvas'); temp.width = nw; temp.height = nh;
+                        temp.getContext('2d').drawImage(canvas, sx, sy, sw, sh, 0, 0, nw, nh);
+                        canvas.width = nw; canvas.height = nh; ctx.drawImage(temp, 0, 0);
+                    } else {
+                        // Añade bordes (Fit)
+                        if (srcRatio > targetRatio) { nw = canvas.width; nh = nw / targetRatio; dy = (nh - canvas.height)/2; }
+                        else { nh = canvas.height; nw = nh * targetRatio; dx = (nw - canvas.width)/2; }
+                        const temp = document.createElement('canvas'); temp.width = nw; temp.height = nh;
+                        const tCtx = temp.getContext('2d');
+                        tCtx.fillStyle = '#000000'; tCtx.fillRect(0,0,nw,nh); // Fondo negro
+                        tCtx.drawImage(canvas, dx, dy);
+                        canvas.width = nw; canvas.height = nh; ctx.drawImage(temp, 0, 0);
                     }
-                });
+                    saveState(); closeToolBtn.click();
+                };
+            } else if (toolId === 'format') {
+                toolContent.innerHTML = `
+                    <div class="control-row"><span>Formato de Salida</span></div>
+                    <select id="export-format-sel" style="margin-top:10px;">
+                        <option value="image/jpeg" ${globalExportFormat === 'image/jpeg' ? 'selected' : ''}>JPG (Recomendado / Ligero)</option>
+                        <option value="image/png" ${globalExportFormat === 'image/png' ? 'selected' : ''}>PNG (Mantiene Transparencia)</option>
+                        <option value="image/webp" ${globalExportFormat === 'image/webp' ? 'selected' : ''}>WEBP (Moderna Web)</option>
+                    </select>
+                `;
+                document.getElementById('export-format-sel').onchange = (e) => globalExportFormat = e.target.value;
             }
+            
             lucide.createIcons();
         }
 
-        exportBtn.addEventListener('click', () => {
-            if (!currentImage) return;
-            const ext = globalExportFormat.split('/')[1];
-            const link = document.createElement('a');
-            link.download = `imagen-optimizada.${ext}`;
-            link.href = canvas.toDataURL(globalExportFormat, globalExportQuality);
-            link.click();
+        // --- EXPORTACIÓN ---
+        document.getElementById('export-btn').addEventListener('click', function() {
+            if (!originalCanvas) return;
+            const btn = this; btn.disabled = true; btn.innerHTML = 'Guardando...';
+            
+            canvas.toBlob((blob) => {
+                const url = URL.createObjectURL(blob);
+                const ext = globalExportFormat.split('/')[1];
+                const a = document.createElement('a');
+                a.download = `editada_${Date.now()}.${ext}`;
+                a.href = url; a.click(); URL.revokeObjectURL(url);
+                btn.disabled = false; btn.innerHTML = '<i data-lucide="download" size="16"></i> Guardar';
+                lucide.createIcons(); updateMeta('¡Guardada!');
+            }, globalExportFormat, globalExportQuality);
         });
     </script>
 </body>

@@ -1,0 +1,1560 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+    <title>Terminal Defender</title>
+    <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20width%3D%2224%22%20height%3D%2224%22%20viewBox%3D%220%200%2024%2024%22%20fill%3D%22none%22%20stroke%3D%22currentColor%22%20stroke-width%3D%222%22%20stroke-linecap%3D%22round%22%20stroke-linejoin%3D%22round%22%20class%3D%22lucide%20lucide-square-terminal-icon%20lucide-square-terminal%22%3E%3Cstyle%3E%20path%2C%20circle%2C%20rect%2C%20polygon%2C%20line%2C%20polyline%2C%20ellipse%20%7B%20stroke%3A%20%23000000%20!important%3B%20%7D%20%40media%20(prefers-color-scheme%3A%20dark)%20%7B%20path%2C%20circle%2C%20rect%2C%20polygon%2C%20line%2C%20polyline%2C%20ellipse%20%7B%20stroke%3A%20%23ffffff%20!important%3B%20%7D%20%7D%20%3C%2Fstyle%3E%3Cpath%20d%3D%22m7%2011%202-2-2-2%22%2F%3E%3Cpath%20d%3D%22M11%2013h4%22%2F%3E%3Crect%20width%3D%2218%22%20height%3D%2218%22%20x%3D%223%22%20y%3D%223%22%20rx%3D%222%22%20ry%3D%222%22%2F%3E%3C%2Fsvg%3E">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Fira+Code:wght@400;600;700&family=Outfit:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
+    <style>
+        :root {
+            /* Paleta Cromática Orgánica y Oscura (Neo-Glass Pure) */
+            --bg: #000000;
+            --surface: #121212;
+            --surface-hover: #1c1c1e;
+            
+            /* Configuración Neo-Glass Pure */
+            --glass: rgba(15, 15, 15, 0.4);
+            --glass-border: rgba(255, 255, 255, 0.08);
+            --blur-val: 30px;
+
+            /* Jerarquía Textual */
+            --text-main: #FFFFFF;
+            --text-muted: #8E8E93;
+
+            /* Estados y Acentos de Sistema */
+            --accent-danger: #FF453A;
+            --accent-success: #34C759;
+            --accent-blue: #0A84FF;
+            --accent-purple: #BF5AF2;
+            --accent-primary: #FFFFFF;
+            --paddle-color: #FFFFFF;
+            --ball-color: #FFFFFF;
+
+            /* Tipografía y Físicas */
+            --font-family: 'Outfit', sans-serif;
+            --font-mono: 'Fira Code', monospace;
+            --border-radius-ui: 14px;
+            --bezier: cubic-bezier(0.16, 1, 0.3, 1);
+            --spring: cubic-bezier(0.34, 1.56, 0.64, 1);
+        }
+
+        /* --- OVERRIDES DE TEMAS / SKINS --- */
+        body.theme-cmd {
+            --bg: #0C0C0C;
+            --surface: #1F1F1F;
+            --text-main: #00FF00;
+            --text-muted: #00AA00;
+            --accent-primary: #00FF00;
+            --paddle-color: #00FF00;
+            --ball-color: #00FF00;
+            --glass-border: rgba(0, 255, 0, 0.2);
+            --font-family: 'Fira Code', monospace;
+            --border-radius-ui: 4px;
+        }
+
+        body.theme-mac {
+            --bg: #1E1E1E;
+            --surface: #282828;
+            --surface-hover: #323232;
+            --text-main: #F5F5F7;
+            --text-muted: #98989D;
+            --accent-primary: #2997FF;
+            --paddle-color: #2997FF;
+            --ball-color: #F5F5F7;
+            --glass: rgba(40, 40, 40, 0.6);
+            --glass-border: rgba(255, 255, 255, 0.15);
+            --border-radius-ui: 18px;
+        }
+
+        body.theme-bios {
+            --bg: #0000AA;
+            --surface: #000088;
+            --text-main: #FFFFFF;
+            --text-muted: #AAAAAA;
+            --accent-primary: #FFFF55;
+            --paddle-color: #FFFF55;
+            --ball-color: #FFFFFF;
+            --glass-border: rgba(255, 255, 85, 0.4);
+            --font-family: 'Fira Code', monospace;
+            --border-radius-ui: 0px;
+        }
+
+        body.theme-amd {
+            --bg: #101010;
+            --surface: #1A1A1A;
+            --text-main: #ED1C24;
+            --text-muted: #991116;
+            --accent-primary: #ED1C24;
+            --paddle-color: #ED1C24;
+            --ball-color: #FFFFFF;
+            --glass-border: rgba(237, 28, 36, 0.3);
+            --border-radius-ui: 6px;
+        }
+
+        body.theme-localhost {
+            --bg: #03100D;
+            --surface: #0A201A;
+            --text-main: #00FF66;
+            --text-muted: #008837;
+            --accent-primary: #00FF66;
+            --paddle-color: #00FF66;
+            --ball-color: #00FF66;
+            --glass-border: rgba(0, 255, 102, 0.25);
+        }
+
+        body.theme-anti-malware {
+            --bg: #1A1200;
+            --surface: #2A1D00;
+            --text-main: #FFCC00;
+            --text-muted: #AA8800;
+            --accent-primary: #FF9500;
+            --paddle-color: #FFCC00;
+            --ball-color: #FF9500;
+            --glass-border: rgba(255, 204, 0, 0.3);
+        }
+
+        body.theme-task-manager {
+            --bg: #0F141C;
+            --surface: #18202C;
+            --text-main: #00E5FF;
+            --text-muted: #007788;
+            --accent-primary: #00E5FF;
+            --paddle-color: #00E5FF;
+            --ball-color: #34C759;
+            --glass-border: rgba(0, 229, 255, 0.2);
+        }
+
+        body.theme-linus {
+            --bg: #191A21;
+            --surface: #282A36;
+            --text-main: #F8F8F2;
+            --text-muted: #6272A4;
+            --accent-primary: #FF79C6;
+            --paddle-color: #BD93F9;
+            --ball-color: #FF79C6;
+            --glass-border: rgba(189, 147, 249, 0.3);
+        }
+
+        body.theme-cpu_overclock {
+            --bg: #1C0500;
+            --surface: #300A00;
+            --text-main: #FF3300;
+            --text-muted: #991F00;
+            --accent-primary: #FF6600;
+            --paddle-color: #FF3300;
+            --ball-color: #FFCC00;
+            --glass-border: rgba(255, 51, 0, 0.4);
+        }
+
+        body.theme-decoded {
+            --bg: #12001A;
+            --surface: #240033;
+            --text-main: #E066FF;
+            --text-muted: #883399;
+            --accent-primary: #FF007F;
+            --paddle-color: #E066FF;
+            --ball-color: #FFE600;
+            --glass-border: rgba(224, 102, 255, 0.3);
+        }
+
+        body.theme-bitshift {
+            --bg: #111111;
+            --surface: #222222;
+            --text-main: #FFFFFF;
+            --text-muted: #666666;
+            --accent-primary: #FFFFFF;
+            --paddle-color: #FFFFFF;
+            --ball-color: #FFFFFF;
+            --glass-border: rgba(255, 255, 255, 0.4);
+            --border-radius-ui: 0px;
+        }
+
+        body.theme-syntaxerror {
+            --bg: #1F0008;
+            --surface: #3B0010;
+            --text-main: #FF2A6D;
+            --text-muted: #991941;
+            --accent-primary: #05D9E8;
+            --paddle-color: #FF2A6D;
+            --ball-color: #05D9E8;
+        }
+
+        body.theme-iusescratch {
+            --bg: #1E293B;
+            --surface: #334155;
+            --text-main: #FFBF00;
+            --text-muted: #94A3B8;
+            --accent-primary: #4C97FF;
+            --paddle-color: #4C97FF;
+            --ball-color: #FF6680;
+            --border-radius-ui: 16px;
+        }
+
+        body.theme-tahoe {
+            --bg: #0A192F;
+            --surface: #112240;
+            --text-main: #64FFDA;
+            --text-muted: #8892B0;
+            --accent-primary: #64FFDA;
+            --paddle-color: #64FFDA;
+            --ball-color: #CCD6F6;
+            --glass: rgba(17, 34, 64, 0.6);
+            --border-radius-ui: 20px;
+        }
+
+        body.theme-longhorn {
+            --bg: #0D233A;
+            --surface: #183B60;
+            --text-main: #4DB3FF;
+            --text-muted: #2A6B9C;
+            --accent-primary: #7ECEFF;
+            --paddle-color: #4DB3FF;
+            --ball-color: #FFFFFF;
+            --border-radius-ui: 10px;
+        }
+
+        body.theme-round-corners {
+            --bg: #121016;
+            --surface: #211D2B;
+            --text-main: #D8B4FE;
+            --text-muted: #8B5CF6;
+            --accent-primary: #C084FC;
+            --paddle-color: #C084FC;
+            --ball-color: #F472B6;
+            --border-radius-ui: 30px;
+        }
+
+        body.theme-emoji {
+            --bg: #1A1A00;
+            --surface: #2E2E00;
+            --text-main: #FFD700;
+            --text-muted: #AA9000;
+            --accent-primary: #FF4500;
+            --paddle-color: #FFD700;
+            --ball-color: #FF4500;
+            --border-radius-ui: 16px;
+        }
+
+        body.theme-sheep {
+            --bg: #141A15;
+            --surface: #222C24;
+            --text-main: #E2F0CB;
+            --text-muted: #88B04B;
+            --accent-primary: #FFB7B2;
+            --paddle-color: #FFB7B2;
+            --ball-color: #E2F0CB;
+            --border-radius-ui: 14px;
+        }
+
+        body.theme-konami {
+            --bg: #0F001C;
+            --surface: #220038;
+            --text-main: #00FFFF;
+            --text-muted: #AA00AA;
+            --accent-primary: #FF00FF;
+            --paddle-color: #00FFFF;
+            --ball-color: #FF00FF;
+            --glass-border: rgba(255, 0, 255, 0.4);
+            --border-radius-ui: 12px;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            user-select: none;
+            -webkit-user-select: none;
+        }
+
+        body, html {
+            width: 100%;
+            height: 100%;
+            background-color: var(--bg);
+            color: var(--text-main);
+            font-family: var(--font-family);
+            overflow: hidden;
+            transition: background-color 0.4s ease, color 0.4s ease;
+        }
+
+        /* Ambient Shader CRT Overlay */
+        .crt-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100vw;
+            height: 100vh;
+            pointer-events: none;
+            z-index: 100;
+            background: linear-gradient(rgba(18, 16, 16, 0) 50%, rgba(0, 0, 0, 0.25) 50%), 
+                        linear-gradient(90deg, rgba(255, 0, 0, 0.03), rgba(0, 255, 0, 0.01), rgba(0, 0, 255, 0.03));
+            background-size: 100% 3px, 6px 100%;
+            opacity: 0.8;
+            transition: opacity 0.3s ease;
+        }
+
+        .crt-vignette {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100vw;
+            height: 100vh;
+            pointer-events: none;
+            z-index: 99;
+            box-shadow: inset 0 0 100px rgba(0, 0, 0, 0.9);
+        }
+
+        body.low-performance .crt-overlay,
+        body.low-performance .crt-vignette {
+            display: none !important;
+        }
+
+        /* App Layout & Canvas Container */
+        .app-container {
+            width: 100%;
+            height: 100dvh;
+            padding: env(safe-area-inset-top) 24px calc(env(safe-area-inset-bottom) + 16px) 24px;
+            display: flex;
+            flex-direction: column;
+            justify-content: flex-start;
+            position: relative;
+            max-width: 900px;
+            margin: 0 auto;
+            overflow-y: auto;
+            transition: filter 0.3s var(--bezier);
+        }
+
+        .app-container.backgrounded {
+            filter: blur(12px) scale(0.98);
+            pointer-events: none;
+        }
+
+        /* App Header */
+        .app-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 14px 0;
+            border-bottom: 1px solid var(--glass-border);
+            margin-bottom: 16px;
+        }
+
+        .header-title-group {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .app-icon-badge {
+            width: 38px;
+            height: 38px;
+            border-radius: var(--border-radius-ui);
+            background: radial-gradient(circle, rgba(255,255,255,0.12) 0%, rgba(255,255,255,0) 80%);
+            border: 1px solid var(--glass-border);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            backdrop-filter: blur(var(--blur-val));
+            -webkit-backdrop-filter: blur(var(--blur-val));
+        }
+
+        .app-title {
+            font-size: 18px;
+            font-weight: 600;
+            color: var(--text-main);
+            letter-spacing: -0.02em;
+        }
+
+        .btn-skins {
+            background: var(--surface);
+            border: 1px solid var(--glass-border);
+            color: var(--text-main);
+            padding: 8px 14px;
+            border-radius: var(--border-radius-ui);
+            font-size: 13px;
+            font-weight: 600;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            transition: all 0.2s var(--bezier);
+        }
+
+        .btn-skins:hover {
+            background: var(--surface-hover);
+            transform: translateY(-1px);
+        }
+
+        /* Terminal Console Elements */
+        .terminal-logs {
+            font-family: var(--font-mono);
+            font-size: clamp(14px, 2.8vw, 16px);
+            line-height: 1.65;
+            color: var(--text-main);
+            white-space: pre-wrap;
+            word-break: break-all;
+            margin-bottom: 16px;
+            z-index: 10;
+        }
+
+        .log-line {
+            opacity: 0;
+            animation: fadeIn 0.15s forwards;
+        }
+
+        @keyframes fadeIn {
+            to { opacity: 1; }
+        }
+
+        .input-line {
+            display: none;
+            align-items: center;
+            font-family: var(--font-mono);
+            font-size: clamp(14px, 2.8vw, 16px);
+            color: var(--text-main);
+            margin-top: 8px;
+            z-index: 20;
+            padding: 10px 14px;
+            background: var(--surface);
+            border: 1px solid var(--glass-border);
+            border-radius: var(--border-radius-ui);
+            transition: border-color 0.2s ease;
+        }
+
+        .prompt-symbol {
+            margin-right: 12px;
+            color: var(--text-muted);
+            white-space: nowrap;
+        }
+
+        .terminal-input {
+            background: transparent;
+            border: none;
+            color: var(--text-main);
+            font-family: var(--font-mono);
+            font-size: clamp(14px, 2.8vw, 16px);
+            font-weight: 600;
+            outline: none;
+            flex: 1;
+            caret-color: var(--text-main);
+            text-transform: uppercase;
+        }
+
+        /* Game Arena Canvas */
+        .game-area {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: 5;
+            display: none;
+        }
+
+        canvas {
+            width: 100%;
+            height: 100%;
+            display: block;
+            transition: filter 0.2s ease;
+        }
+
+        canvas.blur-gimmick {
+            filter: blur(8px);
+        }
+
+        .hud-overlay {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            padding: calc(env(safe-area-inset-top) + 16px) 24px 0 24px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            z-index: 15;
+            pointer-events: none;
+            font-size: clamp(13px, 2.2vw, 15px);
+            font-weight: 600;
+        }
+
+        .hud-box {
+            background: var(--glass);
+            backdrop-filter: blur(var(--blur-val));
+            -webkit-backdrop-filter: blur(var(--blur-val));
+            border: 1px solid var(--glass-border);
+            padding: 8px 16px;
+            border-radius: var(--border-radius-ui);
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            font-variant-numeric: tabular-nums;
+        }
+
+        .dash-indicator {
+            display: inline-block;
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            background-color: var(--accent-success);
+            box-shadow: 0 0 8px var(--accent-success);
+            transition: background-color 0.2s, box-shadow 0.2s;
+        }
+
+        .dash-indicator.cooldown {
+            background-color: var(--text-muted);
+            box-shadow: none;
+        }
+
+        .gimmick-warning {
+            position: absolute;
+            bottom: calc(env(safe-area-inset-bottom) + 24px);
+            left: 50%;
+            transform: translateX(-50%);
+            background: var(--text-main);
+            color: var(--bg);
+            padding: 8px 20px;
+            font-size: 13px;
+            font-weight: 700;
+            border-radius: 100px;
+            display: none;
+            z-index: 15;
+            letter-spacing: 0.5px;
+            animation: pulse 1s infinite alternate;
+        }
+
+        .gimmick-warning.cheat {
+            background: var(--accent-purple);
+            color: #FFFFFF;
+        }
+
+        @keyframes pulse {
+            from { opacity: 0.6; }
+            to { opacity: 1; }
+        }
+
+        .touch-controls {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: 12;
+            display: none;
+            touch-action: none;
+        }
+
+        .mobile-dash-btn {
+            position: absolute;
+            bottom: calc(env(safe-area-inset-bottom) + 28px);
+            right: 28px;
+            width: 64px;
+            height: 64px;
+            border-radius: 50%;
+            background: var(--glass);
+            backdrop-filter: blur(var(--blur-val));
+            -webkit-backdrop-filter: blur(var(--blur-val));
+            border: 1px solid var(--glass-border);
+            color: var(--text-main);
+            display: none;
+            align-items: center;
+            justify-content: center;
+            z-index: 20;
+            font-size: 12px;
+            font-weight: 700;
+            pointer-events: auto;
+        }
+
+        .upgrade-container {
+            display: none;
+            flex-direction: column;
+            gap: 12px;
+            margin-top: 20px;
+            z-index: 20;
+        }
+
+        .upgrade-card {
+            background: var(--surface);
+            border: 1px solid var(--glass-border);
+            padding: 16px;
+            border-radius: var(--border-radius-ui);
+            cursor: pointer;
+            transition: all 0.2s var(--bezier);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .upgrade-card:hover, .upgrade-card:active {
+            background: var(--surface-hover);
+            border-color: rgba(255, 255, 255, 0.2);
+            transform: translateY(-2px);
+        }
+
+        .upgrade-title {
+            font-size: 15px;
+            font-weight: 600;
+            margin-bottom: 4px;
+        }
+
+        .upgrade-desc {
+            font-size: 13px;
+            color: var(--text-muted);
+        }
+
+        /* Modal Collection / Skins System */
+        .modal-backdrop {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100vw;
+            height: 100vh;
+            background: rgba(0, 0, 0, 0.75);
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+            z-index: 200;
+            opacity: 0;
+            pointer-events: none;
+            transition: opacity 0.3s var(--bezier);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+        }
+
+        .modal-backdrop.active {
+            opacity: 1;
+            pointer-events: auto;
+        }
+
+        .modal-box {
+            background: var(--surface);
+            border: 1px solid var(--glass-border);
+            border-radius: var(--border-radius-ui);
+            width: 100%;
+            max-width: 620px;
+            max-height: 80vh;
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+            box-shadow: 0 24px 48px rgba(0,0,0,0.8);
+            transform: scale(0.95);
+            transition: transform 0.3s var(--spring);
+        }
+
+        .modal-backdrop.active .modal-box {
+            transform: scale(1);
+        }
+
+        .modal-header {
+            padding: 18px 20px;
+            border-bottom: 1px solid var(--glass-border);
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+
+        .modal-title {
+            font-size: 17px;
+            font-weight: 700;
+            color: var(--text-main);
+        }
+
+        .modal-close {
+            background: transparent;
+            border: none;
+            color: var(--text-muted);
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 4px;
+            border-radius: 6px;
+        }
+
+        .modal-close:hover {
+            color: var(--text-main);
+            background: var(--surface-hover);
+        }
+
+        .skins-grid {
+            padding: 20px;
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(130px, 1fr));
+            gap: 12px;
+            overflow-y: auto;
+        }
+
+        .skin-card {
+            background: var(--bg);
+            border: 1px solid var(--glass-border);
+            border-radius: var(--border-radius-ui);
+            padding: 14px 10px;
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.2s var(--bezier);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .skin-card:hover {
+            transform: translateY(-2px);
+            border-color: var(--accent-primary);
+        }
+
+        .skin-card.active-skin {
+            border: 2px solid var(--accent-primary);
+            background: var(--surface-hover);
+        }
+
+        .skin-card.locked {
+            opacity: 0.35;
+            cursor: not-allowed;
+            filter: grayscale(1);
+        }
+
+        .skin-card.locked:hover {
+            transform: none;
+            border-color: var(--glass-border);
+        }
+
+        .skin-name {
+            font-size: 13px;
+            font-weight: 600;
+            color: var(--text-main);
+            word-break: break-word;
+        }
+
+        .skin-status {
+            font-size: 11px;
+            color: var(--text-muted);
+            font-weight: 500;
+        }
+
+        /* Shake Error Animation */
+        @keyframes errorShake {
+            0%, 100% { transform: translateX(0); }
+            20%, 60% { transform: translateX(-6px); }
+            40%, 80% { transform: translateX(6px); }
+        }
+
+        .error-shake {
+            animation: errorShake 0.3s var(--bezier);
+            border-color: var(--accent-danger) !important;
+        }
+    </style>
+</head>
+<body>
+
+    <div class="crt-overlay"></div>
+    <div class="crt-vignette"></div>
+
+    <div class="app-container" id="main-view">
+        <header class="app-header">
+            <div class="header-title-group">
+                <div class="app-icon-badge">
+                    <i data-lucide="terminal" size="20" style="color: var(--text-main);"></i>
+                </div>
+                <div class="app-title">Terminal Defender</div>
+            </div>
+            <button class="btn-skins" onclick="openModal('skinsModal')">
+                <i data-lucide="palette" size="16"></i>
+                <span>Skins (<span id="unlockedCount">1</span>/20)</span>
+            </button>
+        </header>
+
+        <main style="flex: 1; display: flex; flex-direction: column; justify-content: flex-start;">
+            <div class="terminal-logs" id="logs"></div>
+            <div class="input-line" id="inputLine">
+                <span class="prompt-symbol" id="promptSymbol">&gt;</span>
+                <input type="text" class="terminal-input" id="termInput" autofocus autocomplete="off" spellcheck="false">
+            </div>
+            <div class="upgrade-container" id="upgradeContainer"></div>
+        </main>
+    </div>
+
+    <!-- Game Arena Overlay -->
+    <div class="game-area" id="gameArea">
+        <div class="hud-overlay" id="hudOverlay">
+            <div class="hud-box" id="playerHud">DEFENDER: <span id="hudPlayerScore">0</span></div>
+            <div class="hud-box" style="text-align: center;">
+                <span id="hudLevel">LVL 1</span><br>
+                <span id="hudTarget" style="color: var(--text-muted); font-size: 11px;">TARGET: 3</span>
+            </div>
+            <div class="hud-box" id="hackerHud">
+                <span id="hudHackerName">HACKER</span>: <span id="hudHackerScore">0</span>
+                <span class="dash-indicator" id="dashReadyIndicator" title="Dash Status"></span>
+            </div>
+        </div>
+        <div class="gimmick-warning" id="gimmickWarning">HACK ATTACK DETECTED</div>
+        <canvas id="pongCanvas"></canvas>
+        <div class="touch-controls" id="touchControls"></div>
+        <div class="mobile-dash-btn" id="mobileDashBtn">DASH</div>
+    </div>
+
+    <!-- Modal Colección de Skins -->
+    <div class="modal-backdrop" id="skinsModal">
+        <div class="modal-box">
+            <div class="modal-header">
+                <div class="modal-title">Colección de Skins</div>
+                <button class="modal-close" onclick="closeActiveModal('skinsModal')">
+                    <i data-lucide="x" size="20"></i>
+                </button>
+            </div>
+            <div class="skins-grid" id="skinsGrid"></div>
+        </div>
+    </div>
+
+    <script>
+        // DOM Elements
+        const logsEl = document.getElementById('logs');
+        const inputLine = document.getElementById('inputLine');
+        const termInput = document.getElementById('termInput');
+        const promptSymbol = document.getElementById('promptSymbol');
+        const upgradeContainer = document.getElementById('upgradeContainer');
+        const gameArea = document.getElementById('gameArea');
+        const canvas = document.getElementById('pongCanvas');
+        const ctx = canvas.getContext('2d');
+        const touchControls = document.getElementById('touchControls');
+        const mobileDashBtn = document.getElementById('mobileDashBtn');
+        const termContainer = document.getElementById('main-view');
+        const gimmickWarning = document.getElementById('gimmickWarning');
+        const dashIndicator = document.getElementById('dashReadyIndicator');
+        const skinsGrid = document.getElementById('skinsGrid');
+        const unlockedCountEl = document.getElementById('unlockedCount');
+
+        // Skins Catalog (20 Skins)
+        const SKINS_CATALOG = [
+            { id: 'System32', name: 'System32', icon: 'cpu', themeClass: '' },
+            { id: 'MAC', name: 'MAC OS', icon: 'laptop', themeClass: 'theme-mac' },
+            { id: 'CMD', name: 'CMD Console', icon: 'terminal', themeClass: 'theme-cmd' },
+            { id: 'BIOS', name: 'BIOS Retro', icon: 'hard-drive', themeClass: 'theme-bios' },
+            { id: 'AMD', name: 'AMD Ryzen', icon: 'zap', themeClass: 'theme-amd' },
+            { id: 'Localhost', name: 'Localhost', icon: 'server', themeClass: 'theme-localhost' },
+            { id: 'Anti-Malware', name: 'Anti-Malware', icon: 'shield-check', themeClass: 'theme-anti-malware' },
+            { id: 'Task-manager', name: 'Task Manager', icon: 'activity', themeClass: 'theme-task-manager' },
+            { id: 'Linus', name: 'Linus OS', icon: 'code-2', themeClass: 'theme-linus' },
+            { id: 'CPU_Overclock', name: 'CPU Overclock', icon: 'flame', themeClass: 'theme-cpu_overclock' },
+            { id: 'Decoded', name: 'Decoded Cyber', icon: 'lock', themeClass: 'theme-decoded' },
+            { id: 'BitShift', name: 'BitShift Mono', icon: 'binary', themeClass: 'theme-bitshift' },
+            { id: 'SyntaxError', name: 'SyntaxError', icon: 'alert-triangle', themeClass: 'theme-syntaxerror' },
+            { id: 'iusescratch', name: 'Scratch Blocks', icon: 'shapes', themeClass: 'theme-iusescratch' },
+            { id: 'Tahoe', name: 'Tahoe Aqua', icon: 'droplet', themeClass: 'theme-tahoe' },
+            { id: 'Longhorn', name: 'Longhorn Aero', icon: 'layout', themeClass: 'theme-longhorn' },
+            { id: 'round-corners', name: 'Round Corners', icon: 'disc', themeClass: 'theme-round-corners' },
+            { id: 'emoji', name: 'Emoji Arcade', icon: 'smile', themeClass: 'theme-emoji' },
+            { id: 'sheep', name: 'Pixel Sheep', icon: 'ghost', themeClass: 'theme-sheep' },
+            { id: 'Konami', name: 'Konami Code', icon: 'sparkles', themeClass: 'theme-konami' }
+        ];
+
+        // State Management & Local Storage
+        let unlockedSkins = JSON.parse(localStorage.getItem('unlocked_pong_skins')) || ['System32'];
+        let activeSkinId = localStorage.getItem('active_pong_skin') || 'System32';
+
+        let currentState = 'BOOT';
+        let userAlias = 'OPERATOR';
+        let currentLevel = 1;
+        let playerScore = 0;
+        let hackerScore = 0;
+        let targetScore = 3;
+        let currentHacker = '';
+        let currentGimmick = 'NONE';
+        let botPrecision = 0.75;
+        let animationFrameId = null;
+
+        // History API Stack for Navigation
+        let activeModalsStack = [];
+
+        function openModal(modalId) {
+            document.getElementById('main-view').classList.add('backgrounded');
+            document.getElementById(modalId).classList.add('active');
+            activeModalsStack.push(modalId);
+            window.history.pushState({ modalId: modalId }, "");
+            updateSkinsUI();
+        }
+
+        function closeActiveModal(modalId) {
+            if (activeModalsStack.includes(modalId)) {
+                window.history.back();
+            }
+        }
+
+        window.addEventListener('popstate', () => {
+            if (activeModalsStack.length > 0) {
+                const topModalId = activeModalsStack.pop();
+                document.getElementById(topModalId).classList.remove('active');
+                if (activeModalsStack.length === 0) {
+                    document.getElementById('main-view').classList.remove('backgrounded');
+                }
+            }
+        });
+
+        // Upgrades & Dash Mechanics
+        let upgrades = {
+            extendedPaddle: 1.0,
+            firewallShield: false,
+            shieldUsed: false,
+            gimmickResistance: 1.0,
+            paddleSpeedBoost: 1.0
+        };
+
+        let isDashing = false;
+        let dashCooldown = false;
+        let dashCooldownTime = 2000;
+        let dashDuration = 150;
+        let dashDirection = 0;
+        let paddleTrail = [];
+
+        // Entities & Canvas Physics
+        let paddleWidth = 14;
+        let basePaddleHeight = 110;
+        let paddleHeight = 110;
+        let playerY = 0;
+        let aiY = 0;
+        let ballX = 0;
+        let ballY = 0;
+        let ballSpeedX = 0;
+        let ballSpeedY = 0;
+        let baseBallSpeed = 3.0;
+        let basePlayerSpeed = 3.2;
+        let aiSpeed = 2.5;
+        let ballSize = 12;
+
+        let isFrozen = false;
+        let isShrunk = false;
+
+        let showPlayerPaddle = false;
+        let showAiPaddle = false;
+        let showBall = false;
+        let keys = {};
+
+        const HACKER_ALIASES = [
+            'Ghost_404', 'CyberNihil', 'NullPointer', 'NetStalker', 
+            'DarkByte', 'VectorZero', 'PhantomNode', 'SYN_Flood', 'RootAccess'
+        ];
+
+        const GIMMICK_LIST = ['NONE', 'BLUR', 'SHRINK', 'GLITCH', 'FREEZE'];
+
+        function saveSkinsState() {
+            localStorage.setItem('unlocked_pong_skins', JSON.stringify(unlockedSkins));
+            localStorage.setItem('active_pong_skin', activeSkinId);
+            updateSkinsUI();
+        }
+
+        function applySkin(skinId) {
+            const skin = SKINS_CATALOG.find(s => s.id.toLowerCase() === skinId.toLowerCase());
+            if (!skin) return false;
+            if (!unlockedSkins.includes(skin.id)) return false;
+
+            activeSkinId = skin.id;
+            document.body.className = skin.themeClass;
+            saveSkinsState();
+            return true;
+        }
+
+        function unlockSkin(skinId) {
+            if (!unlockedSkins.includes(skinId)) {
+                unlockedSkins.push(skinId);
+                saveSkinsState();
+                return true;
+            }
+            return false;
+        }
+
+        function unlockRandomSkin() {
+            const locked = SKINS_CATALOG.filter(s => !unlockedSkins.includes(s.id));
+            if (locked.length === 0) return null;
+            const chosen = locked[Math.floor(Math.random() * locked.length)];
+            unlockSkin(chosen.id);
+            return chosen;
+        }
+
+        function updateSkinsUI() {
+            unlockedCountEl.textContent = unlockedSkins.length;
+            skinsGrid.innerHTML = '';
+
+            SKINS_CATALOG.forEach(skin => {
+                const isUnlocked = unlockedSkins.includes(skin.id);
+                const isActive = activeSkinId === skin.id;
+
+                const card = document.createElement('div');
+                card.className = `skin-card ${isActive ? 'active-skin' : ''} ${!isUnlocked ? 'locked' : ''}`;
+                card.innerHTML = `
+                    <i data-lucide="${isUnlocked ? skin.icon : 'lock'}" size="22" style="color: ${isActive ? 'var(--accent-primary)' : 'var(--text-main)'}"></i>
+                    <div class="skin-name">${skin.name}</div>
+                    <div class="skin-status">${isActive ? 'EQUIPADO' : isUnlocked ? 'DESBLOQUEADO' : 'BLOQUEADO'}</div>
+                `;
+
+                if (isUnlocked) {
+                    card.onclick = () => {
+                        applySkin(skin.id);
+                        closeActiveModal('skinsModal');
+                        appendLog(`[SKIN] Tema cambiado a: ${skin.name}`);
+                    };
+                }
+                skinsGrid.appendChild(card);
+            });
+
+            lucide.createIcons();
+        }
+
+        function scrollToBottom() {
+            termContainer.scrollTop = termContainer.scrollHeight;
+        }
+
+        function appendLog(text, delay = 0) {
+            return new Promise((resolve) => {
+                setTimeout(() => {
+                    const line = document.createElement('div');
+                    line.className = 'log-line';
+                    line.textContent = text;
+                    logsEl.appendChild(line);
+                    scrollToBottom();
+                    resolve();
+                }, delay);
+            });
+        }
+
+        async function bootSequence() {
+            applySkin(activeSkinId);
+            lucide.createIcons();
+
+            await appendLog(`[SYS] Inicializando interfaz defensiva...`, 200);
+            await appendLog(`[SYS] Sistema iniciado correctamente.`, 300);
+            await appendLog(`[SYS] Skin activa: ${activeSkinId} (${unlockedSkins.length}/20 Desbloqueadas)`, 300);
+            await appendLog(`----------------------------------------`, 200);
+
+            promptForAlias();
+        }
+
+        function promptForAlias() {
+            showInput('INTRODUCE TU ALIAS DE DEFENSOR:', (alias) => {
+                const cleanInput = alias.trim();
+                
+                // CHEAT SPECIAL CODE: freeskins
+                if (cleanInput.toLowerCase() === 'freeskins') {
+                    unlockedSkins = SKINS_CATALOG.map(s => s.id);
+                    saveSkinsState();
+                    appendLog(`[CHEAT ACTIVADO] ¡Todas las 20 skins han sido desbloqueadas en localstorage!`).then(() => {
+                        appendLog(`[SYS] Selecciona ahora tu verdadero nombre de usuario.`);
+                        promptForAlias();
+                    });
+                    return;
+                }
+
+                userAlias = cleanInput.toUpperCase() || 'OPERATOR';
+                appendLog(`[OK] Defensor registrado como: ${userAlias}`).then(startNextLevel);
+            });
+        }
+
+        function generateHacker() {
+            const index = Math.min(currentLevel - 1, HACKER_ALIASES.length - 1);
+            currentHacker = HACKER_ALIASES[index];
+            targetScore = Math.min(3 + (currentLevel - 1) * 2, 20);
+            botPrecision = Math.max(0.16, Math.min(0.85, 0.72 - (currentLevel - 1) * 0.07));
+            
+            if (currentLevel === 1) currentGimmick = 'NONE';
+            else if (currentLevel === 2) currentGimmick = 'BLUR';
+            else if (currentLevel === 3) currentGimmick = 'SHRINK';
+            else if (currentLevel === 4) currentGimmick = 'GLITCH';
+            else currentGimmick = GIMMICK_LIST[Math.floor(Math.random() * (GIMMICK_LIST.length - 1)) + 1];
+        }
+
+        async function startNextLevel() {
+            generateHacker();
+            playerScore = 0;
+            hackerScore = 0;
+            upgrades.shieldUsed = false;
+
+            await appendLog(``, 200);
+            if (currentHacker === 'RootAccess') {
+                await appendLog(`[ALERTA] AMENAZA FINAL DETECTADA!`, 400);
+                await appendLog(`[ALERTA] NODO HOSTIL MAESTRO: RootAccess`, 400);
+            } else {
+                await appendLog(`[ALERTA] AMENAZA DETECTADA!`, 400);
+                await appendLog(`[ALERTA] Nodo hostil: ${currentHacker}`, 400);
+            }
+            await appendLog(`[SYS] Puntuación de expulsión: ${targetScore}`, 400);
+            if (currentGimmick !== 'NONE') {
+                await appendLog(`[WARN] Ataque especial: [${currentGimmick}]`, 500);
+            }
+            await appendLog(`[SYS] Lanzando sub-rutina defensiva...`, 500);
+
+            setTimeout(initPongGame, 800);
+        }
+
+        function resizeCanvas() {
+            canvas.width = window.innerWidth;
+            canvas.height = window.innerHeight;
+            
+            const isMobile = canvas.width < 600;
+            paddleWidth = isMobile ? 12 : 16;
+            basePaddleHeight = isMobile ? canvas.height * 0.16 : 110;
+            paddleHeight = basePaddleHeight * upgrades.extendedPaddle;
+            ballSize = isMobile ? 10 : 14;
+
+            mobileDashBtn.style.display = isMobile ? 'flex' : 'none';
+
+            if (playerY === 0) playerY = (canvas.height - paddleHeight) / 2;
+            if (aiY === 0) aiY = (canvas.height - paddleHeight) / 2;
+        }
+
+        window.addEventListener('resize', resizeCanvas);
+
+        function triggerDash() {
+            if (dashCooldown || isFrozen || currentState !== 'PLAYING') return;
+
+            isDashing = true;
+            dashCooldown = true;
+            dashIndicator.classList.add('cooldown');
+
+            if (keys['ArrowUp'] || keys['w'] || keys['W']) dashDirection = -1;
+            else dashDirection = 1;
+
+            setTimeout(() => { isDashing = false; }, dashDuration);
+
+            setTimeout(() => {
+                dashCooldown = false;
+                dashIndicator.classList.remove('cooldown');
+            }, dashCooldownTime);
+        }
+
+        function initPongGame() {
+            resizeCanvas();
+            logsEl.style.display = 'none';
+            upgradeContainer.style.display = 'none';
+            gameArea.style.display = 'block';
+            touchControls.style.display = 'block';
+            currentState = 'GAME_INTRO';
+
+            document.getElementById('hudPlayerScore').textContent = '0';
+            document.getElementById('hudHackerScore').textContent = '0';
+            document.getElementById('hudPlayerScore').previousSibling.textContent = `${userAlias}: `;
+            document.getElementById('hudHackerName').textContent = currentHacker;
+            document.getElementById('hudLevel').textContent = currentHacker === 'RootAccess' ? 'BOSS LEVEL' : `LVL ${currentLevel}`;
+            document.getElementById('hudTarget').textContent = `TARGET: ${targetScore}`;
+
+            playerY = (canvas.height - paddleHeight) / 2;
+            aiY = (canvas.height - paddleHeight) / 2;
+            ballX = canvas.width / 2;
+            ballY = canvas.height / 2;
+
+            baseBallSpeed = 3.2 + (currentLevel - 1) * 0.35;
+            aiSpeed = 2.5 + (currentLevel - 1) * 0.3;
+
+            showPlayerPaddle = false;
+            showAiPaddle = false;
+            showBall = false;
+
+            setTimeout(() => { showPlayerPaddle = true; }, 400);
+            setTimeout(() => { showAiPaddle = true; }, 900);
+            setTimeout(() => {
+                showBall = true;
+                const dir = Math.random() > 0.5 ? 1 : -1;
+                ballSpeedX = dir * baseBallSpeed;
+                ballSpeedY = (Math.random() * 2 - 1) * baseBallSpeed;
+                currentState = 'PLAYING';
+            }, 1600);
+
+            requestAnimationFrame(gameLoop);
+        }
+
+        function resetBall() {
+            ballX = canvas.width / 2;
+            ballY = canvas.height / 2;
+            const dir = ballSpeedX > 0 ? -1 : 1;
+            ballSpeedX = dir * baseBallSpeed;
+            ballSpeedY = (Math.random() * 2 - 1) * baseBallSpeed;
+        }
+
+        function triggerGimmickEffect() {
+            if (currentGimmick === 'NONE' || currentState !== 'PLAYING') return;
+
+            gimmickWarning.style.display = 'block';
+            gimmickWarning.textContent = `HACKER ATAQUE: ${currentGimmick}`;
+            setTimeout(() => { gimmickWarning.style.display = 'none'; }, 1500);
+
+            const durationModifier = upgrades.gimmickResistance;
+
+            if (currentGimmick === 'BLUR') {
+                canvas.classList.add('blur-gimmick');
+                setTimeout(() => { canvas.classList.remove('blur-gimmick'); }, 1800 * durationModifier);
+            } 
+            else if (currentGimmick === 'SHRINK') {
+                if (!isShrunk) {
+                    isShrunk = true;
+                    paddleHeight = (basePaddleHeight * upgrades.extendedPaddle) * 0.6;
+                    setTimeout(() => {
+                        paddleHeight = basePaddleHeight * upgrades.extendedPaddle;
+                        isShrunk = false;
+                    }, 3500 * durationModifier);
+                }
+            } 
+            else if (currentGimmick === 'FREEZE') {
+                isFrozen = true;
+                setTimeout(() => { isFrozen = false; }, 600 * durationModifier);
+            } 
+            else if (currentGimmick === 'GLITCH') {
+                ballX += (Math.random() - 0.5) * 80;
+                ballY += (Math.random() - 0.5) * 80;
+            }
+        }
+
+        function updateGame() {
+            if (currentState !== 'PLAYING') return;
+
+            if (!isFrozen) {
+                let speed = basePlayerSpeed * upgrades.paddleSpeedBoost;
+                
+                if (isDashing) {
+                    speed *= 4.5;
+                    playerY += dashDirection * speed;
+                    paddleTrail.push({ y: playerY, alpha: 0.6 });
+                } else {
+                    if (keys['ArrowUp'] || keys['w'] || keys['W']) {
+                        playerY -= speed;
+                        dashDirection = -1;
+                    }
+                    if (keys['ArrowDown'] || keys['s'] || keys['S']) {
+                        playerY += speed;
+                        dashDirection = 1;
+                    }
+                }
+            }
+
+            for (let i = paddleTrail.length - 1; i >= 0; i--) {
+                paddleTrail[i].alpha -= 0.08;
+                if (paddleTrail[i].alpha <= 0) paddleTrail.splice(i, 1);
+            }
+
+            playerY = Math.max(0, Math.min(canvas.height - paddleHeight, playerY));
+
+            const aiCenter = aiY + paddleHeight / 2;
+            const maxError = (1 - botPrecision) * (canvas.height * 0.2 + currentLevel * 16);
+            const targetOffset = (Math.random() - 0.5) * maxError;
+            const aiTargetY = ballY + targetOffset - paddleHeight / 2;
+            const diff = aiTargetY - aiCenter;
+
+            if (Math.abs(diff) > 8) {
+                aiY += Math.sign(diff) * aiSpeed * (0.55 + botPrecision * 0.95);
+            }
+            aiY = Math.max(0, Math.min(canvas.height - paddleHeight, aiY));
+
+            ballX += ballSpeedX;
+            ballY += ballSpeedY;
+
+            if (ballY <= 0 || ballY >= canvas.height - ballSize) {
+                ballSpeedY *= -1;
+            }
+
+            const playerX = canvas.width < 600 ? 15 : 30;
+            if (ballX <= playerX + paddleWidth && ballX >= playerX) {
+                if (ballY + ballSize >= playerY && ballY <= playerY + paddleHeight) {
+                    ballSpeedX = Math.abs(ballSpeedX) * 1.03;
+                    ballSpeedY += (Math.random() - 0.5) * 1.5;
+                    if (Math.random() < 0.35) triggerGimmickEffect();
+                }
+            }
+
+            const aiX = canvas.width - (canvas.width < 600 ? 15 : 30) - paddleWidth;
+            if (ballX + ballSize >= aiX && ballX <= aiX + paddleWidth) {
+                if (ballY + ballSize >= aiY && ballY <= aiY + paddleHeight) {
+                    ballSpeedX = -Math.abs(ballSpeedX) * 1.03;
+                    ballSpeedY += (Math.random() - 0.5) * 1.5;
+                }
+            }
+
+            if (ballX < 0) {
+                if (upgrades.firewallShield && !upgrades.shieldUsed) {
+                    upgrades.shieldUsed = true;
+                    gimmickWarning.style.display = 'block';
+                    gimmickWarning.textContent = 'FIREWALL SHIELD ACTIVATED!';
+                    setTimeout(() => { gimmickWarning.style.display = 'none'; }, 1500);
+                    resetBall();
+                } else {
+                    hackerScore++;
+                    document.getElementById('hudHackerScore').textContent = hackerScore;
+                    if (hackerScore >= targetScore) triggerGameOver();
+                    else resetBall();
+                }
+            }
+
+            if (ballX > canvas.width) {
+                playerScore++;
+                document.getElementById('hudPlayerScore').textContent = playerScore;
+                if (playerScore >= targetScore) {
+                    if (currentHacker === 'RootAccess') triggerGameVictory();
+                    else triggerExpulsionSuccess();
+                } else {
+                    resetBall();
+                }
+            }
+        }
+
+        function renderGame() {
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+            const playerX = canvas.width < 600 ? 15 : 30;
+            const aiX = canvas.width - (canvas.width < 600 ? 15 : 30) - paddleWidth;
+
+            const computedStyles = getComputedStyle(document.body);
+            const paddleColor = computedStyles.getPropertyValue('--paddle-color').trim() || '#FFFFFF';
+            const ballColor = computedStyles.getPropertyValue('--ball-color').trim() || '#FFFFFF';
+
+            paddleTrail.forEach(t => {
+                ctx.fillStyle = `rgba(10, 132, 255, ${t.alpha})`;
+                ctx.fillRect(playerX, t.y, paddleWidth, paddleHeight);
+            });
+
+            if (showPlayerPaddle) {
+                ctx.fillStyle = isDashing ? '#0A84FF' : paddleColor;
+                ctx.fillRect(playerX, playerY, paddleWidth, paddleHeight);
+            }
+
+            if (showAiPaddle) {
+                ctx.fillStyle = paddleColor;
+                ctx.fillRect(aiX, aiY, paddleWidth, paddleHeight);
+            }
+
+            if (showBall) {
+                ctx.fillStyle = ballColor;
+                ctx.fillRect(ballX, ballY, ballSize, ballSize);
+            }
+
+            if (currentState === 'PLAYING') {
+                ctx.setLineDash([8, 8]);
+                ctx.beginPath();
+                ctx.moveTo(canvas.width / 2, 0);
+                ctx.lineTo(canvas.width / 2, canvas.height);
+                ctx.strokeStyle = 'rgba(255, 255, 255, 0.15)';
+                ctx.lineWidth = 2;
+                ctx.stroke();
+                ctx.setLineDash([]);
+            }
+        }
+
+        function gameLoop() {
+            updateGame();
+            renderGame();
+            if (currentState === 'PLAYING' || currentState === 'GAME_INTRO') {
+                animationFrameId = requestAnimationFrame(gameLoop);
+            }
+        }
+
+        function triggerExpulsionSuccess() {
+            currentState = 'LEVEL_CLEAR';
+            cancelAnimationFrame(animationFrameId);
+            gameArea.style.display = 'none';
+            touchControls.style.display = 'none';
+            canvas.classList.remove('blur-gimmick');
+
+            logsEl.style.display = 'block';
+            logsEl.innerHTML = '';
+
+            handleUpgradeChoice();
+        }
+
+        async function triggerGameVictory() {
+            currentState = 'GAME_VICTORY';
+            cancelAnimationFrame(animationFrameId);
+            gameArea.style.display = 'none';
+            touchControls.style.display = 'none';
+            canvas.classList.remove('blur-gimmick');
+
+            logsEl.style.display = 'block';
+            logsEl.innerHTML = '';
+
+            await appendLog(`========================================`, 200);
+            await appendLog(`Ataque finalizado, no se han encontrado más amenazas. nuevo código encontrado.`, 400);
+            await appendLog(`========================================`, 200);
+
+            const unlockedNew = unlockRandomSkin();
+
+            if (unlockedNew) {
+                await appendLog(`[RECOMPENSA] ¡Has desbloqueado la nueva Skin: ${unlockedNew.name}!`, 500);
+                await appendLog(`[SYS] Puedes equiparla introduciendo "${unlockedNew.id}" o desde la Colección.`, 400);
+            } else {
+                await appendLog(`[CELEBRACIÓN ESPECIAL] ¡FELICIDADES! ¡Has desbloqueado las 20 Skins del sistema!`, 500);
+                if (window.confetti) {
+                    confetti({ particleCount: 150, spread: 80, origin: { y: 0.6 } });
+                }
+            }
+
+            await appendLog(``, 300);
+            showInput('Reiniciar sistema de defensa? (Y/N):', (val) => {
+                if (val.trim().toUpperCase() === 'Y') {
+                    currentLevel = 1;
+                    upgrades = { extendedPaddle: 1.0, firewallShield: false, shieldUsed: false, gimmickResistance: 1.0, paddleSpeedBoost: 1.0 };
+                    startNextLevel();
+                } else {
+                    promptLogOff();
+                }
+            });
+        }
+
+        async function handleUpgradeChoice() {
+            await appendLog(`[SUCCESS] HACKER ${currentHacker} EXPULSADO!`, 300);
+            await appendLog(`[SYS] Selección de mejora defensiva:`, 400);
+
+            const options = [
+                { title: 'OVERCLOCK PADDLE', desc: '+20% Longitud del Paddle', action: () => { upgrades.extendedPaddle += 0.2; } },
+                { title: 'FIREWALL SHIELD', desc: 'Bloquea 1 gol por ronda', action: () => { upgrades.firewallShield = true; } },
+                { title: 'ANTI-HACK PATCH', desc: '-50% Duración de Hacks', action: () => { upgrades.gimmickResistance = 0.5; } },
+                { title: 'ENGINE OVERCLOCK', desc: '+20% Velocidad de Movimiento', action: () => { upgrades.paddleSpeedBoost += 0.2; } }
+            ];
+
+            const shuffled = options.sort(() => 0.5 - Math.random()).slice(0, 2);
+
+            upgradeContainer.innerHTML = '';
+            upgradeContainer.style.display = 'flex';
+
+            shuffled.forEach((opt, idx) => {
+                const card = document.createElement('div');
+                card.className = 'upgrade-card';
+                card.innerHTML = `
+                    <div>
+                        <div class="upgrade-title">[${idx + 1}] ${opt.title}</div>
+                        <div class="upgrade-desc">${opt.desc}</div>
+                    </div>
+                    <i data-lucide="chevron-right" size="18" style="color: var(--text-muted);"></i>
+                `;
+                card.onclick = () => {
+                    opt.action();
+                    upgradeContainer.style.display = 'none';
+                    appendLog(`[OK] Parche instalado: ${opt.title}`).then(() => {
+                        currentLevel++;
+                        startNextLevel();
+                    });
+                };
+                upgradeContainer.appendChild(card);
+            });
+
+            lucide.createIcons();
+            scrollToBottom();
+        }
+
+        function triggerGameOver() {
+            currentState = 'GAME_OVER';
+            cancelAnimationFrame(animationFrameId);
+            gameArea.style.display = 'none';
+            touchControls.style.display = 'none';
+            canvas.classList.remove('blur-gimmick');
+
+            logsEl.style.display = 'block';
+            logsEl.innerHTML = '';
+
+            promptGameOver();
+        }
+
+        async function promptGameOver() {
+            await appendLog(`[ERROR] EXPULSIÓN FALLIDA!`, 400);
+            await appendLog(`[SYS] ${currentHacker} SOBREESCRIBIÓ LAS DEFENSAS`, 500);
+            await appendLog(`----------------------------------------`, 300);
+            
+            showInput('Reintentar protocolo defensivo? (Y/N):', (val) => {
+                if (val.trim().toUpperCase() === 'Y') {
+                    currentLevel = 1;
+                    upgrades = { extendedPaddle: 1.0, firewallShield: false, shieldUsed: false, gimmickResistance: 1.0, paddleSpeedBoost: 1.0 };
+                    startNextLevel();
+                } else {
+                    promptLogOff();
+                }
+            });
+        }
+
+        function triggerShakeError() {
+            inputLine.classList.add('error-shake');
+            setTimeout(() => {
+                inputLine.classList.remove('error-shake');
+            }, 300);
+        }
+
+        function promptLogOff() {
+            appendLog(`[SYS] Cerrando sesión...`, 400);
+            setTimeout(() => {
+                logsEl.innerHTML = '';
+                bootSequence();
+            }, 1200);
+        }
+
+        function showInput(promptText, callback) {
+            promptSymbol.textContent = promptText;
+            termInput.value = '';
+            inputLine.style.display = 'flex';
+            scrollToBottom();
+            setTimeout(() => termInput.focus(), 100);
+
+            const handleKeyDown = (e) => {
+                if (e.key === 'Enter') {
+                    const value = termInput.value.trim();
+                    if (!value) {
+                        triggerShakeError();
+                        return;
+                    }
+                    
+                    if (value.toUpperCase() === 'SKINS' || value.toUpperCase() === 'COLECCION') {
+                        openModal('skinsModal');
+                        return;
+                    }
+
+                    if (applySkin(value)) {
+                        appendLog(`${promptText} ${value}`);
+                        appendLog(`[OK] Skin activada: ${value}`);
+                        termInput.value = '';
+                        return;
+                    }
+
+                    appendLog(`${promptText} ${value}`);
+                    termInput.removeEventListener('keydown', handleKeyDown);
+                    inputLine.style.display = 'none';
+                    callback(value);
+                }
+            };
+
+            termInput.addEventListener('keydown', handleKeyDown);
+        }
+
+        // Global Event Listeners
+        window.addEventListener('keydown', (e) => { 
+            keys[e.key] = true; 
+            if (e.code === 'Space') {
+                e.preventDefault();
+                triggerDash();
+            }
+        });
+
+        window.addEventListener('keyup', (e) => { keys[e.key] = false; });
+
+        const handleTouch = (e) => {
+            if (e.touches.length > 0 && !isFrozen) {
+                const touchY = e.touches[0].clientY;
+                const prevY = playerY;
+                playerY = touchY - paddleHeight / 2;
+                playerY = Math.max(0, Math.min(canvas.height - paddleHeight, playerY));
+                
+                if (playerY < prevY) dashDirection = -1;
+                else if (playerY > prevY) dashDirection = 1;
+            }
+        };
+
+        touchControls.addEventListener('touchstart', handleTouch, { passive: true });
+        touchControls.addEventListener('touchmove', handleTouch, { passive: true });
+        
+        mobileDashBtn.addEventListener('click', (e) => {
+            e.stopPropagation();
+            triggerDash();
+        });
+
+        document.addEventListener('click', () => {
+            if (inputLine.style.display !== 'none') termInput.focus();
+        });
+
+        // App Boot
+        bootSequence();
+    </script>
+</body>
+</html>

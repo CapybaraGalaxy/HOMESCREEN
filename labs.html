@@ -11,6 +11,12 @@
     <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@200;400;500&display=swap" rel="stylesheet">
     <script src="https://unpkg.com/lucide@latest"></script>
     <link rel="stylesheet" href="styles.css">
+    <style>
+        /* Solo en Labs: ocultar el botón de ajustes sin borrarlo */
+        #setBtn {
+            display: none !important;
+        }
+    </style>
     
     <script>
         window.hasHubError = false;
@@ -48,7 +54,7 @@
 
     <a href="https://capybaragalaxy.github.io/HOMESCREEN/" class="local-chip" id="localChip">
         <i data-lucide="monitor-smartphone" style="width: 16px;"></i>
-        <div><strong>VERSIÓN LOCAL</strong> <span>· Ir a web</span></div>
+        <div><strong>VERSIÓN LOCAL</strong> <span>· Ir a web (Homescreen, no labs, al menos por ahora)</span></div>
     </a>
 
     <div class="version-tag" id="versionTag">1.4</div>
@@ -57,7 +63,7 @@
         <header class="header">
             <div class="labs-indicator" style="display: flex; align-items: center; justify-content: center; gap: 6px; color: #0aff16; font-weight: 500; font-size: 14px; margin-bottom: 6px;">
                 <i data-lucide="flask-conical" style="width: 16px; height: 16px;"></i>
-                <span>LABS</span>
+                <span>LABS - Más información próximamente</span>
             </div>
             <div class="clock" id="clock">00:00</div>
             <div class="date" id="date">--</div>
@@ -121,7 +127,7 @@ const tools = [
         icon: 'flask-conical',
         folder: true,
         apps: [
-            { name: 'About', icon: 'badge-info', url: '/about.html' }
+            { name: 'Más información próximamente', icon: 'badge-info', url: '/about.html' }
         ]
     }
 ];

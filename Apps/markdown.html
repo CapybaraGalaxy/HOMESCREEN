@@ -1,0 +1,505 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+    <title>Neo Markdown</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <style>
+        :root {
+            --bg: #000000;
+            --surface: #121212;
+            --surface-hover: #1c1c1e;
+            --surface-active: #2c2c2e;
+            --glass: rgba(15, 15, 15, 0.4);
+            --glass-border: rgba(255, 255, 255, 0.08);
+            --glass-border-focus: rgba(255, 255, 255, 0.2);
+            --blur-val: 30px;
+            
+            --text-main: #FFFFFF;
+            --text-muted: #8E8E93;
+            --text-token: #48484a;
+
+            --accent-danger: #FF453A;
+            --accent-success: #34C759;
+            --accent-primary: #0A84FF;
+
+            --bezier: cubic-bezier(0.16, 1, 0.3, 1);
+            --spring: cubic-bezier(0.34, 1.56, 0.64, 1);
+        }
+
+        * { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
+
+        body {
+            background-color: var(--bg); color: var(--text-main);
+            font-family: 'Outfit', sans-serif;
+            -webkit-font-smoothing: antialiased; -moz-osx-font-smoothing: grayscale;
+            overflow: hidden;
+        }
+
+        .app-container {
+            max-width: 900px; margin: 0 auto; height: 100dvh;
+            display: flex; flex-direction: column;
+            padding: env(safe-area-inset-top) 24px calc(env(safe-area-inset-bottom) + 16px) 24px;
+        }
+
+        /* HEADER */
+        header {
+            display: flex; align-items: center; justify-content: space-between;
+            padding: 16px 0; border-bottom: 1px solid var(--glass-border); flex-shrink: 0;
+        }
+
+        .header-left { display: flex; align-items: center; gap: 12px; }
+        
+        .app-icon-badge {
+            display: flex; align-items: center; justify-content: center;
+            width: 36px; height: 36px; border-radius: 10px;
+            background: radial-gradient(circle at top left, rgba(255,255,255,0.1), transparent);
+            border: 1px solid var(--glass-border);
+            box-shadow: inset 0 1px 0 rgba(255,255,255,0.05);
+        }
+
+        .view-toggle {
+            display: flex; background: var(--surface); border: 1px solid var(--glass-border);
+            border-radius: 12px; overflow: hidden; padding: 4px; gap: 4px;
+        }
+        .view-toggle button {
+            background: transparent; border: none; color: var(--text-muted);
+            padding: 6px 14px; font-family: inherit; font-size: 0.85rem; font-weight: 500;
+            border-radius: 8px; cursor: pointer; transition: all 0.2s var(--bezier);
+        }
+        .view-toggle button.active { background: var(--surface-active); color: var(--text-main); }
+
+        .metrics {
+            display: flex; gap: 16px; color: var(--text-muted); font-size: 0.85rem;
+            font-variant-numeric: tabular-nums;
+        }
+
+        /* TOOLBAR */
+        .toolbar {
+            display: flex; gap: 6px; overflow-x: auto; padding: 12px 16px; margin: 16px 0;
+            background: var(--surface); border: 1px solid var(--glass-border);
+            border-radius: 14px; scrollbar-width: none; backdrop-filter: blur(var(--blur-val));
+            flex-shrink: 0;
+        }
+        .toolbar::-webkit-scrollbar { display: none; }
+        .toolbar-btn {
+            background: transparent; border: 1px solid transparent; color: var(--text-muted);
+            cursor: pointer; padding: 8px; border-radius: 8px;
+            display: flex; align-items: center; justify-content: center;
+            transition: all 0.2s var(--bezier); flex-shrink: 0;
+        }
+        .toolbar-btn:hover { color: var(--text-main); background: var(--surface-hover); }
+        .toolbar-btn:active { transform: scale(0.92); }
+        .toolbar-divider { width: 1px; background: var(--glass-border); margin: 0 4px; flex-shrink: 0; }
+
+        /* EDITOR Y RENDER (Áreas de texto) */
+        .main-content {
+            flex-grow: 1; overflow-y: auto; padding-right: 8px; padding-bottom: 100px;
+            position: relative; scrollbar-width: thin; scrollbar-color: var(--surface-hover) transparent;
+        }
+        .main-content::-webkit-scrollbar { width: 6px; }
+        .main-content::-webkit-scrollbar-thumb { background-color: var(--surface-hover); border-radius: 10px; }
+
+        .view-layer {
+            width: 100%; min-height: 100%; font-size: 1.05rem; line-height: 1.7;
+            display: none; outline: none; word-wrap: break-word;
+        }
+        .view-layer.active { display: block; animation: fadeIn 0.3s var(--bezier); }
+
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(4px); } to { opacity: 1; transform: translateY(0); } }
+
+        /* --- SINTAXIS SEMIVISUAL (Editor) --- */
+        #editor-view {
+            white-space: pre-wrap; color: var(--text-main);
+            caret-color: var(--accent-primary);
+        }
+        .md-token { color: var(--text-token); font-weight: 400; font-style: normal; }
+        
+        .md-h1 { font-size: 2.2rem; font-weight: 700; line-height: 1.2; letter-spacing: -0.03em; color: var(--text-main); margin-top: 24px; display: inline-block; width: 100%; }
+        .md-h2 { font-size: 1.7rem; font-weight: 600; line-height: 1.3; letter-spacing: -0.02em; color: var(--text-main); margin-top: 16px; display: inline-block; width: 100%; border-bottom: 1px solid var(--glass-border); padding-bottom: 4px; }
+        .md-h3 { font-size: 1.3rem; font-weight: 500; line-height: 1.4; color: var(--text-main); margin-top: 12px; display: inline-block; width: 100%; }
+        
+        .md-bold { font-weight: 700; color: #fff; }
+        .md-italic { font-style: italic; }
+        .md-strike { text-decoration: line-through; color: var(--text-muted); }
+        .md-code { background: var(--surface-hover); padding: 2px 6px; border-radius: 6px; font-family: monospace; color: var(--accent-success); font-size: 0.9em; }
+        
+        .md-blockquote { border-left: 3px solid var(--text-token); padding-left: 12px; color: var(--text-muted); display: inline-block; width: 100%; background: rgba(255,255,255,0.02); }
+        .md-link { color: var(--accent-primary); }
+        .md-url { color: var(--text-token); font-size: 0.85em; text-decoration: underline; text-decoration-color: var(--glass-border); }
+
+        /* --- RENDER FINAL --- */
+        #render-view { color: var(--text-main); }
+        #render-view h1 { font-size: 2.2rem; font-weight: 700; margin: 1.2em 0 0.5em; line-height: 1.2; letter-spacing: -0.03em; }
+        #render-view h2 { font-size: 1.7rem; font-weight: 600; margin: 1.2em 0 0.5em; line-height: 1.3; letter-spacing: -0.02em; border-bottom: 1px solid var(--glass-border); padding-bottom: 4px; }
+        #render-view h3 { font-size: 1.3rem; font-weight: 500; margin: 1.2em 0 0.5em; }
+        #render-view p { margin-bottom: 1em; }
+        #render-view strong { font-weight: 700; color: #fff; }
+        #render-view em { font-style: italic; }
+        #render-view blockquote { border-left: 3px solid var(--text-muted); padding-left: 16px; margin: 1em 0; color: var(--text-muted); font-style: italic; background: rgba(255,255,255,0.02); padding: 12px 16px; border-radius: 0 8px 8px 0; }
+        #render-view code { background: var(--surface-hover); padding: 3px 6px; border-radius: 6px; font-family: monospace; font-size: 0.9em; color: var(--accent-success); }
+        #render-view pre { background: var(--surface); padding: 16px; border-radius: 12px; border: 1px solid var(--glass-border); overflow-x: auto; margin: 1.2em 0; }
+        #render-view pre code { background: transparent; padding: 0; color: var(--text-main); font-size: 0.95em; }
+        #render-view a { color: var(--accent-primary); text-decoration: none; border-bottom: 1px solid transparent; transition: border 0.2s; }
+        #render-view a:hover { border-bottom-color: var(--accent-primary); }
+        #render-view ul, #render-view ol { margin: 0.5em 0 1em 24px; }
+        #render-view li { margin-bottom: 0.4em; }
+        #render-view hr { border: none; border-top: 1px solid var(--glass-border); margin: 2em 0; }
+        #render-view img { max-width: 100%; border-radius: 12px; border: 1px solid var(--glass-border); }
+        #render-view table { width: 100%; border-collapse: collapse; margin: 1.5em 0; font-size: 0.95em; border: 1px solid var(--glass-border); border-radius: 8px; overflow: hidden; display: table; }
+        #render-view th, #render-view td { border: 1px solid var(--glass-border); padding: 12px 16px; text-align: left; }
+        #render-view th { background: var(--surface-hover); font-weight: 500; }
+
+        @media (max-width: 600px) {
+            .metrics { display: none; }
+        }
+    </style>
+</head>
+<body>
+
+    <div class="app-container">
+        <header>
+            <div class="header-left">
+                <div class="app-icon-badge">
+                    <i data-lucide="pen-tool" size="18" style="color: var(--text-main);"></i>
+                </div>
+                <div class="view-toggle">
+                    <button id="btn-edit" class="active" onclick="switchView('edit')">Semivisual</button>
+                    <button id="btn-render" onclick="switchView('preview')">Vista Final</button>
+                </div>
+            </div>
+            
+            <div class="metrics">
+                <div><span id="word-count">0</span> palabras</div>
+                <div><span id="char-count">0</span> car.</div>
+            </div>
+        </header>
+
+        <div class="toolbar" id="toolbar">
+            <button class="toolbar-btn" onclick="insertSyntax('# ', '')" title="H1"><i data-lucide="heading-1" size="18"></i></button>
+            <button class="toolbar-btn" onclick="insertSyntax('## ', '')" title="H2"><i data-lucide="heading-2" size="18"></i></button>
+            <button class="toolbar-btn" onclick="insertSyntax('### ', '')" title="H3"><i data-lucide="heading-3" size="18"></i></button>
+            <div class="toolbar-divider"></div>
+            <button class="toolbar-btn" onclick="insertSyntax('**', '**')" title="Negrita"><i data-lucide="bold" size="18"></i></button>
+            <button class="toolbar-btn" onclick="insertSyntax('*', '*')" title="Cursiva"><i data-lucide="italic" size="18"></i></button>
+            <button class="toolbar-btn" onclick="insertSyntax('~~', '~~')" title="Tachado"><i data-lucide="strikethrough" size="18"></i></button>
+            <button class="toolbar-btn" onclick="insertSyntax('`', '`')" title="Código"><i data-lucide="code" size="18"></i></button>
+            <div class="toolbar-divider"></div>
+            <button class="toolbar-btn" onclick="insertSyntax('- ', '')" title="Lista"><i data-lucide="list" size="18"></i></button>
+            <button class="toolbar-btn" onclick="insertSyntax('- [ ] ', '')" title="Tarea"><i data-lucide="check-square" size="18"></i></button>
+            <button class="toolbar-btn" onclick="insertSyntax('> ', '')" title="Cita"><i data-lucide="quote" size="18"></i></button>
+            <div class="toolbar-divider"></div>
+            <button class="toolbar-btn" onclick="insertSyntax('[Texto](', ')')" title="Enlace"><i data-lucide="link" size="18"></i></button>
+            <button class="toolbar-btn" onclick="insertSyntax('![Alt](', ')')" title="Imagen"><i data-lucide="image" size="18"></i></button>
+            <button class="toolbar-btn" onclick="insertTable()" title="Tabla"><i data-lucide="table" size="18"></i></button>
+        </div>
+
+        <main class="main-content">
+            <div id="editor-view" class="view-layer active" contenteditable="true" spellcheck="false"></div>
+            <div id="render-view" class="view-layer"></div>
+        </main>
+    </div>
+
+    <script>
+        lucide.createIcons();
+
+        // ---------------------------------------------------------
+        // 1. ESTADO Y ARQUITECTURA BASE
+        // ---------------------------------------------------------
+        const editor = document.getElementById('editor-view');
+        const renderView = document.getElementById('render-view');
+        let appData = {
+            content: '',
+            mode: 'edit' // 'edit' | 'preview'
+        };
+        let isComposing = false; // Manejo de acentos y caracteres especiales
+
+        const DEFAULT_TEXT = `# Filosofía WYSIWYM (Semivisual)
+Este editor híbrido te permite escribir en **Markdown** mientras ves el formato en tiempo real, pero sin perder de vista los *símbolos originales*.
+
+## Prueba la experiencia fluida
+- Observa cómo los \`#\` cambian el tamaño al instante.
+- Escribe \`**texto**\` para ver la negrita, pero conservando los asteriscos sutilmente atenuados.
+- [ ] Crea listas de tareas fácilmente.
+- [x] Gestión precisa del cursor (Caret).
+
+> El control total del código y la comodidad visual, unificados en un solo lienzo orgánico.
+
+| Elemento | Estado | Rendimiento |
+|----------|--------|-------------|
+| Tablas   | Activo | Nativo      |
+| Tokens   | Gris   | Óptimo      |
+
+Para ver el render purificado sin marcas, pulsa **Vista Final** en la cabecera.`;
+
+        window.onload = () => {
+            const saved = localStorage.getItem('neo_markdown_hybrid');
+            appData.content = saved ? JSON.parse(saved).content : DEFAULT_TEXT;
+            updateEditor();
+            updateMetrics();
+        };
+
+        function saveData() {
+            localStorage.setItem('neo_markdown_hybrid', JSON.stringify({ content: appData.content }));
+        }
+
+        // ---------------------------------------------------------
+        // 2. MOTOR DE PARSEO SEMIVISUAL Y CONTROL DE CARET
+        // ---------------------------------------------------------
+        
+        // Obtener posición absoluta del cursor contando solo texto real
+        function getCaretIndex(el) {
+            let position = 0;
+            const selection = window.getSelection();
+            if (selection.rangeCount === 0) return 0;
+            const range = selection.getRangeAt(0);
+            
+            let found = false;
+            function traverse(node) {
+                if (found) return;
+                if (node === range.endContainer) {
+                    position += range.endOffset;
+                    found = true;
+                    return;
+                }
+                if (node.nodeType === 3) {
+                    position += node.length;
+                } else {
+                    for (let i = 0; i < node.childNodes.length; i++) traverse(node.childNodes[i]);
+                }
+            }
+            traverse(el);
+            return position;
+        }
+
+        // Restaurar posición absoluta del cursor
+        function setCaretIndex(el, pos) {
+            let currentPos = 0;
+            let found = false;
+            const selection = window.getSelection();
+            const range = document.createRange();
+
+            function traverse(node) {
+                if (found) return;
+                if (node.nodeType === 3) {
+                    if (currentPos + node.length >= pos) {
+                        range.setStart(node, pos - currentPos);
+                        range.collapse(true);
+                        selection.removeAllRanges();
+                        selection.addRange(range);
+                        found = true;
+                    } else {
+                        currentPos += node.length;
+                    }
+                } else {
+                    for (let i = 0; i < node.childNodes.length; i++) traverse(node.childNodes[i]);
+                }
+            }
+            traverse(el);
+        }
+
+        // Resaltador de sintaxis al vuelo para el DOM (inyecta Spans semánticos)
+        function syntaxHighlight(text) {
+            let lines = text.split('\n');
+            let html = lines.map(line => {
+                let parsed = line.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+                
+                // Procesar Títulos (Acaparan toda la línea)
+                if (/^(#{1,6})( )(.*)$/.test(parsed)) {
+                    return parsed.replace(/^(#{1,6})( )(.*)$/, (match, hashes, space, content) => {
+                        let level = hashes.length;
+                        return `<span class="md-h${level}"><span class="md-token">${hashes}</span>${space}${highlightInline(content)}</span>`;
+                    });
+                }
+                
+                // Blockquotes
+                if (/^(&gt;)( )(.*)$/.test(parsed)) {
+                    return parsed.replace(/^(&gt;)( )(.*)$/, '<span class="md-blockquote"><span class="md-token">$1</span>$2$3</span>');
+                }
+
+                // Listas Tareas
+                if (/^(- )(\[([ x])\])( )(.*)$/i.test(parsed)) {
+                    return parsed.replace(/^(- )(\[([ x])\])( )(.*)$/i, '<span class="md-list"><span class="md-token">$1$2$4</span>' + highlightInline('$5') + '</span>');
+                }
+
+                return highlightInline(parsed);
+            });
+            
+            // Añadir un salto visual al final para que el cursor baje si acaba en Enter
+            let finalHtml = html.join('\n');
+            if (text.endsWith('\n')) finalHtml += '\n'; 
+            return finalHtml;
+        }
+
+        function highlightInline(text) {
+            let html = text;
+            html = html.replace(/(\*\*)(.*?)(\*\*)/g, '<span class="md-token">$1</span><span class="md-bold">$2</span><span class="md-token">$3</span>');
+            html = html.replace(/(__)(.*?)(__)/g, '<span class="md-token">$1</span><span class="md-bold">$2</span><span class="md-token">$3</span>');
+            html = html.replace(/(\*)(.*?)(\*)/g, '<span class="md-token">$1</span><span class="md-italic">$2</span><span class="md-token">$3</span>');
+            html = html.replace(/(_)(.*?)(_)/g, '<span class="md-token">$1</span><span class="md-italic">$2</span><span class="md-token">$3</span>');
+            html = html.replace(/(~~)(.*?)(~~)/g, '<span class="md-token">$1</span><span class="md-strike">$2</span><span class="md-token">$3</span>');
+            html = html.replace(/(`)(.*?)(`)/g, '<span class="md-token">$1</span><span class="md-code">$2</span><span class="md-token">$3</span>');
+            html = html.replace(/(!\[)(.*?)(\]\()(.*?)(\))/g, '<span class="md-token">$1</span><span class="md-italic">$2</span><span class="md-token">$3</span><span class="md-url">$4</span><span class="md-token">$5</span>');
+            html = html.replace(/(\[)(.*?)(\]\()(.*?)(\))/g, '<span class="md-token">$1</span><span class="md-link">$2</span><span class="md-token">$3</span><span class="md-url">$4</span><span class="md-token">$5</span>');
+            
+            // Tablas: Atenuar los separadores | y -
+            html = html.replace(/(\|)/g, '<span class="md-token">$1</span>');
+            return html;
+        }
+
+        // Flujo principal de actualización reactiva
+        function updateEditor() {
+            const caret = getCaretIndex(editor);
+            editor.innerHTML = syntaxHighlight(appData.content);
+            if (document.activeElement === editor) setCaretIndex(editor, caret);
+            saveData();
+            updateMetrics();
+        }
+
+        // Eventos del Editor
+        editor.addEventListener('compositionstart', () => isComposing = true);
+        editor.addEventListener('compositionend', () => {
+            isComposing = false;
+            appData.content = editor.textContent;
+            updateEditor();
+        });
+
+        editor.addEventListener('input', () => {
+            if (isComposing) return;
+            appData.content = editor.textContent;
+            updateEditor();
+        });
+
+        // Forzar plain text en pegados y Enters
+        editor.addEventListener('keydown', e => {
+            if (e.key === 'Enter') {
+                e.preventDefault();
+                document.execCommand('insertText', false, '\n');
+            }
+        });
+
+        editor.addEventListener('paste', e => {
+            e.preventDefault();
+            const text = (e.originalEvent || e).clipboardData.getData('text/plain');
+            document.execCommand('insertText', false, text);
+        });
+
+        // ---------------------------------------------------------
+        // 3. INTERACCIÓN UI Y HERRAMIENTAS
+        // ---------------------------------------------------------
+
+        function switchView(mode) {
+            appData.mode = mode;
+            document.getElementById('btn-edit').classList.toggle('active', mode === 'edit');
+            document.getElementById('btn-render').classList.toggle('active', mode === 'preview');
+            document.getElementById('toolbar').style.display = mode === 'edit' ? 'flex' : 'none';
+            
+            if (mode === 'edit') {
+                editor.classList.add('active');
+                renderView.classList.remove('active');
+                updateEditor();
+            } else {
+                editor.classList.remove('active');
+                renderView.classList.add('active');
+                compileRender();
+            }
+        }
+
+        function insertSyntax(prefix, suffix) {
+            editor.focus();
+            const selection = window.getSelection();
+            if (!selection.rangeCount) return;
+            const text = selection.toString();
+            document.execCommand('insertText', false, prefix + text + suffix);
+        }
+
+        function insertTable() {
+            const tableMD = `\n| Columna 1 | Columna 2 | Columna 3 |\n|-----------|-----------|-----------|\n| Dato      | Dato      | Dato      |\n`;
+            insertSyntax(tableMD, '');
+        }
+
+        function updateMetrics() {
+            const text = appData.content;
+            const words = text.trim().split(/\s+/).filter(w => w.length > 0).length;
+            document.getElementById('word-count').textContent = words;
+            document.getElementById('char-count').textContent = text.length;
+        }
+
+        // ---------------------------------------------------------
+        // 4. MOTOR DE RENDERIZADO FINAL (Markdown a HTML)
+        // ---------------------------------------------------------
+
+        function compileRender() {
+            let md = appData.content.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+            
+            // Inline
+            md = md.replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>');
+            md = md.replace(/\*(.*?)\*/g, '<em>$1</em>');
+            md = md.replace(/~~(.*?)~~/g, '<del>$1</del>');
+            md = md.replace(/`(.*?)`/g, '<code>$1</code>');
+            md = md.replace(/!\[(.*?)\]\((.*?)\)/g, '<img src="$2" alt="$1">');
+            md = md.replace(/\[(.*?)\]\((.*?)\)/g, '<a href="$2" target="_blank">$1</a>');
+
+            // Bloques (separados por doble salto de línea)
+            let blocks = md.split(/\n\n+/);
+            let htmlBlocks = blocks.map(block => {
+                
+                // Tablas
+                if (block.trim().startsWith('|') && block.includes('|-')) {
+                    let rows = block.trim().split('\n');
+                    let table = '<table>';
+                    rows.forEach((row, idx) => {
+                        if (row.includes('---')) return;
+                        let tag = idx === 0 ? 'th' : 'td';
+                        let cells = row.split('|').filter(c => c.trim() !== '');
+                        table += '<tr>' + cells.map(c => `<${tag}>${c.trim()}</${tag}>`).join('') + '</tr>';
+                    });
+                    return table + '</table>';
+                }
+
+                // Headers
+                if (/^#{1,6}\s/.test(block)) {
+                    let match = block.match(/^(#{1,6})\s+(.*)$/s);
+                    if (match) return `<h${match[1].length}>${match[2]}</h${match[1].length}>`;
+                }
+
+                // Citas
+                if (block.startsWith('&gt;')) {
+                    return `<blockquote>${block.replace(/^&gt;\s?/gm, '').replace(/\n/g, '<br>')}</blockquote>`;
+                }
+
+                // Listas Tareas y Viñetas
+                if (/^[-*]\s/m.test(block)) {
+                    let items = block.split('\n');
+                    let listHTML = '<ul>';
+                    items.forEach(item => {
+                        let cleanItem = item.replace(/^[-*]\s/, '');
+                        if (/^\[[ x]\]\s/i.test(cleanItem)) {
+                            let checked = /^\[x\]/i.test(cleanItem) ? 'checked' : '';
+                            cleanItem = `<input type="checkbox" ${checked} disabled style="margin-right: 8px;"> ` + cleanItem.replace(/^\[[ x]\]\s/i, '');
+                            listHTML += `<li style="list-style: none; margin-left: -24px; display: flex; align-items: center;">${cleanItem}</li>`;
+                        } else {
+                            listHTML += `<li>${cleanItem}</li>`;
+                        }
+                    });
+                    return listHTML + '</ul>';
+                }
+
+                // Código preformateado (Básico)
+                if (block.startsWith('```')) {
+                    return `<pre><code>${block.replace(/```[a-z]*\n?/g, '')}</code></pre>`;
+                }
+
+                // Párrafos por defecto
+                return `<p>${block.replace(/\n/g, '<br>')}</p>`;
+            });
+
+            renderView.innerHTML = htmlBlocks.join('');
+        }
+    </script>
+</body>
+</html>

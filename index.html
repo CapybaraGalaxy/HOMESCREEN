@@ -10,6 +10,12 @@
     <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@200;400;500&display=swap" rel="stylesheet">
     <script src="https://unpkg.com/lucide@latest"></script>
     <link rel="stylesheet" href="styles.css">
+    <style>
+        body.hide-folder-close-btn #folderModal .modal-buttons .secondary,
+        body.hide-folder-close-btn #hiddenFolderModal .modal-buttons .secondary {
+            display: none !important;
+        }
+    </style>
     
     <script>
         window.hasHubError = false;
@@ -50,7 +56,7 @@
         <div><strong>VERSIÓN LOCAL</strong> <span>· Ir a web</span></div>
     </a>
 
-    <div class="version-tag" id="versionTag">1.5.1.3</div>
+    <div class="version-tag" id="versionTag">1.6</div>
 
     <div class="ui-layer">
         <header class="header">
@@ -155,7 +161,9 @@ const tools = [
             { name: 'Contador', icon: 'List-Ordered', url: 'Apps/counter.html' },
             { name: 'Generador de código QR', icon: 'Qr-Code', url: 'Apps/qr.html' },
             { name: 'Bocetos', icon: 'Pencil-Line', url: 'Apps/bocetos.html' },
-            { name: 'Selector de color', icon: 'pipette', url: 'Apps/color.html' }
+            { name: 'Selector de color', icon: 'pipette', url: 'Apps/color.html' },
+            { name: 'Editor de fotos', icon: 'image', url: 'Apps/editor-fotos.html' },
+            { name: 'Conversor zonas horarias', icon: 'globe', url: 'horarios.html' }
         ]
     },
     {
@@ -210,7 +218,7 @@ const tools = [
         ]
     },
     {
-       name: 'Conversores y Traductores',
+        name: 'Conversores y Traductores',
         icon: 'Arrow-Left-Right',
         folder: true,
         apps: [
@@ -231,7 +239,9 @@ const tools = [
             { name: 'Material You', icon: 'palette', url: 'Apps/material-you' },
             { name: 'Galería de iconos', icon: 'Layout-List', url: 'Apps/icontest.html' },
             { name: 'App maker', icon: 'Columns-Settings', url: 'Apps/appmaker.html' },
-            { name: 'Consejos', icon: 'lightbulb', url: 'Apps/consejos.html' }
+            { name: 'Consejos', icon: 'lightbulb', url: 'Apps/consejos.html' },
+            { name: 'Visor HTML', icon: 'square-terminal', url: 'html-preview.html' },
+            { name: 'Labs', icon: 'flask-conical', url: 'Labs.html' }
         ]
     }
 ];
@@ -290,6 +300,16 @@ const appKeywords = {
         'cuentagotas', 'RGBa', 'CMYK', 'HSL', 'códigos', 'herramientas', 'online', 'capturador', 'combinación', 'muestra',
         'creador', 'paletas', 'matiz', 'saturación', 'brillo', 'tonalidad', 'generar', 'copiar', 'pegar', 'diseño-web',
         'digital'
+    ],
+    'Apps/editor-fotos.html': [
+        'foto', 'imagen', 'editor', 'editar', 'recortar', 'crop', 'redimensionar', 'resize', 'filtros', 'efectos',
+        'rotar', 'girar', 'ajustar', 'brillo', 'contraste', 'saturacion', 'pixel', 'png', 'jpg', 'jpeg',
+        'webp', 'canvas', 'dibujo', 'pincel', 'texto', 'mascara', 'optimizar', 'compresión', 'fotomontaje', 'retocar'
+    ],
+    'horarios.html': [
+        'hora', 'zonas', 'horarias', 'conversor', 'reloj', 'mundial', 'tiempo', 'utc', 'gmt', 'timezone',
+        'convertidor', 'internacional', 'paises', 'ciudades', 'desfase', 'diferencia', 'calendario', 'agenda', 'reunion', 'horario',
+        'verano', 'invierno', 'programar', 'sincronizar', 'epoch', 'timestamp', 'local', 'militar', 'am', 'pm'
     ],
     'Apps/calendario.html': [
         'calendario', 'fechas', 'meses', 'dias', 'semanas', 'año', 'agenda', 'citas', 'eventos', 'reuniones',
@@ -403,26 +423,6 @@ const appKeywords = {
         'versiones', 'list', 'check', 'mc', 'modding', 'java', 'analisis', 'dependencias', 'conflictos', 'optifine',
         'plugins', 'servidor', 'cliente', 'actualizacion', 'soporte', 'diagnostico', 'herramienta', 'juego', 'modpack', 'compatibles'
     ],
-    'Apps/material-you': [
-        'material you', 'palette', 'colores', 'diseño', 'android', 'google', 'interfaz', 'ui', 'ux', 'personalizacion',
-        'temas', 'dinamico', 'hex', 'rgb', 'paleta de colores', 'estilo', 'sistema', 'css', 'variables', 'desrollo',
-        'generador', 'armonia', 'monet', 'wallpaper', 'extractor', 'diseñador', 'tokens', 'configuracion', 'visual', 'apariencia'
-    ],
-    'Apps/icontest.html': [
-        'iconos', 'galeria', 'lucide', 'font awesome', 'svg', 'vectores', 'imagenes', 'test', 'visualizador', 'catalogo',
-        'interfaz', 'ui', 'diseño', 'desarrollo web', 'layout', 'list', 'buscador', 'libreria', 'assets', 'simbolos',
-        'graficos', 'herramienta', 'frontend', 'clases', 'nombres', 'muestrario', 'revisar', 'pantalla', 'iconography', 'pack'
-    ],
-    'Apps/appmaker.html': [
-        'app maker', 'creador', 'aplicaciones', 'desarrollo', 'no code', 'constructor', 'builder', 'diseño', 'interfaz', 'herramientas',
-        'settings', 'prototipo', 'crear app', 'software', 'codigo', 'componentes', 'paneles', 'vistas', 'configuracion', 'personalizar',
-        'sistema', 'maquetador', 'drag and drop', 'entorno', 'ide', 'proyecto', 'editor', 'generador', 'utilidad', 'web app'
-    ],
-    'Apps/consejos.html': [
-        'ayuda', 'soporte', 'tutorial', 'guia', 'consejos', 'preguntas frecuentes', 'faq', 'solucion', 'error', 'configurar',
-        'aprender', 'manual', 'paso a paso', 'pantalla de inicio', 'ajustes', 'restaurar', 'copia de seguridad', 'problemas', 'actualizacion', 'comunidad',
-        'trucos', 'primeros pasos', 'personalizar', 'interfaz', 'widgets', 'iconos', 'herramientas', 'soporte tecnico', 'funciones', 'inicio rapido'
-    ],
     'Apps/conversor.html': [
         'conversor', 'convertir', 'unidades', 'unidades de medida', 'unidades de peso', 'unidades de longitud', 'volumen', 'masa', 'temperatura', 'celsius',
         'fahrenheit', 'kilos', 'libras', 'gramos', 'kilometros', 'millas', 'litros', 'galones', 'conversion', 'transformar',
@@ -463,12 +463,41 @@ const appKeywords = {
         'contabilidad', 'palabras', 'cantidad', 'millon', 'generar', 'copiar', 'pegar', 'escuela', 'aprendizaje', 'moneda',
         'lectura'
     ],
+    'Apps/material-you': [
+        'material you', 'palette', 'colores', 'diseño', 'android', 'google', 'interfaz', 'ui', 'ux', 'personalizacion',
+        'temas', 'dinamico', 'hex', 'rgb', 'paleta de colores', 'estilo', 'sistema', 'css', 'variables', 'desrollo',
+        'generador', 'armonia', 'monet', 'wallpaper', 'extractor', 'diseñador', 'tokens', 'configuracion', 'visual', 'apariencia'
+    ],
+    'Apps/icontest.html': [
+        'iconos', 'galeria', 'lucide', 'font awesome', 'svg', 'vectores', 'imagenes', 'test', 'visualizador', 'catalogo',
+        'interfaz', 'ui', 'diseño', 'desarrollo web', 'layout', 'list', 'buscador', 'libreria', 'assets', 'simbolos',
+        'graficos', 'herramienta', 'frontend', 'clases', 'nombres', 'muestrario', 'revisar', 'pantalla', 'iconography', 'pack'
+    ],
+    'Apps/appmaker.html': [
+        'app maker', 'creador', 'aplicaciones', 'desarrollo', 'no code', 'constructor', 'builder', 'diseño', 'interfaz', 'herramientas',
+        'settings', 'prototipo', 'crear app', 'software', 'codigo', 'componentes', 'paneles', 'vistas', 'configuracion', 'personalizar',
+        'sistema', 'maquetador', 'drag and drop', 'entorno', 'ide', 'proyecto', 'editor', 'generador', 'utilidad', 'web app'
+    ],
+    'Apps/consejos.html': [
+        'ayuda', 'soporte', 'tutorial', 'guia', 'consejos', 'preguntas frecuentes', 'faq', 'solucion', 'error', 'configurar',
+        'aprender', 'manual', 'paso a paso', 'pantalla de inicio', 'ajustes', 'restaurar', 'copia de seguridad', 'problemas', 'actualizacion', 'comunidad',
+        'trucos', 'primeros pasos', 'personalizar', 'interfaz', 'widgets', 'iconos', 'herramientas', 'soporte tecnico', 'funciones', 'inicio rapido'
+    ],
+    'html-preview.html': [
+        'html', 'preview', 'visor', 'editor', 'vivo', 'live', 'render', 'codigo', 'code', 'ver',
+        'renderizar', 'web', 'diseño', 'frontend', 'css', 'js', 'programacion', 'utilidades', 'herramientas', 'archivo',
+        'file', 'abrir', 'test', 'probar', 'sandbox', 'maquetar', 'visualizador', 'visor-html', 'previewer', 'live-preview'
+    ],
+    'Labs.html': [
+        'experimentos', 'beta', 'pruebas', 'homescreen', 'interno'
+    ],
     'games.html': [
         'juegos', 'gamecenter', 'neo', 'videojuegos', 'entretenimiento', 'arcade', 'consola', 'gamepad', 'gamer', 'diversion',
         'ocio', 'play', 'gaming', 'retro', 'casual', 'oculto', 'hidden', 'hub', 'plataforma', 'catalogo',
         'coleccion', 'online', 'browser games', 'minijuegos', 'partidas', 'puntuacion', 'records', 'habilidad', 'estrategia', 'accion'
     ]
 };
+
 
         let currentSearchIndex = -1;
         let activeFolderIndex = -1; 
@@ -947,137 +976,239 @@ const frases = {
     <div class="settings-btn" id="setBtn"><i data-lucide="settings" style="width: 20px;"></i></div>
     
     <div class="settings-panel" id="setPanel">
+        <div class="settings-panel-glow"></div>
         <div class="settings-header">
-            <h3 style="margin: 0; font-weight: 500; display: flex; align-items: center; gap: 8px;">
-                <i data-lucide="sliders-horizontal" style="width: 18px; height: 18px;"></i> Ajustes
-            </h3>
-            <span style="cursor: pointer; opacity: 0.5;" onclick="playSound('click'); document.getElementById('setPanel').classList.remove('active')">&times;</span>
+            <div class="settings-title-wrap">
+                <div class="settings-icon-badge">
+                    <i data-lucide="sliders-horizontal" style="width: 18px; height: 18px;"></i>
+                </div>
+                <div>
+                    <h3>Ajustes</h3>
+                    <span class="settings-subtitle">Personalización</span>
+                </div>
+            </div>
         </div>
 
-        <div class="settings-section">
-            <span class="settings-section-title">Diseño de Interfaz</span>
-            <div class="setting-item-row">
-                <div class="setting-item-meta">
-                    <i data-lucide="user"></i>
-                    <div>
-                        <span class="setting-label">Nombre de Usuario</span>
-                        <span class="setting-desc">Personalizar saludo</span>
+        <div class="settings-layout">
+            <aside class="settings-sidebar" aria-label="Pestañas de configuración">
+                <div class="settings-sidebar-title">Configuración</div>
+                <button class="settings-tab active" type="button" data-tab="welcome" aria-selected="true">
+                    <i data-lucide="house"> </i><span>Inicio</span>
+                </button>
+                <button class="settings-tab" type="button" data-tab="pantalla" aria-selected="false">
+                    <i data-lucide="monitor-smartphone""> </i><span>Pantalla</span>
+                </button>
+                <button class="settings-tab" type="button" data-tab="carpetas" aria-selected="false">
+                   <i data-lucide="folders"> </i> <span>Carpetas</span>
+                </button>
+                <button class="settings-tab" type="button" data-tab="apariencia" aria-selected="false">
+                   <i data-lucide="palette"> </i> <span>Apariencia</span>
+                </button>
+                <button class="settings-tab" type="button" data-tab="tactil" aria-selected="false">
+                    <i data-lucide="shapes"> </i><span>Táctil y Sonido</span>
+                </button>
+                <button class="settings-tab" type="button" data-tab="sistema" aria-selected="false">
+                    <i data-lucide="monitor-cog"> </i><span>Sistema</span>
+                </button>
+            </aside>
+
+            <div class="settings-content">
+                <div class="settings-tab-panel active" data-panel="welcome">
+                    <div class="settings-section settings-welcome-section">
+                        <div class="settings-welcome-header">
+                            <div class="settings-icon-badge settings-icon-badge--large">
+                                <i data-lucide="settings" style="width: 20px; height: 20px;"></i>
+                            </div>
+                            <div>
+                                <h4>Bienvenido a tu panel de ajustes</h4>
+                            </div>
+                        </div>
+                        <p class="settings-welcome-text">Personaliza tu experiencia, controla la navegación y accede rápido a las funciones más útiles.</p>
+                        <div class="settings-quick-actions">
+                            <button class="quick-access" type="button" data-tab-target="pantalla"><i data-lucide="monitor-smartphone"></i><span>Personalizar la <strong>pantalla de inicio</strong></span></button>
+                            <button class="quick-access" type="button" data-tab-target="carpetas"><i data-lucide="folder-open"></i><span>Elegir las <strong>carpetas</strong> visibles</span></button>
+                            <button class="quick-access" type="button" data-tab-target="apariencia"><i data-lucide="sparkles"></i><span>Elige el <strong>modo de visualización</strong></span></button>
+                            <button class="quick-access" type="button" data-tab-target="apariencia"><i data-lucide="gauge"></i><span>Mejorar el <strong>rendimiento</strong></span></button>
+                            <button class="quick-access" type="button" data-tab-target="consejos" data-url="Apps/consejos.html"><i data-lucide="lightbulb"></i><span><strong>Consejos</strong></span></button>
+                            <button class="quick-access" type="button" data-tab-target="config" data-url="config.html"><i data-lucide="settings"></i><span><strong>Configuración inicial</strong></span></button>
+                        </div>
                     </div>
                 </div>
-                <input type="text" id="usernameInput" placeholder="Usuario" style="background: rgba(255,255,255,0.08); border: 1px solid var(--glass-border); color: #fff; padding: 6px 12px; border-radius: 10px; font-family: 'Outfit'; font-size: 0.85rem; width: 110px; text-align: right; outline: none;">
-            </div>
-            
-            <div class="setting-item-row" style="margin-top: 12px; margin-bottom: 12px;">
-                <div class="setting-item-meta"><i data-lucide="eye-off"></i><div><span class="setting-label">Ocultar Saludo</span><span class="setting-desc">Desaparece en unos segundos</span></div></div>
-                <div class="switch" id="toggleHideWelcome"></div>
-            </div>
 
-            <div class="setting-item-row" style="margin-bottom: 12px;">
-                <div class="setting-item-meta"><i data-lucide="sparkles"></i><div><span class="setting-label">Animación de bienvenida</span><span class="setting-desc">Efecto al aparecer y ocultarse</span></div></div>
-                <div class="custom-dropdown" id="welcomeAnimationDropdown">
-                    <div class="dropdown-select"><span id="currentWelcomeAnimation">Blur</span><i data-lucide="chevron-down"></i></div>
-                    <div class="dropdown-options">
-                        <div class="dropdown-option selected" data-value="blur">Blur</div>
-                        <div class="dropdown-option" data-value="fade">Fade</div>
+                <div class="settings-tab-panel" data-panel="pantalla">
+                    <div class="settings-section">
+                        <span class="settings-section-title">Saludo de bienvenida</span>
+                        <div class="setting-item-row">
+                            <div class="setting-item-meta">
+                                <i data-lucide="user"></i>
+                                <div>
+                                    <span class="setting-label">Nombre de Usuario</span>
+                                    <span class="setting-desc">Personalizar saludo</span>
+                                </div>
+                            </div>
+                            <input type="text" id="usernameInput" placeholder="Usuario" style="background: rgba(255,255,255,0.08); border: 1px solid var(--glass-border); color: #fff; padding: 6px 12px; border-radius: 10px; font-family: 'Outfit'; font-size: 0.85rem; width: 110px; text-align: right; outline: none;">
+                        </div>
+                        <div class="setting-item-row">
+                            <div class="setting-item-meta"><i data-lucide="eye-off"></i><div><span class="setting-label">Ocultar saludo</span><span class="setting-desc">Desaparece en unos segundos</span></div></div>
+                            <div class="switch" id="toggleHideWelcome"></div>
+                        </div>
+                        <div class="setting-item-row">
+                            <div class="setting-item-meta"><i data-lucide="sparkles"></i><div><span class="setting-label">Animación de bienvenida</span><span class="setting-desc">Efecto del saludo al aparecer y ocultarse</span></div></div>
+                            <div class="custom-dropdown" id="welcomeAnimationDropdown">
+                                <div class="dropdown-select"><span id="currentWelcomeAnimation">Blur</span><i data-lucide="chevron-down"></i></div>
+                                <div class="dropdown-options">
+                                    <div class="dropdown-option selected" data-value="blur">Blur</div>
+                                    <div class="dropdown-option" data-value="fade">Fade</div>
+                                </div>
+                            </div>
+                        </div>
+                        <span class="settings-section-title">Datos adicionales</span>
+                        <div class="setting-item-row">
+                            <div class="setting-item-meta"><i data-lucide="battery"></i><div><span class="setting-label">Mostrar batería</span><span class="setting-desc">Porcentaje bajo el reloj. No disponible en Firefox ni Safari</span></div></div>
+                            <div class="switch" id="toggleBattery"></div>
+                        </div>
+                        <span class="settings-section-title">Opciones de visualización</span>
+                        <div class="setting-item-row setting-range-row">
+                            <div class="setting-item-meta"><i data-lucide="scaling"></i><div><span class="setting-label">Tamaño de carpetas</span><span class="setting-desc">Ajusta los accesos de la pantalla de inicio</span></div></div>
+                            <label class="settings-range-control"><output id="folderSizeValue">3</output><input type="range" id="folderSizeRange" min="1" max="5" value="3" step="1" aria-label="Tamaño de carpetas"></label>
+                        </div>
+                        <div class="setting-item-row setting-range-row">
+                            <div class="setting-item-meta"><i data-lucide="type"></i><div><span class="setting-label">Apps dentro de carpetas</span><span class="setting-desc">Tamaño de texto e iconos</span></div></div>
+                            <label class="settings-range-control"><output id="folderAppsSizeValue">3</output><input type="range" id="folderAppsSizeRange" min="1" max="5" value="3" step="1" aria-label="Tamaño de apps dentro de carpetas"></label>
+                        </div>
+                        <div class="setting-item-row">
+                            <div class="setting-item-meta"><i data-lucide="type"></i><div><span class="setting-label">Ocultar texto de carpetas</span><span class="setting-desc">Mostrar solo iconos en la pantalla de inicio</span></div></div>
+                            <div class="switch" id="toggleFolderLabels"></div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="settings-tab-panel" data-panel="carpetas">
+                    <div class="settings-section">
+                        <span class="settings-section-title">Navegación y carpetas</span>
+                        <div class="setting-item-row">
+                            <div class="setting-item-meta"><i data-lucide="star"></i><div><span class="setting-label">Carpeta Favoritos</span><span class="setting-desc">Atajo de favoritos en inicio</span></div></div>
+                            <div class="switch" id="toggleFavFolder"></div>
+                        </div>
+                        <div class="setting-item-row">
+                            <div class="setting-item-meta"><i data-lucide="flame"></i><div><span class="setting-label">Carpeta Recientes</span><span class="setting-desc">Mostrar apps más usadas</span></div></div>
+                            <div class="switch" id="toggleRecentFolder"></div>
+                        </div>
+                            <div class="setting-item-row">
+                            <div class="setting-item-meta"><i data-lucide="layout-dashboard"></i><div><span class="setting-label">Dock inferior</span><span class="setting-desc">Fijar 5 apps más usadas</span></div></div>
+                            <div class="switch" id="toggleDock"></div>
+                        </div>
+                        <span class="settings-section-title">Preferencias</span>
+                        <div class="setting-item-row">
+                            <div class="setting-item-meta"><i data-lucide="scan"></i><div><span class="setting-label">Animación de carpetas</span><span class="setting-desc">Efecto al abrir y cerrar carpetas</span></div></div>
+                            <div class="custom-dropdown" id="folderAnimationDropdown">
+                                <div class="dropdown-select"><span id="currentFolderAnimation">Slide</span><i data-lucide="chevron-down"></i></div>
+                                <div class="dropdown-options">
+                                    <div class="dropdown-option selected" data-value="slide">Slide</div>
+                                    <div class="dropdown-option" data-value="zoom">Zoom</div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="setting-item-row">
+                            <div class="setting-item-meta"><i data-lucide="search"></i><div><span class="setting-label">Buscador predeterminado</span><span class="setting-desc">Motor para realizar consultas</span></div></div>
+                            <div class="custom-dropdown" id="searchEngineDropdown">
+                                <div class="dropdown-select"><span id="currentSearchEngine">Google</span><i data-lucide="chevron-down"></i></div>
+                                <div class="dropdown-options">
+                                    <div class="dropdown-option selected" data-value="google">Google</div>
+                                    <div class="dropdown-option" data-value="bing">Bing</div>
+                                    <div class="dropdown-option" data-value="duckduckgo">DuckDuckGo</div>
+                                    <div class="dropdown-option" data-value="yahoo">Yahoo</div>
+                                </div>
+                            </div>
+                            </div>
+                                <div class="setting-item-row">
+                            <div class="setting-item-meta"><i data-lucide="x-circle"></i><div><span class="setting-label">Ocultar botón cerrar de carpetas</span><span class="setting-desc">Ocultar botón dentro de las carpetas</span></div></div>
+                            <div class="switch" id="toggleFolderCloseBtn"></div>
+                        </div>
+                    </div>
+                </div>
+                <div class="settings-tab-panel" data-panel="apariencia">
+                    <div class="settings-section">
+                        <span class="settings-section-title">Apariencia y rendimiento</span>
+                        <div class="setting-item-row">
+                            <div class="setting-item-meta"><i data-lucide="layout-template"></i><div><span class="setting-label">Modo de visualización</span><span class="setting-desc">Pill, Lista o Cuadrícula</span></div></div>
+                            <div class="layout-selector">
+                                <button class="layout-opt active" data-layout="pill" type="button">
+                                    <span class="layout-preview preview-pill"><span></span><span></span><span></span></span>
+                                    <span>Pill</span>
+                                </button>
+                                <button class="layout-opt" data-layout="list" type="button">
+                                    <span class="layout-preview preview-list"><span></span><span></span><span></span></span>
+                                    <span>Lista</span>
+                                </button>
+                                <button class="layout-opt" data-layout="grid" type="button">
+                                    <span class="layout-preview preview-grid"><span></span><span></span><span></span><span></span><span></span><span></span></span>
+                                    <span>Cuadrícula</span>
+                                </button>
+                            </div>
+                        </div>
+                        <div class="setting-item-row">
+                            <div class="setting-item-meta"><i data-lucide="sparkles"></i><div><span class="setting-label">Fondo animado</span><span class="setting-desc">Partículas interactivas flotando</span></div></div>
+                            <div class="switch" id="toggleBg"></div>
+                        </div>
+                        <div class="setting-item-row setting-range-row">
+                            <div class="setting-item-meta"><i data-lucide="glass-water"></i><div><span class="setting-label">Transparencia del cristal</span><span class="setting-desc">Más transparente / más opaco</span></div></div>
+                            <label class="settings-range-control"><output id="glassOpacityValue">50%</output><input type="range" id="glassOpacityRange" min="10" max="90" value="50" step="5" aria-label="Transparencia del cristal"></label>
+                        </div>
+                        <div class="setting-item-row">
+                            <div class="setting-item-meta"><i data-lucide="droplet"></i><div><span class="setting-label">Desactivar Blur</span><span class="setting-desc">Mejora el rendimiento</span></div></div>
+                            <div class="switch" id="toggleBlur"></div>
+                        </div>
+                        <span class="settings-section-title">Opciones avanzadas</span>
+                        <div class="setting-item-row">
+                            <div class="setting-item-meta"><i data-lucide="moon"></i><div><span class="setting-label">Fondo</span><span class="setting-desc">⚠ No desactives esta opción salvo que tu navegador o extensión soporte webs con fondo transparente</span></div></div>
+                            <div class="switch" id="toggleDarkBg"></div>
+                        </div>
+                            <div class="setting-item-row" id="settingLocalChip">
+                            <div class="setting-item-meta"><i data-lucide="alert-circle"></i><div><span class="setting-label">Ocultar aviso local</span><span class="setting-desc">No mostrar chip web</span></div></div>
+                            <div class="switch" id="toggleLocalChip"></div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="settings-tab-panel" data-panel="tactil">
+                    <div class="settings-section">
+                        <span class="settings-section-title">Experiencia táctil y audio</span>
+                        <div class="setting-item-row">
+                            <div class="setting-item-meta"><i data-lucide="volume-2"></i><div><span class="setting-label">Efectos de sonido</span><span class="setting-desc">Al interactuar</span></div></div>
+                            <div class="switch" id="toggleSounds"></div>
+                        </div>
+                        <div class="setting-item-row">
+                            <div class="setting-item-meta"><i data-lucide="smartphone"></i><div><span class="setting-label">Vibración háptica</span><span class="setting-desc">Al interactuar</span></div></div>
+                            <div class="switch" id="toggleHaptics"></div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="settings-tab-panel" data-panel="sistema">
+                    <div class="settings-section">
+                        <span class="settings-section-title">Actualizaciones</span>
+                        <div class="settings-info" id="settingsVersionInfo">
+                            Versión actual<strong><span>Cargando...</span></strong>
+                        </div>
+                         <div class="settings-actions-grid">
+                            <button class="settings-action-btn" id="checkUpdatesBtn" type="button"><i data-lucide="refresh-cw" style="width: 14px;"></i> Comprobar</button>
+                            <button class="settings-action-btn" id="showChangelogBtn" type="button"><i data-lucide="history" style="width: 14px;"></i> Changelog</button>
+                        </div>
+                        <span class="settings-section-title">Copias de seguridad</span>
+                        <div class="settings-actions-grid" style="margin-bottom: 8px;">
+                            <button class="settings-action-btn" id="exportSettingsBtn" type="button"><i data-lucide="download" style="width: 14px;"></i> Exportar</button>
+                            <button class="settings-action-btn" id="importSettingsBtn" type="button"><i data-lucide="upload" style="width: 14px;"></i> Importar</button>
+                            <input type="file" id="importSettingsFile" accept=".json,.html,application/json,text/plain" style="display: none;">
+                        </div>
+                        <span class="settings-section-title">Información</span>
+                         <div class="settings-actions-grid">
+                        <button class="settings-action-btn" id="showAboutBtn" type="button" onclick="window.location.href='about.html'" style="width: 100%; margin-top: 8px;"><i data-lucide="badge-info" style="width: 14px;"></i> Sobre Homescreen</button>
+                        <button class="settings-action-btn" id="gotoconfigBtn" type="button" onclick="window.location.href='config.html'" style="width: 100%; margin-top: 8px;"><i data-lucide="settings" style="width: 14px;"></i> Configuración inicial</button>
                     </div>
                 </div>
             </div>
-
-            <div class="setting-item-row" style="margin-bottom: 12px;">
-                <div class="setting-item-meta"><i data-lucide="scan"></i><div><span class="setting-label">Animación de carpetas</span><span class="setting-desc">Efecto al abrir y cerrar carpetas</span></div></div>
-                <div class="custom-dropdown" id="folderAnimationDropdown">
-                    <div class="dropdown-select"><span id="currentFolderAnimation">Slide</span><i data-lucide="chevron-down"></i></div>
-                    <div class="dropdown-options">
-                        <div class="dropdown-option selected" data-value="slide">Slide</div>
-                        <div class="dropdown-option" data-value="zoom">Zoom</div>
-                    </div>
-                </div>
-            </div>
-
-            <div class="layout-selector">
-                <button class="layout-opt" data-layout="pill"><i data-lucide="shapes"></i><span>Pill</span></button>
-                <button class="layout-opt" data-layout="list"><i data-lucide="list"></i><span>Lista</span></button>
-                <button class="layout-opt" data-layout="grid"><i data-lucide="grid"></i><span>Cuadrícula</span></button>
-            </div>
-            
-            <div class="setting-item-row" style="margin-top: 12px;">
-                <div class="setting-item-meta"><i data-lucide="star"></i><div><span class="setting-label">Carpeta Favoritos</span><span class="setting-desc">Atajo de favoritos en inicio</span></div></div>
-                <div class="switch" id="toggleFavFolder"></div>
-            </div>
-            
-            <div class="setting-item-row">
-                <div class="setting-item-meta"><i data-lucide="layout-dashboard"></i><div><span class="setting-label">Dock Inferior</span><span class="setting-desc">Fijar 5 apps más usadas</span></div></div>
-                <div class="switch" id="toggleDock"></div>
-            </div>
-            <div class="setting-item-row">
-                <div class="setting-item-meta"><i data-lucide="flame"></i><div><span class="setting-label">Carpeta Recientes</span><span class="setting-desc">Mostrar apps más usadas</span></div></div>
-                <div class="switch" id="toggleRecentFolder"></div>
-            </div>
-        </div>
-
-        <div class="setting-item-row">
-            <div class="setting-item-meta"><i data-lucide="search"></i><div><span class="setting-label">Buscador predeterminado</span><span class="setting-desc">Motor para realizar consultas</span></div></div>
-            <div class="custom-dropdown" id="searchEngineDropdown">
-                <div class="dropdown-select"><span id="currentSearchEngine">Google</span><i data-lucide="chevron-down"></i></div>
-                <div class="dropdown-options">
-                    <div class="dropdown-option selected" data-value="google">Google</div>
-                    <div class="dropdown-option" data-value="bing">Bing</div>
-                    <div class="dropdown-option" data-value="duckduckgo">DuckDuckGo</div>
-                    <div class="dropdown-option" data-value="yahoo">Yahoo</div>
-                </div>
-            </div>
-        </div>
-
-        <div class="settings-section">
-            <span class="settings-section-title">Efectos y Hardware</span>
-            
-            <div class="setting-item-row">
-                <div class="setting-item-meta"><i data-lucide="battery"></i><div><span class="setting-label">Mostrar Batería</span><span class="setting-desc">Porcentaje bajo el reloj</span></div></div>
-                <div class="switch" id="toggleBattery"></div>
-            </div>
-            <div class="setting-item-row">
-                <div class="setting-item-meta"><i data-lucide="volume-2"></i><div><span class="setting-label">Efectos de Sonido</span><span class="setting-desc">Retroalimentación sutil de UI</span></div></div>
-                <div class="switch" id="toggleSounds"></div>
-            </div>
-            <div class="setting-item-row">
-                <div class="setting-item-meta"><i data-lucide="smartphone"></i><div><span class="setting-label">Vibración Háptica</span><span class="setting-desc">Al tocar tarjetas (Móviles)</span></div></div>
-                <div class="switch" id="toggleHaptics"></div>
-            </div>
-
-            <div class="setting-item-row" style="margin-top:10px;">
-                <div class="setting-item-meta"><i data-lucide="sparkles"></i><div><span class="setting-label">Fondo Animado</span><span class="setting-desc">Partículas interactivas flotando</span></div></div>
-                <div class="switch" id="toggleBg"></div>
-            </div>
-            <div class="setting-item-row">
-                <div class="setting-item-meta"><i data-lucide="moon"></i><div><span class="setting-label">Fondo Negro</span><span class="setting-desc">Negro AMOLED para ahorrar</span></div></div>
-                <div class="switch" id="toggleDarkBg"></div>
-            </div>
-            <div class="setting-item-row">
-                <div class="setting-item-meta"><i data-lucide="droplet"></i><div><span class="setting-label">Desactivar Blur</span><span class="setting-desc">Mejora el rendimiento</span></div></div>
-                <div class="switch" id="toggleBlur"></div>
-            </div>
-            <div class="setting-item-row" id="settingLocalChip">
-                <div class="setting-item-meta"><i data-lucide="alert-circle"></i><div><span class="setting-label">Ocultar Aviso Local</span><span class="setting-desc">No mostrar chip web</span></div></div>
-                <div class="switch" id="toggleLocalChip"></div>
-            </div>
-        </div>
-
-        <div class="settings-section">
-            <span class="settings-section-title">Sistema</span>
-            <div class="settings-info" id="settingsVersionInfo">
-                <strong>Versión actual</strong><span>Cargando...</span>
-            </div>
-            <div class="settings-actions-grid" style="margin-bottom: 8px;">
-                <button class="settings-action-btn" id="exportSettingsBtn" type="button"><i data-lucide="download" style="width: 14px;"></i> Exportar</button>
-                <button class="settings-action-btn" id="importSettingsBtn" type="button"><i data-lucide="upload" style="width: 14px;"></i> Importar</button>
-                <input type="file" id="importSettingsFile" accept=".json,.html,application/json,text/plain" style="display: none;">
-            </div>
-            <div class="settings-actions-grid">
-                <button class="settings-action-btn" id="checkUpdatesBtn" type="button"><i data-lucide="refresh-cw" style="width: 14px;"></i> Comprobar</button>
-                <button class="settings-action-btn" id="showChangelogBtn" type="button"><i data-lucide="history" style="width: 14px;"></i> Changelog</button>
-            </div>
-            <button class="settings-action-btn" id="showAboutBtn" type="button" onclick="window.location.href='about.html'" style="width: 100%; margin-top: 8px;"><i data-lucide="badge-info" style="width: 14px;"></i> Información</button>
-            <button class="settings-action-btn" id="gotoconfigBtn" type="button" onclick="window.location.href='config.html'" style="width: 100%; margin-top: 8px;"><i data-lucide="settings" style="width: 14px;"></i> Configuración inicial</button>
         </div>
     </div>
 
@@ -1091,7 +1222,63 @@ const frases = {
         const clock = document.getElementById('clock');
         const exitZenBtn = document.getElementById('exitZenBtn');
 
-        let versionClicks = 0;
+        const settingsTabs = document.querySelectorAll('.settings-tab');
+        const settingsPanels = document.querySelectorAll('.settings-tab-panel');
+
+        function resizeSettingsPanel() {
+            if (!setPanel) return;
+
+            const header = setPanel.querySelector('.settings-header');
+            const sidebar = setPanel.querySelector('.settings-sidebar');
+            const panelStyles = getComputedStyle(setPanel);
+
+            const headerHeight = header ? header.offsetHeight : 0;
+            const sidebarHeight = sidebar ? sidebar.offsetHeight : 0;
+            const paddingTop = parseFloat(panelStyles.paddingTop || '0');
+            const paddingBottom = parseFloat(panelStyles.paddingBottom || '0');
+            const gap = parseFloat(panelStyles.gap || '0');
+
+            const targetHeight = sidebarHeight + headerHeight + paddingTop + paddingBottom + gap + 10;
+            setPanel.style.height = `${targetHeight}px`;
+        }
+
+        function activateSettingsTab(target) {
+            settingsTabs.forEach((tab) => {
+                const isActive = tab.dataset.tab === target;
+                tab.classList.toggle('active', isActive);
+                tab.setAttribute('aria-selected', String(isActive));
+            });
+
+            settingsPanels.forEach((panel) => {
+                panel.classList.toggle('active', panel.dataset.panel === target);
+            });
+
+            resizeSettingsPanel();
+            const activePanel = setPanel.querySelector('.settings-tab-panel.active');
+            if (activePanel) {
+                activePanel.scrollTop = 0;
+            }
+        }
+
+        window.addEventListener('resize', resizeSettingsPanel);
+
+        settingsTabs.forEach((tab) => {
+            tab.addEventListener('click', () => activateSettingsTab(tab.dataset.tab));
+        });
+
+        document.querySelectorAll('.quick-access').forEach((button) => {
+            button.addEventListener('click', () => {
+                const target = button.dataset.tabTarget;
+                const url = button.dataset.url;
+                if (url) {
+                    window.location.href = url;
+                    return;
+                }
+                activateSettingsTab(target);
+            });
+        });
+
+        let settingsVersionClicks = 0;
         let warningTimer = null;
         let draggedUrl = null;
         let isDraggingFromFavorites = false;
@@ -1113,11 +1300,6 @@ const frases = {
             draggedUrl = null;
             isDraggingFromFavorites = false;
         }
-
-        document.getElementById('versionTag').onclick = (e) => {
-            versionClicks++;
-            if(versionClicks === 5) { versionClicks = 0; openModal('hiddenFolderModal'); }
-        };
 
         /* --- CONTROL DEL RELOJ --- */
         let clockPressTimer = null;
@@ -1151,6 +1333,7 @@ const frases = {
             if (isChronometerMode) return; 
             body.classList.add('zen-mode');
             setPanel.classList.remove('active'); 
+            history.pushState({ mode: 'zen' }, "");
         };
 
         const startPress = (e) => { if (clockPressTimer) clearTimeout(clockPressTimer); clockPressTimer = setTimeout(toggleClockMode, 1200); };
@@ -1177,7 +1360,12 @@ const frases = {
         clock.addEventListener('mousedown', startPress); clock.addEventListener('mouseup', cancelPress); clock.addEventListener('mouseleave', cancelPress);
         clock.addEventListener('touchstart', startPress, { passive: true }); clock.addEventListener('touchend', cancelPress); clock.addEventListener('touchmove', cancelPress);
 
-        exitZenBtn.onclick = () => { triggerHaptic(); playSound('click'); body.classList.remove('zen-mode'); };
+        exitZenBtn.onclick = () => { 
+            triggerHaptic(); 
+            playSound('click'); 
+            body.classList.remove('zen-mode'); 
+            if (history.state && history.state.mode === 'zen') history.back();
+        };
 
         /* --- NOTIFICACIONES --- */
         let toastTimeout = null;
@@ -1256,6 +1444,8 @@ const frases = {
             }
             overlay.classList.add('active');
             document.getElementById(id).classList.add('active');
+            body.classList.add('modal-open');
+            history.pushState({ modalId: id }, "");
         }
 
         async function showChangelogModal() {
@@ -1356,10 +1546,17 @@ const frases = {
 
         function closeModal(id) {
             playSound('click');
-            document.getElementById(id).classList.remove('active');
-            if(!document.querySelector('.custom-modal.active') && !searchPanel.classList.contains('expanded')) {
+            const modalEl = document.getElementById(id);
+            if (modalEl && modalEl.classList.contains('active')) {
+                modalEl.classList.remove('active');
+                if (history.state && history.state.modalId === id) {
+                    history.back();
+                }
+            }
+            if(!document.querySelector('.custom-modal.active') && !searchPanel.classList.contains('expanded') && !setPanel.classList.contains('active')) {
                 overlay.classList.remove('active');
             }
+            if (!document.querySelector('.custom-modal.active')) body.classList.remove('modal-open');
             if(warningTimer) clearInterval(warningTimer);
         }
 
@@ -1377,7 +1574,7 @@ const frases = {
 
         function triggerGameWarning(url) {
             pendingGameUrl = url;
-            document.getElementById('hiddenFolderModal').classList.remove('active');
+            closeModal('hiddenFolderModal');
             openModal('warningModal');
             
             const continueBtn = document.getElementById('continueBtn');
@@ -1423,26 +1620,42 @@ const frases = {
             } else {
                 searchPanel.classList.remove('expanded');
                 body.classList.remove('search-open');
-                if(!document.querySelector('.custom-modal.active')) overlay.classList.remove('active');
+                if(!document.querySelector('.custom-modal.active') && !setPanel.classList.contains('active')) overlay.classList.remove('active');
                 searchInput.value = "";
                 if(typeof filterSearchPersistent === 'function') filterSearchPersistent(""); 
                 if (history.state && history.state.searchOpen) history.back();
             }
         }
 
-        window.addEventListener('popstate', () => {
-            searchPanel.classList.remove('expanded'); 
-            body.classList.remove('search-open');
+        window.addEventListener('popstate', (e) => {
+            if (body.classList.contains('zen-mode')) {
+                body.classList.remove('zen-mode');
+            }
+            if (searchPanel.classList.contains('expanded')) {
+                searchPanel.classList.remove('expanded'); 
+                body.classList.remove('search-open');
+                searchInput.value = "";
+                if(typeof filterSearchPersistent === 'function') filterSearchPersistent("");
+            }
+            if (setPanel && setPanel.classList.contains('active')) {
+                setPanel.classList.remove('active');
+            }
+            document.querySelectorAll('.custom-modal.active').forEach(m => m.classList.remove('active'));
+            body.classList.remove('modal-open');
             overlay.classList.remove('active');
-            if(setPanel) setPanel.classList.remove('active');
-            document.querySelectorAll('.custom-modal').forEach(m => m.classList.remove('active'));
             if(warningTimer) clearInterval(warningTimer);
         });
 
         document.getElementById('trigger').onclick = () => toggleSearch(true);
         overlay.onclick = () => { 
-            toggleSearch(false); 
-            document.querySelectorAll('.custom-modal').forEach(m => { if(m.classList.contains('active')) closeModal(m.id); });
+            if (searchPanel.classList.contains('expanded')) toggleSearch(false); 
+            if (setPanel.classList.contains('active')) {
+                setPanel.classList.remove('active');
+                if (history.state && history.state.panel === 'settings') history.back();
+            }
+            document.querySelectorAll('.custom-modal').forEach(m => { 
+                if(m.classList.contains('active')) closeModal(m.id); 
+            });
         };
         
         window.onkeydown = (e) => {
@@ -1453,7 +1666,11 @@ const frases = {
             
             // Cerrar
             if(e.key === 'Escape') {
-                toggleSearch(false);
+                if (searchPanel.classList.contains('expanded')) toggleSearch(false);
+                if (setPanel.classList.contains('active')) {
+                    setPanel.classList.remove('active');
+                    if (history.state && history.state.panel === 'settings') history.back();
+                }
                 document.querySelectorAll('.custom-modal').forEach(m => { if(m.classList.contains('active')) closeModal(m.id); });
             }
 
@@ -1632,6 +1849,39 @@ const frases = {
             });
         }
 
+        function applyFolderSize(value) {
+            const size = Math.max(1, Math.min(5, Number(value) || 3));
+            document.body.classList.remove('folder-size-1', 'folder-size-2', 'folder-size-3', 'folder-size-4', 'folder-size-5');
+            document.body.classList.add(`folder-size-${size}`);
+            const range = document.getElementById('folderSizeRange');
+            const output = document.getElementById('folderSizeValue');
+            if (range) range.value = size;
+            if (output) output.value = size;
+            localStorage.setItem('folderSize', size);
+        }
+
+        function applyFolderAppsSize(value) {
+            const size = Math.max(1, Math.min(5, Number(value) || 3));
+            document.body.classList.remove('folder-apps-size-1', 'folder-apps-size-2', 'folder-apps-size-3', 'folder-apps-size-4', 'folder-apps-size-5');
+            document.body.classList.add(`folder-apps-size-${size}`);
+            const range = document.getElementById('folderAppsSizeRange');
+            const output = document.getElementById('folderAppsSizeValue');
+            if (range) range.value = size;
+            if (output) output.value = size;
+            localStorage.setItem('folderAppsSize', size);
+        }
+
+        function applyGlassOpacity(value) {
+            const opacity = Math.max(10, Math.min(90, Number(value) || 50));
+            const alpha = opacity / 100;
+            document.documentElement.style.setProperty('--glass', `rgba(15, 15, 15, ${alpha})`);
+            const range = document.getElementById('glassOpacityRange');
+            const output = document.getElementById('glassOpacityValue');
+            if (range) range.value = opacity;
+            if (output) output.textContent = `${opacity}%`;
+            localStorage.setItem('glassOpacity', opacity);
+        }
+
         function markSetupComplete(choice) {
             localStorage.setItem('homescreenSetupChoice', choice);
         }
@@ -1668,13 +1918,33 @@ const frases = {
                 return stored === 'true';
             };
 
+            applyFolderSize(localStorage.getItem('folderSize') || 3);
+            applyFolderAppsSize(localStorage.getItem('folderAppsSize') || 3);
+            applyGlassOpacity(localStorage.getItem('glassOpacity') || 50);
+            const folderSizeRange = document.getElementById('folderSizeRange');
+            const folderAppsSizeRange = document.getElementById('folderAppsSizeRange');
+            const glassOpacityRange = document.getElementById('glassOpacityRange');
+            if (folderSizeRange) folderSizeRange.addEventListener('input', (e) => applyFolderSize(e.target.value));
+            if (folderAppsSizeRange) folderAppsSizeRange.addEventListener('input', (e) => applyFolderAppsSize(e.target.value));
+            if (glassOpacityRange) glassOpacityRange.addEventListener('input', (e) => applyGlassOpacity(e.target.value));
+            setupToggle('toggleFolderLabels', 'hideFolderLabels', (isHidden) => {
+                body.classList.toggle('hide-folder-labels', isHidden);
+            }, 'false');
+
             setupToggle('toggleFavFolder', 'showFavFolder', renderMainGrid, 'true');
             setupToggle('toggleRecentFolder', 'showRecentFolder', renderMainGrid, 'false');
             setupToggle('toggleDock', 'showDock', renderDock, 'false');
             setupToggle('toggleSounds', 'sounds', null, 'false');
             setupToggle('toggleHaptics', 'haptics', null, 'false');
             setupToggle('toggleHideWelcome', 'hideWelcome', () => updateWelcomeMessage(), 'false');
+            setupToggle('toggleFolderCloseBtn', 'hideFolderCloseBtn', (act) => {
+                body.classList.toggle('hide-folder-close-btn', act);
+            }, 'false');
             
+            if (localStorage.getItem('hideFolderCloseBtn') === 'true') {
+                body.classList.add('hide-folder-close-btn');
+            }
+
             const batteryEnabled = setupToggle('toggleBattery', 'showBattery', (act) => {
                 const batEl = document.getElementById('batteryStatus');
                 batEl.style.display = act ? 'inline-flex' : 'none';
@@ -1727,14 +1997,35 @@ const frases = {
             const checkUpdatesBtn = document.getElementById('checkUpdatesBtn');
             const showChangelogBtn = document.getElementById('showChangelogBtn');
             const settingsVersionInfo = document.getElementById('settingsVersionInfo');
+
+            if (settingsVersionInfo) {
+                settingsVersionInfo.addEventListener('click', () => {
+                    settingsVersionClicks++;
+                    if (settingsVersionClicks === 5) {
+                        settingsVersionClicks = 0;
+                        window.location.href = 'media/terminal.html';
+                    }
+                });
+            }
             
             if(setBtn) {
                 setBtn.onclick = async (e) => {
                     e.stopPropagation();
                     playSound('click'); triggerHaptic();
                     const willOpen = !setPanel.classList.contains('active');
-                    setPanel.classList.toggle('active');
-                    if (willOpen && window.getVersionInfo) await refreshSettingsVersionInfo();
+                    if (willOpen) {
+                        setPanel.classList.add('active');
+                        overlay.classList.add('active');
+                        history.pushState({ panel: 'settings' }, "");
+                        resizeSettingsPanel();
+                        if (window.getVersionInfo) await refreshSettingsVersionInfo();
+                    } else {
+                        setPanel.classList.remove('active');
+                        if (!document.querySelector('.custom-modal.active') && !searchPanel.classList.contains('expanded')) {
+                            overlay.classList.remove('active');
+                        }
+                        if (history.state && history.state.panel === 'settings') history.back();
+                    }
                 };
             }
 
@@ -1775,7 +2066,8 @@ const frases = {
                 haptics: 'false',
                 hideWelcome: 'false',
                 welcomeAnimation: 'blur',
-                folderAnimation: 'slide'
+                folderAnimation: 'slide',
+                hideFolderCloseBtn: 'false'
             };
 
             const settingsKeys = Object.keys(settingsDefaults);
@@ -1981,7 +2273,12 @@ const frases = {
                 });
             }
             
-            document.addEventListener('click', (e) => { if(setPanel && !setPanel.contains(e.target)) setPanel.classList.remove('active'); });
+            document.addEventListener('click', (e) => { 
+                if(setPanel && setPanel.classList.contains('active') && !setPanel.contains(e.target)) {
+                    setPanel.classList.remove('active');
+                    if(history.state && history.state.panel==='settings') history.back();
+                }
+            });
             
             if(sBlur) sBlur.onclick = () => { playSound('click'); triggerHaptic(); localStorage.setItem('noblur', body.classList.toggle('no-blur')); sBlur.classList.toggle('on'); };
             if(sBg) {
