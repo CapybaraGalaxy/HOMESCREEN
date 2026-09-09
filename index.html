@@ -240,13 +240,13 @@ const tools = [
             { name: 'Galería de iconos', icon: 'Layout-List', url: 'Apps/icontest.html' },
             { name: 'App maker', icon: 'Columns-Settings', url: 'Apps/appmaker.html' },
             { name: 'Consejos', icon: 'lightbulb', url: 'Apps/consejos.html' },
-            { name: 'Visor HTML', icon: 'square-terminal', url: 'html-preview.html' },
-            { name: 'Labs', icon: 'flask-conical', url: 'Labs.html' }
+            { name: 'Visor HTML', icon: 'square-terminal', url: 'Apps/html-preview.html' },
+            { name: 'Labs', icon: 'flask-conical', url: 'labs.html' }
         ]
     }
 ];
 
-const hiddenApp = { name: 'Neo GameCenter', icon: 'Gamepad2', url: 'games.html' };
+const hiddenApp = { name: 'Neo GameCenter', icon: 'Gamepad2', url: 'Apps/games.html' };
 const hiddenApps = [hiddenApp];
 
 const appKeywords = {
@@ -1202,6 +1202,9 @@ const frases = {
                             <button class="settings-action-btn" id="importSettingsBtn" type="button"><i data-lucide="upload" style="width: 14px;"></i> Importar</button>
                             <input type="file" id="importSettingsFile" accept=".json,.html,application/json,text/plain" style="display: none;">
                         </div>
+                        <span class="settings-section-title">Restablecer</span>
+                        <button class="settings-action-btn" id="resetHomescreenBtn" type="button" style="width: 100%; margin-bottom: 8px; color: #ff6961; border-color: rgba(255, 59, 48, 0.4);"><i data-lucide="trash-2" style="width: 14px;"></i> Reiniciar todo</button>
+                        <p style="color: var(--text-muted); font-size: 12px; margin: -2px 0 8px;">Borra la caché y todos los datos guardados para empezar de nuevo o intentar arreglar bugs.</p>
                         <span class="settings-section-title">Información</span>
                          <div class="settings-actions-grid">
                         <button class="settings-action-btn" id="showAboutBtn" type="button" onclick="window.location.href='about.html'" style="width: 100%; margin-top: 8px;"><i data-lucide="badge-info" style="width: 14px;"></i> Sobre Homescreen</button>
@@ -2240,6 +2243,39 @@ const frases = {
                         importSettingsFromJsonString(evt.target.result);
                     };
                     reader.readAsText(file);
+                };
+            }
+
+            const resetHomescreenBtn = document.getElementById('resetHomescreenBtn');
+            if (resetHomescreenBtn) {
+                resetHomescreenBtn.onclick = async (e) => {
+                    e.stopPropagation();
+                    if (!confirm('¿Seguro que quieres borrar la caché y todos los datos guardados? Homescreen volverá a empezar desde cero.')) return;
+
+                    localStorage.clear();
+                    sessionStorage.clear();
+
+                    if (indexedDB.databases) {
+                        const databases = await indexedDB.databases();
+                        await Promise.all(databases
+                            .filter(database => database.name)
+                            .map(database => new Promise(resolve => {
+                                const request = indexedDB.deleteDatabase(database.name);
+                                request.onsuccess = request.onerror = request.onblocked = resolve;
+                            })));
+                    }
+
+                    if ('caches' in window) {
+                        const cacheNames = await caches.keys();
+                        await Promise.all(cacheNames.map(cacheName => caches.delete(cacheName)));
+                    }
+
+                    if ('serviceWorker' in navigator) {
+                        const registrations = await navigator.serviceWorker.getRegistrations();
+                        await Promise.all(registrations.map(registration => registration.unregister()));
+                    }
+
+                    window.location.replace('index.html');
                 };
             }
 
