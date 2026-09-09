@@ -3,24 +3,49 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover, user-scalable=no">
-    <title>Daily Briefing</title>
+    <title>Resumen Diario</title>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@200;300;400;500;600;700&display=swap" rel="stylesheet">
     <script src="https://unpkg.com/lucide@latest"></script>
     <style>
         :root {
-            --bg: #050507;
-            --surface: #121216;
-            --glass: #14141d;
-            --glass-border: rgba(255, 255, 255, 0.1);
+            /* Paleta Cromática Orgánica y Oscura */
+            --bg: #000000;
+            --surface: #121212;
+            --surface-hover: #1c1c1e;
+
+            /* Configuración Neo-Glass Pure */
+            --glass: rgba(15, 15, 15, 0.4);
+            --glass-border: rgba(255, 255, 255, 0.08);
+            --blur-val: 30px;
+
+            /* Jerarquía Textual */
             --text-main: #FFFFFF;
-            --text-muted: #9A9AB0;
-            --btn-accent: #ffffff;
-            --btn-text: #000000;
-            --accent-glow: rgba(255, 126, 95, 0.15);
+            --text-muted: #8E8E93;
+
+            /* Estados y Acentos de Sistema */
+            --accent-danger: #FF453A;
+            --accent-success: #34C759;
+            --accent-weather-day: #FFB703;
+            --accent-weather-night: #A78BFA;
+            --accent-calendar: #4285F4;
+            --accent-tasks: #34C759;
+
+            /* Físicas de Animación Progresivas */
             --bezier: cubic-bezier(0.16, 1, 0.3, 1);
             --spring: cubic-bezier(0.34, 1.56, 0.64, 1);
+        }
+
+        /* Desactivación de Blurs si se detecta teléfono lento (< 20 FPS) */
+        body.low-fps {
+            --blur-val: 0px !important;
+        }
+        body.low-fps .card-container,
+        body.low-fps .pause-indicator {
+            backdrop-filter: none !important;
+            -webkit-backdrop-filter: none !important;
+            background: rgba(18, 18, 18, 0.95) !important;
         }
 
         * {
@@ -38,40 +63,49 @@
             color: var(--text-main);
             overflow: hidden;
             height: 100dvh;
+            width: 100vw;
             display: flex;
             justify-content: center;
             align-items: center;
         }
 
+        /* FONDO AMBIENTAL REACTIVO */
         .ambient-glow {
             position: fixed;
-            width: 320px;
-            height: 320px;
+            width: 60vw;
+            height: 60vh;
+            max-width: 700px;
+            max-height: 700px;
             border-radius: 50%;
-            background: var(--accent-glow);
-            filter: blur(90px);
-            top: 20%;
+            background: rgba(255, 255, 255, 0.03);
+            filter: blur(120px);
+            top: 50%;
             left: 50%;
-            transform: translate3d(-50%, 0, 0);
+            transform: translate(-50%, -50%);
             pointer-events: none;
-            transition: background 0.8s ease;
+            transition: background 0.8s var(--bezier);
             will-change: background;
             z-index: 1;
         }
 
+        body.low-fps .ambient-glow {
+            display: none !important;
+        }
+
+        /* CONTENEDOR PRINCIPAL RESPONSIVO */
         .app-container {
             width: 100%;
-            max-width: 440px;
+            max-width: 580px;
             height: 100dvh;
-            background: var(--bg);
+            background: transparent;
             position: relative;
             overflow: hidden;
             display: flex;
             flex-direction: column;
-            padding: env(safe-area-inset-top) 16px calc(env(safe-area-inset-bottom) + 16px) 16px;
+            padding: env(safe-area-inset-top) 24px calc(env(safe-area-inset-bottom) + 16px) 24px;
             touch-action: none;
-            perspective: 1200px;
             z-index: 2;
+            margin: 0 auto;
         }
 
         .fade-overlay {
@@ -89,22 +123,24 @@
             pointer-events: auto;
         }
 
+        /* BARRAS DE PROGRESO */
         .stories-progress {
             display: flex;
             gap: 6px;
             width: 100%;
-            padding: 12px 4px;
+            padding: 16px 0 24px 0;
             z-index: 30;
             pointer-events: none;
         }
 
         .progress-segment {
             flex: 1;
-            height: 4px;
-            background: rgba(255, 255, 255, 0.18);
+            height: 3px;
+            background: rgba(255, 255, 255, 0.15);
             border-radius: 4px;
             overflow: hidden;
             position: relative;
+            transform: translateZ(0);
         }
 
         .progress-segment .fill {
@@ -113,30 +149,34 @@
             left: 0;
             height: 100%;
             width: 0%;
-            background: #ffffff;
+            background: #FFFFFF;
             border-radius: 4px;
             box-shadow: 0 0 8px rgba(255, 255, 255, 0.8);
+            will-change: width;
         }
 
+        /* INDICADOR DE PAUSA */
         .pause-indicator {
             position: absolute;
-            top: 48px;
+            top: 56px;
             left: 50%;
             transform: translateX(-50%) translateY(-10px);
-            background: #1e1e28;
-            padding: 6px 14px;
+            background: rgba(20, 20, 26, 0.85);
+            backdrop-filter: blur(16px);
+            -webkit-backdrop-filter: blur(16px);
+            padding: 6px 16px;
             border-radius: 100px;
-            font-size: 0.75rem;
+            font-size: 0.8rem;
+            font-weight: 500;
             color: var(--text-muted);
             opacity: 0;
-            transition: all 0.3s var(--bezier);
+            transition: transform 0.3s var(--spring), opacity 0.3s var(--bezier);
             pointer-events: none;
             z-index: 40;
-            border: 1px solid rgba(255, 255, 255, 0.1);
+            border: 1px solid var(--glass-border);
             display: flex;
             align-items: center;
             gap: 6px;
-            box-shadow: 0 10px 20px rgba(0,0,0,0.5);
         }
 
         .pause-indicator.visible {
@@ -144,13 +184,14 @@
             transform: translateX(-50%) translateY(0);
         }
 
+        /* TRACK Y CARRUSEL */
         .stories-track {
             display: flex;
             height: 100%;
             width: 100%;
             transition: transform 0.6s var(--bezier);
             z-index: 10;
-            transform-style: preserve-3d;
+            will-change: transform;
         }
 
         .story-screen {
@@ -158,208 +199,205 @@
             height: 100%;
             display: flex;
             flex-direction: column;
-            justify-content: space-between;
             position: relative;
-            padding: 8px 0;
-            opacity: 0.25;
-            transform: scale(0.88) rotateY(15deg);
+            opacity: 0;
+            transform: scale(0.95);
             transition: opacity 0.6s var(--bezier), transform 0.6s var(--bezier);
-            transform-origin: center center;
+            padding-bottom: 20px;
         }
 
         .story-screen.active {
             opacity: 1;
-            transform: scale(1) rotateY(0deg);
+            transform: scale(1);
         }
 
+        /* TARJETA CONTENEDORA NEO-GLASS */
         .card-container {
             background: var(--glass);
+            backdrop-filter: blur(var(--blur-val));
+            -webkit-backdrop-filter: blur(var(--blur-val));
             border: 1px solid var(--glass-border);
-            border-radius: 32px;
-            padding: 28px 24px;
+            border-radius: 36px;
+            padding: 40px 32px;
             height: 100%;
+            width: 100%;
             display: flex;
             flex-direction: column;
             justify-content: space-between;
+            align-items: center;
             position: relative;
             overflow: hidden;
-            box-shadow: 0 30px 60px rgba(0, 0, 0, 0.6),
-                        inset 0 1px 0 rgba(255, 255, 255, 0.05);
+            box-shadow: 0 25px 60px rgba(0, 0, 0, 0.6),
+                        inset 0 1px 0 rgba(255, 255, 255, 0.08);
         }
 
+        /* SVG ANIMADO DE FONDO */
         .bg-anim-svg {
             position: absolute;
             top: 50%;
             left: 50%;
             transform: translate(-50%, -50%);
-            width: 90%;
-            height: 90%;
-            opacity: 0.08;
+            width: 80%;
+            height: 80%;
+            opacity: 0.04;
             z-index: 1;
             pointer-events: none;
         }
 
         .draw-path {
-            stroke-dasharray: 1;
-            stroke-dashoffset: 1;
+            stroke-dasharray: 300;
+            stroke-dashoffset: 300;
+            transition: stroke-dashoffset 2.5s var(--bezier);
         }
 
         .story-screen.active .draw-path {
-            animation: drawLine 5s var(--bezier) forwards;
+            stroke-dashoffset: 0;
         }
 
-        @keyframes drawLine {
-            to { stroke-dashoffset: 0; }
+        /* ANIMACIÓN CINEMÁTICA DE ENTRADA DESDE LA NADA (SCALE 0 + OPACITY 0) */
+        .cinematic-element {
+            opacity: 0;
+            transform: scale(0) translateY(30px);
+            transition: opacity 0.9s var(--bezier), transform 0.9s var(--spring);
+            will-change: opacity, transform;
         }
 
-        .card-header, .launcher-content, .app-launch-btn, .welcome-hero {
+        .story-screen.active .cinematic-element.show {
+            opacity: 1;
+            transform: scale(1) translateY(0);
+        }
+
+        /* ANIMACIONES EN CASCADA ESTÁNDAR PARA OTRAS PANTALLAS */
+        .anim-element {
+            opacity: 0;
+            transform: scale(0.4) translateY(20px);
+            transition: opacity 0.7s var(--bezier), transform 0.7s var(--spring);
+            will-change: opacity, transform;
+        }
+
+        .story-screen.active .anim-element {
+            opacity: 1;
+            transform: scale(1) translateY(0);
+        }
+
+        .story-screen.active .anim-delay-1 { transition-delay: 0.08s; }
+        .story-screen.active .anim-delay-2 { transition-delay: 0.16s; }
+        .story-screen.active .anim-delay-3 { transition-delay: 0.24s; }
+        .story-screen.active .anim-delay-4 { transition-delay: 0.32s; }
+        .story-screen.active .anim-delay-5 { transition-delay: 0.40s; }
+
+        /* PORTADA MINIMALISTA */
+        .cover-card {
+            background: radial-gradient(circle at 50% 30%, rgba(255, 255, 255, 0.04) 0%, rgba(5, 5, 8, 0.8) 100%);
+            text-align: center;
+        }
+
+        .cover-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            padding: 8px 18px;
+            background: rgba(255, 255, 255, 0.04);
+            border: 1px solid rgba(255, 255, 255, 0.08);
+            border-radius: 100px;
+            font-size: 0.75rem;
+            font-weight: 600;
+            letter-spacing: 2px;
+            text-transform: uppercase;
+            color: var(--text-muted);
+            z-index: 5;
+        }
+
+        .cover-hero {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            margin: auto 0;
+            width: 100%;
             position: relative;
             z-index: 5;
         }
 
+        .cover-date-pill {
+            font-size: 0.85rem;
+            font-weight: 600;
+            letter-spacing: 2.5px;
+            text-transform: uppercase;
+            color: rgba(255, 255, 255, 0.9);
+            background: rgba(255, 255, 255, 0.03);
+            padding: 8px 20px;
+            border-radius: 100px;
+            border: 1px solid rgba(255, 255, 255, 0.08);
+            margin-bottom: 20px;
+            min-height: 38px;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .typewriter-cursor {
+            display: inline-block;
+            width: 2px;
+            height: 1em;
+            background-color: #FFFFFF;
+            margin-left: 4px;
+            animation: blinkCursor 0.8s infinite;
+            vertical-align: middle;
+        }
+
+        @keyframes blinkCursor {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0; }
+        }
+
+        .cover-clock {
+            font-size: clamp(5rem, 15vw, 7rem);
+            font-weight: 200;
+            letter-spacing: -3px;
+            font-variant-numeric: tabular-nums;
+            line-height: 0.9;
+            background: linear-gradient(180deg, #FFFFFF 0%, rgba(255, 255, 255, 0.4) 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            margin-bottom: 12px;
+        }
+
+        .cover-greeting {
+            font-size: 1.5rem;
+            font-weight: 400;
+            color: var(--text-main);
+            letter-spacing: -0.2px;
+            margin-bottom: 4px;
+        }
+
+        .cover-sub {
+            font-size: 0.95rem;
+            font-weight: 300;
+            color: var(--text-muted);
+        }
+
+        /* ELEMENTOS PANTALLAS DE APPS */
         .card-header {
             display: flex;
-            justify-content: space-between;
+            justify-content: center;
             align-items: center;
+            width: 100%;
+            z-index: 5;
         }
 
         .card-badge {
             display: inline-flex;
             align-items: center;
             gap: 8px;
-            background: rgba(255, 255, 255, 0.05);
-            padding: 8px 16px;
-            border-radius: 100px;
-            border: 1px solid rgba(255, 255, 255, 0.1);
-            font-size: 0.85rem;
-            font-weight: 600;
-            letter-spacing: 0.3px;
-        }
-
-        .screen-1-card {
-            background: radial-gradient(circle at 50% 25%, #2a1636 0%, #171124 50%, #0d0e15 100%);
-            border: 1px solid rgba(255, 126, 95, 0.25);
-            justify-content: space-between;
-            align-items: center;
-            text-align: center;
-        }
-
-        .welcome-badge {
-            background: rgba(255, 126, 95, 0.12);
-            border-color: rgba(255, 126, 95, 0.3);
-            color: #ff9e80;
-        }
-
-        .welcome-hero {
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            gap: 10px;
-            margin: auto 0;
-        }
-
-        .date-pill {
-            font-size: 0.8rem;
-            text-transform: uppercase;
-            letter-spacing: 2.5px;
-            color: #ff9e80;
-            font-weight: 600;
-            background: rgba(255, 158, 128, 0.08);
-            padding: 6px 16px;
-            border-radius: 100px;
-            border: 1px solid rgba(255, 158, 128, 0.15);
-        }
-
-        .live-clock {
-            font-size: 4.8rem;
-            font-weight: 700;
-            letter-spacing: -2px;
-            font-variant-numeric: tabular-nums;
-            background: linear-gradient(180deg, #FFFFFF 0%, rgba(255, 255, 255, 0.65) 100%);
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
-            text-shadow: 0 10px 30px rgba(0,0,0,0.5);
-            line-height: 1;
-            margin: 6px 0;
-        }
-
-        .typing-container {
-            min-height: 36px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-        }
-
-        .typing-greeting {
-            font-size: 1.35rem;
-            color: var(--text-main);
-            font-weight: 500;
-            border-right: 2px solid #ff9e80;
-            white-space: nowrap;
-            overflow: hidden;
-            display: inline-block;
-            animation: blinkCaret 0.75s step-end infinite;
-        }
-
-        @keyframes blinkCaret {
-            from, to { border-color: transparent; }
-            50% { border-color: #ff9e80; }
-        }
-
-        .swipe-hint {
-            z-index: 5;
-            display: inline-flex;
-            align-items: center;
-            gap: 8px;
-            padding: 10px 20px;
             background: rgba(255, 255, 255, 0.04);
+            padding: 8px 18px;
             border-radius: 100px;
             border: 1px solid rgba(255, 255, 255, 0.08);
-            font-size: 0.82rem;
+            font-size: 0.85rem;
+            font-weight: 500;
             color: var(--text-muted);
-            letter-spacing: 0.5px;
-            animation: pulseHint 2s infinite ease-in-out;
         }
-
-        @keyframes pulseHint {
-            0%, 100% { opacity: 0.5; transform: translateY(0); }
-            50% { opacity: 0.9; transform: translateY(-4px); }
-        }
-
-        .app-launch-btn {
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            gap: 12px;
-            width: 100%;
-            padding: 18px 24px;
-            background: var(--btn-accent);
-            color: var(--btn-text);
-            font-weight: 700;
-            font-size: 1.05rem;
-            border-radius: 22px;
-            text-decoration: none;
-            box-shadow: 0 12px 30px rgba(255, 255, 255, 0.15);
-            transition: transform 0.25s var(--spring), box-shadow 0.25s ease;
-            cursor: pointer;
-            -webkit-tap-highlight-color: transparent;
-        }
-
-        .app-launch-btn:active {
-            transform: scale(0.95);
-            box-shadow: 0 5px 15px rgba(255, 255, 255, 0.05);
-        }
-
-        #weather-canvas, #fx-canvas {
-            position: absolute;
-            inset: 0;
-            pointer-events: none;
-            width: 100%;
-            height: 100%;
-        }
-
-        #weather-canvas { opacity: 0.7; z-index: 2; }
-        #fx-canvas { z-index: 99; }
 
         .launcher-content {
             margin: auto 0;
@@ -367,26 +405,26 @@
             display: flex;
             flex-direction: column;
             align-items: center;
-            gap: 16px;
+            gap: 20px;
+            position: relative;
+            z-index: 5;
+            width: 100%;
         }
 
         .app-icon-wrapper {
-            width: 86px;
-            height: 86px;
-            background: rgba(255, 255, 255, 0.04);
-            border: 1px solid rgba(255, 255, 255, 0.12);
-            border-radius: 26px;
+            width: 96px;
+            height: 96px;
+            background: radial-gradient(circle at 30% 30%, rgba(255, 255, 255, 0.08), rgba(255, 255, 255, 0.01));
+            border: 1px solid var(--glass-border);
+            border-radius: 28px;
             display: flex;
             align-items: center;
             justify-content: center;
-            margin-bottom: 8px;
-            box-shadow: 0 15px 35px rgba(0,0,0,0.4);
-            position: relative;
-            transition: transform 0.4s var(--spring);
+            box-shadow: 0 16px 40px rgba(0, 0, 0, 0.4), inset 0 1px 0 rgba(255, 255, 255, 0.1);
         }
 
         .story-screen.active .app-icon-wrapper {
-            animation: floatIcon 4s ease-in-out infinite;
+            animation: floatIcon 3.5s ease-in-out infinite 0.4s;
         }
 
         @keyframes floatIcon {
@@ -395,55 +433,91 @@
         }
 
         .launcher-title {
-            font-size: 1.85rem;
-            font-weight: 700;
+            font-size: clamp(1.8rem, 5vw, 2.2rem);
+            font-weight: 600;
             letter-spacing: -0.5px;
+            color: var(--text-main);
         }
 
         .launcher-desc {
             color: var(--text-muted);
-            font-size: 0.95rem;
+            font-size: 1rem;
             line-height: 1.5;
-            max-width: 280px;
+            font-weight: 300;
+            max-width: 300px;
         }
 
-        .finish-btn {
-            position: relative;
-            overflow: hidden;
-            background: #ffffff;
-            color: #000000;
-            border: none;
-            padding: 20px 40px;
-            border-radius: 100px;
-            font-size: 1.1rem;
-            font-weight: 700;
-            cursor: pointer;
-            box-shadow: 0 12px 35px rgba(255, 255, 255, 0.2);
-            transition: transform 0.25s var(--spring), box-shadow 0.25s ease;
+        /* BOTONES DE ACCIÓN */
+        .app-launch-btn {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
             width: 100%;
-            z-index: 50;
+            max-width: 320px;
+            padding: 18px 24px;
+            background: #FFFFFF;
+            color: #000000;
+            font-weight: 600;
+            font-size: 1rem;
+            border-radius: 100px;
+            text-decoration: none;
+            box-shadow: 0 10px 30px rgba(255, 255, 255, 0.15);
+            transition: transform 0.2s var(--spring), background-color 0.2s ease;
+            cursor: pointer;
+            z-index: 5;
             -webkit-tap-highlight-color: transparent;
         }
 
-        .finish-btn:active {
-            transform: scale(0.94);
+        .app-launch-btn:active, .finish-btn:active {
+            transform: scale(0.95);
+            background: #E5E5EA;
         }
 
-        .ripple-particle {
+        .finish-btn {
+            background: #FFFFFF;
+            color: #000000;
+            border: none;
+            padding: 18px 32px;
+            border-radius: 100px;
+            font-size: 1rem;
+            font-weight: 600;
+            cursor: pointer;
+            box-shadow: 0 10px 30px rgba(255, 255, 255, 0.15);
+            transition: transform 0.2s var(--spring);
+            width: 100%;
+            max-width: 320px;
+            z-index: 5;
+            -webkit-tap-highlight-color: transparent;
+        }
+
+        .swipe-hint {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            font-size: 0.85rem;
+            color: var(--text-muted);
+            z-index: 5;
+            animation: pulseHint 2.5s infinite ease-in-out;
+            padding-top: 10px;
+        }
+
+        @keyframes pulseHint {
+            0%, 100% { opacity: 0.3; transform: translateX(0); }
+            50% { opacity: 0.8; transform: translateX(4px); }
+        }
+
+        /* CANVASES FLOTANTES */
+        #weather-canvas, #fx-canvas {
             position: absolute;
-            border-radius: 50%;
-            background: rgba(0, 0, 0, 0.15);
-            transform: scale(0);
-            animation: rippleAnim 0.6s ease-out;
+            inset: 0;
             pointer-events: none;
+            width: 100%;
+            height: 100%;
         }
 
-        @keyframes rippleAnim {
-            to {
-                transform: scale(4);
-                opacity: 0;
-            }
-        }
+        #weather-canvas { opacity: 0.5; z-index: 2; }
+        #fx-canvas { z-index: 99; }
     </style>
 </head>
 <body>
@@ -452,191 +526,157 @@
     <canvas id="fx-canvas"></canvas>
     <div class="fade-overlay" id="fade-overlay"></div>
 
-    <div class="app-container" id="app">
+    <div class="app-container" id="main-view">
 
+        <!-- Indicador de Pausa -->
         <div class="pause-indicator" id="pause-indicator">
-            <i data-lucide="pause" size="12"></i> Pausado
+            <i data-lucide="pause" size="14"></i> Pausado
         </div>
 
+        <!-- Barras de Progreso -->
         <div class="stories-progress" id="progress-bar">
             <div class="progress-segment"><div class="fill"></div></div>
             <div class="progress-segment"><div class="fill"></div></div>
             <div class="progress-segment"><div class="fill"></div></div>
             <div class="progress-segment"><div class="fill"></div></div>
             <div class="progress-segment"><div class="fill"></div></div>
-            <div class="progress-segment"><div class="fill"></div></div>
         </div>
 
+        <!-- Carrusel Principal -->
         <div class="stories-track" id="stories-track">
             
-            <!-- Pantalla 1: Bienvenida -->
-            <div class="story-screen screen-1 active" id="screen-0">
-                <div class="card-container screen-1-card">
-                    <svg class="bg-anim-svg" viewBox="0 0 100 100">
-                        <circle cx="50" cy="50" r="42" stroke="#ff7e5f" stroke-width="1" fill="none" pathLength="1" class="draw-path"/>
-                        <circle cx="50" cy="50" r="28" stroke="#ff7e5f" stroke-width="0.8" stroke-dasharray="2 2" fill="none" pathLength="1" class="draw-path" style="animation-delay: 0.2s"/>
-                        <path d="M50 0 V100 M0 50 H100 M15 15 L85 85 M15 85 L85 15" stroke="#ff7e5f" stroke-width="0.5" stroke-dasharray="1 3" fill="none" pathLength="1" class="draw-path" style="animation-delay: 0.4s"/>
-                    </svg>
-
-                    <div class="card-header" style="justify-content: center; width: 100%;">
-                        <div class="card-badge welcome-badge">
-                            <i data-lucide="sparkles" size="15"></i> DAILY BRIEFING
-                        </div>
+            <!-- 1. PORTADA CINEMÁTICA -->
+            <div class="story-screen active" id="screen-0">
+                <div class="card-container cover-card">
+                    <div class="cover-badge cinematic-element" id="cinematic-badge">
+                        <i data-lucide="sparkles" size="14" style="color: #ffffff;"></i>
+                        <span>RESUMEN DIARIO</span>
                     </div>
 
-                    <div class="welcome-hero">
-                        <div class="date-pill" id="current-date">CARGANDO...</div>
-                        <div class="live-clock" id="live-clock">00:00</div>
-                        <div class="typing-container">
-                            <span class="typing-greeting" id="typing-text"></span>
+                    <div class="cover-hero">
+                        <!-- Fecha escrita lentamente con efecto máquina de escribir -->
+                        <div class="cover-date-pill cinematic-element" id="cinematic-date-box">
+                            <span id="typewriter-text"></span><span class="typewriter-cursor" id="typewriter-cursor"></span>
                         </div>
+
+                        <div class="cover-clock cinematic-element" id="cinematic-clock">00:00</div>
+                        <div class="cover-greeting cinematic-element" id="cinematic-greeting">Hola</div>
+                        <div class="cover-sub cinematic-element" id="cinematic-sub">Tu jornada resumida de un vistazo</div>
                     </div>
 
-                    <div class="swipe-hint">
-                        <span>Toca para explorar</span>
-                        <i data-lucide="chevron-right" size="16"></i>
+                    <div class="swipe-hint cinematic-element" id="cinematic-hint">
+                        <span>Toca los lados para navegar</span>
+                        <i data-lucide="arrow-right" size="14"></i>
                     </div>
                 </div>
             </div>
 
-            <!-- Pantalla 2: El Tiempo -->
+            <!-- 2. GRADIENT WEATHER -->
             <div class="story-screen" id="screen-1">
                 <div class="card-container">
                     <svg class="bg-anim-svg" viewBox="0 0 100 100">
-                        <circle cx="50" cy="50" r="25" stroke="#ffb703" stroke-width="1.2" fill="none" pathLength="1" class="draw-path"/>
-                        <path d="M50 5 v15 M50 80 v15 M5 50 h15 M80 50 h15 M18 18 l10 10 M72 72 l10 10 M18 82 l10 -10 M72 28 l10 -10" stroke="#ffb703" stroke-width="1.5" stroke-linecap="round" fill="none" pathLength="1" class="draw-path" style="animation-delay: 0.3s"/>
+                        <circle cx="50" cy="50" r="30" id="weather-svg-accent" stroke="#FFB703" stroke-width="1" fill="none" pathLength="300" class="draw-path"/>
                     </svg>
 
                     <canvas id="weather-canvas"></canvas>
-                    <div class="card-header">
-                        <div class="card-badge">
-                            <i data-lucide="cloud-sun" size="18"></i> El Tiempo
-                        </div>
+                    
+                    <div class="card-header anim-element anim-delay-1">
+                        <div class="card-badge" id="weather-badge"></div>
                     </div>
 
                     <div class="launcher-content">
-                        <div class="app-icon-wrapper">
-                            <i data-lucide="sun" size="42" style="color: #ffb703;"></i>
-                        </div>
-                        <h2 class="launcher-title">Gradient Weather</h2>
-                        <p class="launcher-desc">Mira el tiempo de hoy y la predicción de mañana.</p>
+                        <div class="app-icon-wrapper anim-element anim-delay-2" id="weather-icon-box"></div>
+                        <h2 class="launcher-title anim-element anim-delay-3">Gradient Weather</h2>
+                        <p class="launcher-desc anim-element anim-delay-4" id="weather-desc">Cargando previsión...</p>
                     </div>
 
-                    <a href="intent://launch#Intent;package=com.subtlesignals.gradientweather;scheme=https;S.browser_fallback_url=https%3A%2F%2Fplay.google.com%2Fstore%2Fapps%2Fdetails%3Fid%3Dcom.subtlesignals.gradientweather;end" class="app-launch-btn" onclick="launchApp(event, this.getAttribute('href'))">
+                    <a href="intent://#Intent;scheme=android-app;package=com.subtlesignals.gradientweather;end" class="app-launch-btn anim-element anim-delay-5" onclick="launchApp(event, this.getAttribute('href'))">
                         <span>Abrir Gradient Weather</span>
-                        <i data-lucide="external-link" size="18"></i>
+                        <i data-lucide="external-link" size="16"></i>
                     </a>
                 </div>
             </div>
 
-            <!-- Pantalla 3: Google Calendar -->
+            <!-- 3. GOOGLE CALENDAR -->
             <div class="story-screen" id="screen-2">
                 <div class="card-container">
                     <svg class="bg-anim-svg" viewBox="0 0 100 100">
-                        <rect x="8" y="15" width="84" height="75" rx="8" stroke="#4285F4" stroke-width="1.2" fill="none" pathLength="1" class="draw-path"/>
-                        <path d="M28 6 v18 M72 6 v18" stroke="#4285F4" stroke-width="2" stroke-linecap="round" fill="none" pathLength="1" class="draw-path" style="animation-delay: 0.2s"/>
-                        <path d="M8 38 h84" stroke="#4285F4" stroke-width="1.2" fill="none" pathLength="1" class="draw-path" style="animation-delay: 0.3s"/>
-                        <path d="M28 52 h12 M58 52 h12 M28 68 h12" stroke="#4285F4" stroke-width="1" stroke-linecap="round" fill="none" pathLength="1" class="draw-path" style="animation-delay: 0.4s"/>
-                        <rect x="56" y="64" width="16" height="16" rx="4" stroke="#4285F4" stroke-width="1.5" fill="rgba(66, 133, 244, 0.25)" pathLength="1" class="draw-path" style="animation-delay: 0.5s"/>
+                        <rect x="20" y="25" width="60" height="55" rx="8" stroke="#4285F4" stroke-width="1" fill="none" pathLength="300" class="draw-path"/>
+                        <path d="M35 15 v20 M65 15 v20 M20 45 h60" stroke="#4285F4" stroke-width="1.2" stroke-linecap="round" fill="none" pathLength="300" class="draw-path"/>
                     </svg>
 
-                    <div class="card-header">
+                    <div class="card-header anim-element anim-delay-1">
                         <div class="card-badge">
-                            <i data-lucide="calendar" size="18"></i> Calendario
+                            <i data-lucide="calendar" size="15"></i> Calendario
                         </div>
                     </div>
 
                     <div class="launcher-content">
-                        <div class="app-icon-wrapper">
-                            <i data-lucide="calendar-days" size="42" style="color: #4285F4;"></i>
+                        <div class="app-icon-wrapper anim-element anim-delay-2">
+                            <i data-lucide="calendar" size="40" style="color: var(--accent-calendar);"></i>
                         </div>
-                        <h2 class="launcher-title">Google Calendar</h2>
-                        <p class="launcher-desc">Comprueba tus eventos programados para hoy.</p>
+                        <h2 class="launcher-title anim-element anim-delay-3">Google Calendar</h2>
+                        <p class="launcher-desc anim-element anim-delay-4">Revisa tus eventos programados, reuniones y entregas de hoy.</p>
                     </div>
 
-                    <a href="intent://launch#Intent;package=com.google.android.calendar;scheme=https;S.browser_fallback_url=https%3A%2F%2Fplay.google.com%2Fstore%2Fapps%2Fdetails%3Fid%3Dcom.google.android.calendar;end" class="app-launch-btn" onclick="launchApp(event, this.getAttribute('href'))">
+                    <a href="intent://#Intent;scheme=android-app;package=com.google.android.calendar;end" class="app-launch-btn anim-element anim-delay-5" onclick="launchApp(event, this.getAttribute('href'))">
                         <span>Abrir Google Calendar</span>
-                        <i data-lucide="external-link" size="18"></i>
+                        <i data-lucide="external-link" size="16"></i>
                     </a>
                 </div>
             </div>
 
-            <!-- Pantalla 4: Google Tasks -->
+            <!-- 4. GOOGLE TASKS -->
             <div class="story-screen" id="screen-3">
                 <div class="card-container">
                     <svg class="bg-anim-svg" viewBox="0 0 100 100">
-                        <circle cx="50" cy="50" r="44" stroke="#34A853" stroke-width="1.2" fill="none" pathLength="1" class="draw-path"/>
-                        <path d="M28 50 l16 16 l28 -32" stroke="#34A853" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" fill="none" pathLength="1" class="draw-path" style="animation-delay: 0.3s"/>
+                        <circle cx="50" cy="50" r="40" stroke="#34C759" stroke-width="1" fill="none" pathLength="300" class="draw-path"/>
+                        <path d="M35 50 l10 10 l20 -20" stroke="#34C759" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" fill="none" pathLength="300" class="draw-path"/>
                     </svg>
 
-                    <div class="card-header">
+                    <div class="card-header anim-element anim-delay-1">
                         <div class="card-badge">
-                            <i data-lucide="check-square" size="18"></i> Tareas
+                            <i data-lucide="check-circle-2" size="15"></i> Tareas
                         </div>
                     </div>
 
                     <div class="launcher-content">
-                        <div class="app-icon-wrapper">
-                            <i data-lucide="check-circle-2" size="42" style="color: #34A853;"></i>
+                        <div class="app-icon-wrapper anim-element anim-delay-2">
+                            <i data-lucide="check-circle-2" size="40" style="color: var(--accent-tasks);"></i>
                         </div>
-                        <h2 class="launcher-title">Google Tasks</h2>
-                        <p class="launcher-desc">Revisa tus pendientes y organiza tu día</p>
+                        <h2 class="launcher-title anim-element anim-delay-3">Google Tasks</h2>
+                        <p class="launcher-desc anim-element anim-delay-4">Organiza tus pendientes y completa los objetivos del día.</p>
                     </div>
 
-                    <a href="intent://launch#Intent;package=com.google.android.apps.tasks;scheme=https;S.browser_fallback_url=https%3A%2F%2Fplay.google.com%2Fstore%2Fapps%2Fdetails%3Fid%3Dcom.google.android.apps.tasks;end" class="app-launch-btn" onclick="launchApp(event, this.getAttribute('href'))">
+                    <a href="intent://#Intent;scheme=android-app;package=com.google.android.apps.tasks;end" class="app-launch-btn anim-element anim-delay-5" onclick="launchApp(event, this.getAttribute('href'))">
                         <span>Abrir Google Tasks</span>
-                        <i data-lucide="external-link" size="18"></i>
+                        <i data-lucide="external-link" size="16"></i>
                     </a>
                 </div>
             </div>
 
-            <!-- Pantalla 5: Read You -->
+            <!-- 5. CIERRE -->
             <div class="story-screen" id="screen-4">
                 <div class="card-container">
                     <svg class="bg-anim-svg" viewBox="0 0 100 100">
-                        <path d="M10 20 h60 a12 12 0 0 1 12 12 v48 a12 12 0 0 1 -12 12 h-60 a6 6 0 0 1 -6 -6 v-60 a6 6 0 0 1 6 -6 z" stroke="#a855f7" stroke-width="1.2" fill="none" pathLength="1" class="draw-path"/>
-                        <path d="M10 36 h72" stroke="#a855f7" stroke-width="1.2" fill="none" pathLength="1" class="draw-path" style="animation-delay: 0.2s"/>
-                        <path d="M22 52 h24 M22 66 h40 M22 78 h28" stroke="#a855f7" stroke-width="1.5" stroke-linecap="round" fill="none" pathLength="1" class="draw-path" style="animation-delay: 0.4s"/>
+                        <path d="M50 15 L58 42 L85 50 L58 58 L50 85 L42 58 L15 50 L42 42 Z" stroke="#ffffff" stroke-width="1" fill="none" pathLength="300" class="draw-path"/>
                     </svg>
 
-                    <div class="card-header">
+                    <div class="card-header anim-element anim-delay-1">
                         <div class="card-badge">
-                            <i data-lucide="rss" size="18"></i> Noticias
+                            <i data-lucide="shield-check" size="15"></i> Listo
                         </div>
                     </div>
 
                     <div class="launcher-content">
-                        <div class="app-icon-wrapper">
-                            <i data-lucide="newspaper" size="42" style="color: #a855f7;"></i>
+                        <div class="app-icon-wrapper anim-element anim-delay-2" style="border-radius: 50%;">
+                            <i data-lucide="sparkles" size="40" style="color: #FFFFFF;"></i>
                         </div>
-                        <h2 class="launcher-title">Read You</h2>
-                        <p class="launcher-desc">Ponte al día con las últimas noticias e titulares.</p>
+                        <h2 class="launcher-title anim-element anim-delay-3">Resumen Completado</h2>
+                        <p class="launcher-desc anim-element anim-delay-4">Tienes todo bajo control. ¡Que tengas un excelente día!</p>
                     </div>
 
-                    <a href="intent://launch#Intent;package=me.ash.reader;scheme=https;S.browser_fallback_url=https%3A%2F%2Fplay.google.com%2Fstore%2Fapps%2Fdetails%3Fid%3Dme.ash.reader;end" class="app-launch-btn" onclick="launchApp(event, this.getAttribute('href'))">
-                        <span>Abrir Read You</span>
-                        <i data-lucide="external-link" size="18"></i>
-                    </a>
-                </div>
-            </div>
-
-            <!-- Pantalla 6: Cierre -->
-            <div class="story-screen" id="screen-5">
-                <div class="card-container" style="justify-content: space-between;">
-                    <svg class="bg-anim-svg" viewBox="0 0 100 100">
-                        <path d="M50 5 L58 42 L95 50 L58 58 L50 95 L42 58 L5 50 L42 42 Z" stroke="#ffffff" stroke-width="1.2" stroke-linejoin="round" fill="none" pathLength="1" class="draw-path"/>
-                        <path d="M22 18 L26 30 L38 34 L26 38 L22 50 L18 38 L6 34 L18 30 Z" stroke="#ffffff" stroke-dasharray="1 2" stroke-width="0.8" stroke-linejoin="round" fill="none" pathLength="1" class="draw-path" style="animation-delay: 0.3s"/>
-                    </svg>
-
-                    <div class="launcher-content" style="margin: auto 0;">
-                        <div class="app-icon-wrapper" style="border-radius: 50%; width: 90px; height: 90px;">
-                            <i data-lucide="sparkles" size="40" style="color: #ffffff;"></i>
-                        </div>
-                        <h2 class="launcher-title">¡Briefing Listo!</h2>
-                        <p class="launcher-desc">Tienes todo bajo control. ¡Que tengas un excelente día!</p>
-                    </div>
-
-                    <button class="finish-btn" onclick="handleFinish(event)">
+                    <button class="finish-btn anim-element anim-delay-5" onclick="handleFinish(event)">
                         ¡A por el día!
                     </button>
                 </div>
@@ -646,67 +686,188 @@
     </div>
 
     <script>
+        // --- RENDIMIENTO: MONITOREO FPS (<20 FPS DESACTIVA SOLO BLUR) ---
+        let lastFrameTime = performance.now();
+        let frameCount = 0;
+        let fpsBuffer = [];
+
+        function monitorFPS(now) {
+            frameCount++;
+            const delta = now - lastFrameTime;
+            if (delta >= 1000) {
+                const currentFPS = (frameCount * 1000) / delta;
+                fpsBuffer.push(currentFPS);
+                if (fpsBuffer.length > 3) fpsBuffer.shift();
+
+                const avgFPS = fpsBuffer.reduce((a, b) => a + b, 0) / fpsBuffer.length;
+                if (avgFPS < 20) {
+                    document.body.classList.add('low-fps');
+                } else {
+                    document.body.classList.remove('low-fps');
+                }
+
+                frameCount = 0;
+                lastFrameTime = now;
+            }
+            requestAnimationFrame(monitorFPS);
+        }
+        requestAnimationFrame(monitorFPS);
+
+        // --- INICIALIZACIÓN CLIMA DÍA/NOCHE ---
+        function initWeatherIcon() {
+            const hour = new Date().getHours();
+            const isNight = (hour >= 20 || hour < 6);
+            
+            const badgeBox = document.getElementById('weather-badge');
+            const iconBox = document.getElementById('weather-icon-box');
+            const desc = document.getElementById('weather-desc');
+            const svgAccent = document.getElementById('weather-svg-accent');
+
+            if (isNight) {
+                badgeBox.innerHTML = `<i data-lucide="moon" size="15"></i><span>El Tiempo (Noche)</span>`;
+                iconBox.innerHTML = `<i data-lucide="moon" size="40" style="color: var(--accent-weather-night);"></i>`;
+                desc.textContent = "Consulta la previsión meteorológica nocturna y temperaturas de hoy.";
+                svgAccent.setAttribute('stroke', '#A78BFA');
+            } else {
+                badgeBox.innerHTML = `<i data-lucide="sun" size="15"></i><span>El Tiempo</span>`;
+                iconBox.innerHTML = `<i data-lucide="sun" size="40" style="color: var(--accent-weather-day);"></i>`;
+                desc.textContent = "Consulta la previsión meteorológica y temperaturas para hoy.";
+                svgAccent.setAttribute('stroke', '#FFB703');
+            }
+        }
+        initWeatherIcon();
         lucide.createIcons();
 
-        let currentScreen = 0;
-        const totalScreens = 6;
-        let storyTimer = null;
-        let progressStartTime = 0;
-        let elapsedTime = 0;
-        let isPaused = false;
-        const durationPerScreen = 6000;
+        // --- ESTADO GLOBAL Y MOTOR ---
+        const appState = {
+            currentScreen: 0,
+            totalScreens: 5,
+            isPaused: false,
+            durationCover: 7500, // Portada más larga para dar tiempo a la intro cinemática
+            durationStandard: 5500,
+            timer: null,
+            startTime: 0,
+            elapsed: 0,
+            cinematicPlayed: false,
+            isNightTime: new Date().getHours() >= 20 || new Date().getHours() < 6
+        };
 
-        const track = document.getElementById('stories-track');
-        const segments = document.querySelectorAll('.progress-segment');
-        const fadeOverlay = document.getElementById('fade-overlay');
-        const ambientGlow = document.getElementById('ambient-glow');
-        const pauseIndicator = document.getElementById('pause-indicator');
+        const DOM = {
+            track: document.getElementById('stories-track'),
+            segments: document.querySelectorAll('.progress-segment'),
+            glow: document.getElementById('ambient-glow'),
+            pause: document.getElementById('pause-indicator'),
+            main: document.getElementById('main-view'),
+            overlay: document.getElementById('fade-overlay'),
+            clock: document.getElementById('cinematic-clock'),
+            greeting: document.getElementById('cinematic-greeting'),
+            typewriterText: document.getElementById('typewriter-text'),
+            typewriterCursor: document.getElementById('typewriter-cursor')
+        };
 
         const glowColors = [
-            'rgba(255, 126, 95, 0.18)',  
-            'rgba(255, 183, 3, 0.14)',   
-            'rgba(66, 133, 244, 0.14)',  
-            'rgba(52, 168, 83, 0.14)',   
-            'rgba(168, 85, 247, 0.14)',  
-            'rgba(255, 255, 255, 0.12)'   
+            'rgba(255, 255, 255, 0.03)',
+            appState.isNightTime ? 'rgba(167, 139, 250, 0.12)' : 'rgba(255, 183, 3, 0.12)',
+            'rgba(66, 133, 244, 0.12)',
+            'rgba(52, 199, 89, 0.12)',
+            'rgba(255, 255, 255, 0.06)'
         ];
 
         function triggerHaptic() {
-            if (navigator.vibrate) navigator.vibrate(12);
+            if (navigator.vibrate) try { navigator.vibrate(10); } catch(e){}
         }
 
-        function updateStoryView() {
-            track.style.transform = `translateX(-${currentScreen * 100}%)`;
-            ambientGlow.style.background = glowColors[currentScreen];
-            
+        // --- ANIMACIÓN CINEMÁTICA DE ENTRADA (5 SEGUNDOS) ---
+        function runCinematicEntrance() {
+            if (appState.cinematicPlayed) return;
+            appState.cinematicPlayed = true;
+
+            const now = new Date();
+            const options = { weekday: 'long', day: 'numeric', month: 'long' };
+            const fullDateString = now.toLocaleDateString('es-ES', options).toUpperCase();
+
+            // Elementos cinemáticos
+            const dateBox = document.getElementById('cinematic-date-box');
+            const badge = document.getElementById('cinematic-badge');
+            const clock = document.getElementById('cinematic-clock');
+            const greeting = document.getElementById('cinematic-greeting');
+            const sub = document.getElementById('cinematic-sub');
+            const hint = document.getElementById('cinematic-hint');
+
+            // 0s: Aparece la píldora de fecha vacía
+            setTimeout(() => dateBox.classList.add('show'), 100);
+
+            // 0.3s a 2.6s: Escritura lenta carácter por carácter de la fecha
+            let charIdx = 0;
+            const typeInterval = 2300 / fullDateString.length;
+
+            setTimeout(() => {
+                const typer = setInterval(() => {
+                    if (charIdx < fullDateString.length) {
+                        DOM.typewriterText.textContent += fullDateString.charAt(charIdx);
+                        charIdx++;
+                    } else {
+                        clearInterval(typer);
+                        setTimeout(() => {
+                            if (DOM.typewriterCursor) DOM.typewriterCursor.style.display = 'none';
+                        }, 800);
+                    }
+                }, typeInterval);
+            }, 300);
+
+            // 2.8s: Emerge el Badge "RESUMEN DIARIO" desde la nada
+            setTimeout(() => badge.classList.add('show'), 2800);
+
+            // 3.4s: Emerge el Reloj gigante desde la nada
+            setTimeout(() => clock.classList.add('show'), 3400);
+
+            // 4.0s: Emerge el Saludo desde la nada
+            setTimeout(() => greeting.classList.add('show'), 4000);
+
+            // 4.5s: Emergen Subtítulo y Guía de interacción
+            setTimeout(() => {
+                sub.classList.add('show');
+                hint.classList.add('show');
+            }, 4500);
+        }
+
+        // --- LÓGICA DE NAVEGACIÓN ---
+        function getCurrentDuration() {
+            return appState.currentScreen === 0 ? appState.durationCover : appState.durationStandard;
+        }
+
+        function renderView() {
+            DOM.track.style.transform = `translateX(-${appState.currentScreen * 100}%)`;
+            DOM.glow.style.background = glowColors[appState.currentScreen];
+
             document.querySelectorAll('.story-screen').forEach((scr, idx) => {
-                if(idx === currentScreen) {
-                    scr.classList.remove('active');
-                    void scr.offsetWidth;
-                    scr.classList.add('active');
-                } else {
-                    scr.classList.remove('active');
-                }
+                if (idx === appState.currentScreen) scr.classList.add('active');
+                else scr.classList.remove('active');
             });
 
-            elapsedTime = 0;
+            if (appState.currentScreen === 0) {
+                runCinematicEntrance();
+            }
+
+            appState.elapsed = 0;
             updateProgress();
             startTimer();
         }
 
         function updateProgress() {
-            segments.forEach((seg, idx) => {
+            const currentDuration = getCurrentDuration();
+
+            DOM.segments.forEach((seg, idx) => {
                 const fill = seg.querySelector('.fill');
-                
-                if (idx < currentScreen) {
+                if (idx < appState.currentScreen) {
                     fill.style.transition = 'none';
                     fill.style.width = '100%';
-                } else if (idx === currentScreen) {
+                } else if (idx === appState.currentScreen) {
                     fill.style.transition = 'none';
-                    fill.style.width = `${(elapsedTime / durationPerScreen) * 100}%`;
+                    fill.style.width = `${(appState.elapsed / currentDuration) * 100}%`;
                     void fill.offsetWidth;
-                    if (!isPaused) {
-                        const remaining = durationPerScreen - elapsedTime;
+                    if (!appState.isPaused) {
+                        const remaining = currentDuration - appState.elapsed;
                         fill.style.transition = `width ${remaining}ms linear`;
                         fill.style.width = '100%';
                     }
@@ -719,266 +880,192 @@
 
         function nextScreen() {
             triggerHaptic();
-            if (currentScreen < totalScreens - 1) {
-                currentScreen++;
-                updateStoryView();
-            } else {
-                currentScreen = 0;
-                updateStoryView();
-            }
+            if (appState.currentScreen < appState.totalScreens - 1) appState.currentScreen++;
+            else appState.currentScreen = 0;
+            renderView();
         }
 
         function prevScreen() {
             triggerHaptic();
-            if (currentScreen > 0) {
-                currentScreen--;
-                updateStoryView();
-            }
+            if (appState.currentScreen > 0) appState.currentScreen--;
+            renderView();
         }
 
         function startTimer() {
-            clearTimeout(storyTimer);
-            progressStartTime = Date.now();
+            clearTimeout(appState.timer);
+            appState.startTime = Date.now();
+            const currentDuration = getCurrentDuration();
+            const remaining = currentDuration - appState.elapsed;
             
-            const remaining = durationPerScreen - elapsedTime;
-            storyTimer = setTimeout(() => {
-                if (!isPaused) {
-                    if (currentScreen < totalScreens - 1) {
-                        nextScreen();
-                    }
-                }
+            appState.timer = setTimeout(() => {
+                if (!appState.isPaused) nextScreen();
             }, remaining);
         }
 
-        function pauseTimer() {
-            if (isPaused) return;
-            isPaused = true;
-            clearTimeout(storyTimer);
-            elapsedTime += Date.now() - progressStartTime;
-            
-            pauseIndicator.classList.add('visible');
-            
-            const currentFill = segments[currentScreen]?.querySelector('.fill');
-            if (currentFill) {
-                const computedWidth = getComputedStyle(currentFill).width;
-                currentFill.style.transition = 'none';
-                currentFill.style.width = computedWidth;
-            }
-        }
-
-        function resumeTimer() {
-            if (!isPaused) return;
-            isPaused = false;
-            pauseIndicator.classList.remove('visible');
-            updateProgress();
-            startTimer();
-        }
-
-        let touchStartTime = 0;
-        let touchStartX = 0;
-        let touchStartY = 0;
-        let holdTimeout = null;
-
-        const app = document.getElementById('app');
-
-        app.addEventListener('pointerdown', e => {
-            if (e.target.closest('.app-launch-btn, .finish-btn')) return;
-            
-            touchStartTime = Date.now();
-            touchStartX = e.clientX;
-            touchStartY = e.clientY;
-
-            holdTimeout = setTimeout(() => {
-                pauseTimer();
-            }, 200);
-        });
-
-        app.addEventListener('pointerup', e => {
-            if (e.target.closest('.app-launch-btn, .finish-btn')) return;
-
-            clearTimeout(holdTimeout);
-            const duration = Date.now() - touchStartTime;
-            const diffX = Math.abs(e.clientX - touchStartX);
-            const diffY = Math.abs(e.clientY - touchStartY);
-
-            if (isPaused) {
-                resumeTimer();
-            } else if (duration < 250 && diffX < 15 && diffY < 15) {
-                const screenWidth = window.innerWidth;
-                if (e.clientX < screenWidth * 0.3) {
-                    prevScreen();
-                } else {
-                    nextScreen();
+        function togglePause(forcePause) {
+            if (forcePause && !appState.isPaused) {
+                appState.isPaused = true;
+                clearTimeout(appState.timer);
+                appState.elapsed += Date.now() - appState.startTime;
+                DOM.pause.classList.add('visible');
+                
+                const currentFill = DOM.segments[appState.currentScreen]?.querySelector('.fill');
+                if (currentFill) {
+                    currentFill.style.transition = 'none';
+                    currentFill.style.width = getComputedStyle(currentFill).width;
                 }
+            } else if (!forcePause && appState.isPaused) {
+                appState.isPaused = false;
+                DOM.pause.classList.remove('visible');
+                updateProgress();
+                startTimer();
+            }
+        }
+
+        // --- CONTROLES TÁCTILES Y RATÓN ---
+        let touchData = { startX: 0, startY: 0, time: 0, holdTimer: null };
+
+        DOM.main.addEventListener('pointerdown', e => {
+            if (e.target.closest('.app-launch-btn, .finish-btn')) return;
+            touchData.startX = e.clientX;
+            touchData.startY = e.clientY;
+            touchData.time = Date.now();
+            touchData.holdTimer = setTimeout(() => togglePause(true), 250);
+        });
+
+        DOM.main.addEventListener('pointerup', e => {
+            if (e.target.closest('.app-launch-btn, .finish-btn')) return;
+            clearTimeout(touchData.holdTimer);
+            
+            const diffX = Math.abs(e.clientX - touchData.startX);
+            const duration = Date.now() - touchData.time;
+
+            if (appState.isPaused) {
+                togglePause(false);
+            } else if (duration < 250 && diffX < 20) {
+                const rect = DOM.main.getBoundingClientRect();
+                const relativeX = e.clientX - rect.left;
+                if (relativeX < rect.width * 0.35) prevScreen();
+                else nextScreen();
             }
         });
 
-        app.addEventListener('pointercancel', () => {
-            clearTimeout(holdTimeout);
-            if (isPaused) resumeTimer();
+        DOM.main.addEventListener('pointercancel', () => {
+            clearTimeout(touchData.holdTimer);
+            if (appState.isPaused) togglePause(false);
         });
 
+        // NAVEGACIÓN TECLADO
+        window.addEventListener('keydown', e => {
+            if (e.key === 'ArrowRight' || e.key === 'Space') nextScreen();
+            else if (e.key === 'ArrowLeft') prevScreen();
+        });
+
+        // INTENTS DE ANDROID Y ACCIONES
         function launchApp(event, intentUrl) {
             event.preventDefault();
             event.stopPropagation();
             triggerHaptic();
-            
-            clearTimeout(storyTimer);
-            fadeOverlay.classList.add('active');
+            clearTimeout(appState.timer);
+            DOM.overlay.classList.add('active');
 
             setTimeout(() => {
                 window.location.href = intentUrl;
-                setTimeout(() => {
-                    fadeOverlay.classList.remove('active');
-                }, 1000);
+                setTimeout(() => DOM.overlay.classList.remove('active'), 1200);
             }, 250);
         }
 
-        function updateDateAndClock() {
-            const now = new Date();
-            
-            const h = String(now.getHours()).padStart(2, '0');
-            const m = String(now.getMinutes()).padStart(2, '0');
-            document.getElementById('live-clock').textContent = `${h}:${m}`;
-
-            const options = { weekday: 'long', day: 'numeric', month: 'long' };
-            const dateStr = now.toLocaleDateString('es-ES', options).toUpperCase();
-            document.getElementById('current-date').textContent = dateStr;
-        }
-        setInterval(updateDateAndClock, 1000);
-        updateDateAndClock();
-
-        const greetingMsg = "Buenos días, Guillermo";
-        let charIdx = 0;
-        function typeWriter() {
-            if (charIdx < greetingMsg.length) {
-                document.getElementById('typing-text').textContent += greetingMsg.charAt(charIdx);
-                charIdx++;
-                setTimeout(typeWriter, 70);
-            }
-        }
-        setTimeout(typeWriter, 400);
-
-        const weatherCanvas = document.getElementById('weather-canvas');
-        const wCtx = weatherCanvas.getContext('2d', { alpha: true });
-        let particles = [];
-
-        function resizeCanvas() {
-            weatherCanvas.width = weatherCanvas.offsetWidth;
-            weatherCanvas.height = weatherCanvas.offsetHeight;
-        }
-        resizeCanvas();
-
-        for (let i = 0; i < 25; i++) {
-            particles.push({
-                x: Math.random() * window.innerWidth,
-                y: Math.random() * window.innerHeight,
-                r: Math.random() * 2 + 1,
-                dx: (Math.random() - 0.5) * 0.5,
-                dy: Math.random() * 0.4 + 0.2,
-                opacity: Math.random() * 0.6 + 0.2
-            });
-        }
-
-        function drawWeatherParticles() {
-            wCtx.clearRect(0, 0, weatherCanvas.width, weatherCanvas.height);
-            wCtx.fillStyle = '#ffffff';
-            particles.forEach(p => {
-                wCtx.beginPath();
-                wCtx.arc(p.x, p.y, p.r, 0, Math.PI * 2);
-                wCtx.globalAlpha = p.opacity;
-                wCtx.fill();
-                p.x += p.dx;
-                p.y += p.dy;
-                if (p.y > weatherCanvas.height) p.y = 0;
-                if (p.x > weatherCanvas.width || p.x < 0) p.x = Math.random() * weatherCanvas.width;
-            });
-            requestAnimationFrame(drawWeatherParticles);
-        }
-        drawWeatherParticles();
-
         function handleFinish(event) {
-            triggerRipple(event);
             triggerHaptic();
             launchConfetti();
-
-            setTimeout(() => {
-                fadeOverlay.classList.add('active');
-            }, 800);
+            setTimeout(() => DOM.overlay.classList.add('active'), 800);
         }
 
-        function triggerRipple(event) {
-            event.stopPropagation();
-            const button = event.currentTarget;
-            const circle = document.createElement('span');
-            const diameter = Math.max(button.clientWidth, button.clientHeight);
-            const radius = diameter / 2;
+        // RELOJ Y SALUDO
+        function tickClock() {
+            const now = new Date();
+            const h = String(now.getHours()).padStart(2, '0');
+            const m = String(now.getMinutes()).padStart(2, '0');
+            DOM.clock.textContent = `${h}:${m}`;
 
-            const rect = button.getBoundingClientRect();
-            circle.style.width = circle.style.height = `${diameter}px`;
-            circle.style.left = `${event.clientX - rect.left - radius}px`;
-            circle.style.top = `${event.clientY - rect.top - radius}px`;
-            circle.classList.add('ripple-particle');
+            const hour = now.getHours();
+            if (hour >= 6 && hour < 13) DOM.greeting.textContent = "Buenos días";
+            else if (hour >= 13 && hour < 20) DOM.greeting.textContent = "Buenas tardes";
+            else DOM.greeting.textContent = "Buenas noches";
+        }
+        setInterval(tickClock, 1000);
+        tickClock();
 
-            const existingRipple = button.getElementsByClassName('ripple-particle')[0];
-            if (existingRipple) existingRipple.remove();
+        // CANVASES (CLIMA Y CONFETI)
+        const wCanvas = document.getElementById('weather-canvas');
+        const wCtx = wCanvas.getContext('2d', { alpha: true });
+        let particles = Array.from({length: 18}, () => ({
+            x: Math.random() * window.innerWidth,
+            y: Math.random() * window.innerHeight,
+            r: Math.random() * 1.5 + 0.5,
+            dx: (Math.random() - 0.5) * 0.2,
+            dy: Math.random() * 0.3 + 0.1,
+            op: Math.random() * 0.4 + 0.1
+        }));
 
-            button.appendChild(circle);
+        function drawWeather() {
+            if (appState.currentScreen === 1) {
+                wCanvas.width = wCanvas.offsetWidth;
+                wCanvas.height = wCanvas.offsetHeight;
+                wCtx.clearRect(0, 0, wCanvas.width, wCanvas.height);
+                wCtx.fillStyle = '#FFFFFF';
+                particles.forEach(p => {
+                    wCtx.beginPath();
+                    wCtx.arc(p.x, p.y, p.r, 0, Math.PI * 2);
+                    wCtx.globalAlpha = p.op;
+                    wCtx.fill();
+                    p.x += p.dx; p.y += p.dy;
+                    if (p.y > wCanvas.height) p.y = 0;
+                    if (p.x > wCanvas.width || p.x < 0) p.x = Math.random() * wCanvas.width;
+                });
+            }
+            requestAnimationFrame(drawWeather);
         }
 
         const fxCanvas = document.getElementById('fx-canvas');
         const fxCtx = fxCanvas.getContext('2d');
         let confettis = [];
 
-        function resizeFxCanvas() {
+        function launchConfetti() {
             fxCanvas.width = window.innerWidth;
             fxCanvas.height = window.innerHeight;
-        }
-        resizeFxCanvas();
-        window.addEventListener('resize', () => { resizeCanvas(); resizeFxCanvas(); });
-
-        function launchConfetti() {
-            confettis = [];
-            const colors = ['#ffffff', '#ffb703', '#4285F4', '#34A853', '#a855f7'];
-            for (let i = 0; i < 70; i++) {
-                confettis.push({
-                    x: fxCanvas.width / 2,
-                    y: fxCanvas.height - 100,
-                    vx: (Math.random() - 0.5) * 12,
-                    vy: (Math.random() * -12) - 6,
-                    size: Math.random() * 6 + 4,
-                    color: colors[Math.floor(Math.random() * colors.length)],
-                    rotation: Math.random() * 360,
-                    rSpeed: (Math.random() - 0.5) * 10
-                });
-            }
+            const colors = ['#FFFFFF', '#FFB703', '#A78BFA', '#4285F4', '#34C759'];
+            confettis = Array.from({length: 60}, () => ({
+                x: fxCanvas.width / 2,
+                y: fxCanvas.height / 2 + 50,
+                vx: (Math.random() - 0.5) * 12,
+                vy: (Math.random() * -12) - 3,
+                s: Math.random() * 6 + 3,
+                c: colors[Math.floor(Math.random() * colors.length)],
+                r: Math.random() * 360,
+                rs: (Math.random() - 0.5) * 8
+            }));
             animateConfetti();
         }
 
         function animateConfetti() {
             fxCtx.clearRect(0, 0, fxCanvas.width, fxCanvas.height);
             let active = false;
-
             confettis.forEach(c => {
-                c.x += c.vx;
-                c.y += c.vy;
-                c.vy += 0.4;
-                c.rotation += c.rSpeed;
-
+                c.x += c.vx; c.y += c.vy; c.vy += 0.35; c.r += c.rs;
                 if (c.y < fxCanvas.height) active = true;
-
                 fxCtx.save();
                 fxCtx.translate(c.x, c.y);
-                fxCtx.rotate((c.rotation * Math.PI) / 180);
-                fxCtx.fillStyle = c.color;
-                fxCtx.fillRect(-c.size / 2, -c.size / 2, c.size, c.size);
+                fxCtx.rotate((c.r * Math.PI) / 180);
+                fxCtx.fillStyle = c.c;
+                fxCtx.fillRect(-c.s / 2, -c.s / 2, c.s, c.s);
                 fxCtx.restore();
             });
-
             if (active) requestAnimationFrame(animateConfetti);
         }
 
-        updateStoryView();
+        drawWeather();
+        renderView();
     </script>
 </body>
 </html>
