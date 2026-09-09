@@ -2,7 +2,7 @@
 <html lang="es">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover, user-scalable=no">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, viewport-fit=cover, user-scalable=no">
     <title>Resumen Diario</title>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -37,15 +37,19 @@
             --spring: cubic-bezier(0.34, 1.56, 0.64, 1);
         }
 
-        /* Desactivación de Blurs si se detecta teléfono lento (< 20 FPS) */
-        body.low-fps {
+        /* Desactivación manual de blurs */
+        body.no-blur {
             --blur-val: 0px !important;
         }
-        body.low-fps .card-container,
-        body.low-fps .pause-indicator {
+        body.no-blur .card-container,
+        body.no-blur .pause-indicator,
+        body.no-blur .modal-card {
             backdrop-filter: none !important;
             -webkit-backdrop-filter: none !important;
-            background: rgba(18, 18, 18, 0.95) !important;
+            background: rgba(18, 18, 18, 0.98) !important;
+        }
+        body.no-blur .ambient-glow {
+            display: none !important;
         }
 
         * {
@@ -88,10 +92,6 @@
             z-index: 1;
         }
 
-        body.low-fps .ambient-glow {
-            display: none !important;
-        }
-
         /* CONTENEDOR PRINCIPAL RESPONSIVO */
         .app-container {
             width: 100%;
@@ -106,21 +106,12 @@
             touch-action: none;
             z-index: 2;
             margin: 0 auto;
+            transition: filter 0.4s var(--bezier);
         }
 
-        .fade-overlay {
-            position: fixed;
-            inset: 0;
-            background: #000000;
-            opacity: 0;
+        .app-container.backgrounded {
+            filter: scale(0.96) blur(4px);
             pointer-events: none;
-            transition: opacity 0.4s ease;
-            z-index: 9999;
-        }
-
-        .fade-overlay.active {
-            opacity: 1;
-            pointer-events: auto;
         }
 
         /* BARRAS DE PROGRESO */
@@ -155,10 +146,45 @@
             will-change: width;
         }
 
+        /* HEADER Y CONTROLES SUPERIORES CENTRADOS */
+        .top-controls {
+            position: absolute;
+            top: calc(env(safe-area-inset-top) + 16px);
+            right: 24px;
+            z-index: 50;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 4px;
+        }
+
+        .icon-btn {
+            background: rgba(255, 255, 255, 0.08);
+            border: 1px solid var(--glass-border);
+            color: var(--text-main);
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            display: inline-flex;
+            justify-content: center;
+            align-items: center;
+            padding: 0;
+            cursor: pointer;
+            backdrop-filter: blur(10px);
+            -webkit-backdrop-filter: blur(10px);
+            transition: transform 0.2s var(--spring), background 0.2s;
+            -webkit-tap-highlight-color: transparent;
+        }
+
+        .icon-btn:active {
+            transform: scale(0.9);
+            background: rgba(255, 255, 255, 0.15);
+        }
+
         /* INDICADOR DE PAUSA */
         .pause-indicator {
             position: absolute;
-            top: 56px;
+            top: 60px;
             left: 50%;
             transform: translateX(-50%) translateY(-10px);
             background: rgba(20, 20, 26, 0.85);
@@ -247,14 +273,14 @@
         .draw-path {
             stroke-dasharray: 300;
             stroke-dashoffset: 300;
-            transition: stroke-dashoffset 2.5s var(--bezier);
+            transition: stroke-dashoffset 2s var(--bezier);
         }
 
         .story-screen.active .draw-path {
             stroke-dashoffset: 0;
         }
 
-        /* ANIMACIÓN CINEMÁTICA DE ENTRADA DESDE LA NADA (SCALE 0 + OPACITY 0) */
+        /* ANIMACIÓN CINEMÁTICA DE ENTRADA DESDE LA NADA */
         .cinematic-element {
             opacity: 0;
             transform: scale(0) translateY(30px);
@@ -267,7 +293,7 @@
             transform: scale(1) translateY(0);
         }
 
-        /* ANIMACIONES EN CASCADA ESTÁNDAR PARA OTRAS PANTALLAS */
+        /* ANIMACIONES ESTÁNDAR */
         .anim-element {
             opacity: 0;
             transform: scale(0.4) translateY(20px);
@@ -375,6 +401,8 @@
             font-size: 0.95rem;
             font-weight: 300;
             color: var(--text-muted);
+            max-width: 80%;
+            line-height: 1.4;
         }
 
         /* ELEMENTOS PANTALLAS DE APPS */
@@ -423,15 +451,6 @@
             box-shadow: 0 16px 40px rgba(0, 0, 0, 0.4), inset 0 1px 0 rgba(255, 255, 255, 0.1);
         }
 
-        .story-screen.active .app-icon-wrapper {
-            animation: floatIcon 3.5s ease-in-out infinite 0.4s;
-        }
-
-        @keyframes floatIcon {
-            0%, 100% { transform: translateY(0px); }
-            50% { transform: translateY(-8px); }
-        }
-
         .launcher-title {
             font-size: clamp(1.8rem, 5vw, 2.2rem);
             font-weight: 600;
@@ -447,7 +466,7 @@
             max-width: 300px;
         }
 
-        /* BOTONES DE ACCIÓN */
+        /* BOTONES DE ACCIÓN - ANDROID INTENTS */
         .app-launch-btn {
             display: flex;
             align-items: center;
@@ -491,20 +510,129 @@
             -webkit-tap-highlight-color: transparent;
         }
 
-        .swipe-hint {
-            display: inline-flex;
-            align-items: center;
-            gap: 8px;
-            font-size: 0.85rem;
-            color: var(--text-muted);
-            z-index: 5;
-            animation: pulseHint 2.5s infinite ease-in-out;
-            padding-top: 10px;
+        /* MODAL DE AJUSTES */
+        .modal-overlay {
+            position: fixed;
+            inset: 0;
+            background: rgba(0, 0, 0, 0.6);
+            z-index: 999;
+            display: flex;
+            align-items: flex-end;
+            justify-content: center;
+            opacity: 0;
+            pointer-events: none;
+            transition: opacity 0.4s var(--bezier);
+            padding: 16px;
         }
 
-        @keyframes pulseHint {
-            0%, 100% { opacity: 0.3; transform: translateX(0); }
-            50% { opacity: 0.8; transform: translateX(4px); }
+        .modal-overlay.active {
+            opacity: 1;
+            pointer-events: auto;
+        }
+
+        .modal-card {
+            width: 100%;
+            max-width: 580px;
+            background: var(--glass);
+            backdrop-filter: blur(var(--blur-val));
+            -webkit-backdrop-filter: blur(var(--blur-val));
+            border: 1px solid var(--glass-border);
+            border-radius: 32px;
+            padding: 32px;
+            transform: translateY(100px);
+            transition: transform 0.5s var(--spring);
+            box-shadow: 0 25px 60px rgba(0, 0, 0, 0.8);
+            margin-bottom: env(safe-area-inset-bottom);
+        }
+
+        .modal-overlay.active .modal-card {
+            transform: translateY(0);
+        }
+
+        .modal-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 24px;
+        }
+
+        .modal-header h3 {
+            font-size: 1.4rem;
+            font-weight: 600;
+        }
+
+        .form-group {
+            margin-bottom: 24px;
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+
+        .form-group label {
+            font-size: 0.9rem;
+            color: var(--text-muted);
+            font-weight: 500;
+        }
+
+        .neo-input {
+            width: 100%;
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid var(--glass-border);
+            padding: 16px 20px;
+            border-radius: 16px;
+            color: var(--text-main);
+            font-size: 1rem;
+            outline: none;
+            transition: border-color 0.3s ease, box-shadow 0.3s ease;
+        }
+
+        .neo-input:focus {
+            border-color: rgba(255, 255, 255, 0.3);
+            box-shadow: 0 0 0 3px rgba(255, 255, 255, 0.05);
+        }
+
+        .toggle-group {
+            flex-direction: row;
+            justify-content: space-between;
+            align-items: center;
+            background: rgba(255, 255, 255, 0.03);
+            padding: 16px 20px;
+            border-radius: 16px;
+            border: 1px solid var(--glass-border);
+        }
+
+        /* Toggle Checkbox Minimalista */
+        .neo-toggle {
+            appearance: none;
+            width: 48px;
+            height: 28px;
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 100px;
+            position: relative;
+            cursor: pointer;
+            outline: none;
+            transition: background 0.3s ease;
+        }
+        
+        .neo-toggle::after {
+            content: '';
+            position: absolute;
+            top: 3px;
+            left: 3px;
+            width: 22px;
+            height: 22px;
+            background: #FFFFFF;
+            border-radius: 50%;
+            transition: transform 0.3s var(--spring);
+            box-shadow: 0 2px 5px rgba(0,0,0,0.3);
+        }
+
+        .neo-toggle:checked {
+            background: var(--accent-success);
+        }
+
+        .neo-toggle:checked::after {
+            transform: translateX(20px);
         }
 
         /* CANVASES FLOTANTES */
@@ -518,17 +646,36 @@
 
         #weather-canvas { opacity: 0.5; z-index: 2; }
         #fx-canvas { z-index: 99; }
+
+        .black-screen-transition {
+            position: fixed;
+            inset: 0;
+            background: #000000;
+            opacity: 0;
+            pointer-events: none;
+            transition: opacity 0.7s var(--bezier);
+            z-index: 1000;
+        }
+
+        .black-screen-transition.active {
+            opacity: 1;
+        }
     </style>
 </head>
 <body>
 
     <div class="ambient-glow" id="ambient-glow"></div>
     <canvas id="fx-canvas"></canvas>
-    <div class="fade-overlay" id="fade-overlay"></div>
 
     <div class="app-container" id="main-view">
 
-        <!-- Indicador de Pausa -->
+        <!-- Controles Superiores (Ajustes) -->
+        <div class="top-controls" id="top-controls">
+            <button class="icon-btn" onclick="openModal('settings-modal')" aria-label="Ajustes">
+                <i data-lucide="settings" size="18"></i>
+            </button>
+        </div>
+
         <div class="pause-indicator" id="pause-indicator">
             <i data-lucide="pause" size="14"></i> Pausado
         </div>
@@ -554,20 +701,16 @@
                     </div>
 
                     <div class="cover-hero">
-                        <!-- Fecha escrita lentamente con efecto máquina de escribir -->
                         <div class="cover-date-pill cinematic-element" id="cinematic-date-box">
                             <span id="typewriter-text"></span><span class="typewriter-cursor" id="typewriter-cursor"></span>
                         </div>
 
                         <div class="cover-clock cinematic-element" id="cinematic-clock">00:00</div>
                         <div class="cover-greeting cinematic-element" id="cinematic-greeting">Hola</div>
-                        <div class="cover-sub cinematic-element" id="cinematic-sub">Tu jornada resumida de un vistazo</div>
+                        <div class="cover-sub cinematic-element" id="cinematic-sub">Tu día resumido de un vistazo</div>
                     </div>
 
-                    <div class="swipe-hint cinematic-element" id="cinematic-hint">
-                        <span>Toca los lados para navegar</span>
-                        <i data-lucide="arrow-right" size="14"></i>
-                    </div>
+                    <div style="height: 40px;"></div>
                 </div>
             </div>
 
@@ -590,7 +733,7 @@
                         <p class="launcher-desc anim-element anim-delay-4" id="weather-desc">Cargando previsión...</p>
                     </div>
 
-                    <a href="intent://#Intent;scheme=android-app;package=com.subtlesignals.gradientweather;end" class="app-launch-btn anim-element anim-delay-5" onclick="launchApp(event, this.getAttribute('href'))">
+                    <a href="intent:#Intent;action=android.intent.action.MAIN;category=android.intent.category.LAUNCHER;package=com.subtlesignals.gradientweather;end" class="app-launch-btn anim-element anim-delay-5" onclick="recordInteraction(this)">
                         <span>Abrir Gradient Weather</span>
                         <i data-lucide="external-link" size="16"></i>
                     </a>
@@ -619,7 +762,7 @@
                         <p class="launcher-desc anim-element anim-delay-4">Revisa tus eventos programados, reuniones y entregas de hoy.</p>
                     </div>
 
-                    <a href="intent://#Intent;scheme=android-app;package=com.google.android.calendar;end" class="app-launch-btn anim-element anim-delay-5" onclick="launchApp(event, this.getAttribute('href'))">
+                    <a href="intent:#Intent;action=android.intent.action.MAIN;category=android.intent.category.LAUNCHER;package=com.google.android.calendar;end" class="app-launch-btn anim-element anim-delay-5" onclick="recordInteraction(this)">
                         <span>Abrir Google Calendar</span>
                         <i data-lucide="external-link" size="16"></i>
                     </a>
@@ -648,7 +791,7 @@
                         <p class="launcher-desc anim-element anim-delay-4">Organiza tus pendientes y completa los objetivos del día.</p>
                     </div>
 
-                    <a href="intent://#Intent;scheme=android-app;package=com.google.android.apps.tasks;end" class="app-launch-btn anim-element anim-delay-5" onclick="launchApp(event, this.getAttribute('href'))">
+                    <a href="intent:#Intent;action=android.intent.action.MAIN;category=android.intent.category.LAUNCHER;package=com.google.android.apps.tasks;end" class="app-launch-btn anim-element anim-delay-5" onclick="recordInteraction(this)">
                         <span>Abrir Google Tasks</span>
                         <i data-lucide="external-link" size="16"></i>
                     </a>
@@ -685,65 +828,65 @@
         </div>
     </div>
 
+    <!-- MODAL DE AJUSTES -->
+    <div id="settings-modal" class="modal-overlay">
+        <div class="modal-card">
+            <div class="modal-header">
+                <h3>Ajustes de Interfaz</h3>
+                <button class="icon-btn" onclick="closeActiveModal('settings-modal')">
+                    <i data-lucide="x" size="18"></i>
+                </button>
+            </div>
+            <div class="modal-body">
+                <div class="form-group">
+                    <label>Tu Nombre (Opcional)</label>
+                    <input type="text" id="name-input" class="neo-input" placeholder="Ej. Álex" autocomplete="off">
+                </div>
+                <div class="form-group toggle-group">
+                    <label>Desactivar Desenfoque (Blur)</label>
+                    <input type="checkbox" id="blur-toggle" class="neo-toggle">
+                </div>
+                <button class="finish-btn" style="width: 100%; max-width: 100%; margin-top: 10px;" onclick="saveSettings()">
+                    Guardar y Aplicar
+                </button>
+            </div>
+        </div>
+    </div>
+
     <script>
-        // --- RENDIMIENTO: MONITOREO FPS (<20 FPS DESACTIVA SOLO BLUR) ---
-        let lastFrameTime = performance.now();
-        let frameCount = 0;
-        let fpsBuffer = [];
-
-        function monitorFPS(now) {
-            frameCount++;
-            const delta = now - lastFrameTime;
-            if (delta >= 1000) {
-                const currentFPS = (frameCount * 1000) / delta;
-                fpsBuffer.push(currentFPS);
-                if (fpsBuffer.length > 3) fpsBuffer.shift();
-
-                const avgFPS = fpsBuffer.reduce((a, b) => a + b, 0) / fpsBuffer.length;
-                if (avgFPS < 20) {
-                    document.body.classList.add('low-fps');
-                } else {
-                    document.body.classList.remove('low-fps');
-                }
-
-                frameCount = 0;
-                lastFrameTime = now;
-            }
-            requestAnimationFrame(monitorFPS);
+        // --- 1. REGISTRO DE SERVICE WORKER PARA ACCESO OFFLINE TOTAL ---
+        const swLogic = `
+            const CACHE_NAME = 'neo-glass-rd-v2';
+            self.addEventListener('install', e => {
+                e.waitUntil(caches.open(CACHE_NAME).then(c => c.addAll([location.href])));
+                self.skipWaiting();
+            });
+            self.addEventListener('activate', e => {
+                e.waitUntil(self.clients.claim());
+            });
+            self.addEventListener('fetch', e => {
+                e.respondWith(caches.match(e.request).then(res => res || fetch(e.request)));
+            });
+        `;
+        const swBlob = new Blob([swLogic], { type: 'application/javascript' });
+        const swUrl = URL.createObjectURL(swBlob);
+        if ('serviceWorker' in navigator) {
+            window.addEventListener('load', () => {
+                navigator.serviceWorker.register(swUrl).catch(() => {});
+            });
         }
-        requestAnimationFrame(monitorFPS);
 
-        // --- INICIALIZACIÓN CLIMA DÍA/NOCHE ---
-        function initWeatherIcon() {
-            const hour = new Date().getHours();
-            const isNight = (hour >= 20 || hour < 6);
-            
-            const badgeBox = document.getElementById('weather-badge');
-            const iconBox = document.getElementById('weather-icon-box');
-            const desc = document.getElementById('weather-desc');
-            const svgAccent = document.getElementById('weather-svg-accent');
+        // --- 2. ESTADO GLOBAL REACTIVO ---
+        let appData = JSON.parse(localStorage.getItem('neoGlass_rd_state')) || {
+            userName: '',
+            disableBlur: false
+        };
 
-            if (isNight) {
-                badgeBox.innerHTML = `<i data-lucide="moon" size="15"></i><span>El Tiempo (Noche)</span>`;
-                iconBox.innerHTML = `<i data-lucide="moon" size="40" style="color: var(--accent-weather-night);"></i>`;
-                desc.textContent = "Consulta la previsión meteorológica nocturna y temperaturas de hoy.";
-                svgAccent.setAttribute('stroke', '#A78BFA');
-            } else {
-                badgeBox.innerHTML = `<i data-lucide="sun" size="15"></i><span>El Tiempo</span>`;
-                iconBox.innerHTML = `<i data-lucide="sun" size="40" style="color: var(--accent-weather-day);"></i>`;
-                desc.textContent = "Consulta la previsión meteorológica y temperaturas para hoy.";
-                svgAccent.setAttribute('stroke', '#FFB703');
-            }
-        }
-        initWeatherIcon();
-        lucide.createIcons();
-
-        // --- ESTADO GLOBAL Y MOTOR ---
         const appState = {
             currentScreen: 0,
             totalScreens: 5,
             isPaused: false,
-            durationCover: 7500, // Portada más larga para dar tiempo a la intro cinemática
+            durationCover: 5500,
             durationStandard: 5500,
             timer: null,
             startTime: 0,
@@ -752,17 +895,22 @@
             isNightTime: new Date().getHours() >= 20 || new Date().getHours() < 6
         };
 
+        const activeModalsStack = [];
+
         const DOM = {
             track: document.getElementById('stories-track'),
             segments: document.querySelectorAll('.progress-segment'),
             glow: document.getElementById('ambient-glow'),
             pause: document.getElementById('pause-indicator'),
             main: document.getElementById('main-view'),
-            overlay: document.getElementById('fade-overlay'),
+            topControls: document.getElementById('top-controls'),
             clock: document.getElementById('cinematic-clock'),
             greeting: document.getElementById('cinematic-greeting'),
+            sub: document.getElementById('cinematic-sub'),
             typewriterText: document.getElementById('typewriter-text'),
-            typewriterCursor: document.getElementById('typewriter-cursor')
+            typewriterCursor: document.getElementById('typewriter-cursor'),
+            nameInput: document.getElementById('name-input'),
+            blurToggle: document.getElementById('blur-toggle')
         };
 
         const glowColors = [
@@ -773,11 +921,104 @@
             'rgba(255, 255, 255, 0.06)'
         ];
 
+        // --- 3. INICIALIZACIÓN DE MOTOR Y ESTADO ---
+        function initApp() {
+            lucide.createIcons();
+            initWeatherIcon();
+            
+            DOM.nameInput.value = appData.userName;
+            DOM.blurToggle.checked = appData.disableBlur;
+            applyVisualSettings();
+            
+            renderView();
+            setInterval(tickClockAndGreetings, 60000);
+            tickClockAndGreetings();
+        }
+
         function triggerHaptic() {
             if (navigator.vibrate) try { navigator.vibrate(10); } catch(e){}
         }
 
-        // --- ANIMACIÓN CINEMÁTICA DE ENTRADA (5 SEGUNDOS) ---
+        // --- 4. CONTROL DE AJUSTES Y TEXTOS DINÁMICOS ---
+        function saveSettings() {
+            appData.userName = DOM.nameInput.value.trim();
+            appData.disableBlur = DOM.blurToggle.checked;
+            
+            localStorage.setItem('neoGlass_rd_state', JSON.stringify(appData));
+            applyVisualSettings();
+            tickClockAndGreetings();
+            closeActiveModal('settings-modal');
+        }
+
+        function applyVisualSettings() {
+            if (appData.disableBlur) {
+                document.body.classList.add('no-blur');
+            } else {
+                document.body.classList.remove('no-blur');
+            }
+        }
+
+        function tickClockAndGreetings() {
+            const now = new Date();
+            const hStr = String(now.getHours()).padStart(2, '0');
+            const mStr = String(now.getMinutes()).padStart(2, '0');
+            DOM.clock.textContent = `${hStr}:${mStr}`;
+
+            const hour = now.getHours();
+            let baseGreeting = "";
+            let baseSub = "";
+
+            if (hour >= 0 && hour < 6) { 
+                baseGreeting = "Buena madrugada"; 
+                baseSub = "Es tarde, la noche está en calma."; 
+            } else if (hour >= 6 && hour < 12) { 
+                baseGreeting = "Buenos días"; 
+                baseSub = "Comienza el día con enfoque y energía."; 
+            } else if (hour >= 12 && hour < 20) { 
+                baseGreeting = "Buenas tardes"; 
+                baseSub = "Sigue adelante, mantén el ritmo de la jornada."; 
+            } else { 
+                baseGreeting = "Buenas noches"; 
+                baseSub = "Jornada completada, es momento de descansar."; 
+            }
+
+            if (appData.userName) {
+                baseGreeting += `, ${appData.userName}`;
+            }
+
+            DOM.greeting.textContent = baseGreeting;
+            DOM.sub.textContent = baseSub;
+        }
+
+        // --- 5. LÓGICA HISTORY API PARA MODALES ---
+        function openModal(modalId) {
+            triggerHaptic();
+            togglePause(true);
+            DOM.main.classList.add('backgrounded');
+            document.getElementById(modalId).classList.add('active');
+            activeModalsStack.push(modalId);
+            window.history.pushState({ modalId: modalId }, "");
+        }
+
+        function closeActiveModal(modalId) {
+            triggerHaptic();
+            if (activeModalsStack.includes(modalId)) {
+                window.history.back();
+            }
+        }
+
+        window.addEventListener('popstate', () => {
+            if (activeModalsStack.length > 0) {
+                const topModalId = activeModalsStack.pop();
+                document.getElementById(topModalId).classList.remove('active');
+                if (activeModalsStack.length === 0) {
+                    DOM.main.classList.remove('backgrounded');
+                    togglePause(false);
+                }
+            }
+        });
+
+        // --- 6. ANIMACIÓN CINEMÁTICA DE ENTRADA ---
         function runCinematicEntrance() {
             if (appState.cinematicPlayed) return;
             appState.cinematicPlayed = true;
@@ -786,18 +1027,14 @@
             const options = { weekday: 'long', day: 'numeric', month: 'long' };
             const fullDateString = now.toLocaleDateString('es-ES', options).toUpperCase();
 
-            // Elementos cinemáticos
             const dateBox = document.getElementById('cinematic-date-box');
             const badge = document.getElementById('cinematic-badge');
             const clock = document.getElementById('cinematic-clock');
             const greeting = document.getElementById('cinematic-greeting');
             const sub = document.getElementById('cinematic-sub');
-            const hint = document.getElementById('cinematic-hint');
 
-            // 0s: Aparece la píldora de fecha vacía
             setTimeout(() => dateBox.classList.add('show'), 100);
 
-            // 0.3s a 2.6s: Escritura lenta carácter por carácter de la fecha
             let charIdx = 0;
             const typeInterval = 2300 / fullDateString.length;
 
@@ -815,28 +1052,39 @@
                 }, typeInterval);
             }, 300);
 
-            // 2.8s: Emerge el Badge "RESUMEN DIARIO" desde la nada
             setTimeout(() => badge.classList.add('show'), 2800);
-
-            // 3.4s: Emerge el Reloj gigante desde la nada
             setTimeout(() => clock.classList.add('show'), 3400);
-
-            // 4.0s: Emerge el Saludo desde la nada
             setTimeout(() => greeting.classList.add('show'), 4000);
-
-            // 4.5s: Emergen Subtítulo y Guía de interacción
-            setTimeout(() => {
-                sub.classList.add('show');
-                hint.classList.add('show');
-            }, 4500);
+            setTimeout(() => sub.classList.add('show'), 4500);
         }
 
-        // --- LÓGICA DE NAVEGACIÓN ---
+        // --- 7. NAVEGACIÓN Y PANTALLA NEGRA FINAL ---
+        function triggerBlackScreen() {
+            clearTimeout(appState.timer);
+            const transition = document.createElement('div');
+            transition.className = 'black-screen-transition';
+            document.body.appendChild(transition);
+
+            requestAnimationFrame(() => {
+                transition.classList.add('active');
+            });
+
+            setTimeout(() => {
+                document.body.innerHTML = '';
+                document.body.style.background = '#000000';
+            }, 700);
+        }
+
         function getCurrentDuration() {
             return appState.currentScreen === 0 ? appState.durationCover : appState.durationStandard;
         }
 
         function renderView() {
+            // El botón de ajustes solo es visible en la primera página
+            if (DOM.topControls) {
+                DOM.topControls.style.display = appState.currentScreen === 0 ? 'flex' : 'none';
+            }
+
             DOM.track.style.transform = `translateX(-${appState.currentScreen * 100}%)`;
             DOM.glow.style.background = glowColors[appState.currentScreen];
 
@@ -879,13 +1127,18 @@
         }
 
         function nextScreen() {
+            if (activeModalsStack.length > 0) return;
             triggerHaptic();
-            if (appState.currentScreen < appState.totalScreens - 1) appState.currentScreen++;
-            else appState.currentScreen = 0;
-            renderView();
+            if (appState.currentScreen < appState.totalScreens - 1) {
+                appState.currentScreen++;
+                renderView();
+            } else {
+                triggerBlackScreen();
+            }
         }
 
         function prevScreen() {
+            if (activeModalsStack.length > 0) return;
             triggerHaptic();
             if (appState.currentScreen > 0) appState.currentScreen--;
             renderView();
@@ -898,7 +1151,7 @@
             const remaining = currentDuration - appState.elapsed;
             
             appState.timer = setTimeout(() => {
-                if (!appState.isPaused) nextScreen();
+                if (!appState.isPaused && activeModalsStack.length === 0) nextScreen();
             }, remaining);
         }
 
@@ -907,7 +1160,8 @@
                 appState.isPaused = true;
                 clearTimeout(appState.timer);
                 appState.elapsed += Date.now() - appState.startTime;
-                DOM.pause.classList.add('visible');
+                
+                if(activeModalsStack.length === 0) DOM.pause.classList.add('visible');
                 
                 const currentFill = DOM.segments[appState.currentScreen]?.querySelector('.fill');
                 if (currentFill) {
@@ -922,11 +1176,13 @@
             }
         }
 
-        // --- CONTROLES TÁCTILES Y RATÓN ---
+        // --- 8. CONTROLES TÁCTILES Y RATÓN ---
         let touchData = { startX: 0, startY: 0, time: 0, holdTimer: null };
 
         DOM.main.addEventListener('pointerdown', e => {
-            if (e.target.closest('.app-launch-btn, .finish-btn')) return;
+            if (e.target.closest('button, .app-launch-btn, input, label, .modal-card')) return;
+            if (activeModalsStack.length > 0) return;
+            
             touchData.startX = e.clientX;
             touchData.startY = e.clientY;
             touchData.time = Date.now();
@@ -934,13 +1190,15 @@
         });
 
         DOM.main.addEventListener('pointerup', e => {
-            if (e.target.closest('.app-launch-btn, .finish-btn')) return;
+            if (e.target.closest('button, .app-launch-btn, input, label, .modal-card')) return;
+            if (activeModalsStack.length > 0) return;
+            
             clearTimeout(touchData.holdTimer);
             
             const diffX = Math.abs(e.clientX - touchData.startX);
             const duration = Date.now() - touchData.time;
 
-            if (appState.isPaused) {
+            if (appState.isPaused && activeModalsStack.length === 0) {
                 togglePause(false);
             } else if (duration < 250 && diffX < 20) {
                 const rect = DOM.main.getBoundingClientRect();
@@ -952,51 +1210,56 @@
 
         DOM.main.addEventListener('pointercancel', () => {
             clearTimeout(touchData.holdTimer);
-            if (appState.isPaused) togglePause(false);
+            if (appState.isPaused && activeModalsStack.length === 0) togglePause(false);
         });
 
-        // NAVEGACIÓN TECLADO
         window.addEventListener('keydown', e => {
+            if (activeModalsStack.length > 0) return;
             if (e.key === 'ArrowRight' || e.key === 'Space') nextScreen();
             else if (e.key === 'ArrowLeft') prevScreen();
         });
 
-        // INTENTS DE ANDROID Y ACCIONES
-        function launchApp(event, intentUrl) {
-            event.preventDefault();
-            event.stopPropagation();
-            triggerHaptic();
-            clearTimeout(appState.timer);
-            DOM.overlay.classList.add('active');
+        // --- 9. INTEGRACIÓN DE APPS Y EFECTOS ---
+        function initWeatherIcon() {
+            const badgeBox = document.getElementById('weather-badge');
+            const iconBox = document.getElementById('weather-icon-box');
+            const desc = document.getElementById('weather-desc');
+            const svgAccent = document.getElementById('weather-svg-accent');
 
-            setTimeout(() => {
-                window.location.href = intentUrl;
-                setTimeout(() => DOM.overlay.classList.remove('active'), 1200);
-            }, 250);
+            if (appState.isNightTime) {
+                badgeBox.innerHTML = `<i data-lucide="moon" size="15"></i><span>El Tiempo (Noche)</span>`;
+                iconBox.innerHTML = `<i data-lucide="moon" size="40" style="color: var(--accent-weather-night);"></i>`;
+                desc.textContent = "Consulta la previsión meteorológica nocturna y temperaturas.";
+                svgAccent.setAttribute('stroke', '#A78BFA');
+            } else {
+                badgeBox.innerHTML = `<i data-lucide="sun" size="15"></i><span>El Tiempo</span>`;
+                iconBox.innerHTML = `<i data-lucide="sun" size="40" style="color: var(--accent-weather-day);"></i>`;
+                desc.textContent = "Consulta la previsión meteorológica y temperaturas para hoy.";
+                svgAccent.setAttribute('stroke', '#FFB703');
+            }
+            // Re-renderizar iconos de Lucide tras insertar contenido dinámico
+            lucide.createIcons();
+        }
+
+        function recordInteraction(btn) {
+            triggerHaptic();
+            btn.style.transform = 'scale(0.92)';
+            setTimeout(() => btn.style.transform = '', 200);
+            
+            clearTimeout(appState.timer);
+            setTimeout(() => { if(!appState.isPaused) startTimer(); }, 3000); 
         }
 
         function handleFinish(event) {
             triggerHaptic();
+            event.target.style.transform = 'scale(0.92)';
             launchConfetti();
-            setTimeout(() => DOM.overlay.classList.add('active'), 800);
+            setTimeout(() => {
+                triggerBlackScreen();
+            }, 800);
         }
 
-        // RELOJ Y SALUDO
-        function tickClock() {
-            const now = new Date();
-            const h = String(now.getHours()).padStart(2, '0');
-            const m = String(now.getMinutes()).padStart(2, '0');
-            DOM.clock.textContent = `${h}:${m}`;
-
-            const hour = now.getHours();
-            if (hour >= 6 && hour < 13) DOM.greeting.textContent = "Buenos días";
-            else if (hour >= 13 && hour < 20) DOM.greeting.textContent = "Buenas tardes";
-            else DOM.greeting.textContent = "Buenas noches";
-        }
-        setInterval(tickClock, 1000);
-        tickClock();
-
-        // CANVASES (CLIMA Y CONFETI)
+        // CANVASES: CLIMA Y CONFETI
         const wCanvas = document.getElementById('weather-canvas');
         const wCtx = wCanvas.getContext('2d', { alpha: true });
         let particles = Array.from({length: 18}, () => ({
@@ -1035,11 +1298,11 @@
             fxCanvas.width = window.innerWidth;
             fxCanvas.height = window.innerHeight;
             const colors = ['#FFFFFF', '#FFB703', '#A78BFA', '#4285F4', '#34C759'];
-            confettis = Array.from({length: 60}, () => ({
+            confettis = Array.from({length: 70}, () => ({
                 x: fxCanvas.width / 2,
                 y: fxCanvas.height / 2 + 50,
-                vx: (Math.random() - 0.5) * 12,
-                vy: (Math.random() * -12) - 3,
+                vx: (Math.random() - 0.5) * 14,
+                vy: (Math.random() * -14) - 4,
                 s: Math.random() * 6 + 3,
                 c: colors[Math.floor(Math.random() * colors.length)],
                 r: Math.random() * 360,
@@ -1052,7 +1315,7 @@
             fxCtx.clearRect(0, 0, fxCanvas.width, fxCanvas.height);
             let active = false;
             confettis.forEach(c => {
-                c.x += c.vx; c.y += c.vy; c.vy += 0.35; c.r += c.rs;
+                c.x += c.vx; c.y += c.vy; c.vy += 0.4; c.r += c.rs;
                 if (c.y < fxCanvas.height) active = true;
                 fxCtx.save();
                 fxCtx.translate(c.x, c.y);
@@ -1062,10 +1325,11 @@
                 fxCtx.restore();
             });
             if (active) requestAnimationFrame(animateConfetti);
+            else fxCtx.clearRect(0, 0, fxCanvas.width, fxCanvas.height);
         }
 
+        window.onload = initApp;
         drawWeather();
-        renderView();
     </script>
 </body>
 </html>

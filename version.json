@@ -1,7 +1,9 @@
 {
-  "version": "1.6.1 BETA",
+  "version": "1.6.3",
   "date": "29 de Agosto 2026",
   "changes": [
+    "✦ Novedades de la versión 1.6.3",
+  "Se ha arreglado un error que dificultaba la visualización del panel de ajustes en pantallas verticales.",
     "✦ Novedades de la versión 1.6",
   "Ajustes mejorados, ahora no es un popup lateral, es un popup a pantala completa navegable con pestañas. (Pronto se mejorará la interfaz para pantallas verticales)",
   "Nuevas opciones en Pantalla>Opciones de visualización: Tamaño de carpetas (Ajusta los accesos de la pantalla de inicio), Apps dentro de carpetas (Tamaño de texto e iconos) y Ocultar texto de carpetas (Mostrar solo iconos en la pantalla de inicio).",
