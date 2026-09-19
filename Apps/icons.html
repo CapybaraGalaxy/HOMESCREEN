@@ -1,0 +1,857 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+    <title>Galería de Iconos</title>
+        <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20width%3D%2224%22%20height%3D%2224%22%20viewBox%3D%220%200%2024%2024%22%20fill%3D%22none%22%20stroke%3D%22currentColor%22%20stroke-width%3D%222%22%20stroke-linecap%3D%22round%22%20stroke-linejoin%3D%22round%22%20class%3D%22lucide%20lucide-layout-list-icon%20lucide-layout-list%22%3E%3Cstyle%3E%20path%2C%20circle%2C%20rect%2C%20polygon%2C%20line%2C%20polyline%2C%20ellipse%20%7B%20stroke%3A%20%23000000%20!important%3B%20%7D%20%40media%20(prefers-color-scheme%3A%20dark)%20%7B%20path%2C%20circle%2C%20rect%2C%20polygon%2C%20line%2C%20polyline%2C%20ellipse%20%7B%20stroke%3A%20%23ffffff%20!important%3B%20%7D%20%7D%20%3C%2Fstyle%3E%3Crect%20width%3D%227%22%20height%3D%227%22%20x%3D%223%22%20y%3D%223%22%20rx%3D%221%22%2F%3E%3Crect%20width%3D%227%22%20height%3D%227%22%20x%3D%223%22%20y%3D%2214%22%20rx%3D%221%22%2F%3E%3Cpath%20d%3D%22M14%204h7%22%2F%3E%3Cpath%20d%3D%22M14%209h7%22%2F%3E%3Cpath%20d%3D%22M14%2015h7%22%2F%3E%3Cpath%20d%3D%22M14%2020h7%22%2F%3E%3C%2Fsvg%3E">
+
+    
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-25..200" />
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Material+Symbols+Rounded:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-25..200" />
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Material+Symbols+Sharp:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-25..200" />
+
+    <script src="https://unpkg.com/lucide@latest"></script>
+
+    <style>
+        :root {
+            --bg: #000000;
+            --surface: #121212;
+            --surface-hover: #1c1c1e;
+            --glass: rgba(15, 15, 15, 0.4);
+            --glass-border: rgba(255, 255, 255, 0.08);
+            --blur-val: 30px;
+            --text-main: #FFFFFF;
+            --text-muted: #8E8E93;
+            --accent-danger: #FF453A;
+            --bezier: cubic-bezier(0.16, 1, 0.3, 1);
+            --spring: cubic-bezier(0.34, 1.56, 0.64, 1);
+            --insp-ms-fill: 0;
+            --insp-ms-wght: 400;
+            --insp-ms-grad: 0;
+            --insp-ms-opsz: 24;
+            --insp-lu-stroke: 2;
+            --control-accent: #ffffff;
+        }
+
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+
+        body {
+            font-family: 'Outfit', sans-serif;
+            background-color: var(--bg);
+            color: var(--text-main);
+            overflow: hidden;
+            -webkit-font-smoothing: antialiased;
+            background-image: radial-gradient(circle at 15% 0%, rgba(255,255,255,0.08), transparent 34%), radial-gradient(circle at 100% 100%, rgba(105,105,105,0.12), transparent 30%);
+        }
+
+        .ms-icon {
+            font-weight: normal; font-style: normal; line-height: 1;
+            display: inline-block; white-space: nowrap; user-select: none;
+            transition: color 0.2s var(--bezier);
+        }
+        .ms-outlined { font-family: 'Material Symbols Outlined'; }
+        .ms-rounded { font-family: 'Material Symbols Rounded'; }
+        .ms-sharp { font-family: 'Material Symbols Sharp'; }
+
+        .lu-icon-wrapper { display: flex; align-items: center; justify-content: center; transition: color 0.2s var(--bezier); }
+
+        .app-container {
+            height: 100dvh;
+            display: flex;
+            flex-direction: column;
+            padding: env(safe-area-inset-top) 24px calc(env(safe-area-inset-bottom) + 16px) 24px;
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        header {
+            display: flex; align-items: center; justify-content: space-between;
+            padding: 16px 0; gap: 16px; flex-shrink: 0;
+        }
+        .header-brand { display: flex; align-items: center; gap: 12px; }
+        .app-icon-badge {
+            width: 40px; height: 40px; border-radius: 12px;
+            background: radial-gradient(circle at top left, rgba(255,255,255,0.12), transparent);
+            border: 1px solid var(--glass-border);
+            display: flex; align-items: center; justify-content: center;
+            box-shadow: 0 8px 16px rgba(0,0,0,0.4);
+            animation: rise-in 0.7s var(--bezier) both;
+        }
+        .header-titles h1 { font-size: 1.1rem; font-weight: 600; letter-spacing: -0.02em; animation: rise-in 0.7s 0.08s var(--bezier) both; }
+        .header-stats {
+            font-size: 0.8rem; color: var(--text-muted);
+            font-variant-numeric: tabular-nums;
+            animation: rise-in 0.7s 0.14s var(--bezier) both;
+        }
+
+        .folders-scroll-area {
+            display: flex; gap: 10px; overflow-x: auto;
+            padding: 4px 0 12px 0; scrollbar-width: none;
+            -webkit-overflow-scrolling: touch; flex-shrink: 0; align-items: center;
+        }
+        .folders-scroll-area::-webkit-scrollbar { display: none; }
+        
+        .pill {
+            display: flex; align-items: center; gap: 8px;
+            background: var(--surface); border: 1px solid var(--glass-border);
+            padding: 8px 20px; border-radius: 100px; font-size: 0.85rem; font-weight: 500;
+            color: var(--text-muted); cursor: pointer; transition: all 0.2s var(--bezier);
+            white-space: nowrap; user-select: none;
+        }
+        .pill:hover { background: var(--surface-hover); color: var(--text-main); }
+        .pill.active { background: rgba(255,255,255,0.1); color: var(--text-main); border-color: rgba(255,255,255,0.3); }
+.pill-action { 
+    background: var(--surface-hover); 
+    color: var(--text-main); 
+    font-family: inherit; /* Hereda 'Outfit' automáticamente del body */
+}
+
+        .pill:active, .btn-action:active, .style-btn:active { transform: scale(0.96); }
+
+        .divider-vert { width: 1px; height: 24px; background: var(--glass-border); margin: 0 4px; }
+
+        .fab-search-container {
+            position: absolute; bottom: 30px; left: 50%; transform: translateX(-50%);
+            display: flex; align-items: center; z-index: 100;
+            background: var(--glass); backdrop-filter: blur(var(--blur-val)); -webkit-backdrop-filter: blur(var(--blur-val));
+            border: 1px solid var(--glass-border); border-radius: 100px; padding: 10px 20px; gap: 12px;
+            width: 90%; max-width: 500px; box-shadow: 0 16px 40px rgba(0,0,0,0.5);
+            transition: width 0.3s var(--bezier), opacity 0.3s var(--bezier), transform 0.3s var(--bezier);
+        }
+        .search-toggle { width: 34px; height: 34px; flex: 0 0 auto; display: grid; place-items: center; padding: 0; border: 0; border-radius: 50%; background: transparent; color: var(--text-muted); cursor: pointer; }
+        .search-toggle:hover { background: rgba(255,255,255,0.08); color: var(--text-main); }
+        .fab-search-container:not(.expanded) { width: 46px; padding: 6px; }
+        .fab-search-container:not(.expanded) input { width: 0; opacity: 0; pointer-events: none; }
+        .fab-search-container.expanded { width: min(90%, 500px); }
+        .fab-search-container input {
+            background: transparent; border: none; color: var(--text-main); font-family: inherit;
+            font-size: 1rem; width: 100%; outline: none;
+        }
+
+        .main-content { display: flex; flex: 1; gap: 16px; overflow: hidden; position: relative; }
+
+        .catalog-section {
+            flex: 1; display: flex; flex-direction: column; background: var(--surface);
+            border: 1px solid var(--glass-border); border-radius: 20px; overflow: hidden;
+            animation: panel-in 0.7s 0.12s var(--bezier) both;
+        }
+
+        .icons-grid-container {
+            flex: 1; overflow-y: auto; padding: 16px; display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(84px, 1fr)); gap: 12px; align-content: start;
+            will-change: transform;
+        }
+        .icons-grid-container::-webkit-scrollbar { width: 6px; }
+        .icons-grid-container::-webkit-scrollbar-thumb { background: var(--glass-border); border-radius: 10px; }
+
+        .icon-card {
+            display: flex; flex-direction: column; align-items: center; justify-content: center;
+            padding: 16px 8px; border-radius: 12px; background: transparent; border: 1px solid transparent;
+            cursor: pointer; transition: background 0.25s var(--bezier), border-color 0.25s var(--bezier), transform 0.25s var(--spring), box-shadow 0.25s var(--bezier); position: relative;
+            animation: card-in 0.5s calc(var(--card-index, 0) * 18ms) var(--bezier) both;
+        }
+        .icon-card:hover { background: rgba(255,255,255,0.03); border-color: var(--glass-border); transform: translateY(-3px); box-shadow: 0 10px 24px rgba(0,0,0,0.18); }
+        .icon-card:active { transform: scale(0.95); }
+        .icon-card.selected { background: rgba(255,255,255,0.08); border-color: rgba(255,255,255,0.25); }
+        
+        .icon-card .name {
+            margin-top: 10px; font-size: 0.65rem; color: var(--text-muted); text-align: center;
+            width: 100%; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+        }
+
+        .inspector-panel {
+            width: 320px; display: flex; flex-direction: column; background: var(--glass);
+            backdrop-filter: blur(var(--blur-val)); -webkit-backdrop-filter: blur(var(--blur-val));
+            border: 1px solid var(--glass-border); border-radius: 20px; min-height: 0;
+            overflow-y: auto; overflow-x: hidden; scrollbar-width: thin;
+            animation: panel-in 0.7s 0.2s var(--bezier) both;
+        }
+        .inspector-panel::-webkit-scrollbar { width: 6px; }
+        .inspector-panel::-webkit-scrollbar-thumb { background: var(--glass-border); border-radius: 10px; }
+        .inspector-header { padding: 20px; border-bottom: 1px solid var(--glass-border); display: flex; justify-content: space-between; align-items: center;}
+        .inspector-header h2 { font-size: 1rem; font-weight: 500; }
+        
+        .badge-lib { background: var(--surface); padding: 4px 8px; border-radius: 6px; font-size: 0.65rem; border: 1px solid var(--glass-border); color: var(--text-muted); }
+
+        .preview-box {
+            margin: 20px; min-height: 140px; height: 140px; background: var(--bg); border-radius: 16px;
+            border: 1px solid var(--glass-border); display: flex; align-items: center; justify-content: center;
+            overflow: hidden; background-image: linear-gradient(135deg, rgba(255,255,255,0.04), transparent 55%);
+            transition: border-color 0.3s var(--bezier), box-shadow 0.3s var(--bezier);
+        }
+        .preview-box:has(.ms-icon), .preview-box:has(.lu-icon-wrapper) { animation: preview-in 0.45s var(--spring); }
+        .preview-box .ms-icon {
+            font-size: 64px; 
+            font-variation-settings: 'FILL' var(--insp-ms-fill), 'wght' var(--insp-ms-wght), 'GRAD' var(--insp-ms-grad), 'opsz' var(--insp-ms-opsz);
+        }
+        .preview-box .lu-icon-wrapper svg { width: 64px; height: 64px; stroke-width: var(--insp-lu-stroke); }
+
+        .controls-group { padding: 0 20px 20px 20px; display: flex; flex-direction: column; gap: 20px; }
+        .control-row { display: flex; flex-direction: column; gap: 10px; }
+        .control-label { display: flex; justify-content: space-between; align-items: center; font-size: 0.8rem; color: var(--text-muted); font-weight: 500; }
+        .control-val { font-variant-numeric: tabular-nums; color: var(--text-main); }
+
+        .style-segmented { display: flex; background: rgba(255,255,255,0.05); padding: 4px; border-radius: 12px; gap: 4px; }
+        .style-btn {
+            flex: 1; background: transparent; border: none; color: var(--text-muted); padding: 8px 0;
+            border-radius: 8px; cursor: pointer; display: flex; align-items: center; justify-content: center; transition: all 0.2s var(--bezier);
+        }
+        .style-btn:hover { color: var(--text-main); }
+        .style-btn.active { background: var(--surface-hover); color: var(--text-main); box-shadow: 0 2px 4px rgba(0,0,0,0.3); }
+
+        .checkbox-label { display: flex; align-items: center; gap: 10px; cursor: pointer; font-size: 0.85rem; font-weight: 500; user-select: none; padding: 10px 12px; border: 1px solid transparent; border-radius: 10px; transition: background 0.25s var(--bezier), border-color 0.25s var(--bezier); }
+        .checkbox-label:hover { background: rgba(255,255,255,0.05); border-color: var(--glass-border); }
+        .checkbox-label input[type="checkbox"] { position: absolute; opacity: 0; pointer-events: none; }
+        .checkbox-ui { width: 38px; height: 22px; flex: 0 0 auto; border-radius: 100px; background: rgba(255,255,255,0.12); border: 1px solid rgba(255,255,255,0.16); padding: 2px; transition: background 0.3s var(--bezier), border-color 0.3s var(--bezier); }
+        .checkbox-ui::after { content: ''; display: block; width: 16px; height: 16px; border-radius: 50%; background: #8e8e93; transition: transform 0.35s var(--spring), background 0.3s var(--bezier); }
+        .checkbox-label input:checked + .checkbox-ui { background: var(--control-accent); border-color: var(--control-accent); }
+        .checkbox-label input:checked + .checkbox-ui::after { transform: translateX(16px); background: #000; }
+        .checkbox-label input:focus-visible + .checkbox-ui { outline: 2px solid var(--text-main); outline-offset: 3px; }
+
+        input[type="range"] { -webkit-appearance: none; width: 100%; height: 4px; background: rgba(255,255,255,0.1); border-radius: 2px; outline: none; }
+        input[type="range"]::-webkit-slider-thumb {
+            -webkit-appearance: none; width: 16px; height: 16px; border-radius: 50%; background: var(--text-main);
+            box-shadow: 0 2px 8px rgba(0,0,0,0.5); cursor: grab;
+        }
+
+        .btn-action {
+            background: var(--surface-hover); border: 1px solid var(--glass-border); color: var(--text-main);
+            padding: 10px 12px; border-radius: 10px; font-size: 0.8rem; font-family: inherit; cursor: pointer;
+            display: flex; align-items: center; justify-content: center; gap: 6px; transition: all 0.2s var(--bezier); width: 100%;
+        }
+        .btn-action:hover { background: rgba(255,255,255,0.1); border-color: rgba(255,255,255,0.2); }
+        .btn-primary { background: var(--text-main); color: #000000; border: none; font-weight: 600; }
+        .btn-primary:hover { background: #E0E0E0; }
+
+        .color-control { display: flex; align-items: center; gap: 10px; padding: 8px 10px; border: 1px solid var(--glass-border); border-radius: 10px; background: rgba(255,255,255,0.04); }
+        .color-control input[type="color"] { width: 28px; height: 28px; padding: 0; border: 0; border-radius: 8px; background: transparent; cursor: pointer; }
+        .color-control input[type="color"]::-webkit-color-swatch-wrapper { padding: 0; }
+        .color-control input[type="color"]::-webkit-color-swatch { border: 1px solid rgba(255,255,255,0.2); border-radius: 7px; }
+        .color-value { color: var(--text-main); font-family: ui-monospace, SFMono-Regular, Consolas, monospace; font-size: 0.75rem; }
+        .export-dropdown { position: relative; }
+        .export-dropdown > .btn-action { justify-content: space-between; }
+        .export-menu { position: fixed; right: auto; bottom: auto; min-width: 210px; padding: 6px; display: none; gap: 3px; background: #202023; border: 1px solid var(--glass-border); border-radius: 12px; box-shadow: 0 18px 40px rgba(0,0,0,0.45); transform: translateY(6px) scale(0.97); transform-origin: bottom right; z-index: 3000; }
+        .export-menu.is-open { display: grid; transform: translateY(0) scale(1); }
+        .export-menu button { display: flex; align-items: center; gap: 9px; width: 100%; padding: 9px 10px; border: 0; border-radius: 8px; background: transparent; color: var(--text-main); font: inherit; font-size: 0.78rem; text-align: left; cursor: pointer; }
+        .export-menu button:hover { background: rgba(255,255,255,0.09); }
+        .favicon-generator { border: 1px solid var(--glass-border); border-radius: 14px; background: rgba(255,255,255,0.035); overflow: hidden; }
+        .favicon-generator summary { display: flex; align-items: center; justify-content: space-between; padding: 12px; cursor: pointer; list-style: none; font-size: 0.82rem; font-weight: 600; }
+        .favicon-generator summary::-webkit-details-marker { display: none; }
+        .favicon-generator summary::after { content: '+'; color: var(--text-muted); font-size: 1.1rem; transition: transform 0.25s var(--bezier); }
+        .favicon-generator[open] summary::after { transform: rotate(45deg); }
+        .favicon-body { display: grid; gap: 12px; padding: 0 12px 12px; animation: rise-in 0.3s var(--bezier) both; }
+        .favicon-colors { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+        .favicon-color { display: grid; gap: 6px; min-width: 0; }
+        .favicon-color label { font-size: 0.68rem; color: var(--text-muted); }
+        .favicon-preview { display: grid; grid-template-columns: 1fr 1fr; gap: 6px; }
+        .favicon-preview-card { display: grid; justify-items: center; gap: 5px; padding: 8px 4px; border-radius: 9px; border: 1px solid var(--glass-border); }
+        .favicon-preview-card.light { background: #fff; color: #000; }
+        .favicon-preview-card.dark { background: #18181b; color: #fff; }
+        .favicon-preview-card span { font-size: 0.62rem; opacity: 0.7; }
+        .favicon-preview-card img { width: 30px; height: 30px; display: block; }
+        .favicon-output { min-height: 76px; height: 76px; font-family: ui-monospace, SFMono-Regular, Consolas, monospace; font-size: 0.64rem; line-height: 1.35; resize: vertical; background: rgba(0,0,0,0.3); color: var(--text-muted); border: 1px solid var(--glass-border); border-radius: 9px; padding: 8px; }
+        .png-size-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 5px; }
+        .png-size-grid button { padding: 7px 3px; font-size: 0.68rem; }
+        .preview-fallback { color: var(--text-muted); font-size: 0.72rem; }
+
+        .grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; width: 100%; }
+        .divider { height: 1px; background: var(--glass-border); margin: 4px 0; }
+        .d-none { display: none !important; }
+
+        .toast {
+            position: fixed; top: 40px; left: 50%; transform: translate(-50%, -20px);
+            background: var(--text-main); color: #000; padding: 12px 24px; border-radius: 100px;
+            font-size: 0.85rem; font-weight: 600; box-shadow: 0 10px 30px rgba(0,0,0,0.5);
+            opacity: 0; pointer-events: none; transition: all 0.3s var(--spring); z-index: 2000;
+        }
+        .toast.visible { transform: translate(-50%, 0); opacity: 1; }
+
+        @keyframes rise-in { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+        @keyframes panel-in { from { opacity: 0; transform: translateY(14px) scale(0.985); } to { opacity: 1; transform: translateY(0) scale(1); } }
+        @keyframes card-in { from { opacity: 0; transform: translateY(8px) scale(0.96); } to { opacity: 1; transform: translateY(0) scale(1); } }
+        @keyframes preview-in { from { opacity: 0; transform: scale(0.82); } to { opacity: 1; transform: scale(1); } }
+
+        @media (prefers-reduced-motion: reduce) {
+            *, *::before, *::after { animation-duration: 0.001ms !important; animation-iteration-count: 1 !important; transition-duration: 0.001ms !important; }
+        }
+
+        @media (max-width: 900px) {
+            .app-container { max-width: 100%; padding: env(safe-area-inset-top) 16px calc(env(safe-area-inset-bottom) + 16px) 16px; }
+            .main-content { flex-direction: column; overflow-y: auto; overflow-x: hidden; gap: 12px; padding-bottom: 4px; }
+            .catalog-section { flex: 0 0 min(52vh, 520px); min-height: 280px; }
+            .inspector-panel { width: 100%; max-height: none; flex: 0 0 auto; border-radius: 20px; }
+            .fab-search-container { position: sticky; inset: auto; order: -1; transform: none; width: 46px; max-width: none; margin: 0 0 0 auto; padding: 6px; }
+            .fab-search-container.expanded { width: 100%; padding: 11px 16px; }
+            .icons-grid-container { grid-template-columns: repeat(auto-fill, minmax(72px, 1fr)); padding: 12px; gap: 8px; }
+            .icon-card { padding: 13px 6px; }
+        }
+
+        @media (max-width: 520px) {
+            .app-container { padding-left: 10px; padding-right: 10px; }
+            header { padding: 12px 4px; }
+            .app-icon-badge { width: 36px; height: 36px; border-radius: 10px; }
+            .header-titles h1 { font-size: 1rem; }
+            .folders-scroll-area { margin: 0 -10px; padding: 4px 10px 12px; }
+            .pill { padding: 8px 14px; }
+            .preview-box { margin: 14px; height: 120px; }
+            .controls-group { padding: 0 14px 16px; gap: 16px; }
+            .favicon-colors { grid-template-columns: 1fr; }
+            .export-menu { right: auto; left: 0; transform-origin: bottom left; }
+        }
+    </style>
+</head>
+<body>
+
+    <div class="app-container">
+        <header>
+            <div class="header-brand">
+                <div class="app-icon-badge"><i data-lucide="layers" size="20" style="color: var(--text-main);"></i></div>
+                <div class="header-titles">
+                    <h1>Galería de Iconos</h1>
+                    <div class="header-stats" id="ui-stats">Iniciando motor...</div>
+                </div>
+            </div>
+        </header>
+
+        <nav class="folders-scroll-area" id="tabs-container">
+            <div class="pill active" id="tab-material" onclick="engine.setTab('material')">
+                <i data-lucide="component" size="16"></i> Material
+            </div>
+            <div class="pill" id="tab-lucide" onclick="engine.setTab('lucide')">
+                <i data-lucide="feather" size="16"></i> Lucide
+            </div>
+            <div class="divider-vert"></div>
+            <button class="pill pill-action" onclick="actions.copyProps()" title="Copiar Propiedades">
+                <i data-lucide="copy" size="16"></i> Copiar Estilo
+            </button>
+            <button class="pill pill-action" onclick="actions.pasteProps()" title="Pegar Propiedades">
+                <i data-lucide="clipboard" size="16"></i> Pegar Estilo
+            </button>
+        </nav>
+
+        <main class="main-content">
+            <div class="catalog-section">
+                <div class="icons-grid-container" id="grid-container"></div>
+            </div>
+
+            <aside class="inspector-panel">
+                <div class="inspector-header">
+                    <h2>Inspector</h2>
+                    <span class="badge-lib" id="insp-badge">Librería</span>
+                </div>
+
+                <div class="preview-box" id="preview-container"></div>
+
+                <div class="controls-group">
+                    <div id="controls-material" class="d-none">
+                        <div class="control-row">
+                            <div class="style-segmented" id="style-selector">
+                                <button class="style-btn" data-val="outlined"><i data-lucide="circle-dashed" size="18"></i></button>
+                                <button class="style-btn" data-val="rounded"><i data-lucide="circle" size="18"></i></button>
+                                <button class="style-btn" data-val="sharp"><i data-lucide="square" size="18"></i></button>
+                            </div>
+                        </div>
+                        <div class="control-row" style="margin-top: 10px;">
+                            <label class="checkbox-label"><input type="checkbox" id="check-fill"><span class="checkbox-ui" aria-hidden="true"></span><span>Relleno Sólido</span></label>
+                        </div>
+                        <div class="control-row">
+                            <div class="control-label"><span>Grosor (wght)</span><span class="control-val" id="val-wght">400</span></div>
+                            <input type="range" id="range-wght" min="100" max="700" step="1" value="400">
+                        </div>
+                        <div class="control-row">
+                            <div class="control-label"><span>Grado (GRAD)</span><span class="control-val" id="val-grad">0</span></div>
+                            <input type="range" id="range-grad" min="-25" max="200" step="1" value="0">
+                        </div>
+                        <div class="control-row">
+                            <div class="control-label"><span>Tamaño Óptico (opsz)</span><span class="control-val" id="val-opsz">24</span></div>
+                            <input type="range" id="range-opsz" min="20" max="48" step="0.1" value="24">
+                        </div>
+                    </div>
+
+                    <div id="controls-lucide" class="d-none">
+                        <div class="control-row">
+                            <div class="control-label"><span>Grosor Trazo</span><span class="control-val" id="val-stroke">2.0</span></div>
+                            <input type="range" id="range-stroke" min="0.5" max="3" step="0.01" value="2">
+                        </div>
+                    </div>
+                    
+                    <div class="divider"></div>
+
+                    <div class="control-row">
+                        <div class="grid-2">
+                            <div class="export-dropdown">
+                                <button class="btn-action" type="button" aria-haspopup="true"><i data-lucide="share" size="16"></i> Exportar <i data-lucide="chevron-up" size="14"></i></button>
+                                <div class="export-menu">
+                                    <button type="button" onclick="actions.copyName()"><i data-lucide="tag" size="15"></i> Copiar nombre</button>
+                                    <button type="button" onclick="actions.exportCode('html')"><i data-lucide="code" size="15"></i> Copiar HTML</button>
+                                    <button type="button" onclick="actions.copySVG()"><i data-lucide="copy" size="15"></i> Copiar SVG</button>
+                                    <div class="png-size-grid" aria-label="Tamaños PNG">
+                                        <button type="button" onclick="actions.copyPNG(128)">Copiar 128</button>
+                                        <button type="button" onclick="actions.copyPNG(256)">Copiar 256</button>
+                                        <button type="button" onclick="actions.copyPNG(512)">Copiar 512</button>
+                                        <button type="button" onclick="actions.copyPNG(1024)">Copiar 1024</button>
+                                    </div>
+                                    <button type="button" onclick="actions.downloadSVG()"><i data-lucide="file-down" size="15"></i> Descargar SVG</button>
+                                    <div class="png-size-grid" aria-label="Tamaños de descarga PNG">
+                                        <button type="button" onclick="actions.downloadPNG(128)">PNG 128</button>
+                                        <button type="button" onclick="actions.downloadPNG(256)">PNG 256</button>
+                                        <button type="button" onclick="actions.downloadPNG(512)">PNG 512</button>
+                                        <button type="button" onclick="actions.downloadPNG(1024)">PNG 1024</button>
+                                    </div>
+                                </div>
+                            </div>
+                            <button class="btn-action btn-primary" onclick="actions.copyName()"><i data-lucide="tag" size="16"></i> Copiar nombre</button>
+                        </div>
+                        <div class="control-row">
+                            <div class="control-label"><span>Color del icono</span><span class="color-value" id="icon-color-value">#FFFFFF</span></div>
+                            <label class="color-control"><input type="color" id="icon-color" value="#ffffff" aria-label="Color del icono"><span>Seleccionar color</span></label>
+                        </div>
+                        <details class="favicon-generator" open>
+                            <summary>Generador de favicon dinámico</summary>
+                            <div class="favicon-body">
+                                <div class="favicon-colors">
+                                    <div class="favicon-color"><label for="favicon-light">Tema claro</label><label class="color-control"><input type="color" id="favicon-light" value="#000000" aria-label="Color del favicon en tema claro"><span class="color-value" id="favicon-light-value">#000000</span></label></div>
+                                    <div class="favicon-color"><label for="favicon-dark">Tema oscuro</label><label class="color-control"><input type="color" id="favicon-dark" value="#ffffff" aria-label="Color del favicon en tema oscuro"><span class="color-value" id="favicon-dark-value">#FFFFFF</span></label></div>
+                                </div>
+                                <div class="favicon-preview" aria-label="Vista previa del favicon">
+                                    <div class="favicon-preview-card light"><span>Claro</span><img id="favicon-preview-light" alt="Vista previa clara"></div>
+                                    <div class="favicon-preview-card dark"><span>Oscuro</span><img id="favicon-preview-dark" alt="Vista previa oscura"></div>
+                                </div>
+                                <button class="btn-action btn-primary" type="button" onclick="actions.generateFavicon()"><i data-lucide="sparkles" size="15"></i> Generar favicon</button>
+                                <textarea id="favicon-output" class="favicon-output" readonly placeholder="El código link aparecerá aquí..."></textarea>
+                                <button class="btn-action" type="button" onclick="actions.copyFavicon()"><i data-lucide="copy" size="15"></i> Copiar código favicon</button>
+                            </div>
+                        </details>
+                    </div>
+                </div>
+            </aside>
+            
+            <div class="fab-search-container" id="fab-search">
+                <button class="search-toggle" id="search-toggle" type="button" aria-label="Abrir búsqueda" aria-expanded="false"><i data-lucide="search" size="18"></i></button>
+                <input type="text" id="input-search" placeholder="Buscar símbolo (ej: search, user)..." autocomplete="off" spellcheck="false">
+            </div>
+        </main>
+    </div>
+
+    <div class="toast" id="toast-msg">Notificación</div>
+
+    <script>
+        let appData = {
+            activeTab: 'material',
+            searchQuery: '',
+            catalogs: { material: [], lucide: [] },
+            copiedConfig: null,
+            inspector: {
+                library: 'material', 
+                name: 'search',
+                config: { style: 'outlined', fill: false, wght: 400, grad: 0, opsz: 24, strokeWidth: 2, color: '#ffffff' }
+            }
+        };
+
+        let renderPage = 1;
+        const pageSize = 80;
+        let isRendering = false;
+
+        const engine = {
+            init() {
+                lucide.createIcons();
+                this.bindEvents();
+                this.fetchCatalogs();
+            },
+            async fetchCatalogs() {
+                appData.catalogs.lucide = Object.keys(lucide.icons);
+                try {
+                    const res = await fetch('https://raw.githubusercontent.com/google/material-design-icons/master/variablefont/MaterialSymbolsOutlined%5BFILL%2CGRAD%2Copsz%2Cwght%5D.codepoints');
+                    if(res.ok) {
+                        const text = await res.text();
+                        appData.catalogs.material = text.split('\n').map(l => l.trim().split(' ')[0]).filter(Boolean);
+                    } else throw new Error();
+                } catch(e) {
+                    appData.catalogs.material = ['search','home','settings','favorite','star','add','close','menu','delete'];
+                }
+                renderer.fullRender();
+            },
+            bindEvents() {
+                let searchTimeout;
+                const searchShell = document.getElementById('fab-search');
+                const searchToggle = document.getElementById('search-toggle');
+                searchToggle.addEventListener('click', () => {
+                    const expanded = searchShell.classList.toggle('expanded');
+                    searchToggle.setAttribute('aria-expanded', expanded);
+                    if (expanded) document.getElementById('input-search').focus();
+                });
+                const exportDropdown = document.querySelector('.export-dropdown');
+                const exportButton = exportDropdown.querySelector(':scope > .btn-action');
+                const exportMenu = exportDropdown.querySelector('.export-menu');
+                document.body.appendChild(exportMenu);
+                exportButton.addEventListener('click', e => {
+                    e.stopPropagation();
+                    const isOpen = exportDropdown.classList.toggle('open');
+                    if (isOpen) {
+                        const rect = exportButton.getBoundingClientRect();
+                        exportMenu.hidden = false;
+                        exportMenu.classList.add('is-open');
+                        exportMenu.style.left = `${Math.max(8, rect.right - 210)}px`;
+                        exportMenu.style.top = '8px';
+                        const menuHeight = exportMenu.offsetHeight;
+                        const top = rect.top - menuHeight - 8;
+                        exportMenu.style.top = `${top > 8 ? top : Math.min(window.innerHeight - menuHeight - 8, rect.bottom + 8)}px`;
+                    } else {
+                        exportMenu.classList.remove('is-open');
+                        exportMenu.hidden = true;
+                    }
+                });
+                document.addEventListener('click', e => {
+                    if (!exportDropdown.contains(e.target)) {
+                        exportDropdown.classList.remove('open');
+                        exportMenu.classList.remove('is-open');
+                        exportMenu.hidden = true;
+                    }
+                });
+                document.getElementById('input-search').addEventListener('input', (e) => {
+                    clearTimeout(searchTimeout);
+                    searchTimeout = setTimeout(() => {
+                        appData.searchQuery = e.target.value.trim().toLowerCase();
+                        renderPage = 1;
+                        renderer.renderGrid();
+                    }, 150);
+                });
+
+                const grid = document.getElementById('grid-container');
+                grid.addEventListener('scroll', () => {
+                    if (grid.scrollTop + grid.clientHeight >= grid.scrollHeight - 100) {
+                        renderPage++;
+                        renderer.renderGrid(true);
+                    }
+                });
+
+                document.getElementById('check-fill').addEventListener('change', e => this.updateConfig('fill', e.target.checked));
+                document.getElementById('icon-color').addEventListener('input', e => {
+                    document.getElementById('icon-color-value').textContent = e.target.value.toUpperCase();
+                    this.updateConfig('color', e.target.value);
+                    actions.generateFavicon(false);
+                });
+                ['light', 'dark'].forEach(theme => {
+                    document.getElementById(`favicon-${theme}`).addEventListener('input', e => {
+                        document.getElementById(`favicon-${theme}-value`).textContent = e.target.value.toUpperCase();
+                        actions.generateFavicon(false);
+                    });
+                });
+                document.getElementById('style-selector').addEventListener('click', e => {
+                    const btn = e.target.closest('.style-btn');
+                    if (btn && btn.dataset.val) this.updateConfig('style', btn.dataset.val);
+                });
+
+                const bindRange = (id, key, valId, isFloat = false) => {
+                    let frameId;
+                    document.getElementById(id).addEventListener('input', e => {
+                        const val = isFloat ? parseFloat(e.target.value) : parseInt(e.target.value);
+                        document.getElementById(valId).textContent = isFloat ? val.toFixed(1) : val;
+                        
+                        cancelAnimationFrame(frameId);
+                        frameId = requestAnimationFrame(() => {
+                            if (key === 'strokeWidth') document.documentElement.style.setProperty('--insp-lu-stroke', val);
+                            else if (key === 'wght') document.documentElement.style.setProperty('--insp-ms-wght', val);
+                            else if (key === 'grad') document.documentElement.style.setProperty('--insp-ms-grad', val);
+                            else if (key === 'opsz') document.documentElement.style.setProperty('--insp-ms-opsz', val);
+                            
+                            appData.inspector.config[key] = val;
+                        });
+                    });
+                };
+
+                bindRange('range-wght', 'wght', 'val-wght');
+                bindRange('range-grad', 'grad', 'val-grad');
+                bindRange('range-opsz', 'opsz', 'val-opsz', true);
+                bindRange('range-stroke', 'strokeWidth', 'val-stroke', true);
+            },
+            updateConfig(key, val) {
+                appData.inspector.config[key] = val;
+                renderer.renderInspector();
+                renderer.updateGridStyles();
+            },
+            setTab(tabId) {
+                appData.activeTab = tabId;
+                appData.inspector.library = tabId;
+                appData.searchQuery = '';
+                document.getElementById('input-search').value = '';
+                
+                document.getElementById('tab-material').classList.toggle('active', tabId === 'material');
+                document.getElementById('tab-lucide').classList.toggle('active', tabId === 'lucide');
+                
+                const source = appData.catalogs[tabId];
+                if (source && source.length > 0) {
+                    appData.inspector.name = source[0];
+                }
+
+                renderPage = 1;
+                renderer.fullRender();
+            },
+            selectIcon(library, name) {
+                appData.inspector.library = library;
+                appData.inspector.name = name;
+                renderer.renderInspector();
+                
+                document.querySelectorAll('.icon-card').forEach(c => c.classList.remove('selected'));
+                const selCard = document.querySelector(`.icon-card[data-name="${name}"][data-lib="${library}"]`);
+                if (selCard) selCard.classList.add('selected');
+            }
+        };
+
+        const renderer = {
+            fullRender() {
+                this.renderGrid();
+                this.renderInspector();
+                this.updateGridStyles();
+            },
+            renderGrid(append = false) {
+                if (isRendering) return;
+                isRendering = true;
+
+                const grid = document.getElementById('grid-container');
+                const stats = document.getElementById('ui-stats');
+                
+                const source = appData.catalogs[appData.activeTab] || [];
+                const q = appData.searchQuery;
+                const filtered = q ? source.filter(n => n.toLowerCase().includes(q)) : source;
+                stats.textContent = `${filtered.length} iconos`;
+                
+                const start = append ? (renderPage - 1) * pageSize : 0;
+                const end = renderPage * pageSize;
+                const items = filtered.slice(start, end);
+
+                if (items.length === 0 && !append) {
+                    grid.innerHTML = '';
+                    isRendering = false;
+                    return;
+                }
+
+                const fragment = document.createDocumentFragment();
+
+                items.forEach((name, index) => {
+                    const card = document.createElement('div');
+                    const sel = (appData.inspector.name === name && appData.inspector.library === appData.activeTab) ? 'selected' : '';
+                    card.className = `icon-card ${sel}`;
+                    card.dataset.lib = appData.activeTab;
+                    card.dataset.name = name;
+                    card.style.setProperty('--card-index', index);
+                    card.onclick = () => engine.selectIcon(appData.activeTab, name);
+
+                    if (appData.activeTab === 'material') {
+                        card.innerHTML = `<span class="ms-icon ms-${appData.inspector.config.style}" style="font-size: 32px;">${name}</span><span class="name">${name}</span>`;
+                    } else {
+                        card.innerHTML = `<div class="lu-icon-wrapper"><i data-lucide="${name}"></i></div><span class="name">${name}</span>`;
+                    }
+                    fragment.appendChild(card);
+                });
+
+                if (append) {
+                    grid.appendChild(fragment);
+                } else {
+                    grid.innerHTML = '';
+                    grid.appendChild(fragment);
+                }
+
+                if (appData.activeTab === 'lucide') {
+                    lucide.createIcons({ root: grid });
+                }
+                
+                isRendering = false;
+            },
+            updateGridStyles() {
+                const c = appData.inspector.config;
+                document.querySelectorAll('.icon-card').forEach(card => {
+                    if (card.dataset.lib === 'material') {
+                        const icon = card.querySelector('.ms-icon');
+                        if (!icon) return;
+                        icon.className = `ms-icon ms-${c.style}`;
+                        icon.style.color = c.color || '#ffffff';
+                        icon.style.fontVariationSettings = `'FILL' ${c.fill ? 1 : 0}, 'wght' ${c.wght}, 'GRAD' ${c.grad}, 'opsz' ${c.opsz}`;
+                    } else {
+                        const wrapper = card.querySelector('.lu-icon-wrapper');
+                        const svg = wrapper?.querySelector('svg');
+                        if (!wrapper || !svg) return;
+                        wrapper.style.color = c.color || '#ffffff';
+                        svg.style.strokeWidth = c.strokeWidth;
+                    }
+                });
+            },
+            renderInspector() {
+                const c = appData.inspector.config;
+                const lib = appData.inspector.library;
+                const root = document.documentElement;
+                
+                document.getElementById('insp-badge').textContent = lib === 'material' ? 'Material Symbols' : 'Lucide Icons';
+                document.getElementById('controls-material').classList.toggle('d-none', lib === 'lucide');
+                document.getElementById('controls-lucide').classList.toggle('d-none', lib === 'material');
+
+                const preview = document.getElementById('preview-container');
+
+                if (lib === 'material') {
+                    root.style.setProperty('--insp-ms-fill', c.fill ? 1 : 0);
+                    root.style.setProperty('--insp-ms-wght', c.wght);
+                    root.style.setProperty('--insp-ms-grad', c.grad);
+                    root.style.setProperty('--insp-ms-opsz', c.opsz);
+                    
+                    document.getElementById('check-fill').checked = c.fill;
+                    document.getElementById('icon-color').value = c.color || '#ffffff';
+                    document.getElementById('icon-color-value').textContent = (c.color || '#ffffff').toUpperCase();
+                    document.getElementById('range-wght').value = c.wght; document.getElementById('val-wght').textContent = c.wght;
+                    document.getElementById('range-grad').value = c.grad; document.getElementById('val-grad').textContent = c.grad;
+                    document.getElementById('range-opsz').value = c.opsz; document.getElementById('val-opsz').textContent = c.opsz;
+                    
+                    document.querySelectorAll('.style-btn').forEach(btn => btn.classList.toggle('active', btn.dataset.val === c.style));
+                    preview.innerHTML = `<span class="ms-icon ms-${c.style}" style="color: ${c.color || '#ffffff'};">${appData.inspector.name}</span>`;
+                } else {
+                    root.style.setProperty('--insp-lu-stroke', c.strokeWidth);
+                    document.getElementById('range-stroke').value = c.strokeWidth; document.getElementById('val-stroke').textContent = c.strokeWidth;
+                    preview.innerHTML = `<div class="lu-icon-wrapper" style="color: ${c.color || '#ffffff'};"><i data-lucide="${appData.inspector.name}"></i></div>`;
+                    lucide.createIcons({ root: preview });
+                }
+                actions.generateFavicon(false);
+            }
+        };
+
+        const actions = {
+            showToast(msg) {
+                const t = document.getElementById('toast-msg');
+                t.textContent = msg; t.classList.add('visible');
+                setTimeout(() => t.classList.remove('visible'), 2500);
+            },
+            copyProps() {
+                appData.copiedConfig = JSON.parse(JSON.stringify(appData.inspector.config));
+                this.showToast('Estilo copiado');
+            },
+            pasteProps() {
+                if (!appData.copiedConfig) return this.showToast('Primero copia un estilo');
+                appData.inspector.config = JSON.parse(JSON.stringify(appData.copiedConfig));
+                renderer.renderInspector();
+                this.showToast('Estilo aplicado');
+            },
+            copyName() {
+                this.writeClipboard(appData.inspector.name, 'Nombre copiado');
+            },
+            escapeXml(value) {
+                return String(value).replace(/[<>&'\"]/g, char => ({ '<': '&lt;', '>': '&gt;', '&': '&amp;', "'": '&apos;', '"': '&quot;' }[char]));
+            },
+            buildSVG(color = appData.inspector.config.color || '#ffffff', includeTheme = false, darkColor = color) {
+                const lib = appData.inspector.library;
+                const name = this.escapeXml(appData.inspector.name);
+                const c = appData.inspector.config;
+                let svg = '';
+
+                if (lib === 'material') {
+                    const font = c.style === 'rounded' ? 'Material Symbols Rounded' : c.style === 'sharp' ? 'Material Symbols Sharp' : 'Material Symbols Outlined';
+                    const themeRule = includeTheme ? `@media (prefers-color-scheme: dark) { .s { color: ${darkColor} !important; fill: ${darkColor} !important; } }` : '';
+                    svg = `<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24"><style>@import url('https://fonts.googleapis.com/css2?family=${font.replace(/ /g, '+')}:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-25..200');.s{font-family:'${font}';font-size:24px;color:${color};fill:${color};font-variation-settings:'FILL' ${c.fill ? 1 : 0},'wght' ${c.wght},'GRAD' ${c.grad},'opsz' ${c.opsz};}${themeRule}</style><text class="s" x="50%" y="50%" dominant-baseline="central" text-anchor="middle">${name}</text></svg>`;
+                } else {
+                    const iconNode = lucide.createElement(lucide.icons[appData.inspector.name]);
+                    iconNode.setAttribute('width', '24');
+                    iconNode.setAttribute('height', '24');
+                    iconNode.setAttribute('viewBox', '0 0 24 24');
+                    iconNode.setAttribute('stroke', color);
+                    iconNode.setAttribute('stroke-width', c.strokeWidth);
+                    iconNode.setAttribute('fill', 'none');
+                    const themeRule = includeTheme ? `@media (prefers-color-scheme: dark) { .icon-shape { stroke: ${darkColor} !important; } }` : '';
+                    svg = `<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="${color}" stroke-width="${c.strokeWidth}" stroke-linecap="round" stroke-linejoin="round"><style>.icon-shape{stroke:${color} !important;}${themeRule}</style><g class="icon-shape">${iconNode.innerHTML}</g></svg>`;
+                }
+                return svg;
+            },
+            async writeClipboard(text, successMessage) {
+                try {
+                    await navigator.clipboard.writeText(text);
+                    this.showToast(successMessage);
+                } catch (error) {
+                    this.showToast('No se pudo copiar');
+                }
+            },
+            exportCode(type) {
+                const c = appData.inspector.config;
+                const code = type === 'html'
+                    ? (appData.inspector.library === 'material' ? `<span class="material-symbols-${c.style}">${appData.inspector.name}</span>` : `<i data-lucide="${appData.inspector.name}"></i>`)
+                    : this.buildSVG();
+                this.writeClipboard(code, `${type.toUpperCase()} copiado`);
+            },
+            copySVG() {
+                this.writeClipboard(this.buildSVG(), 'SVG copiado');
+            },
+            downloadSVG() {
+                const blob = new Blob([this.buildSVG()], { type: 'image/svg+xml;charset=utf-8' });
+                const url = URL.createObjectURL(blob);
+                const link = document.createElement('a');
+                link.href = url; link.download = `${appData.inspector.name}.svg`; link.click();
+                URL.revokeObjectURL(url);
+                this.showToast('SVG descargado');
+            },
+            async createPNGCanvas(size = 512, colorOverride = null) {
+                await document.fonts.ready;
+                const canvas = document.createElement('canvas');
+                const res = size; canvas.width = res; canvas.height = res;
+                const ctx = canvas.getContext('2d');
+                const c = appData.inspector.config;
+                ctx.clearRect(0, 0, res, res);
+                if (appData.inspector.library === 'material') {
+                    const fontName = c.style === 'rounded' ? 'Material Symbols Rounded' : c.style === 'sharp' ? 'Material Symbols Sharp' : 'Material Symbols Outlined';
+                    ctx.fillStyle = colorOverride || c.color || '#ffffff'; ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
+                    if ('fontVariationSettings' in ctx) ctx.fontVariationSettings = `'FILL' ${c.fill ? 1 : 0}, 'wght' ${c.wght}, 'GRAD' ${c.grad}, 'opsz' ${c.opsz}`;
+                    ctx.font = `${res * 0.72}px "${fontName}"`;
+                    ctx.fillText(appData.inspector.name, res / 2, res / 2);
+                    return canvas;
+                }
+                return new Promise(resolve => {
+                    const image = new Image();
+                    const url = URL.createObjectURL(new Blob([this.buildSVG(colorOverride || c.color || '#ffffff')], { type: 'image/svg+xml;charset=utf-8' }));
+                    image.onload = () => { ctx.drawImage(image, 0, 0, res, res); URL.revokeObjectURL(url); resolve(canvas); };
+                    image.src = url;
+                });
+            },
+            async copyPNG(size = 512) {
+                if (!window.ClipboardItem) return this.showToast('Tu navegador no permite copiar PNG');
+                const canvas = await this.createPNGCanvas(size);
+                canvas.toBlob(async blob => {
+                    try { await navigator.clipboard.write([new ClipboardItem({ 'image/png': blob })]); this.showToast(`PNG ${size}px copiado`); }
+                    catch (error) { this.showToast('No se pudo copiar el PNG'); }
+                }, 'image/png');
+            },
+            async downloadPNG(size = 512) {
+                const canvas = await this.createPNGCanvas(size);
+                this.execDownload(canvas, `${appData.inspector.name}-${size}.png`);
+            },
+            async generateFavicon(showMessage = true) {
+                const light = document.getElementById('favicon-light').value;
+                const dark = document.getElementById('favicon-dark').value;
+                const svg = this.buildSVG(light, true, dark);
+                const encodedSvg = encodeURIComponent(svg).replace(/'/g, '%27').replace(/"/g, '%22');
+                const lightPng = (await this.createPNGCanvas(64, light)).toDataURL('image/png');
+                const darkPng = (await this.createPNGCanvas(64, dark)).toDataURL('image/png');
+                document.getElementById('favicon-output').value = `<link rel="icon" type="image/svg+xml" href="data:image/svg+xml,${encodedSvg}">\n<link rel="icon" type="image/png" media="(prefers-color-scheme: light)" href="${lightPng}">\n<link rel="icon" type="image/png" media="(prefers-color-scheme: dark)" href="${darkPng}">`;
+                document.getElementById('favicon-preview-light').src = lightPng;
+                document.getElementById('favicon-preview-dark').src = darkPng;
+                if (showMessage) this.showToast('Favicon generado');
+            },
+            copyFavicon() {
+                const output = document.getElementById('favicon-output').value;
+                if (!output) return this.generateFavicon();
+                this.writeClipboard(output, 'Código favicon copiado');
+            },
+            execDownload(canvas, filename) {
+                canvas.toBlob(blob => {
+                    if(!blob) return;
+                    const url = URL.createObjectURL(blob);
+                    const a = document.createElement('a');
+                    a.href = url; a.download = filename; a.click();
+                    URL.revokeObjectURL(url);
+                    this.showToast('PNG descargado');
+                }, 'image/png');
+            }
+        };
+
+        window.onload = () => engine.init();
+    </script>
+</body>
+</html>

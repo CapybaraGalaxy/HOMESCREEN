@@ -1,0 +1,1362 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+    <title>Gestor de Tareas</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@200;300;400;500;600;700&display=swap" rel="stylesheet">
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
+    <style>
+        :root {
+            --bg: #000000;
+            --surface: #121212;
+            --surface-hover: #1c1c1e;
+            --glass: rgba(15, 15, 15, 0.4);
+            --glass-border: rgba(255, 255, 255, 0.08);
+            --blur-val: 30px;
+            
+            --text-main: #FFFFFF;
+            --text-muted: #8E8E93;
+            
+            --accent-primary: #0A84FF;
+            --accent-danger: #FF453A;
+            --accent-success: #34C759;
+            --accent-warning: #FF9F0A;
+            
+            --bezier: cubic-bezier(0.16, 1, 0.3, 1);
+            --spring: cubic-bezier(0.22, 1, 0.36, 1);
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            -webkit-tap-highlight-color: transparent;
+        }
+
+        body {
+            font-family: 'Outfit', sans-serif;
+            background-color: var(--bg);
+            color: var(--text-main);
+            overflow: hidden;
+        }
+
+        .app-container {
+            width: 100%;
+            max-width: 900px;
+            margin: 0 auto;
+            height: 100dvh;
+            padding: env(safe-area-inset-top) 24px calc(env(safe-area-inset-bottom) + 16px) 24px;
+            display: flex;
+            flex-direction: column;
+            transition: transform 0.4s var(--bezier), opacity 0.4s var(--bezier);
+        }
+
+        .app-container.backgrounded {
+            transform: scale(0.96);
+            opacity: 0.5;
+            pointer-events: none;
+        }
+
+        /* --- Header --- */
+        header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 16px 0;
+            flex-shrink: 0;
+        }
+
+        .header-title-group {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .app-icon-badge {
+            width: 40px;
+            height: 40px;
+            border-radius: 12px;
+            background: radial-gradient(circle at top left, rgba(255,255,255,0.1), transparent);
+            border: 1px solid var(--glass-border);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.5);
+            transition: transform 0.3s var(--spring);
+        }
+        .app-icon-badge:hover {
+            transform: scale(1.08) rotate(-4deg);
+        }
+
+        h1 {
+            font-size: 20px;
+            font-weight: 500;
+            letter-spacing: -0.02em;
+        }
+
+        .task-counter {
+            font-size: 14px;
+            color: var(--text-muted);
+            font-variant-numeric: tabular-nums;
+            background: var(--surface);
+            padding: 2px 8px;
+            border-radius: 20px;
+            border: 1px solid var(--glass-border);
+            transition: transform 0.3s var(--spring), background-color 0.3s var(--bezier);
+        }
+
+        .header-actions {
+            display: flex;
+            gap: 8px;
+        }
+
+        button.icon-btn {
+            background: var(--surface);
+            border: 1px solid var(--glass-border);
+            color: var(--text-main);
+            width: 36px;
+            height: 36px;
+            border-radius: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            transition: background 0.2s, transform 0.3s var(--spring);
+        }
+        button.icon-btn:hover { background: var(--surface-hover); transform: scale(1.05); }
+        button.icon-btn:active { transform: scale(0.9); }
+
+        /* --- Projects Navigation --- */
+        .folders-scroll-area {
+            display: flex;
+            gap: 10px;
+            overflow-x: auto;
+            padding: 4px 0 16px 0;
+            scrollbar-width: none;
+            -webkit-overflow-scrolling: touch;
+            flex-shrink: 0;
+        }
+        .folders-scroll-area::-webkit-scrollbar { display: none; }
+
+        .project-pill {
+            background: var(--surface);
+            border: 1px solid var(--glass-border);
+            padding: 8px 16px;
+            border-radius: 24px;
+            font-size: 14px;
+            color: var(--text-muted);
+            cursor: pointer;
+            white-space: nowrap;
+            transition: background 0.3s var(--bezier), color 0.3s var(--bezier), border-color 0.3s var(--bezier);
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+        .project-pill:hover { background: var(--surface-hover); }
+        .project-pill:active { opacity: 0.75; }
+        .project-pill.active {
+            background: var(--text-main);
+            color: var(--bg);
+            border-color: var(--text-main);
+            font-weight: 500;
+        }
+
+        /* --- Main Content --- */
+        .main-content {
+            flex-grow: 1;
+            display: flex;
+            flex-direction: column;
+            overflow: visible; /* Muestra el contenido que sobresale en lugar de ocultarlo o poner barras de scroll */
+            position: relative;
+        }
+
+        .task-controls {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+            margin-bottom: 16px;
+            flex-shrink: 0;
+        }
+
+        .filter-group {
+            display: flex;
+            gap: 16px;
+            font-size: 14px;
+            color: var(--text-muted);
+        }
+        .filter-btn {
+            cursor: pointer;
+            transition: color 0.3s var(--bezier), transform 0.3s var(--spring);
+            display: inline-block;
+        }
+        .filter-btn:hover { color: var(--text-main); transform: translateY(-1px); }
+        .filter-btn:active { transform: scale(0.95); }
+        .filter-btn.active { color: var(--text-main); font-weight: 500; }
+
+        .input-group {
+            display: flex;
+            gap: 8px;
+            position: relative;
+        }
+        
+        .main-input {
+            flex-grow: 1;
+            background: var(--surface);
+            border: 1px solid var(--glass-border);
+            padding: 14px 16px;
+            border-radius: 12px;
+            color: var(--text-main);
+            font-family: inherit;
+            font-size: 16px;
+            transition: border-color 0.3s, box-shadow 0.3s, transform 0.3s var(--spring);
+            outline: none;
+        }
+        .main-input:focus {
+            border-color: rgba(255,255,255,0.3);
+            box-shadow: 0 0 0 4px rgba(255,255,255,0.05);
+        }
+
+        .error-shake {
+            animation: shake 0.3s var(--bezier);
+            border-color: var(--accent-danger) !important;
+        }
+        @keyframes shake {
+            0%, 100% { transform: translateX(0); }
+            20%, 60% { transform: translateX(-6px); }
+            40%, 80% { transform: translateX(6px); }
+        }
+
+        /* --- Task List --- */
+        .task-list {
+            flex-grow: 1;
+            overflow: visible; /* Muestra el contenido que sobresale en lugar de ocultarlo o poner barras de scroll */
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+            padding-bottom: 80px;
+            scrollbar-width: none;
+        }
+        .task-list::-webkit-scrollbar { display: none; }
+
+        .task-item {
+            background: var(--glass);
+            backdrop-filter: blur(var(--blur-val));
+            -webkit-backdrop-filter: blur(var(--blur-val));
+            border: 1px solid var(--glass-border);
+            border-radius: 12px;
+            padding: 14px 16px;
+            display: flex;
+            align-items: center;
+            gap: 14px;
+            cursor: grab;
+            transition: transform 0.25s ease-out, opacity 0.3s var(--bezier), background 0.3s var(--bezier), border-color 0.3s var(--bezier);
+            user-select: none;
+            will-change: transform, opacity;
+        }
+        .task-item:hover {
+            transform: translateY(-2px) scale(1.005);
+            background: rgba(25, 25, 25, 0.5);
+        }
+        .task-item:active { cursor: grabbing; transform: scale(0.98); }
+        .task-item.dragging { opacity: 0.3; transform: scale(0.95); }
+        .task-item.drag-over {
+            border-top: 2px solid var(--accent-primary);
+            transform: translateY(4px);
+        }
+
+        /* Animation States */
+        @keyframes elasticSlideIn {
+            0% { opacity: 0; transform: translateY(10px); }
+            100% { opacity: 1; transform: translateY(0); }
+        }
+
+        .task-item.anim-add {
+            animation: elasticSlideIn 0.5s ease-out forwards;
+        }
+
+        .task-item.anim-delete {
+            animation: elasticDelete 0.4s var(--bezier) forwards;
+            pointer-events: none;
+        }
+
+        @keyframes elasticDelete {
+            0% { opacity: 1; transform: scale(1) translateX(0); }
+            30% { transform: scale(1.02) translateX(-10px); }
+            100% { opacity: 0; transform: scale(0.7) translateX(80px); height: 0; padding-top: 0; padding-bottom: 0; margin: 0; border: none; }
+        }
+
+        .task-item.completed { opacity: 0.55; }
+        .task-item.completed .task-title {
+            text-decoration: line-through;
+            color: var(--text-muted);
+        }
+
+        /* Custom Elastic Checkbox */
+        .checkbox-wrapper {
+            position: relative;
+            width: 22px;
+            height: 22px;
+            flex-shrink: 0;
+            cursor: pointer;
+        }
+        .checkbox-wrapper input {
+            opacity: 0;
+            width: 0;
+            height: 0;
+            position: absolute;
+        }
+        .checkbox-bg {
+            position: absolute;
+            top: 0; left: 0; right: 0; bottom: 0;
+            border: 2px solid var(--text-muted);
+            border-radius: 6px;
+            transition: background-color 0.2s ease, border-color 0.2s ease;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        .checkbox-wrapper:hover .checkbox-bg {
+            border-color: var(--text-main);
+            transform: scale(1.12);
+        }
+        .checkbox-wrapper input:checked ~ .checkbox-bg {
+            background: var(--text-main);
+            border-color: var(--text-main);
+            animation: springPop 0.4s var(--spring);
+        }
+        .check-icon {
+            color: var(--bg);
+            opacity: 0;
+            transform: scale(0.2) rotate(-20deg);
+            transition: transform 0.15s ease, opacity 0.15s ease;
+        }
+        .checkbox-wrapper input:checked ~ .checkbox-bg .check-icon {
+            opacity: 1;
+            transform: scale(1) rotate(0deg);
+        }
+
+        .task-content {
+            flex-grow: 1;
+            display: flex;
+            flex-direction: column;
+            gap: 4px;
+            overflow: hidden;
+        }
+
+        .task-content:has(.subtasks-preview) { overflow: visible; }
+
+        .subtasks-preview {
+            display: flex;
+            flex-direction: column;
+            gap: 5px;
+            margin-top: 6px;
+            padding-left: 2px;
+        }
+
+        .subtask-preview-item {
+            display: flex;
+            align-items: center;
+            gap: 7px;
+            min-height: 24px;
+            color: var(--text-muted);
+            font-size: 12px;
+            cursor: grab;
+            transition: color 0.25s var(--bezier), transform 0.25s var(--spring), opacity 0.25s var(--bezier);
+        }
+
+        .subtask-preview-item:hover { color: var(--text-main); transform: translateX(3px); }
+        .subtask-preview-item.dragging { opacity: 0.35; transform: scale(0.98); }
+        .subtask-preview-item.drag-over { color: var(--accent-primary); border-top: 1px solid var(--accent-primary); }
+        .subtask-preview-item.completed span { text-decoration: line-through; color: var(--text-muted); }
+        .subtask-preview-item span { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+
+        .subtask-mini-check {
+            width: 15px;
+            height: 15px;
+            accent-color: var(--accent-success);
+            cursor: pointer;
+            flex-shrink: 0;
+        }
+
+        .subtask-edit-btn {
+            margin-left: auto;
+            opacity: 0;
+            border: 0;
+            background: transparent;
+            color: var(--text-muted);
+            cursor: pointer;
+            padding: 2px;
+            transition: opacity 0.2s, color 0.2s;
+        }
+
+        .subtask-preview-item:hover .subtask-edit-btn,
+        .subtask-edit-btn:focus { opacity: 1; }
+        .subtask-edit-btn:hover { color: var(--text-main); }
+
+        .subtask-edit-input {
+            min-width: 0;
+            flex: 1;
+            padding: 3px 6px;
+            border: 1px solid var(--glass-border);
+            border-radius: 5px;
+            background: var(--surface);
+            color: var(--text-main);
+            font: inherit;
+            outline: none;
+        }
+
+        .task-title {
+            font-size: 16px;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            transition: color 0.3s var(--bezier);
+        }
+
+        .task-meta {
+            display: flex;
+            gap: 8px;
+            align-items: center;
+            font-size: 12px;
+        }
+
+        .badge {
+            padding: 2px 6px;
+            border-radius: 4px;
+            font-weight: 500;
+            transition: transform 0.3s var(--spring);
+        }
+        .badge.today { background: rgba(10, 132, 255, 0.15); color: var(--accent-primary); }
+        .badge.tomorrow { background: rgba(255, 159, 10, 0.15); color: var(--accent-warning); }
+        .badge.overdue { background: rgba(255, 69, 58, 0.15); color: var(--accent-danger); }
+
+        .progress-bar-container {
+            width: 60px;
+            height: 4px;
+            background: rgba(255,255,255,0.1);
+            border-radius: 2px;
+            overflow: hidden;
+            margin-top: 2px;
+        }
+        .progress-bar {
+            height: 100%;
+            background: var(--text-main);
+            transition: width 0.4s var(--spring);
+        }
+
+        .task-actions {
+            display: flex;
+            gap: 4px;
+            opacity: 0.5;
+            transition: opacity 0.2s var(--bezier);
+        }
+        .task-item:hover .task-actions { opacity: 1; }
+        
+        .delete-btn:hover { color: var(--accent-danger); }
+
+        /* Search FAB */
+        .fab-search-container {
+            position: absolute;
+            bottom: 24px;
+            left: 50%;
+            transform: translateX(-50%);
+            z-index: 50;
+            display: flex;
+            align-items: center;
+            background: rgba(20, 20, 20, 0.85);
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+            border: 1px solid rgba(255,255,255,0.15);
+            border-radius: 100px;
+            padding: 8px;
+            width: 50px;
+            transition: width 0.5s var(--spring), background 0.3s var(--bezier);
+            overflow: hidden;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.8);
+        }
+        .fab-search-container.expanded { width: 300px; }
+        .fab-search-container input {
+            background: transparent;
+            border: none;
+            color: var(--text-main);
+            font-family: inherit;
+            font-size: 15px;
+            outline: none;
+            width: 0;
+            opacity: 0;
+            transition: width 0.4s var(--bezier), opacity 0.3s;
+            margin-left: 8px;
+        }
+        .fab-search-container.expanded input {
+            width: calc(100% - 40px);
+            opacity: 1;
+        }
+        .fab-search-btn {
+            background: transparent;
+            border: none;
+            color: var(--text-muted);
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            width: 32px;
+            height: 32px;
+            border-radius: 50%;
+            flex-shrink: 0;
+            transition: transform 0.3s var(--spring), color 0.2s;
+        }
+        .fab-search-btn:active { transform: scale(0.85); }
+        .fab-search-container.expanded .fab-search-btn { color: var(--text-main); }
+
+        /* --- Modals --- */
+        .modal-overlay {
+            position: fixed;
+            top: 0; left: 0; width: 100%; height: 100dvh;
+            background: rgba(0,0,0,0.6);
+            backdrop-filter: blur(8px);
+            -webkit-backdrop-filter: blur(8px);
+            z-index: 100;
+            display: flex;
+            align-items: flex-end;
+            justify-content: center;
+            opacity: 0;
+            pointer-events: none;
+            transition: opacity 0.4s var(--bezier);
+        }
+        @media (min-width: 768px) { .modal-overlay { align-items: center; } }
+        
+        .modal-overlay.active {
+            opacity: 1;
+            pointer-events: auto;
+        }
+
+        .modal-surface {
+            background: var(--surface);
+            border: 1px solid var(--glass-border);
+            width: 100%;
+            max-width: 500px;
+            border-radius: 24px 24px 0 0;
+            padding: 24px;
+            transform: translateY(100%);
+            transition: transform 0.5s var(--spring);
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+            max-height: 85dvh;
+        }
+        @media (min-width: 768px) {
+            .modal-surface {
+                border-radius: 20px;
+                transform: translateY(20px) scale(0.9);
+            }
+        }
+
+        .modal-overlay.active .modal-surface {
+            transform: translateY(0) scale(1);
+        }
+
+        .modal-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        .modal-title { font-size: 18px; font-weight: 500; }
+        
+        .input-labeled { display: flex; flex-direction: column; gap: 8px; }
+        .input-labeled label { font-size: 13px; color: var(--text-muted); }
+        
+        .subtasks-list { display: flex; flex-direction: column; gap: 8px; max-height: 300px; overflow-y: auto; }
+        .subtask-item { 
+            display: flex; 
+            align-items: center; 
+            gap: 10px; 
+            font-size: 14px;
+            animation: elasticSlideIn 0.35s var(--spring);
+            cursor: grab;
+            transition: transform 0.25s var(--spring), opacity 0.25s var(--bezier), border-color 0.25s;
+            padding: 4px 6px;
+            border-top: 1px solid transparent;
+        }
+        .subtask-item.dragging { opacity: 0.35; }
+        .subtask-item.drag-over { border-top-color: var(--accent-primary); transform: translateY(3px); }
+        .subtask-title-input { flex: 1; min-width: 0; }
+        .subtask-drag-handle { color: var(--text-muted); cursor: grab; }
+        
+        .btn-primary {
+            background: var(--text-main);
+            color: var(--bg);
+            border: none;
+            padding: 14px;
+            border-radius: 12px;
+            font-size: 16px;
+            font-weight: 600;
+            font-family: inherit;
+            cursor: pointer;
+            transition: transform 0.3s var(--spring), background 0.2s;
+        }
+        .btn-primary:hover { transform: translateY(-1px); }
+        .btn-primary:active { transform: scale(0.95); }
+
+    </style>
+</head>
+<body>
+
+    <div class="app-container" id="main-view">
+        <header>
+            <div class="header-title-group">
+                <div class="app-icon-badge">
+                    <i data-lucide="check-square" size="20" style="color: var(--text-main);"></i>
+                </div>
+                <h1>Gestor de Tareas</h1>
+                <span class="task-counter" id="global-counter">0</span>
+            </div>
+            <div class="header-actions">
+                <button class="icon-btn" onclick="exportData()" title="Exportar Copia"><i data-lucide="download" size="18"></i></button>
+                <input type="file" id="import-file" style="display:none" accept=".json" onchange="importData(event)">
+                <button class="icon-btn" onclick="document.getElementById('import-file').click()" title="Importar"><i data-lucide="upload" size="18"></i></button>
+                <button class="icon-btn" onclick="clearCompleted()" title="Limpiar Completadas"><i data-lucide="trash" size="18"></i></button>
+            </div>
+        </header>
+
+        <div class="folders-scroll-area" id="projects-container">
+            <!-- Projects injected via JS -->
+        </div>
+
+        <main class="main-content">
+            <div class="task-controls">
+                <div class="filter-group" id="filter-group">
+                    <span class="filter-btn active" data-filter="all" onclick="setFilter('all')">Todas</span>
+                    <span class="filter-btn" data-filter="pending" onclick="setFilter('pending')">Pendientes</span>
+                    <span class="filter-btn" data-filter="completed" onclick="setFilter('completed')">Completadas</span>
+                </div>
+                <div class="input-group">
+                    <input type="text" id="new-task-input" class="main-input" placeholder="Nueva tarea... (Presiona Enter)" autocomplete="off">
+                    <button class="icon-btn" style="width: 48px; height: 48px; border-radius: 12px;" onclick="handleAddTaskBtn()">
+                        <i data-lucide="plus"></i>
+                    </button>
+                </div>
+            </div>
+
+            <div class="task-list" id="task-list">
+                <!-- Tasks injected via JS -->
+            </div>
+
+            <div class="fab-search-container" id="fab-search">
+                <button class="fab-search-btn" onclick="toggleSearch()"><i data-lucide="search" size="18"></i></button>
+                <input type="text" id="search-input" placeholder="Buscar tareas..." oninput="handleSearch()">
+            </div>
+        </main>
+    </div>
+
+    <!-- Modal: Edit Task -->
+    <div class="modal-overlay" id="modal-task-details">
+        <div class="modal-surface">
+            <div class="modal-header">
+                <h2 class="modal-title">Detalles de Tarea</h2>
+                <button class="icon-btn" onclick="closeActiveModal('modal-task-details')"><i data-lucide="x" size="18"></i></button>
+            </div>
+            
+            <div class="input-labeled">
+                <label>Título de la tarea</label>
+                <input type="text" id="edit-task-title" class="main-input">
+            </div>
+
+            <div class="input-labeled">
+                <label>Fecha límite</label>
+                <input type="date" id="edit-task-date" class="main-input">
+            </div>
+
+            <div class="input-labeled">
+                <label>Subtareas</label>
+                <div class="input-group">
+                    <input type="text" id="new-subtask-input" class="main-input" placeholder="Añadir paso..." onkeydown="if(event.key==='Enter') addSubtask()">
+                    <button class="icon-btn" onclick="addSubtask()"><i data-lucide="plus" size="18"></i></button>
+                </div>
+                <div class="subtasks-list" id="subtasks-container">
+                    <!-- Subtasks injected -->
+                </div>
+            </div>
+
+            <button class="btn-primary" onclick="saveTaskDetails()">Guardar Cambios</button>
+        </div>
+    </div>
+
+    <!-- Modal: New Project -->
+    <div class="modal-overlay" id="modal-new-project">
+        <div class="modal-surface">
+            <div class="modal-header">
+                <h2 class="modal-title">Nuevo Proyecto</h2>
+                <button class="icon-btn" onclick="closeActiveModal('modal-new-project')"><i data-lucide="x" size="18"></i></button>
+            </div>
+            <div class="input-labeled">
+                <label>Nombre del proyecto</label>
+                <input type="text" id="new-project-name" class="main-input" placeholder="Ej. Trabajo, Personal..." autocomplete="off">
+            </div>
+            <button class="btn-primary" onclick="createProject()">Crear</button>
+        </div>
+    </div>
+
+    <script>
+        const STORAGE_KEY = 'neoGlassTaskData_v1';
+        let appData = {
+            projects: [
+                { id: 'inbox', name: 'Bandeja de Entrada' }
+            ],
+            activeProjectId: 'inbox',
+            tasks: [],
+            filter: 'all',
+            searchQuery: ''
+        };
+
+        let editingTaskId = null;
+        let dragSourceEl = null;
+        let dragSourceId = null;
+        let newlyAddedTaskId = null;
+
+        let activeModalsStack = [];
+
+        window.onload = () => {
+            const stored = localStorage.getItem(STORAGE_KEY);
+            if (stored) {
+                try {
+                    appData = JSON.parse(stored);
+                    if(!appData.projects) appData.projects = [{ id: 'inbox', name: 'Bandeja de Entrada' }];
+                } catch(e) { console.error("Error parsing DB", e); }
+            } else {
+                appData.tasks = [
+                    { id: 't1', projectId: 'inbox', title: 'Aprender Neo-Glass Design', completed: true, dueDate: getTodayStr(), subtasks: [] },
+                    { id: 't2', projectId: 'inbox', title: 'Implementar atajos de teclado', completed: false, dueDate: getTomorrowStr(), subtasks: [] },
+                    { id: 't3', projectId: 'inbox', title: 'Comprar café de especialidad', completed: false, dueDate: '', subtasks: [{id: 's1', title: 'Ir a la tienda', completed: false}] }
+                ];
+                saveData();
+            }
+            lucide.createIcons();
+            setupEventListeners();
+            renderApp();
+        };
+
+        function saveData() {
+            localStorage.setItem(STORAGE_KEY, JSON.stringify(appData));
+            updateCounterPulse();
+        }
+
+        function renderApp() {
+            renderProjects();
+            renderTasks();
+            updateCounter();
+            lucide.createIcons();
+        }
+
+        function renderProjects() {
+            const container = document.getElementById('projects-container');
+            container.innerHTML = '';
+            
+            appData.projects.forEach(proj => {
+                const pill = document.createElement('div');
+                pill.className = `project-pill ${appData.activeProjectId === proj.id ? 'active' : ''}`;
+                pill.onclick = () => { 
+                    appData.activeProjectId = proj.id; 
+                    renderApp(); 
+                };
+                pill.innerHTML = `
+                    <i data-lucide="${proj.id==='inbox' ? 'inbox' : 'folder'}" size="14"></i>
+                    ${proj.name}
+                `;
+                container.appendChild(pill);
+            });
+
+            const addBtn = document.createElement('div');
+            addBtn.className = 'project-pill';
+            addBtn.onclick = () => openModal('modal-new-project');
+            addBtn.innerHTML = `<i data-lucide="plus" size="14"></i>`;
+            container.appendChild(addBtn);
+        }
+
+        function renderTasks() {
+            const container = document.getElementById('task-list');
+            
+            let filteredTasks = appData.tasks.filter(t => t.projectId === appData.activeProjectId);
+            
+            if (appData.filter === 'pending') filteredTasks = filteredTasks.filter(t => !t.completed);
+            if (appData.filter === 'completed') filteredTasks = filteredTasks.filter(t => t.completed);
+            if (appData.searchQuery.trim() !== '') {
+                const q = appData.searchQuery.toLowerCase();
+                filteredTasks = filteredTasks.filter(t => t.title.toLowerCase().includes(q));
+            }
+
+            const visibleIds = new Set(filteredTasks.map(task => task.id));
+            container.querySelectorAll('.task-item').forEach(el => {
+                if (!visibleIds.has(el.dataset.id)) el.remove();
+            });
+
+            filteredTasks.forEach((task, index) => {
+                let el = container.querySelector(`[data-id="${task.id}"]`);
+                if (!el) {
+                    el = document.createElement('div');
+                    el.className = 'task-item';
+                    el.draggable = true;
+                    el.dataset.id = task.id;
+                    el.addEventListener('dragstart', handleDragStart);
+                    el.addEventListener('dragover', handleDragOver);
+                    el.addEventListener('dragleave', handleDragLeave);
+                    el.addEventListener('drop', handleDrop);
+                    el.addEventListener('dragend', handleDragEnd);
+                }
+                el.classList.toggle('completed', task.completed);
+                el.classList.toggle('anim-add', task.id === newlyAddedTaskId);
+
+                let metaHtml = '';
+                if (task.dueDate) {
+                    const badgeInfo = getDateBadge(task.dueDate);
+                    metaHtml += `<span class="badge ${badgeInfo.class}">${badgeInfo.text}</span>`;
+                }
+                if (task.subtasks && task.subtasks.length > 0) {
+                    const completedSubs = task.subtasks.filter(s => s.completed).length;
+                    const percent = (completedSubs / task.subtasks.length) * 100;
+                    metaHtml += `
+                        <span style="color: var(--text-muted);"><i data-lucide="list-tree" size="12" style="vertical-align: middle;"></i> ${completedSubs}/${task.subtasks.length}</span>
+                        <div class="progress-bar-container"><div class="progress-bar" style="width: ${percent}%"></div></div>
+                    `;
+                }
+
+                const subtasksHtml = task.subtasks && task.subtasks.length > 0 ? `
+                    <div class="subtasks-preview" aria-label="Subtareas">
+                        ${task.subtasks.map(sub => `
+                            <div class="subtask-preview-item ${sub.completed ? 'completed' : ''}" draggable="true" data-subtask-id="${sub.id}"
+                                ondragstart="handleSubtaskDragStart(event, '${task.id}', '${sub.id}')"
+                                ondragover="handleSubtaskDragOver(event)"
+                                ondragleave="handleSubtaskDragLeave(event)"
+                                ondrop="handleSubtaskDrop(event, '${task.id}', '${sub.id}')"
+                                ondragend="handleSubtaskDragEnd(event)">
+                                <input class="subtask-mini-check" type="checkbox" ${sub.completed ? 'checked' : ''}
+                                    onclick="event.stopPropagation()" onchange="toggleMainSubtask('${task.id}', '${sub.id}')">
+                                <span ondblclick="event.stopPropagation(); editSubtaskInline('${task.id}', '${sub.id}', this)">${escapeHTML(sub.title)}</span>
+                                <button class="subtask-edit-btn" type="button" title="Editar subtarea" onclick="event.stopPropagation(); editSubtaskInline('${task.id}', '${sub.id}', this.previousElementSibling)">
+                                    <i data-lucide="pencil" size="12"></i>
+                                </button>
+                            </div>
+                        `).join('')}
+                    </div>
+                ` : '';
+
+                el.innerHTML = `
+                    <label class="checkbox-wrapper">
+                        <input type="checkbox" ${task.completed ? 'checked' : ''} onchange="toggleTask('${task.id}', this)">
+                        <div class="checkbox-bg"><i data-lucide="check" size="14" class="check-icon"></i></div>
+                    </label>
+                    <div class="task-content" ondblclick="editTask('${task.id}')">
+                        <span class="task-title">${escapeHTML(task.title)}</span>
+                        ${metaHtml ? `<div class="task-meta">${metaHtml}</div>` : ''}
+                        ${subtasksHtml}
+                    </div>
+                    <div class="task-actions">
+                        <button class="icon-btn" onclick="editTask('${task.id}')" title="Editar"><i data-lucide="edit-2" size="16"></i></button>
+                        <button class="icon-btn delete-btn" onclick="deleteTaskWithAnim('${task.id}', this)" title="Eliminar"><i data-lucide="trash-2" size="16"></i></button>
+                    </div>
+                `;
+                if (el !== container.children[index]) container.appendChild(el);
+            });
+            
+            newlyAddedTaskId = null; // reset creation flag
+
+            document.querySelectorAll('.filter-btn').forEach(btn => {
+                btn.classList.toggle('active', btn.dataset.filter === appData.filter);
+            });
+        }
+
+        function updateCounter() {
+            const pending = appData.tasks.filter(t => !t.completed).length;
+            document.getElementById('global-counter').innerText = pending;
+        }
+
+        function updateCounterPulse() {
+            const el = document.getElementById('global-counter');
+            el.style.transform = 'scale(1.3)';
+            setTimeout(() => el.style.transform = 'scale(1)', 300);
+        }
+
+        // --- Animated Actions ---
+        function handleAddTaskBtn() {
+            const input = document.getElementById('new-task-input');
+            const title = input.value.trim();
+            if (!title) {
+                shakeElement(input);
+                return;
+            }
+            addTask(title);
+            input.value = '';
+        }
+
+        function addTask(title) {
+            const newTask = {
+                id: 't_' + Date.now(),
+                projectId: appData.activeProjectId,
+                title: title,
+                completed: false,
+                dueDate: '',
+                subtasks: []
+            };
+            newlyAddedTaskId = newTask.id;
+            appData.tasks.unshift(newTask);
+            saveData();
+            renderApp();
+        }
+
+        function toggleTask(id, checkboxEl) {
+            const task = appData.tasks.find(t => t.id === id);
+            if (!task) return;
+
+            task.completed = !task.completed;
+
+            saveData();
+            renderApp();
+            if (task.completed) {
+                triggerTaskConfetti();
+                checkAllCompletedCelebration();
+            }
+        }
+
+        function deleteTaskWithAnim(id, btnEl) {
+            const itemEl = btnEl.closest('.task-item');
+            itemEl.classList.add('anim-delete');
+            setTimeout(() => {
+                deleteTask(id);
+            }, 380);
+        }
+
+        function deleteTask(id) {
+            appData.tasks = appData.tasks.filter(t => t.id !== id);
+            saveData();
+            renderApp();
+        }
+
+        function clearCompleted() {
+            const completedItems = document.querySelectorAll('.task-item.completed');
+            completedItems.forEach(el => el.classList.add('anim-delete'));
+            
+            setTimeout(() => {
+                appData.tasks = appData.tasks.filter(t => !t.completed || t.projectId !== appData.activeProjectId);
+                saveData();
+                renderApp();
+            }, completedItems.length > 0 ? 380 : 0);
+        }
+
+        // --- Confetti Celebration ---
+        function checkAllCompletedCelebration() {
+            const projectTasks = appData.tasks.filter(t => t.projectId === appData.activeProjectId);
+            if (projectTasks.length > 0 && projectTasks.every(t => t.completed)) {
+                triggerBigConfetti();
+            }
+        }
+
+        function triggerTaskConfetti() {
+            if (typeof confetti === 'function') {
+                confetti({
+                    particleCount: 55,
+                    spread: 58,
+                    startVelocity: 28,
+                    origin: { y: 0.6 },
+                    colors: ['#0A84FF', '#34C759', '#FF9F0A', '#FFFFFF'],
+                    disableForReducedMotion: true
+                });
+            }
+        }
+
+        function triggerBigConfetti() {
+            if (typeof confetti !== 'function') return;
+            const end = Date.now() + 100;
+            const colors = ['#0A84FF', '#34C759', '#FF9F0A', '#FFFFFF', '#FF453A'];
+            const burst = () => {
+                confetti({ particleCount: 90, angle: 60, spread: 75, origin: { x: 0, y: 0.72 }, colors, disableForReducedMotion: true });
+                confetti({ particleCount: 90, angle: 120, spread: 75, origin: { x: 1, y: 0.72 }, colors, disableForReducedMotion: true });
+                if (Date.now() < end) requestAnimationFrame(burst);
+            };
+            burst();
+        }
+
+        function setFilter(filter) {
+            appData.filter = filter;
+            renderApp();
+        }
+
+        // --- Drag & Drop ---
+        function handleDragStart(e) {
+            dragSourceEl = this;
+            dragSourceId = this.dataset.id;
+            e.dataTransfer.effectAllowed = 'move';
+            e.dataTransfer.setData('text/plain', dragSourceId);
+            setTimeout(() => this.classList.add('dragging'), 0);
+        }
+        function handleDragOver(e) {
+            if (e.preventDefault) e.preventDefault();
+            e.dataTransfer.dropEffect = 'move';
+            this.classList.add('drag-over');
+            return false;
+        }
+        function handleDragLeave(e) {
+            this.classList.remove('drag-over');
+        }
+        function handleDrop(e) {
+            if (e.stopPropagation) e.stopPropagation();
+            this.classList.remove('drag-over');
+            
+            if (dragSourceEl !== this) {
+                const dropId = this.dataset.id;
+                reorderTasks(dragSourceId, dropId);
+            }
+            return false;
+        }
+        function handleDragEnd(e) {
+            this.classList.remove('dragging');
+            document.querySelectorAll('.task-item').forEach(el => el.classList.remove('drag-over'));
+        }
+
+        function reorderTasks(dragId, dropId) {
+            const filtered = appData.tasks.filter(t => t.projectId === appData.activeProjectId);
+            const dragIdx = filtered.findIndex(t => t.id === dragId);
+            const dropIdx = filtered.findIndex(t => t.id === dropId);
+            
+            if(dragIdx === -1 || dropIdx === -1) return;
+
+            const dragTask = filtered.splice(dragIdx, 1)[0];
+            filtered.splice(dropIdx, 0, dragTask);
+
+            const otherTasks = appData.tasks.filter(t => t.projectId !== appData.activeProjectId);
+            appData.tasks = [...filtered, ...otherTasks];
+            
+            saveData();
+            renderApp();
+        }
+
+        let dragSubtaskTaskId = null;
+        let dragSubtaskId = null;
+
+        function getSubtask(taskId, subtaskId) {
+            const task = appData.tasks.find(item => item.id === taskId);
+            return task && task.subtasks ? task.subtasks.find(item => item.id === subtaskId) : null;
+        }
+
+        function toggleMainSubtask(taskId, subtaskId) {
+            const subtask = getSubtask(taskId, subtaskId);
+            if (!subtask) return;
+            subtask.completed = !subtask.completed;
+            saveData();
+            renderApp();
+            if (subtask.completed) triggerTaskConfetti();
+        }
+
+        function editSubtaskInline(taskId, subtaskId, labelEl) {
+            const subtask = getSubtask(taskId, subtaskId);
+            if (!subtask || labelEl.querySelector('input')) return;
+
+            const input = document.createElement('input');
+            input.className = 'subtask-edit-input';
+            input.value = subtask.title;
+            labelEl.replaceWith(input);
+            input.focus();
+            input.select();
+
+            let finished = false;
+            const finish = () => {
+                if (finished) return;
+                finished = true;
+                const title = input.value.trim();
+                if (!title) {
+                    renderApp();
+                    return;
+                }
+                subtask.title = title;
+                saveData();
+                renderApp();
+            };
+            input.addEventListener('blur', finish);
+            input.addEventListener('keydown', event => {
+                if (event.key === 'Enter') finish();
+                if (event.key === 'Escape') {
+                    finished = true;
+                    renderApp();
+                }
+            });
+        }
+
+        function handleSubtaskDragStart(event, taskId, subtaskId) {
+            event.stopPropagation();
+            dragSubtaskTaskId = taskId;
+            dragSubtaskId = subtaskId;
+            event.dataTransfer.effectAllowed = 'move';
+            event.dataTransfer.setData('text/plain', subtaskId);
+            event.currentTarget.classList.add('dragging');
+        }
+
+        function handleSubtaskDragOver(event) {
+            event.preventDefault();
+            event.stopPropagation();
+            event.dataTransfer.dropEffect = 'move';
+            event.currentTarget.classList.add('drag-over');
+        }
+
+        function handleSubtaskDragLeave(event) {
+            event.currentTarget.classList.remove('drag-over');
+        }
+
+        function handleSubtaskDrop(event, taskId, dropSubtaskId) {
+            event.preventDefault();
+            event.stopPropagation();
+            event.currentTarget.classList.remove('drag-over');
+            if (dragSubtaskTaskId === taskId && dragSubtaskId !== dropSubtaskId) {
+                reorderSubtasks(taskId, dragSubtaskId, dropSubtaskId);
+            }
+        }
+
+        function handleSubtaskDragEnd(event) {
+            event.currentTarget.classList.remove('dragging', 'drag-over');
+            document.querySelectorAll('.subtask-preview-item, .subtask-item').forEach(item => item.classList.remove('drag-over', 'dragging'));
+            dragSubtaskTaskId = null;
+            dragSubtaskId = null;
+        }
+
+        function reorderSubtasks(taskId, dragId, dropId) {
+            const task = appData.tasks.find(item => item.id === taskId);
+            if (!task || !task.subtasks) return;
+            const fromIndex = task.subtasks.findIndex(item => item.id === dragId);
+            const toIndex = task.subtasks.findIndex(item => item.id === dropId);
+            if (fromIndex === -1 || toIndex === -1) return;
+            const [moved] = task.subtasks.splice(fromIndex, 1);
+            task.subtasks.splice(toIndex, 0, moved);
+            saveData();
+            renderApp();
+            if (editingTaskId === taskId) renderSubtasksModal(task.subtasks);
+        }
+
+        // --- Modals & Complex Edits ---
+        function openModal(modalId) {
+            document.getElementById('main-view').classList.add('backgrounded');
+            document.getElementById(modalId).classList.add('active');
+            activeModalsStack.push(modalId);
+            window.history.pushState({ modalId: modalId }, "");
+            
+            if(modalId === 'modal-new-project') {
+                setTimeout(() => document.getElementById('new-project-name').focus(), 150);
+            }
+        }
+
+        function closeActiveModal(modalId) {
+            if (activeModalsStack.includes(modalId)) {
+                window.history.back();
+            }
+        }
+
+        window.addEventListener('popstate', (e) => {
+            if (activeModalsStack.length > 0) {
+                const topModalId = activeModalsStack.pop();
+                document.getElementById(topModalId).classList.remove('active');
+                if (activeModalsStack.length === 0) {
+                    document.getElementById('main-view').classList.remove('backgrounded');
+                }
+            }
+        });
+
+        function editTask(id) {
+            editingTaskId = id;
+            const task = appData.tasks.find(t => t.id === id);
+            document.getElementById('edit-task-title').value = task.title;
+            document.getElementById('edit-task-date').value = task.dueDate || '';
+            renderSubtasksModal(task.subtasks || []);
+            openModal('modal-task-details');
+        }
+
+        function renderSubtasksModal(subtasks) {
+            const container = document.getElementById('subtasks-container');
+            container.innerHTML = '';
+            subtasks.forEach(sub => {
+                const item = document.createElement('div');
+                item.className = 'subtask-item';
+                item.draggable = true;
+                item.dataset.subtaskId = sub.id;
+                item.ondragstart = event => handleSubtaskDragStart(event, editingTaskId, sub.id);
+                item.ondragover = handleSubtaskDragOver;
+                item.ondragleave = handleSubtaskDragLeave;
+                item.ondrop = event => handleSubtaskDrop(event, editingTaskId, sub.id);
+                item.ondragend = handleSubtaskDragEnd;
+                item.innerHTML = `
+                        <i data-lucide="grip-vertical" class="subtask-drag-handle" size="14"></i>
+                        <label class="checkbox-wrapper" style="width: 18px; height: 18px;">
+                            <input type="checkbox" ${sub.completed ? 'checked' : ''} onchange="toggleModalSubtask('${sub.id}')">
+                            <div class="checkbox-bg" style="border-radius: 4px;"><i data-lucide="check" size="12" class="check-icon"></i></div>
+                        </label>
+                        <input class="main-input subtask-title-input" value="${escapeHTML(sub.title)}" aria-label="Editar subtarea">
+                        <button class="icon-btn delete-btn" style="width: 24px; height: 24px; margin-left: auto;" onclick="deleteModalSubtask('${sub.id}')">
+                            <i data-lucide="x" size="12"></i>
+                        </button>
+                    </div>
+                `;
+                item.querySelector('.subtask-title-input').addEventListener('input', event => {
+                    sub.title = event.target.value;
+                });
+                container.appendChild(item);
+            });
+            lucide.createIcons();
+        }
+
+        function addSubtask() {
+            const input = document.getElementById('new-subtask-input');
+            const title = input.value.trim();
+            if(!title) return shakeElement(input);
+            
+            const task = appData.tasks.find(t => t.id === editingTaskId);
+            if(!task.subtasks) task.subtasks = [];
+            task.subtasks.push({ id: 's_' + Date.now(), title, completed: false });
+            input.value = '';
+            saveData();
+            renderSubtasksModal(task.subtasks);
+        }
+
+        function toggleModalSubtask(subId) {
+            const task = appData.tasks.find(t => t.id === editingTaskId);
+            const sub = task.subtasks.find(s => s.id === subId);
+            if(sub) sub.completed = !sub.completed;
+            saveData();
+            renderSubtasksModal(task.subtasks);
+        }
+        
+        function deleteModalSubtask(subId) {
+            const task = appData.tasks.find(t => t.id === editingTaskId);
+            task.subtasks = task.subtasks.filter(s => s.id !== subId);
+            saveData();
+            renderSubtasksModal(task.subtasks);
+        }
+
+        function saveTaskDetails() {
+            const titleInput = document.getElementById('edit-task-title');
+            if(!titleInput.value.trim()) {
+                shakeElement(titleInput);
+                return;
+            }
+            const task = appData.tasks.find(t => t.id === editingTaskId);
+            task.title = titleInput.value.trim();
+            task.dueDate = document.getElementById('edit-task-date').value;
+            saveData();
+            closeActiveModal('modal-task-details');
+            renderTasks();
+            updateCounter();
+            lucide.createIcons();
+        }
+
+        function createProject() {
+            const input = document.getElementById('new-project-name');
+            const name = input.value.trim();
+            if (!name) return shakeElement(input);
+
+            const newProj = { id: 'p_' + Date.now(), name: name };
+            appData.projects.push(newProj);
+            appData.activeProjectId = newProj.id;
+            
+            input.value = '';
+            saveData();
+            closeActiveModal('modal-new-project');
+            renderApp();
+        }
+
+        // --- Utilities ---
+        function setupEventListeners() {
+            document.getElementById('new-task-input').addEventListener('keydown', (e) => {
+                if (e.key === 'Enter') handleAddTaskBtn();
+            });
+
+            document.addEventListener('keydown', (e) => {
+                if ((e.ctrlKey || e.metaKey) && e.key === 'k') {
+                    e.preventDefault();
+                    toggleSearch();
+                }
+                if (e.key.toLowerCase() === 'n' && document.activeElement.tagName !== 'INPUT' && activeModalsStack.length === 0) {
+                    e.preventDefault();
+                    document.getElementById('new-task-input').focus();
+                }
+            });
+        }
+
+        let searchExpanded = false;
+        function toggleSearch() {
+            const container = document.getElementById('fab-search');
+            const input = document.getElementById('search-input');
+            searchExpanded = !searchExpanded;
+            if(searchExpanded) {
+                container.classList.add('expanded');
+                setTimeout(() => input.focus(), 300);
+            } else {
+                container.classList.remove('expanded');
+                input.value = '';
+                appData.searchQuery = '';
+                renderApp();
+                input.blur();
+            }
+        }
+
+        function handleSearch() {
+            appData.searchQuery = document.getElementById('search-input').value;
+            renderApp();
+        }
+
+        function getTodayStr() { return new Date().toISOString().split('T')[0]; }
+        function getTomorrowStr() {
+            const d = new Date();
+            d.setDate(d.getDate() + 1);
+            return d.toISOString().split('T')[0];
+        }
+        function getDateBadge(dateStr) {
+            const today = getTodayStr();
+            const tomorrow = getTomorrowStr();
+            if (dateStr === today) return { text: 'Hoy', class: 'today' };
+            if (dateStr === tomorrow) return { text: 'Mañana', class: 'tomorrow' };
+            if (dateStr < today) return { text: 'Vencida', class: 'overdue' };
+            return { text: dateStr.split('-').reverse().join('/'), class: 'default' };
+        }
+
+        function shakeElement(el) {
+            el.classList.add('error-shake');
+            setTimeout(() => el.classList.remove('error-shake'), 300);
+        }
+
+        function escapeHTML(str) {
+            const p = document.createElement('p');
+            p.appendChild(document.createTextNode(str));
+            return p.innerHTML;
+        }
+
+        function exportData() {
+            const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(appData));
+            const downloadAnchorNode = document.createElement('a');
+            downloadAnchorNode.setAttribute("href", dataStr);
+            downloadAnchorNode.setAttribute("download", "tareas_backup.json");
+            document.body.appendChild(downloadAnchorNode);
+            downloadAnchorNode.click();
+            downloadAnchorNode.remove();
+        }
+
+        function importData(event) {
+            const file = event.target.files[0];
+            if (!file) return;
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                try {
+                    const imported = JSON.parse(e.target.result);
+                    if(imported.tasks && imported.projects) {
+                        appData = imported;
+                        saveData();
+                        renderApp();
+                    } else {
+                        alert("Formato no válido");
+                    }
+                } catch(err) { alert("Error leyendo el archivo"); }
+            };
+            reader.readAsText(file);
+            event.target.value = '';
+        }
+
+    </script>
+</body>
+</html>

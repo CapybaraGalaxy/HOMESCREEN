@@ -1035,6 +1035,21 @@
         function promptForAlias() {
             showInput('INTRODUCE TU ALIAS DE DEFENSOR:', (alias) => {
                 const cleanInput = alias.trim();
+
+                if (cleanInput.toLowerCase() === 'reset') {
+                    localStorage.removeItem('unlocked_pong_skins');
+                    localStorage.removeItem('active_pong_skin');
+                    unlockedSkins = ['System32'];
+                    activeSkinId = 'System32';
+                    currentLevel = 1;
+                    upgrades = { extendedPaddle: 1.0, firewallShield: false, shieldUsed: false, gimmickResistance: 1.0, paddleSpeedBoost: 1.0 };
+                    activeModalsStack = [];
+                    document.body.className = '';
+                    logsEl.innerHTML = '';
+                    inputLine.style.display = 'none';
+                    appendLog(`[SYS] Progreso, mejoras y skins reiniciados.`).then(() => bootSequence());
+                    return;
+                }
                 
                 // CHEAT SPECIAL CODE: freeskins
                 if (cleanInput.toLowerCase() === 'freeskins') {

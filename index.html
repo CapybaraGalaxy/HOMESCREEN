@@ -123,6 +123,21 @@
         </div>
     </div>
 
+    <div class="custom-modal app-editor-modal" id="appEditorModal">
+        <div class="modal-title"><i data-lucide="pencil"></i> Editar app</div>
+        <div class="app-form-grid">
+            <label class="app-form-field"><span>Nombre</span><input id="editAppName" type="text" maxlength="60"></label>
+            <label class="app-form-field"><span>Enlace</span><input id="editAppUrl" type="url"></label>
+            <label class="app-form-field"><span>Carpeta</span><div class="custom-dropdown app-form-dropdown" id="editAppFolder"><div class="dropdown-select"><span></span><i data-lucide="chevron-down"></i></div><div class="dropdown-options"></div></div></label>
+            <label class="app-form-field"><span>Icono</span><div class="custom-dropdown app-form-dropdown" id="editAppIconType"><div class="dropdown-select"><span></span><i data-lucide="chevron-down"></i></div><div class="dropdown-options"><div class="dropdown-option" data-value="lucide">Icono Lucide</div><div class="dropdown-option" data-value="favicon">Favicon del enlace</div><div class="dropdown-option" data-value="svg">Path SVG manual</div><div class="dropdown-option" data-value="upload">SVG o PNG</div></div></div></label>
+            <label class="app-form-field" id="editLucideField"><span>Nombre del icono Lucide</span><input id="editAppIcon" type="text"></label>
+            <label class="app-form-field" id="editSvgField" hidden><span>Path SVG (`d`)</span><textarea id="editAppSvgPath" rows="2"></textarea></label>
+            <label class="app-form-field" id="editUploadField" hidden><span>Reemplazar SVG o PNG</span><input id="editAppIconFile" type="file" accept="image/svg+xml,image/png,.svg,.png"></label>
+        </div>
+        <div class="app-preview"><span class="app-preview-label">Vista previa</span><div class="app-preview-card" id="editAppPreviewCard"></div></div>
+        <div class="modal-buttons"><button class="modal-btn secondary" onclick="closeModal('appEditorModal')">Cancelar</button><button class="modal-btn primary" id="saveAppEditBtn">Guardar cambios</button></div>
+    </div>
+
     <div class="custom-modal welcome-modal" id="firstRunModal">
         <div class="modal-title"><i data-lucide="sparkles" style="color: #FFD60A;"></i> Bienvenido a Homescreen</div>
         <p class="modal-text">Personaliza tu experiencia antes de empezar: elige tu nombre, diseño, efectos y preferencias.</p>
@@ -163,7 +178,7 @@ const tools = [
             { name: 'Bocetos', icon: 'Pencil-Line', url: 'Apps/bocetos.html' },
             { name: 'Selector de color', icon: 'pipette', url: 'Apps/color.html' },
             { name: 'Editor de fotos', icon: 'image', url: 'Apps/editor-fotos.html' },
-            { name: 'Conversor zonas horarias', icon: 'globe', url: 'horarios.html' }
+            { name: 'Conversor zonas horarias', icon: 'globe', url: 'Apps/horarios.html' }
         ]
     },
     {
@@ -200,7 +215,7 @@ const tools = [
             { name: 'Ruleta aleatoria', icon: 'Ferris-Wheel', url: 'Apps/aleatorio.html' },
             { name: 'Creador de memes', icon: 'Laugh', url: 'Apps/meme.html' },
             { name: 'Creador de Tierlist', icon: 'list-ordered', url: 'Apps/tierlist.html' },
-            { name: 'Estudio de Ritmos', icon: 'music', url: 'Apps/estudio-ritmos' },
+            { name: 'Estudio de Ritmos', icon: 'music', url: 'Apps/estudio-ritmos.html' },
             { name: 'Quiz Studio', icon: 'brain-circuit', url: 'Apps/quiz-studio.html' },
             { name: 'Rosco', icon: 'help-circle', url: 'Apps/rosco.html' },
             { name: 'Memory (temporalmente)', icon: 'brain', url: 'Games/memory.html' },
@@ -223,7 +238,7 @@ const tools = [
         folder: true,
         apps: [
             { name: 'Conversor de unidades', icon: 'Arrow-Left-Right', url: 'Apps/conversor.html' },
-            { name: 'Conversor a Base64', icon: 'upload-cloud', url: 'Apps/img-base64.html' },
+            { name: 'Conversor a Base64', icon: 'upload-cloud', url: 'Apps/base64.html' },
             { name: 'Traductor Wingdings', icon: 'sparkles', url: 'Apps/wingdings.html' },
             { name: 'Conversor Binario', icon: 'binary', url: 'Apps/binario.html' },
             { name: 'Conversor Morse', icon: 'radio', url: 'Apps/morse.html' },
@@ -236,7 +251,7 @@ const tools = [
         icon: 'Settings2',
         folder: true,
         apps: [
-            { name: 'Material You', icon: 'palette', url: 'Apps/material-you' },
+            { name: 'Material You', icon: 'palette', url: 'Apps/material-you.html' },
             { name: 'Galería de iconos', icon: 'Layout-List', url: 'Apps/icontest.html' },
             { name: 'App maker', icon: 'Columns-Settings', url: 'Apps/appmaker.html' },
             { name: 'Consejos', icon: 'lightbulb', url: 'Apps/consejos.html' },
@@ -246,8 +261,54 @@ const tools = [
     }
 ];
 
-const hiddenApp = { name: 'Neo GameCenter', icon: 'Gamepad2', url: 'Apps/games.html' };
+const hiddenApp = { name: 'Neo GameCenter', icon: 'Gamepad2', url: 'games.html' };
 const hiddenApps = [hiddenApp];
+
+function getHiddenAppUrls() {
+    try { return new Set(JSON.parse(localStorage.getItem('hiddenAppUrls') || '[]')); } catch (error) { return new Set(); }
+}
+
+function getCustomApps() {
+    try {
+        const apps = JSON.parse(localStorage.getItem('customApps') || '[]');
+        return Array.isArray(apps) ? apps.map(app => ({ ...app, isCustom: true })) : [];
+    } catch (error) { return []; }
+}
+
+function getAllAppEntries() {
+    const apps = [];
+    tools.forEach(folder => (folder.apps || []).forEach(app => apps.push({ ...app, source: folder.name })));
+    getCustomApps().forEach(app => apps.push({ ...app, source: 'Apps añadidas' }));
+    return apps;
+}
+
+function getSearchAppEntries() {
+    return [...getAllAppEntries(), ...hiddenApps.map(app => ({ ...app, source: 'Carpetas ocultas' }))];
+}
+
+function getCustomAppsFolder(name) {
+    return getCustomApps().filter(app => (app.folder || 'Apps añadidas') === name);
+}
+
+function getFolderApps(folder) {
+    const customApps = localStorage.getItem('showCustomApps') === 'false' ? [] : getCustomAppsFolder(folder.name);
+    return [...(folder.apps || []), ...customApps];
+}
+
+function getVisibleApps(apps) {
+    const hiddenUrls = getHiddenAppUrls();
+    return apps.filter(app => !hiddenUrls.has(app.url) && !(app.isCustom && localStorage.getItem('showCustomApps') === 'false'));
+}
+
+function appIconMarkup(app) {
+    if (app.iconType === 'favicon') {
+        const faviconUrl = `https://www.google.com/s2/favicons?domain=${encodeURIComponent(app.url)}&sz=64`;
+        return `<img class="app-custom-icon" src="${faviconUrl}" alt="">`;
+    }
+    if (app.iconType === 'upload' && app.iconData) return `<img class="app-custom-icon" src="${app.iconData}" alt="">`;
+    if (app.iconType === 'svg' && app.svgPath) return `<svg class="app-custom-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="${escapeHtml(app.svgPath)}"></path></svg>`;
+    return `<i data-lucide="${app.icon || 'link'}"></i>`;
+}
 
 const appKeywords = {
     'Apps/dinero.html': [
@@ -306,7 +367,7 @@ const appKeywords = {
         'rotar', 'girar', 'ajustar', 'brillo', 'contraste', 'saturacion', 'pixel', 'png', 'jpg', 'jpeg',
         'webp', 'canvas', 'dibujo', 'pincel', 'texto', 'mascara', 'optimizar', 'compresión', 'fotomontaje', 'retocar'
     ],
-    'horarios.html': [
+    'Apps/horarios.html': [
         'hora', 'zonas', 'horarias', 'conversor', 'reloj', 'mundial', 'tiempo', 'utc', 'gmt', 'timezone',
         'convertidor', 'internacional', 'paises', 'ciudades', 'desfase', 'diferencia', 'calendario', 'agenda', 'reunion', 'horario',
         'verano', 'invierno', 'programar', 'sincronizar', 'epoch', 'timestamp', 'local', 'militar', 'am', 'pm'
@@ -386,7 +447,7 @@ const appKeywords = {
         'favoritos', 'comparar', 'mejor', 'peor', 'personajes', 'juegos', 'anime', 'plantilla', 'personalizar', 'ordenar',
         's', 'a', 'b', 'c', 'd', 'e', 'f', 'tier', 'list', 'ranking maker'
     ],
-    'Apps/estudio-ritmos': [
+    'Apps/estudio-ritmos.html': [
         'piano', 'ritmos', 'música', 'tutorial', 'guía', 'ayuda', 'soporte', 'aprender', 'notas', 'acordes',
         'teclado', 'partitura', 'tempo', 'metrónomo', 'grabar', 'componer', 'melodía', 'solución', 'error', 'ajustes',
         'configurar', 'clases', 'escalas', 'audio', 'pistas', 'MIDI', 'instrumentos', 'práctica', 'paso a paso', 'lecciones'
@@ -428,7 +489,7 @@ const appKeywords = {
         'fahrenheit', 'kilos', 'libras', 'gramos', 'kilometros', 'millas', 'litros', 'galones', 'conversion', 'transformar',
         'equivalencia', 'calculo', 'sistema metrico', 'imperial', 'escala', 'magnitud', 'fisica', 'valores', 'unidades de tiempo', 'unidades de velocidad'
     ],
-    'Apps/img-base64.html': [
+    'Apps/base64.html': [
         'conversor', 'base64', 'imagen', 'codificar', 'decodificar', 'encoder', 'decoder', 'b64', 'texto', 'codigo',
         'datos', 'dataurl', 'src', 'html', 'css', 'desarrollo', 'web', 'archivo', 'bytes', 'string',
         'convertir', 'encriptar', 'binario', 'upload', 'cloud', 'programacion', 'formato', 'asset', 'optimizar', 'transformar'
@@ -463,7 +524,7 @@ const appKeywords = {
         'contabilidad', 'palabras', 'cantidad', 'millon', 'generar', 'copiar', 'pegar', 'escuela', 'aprendizaje', 'moneda',
         'lectura'
     ],
-    'Apps/material-you': [
+    'Apps/material-you.html': [
         'material you', 'palette', 'colores', 'diseño', 'android', 'google', 'interfaz', 'ui', 'ux', 'personalizacion',
         'temas', 'dinamico', 'hex', 'rgb', 'paleta de colores', 'estilo', 'sistema', 'css', 'variables', 'desrollo',
         'generador', 'armonia', 'monet', 'wallpaper', 'extractor', 'diseñador', 'tokens', 'configuracion', 'visual', 'apariencia'
@@ -488,7 +549,7 @@ const appKeywords = {
         'renderizar', 'web', 'diseño', 'frontend', 'css', 'js', 'programacion', 'utilidades', 'herramientas', 'archivo',
         'file', 'abrir', 'test', 'probar', 'sandbox', 'maquetar', 'visualizador', 'visor-html', 'previewer', 'live-preview'
     ],
-    'Labs.html': [
+    'labs.html': [
         'experimentos', 'beta', 'pruebas', 'homescreen', 'interno'
     ],
     'games.html': [
@@ -710,9 +771,7 @@ const frases = {
 
         function getTopApps(limit = 4) {
             let stats = JSON.parse(localStorage.getItem('appUsageStats') || '{}');
-            const allApps = [];
-            tools.forEach(cat => cat.apps && allApps.push(...cat.apps));
-            if (typeof hiddenApps !== 'undefined') allApps.push(...hiddenApps);
+            const allApps = getVisibleApps(getAllAppEntries());
 
             const sortedUrls = Object.keys(stats).sort((a,b) => stats[b] - stats[a]);
             const topApps = [];
@@ -748,12 +807,8 @@ const frases = {
             const resultsArea = document.getElementById('resultsArea') || document.querySelector('.results-area');
             if (!resultsArea) return;
             resultsArea.innerHTML = '';
-            tools.forEach(category => {
-                if (category.apps) { category.apps.forEach(app => { createSearchItemElement(resultsArea, app); }); }
-            });
-            if (typeof hiddenApps !== 'undefined') {
-                hiddenApps.forEach(app => { createSearchItemElement(resultsArea, app); });
-            }
+            getVisibleApps(getAllAppEntries()).forEach(app => createSearchItemElement(resultsArea, app));
+            hiddenApps.forEach(app => createSearchItemElement(resultsArea, app));
             if (window.lucide) lucide.createIcons();
         }
 
@@ -764,7 +819,7 @@ const frases = {
             item.setAttribute('data-url', app.url); 
             item.setAttribute('data-name', app.name.toLowerCase());
             item.onclick = (e) => handleAppClick(e, app.url);
-            item.innerHTML = `<i data-lucide="${app.icon || 'link'}"></i><span style="margin-left:12px;">${app.name}</span>`;
+            item.innerHTML = `${appIconMarkup(app)}<span style="margin-left:12px;">${app.name}</span>`;
             container.appendChild(item);
         }
 
@@ -1001,6 +1056,9 @@ const frases = {
                 <button class="settings-tab" type="button" data-tab="carpetas" aria-selected="false">
                    <i data-lucide="folders"> </i> <span>Carpetas</span>
                 </button>
+                <button class="settings-tab" type="button" data-tab="apps" aria-selected="false">
+                    <i data-lucide="app-window"> </i><span>Apps</span>
+                </button>
                 <button class="settings-tab" type="button" data-tab="apariencia" aria-selected="false">
                    <i data-lucide="palette"> </i> <span>Apariencia</span>
                 </button>
@@ -1070,11 +1128,11 @@ const frases = {
                         <span class="settings-section-title">Opciones de visualización</span>
                         <div class="setting-item-row setting-range-row">
                             <div class="setting-item-meta"><i data-lucide="scaling"></i><div><span class="setting-label">Tamaño de carpetas</span><span class="setting-desc">Ajusta los accesos de la pantalla de inicio</span></div></div>
-                            <label class="settings-range-control"><output id="folderSizeValue">3</output><input type="range" id="folderSizeRange" min="1" max="5" value="3" step="1" aria-label="Tamaño de carpetas"></label>
+                            <label class="settings-range-control"><output id="folderSizeValue">3</output><input type="range" id="folderSizeRange" min="1" max="5" value="3" step="0.01" aria-label="Tamaño de carpetas"></label>
                         </div>
                         <div class="setting-item-row setting-range-row">
                             <div class="setting-item-meta"><i data-lucide="type"></i><div><span class="setting-label">Apps dentro de carpetas</span><span class="setting-desc">Tamaño de texto e iconos</span></div></div>
-                            <label class="settings-range-control"><output id="folderAppsSizeValue">3</output><input type="range" id="folderAppsSizeRange" min="1" max="5" value="3" step="1" aria-label="Tamaño de apps dentro de carpetas"></label>
+                            <label class="settings-range-control"><output id="folderAppsSizeValue">3</output><input type="range" id="folderAppsSizeRange" min="1" max="5" value="3" step="0.01" aria-label="Tamaño de apps dentro de carpetas"></label>
                         </div>
                         <div class="setting-item-row">
                             <div class="setting-item-meta"><i data-lucide="type"></i><div><span class="setting-label">Ocultar texto de carpetas</span><span class="setting-desc">Mostrar solo iconos en la pantalla de inicio</span></div></div>
@@ -1098,6 +1156,10 @@ const frases = {
                             <div class="setting-item-meta"><i data-lucide="layout-dashboard"></i><div><span class="setting-label">Dock inferior</span><span class="setting-desc">Fijar 5 apps más usadas</span></div></div>
                             <div class="switch" id="toggleDock"></div>
                         </div>
+                            <div class="setting-item-row">
+                                <div class="setting-item-meta"><i data-lucide="app-window"></i><div><span class="setting-label">Apps añadidas</span><span class="setting-desc">Mostrar la carpeta de apps creadas manualmente</span></div></div>
+                                <div class="switch" id="toggleCustomApps"></div>
+                            </div>
                         <span class="settings-section-title">Preferencias</span>
                         <div class="setting-item-row">
                             <div class="setting-item-meta"><i data-lucide="scan"></i><div><span class="setting-label">Animación de carpetas</span><span class="setting-desc">Efecto al abrir y cerrar carpetas</span></div></div>
@@ -1128,6 +1190,31 @@ const frases = {
                         </div>
                     </div>
                 </div>
+                <div class="settings-tab-panel" data-panel="apps">
+                    <div class="settings-section">
+                        <span class="settings-section-title">Añadir una app</span>
+                        <div class="app-form-grid">
+                            <label class="app-form-field"><span>Nombre</span><input id="customAppName" type="text" maxlength="60" placeholder="Mi herramienta"></label>
+                            <label class="app-form-field"><span>Enlace</span><input id="customAppUrl" type="url" placeholder="https://ejemplo.com"></label>
+                            <label class="app-form-field"><span>Carpeta</span><div class="custom-dropdown app-form-dropdown" id="customAppFolder"><div class="dropdown-select"><span></span><i data-lucide="chevron-down"></i></div><div class="dropdown-options"></div></div></label>
+                            <label class="app-form-field"><span>Icono</span><div class="custom-dropdown app-form-dropdown" id="customAppIconType"><div class="dropdown-select"><span></span><i data-lucide="chevron-down"></i></div><div class="dropdown-options"><div class="dropdown-option" data-value="lucide">Icono Lucide</div><div class="dropdown-option" data-value="favicon">Favicon del enlace</div><div class="dropdown-option" data-value="svg">Path SVG manual</div><div class="dropdown-option" data-value="upload">SVG o PNG</div></div></div></label>
+                            <label class="app-form-field" id="customLucideField"><span>Nombre del icono Lucide</span><input id="customAppIcon" type="text" value="link" placeholder="link"></label>
+                            <label class="app-form-field" id="customSvgField" hidden><span>Path SVG (`d`)</span><textarea id="customAppSvgPath" rows="2" placeholder="M12 5v14M5 12h14"></textarea></label>
+                            <label class="app-form-field" id="customUploadField" hidden><span>Archivo de icono</span><input id="customAppIconFile" type="file" accept="image/svg+xml,image/png,.svg,.png"></label>
+                        </div>
+                        <div class="app-preview" id="customAppPreview"><span class="app-preview-label">Vista previa</span><div class="app-preview-card" id="customAppPreviewCard"><i data-lucide="link"></i><span>Mi herramienta</span></div></div>
+                        <button class="settings-action-btn app-add-btn" id="addCustomAppBtn" type="button"><i data-lucide="plus" style="width: 14px;"></i> Añadir app</button>
+                        <span class="settings-section-title">Apps disponibles</span>
+                        <div class="apps-toolbar">
+                            <label class="apps-search"><i data-lucide="search"></i><input id="appsFilterInput" type="search" placeholder="Buscar apps..."></label>
+                            <div class="custom-dropdown apps-status-filter" id="appsStatusFilter"><div class="dropdown-select"><span>Todas</span><i data-lucide="chevron-down"></i></div><div class="dropdown-options"><div class="dropdown-option selected" data-value="all">Todas</div><div class="dropdown-option" data-value="active">Activas</div><div class="dropdown-option" data-value="hidden">Ocultas</div></div></div>
+                        </div>
+                        <div class="apps-filter-summary" id="appsFilterSummary"></div>
+                        <div class="apps-visibility-list" id="appsVisibilityList"></div>
+                        <div class="custom-apps-list" id="customAppsList"></div>
+                    </div>
+                </div>
+
                 <div class="settings-tab-panel" data-panel="apariencia">
                     <div class="settings-section">
                         <span class="settings-section-title">Apariencia y rendimiento</span>
@@ -1154,11 +1241,23 @@ const frases = {
                         </div>
                         <div class="setting-item-row setting-range-row">
                             <div class="setting-item-meta"><i data-lucide="glass-water"></i><div><span class="setting-label">Transparencia del cristal</span><span class="setting-desc">Más transparente / más opaco</span></div></div>
-                            <label class="settings-range-control"><output id="glassOpacityValue">50%</output><input type="range" id="glassOpacityRange" min="10" max="90" value="50" step="5" aria-label="Transparencia del cristal"></label>
+                            <label class="settings-range-control"><output id="glassOpacityValue">50%</output><input type="range" id="glassOpacityRange" min="10" max="90" value="50" step="1" aria-label="Transparencia del cristal"></label>
                         </div>
                         <div class="setting-item-row">
                             <div class="setting-item-meta"><i data-lucide="droplet"></i><div><span class="setting-label">Desactivar Blur</span><span class="setting-desc">Mejora el rendimiento</span></div></div>
                             <div class="switch" id="toggleBlur"></div>
+                        </div>
+                        <div class="setting-item-row">
+                            <div class="setting-item-meta"><i data-lucide="gauge"></i><div><span class="setting-label">Modo super rendimiento</span><span class="setting-desc">Desactiva efectos, partículas y animaciones pesadas</span></div></div>
+                            <div class="switch" id="toggleSuperPerformance"></div>
+                        </div>
+                        <div class="performance-suggestion" id="performanceSuggestion" hidden>
+                            <div class="performance-suggestion-title"><i data-lucide="triangle-alert"></i><span>Homescreen detecta un rendimiento bajo</span></div>
+                            <p id="performanceSuggestionText"></p>
+                            <div class="performance-suggestion-actions">
+                                <button class="settings-action-btn" id="performanceBlurBtn" type="button">Desactivar Blur</button>
+                                <button class="settings-action-btn" id="performanceModeBtn" type="button">Activar super rendimiento</button>
+                            </div>
                         </div>
                         <span class="settings-section-title">Opciones avanzadas</span>
                         <div class="setting-item-row">
@@ -1287,6 +1386,7 @@ const frases = {
         });
 
         let settingsVersionClicks = 0;
+        let versionClicks = 0;
         let warningTimer = null;
         let draggedUrl = null;
         let isDraggingFromFavorites = false;
@@ -1308,6 +1408,14 @@ const frases = {
             draggedUrl = null;
             isDraggingFromFavorites = false;
         }
+
+        document.getElementById('versionTag').onclick = () => {
+            versionClicks++;
+            if (versionClicks === 5) {
+                versionClicks = 0;
+                openModal('hiddenFolderModal');
+            }
+        };
 
         /* --- CONTROL DEL RELOJ --- */
         let clockPressTimer = null;
@@ -1407,9 +1515,7 @@ const frases = {
 
         function getFavoriteApps() {
             const favUrls = getFavorites();
-            const allApps = [];
-            tools.forEach(f => f.apps.forEach(a => allApps.push(a)));
-            return allApps.filter(a => favUrls.includes(a.url));
+            return getVisibleApps(getAllAppEntries()).filter(a => favUrls.includes(a.url));
         }
 
         function openFavoritesFolder() { openFolder({ name: 'Favoritos', apps: getFavoriteApps() }); }
@@ -1419,22 +1525,32 @@ const frases = {
             const showRecent = localStorage.getItem('showRecentFolder') === 'true'; 
             
             let gridHTML = "";
+              let animationIndex = 0;
             activeGridIndex = -1; // Resetear índice de selección de cuadrícula principal
 
             if (showFavs) {
-                 gridHTML += `<div class="tool-card" onclick="playSound('click'); openFavoritesFolder()" style="animation-delay: 0s"><i data-lucide="star"></i><span>Favoritos</span></div>`;
+                  gridHTML += `<div class="tool-card" onclick="playSound('click'); openFavoritesFolder()" style="animation-delay:${animationIndex++ * 0.05}s"><i data-lucide="star"></i><span>Favoritos</span></div>`;
             }
             
             if (showRecent) {
-                 gridHTML += `<div class="tool-card" onclick='playSound("click"); openFolder({name: "Más usadas", apps: getTopApps(8)})' style="animation-delay: 0.02s"><i data-lucide="flame"></i><span>Más usadas</span></div>`;
+                  gridHTML += `<div class="tool-card" onclick='playSound("click"); openFolder({name: "Más usadas", apps: getTopApps(8)})' style="animation-delay:${animationIndex++ * 0.05}s"><i data-lucide="flame"></i><span>Más usadas</span></div>`;
             }
 
-            gridHTML += tools.map((t, i) => `
-                <div class="tool-card" onclick="playSound('click'); openFolder(tools[${i}])" style="animation-delay:${(i + (showFavs ? 1 : 0) + (showRecent ? 1 : 0)) * 0.05}s">
+            gridHTML += tools.map((t, i) => {
+                if (!getVisibleApps(getFolderApps(t)).length) return '';
+                const delay = animationIndex++ * 0.05;
+                return `
+                <div class="tool-card" onclick="playSound('click'); openFolder(tools[${i}])" style="animation-delay:${delay}s">
                     <i data-lucide="${t.icon}"></i>
                     <span>${t.name}</span>
                 </div>
-            `).join('');
+                `;
+            }).join('');
+            const customApps = getVisibleApps(getCustomApps()).filter(app => (app.folder || 'Apps añadidas') === 'Apps añadidas');
+            if (localStorage.getItem('showCustomApps') !== 'false' && customApps.length) {
+                const delay = animationIndex++ * 0.05;
+                gridHTML += `<div class="tool-card" onclick="playSound('click'); openFolder({name: 'Apps añadidas', apps: getVisibleApps(getCustomAppsFolder('Apps añadidas'))})" style="animation-delay:${delay}s"><i data-lucide="app-window"></i><span>Apps añadidas</span></div>`;
+            }
             grid.innerHTML = gridHTML;
             if(window.lucide) lucide.createIcons();
         }
@@ -1492,14 +1608,14 @@ const frases = {
 
             const isFavFolder = folder.name === 'Favoritos' || folder.name === 'Más usadas';
 
-            folderApps.innerHTML = folder.apps.map((app, index) => {
+                folderApps.innerHTML = getVisibleApps(folder.name === 'Apps añadidas' ? getCustomAppsFolder('Apps añadidas') : getFolderApps(folder)).map((app, index) => {
                 const favClass = isFavorite(app.url) ? 'active' : '';
                 return `
                     <a href="${app.url}" class="tool-card" draggable="true" 
                        onclick="handleAppClick(event, '${app.url}')"
                        ondragstart="handleAppDragStart(event, '${app.url}', ${isFavFolder})" 
                        ondragend="handleAppDragEnd(event)" data-url="${app.url}">
-                        <i data-lucide="${app.icon}"></i>
+                        ${appIconMarkup(app)}
                         <span>${app.name}</span>
                         <button class="star-btn ${favClass}" onclick="event.preventDefault(); event.stopPropagation(); toggleFavorite('${app.url}', this);">
                             <i data-lucide="star"></i>
@@ -1857,26 +1973,97 @@ const frases = {
             });
         }
 
+        function applySuperPerformanceMode(enabled) {
+            body.classList.toggle('super-performance', enabled);
+            const toggle = document.getElementById('toggleSuperPerformance');
+            const blurToggle = document.getElementById('toggleBlur');
+            const backgroundToggle = document.getElementById('toggleBg');
+            if (toggle) toggle.classList.toggle('on', enabled);
+            if (enabled) {
+                if (!localStorage.getItem('superPerformancePrevious')) {
+                    localStorage.setItem('superPerformancePrevious', JSON.stringify({
+                        noblur: localStorage.getItem('noblur') === 'true',
+                        bg: localStorage.getItem('bg') === 'true'
+                    }));
+                }
+                body.classList.add('no-blur');
+                if (blurToggle) blurToggle.classList.add('on');
+                if (backgroundToggle) backgroundToggle.classList.remove('on');
+                body.classList.remove('bg-active');
+                localStorage.setItem('noblur', 'true');
+                localStorage.setItem('bg', 'false');
+                cancelAnimationFrame(animationId);
+                if (ctx) ctx.clearRect(0, 0, canvas.width, canvas.height);
+            } else {
+                let previous = null;
+                try { previous = JSON.parse(localStorage.getItem('superPerformancePrevious')); } catch (error) {}
+                const restoreBlur = previous?.noblur === true;
+                const restoreBackground = previous?.bg === true;
+                body.classList.toggle('no-blur', restoreBlur);
+                body.classList.toggle('bg-active', restoreBackground);
+                if (blurToggle) blurToggle.classList.toggle('on', restoreBlur);
+                if (backgroundToggle) backgroundToggle.classList.toggle('on', restoreBackground);
+                localStorage.setItem('noblur', String(restoreBlur));
+                localStorage.setItem('bg', String(restoreBackground));
+                if (restoreBackground) initParticles();
+                localStorage.removeItem('superPerformancePrevious');
+            }
+            localStorage.setItem('superPerformance', String(enabled));
+        }
+
+        function showPerformanceSuggestion() {
+            const suggestion = document.getElementById('performanceSuggestion');
+            const text = document.getElementById('performanceSuggestionText');
+            if (!suggestion || localStorage.getItem('superPerformance') === 'true' || localStorage.getItem('performanceSuggestionDismissed') === 'true') return;
+            const blurEnabled = localStorage.getItem('noblur') !== 'true';
+            text.textContent = blurEnabled
+                ? 'Prueba primero Desactivar Blur. Si sigue yendo lento, activa el modo super rendimiento.'
+                : 'Prueba el modo super rendimiento para desactivar el resto de efectos costosos.';
+            suggestion.hidden = false;
+            suggestion.classList.add('visible');
+            if (window.lucide) lucide.createIcons();
+            showToast(blurEnabled ? 'Rendimiento bajo: prueba Desactivar Blur' : 'Rendimiento bajo: prueba super rendimiento', 'gauge');
+        }
+
+        function evaluatePerformance() {
+            const lowHardware = navigator.hardwareConcurrency <= 2 || navigator.deviceMemory <= 2;
+            let frames = 0;
+            let previous = performance.now();
+            let totalFrameTime = 0;
+            const sample = (now) => {
+                totalFrameTime += now - previous;
+                previous = now;
+                frames++;
+                if (frames < 24) requestAnimationFrame(sample);
+                else if (lowHardware || totalFrameTime / frames > 40) showPerformanceSuggestion();
+            };
+            requestAnimationFrame(sample);
+        }
+
         function applyFolderSize(value) {
             const size = Math.max(1, Math.min(5, Number(value) || 3));
+            const visualSize = Math.round(size);
             document.body.classList.remove('folder-size-1', 'folder-size-2', 'folder-size-3', 'folder-size-4', 'folder-size-5');
-            document.body.classList.add(`folder-size-${size}`);
+            document.body.classList.add(`folder-size-${visualSize}`);
             const range = document.getElementById('folderSizeRange');
             const output = document.getElementById('folderSizeValue');
             if (range) range.value = size;
-            if (output) output.value = size;
-            localStorage.setItem('folderSize', size);
+            if (output) output.value = visualSize;
+            if (range) range.style.setProperty('--range-progress', `${((size - 1) / 4) * 100}%`);
+            localStorage.setItem('folderSize', visualSize);
         }
 
         function applyFolderAppsSize(value) {
             const size = Math.max(1, Math.min(5, Number(value) || 3));
+            const visualSize = Math.round(size);
             document.body.classList.remove('folder-apps-size-1', 'folder-apps-size-2', 'folder-apps-size-3', 'folder-apps-size-4', 'folder-apps-size-5');
-            document.body.classList.add(`folder-apps-size-${size}`);
+            document.body.classList.add(`folder-apps-size-${visualSize}`);
             const range = document.getElementById('folderAppsSizeRange');
             const output = document.getElementById('folderAppsSizeValue');
             if (range) range.value = size;
-            if (output) output.value = size;
-            localStorage.setItem('folderAppsSize', size);
+            if (output) output.value = visualSize;
+            if (range) range.style.setProperty('--range-progress', `${((size - 1) / 4) * 100}%`);
+            localStorage.setItem('folderAppsSize', visualSize);
         }
 
         function applyGlassOpacity(value) {
@@ -1887,11 +2074,231 @@ const frases = {
             const output = document.getElementById('glassOpacityValue');
             if (range) range.value = opacity;
             if (output) output.textContent = `${opacity}%`;
+            if (range) range.style.setProperty('--range-progress', `${((opacity - 10) / 80) * 100}%`);
             localStorage.setItem('glassOpacity', opacity);
+        }
+
+        function bindSmoothSnapRange(id, applyValue, min, max) {
+            const range = document.getElementById(id);
+            if (!range) return;
+            let lastValue = Number(range.value);
+            let animationFrame = null;
+            range.addEventListener('input', event => {
+                lastValue = Number(event.target.value);
+                applyValue(lastValue);
+            });
+            const snap = event => {
+                if (animationFrame) cancelAnimationFrame(animationFrame);
+                const start = lastValue;
+                const target = Math.max(min, Math.min(max, Math.round(Number(event.target.value))));
+                const startedAt = performance.now();
+                const duration = 220;
+                const animate = now => {
+                    const progress = Math.min(1, (now - startedAt) / duration);
+                    const eased = 1 - Math.pow(1 - progress, 3);
+                    const value = start + (target - start) * eased;
+                    range.value = value;
+                    applyValue(value);
+                    if (progress < 1) animationFrame = requestAnimationFrame(animate);
+                    else { animationFrame = null; range.value = target; lastValue = target; applyValue(target); }
+                };
+                animationFrame = requestAnimationFrame(animate);
+            };
+            range.addEventListener('change', snap);
+            range.addEventListener('pointerup', snap);
+            range.addEventListener('touchend', snap, { passive: true });
         }
 
         function markSetupComplete(choice) {
             localStorage.setItem('homescreenSetupChoice', choice);
+        }
+
+        function escapeHtml(value) {
+            return String(value).replace(/[&<>'"]/g, character => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', "'": '&#39;', '"': '&quot;' }[character]));
+        }
+
+        function renderAppsSettings() {
+            const list = document.getElementById('appsVisibilityList');
+            if (!list) return;
+            const hiddenUrls = getHiddenAppUrls();
+            const query = (document.getElementById('appsFilterInput')?.value || '').trim().toLowerCase();
+            const status = getCustomDropdownValue('appsStatusFilter') || 'all';
+            const entries = getAllAppEntries().filter(app => {
+                const isHidden = hiddenUrls.has(app.url);
+                const matchesText = !query || `${app.name} ${app.source}`.toLowerCase().includes(query);
+                const matchesStatus = status === 'all' || (status === 'hidden' ? isHidden : !isHidden);
+                return matchesText && matchesStatus;
+            });
+            list.innerHTML = '';
+            entries.forEach(app => {
+                const row = document.createElement('div');
+                const isCustom = app.source === 'Apps añadidas';
+                const isHidden = hiddenUrls.has(app.url);
+                row.className = `app-visibility-row ${isHidden ? 'is-hidden' : 'is-active'} ${isCustom ? 'is-custom' : 'is-system'}`;
+                row.innerHTML = `${appIconMarkup(app)}<div class="app-visibility-meta"><strong>${escapeHtml(app.name)}</strong><small>${escapeHtml(app.folder || app.source)}</small></div><span class="app-status"><i data-lucide="${isHidden ? 'eye-off' : 'eye'}"></i>${isHidden ? 'Oculta' : 'Activa'}</span><button class="app-visibility-toggle" type="button" aria-pressed="${!isHidden}">${isHidden ? 'Mostrar' : 'Ocultar'}</button>${isCustom ? '<button class="app-edit-btn" type="button" title="Editar app" aria-label="Editar app"><i data-lucide="pencil"></i></button><button class="app-remove-btn" type="button" title="Eliminar app" aria-label="Eliminar app"><i data-lucide="trash-2"></i></button>' : ''}`;
+                row.querySelector('button').onclick = () => {
+                    const urls = getHiddenAppUrls();
+                    if (urls.has(app.url)) urls.delete(app.url); else urls.add(app.url);
+                    localStorage.setItem('hiddenAppUrls', JSON.stringify([...urls]));
+                    renderAppsSettings();
+                    renderMainGrid();
+                    buildPersistentSearchDOM();
+                    renderDock();
+                };
+                if (isCustom) {
+                    row.querySelector('.app-edit-btn').onclick = () => openCustomAppEditor(app);
+                    row.querySelector('.app-remove-btn').onclick = () => {
+                        if (!confirm(`¿Eliminar "${app.name}"?`)) return;
+                        localStorage.setItem('customApps', JSON.stringify(getCustomApps().filter(item => item.id !== app.id)));
+                        renderAppsSettings(); renderMainGrid(); buildPersistentSearchDOM(); renderDock();
+                    };
+                }
+                list.appendChild(row);
+            });
+            const summary = document.getElementById('appsFilterSummary');
+            if (summary) summary.textContent = `${entries.length} app${entries.length === 1 ? '' : 's'} · ${entries.filter(app => !hiddenUrls.has(app.url)).length} activas`;
+            if (window.lucide) lucide.createIcons();
+        }
+
+        function getCustomDropdownValue(id) {
+            return document.getElementById(id)?.dataset.value || '';
+        }
+
+        function setCustomDropdownValue(id, value) {
+            const dropdown = document.getElementById(id);
+            if (!dropdown) return;
+            const option = dropdown.querySelector(`.dropdown-option[data-value="${CSS.escape(value)}"]`) || dropdown.querySelector('.dropdown-option');
+            dropdown.dataset.value = option?.dataset.value || value;
+            const label = dropdown.querySelector('.dropdown-select span');
+            if (label) label.textContent = option?.textContent || value;
+            dropdown.querySelectorAll('.dropdown-option').forEach(item => item.classList.toggle('selected', item === option));
+        }
+
+        function initAppDropdown(id, onChange) {
+            const dropdown = document.getElementById(id);
+            if (!dropdown) return;
+            if (dropdown.dataset.selectBound !== 'true') {
+                dropdown.dataset.selectBound = 'true';
+                dropdown.querySelector('.dropdown-select')?.addEventListener('click', event => {
+                    event.stopPropagation();
+                    document.querySelectorAll('.custom-dropdown.active').forEach(item => { if (item !== dropdown) item.classList.remove('active'); });
+                    dropdown.classList.toggle('active');
+                });
+            }
+            dropdown.querySelectorAll('.dropdown-option').forEach(option => {
+                option.onclick = event => {
+                event.stopPropagation();
+                setCustomDropdownValue(id, option.dataset.value);
+                dropdown.classList.remove('active');
+                onChange?.(option.dataset.value);
+                };
+            });
+            if (dropdown.dataset.documentBound !== 'true') {
+                dropdown.dataset.documentBound = 'true';
+                document.addEventListener('click', event => {
+                    if (!dropdown.contains(event.target)) dropdown.classList.remove('active');
+                });
+            }
+        }
+
+        function populateAppFolderSelect(dropdown, value = 'Apps añadidas') {
+            if (!dropdown) return;
+            dropdown.querySelector('.dropdown-options').innerHTML = ['Apps añadidas', ...tools.map(folder => folder.name)].map(folder => `<div class="dropdown-option" data-value="${escapeHtml(folder)}">${escapeHtml(folder)}</div>`).join('');
+            initAppDropdown(dropdown.id);
+            setCustomDropdownValue(dropdown.id, value);
+        }
+
+        function getFormApp(typePrefix = 'custom') {
+            const id = typePrefix === 'edit' ? 'edit' : 'custom';
+            return {
+                name: document.getElementById(`${id}AppName`).value.trim(),
+                url: document.getElementById(`${id}AppUrl`).value.trim(),
+                folder: document.getElementById(`${id}AppFolder`).value,
+                iconType: getCustomDropdownValue(`${id}AppIconType`),
+                icon: document.getElementById(`${id}AppIcon`).value.trim() || 'link',
+                svgPath: document.getElementById(`${id}AppSvgPath`).value.trim()
+            };
+        }
+
+        function renderAppPreview(app, targetId) {
+            const target = document.getElementById(targetId);
+            if (!target) return;
+            target.innerHTML = `${appIconMarkup(app)}<span>${escapeHtml(app.name || 'Mi herramienta')}</span>`;
+            if (window.lucide) lucide.createIcons();
+        }
+
+        function bindIconFields(prefix) {
+            const id = prefix === 'edit' ? 'edit' : 'custom';
+            const type = document.getElementById(`${id}AppIconType`);
+            const lucideField = document.getElementById(`${id}LucideField`);
+            const svgField = document.getElementById(`${id}SvgField`);
+            const uploadField = document.getElementById(`${id}UploadField`);
+            const update = () => {
+                const iconType = getCustomDropdownValue(`${id}AppIconType`) || 'lucide';
+                lucideField.hidden = iconType !== 'lucide';
+                svgField.hidden = iconType !== 'svg';
+                uploadField.hidden = iconType !== 'upload';
+                renderAppPreview(getFormApp(prefix), id === 'edit' ? 'editAppPreviewCard' : 'customAppPreviewCard');
+            };
+            initAppDropdown(`${id}AppIconType`, update);
+            if (!getCustomDropdownValue(`${id}AppIconType`)) setCustomDropdownValue(`${id}AppIconType`, 'lucide');
+            [`${id}AppName`, `${id}AppUrl`, `${id}AppIcon`, `${id}AppSvgPath`].forEach(fieldId => document.getElementById(fieldId)?.addEventListener('input', () => renderAppPreview(getFormApp(prefix), id === 'edit' ? 'editAppPreviewCard' : 'customAppPreviewCard')));
+            update();
+        }
+
+        function openCustomAppEditor(app) {
+            document.getElementById('editAppName').value = app.name;
+            document.getElementById('editAppUrl').value = app.url;
+            document.getElementById('editAppIcon').value = app.icon || 'link';
+            document.getElementById('editAppSvgPath').value = app.svgPath || '';
+            setCustomDropdownValue('editAppIconType', app.iconType || 'lucide');
+            document.getElementById('editAppIconFile').value = '';
+            populateAppFolderSelect(document.getElementById('editAppFolder'), app.folder || 'Apps añadidas');
+            bindIconFields('edit');
+            document.getElementById('saveAppEditBtn').onclick = () => {
+                const values = getFormApp('edit');
+                if (!values.name || !values.url) { showToast('Completa el nombre y el enlace', 'alert-circle'); return; }
+                const finish = (iconData = app.iconData || '') => {
+                    const updated = getCustomApps().map(item => item.id === app.id ? { ...item, ...values, iconData } : item);
+                    localStorage.setItem('customApps', JSON.stringify(updated));
+                    closeModal('appEditorModal'); renderAppsSettings(); renderMainGrid(); buildPersistentSearchDOM(); renderDock();
+                };
+                const file = document.getElementById('editAppIconFile').files[0];
+                if (values.iconType === 'upload' && file) { const reader = new FileReader(); reader.onload = event => finish(event.target.result); reader.readAsDataURL(file); } else finish();
+            };
+            openModal('appEditorModal');
+        }
+
+        function setupCustomAppForm() {
+            populateAppFolderSelect(document.getElementById('customAppFolder'));
+            bindIconFields('custom');
+            document.getElementById('appsFilterInput')?.addEventListener('input', renderAppsSettings);
+            initAppDropdown('appsStatusFilter', renderAppsSettings);
+            if (!getCustomDropdownValue('appsStatusFilter')) setCustomDropdownValue('appsStatusFilter', 'all');
+
+            document.getElementById('addCustomAppBtn')?.addEventListener('click', () => {
+                const values = getFormApp();
+                const iconType = values.iconType;
+                if (!values.name || !values.url) { showToast('Completa el nombre y el enlace', 'alert-circle'); return; }
+                const saveApp = (iconData = '') => {
+                    const app = { id: `custom-${Date.now()}`, ...values, iconData };
+                    const apps = getCustomApps();
+                    apps.push(app);
+                    localStorage.setItem('customApps', JSON.stringify(apps));
+                    document.getElementById('customAppName').value = '';
+                    document.getElementById('customAppUrl').value = '';
+                    document.getElementById('customAppIconFile').value = '';
+                    renderAppsSettings(); renderMainGrid(); buildPersistentSearchDOM(); renderDock();
+                    showToast('App añadida', 'check');
+                };
+                if (iconType === 'upload') {
+                    const file = document.getElementById('customAppIconFile').files[0];
+                    if (!file) { showToast('Selecciona un SVG o PNG', 'upload'); return; }
+                    const reader = new FileReader();
+                    reader.onload = event => saveApp(event.target.result);
+                    reader.readAsDataURL(file);
+                } else saveApp();
+            });
         }
 
         /* --- INICIALIZADOR DE INTERFAZ (INIT) --- */
@@ -1900,6 +2307,8 @@ const frases = {
             updateWelcomeMessage();
             if(window.hasHubError) return;
             renderMainGrid();
+            renderAppsSettings();
+            setupCustomAppForm();
             
             // Configurar Nombre de Usuario desde Ajustes
             const usernameInput = document.getElementById('usernameInput');
@@ -1929,12 +2338,9 @@ const frases = {
             applyFolderSize(localStorage.getItem('folderSize') || 3);
             applyFolderAppsSize(localStorage.getItem('folderAppsSize') || 3);
             applyGlassOpacity(localStorage.getItem('glassOpacity') || 50);
-            const folderSizeRange = document.getElementById('folderSizeRange');
-            const folderAppsSizeRange = document.getElementById('folderAppsSizeRange');
-            const glassOpacityRange = document.getElementById('glassOpacityRange');
-            if (folderSizeRange) folderSizeRange.addEventListener('input', (e) => applyFolderSize(e.target.value));
-            if (folderAppsSizeRange) folderAppsSizeRange.addEventListener('input', (e) => applyFolderAppsSize(e.target.value));
-            if (glassOpacityRange) glassOpacityRange.addEventListener('input', (e) => applyGlassOpacity(e.target.value));
+            bindSmoothSnapRange('folderSizeRange', applyFolderSize, 1, 5);
+            bindSmoothSnapRange('folderAppsSizeRange', applyFolderAppsSize, 1, 5);
+            bindSmoothSnapRange('glassOpacityRange', applyGlassOpacity, 10, 90);
             setupToggle('toggleFolderLabels', 'hideFolderLabels', (isHidden) => {
                 body.classList.toggle('hide-folder-labels', isHidden);
             }, 'false');
@@ -1942,9 +2348,34 @@ const frases = {
             setupToggle('toggleFavFolder', 'showFavFolder', renderMainGrid, 'true');
             setupToggle('toggleRecentFolder', 'showRecentFolder', renderMainGrid, 'false');
             setupToggle('toggleDock', 'showDock', renderDock, 'false');
+            setupToggle('toggleCustomApps', 'showCustomApps', renderMainGrid, 'true');
             setupToggle('toggleSounds', 'sounds', null, 'false');
             setupToggle('toggleHaptics', 'haptics', null, 'false');
             setupToggle('toggleHideWelcome', 'hideWelcome', () => updateWelcomeMessage(), 'false');
+            const superPerformanceEnabled = localStorage.getItem('superPerformance') === 'true';
+            if (superPerformanceEnabled) applySuperPerformanceMode(true);
+            const superPerformanceToggle = document.getElementById('toggleSuperPerformance');
+            if (superPerformanceToggle) {
+                superPerformanceToggle.onclick = () => {
+                    playSound('click'); triggerHaptic();
+                    applySuperPerformanceMode(!body.classList.contains('super-performance'));
+                };
+            }
+            document.getElementById('performanceBlurBtn')?.addEventListener('click', () => {
+                playSound('click');
+                body.classList.add('no-blur');
+                const blurToggle = document.getElementById('toggleBlur');
+                if (blurToggle) blurToggle.classList.add('on');
+                localStorage.setItem('noblur', 'true');
+                localStorage.setItem('performanceSuggestionDismissed', 'true');
+                document.getElementById('performanceSuggestion').hidden = true;
+                showToast('Blur desactivado', 'droplet');
+            });
+            document.getElementById('performanceModeBtn')?.addEventListener('click', () => {
+                playSound('click');
+                applySuperPerformanceMode(true);
+                document.getElementById('performanceSuggestion').hidden = true;
+            });
             setupToggle('toggleFolderCloseBtn', 'hideFolderCloseBtn', (act) => {
                 body.classList.toggle('hide-folder-close-btn', act);
             }, 'false');
@@ -2069,9 +2500,11 @@ const frases = {
                 appUsageStats: '{}',
                 showDock: 'false',
                 showRecentFolder: 'false',
+                showCustomApps: 'true',
                 showBattery: 'false',
                 sounds: 'false',
                 haptics: 'false',
+                superPerformance: 'false',
                 hideWelcome: 'false',
                 welcomeAnimation: 'blur',
                 folderAnimation: 'slide',
@@ -2332,6 +2765,7 @@ const frases = {
                 };
             }
             if(sDarkBg) sDarkBg.onclick = () => { playSound('click'); triggerHaptic(); const act = sDarkBg.classList.toggle('on'); localStorage.setItem('darkbg', act); setBgColor(act); };
+            setTimeout(evaluatePerformance, 2500);
         }
 
         window.onload = init;

@@ -1,0 +1,1463 @@
+<!DOCTYPE html>
+<html lang="es" class="dark">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Homescreen</title>
+    <link rel="manifest" href="data:application/manifest+json,%7B%22name%22%3A%22Homescreen%22%2C%22short_name%22%3A%22Homescreen%22%2C%22start_url%22%3A%22.%2F%22%2C%22display%22%3A%22standalone%22%2C%22background_color%22%3A%22%23121212%22%2C%22theme_color%22%3A%22%23121212%22%7D">
+    <meta name="theme-color" content="#121212">
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Material+Symbols+Rounded:opsz,wght,FILL,GRAD@24,400,0,0" />
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --md-sys-color-background: #121212;
+            --md-sys-color-on-background: #E6E1E5;
+            --md-sys-color-surface: #1C1B1F;
+            --md-sys-color-surface-variant: #49454F;
+            --md-sys-color-on-surface: #E6E1E5;
+            --md-sys-color-on-surface-variant: #CAC4D0;
+            --md-sys-color-primary: #D0BCFF;
+            --md-sys-color-on-primary: #381E72;
+            --md-sys-color-primary-container: #4F378B;
+            --md-sys-color-on-primary-container: #EADDFF;
+            --md-sys-color-secondary-container: #4A4458;
+            --md-sys-color-on-secondary-container: #E8DEF8;
+            --md-sys-color-outline: #938F99;
+            --md-sys-color-outline-variant: #49454F;
+            --md-sys-color-error: #F2B8B5;
+            --md-sys-color-error-container: #8C1D18;
+            
+            --border-radius-sm: 8px;
+            --border-radius-md: 12px;
+            --border-radius-lg: 16px;
+            --border-radius-full: 9999px;
+            --sidebar-width: 260px;
+            --detail-width: 320px;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            font-family: 'Inter', system-ui, -apple-system, sans-serif;
+            background-color: var(--md-sys-color-background);
+            color: var(--md-sys-color-on-background);
+            display: flex;
+            height: 100vh;
+            overflow: hidden;
+            -webkit-font-smoothing: antialiased;
+        }
+
+        button {
+            font-family: inherit;
+            cursor: pointer;
+            border: none;
+            background: none;
+            color: inherit;
+            transition: all 0.2s ease;
+        }
+
+        input { font-family: inherit; }
+
+        #app-layout {
+            display: flex;
+            width: 100%;
+            height: 100%;
+        }
+
+        #sidebar {
+            width: var(--sidebar-width);
+            background-color: var(--md-sys-color-surface);
+            display: flex;
+            flex-direction: column;
+            border-right: 1px solid var(--md-sys-color-outline-variant);
+            padding: 16px;
+            flex-shrink: 0;
+        }
+
+        .sidebar-header {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            padding: 12px;
+            margin-bottom: 24px;
+        }
+
+        .logo-icon {
+            color: var(--md-sys-color-primary);
+            font-size: 28px;
+        }
+
+        .logo-text {
+            font-size: 1.25rem;
+            font-weight: 600;
+            letter-spacing: -0.5px;
+        }
+
+        .nav-group {
+            display: flex;
+            flex-direction: column;
+            gap: 4px;
+            margin-bottom: 24px;
+        }
+
+        .nav-item {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            padding: 12px 16px;
+            border-radius: var(--border-radius-full);
+            color: var(--md-sys-color-on-surface-variant);
+            font-weight: 500;
+        }
+
+        .nav-item:hover {
+            background-color: rgba(230, 225, 229, 0.08);
+            color: var(--md-sys-color-on-surface);
+        }
+
+        .nav-item.active {
+            background-color: var(--md-sys-color-secondary-container);
+            color: var(--md-sys-color-on-secondary-container);
+        }
+
+        .projects-section {
+            flex: 1;
+            overflow-y: auto;
+        }
+
+        .section-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 0 16px 8px;
+            font-size: 0.85rem;
+            font-weight: 600;
+            color: var(--md-sys-color-outline);
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .icon-btn {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            width: 32px;
+            height: 32px;
+            border-radius: 50%;
+            color: var(--md-sys-color-on-surface-variant);
+        }
+
+        .icon-btn:hover {
+            background-color: rgba(230, 225, 229, 0.08);
+            color: var(--md-sys-color-on-surface);
+        }
+
+        #main-content {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .main-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 24px 32px;
+            height: 80px;
+            flex-shrink: 0;
+        }
+
+        .main-header h1 {
+            font-size: 1.75rem;
+            font-weight: 600;
+            letter-spacing: -0.5px;
+        }
+
+        .header-actions {
+            display: flex;
+            align-items: center;
+            gap: 16px;
+        }
+
+        .search-bar {
+            display: flex;
+            align-items: center;
+            background-color: var(--md-sys-color-surface);
+            border: 1px solid var(--md-sys-color-outline-variant);
+            border-radius: var(--border-radius-full);
+            padding: 8px 16px;
+            gap: 8px;
+            width: 300px;
+        }
+
+        .search-bar.hidden { display: none; }
+
+        .search-bar input {
+            background: transparent;
+            border: none;
+            color: var(--md-sys-color-on-surface);
+            outline: none;
+            width: 100%;
+        }
+
+        .grid-container {
+            flex: 1;
+            padding: 0 32px 32px;
+            overflow-y: auto;
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
+            grid-auto-rows: min-content;
+            gap: 16px;
+            align-items: start;
+        }
+
+        .item-card {
+            background-color: var(--md-sys-color-surface);
+            border: 1px solid var(--md-sys-color-outline-variant);
+            border-radius: var(--border-radius-md);
+            overflow: hidden;
+            cursor: pointer;
+            transition: transform 0.2s, box-shadow 0.2s, border-color 0.2s;
+            display: flex;
+            flex-direction: column;
+            position: relative;
+        }
+
+        .item-card:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(0,0,0,0.2);
+            border-color: var(--md-sys-color-outline);
+        }
+
+        .item-card.selected {
+            border-color: var(--md-sys-color-primary);
+            background-color: rgba(208, 188, 255, 0.05);
+        }
+
+        .card-content {
+            padding: 16px;
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+            flex: 1;
+        }
+
+        .card-header {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            color: var(--md-sys-color-outline);
+            font-size: 0.85rem;
+        }
+
+        .card-header .material-symbols-rounded { font-size: 18px; }
+
+        .card-text {
+            font-size: 0.95rem;
+            line-height: 1.5;
+            color: var(--md-sys-color-on-surface);
+            display: -webkit-box;
+            -webkit-line-clamp: 6;
+            -webkit-box-orient: vertical;
+            overflow: hidden;
+            word-break: break-word;
+        }
+
+        .card-url-title {
+            font-weight: 500;
+            color: var(--md-sys-color-primary);
+            word-break: break-word;
+        }
+        .card-url-link {
+            font-size: 0.85rem;
+            color: var(--md-sys-color-on-surface-variant);
+            text-overflow: ellipsis;
+            overflow: hidden;
+            white-space: nowrap;
+        }
+
+        .card-img-preview {
+            width: 100%;
+            max-height: 200px;
+            object-fit: cover;
+            background-color: #000;
+        }
+
+        .card-file-name {
+            font-weight: 500;
+            word-break: break-word;
+        }
+        .card-file-meta {
+            font-size: 0.8rem;
+            color: var(--md-sys-color-outline);
+        }
+
+        #empty-state {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            text-align: center;
+            color: var(--md-sys-color-outline);
+        }
+
+        #empty-state .empty-icon {
+            font-size: 64px;
+            margin-bottom: 16px;
+            opacity: 0.5;
+        }
+
+        #detail-panel {
+            width: var(--detail-width);
+            background-color: var(--md-sys-color-surface);
+            border-left: 1px solid var(--md-sys-color-outline-variant);
+            display: flex;
+            flex-direction: column;
+            flex-shrink: 0;
+            transition: transform 0.3s ease;
+        }
+
+        #detail-panel.hidden { display: none; }
+
+        .detail-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 16px 24px;
+            border-bottom: 1px solid var(--md-sys-color-outline-variant);
+        }
+
+        .detail-body {
+            flex: 1;
+            overflow-y: auto;
+            padding: 24px;
+            display: flex;
+            flex-direction: column;
+            gap: 16px;
+        }
+
+        .detail-actions {
+            padding: 16px 24px;
+            border-top: 1px solid var(--md-sys-color-outline-variant);
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+        }
+
+        .action-btn {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            padding: 12px 16px;
+            border-radius: var(--border-radius-sm);
+            font-weight: 500;
+            background-color: var(--md-sys-color-surface-variant);
+            color: var(--md-sys-color-on-surface-variant);
+        }
+        .action-btn:hover {
+            background-color: rgba(230,225,229,0.12);
+            color: var(--md-sys-color-on-surface);
+        }
+        .action-btn.danger {
+            color: var(--md-sys-color-error);
+            background-color: rgba(242,184,181,0.1);
+        }
+        .action-btn.danger:hover {
+            background-color: var(--md-sys-color-error-container);
+            color: #fff;
+        }
+
+        .detail-img {
+            width: 100%;
+            border-radius: var(--border-radius-sm);
+            background-color: #000;
+        }
+        .detail-text {
+            font-size: 0.95rem;
+            line-height: 1.6;
+            white-space: pre-wrap;
+            word-break: break-word;
+        }
+        .detail-meta-group {
+            display: flex;
+            flex-direction: column;
+            gap: 4px;
+        }
+        .detail-meta-label {
+            font-size: 0.8rem;
+            color: var(--md-sys-color-outline);
+        }
+        .detail-meta-value {
+            font-size: 0.95rem;
+            word-break: break-word;
+        }
+
+        #drop-zone-overlay {
+            position: absolute;
+            top: 0; left: 0; right: 0; bottom: 0;
+            background-color: rgba(28, 27, 31, 0.9);
+            z-index: 100;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border: 4px dashed var(--md-sys-color-primary);
+            border-radius: var(--border-radius-lg);
+            margin: 16px;
+        }
+        #drop-zone-overlay.hidden { display: none; }
+        .drop-zone-content {
+            text-align: center;
+            color: var(--md-sys-color-primary);
+        }
+        .drop-zone-content .material-symbols-rounded {
+            font-size: 64px;
+            margin-bottom: 16px;
+        }
+
+        #modal-backdrop {
+            position: fixed;
+            top: 0; left: 0; right: 0; bottom: 0;
+            background-color: rgba(0,0,0,0.5);
+            backdrop-filter: blur(4px);
+            z-index: 200;
+        }
+        .modal {
+            position: fixed;
+            top: 50%; left: 50%;
+            transform: translate(-50%, -50%);
+            background-color: var(--md-sys-color-surface);
+            border: 1px solid var(--md-sys-color-outline-variant);
+            border-radius: var(--border-radius-lg);
+            padding: 24px;
+            width: 90%;
+            max-width: 400px;
+            z-index: 201;
+            box-shadow: 0 24px 38px rgba(0,0,0,0.4);
+        }
+        .modal.hidden, #modal-backdrop.hidden { display: none; }
+        .modal h3 { margin-bottom: 16px; font-weight: 500; }
+        .modal input[type="text"] {
+            width: 100%;
+            background-color: var(--md-sys-color-surface-variant);
+            border: none;
+            border-radius: var(--border-radius-sm);
+            padding: 12px 16px;
+            color: var(--md-sys-color-on-surface);
+            font-size: 1rem;
+            margin-bottom: 24px;
+            outline: none;
+        }
+        .modal input[type="text"]:focus {
+            border-bottom: 2px solid var(--md-sys-color-primary);
+            border-bottom-left-radius: 0;
+            border-bottom-right-radius: 0;
+        }
+        .modal-actions {
+            display: flex;
+            justify-content: flex-end;
+            gap: 8px;
+        }
+
+        .text-btn {
+            padding: 10px 16px;
+            border-radius: var(--border-radius-full);
+            color: var(--md-sys-color-primary);
+            font-weight: 500;
+        }
+        .text-btn:hover { background-color: rgba(208, 188, 255, 0.08); }
+
+        .filled-btn {
+            padding: 10px 24px;
+            border-radius: var(--border-radius-full);
+            background-color: var(--md-sys-color-primary);
+            color: var(--md-sys-color-on-primary);
+            font-weight: 500;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        .filled-btn:hover { opacity: 0.9; }
+        .filled-btn.tonal {
+            background-color: var(--md-sys-color-secondary-container);
+            color: var(--md-sys-color-on-secondary-container);
+        }
+
+        .list-selection {
+            max-height: 250px;
+            overflow-y: auto;
+            margin-bottom: 16px;
+            display: flex;
+            flex-direction: column;
+            gap: 4px;
+        }
+        .list-item {
+            padding: 12px;
+            border-radius: var(--border-radius-sm);
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+        .list-item:hover { background-color: var(--md-sys-color-surface-variant); }
+
+        .settings-options {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+            margin-bottom: 24px;
+        }
+
+        #toast-container {
+            position: fixed;
+            bottom: 24px;
+            left: 50%;
+            transform: translateX(-50%);
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+            z-index: 1000;
+        }
+        .toast {
+            background-color: var(--md-sys-color-on-surface);
+            color: var(--md-sys-color-surface);
+            padding: 12px 24px;
+            border-radius: var(--border-radius-sm);
+            font-size: 0.9rem;
+            font-weight: 500;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.2);
+            animation: slideUp 0.3s ease forwards, fadeOut 0.3s ease 2.7s forwards;
+        }
+
+        @keyframes slideUp {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        @keyframes fadeOut {
+            from { opacity: 1; }
+            to { opacity: 0; }
+        }
+
+        @media (max-width: 768px) {
+            #app-layout { flex-direction: column; }
+            #sidebar {
+                width: 100%;
+                height: auto;
+                border-right: none;
+                border-bottom: 1px solid var(--md-sys-color-outline-variant);
+                padding: 8px 16px;
+                order: 2;
+            }
+            .sidebar-header, .projects-section .section-header, .sidebar-footer { display: none; }
+            .nav-group {
+                flex-direction: row;
+                justify-content: space-around;
+                margin-bottom: 0;
+            }
+            .nav-item { flex-direction: column; gap: 4px; padding: 8px; border-radius: 8px; }
+            .nav-label { font-size: 0.75rem; }
+            #projects-list { display: none; }
+            
+            #main-content { order: 1; }
+            .main-header { padding: 16px; height: 64px; }
+            .main-header h1 { font-size: 1.25rem; }
+            .grid-container { padding: 0 16px 16px; grid-template-columns: 1fr; }
+            
+            #detail-panel {
+                position: fixed;
+                top: 0; left: 0; right: 0; bottom: 0;
+                width: 100%;
+                z-index: 300;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div id="app-layout">
+        <!-- Sidebar Navigation -->
+        <nav id="sidebar">
+            <div class="sidebar-header">
+                <span class="material-symbols-rounded logo-icon">home</span>
+                <span class="logo-text">Homescreen</span>
+            </div>
+            
+            <div class="nav-group">
+                <button class="nav-item active" data-view="inbox" data-project-id="null">
+                    <span class="material-symbols-rounded">inbox</span>
+                    <span class="nav-label">Inbox</span>
+                </button>
+                <button class="nav-item" data-view="search">
+                    <span class="material-symbols-rounded">search</span>
+                    <span class="nav-label">Buscar</span>
+                </button>
+            </div>
+
+            <div class="projects-section">
+                <div class="section-header">
+                    <span>Proyectos</span>
+                    <button class="icon-btn" id="btn-new-project" title="Nuevo Proyecto">
+                        <span class="material-symbols-rounded">add</span>
+                    </button>
+                </div>
+                <div id="projects-list" class="nav-group"></div>
+            </div>
+
+            <div class="sidebar-footer">
+                <button class="nav-item" id="btn-settings" title="Ajustes / Respaldo">
+                    <span class="material-symbols-rounded">settings</span>
+                    <span class="nav-label">Ajustes</span>
+                </button>
+            </div>
+        </nav>
+
+        <!-- Main Content Area -->
+        <main id="main-content">
+            <header class="main-header">
+                <h1 id="current-view-title">Inbox</h1>
+                <div class="header-actions">
+                    <div class="search-bar hidden" id="search-container">
+                        <span class="material-symbols-rounded">search</span>
+                        <input type="text" id="search-input" placeholder="Buscar contenido...">
+                    </div>
+                </div>
+            </header>
+
+            <div id="drop-zone-overlay" class="hidden">
+                <div class="drop-zone-content">
+                    <span class="material-symbols-rounded">download</span>
+                    <h2>Suelta para guardar en <span id="drop-target-name">Inbox</span></h2>
+                </div>
+            </div>
+
+            <div id="items-grid" class="grid-container"></div>
+            
+            <div id="empty-state" class="hidden">
+                <span class="material-symbols-rounded empty-icon">inventory_2</span>
+                <p>No hay elementos aquí.</p>
+                <small>Usa Ctrl+V para pegar contenido desde el portapapeles.</small>
+            </div>
+        </main>
+
+        <!-- Detail Panel -->
+        <aside id="detail-panel" class="hidden">
+            <header class="detail-header">
+                <h2>Detalle</h2>
+                <button class="icon-btn" id="btn-close-detail">
+                    <span class="material-symbols-rounded">close</span>
+                </button>
+            </header>
+            <div id="detail-content" class="detail-body"></div>
+            <div class="detail-actions">
+                <button class="action-btn" id="btn-detail-copy">
+                    <span class="material-symbols-rounded">content_copy</span> Copiar
+                </button>
+                <button class="action-btn" id="btn-detail-move">
+                    <span class="material-symbols-rounded">move_item</span> Mover
+                </button>
+                <button class="action-btn" id="btn-detail-download">
+                    <span class="material-symbols-rounded">download</span> Descargar
+                </button>
+                <button class="action-btn danger" id="btn-detail-delete">
+                    <span class="material-symbols-rounded">delete</span> Eliminar
+                </button>
+            </div>
+        </aside>
+    </div>
+
+    <!-- Modals -->
+    <div id="modal-backdrop" class="hidden"></div>
+    
+    <div id="modal-project" class="modal hidden">
+        <h3 id="modal-project-title">Nuevo Proyecto</h3>
+        <input type="text" id="input-project-name" placeholder="Nombre del proyecto" autocomplete="off">
+        <div class="modal-actions">
+            <button class="text-btn" id="btn-cancel-project">Cancelar</button>
+            <button class="filled-btn" id="btn-save-project">Guardar</button>
+        </div>
+    </div>
+
+    <div id="modal-move" class="modal hidden">
+        <h3>Mover a...</h3>
+        <div id="move-project-list" class="list-selection"></div>
+        <div class="modal-actions">
+            <button class="text-btn" id="btn-cancel-move">Cancelar</button>
+        </div>
+    </div>
+
+    <div id="modal-settings" class="modal hidden">
+        <h3>Ajustes y Respaldo</h3>
+        <div class="settings-options">
+            <button class="filled-btn" id="btn-export-data">
+                <span class="material-symbols-rounded">download</span> Exportar Datos
+            </button>
+            <button class="filled-btn tonal" id="btn-import-data">
+                <span class="material-symbols-rounded">upload</span> Importar Datos
+            </button>
+            <input type="file" id="input-import-file" accept=".json" class="hidden">
+        </div>
+        <div class="modal-actions">
+            <button class="text-btn" id="btn-close-settings">Cerrar</button>
+        </div>
+    </div>
+
+    <div id="toast-container"></div>
+
+    <script>
+        // IndexedDB Module
+        const DB_NAME = 'HomescreenDB';
+        const DB_VERSION = 1;
+
+        class Database {
+            constructor() { this.db = null; }
+
+            async init() {
+                return new Promise((resolve, reject) => {
+                    const request = indexedDB.open(DB_NAME, DB_VERSION);
+                    request.onerror = () => reject(request.error);
+                    request.onsuccess = () => { this.db = request.result; resolve(); };
+                    request.onupgradeneeded = (event) => {
+                        const db = event.target.result;
+                        if (!db.objectStoreNames.contains('projects')) {
+                            db.createObjectStore('projects', { keyPath: 'id' });
+                        }
+                        if (!db.objectStoreNames.contains('items')) {
+                            const itemStore = db.createObjectStore('items', { keyPath: 'id' });
+                            itemStore.createIndex('projectId', 'projectId', { unique: false });
+                            itemStore.createIndex('createdAt', 'createdAt', { unique: false });
+                            itemStore.createIndex('type', 'type', { unique: false });
+                        }
+                    };
+                });
+            }
+
+            async saveProject(project) { return this._write('projects', project); }
+            async getProjects() { return this._getAll('projects'); }
+            async deleteProject(id) { return this._delete('projects', id); }
+            async saveItem(item) { return this._write('items', item); }
+
+            async getItemsByProject(projectId) {
+                return new Promise((resolve, reject) => {
+                    const transaction = this.db.transaction('items', 'readonly');
+                    const store = transaction.objectStore('items');
+                    const index = store.index('projectId');
+                    const request = index.getAll(projectId);
+                    request.onsuccess = () => {
+                        const items = request.result.sort((a, b) => b.createdAt - a.createdAt);
+                        resolve(items);
+                    };
+                    request.onerror = () => reject(request.error);
+                });
+            }
+            
+            async getAllItems() {
+                return new Promise((resolve, reject) => {
+                    const transaction = this.db.transaction('items', 'readonly');
+                    const store = transaction.objectStore('items');
+                    const request = store.getAll();
+                    request.onsuccess = () => resolve(request.result.sort((a, b) => b.createdAt - a.createdAt));
+                    request.onerror = () => reject(request.error);
+                });
+            }
+
+            async deleteItem(id) { return this._delete('items', id); }
+
+            async updateItemContext(id, newProjectId) {
+                return new Promise((resolve, reject) => {
+                    const transaction = this.db.transaction('items', 'readwrite');
+                    const store = transaction.objectStore('items');
+                    const getRequest = store.get(id);
+                    getRequest.onsuccess = () => {
+                        const data = getRequest.result;
+                        if (data) {
+                            data.projectId = newProjectId;
+                            data.updatedAt = Date.now();
+                            store.put(data);
+                            resolve();
+                        } else {
+                            reject(new Error("Item not found"));
+                        }
+                    };
+                    getRequest.onerror = () => reject(getRequest.error);
+                });
+            }
+
+            _write(storeName, data) {
+                return new Promise((resolve, reject) => {
+                    const transaction = this.db.transaction(storeName, 'readwrite');
+                    const store = transaction.objectStore(storeName);
+                    const request = store.put(data);
+                    request.onsuccess = () => resolve();
+                    request.onerror = () => reject(request.error);
+                });
+            }
+
+            _getAll(storeName) {
+                return new Promise((resolve, reject) => {
+                    const transaction = this.db.transaction(storeName, 'readonly');
+                    const store = transaction.objectStore(storeName);
+                    const request = store.getAll();
+                    request.onsuccess = () => resolve(request.result);
+                    request.onerror = () => reject(request.error);
+                });
+            }
+
+            _delete(storeName, id) {
+                return new Promise((resolve, reject) => {
+                    const transaction = this.db.transaction(storeName, 'readwrite');
+                    const store = transaction.objectStore(storeName);
+                    const request = store.delete(id);
+                    request.onsuccess = () => resolve();
+                    request.onerror = () => reject(request.error);
+                });
+            }
+        }
+
+        const db = new Database();
+
+        // Application Logic
+        const state = {
+            currentProjectId: null,
+            currentProjectName: 'Inbox',
+            view: 'inbox',
+            projects: [],
+            items: [],
+            selectedItem: null,
+            objectUrls: []
+        };
+
+        const els = {
+            viewTitle: document.getElementById('current-view-title'),
+            grid: document.getElementById('items-grid'),
+            emptyState: document.getElementById('empty-state'),
+            projectsList: document.getElementById('projects-list'),
+            navItems: document.querySelectorAll('.nav-item[data-view]'),
+            btnNewProject: document.getElementById('btn-new-project'),
+            searchContainer: document.getElementById('search-container'),
+            searchInput: document.getElementById('search-input'),
+            detailPanel: document.getElementById('detail-panel'),
+            detailContent: document.getElementById('detail-content'),
+            btnCloseDetail: document.getElementById('btn-close-detail'),
+            btnDetailCopy: document.getElementById('btn-detail-copy'),
+            btnDetailMove: document.getElementById('btn-detail-move'),
+            btnDetailDownload: document.getElementById('btn-detail-download'),
+            btnDetailDelete: document.getElementById('btn-detail-delete'),
+            backdrop: document.getElementById('modal-backdrop'),
+            modalProject: document.getElementById('modal-project'),
+            inputProjectName: document.getElementById('input-project-name'),
+            btnSaveProject: document.getElementById('btn-save-project'),
+            btnCancelProject: document.getElementById('btn-cancel-project'),
+            modalMove: document.getElementById('modal-move'),
+            moveProjectList: document.getElementById('move-project-list'),
+            btnCancelMove: document.getElementById('btn-cancel-move'),
+            modalSettings: document.getElementById('modal-settings'),
+            btnSettings: document.getElementById('btn-settings'),
+            btnCloseSettings: document.getElementById('btn-close-settings'),
+            btnExportData: document.getElementById('btn-export-data'),
+            btnImportData: document.getElementById('btn-import-data'),
+            inputImportFile: document.getElementById('input-import-file'),
+            dropZone: document.getElementById('drop-zone-overlay'),
+            dropTargetName: document.getElementById('drop-target-name')
+        };
+
+        const generateId = () => crypto.randomUUID();
+        const formatBytes = (bytes) => {
+            if (bytes === 0) return '0 Bytes';
+            const k = 1024, sizes = ['Bytes', 'KB', 'MB', 'GB'], i = Math.floor(Math.log(bytes) / Math.log(k));
+            return parseFloat((bytes / Math.pow(k, i)).toFixed(1)) + ' ' + sizes[i];
+        };
+        const isValidUrl = (str) => {
+            try { new URL(str); return true; } catch { return false; }
+        };
+        const extractUrlMeta = (urlStr) => {
+            try { const u = new URL(urlStr); return { domain: u.hostname, path: u.pathname !== '/' ? u.pathname : '' }; } catch { return {}; }
+        };
+        const showToast = (message) => {
+            const container = document.getElementById('toast-container');
+            const toast = document.createElement('div');
+            toast.className = 'toast';
+            toast.textContent = message;
+            container.appendChild(toast);
+            setTimeout(() => { if (toast.parentNode) toast.remove(); }, 3000);
+        };
+        const clearObjectUrls = () => {
+            state.objectUrls.forEach(url => URL.revokeObjectURL(url));
+            state.objectUrls = [];
+        };
+
+        async function init() {
+            try {
+                await db.init();
+                await loadProjects();
+                await loadCurrentView();
+                setupEventListeners();
+                registerServiceWorker();
+            } catch (e) {
+                console.error("Failed to init database", e);
+                showToast("Error al inicializar la base de datos.");
+            }
+        }
+
+        async function loadProjects() {
+            state.projects = await db.getProjects();
+            renderProjectsSidebar();
+        }
+
+        async function loadCurrentView() {
+            els.viewTitle.textContent = state.view === 'search' ? 'Buscar' : state.currentProjectName;
+            els.dropTargetName.textContent = state.currentProjectName;
+            
+            if (state.view === 'search') {
+                els.searchContainer.classList.remove('hidden');
+                els.searchInput.focus();
+                state.items = await db.getAllItems();
+                renderItems(els.searchInput.value);
+            } else {
+                els.searchContainer.classList.add('hidden');
+                els.searchInput.value = '';
+                state.items = await db.getItemsByProject(state.currentProjectId);
+                renderItems();
+            }
+        }
+
+        function renderProjectsSidebar() {
+            els.projectsList.innerHTML = '';
+            state.projects.forEach(p => {
+                const btn = document.createElement('button');
+                btn.className = `nav-item ${state.currentProjectId === p.id && state.view === 'project' ? 'active' : ''}`;
+                btn.dataset.view = 'project';
+                btn.dataset.projectId = p.id;
+                
+                btn.innerHTML = `
+                    <span class="material-symbols-rounded">folder</span>
+                    <span class="nav-label">${escapeHtml(p.name)}</span>
+                `;
+                
+                btn.addEventListener('click', () => switchContext('project', p.id, p.name));
+                els.projectsList.appendChild(btn);
+            });
+        }
+
+        function renderItems(filterText = '') {
+            clearObjectUrls();
+            els.grid.innerHTML = '';
+            closeDetailPanel();
+            
+            let itemsToRender = state.items;
+            
+            if (filterText) {
+                const f = filterText.toLowerCase();
+                itemsToRender = state.items.filter(item => {
+                    if (item.type === 'text' && item.content.toLowerCase().includes(f)) return true;
+                    if (item.type === 'url' && (item.content.toLowerCase().includes(f) || item.metadata.domain?.toLowerCase().includes(f))) return true;
+                    if ((item.type === 'image' || item.type === 'file') && item.metadata.name?.toLowerCase().includes(f)) return true;
+                    return false;
+                });
+            }
+
+            if (itemsToRender.length === 0) {
+                els.emptyState.classList.remove('hidden');
+            } else {
+                els.emptyState.classList.add('hidden');
+                itemsToRender.forEach(item => {
+                    const card = document.createElement('div');
+                    card.className = 'item-card';
+                    card.dataset.id = item.id;
+                    card.addEventListener('click', () => openDetail(item, card));
+                    
+                    if (item.type === 'text') {
+                        card.innerHTML = `
+                            <div class="card-content">
+                                <div class="card-header"><span class="material-symbols-rounded">notes</span> Texto</div>
+                                <div class="card-text">${escapeHtml(item.content)}</div>
+                            </div>`;
+                    } else if (item.type === 'url') {
+                        card.innerHTML = `
+                            <div class="card-content">
+                                <div class="card-header"><span class="material-symbols-rounded">link</span> ${escapeHtml(item.metadata.domain || 'URL')}</div>
+                                <div class="card-url-title">${escapeHtml(item.metadata.domain || 'Enlace')}</div>
+                                <div class="card-url-link">${escapeHtml(item.content)}</div>
+                            </div>`;
+                    } else if (item.type === 'image') {
+                        const url = URL.createObjectURL(item.blob);
+                        state.objectUrls.push(url);
+                        card.innerHTML = `
+                            <img src="${url}" class="card-img-preview" alt="${escapeHtml(item.metadata.name)}" loading="lazy">
+                            <div class="card-content" style="flex: none; padding-top: 8px;">
+                                <div class="card-file-name" style="font-size: 0.85rem; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">${escapeHtml(item.metadata.name)}</div>
+                            </div>`;
+                    } else if (item.type === 'file') {
+                        card.innerHTML = `
+                            <div class="card-content">
+                                <div class="card-header"><span class="material-symbols-rounded">insert_drive_file</span> Archivo</div>
+                                <div class="card-file-name">${escapeHtml(item.metadata.name)}</div>
+                                <div class="card-file-meta">${formatBytes(item.metadata.size)} • ${escapeHtml(item.metadata.mimeType || 'Desconocido')}</div>
+                            </div>`;
+                    }
+                    
+                    els.grid.appendChild(card);
+                });
+            }
+        }
+
+        function switchContext(view, projectId = null, projectName = 'Inbox') {
+            state.view = view;
+            state.currentProjectId = projectId;
+            state.currentProjectName = projectName;
+            
+            document.querySelectorAll('.nav-item').forEach(el => el.classList.remove('active'));
+            
+            if (view === 'inbox') {
+                document.querySelector('.nav-item[data-view="inbox"]').classList.add('active');
+            } else if (view === 'search') {
+                document.querySelector('.nav-item[data-view="search"]').classList.add('active');
+            } else if (view === 'project') {
+                const btn = document.querySelector(`.nav-item[data-project-id="${projectId}"]`);
+                if (btn) btn.classList.add('active');
+            }
+            
+            loadCurrentView();
+        }
+
+        function openDetail(item, cardElement) {
+            state.selectedItem = item;
+            document.querySelectorAll('.item-card').forEach(c => c.classList.remove('selected'));
+            if (cardElement) cardElement.classList.add('selected');
+            
+            els.detailContent.innerHTML = '';
+            els.btnDetailDownload.style.display = 'none';
+            
+            if (item.type === 'text') {
+                els.detailContent.innerHTML = `
+                    <div class="detail-meta-group">
+                        <span class="detail-meta-label">Contenido</span>
+                        <div class="detail-text">${escapeHtml(item.content)}</div>
+                    </div>`;
+            } else if (item.type === 'url') {
+                els.detailContent.innerHTML = `
+                    <div class="detail-meta-group">
+                        <span class="detail-meta-label">Dominio</span>
+                        <span class="detail-meta-value">${escapeHtml(item.metadata.domain || 'N/A')}</span>
+                    </div>
+                    <div class="detail-meta-group" style="margin-top: 16px;">
+                        <span class="detail-meta-label">URL</span>
+                        <a href="${item.content}" target="_blank" class="detail-meta-value card-url-title" style="word-break: break-all;">${escapeHtml(item.content)}</a>
+                    </div>`;
+            } else if (item.type === 'image') {
+                const url = URL.createObjectURL(item.blob);
+                state.objectUrls.push(url);
+                els.detailContent.innerHTML = `
+                    <img src="${url}" class="detail-img" alt="${escapeHtml(item.metadata.name)}">
+                    <div class="detail-meta-group" style="margin-top: 16px;">
+                        <span class="detail-meta-label">Nombre</span>
+                        <span class="detail-meta-value">${escapeHtml(item.metadata.name)}</span>
+                    </div>
+                    <div class="detail-meta-group" style="margin-top: 8px;">
+                        <span class="detail-meta-label">Tamaño</span>
+                        <span class="detail-meta-value">${formatBytes(item.metadata.size)}</span>
+                    </div>`;
+                els.btnDetailDownload.style.display = 'flex';
+            } else if (item.type === 'file') {
+                els.detailContent.innerHTML = `
+                    <div style="text-align: center; margin-bottom: 24px; color: var(--md-sys-color-primary);">
+                        <span class="material-symbols-rounded" style="font-size: 64px;">insert_drive_file</span>
+                    </div>
+                    <div class="detail-meta-group">
+                        <span class="detail-meta-label">Nombre</span>
+                        <span class="detail-meta-value">${escapeHtml(item.metadata.name)}</span>
+                    </div>
+                    <div class="detail-meta-group" style="margin-top: 8px;">
+                        <span class="detail-meta-label">Tipo</span>
+                        <span class="detail-meta-value">${escapeHtml(item.metadata.mimeType || 'Desconocido')}</span>
+                    </div>
+                    <div class="detail-meta-group" style="margin-top: 8px;">
+                        <span class="detail-meta-label">Tamaño</span>
+                        <span class="detail-meta-value">${formatBytes(item.metadata.size)}</span>
+                    </div>`;
+                els.btnDetailDownload.style.display = 'flex';
+            }
+            
+            els.detailPanel.classList.remove('hidden');
+        }
+
+        function closeDetailPanel() {
+            els.detailPanel.classList.add('hidden');
+            state.selectedItem = null;
+            document.querySelectorAll('.item-card').forEach(c => c.classList.remove('selected'));
+        }
+
+        async function copyCurrentItem() {
+            if (!state.selectedItem) return;
+            const item = state.selectedItem;
+            
+            try {
+                if (item.type === 'text' || item.type === 'url') {
+                    await navigator.clipboard.writeText(item.content);
+                    showToast('Copiado al portapapeles');
+                } else if (item.type === 'image') {
+                    try {
+                        const clipboardItem = new ClipboardItem({ [item.blob.type]: item.blob });
+                        await navigator.clipboard.write([clipboardItem]);
+                        showToast('Imagen copiada');
+                    } catch (e) {
+                        showToast('El navegador no soporta copiar esta imagen directamente. Usa descargar.');
+                    }
+                } else {
+                    showToast('No se puede copiar este tipo de archivo. Usa descargar.');
+                }
+            } catch (err) {
+                showToast('Error al copiar');
+                console.error(err);
+            }
+        }
+
+        function downloadCurrentItem() {
+            if (!state.selectedItem || !state.selectedItem.blob) return;
+            const item = state.selectedItem;
+            const url = URL.createObjectURL(item.blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = item.metadata.name || 'descarga';
+            document.body.appendChild(a);
+            a.click();
+            document.body.removeChild(a);
+            URL.revokeObjectURL(url);
+        }
+
+        async function deleteCurrentItem() {
+            if (!state.selectedItem) return;
+            await db.deleteItem(state.selectedItem.id);
+            showToast('Elemento eliminado');
+            closeDetailPanel();
+            loadCurrentView();
+        }
+
+        function openMoveModal() {
+            if (!state.selectedItem) return;
+            
+            els.moveProjectList.innerHTML = `
+                <div class="list-item" data-id="null">
+                    <span class="material-symbols-rounded">inbox</span> Inbox
+                </div>
+            `;
+            
+            state.projects.forEach(p => {
+                const div = document.createElement('div');
+                div.className = 'list-item';
+                div.dataset.id = p.id;
+                div.innerHTML = `<span class="material-symbols-rounded">folder</span> ${escapeHtml(p.name)}`;
+                els.moveProjectList.appendChild(div);
+            });
+            
+            document.querySelectorAll('#move-project-list .list-item').forEach(el => {
+                el.addEventListener('click', async () => {
+                    const targetId = el.dataset.id === 'null' ? null : el.dataset.id;
+                    await db.updateItemContext(state.selectedItem.id, targetId);
+                    showToast('Elemento movido');
+                    closeModal(els.modalMove);
+                    closeDetailPanel();
+                    loadCurrentView();
+                });
+            });
+            
+            openModal(els.modalMove);
+        }
+
+        // Paste Handling
+        document.addEventListener('paste', async (e) => {
+            const active = document.activeElement;
+            if (active && (active.tagName === 'INPUT' || active.tagName === 'TEXTAREA' || active.isContentEditable)) {
+                return;
+            }
+            
+            const clipboardData = e.clipboardData;
+            if (!clipboardData) return;
+
+            let itemsToSave = [];
+            const targetProject = state.view === 'search' ? null : state.currentProjectId;
+
+            if (clipboardData.files && clipboardData.files.length > 0) {
+                for (const file of clipboardData.files) {
+                    const isImage = file.type.startsWith('image/');
+                    itemsToSave.push({
+                        id: generateId(),
+                        projectId: targetProject,
+                        type: isImage ? 'image' : 'file',
+                        blob: file,
+                        metadata: {
+                            name: file.name || (isImage ? 'imagen_pegada.png' : 'archivo_pegado'),
+                            size: file.size,
+                            mimeType: file.type
+                        },
+                        createdAt: Date.now()
+                    });
+                }
+            } else {
+                const text = clipboardData.getData('text/plain');
+                if (text && text.trim().length > 0) {
+                    const isUrl = isValidUrl(text.trim());
+                    itemsToSave.push({
+                        id: generateId(),
+                        projectId: targetProject,
+                        type: isUrl ? 'url' : 'text',
+                        content: text.trim(),
+                        metadata: isUrl ? extractUrlMeta(text.trim()) : {},
+                        createdAt: Date.now()
+                    });
+                }
+            }
+
+            if (itemsToSave.length > 0) {
+                e.preventDefault();
+                for (const item of itemsToSave) {
+                    await db.saveItem(item);
+                }
+                showToast(`Guardado en ${state.view === 'search' ? 'Inbox' : state.currentProjectName}`);
+                
+                if (state.view === 'search') {
+                    switchContext('inbox');
+                } else {
+                    loadCurrentView();
+                }
+            }
+        });
+
+        // Drag and Drop
+        document.addEventListener('dragover', (e) => {
+            e.preventDefault();
+            if (!els.dropZone.classList.contains('hidden')) return;
+            if (e.dataTransfer.types.includes('Files')) {
+                els.dropZone.classList.remove('hidden');
+            }
+        });
+
+        document.addEventListener('dragleave', (e) => {
+            e.preventDefault();
+            if (e.clientX === 0 && e.clientY === 0) {
+                els.dropZone.classList.add('hidden');
+            }
+        });
+
+        document.addEventListener('drop', async (e) => {
+            e.preventDefault();
+            els.dropZone.classList.add('hidden');
+            
+            if (e.dataTransfer.files && e.dataTransfer.files.length > 0) {
+                const targetProject = state.view === 'search' ? null : state.currentProjectId;
+                for (const file of e.dataTransfer.files) {
+                    const isImage = file.type.startsWith('image/');
+                    await db.saveItem({
+                        id: generateId(),
+                        projectId: targetProject,
+                        type: isImage ? 'image' : 'file',
+                        blob: file,
+                        metadata: {
+                            name: file.name,
+                            size: file.size,
+                            mimeType: file.type
+                        },
+                        createdAt: Date.now()
+                    });
+                }
+                showToast('Archivos guardados');
+                if (state.view === 'search') switchContext('inbox');
+                else loadCurrentView();
+            }
+        });
+
+        function setupEventListeners() {
+            document.querySelector('.nav-item[data-view="inbox"]').addEventListener('click', () => switchContext('inbox'));
+            document.querySelector('.nav-item[data-view="search"]').addEventListener('click', () => switchContext('search'));
+            
+            els.searchInput.addEventListener('input', (e) => renderItems(e.target.value));
+
+            els.btnCloseDetail.addEventListener('click', closeDetailPanel);
+            els.btnDetailCopy.addEventListener('click', copyCurrentItem);
+            els.btnDetailDelete.addEventListener('click', deleteCurrentItem);
+            els.btnDetailMove.addEventListener('click', openMoveModal);
+            els.btnDetailDownload.addEventListener('click', downloadCurrentItem);
+
+            els.btnNewProject.addEventListener('click', () => {
+                els.inputProjectName.value = '';
+                openModal(els.modalProject);
+                els.inputProjectName.focus();
+            });
+            els.btnCancelProject.addEventListener('click', () => closeModal(els.modalProject));
+            els.btnSaveProject.addEventListener('click', async () => {
+                const name = els.inputProjectName.value.trim();
+                if (name) {
+                    const newProject = {
+                        id: generateId(),
+                        name: name,
+                        createdAt: Date.now(),
+                        updatedAt: Date.now()
+                    };
+                    await db.saveProject(newProject);
+                    await loadProjects();
+                    closeModal(els.modalProject);
+                    switchContext('project', newProject.id, newProject.name);
+                }
+            });
+            
+            els.inputProjectName.addEventListener('keypress', (e) => {
+                if (e.key === 'Enter') els.btnSaveProject.click();
+            });
+
+            els.btnCancelMove.addEventListener('click', () => closeModal(els.modalMove));
+            
+            els.btnSettings.addEventListener('click', () => openModal(els.modalSettings));
+            els.btnCloseSettings.addEventListener('click', () => closeModal(els.modalSettings));
+            
+            els.btnExportData.addEventListener('click', handleExport);
+            els.btnImportData.addEventListener('click', () => els.inputImportFile.click());
+            els.inputImportFile.addEventListener('change', handleImport);
+
+            els.backdrop.addEventListener('click', () => {
+                closeModal(els.modalProject);
+                closeModal(els.modalMove);
+                closeModal(els.modalSettings);
+            });
+        }
+
+        function openModal(modalEl) {
+            els.backdrop.classList.remove('hidden');
+            modalEl.classList.remove('hidden');
+        }
+        function closeModal(modalEl) {
+            els.backdrop.classList.add('hidden');
+            modalEl.classList.add('hidden');
+        }
+
+        function escapeHtml(unsafe) {
+            if (typeof unsafe !== 'string') return unsafe;
+            return unsafe
+                 .replace(/&/g, "&amp;")
+                 .replace(/</g, "&lt;")
+                 .replace(/>/g, "&gt;")
+                 .replace(/"/g, "&quot;")
+                 .replace(/'/g, "&#039;");
+        }
+
+        async function handleExport() {
+            showToast("Generando exportación...");
+            try {
+                const projects = await db.getProjects();
+                const items = await db.getAllItems();
+                
+                const serializedItems = await Promise.all(items.map(async item => {
+                    let serialized = { ...item };
+                    if (item.blob) {
+                        serialized.blobData = await blobToBase64(item.blob);
+                        delete serialized.blob;
+                    }
+                    return serialized;
+                }));
+
+                const exportData = {
+                    version: 1,
+                    timestamp: Date.now(),
+                    projects,
+                    items: serializedItems
+                };
+
+                const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(exportData));
+                const downloadAnchorNode = document.createElement('a');
+                downloadAnchorNode.setAttribute("href", dataStr);
+                downloadAnchorNode.setAttribute("download", `homescreen_backup_${new Date().toISOString().slice(0,10)}.json`);
+                document.body.appendChild(downloadAnchorNode);
+                downloadAnchorNode.click();
+                downloadAnchorNode.remove();
+                showToast("Exportación completada");
+            } catch (e) {
+                console.error(e);
+                showToast("Error al exportar");
+            }
+        }
+
+        async function handleImport(e) {
+            const file = e.target.files[0];
+            if (!file) return;
+
+            const reader = new FileReader();
+            reader.onload = async (event) => {
+                try {
+                    showToast("Importando datos...");
+                    const data = JSON.parse(event.target.result);
+                    
+                    if (data.projects) {
+                        for (const p of data.projects) await db.saveProject(p);
+                    }
+                    
+                    if (data.items) {
+                        for (const item of data.items) {
+                            if (item.blobData) {
+                                item.blob = await base64ToBlob(item.blobData, item.metadata?.mimeType);
+                                delete item.blobData;
+                            }
+                            await db.saveItem(item);
+                        }
+                    }
+                    
+                    await loadProjects();
+                    await loadCurrentView();
+                    closeModal(els.modalSettings);
+                    showToast("Importación completada con éxito");
+                } catch (err) {
+                    console.error(err);
+                    showToast("Error al importar: archivo inválido");
+                }
+                els.inputImportFile.value = '';
+            };
+            reader.readAsText(file);
+        }
+
+        function blobToBase64(blob) {
+            return new Promise((resolve, reject) => {
+                const reader = new FileReader();
+                reader.onloadend = () => resolve(reader.result);
+                reader.onerror = reject;
+                reader.readAsDataURL(blob);
+            });
+        }
+
+        async function base64ToBlob(base64Data, mimeType) {
+            const res = await fetch(base64Data);
+            return await res.blob();
+        }
+
+        function registerServiceWorker() {
+            if ('serviceWorker' in navigator) {
+                const swCode = `
+                    const CACHE_NAME = 'homescreen-single-v1';
+                    self.addEventListener('install', e => { self.skipWaiting(); });
+                    self.addEventListener('activate', e => { self.clients.claim(); });
+                    self.addEventListener('fetch', e => {
+                        if (e.request.method !== 'GET' || !e.request.url.startsWith('http')) return;
+                        e.respondWith(
+                            caches.match(e.request).then(res => res || fetch(e.request).then(netRes => {
+                                if (netRes.status === 200 && netRes.type === 'basic') {
+                                    const clone = netRes.clone();
+                                    caches.open(CACHE_NAME).then(c => c.put(e.request, clone));
+                                }
+                                return netRes;
+                            }))
+                        );
+                    });
+                `;
+                const blob = new Blob([swCode], { type: 'application/javascript' });
+                const swUrl = URL.createObjectURL(blob);
+                navigator.serviceWorker.register(swUrl).catch(err => console.log('SW error:', err));
+            }
+        }
+
+        init();
+    </script>
+</body>
+</html>
