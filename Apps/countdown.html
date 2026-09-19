@@ -298,6 +298,35 @@
         .dot { width: 6px; height: 6px; border-radius: 50%; background: var(--glass-border); }
         .dot.passed { background: var(--text-main); box-shadow: 0 0 6px rgba(255,255,255,0.3); }
 
+        .extra-info-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+            gap: 12px;
+            margin-bottom: 20px;
+        }
+        .info-card {
+            background: var(--surface);
+            border: 1px solid var(--glass-border);
+            border-radius: 18px;
+            padding: 16px;
+            display: flex;
+            flex-direction: column;
+            gap: 6px;
+        }
+        .info-card-header {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            color: var(--text-muted);
+            font-size: 0.8rem;
+            font-weight: 500;
+        }
+        .info-card-value {
+            font-size: 1.15rem;
+            font-weight: 600;
+            color: var(--text-main);
+        }
+
         .cat-list-item { display: flex; align-items: center; justify-content: space-between; padding: 14px 16px; background: var(--surface); border: 1px solid var(--glass-border); border-radius: 14px; margin-bottom: 10px; }
         .cat-list-actions { display: flex; align-items: center; gap: 8px; }
 
@@ -376,7 +405,11 @@
                 </label>
             </div>
             <div class="form-group">
-                <label for="input-date">Fecha</label>
+                <label for="input-start-date">Fecha de Inicio (Opcional)</label>
+                <input type="datetime-local" id="input-start-date" class="form-input">
+            </div>
+            <div class="form-group">
+                <label for="input-date">Fecha Objetivo</label>
                 <input type="datetime-local" id="input-date" class="form-input" oninput="updatePreviewTextOnly()">
             </div>
             <div class="form-group">
@@ -441,6 +474,7 @@
                 <div class="scale-info" id="view-scale">-</div>
                 <div class="dots-grid" id="view-dots"></div>
             </div>
+            <div class="extra-info-grid" id="view-extra-info"></div>
             <div id="view-live-card"></div>
         </div>
     </div>
@@ -529,6 +563,7 @@
                 document.getElementById('form-title').textContent = 'Nuevo Evento';
                 document.getElementById('btn-submit-form').textContent = 'Crear Contador';
                 document.getElementById('input-title').value = '';
+                document.getElementById('input-start-date').value = '';
                 document.getElementById('input-date').value = '';
                 document.getElementById('input-allday').checked = false;
                 // Configurar GENERAL por defecto de manera limpia
@@ -612,8 +647,10 @@
 
         function toggleAllDayField() {
             const dateInput = document.getElementById('input-date');
+            const startDateInput = document.getElementById('input-start-date');
             const isAllDay = document.getElementById('input-allday').checked;
             dateInput.type = isAllDay ? 'date' : 'datetime-local';
+            startDateInput.type = isAllDay ? 'date' : 'datetime-local';
         }
 
         // --- DROPDOWN CATEGORÍAS ---
@@ -869,6 +906,7 @@
 
         function saveEventForm() {
             const title = document.getElementById('input-title');
+            const startDate = document.getElementById('input-start-date');
             const date = document.getElementById('input-date');
             const hidden = document.getElementById('input-category-hidden').value;
             const isAllDay = document.getElementById('input-allday').checked;
@@ -878,12 +916,24 @@
             if (!hidden) return triggerShake('category-select-container');
 
             const targetTime = new Date(isAllDay ? date.value + 'T00:00:00' : date.value).getTime();
+            const startTime = startDate.value ? new Date(isAllDay ? startDate.value + 'T00:00:00' : startDate.value).getTime() : Date.now();
+
+            if (startTime > targetTime) return triggerShake('input-start-date');
+
             const [icon, label] = hidden.split('|');
 
             if (appData.editingId) {
                 const idx = appData.events.findIndex(e => e.id === appData.editingId);
                 if (idx > -1) {
-                    appData.events[idx] = { ...appData.events[idx], title: title.value.trim(), category: icon, categoryLabel: label, targetAt: targetTime, isAllDay };
+                    appData.events[idx] = { 
+                        ...appData.events[idx], 
+                        title: title.value.trim(), 
+                        category: icon, 
+                        categoryLabel: label, 
+                        createdAt: startTime,
+                        targetAt: targetTime, 
+                        isAllDay 
+                    };
                     showToast('Evento actualizado con éxito');
                 }
             } else {
@@ -892,7 +942,7 @@
                     title: title.value.trim(),
                     category: icon,
                     categoryLabel: label,
-                    createdAt: Date.now(),
+                    createdAt: startTime,
                     targetAt: targetTime,
                     isAllDay: isAllDay
                 });
@@ -911,8 +961,9 @@
             document.getElementById('view-live-card').innerHTML = generateCardHTML({...event, id: 'view_' + event.id}, true);
 
             const now = Date.now();
-            const totalMs = event.targetAt - event.createdAt;
-            const passedMs = now - event.createdAt;
+            const startMs = event.createdAt || now;
+            const totalMs = event.targetAt - startMs;
+            const passedMs = now - startMs;
             
             let totalDays = Math.max(1, Math.ceil(totalMs / (1000 * 60 * 60 * 24)));
             let passedDays = Math.max(0, Math.floor(passedMs / (1000 * 60 * 60 * 24)));
@@ -939,6 +990,41 @@
             }
             document.getElementById('view-dots').innerHTML = dots;
 
+            // Información extra extendida
+            const startDateObj = new Date(startMs);
+            const targetDateObj = new Date(event.targetAt);
+            const options = { day: 'numeric', month: 'short', year: 'numeric' };
+            if (!event.isAllDay) {
+                options.hour = '2-digit';
+                options.minute = '2-digit';
+            }
+
+            const formatStartDate = startDateObj.toLocaleDateString('es-ES', options);
+            const formatTargetDate = targetDateObj.toLocaleDateString('es-ES', options);
+            
+            const remainingMs = Math.max(0, event.targetAt - now);
+            const totalHours = Math.floor(remainingMs / (1000 * 60 * 60));
+            const totalWeeks = (remainingMs / (1000 * 60 * 60 * 24 * 7)).toFixed(1);
+
+            document.getElementById('view-extra-info').innerHTML = `
+                <div class="info-card">
+                    <div class="info-card-header"><i data-lucide="play-circle" size="14"></i> Fecha Inicio</div>
+                    <div class="info-card-value" style="font-size: 0.95rem;">${formatStartDate}</div>
+                </div>
+                <div class="info-card">
+                    <div class="info-card-header"><i data-lucide="flag" size="14"></i> Fecha Objetivo</div>
+                    <div class="info-card-value" style="font-size: 0.95rem;">${formatTargetDate}</div>
+                </div>
+                <div class="info-card">
+                    <div class="info-card-header"><i data-lucide="clock" size="14"></i> Horas Restantes</div>
+                    <div class="info-card-value">${totalHours} h</div>
+                </div>
+                <div class="info-card">
+                    <div class="info-card-header"><i data-lucide="calendar-range" size="14"></i> Semanas Restantes</div>
+                    <div class="info-card-value">${totalWeeks} sem</div>
+                </div>
+            `;
+
             lucide.createIcons({ root: document.getElementById('modal-view') });
             updateTickers();
         }
@@ -955,11 +1041,22 @@
             document.getElementById('input-allday').checked = event.isAllDay || false;
             toggleAllDayField();
 
-            const d = new Date(event.targetAt);
+            const targetD = new Date(event.targetAt);
             if (event.isAllDay) {
-                document.getElementById('input-date').value = d.toISOString().split('T')[0];
+                document.getElementById('input-date').value = targetD.toISOString().split('T')[0];
             } else {
-                document.getElementById('input-date').value = new Date(d.getTime() - d.getTimezoneOffset()*60000).toISOString().slice(0,16);
+                document.getElementById('input-date').value = new Date(targetD.getTime() - targetD.getTimezoneOffset()*60000).toISOString().slice(0,16);
+            }
+
+            if (event.createdAt) {
+                const startD = new Date(event.createdAt);
+                if (event.isAllDay) {
+                    document.getElementById('input-start-date').value = startD.toISOString().split('T')[0];
+                } else {
+                    document.getElementById('input-start-date').value = new Date(startD.getTime() - startD.getTimezoneOffset()*60000).toISOString().slice(0,16);
+                }
+            } else {
+                document.getElementById('input-start-date').value = '';
             }
 
             buildCustomCategoryDropdown();

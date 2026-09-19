@@ -161,6 +161,17 @@
             flex-direction: column;
             gap: 4px;
             transition: transform 0.2s var(--spring);
+            position: relative;
+        }
+
+        .metric-card.interactive {
+            cursor: pointer;
+            user-select: none;
+        }
+
+        .metric-card.interactive:hover {
+            background: var(--surface-hover);
+            transform: translateY(-2px);
         }
 
         .metric-value {
@@ -175,6 +186,78 @@
             color: var(--text-muted);
             text-transform: uppercase;
             letter-spacing: 0.05em;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+
+        .metric-sublabel {
+            font-size: 0.7rem;
+            color: var(--accent-blue);
+            font-weight: 500;
+            margin-top: 2px;
+        }
+
+        /* Menú flotante y responsivo para opciones de lectura */
+        .reading-menu {
+            display: none;
+            position: fixed;
+            background: rgba(22, 22, 24, 0.95);
+            border: 1px solid var(--glass-border);
+            border-radius: 16px;
+            padding: 10px;
+            width: min(260px, 90vw);
+            max-height: min(320px, 60vh);
+            overflow-y: auto;
+            box-shadow: 0 12px 32px rgba(0,0,0,0.6);
+            backdrop-filter: blur(var(--blur-val));
+            -webkit-backdrop-filter: blur(var(--blur-val));
+            z-index: 9999;
+            flex-direction: column;
+            gap: 8px;
+            scrollbar-width: thin;
+            scrollbar-color: var(--glass-border) transparent;
+        }
+
+        .reading-menu.active {
+            display: flex;
+        }
+
+        .menu-section-title {
+            font-size: 0.7rem;
+            font-weight: 600;
+            color: var(--text-muted);
+            text-transform: uppercase;
+            padding: 4px 8px;
+            letter-spacing: 0.05em;
+        }
+
+        .menu-options-group {
+            display: flex;
+            flex-direction: column;
+            gap: 2px;
+        }
+
+        .menu-option {
+            padding: 8px 10px;
+            font-size: 0.85rem;
+            border-radius: 8px;
+            color: var(--text-main);
+            cursor: pointer;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            transition: background 0.15s ease;
+        }
+
+        .menu-option:hover {
+            background: rgba(255, 255, 255, 0.08);
+        }
+
+        .menu-option.selected {
+            color: var(--accent-blue);
+            font-weight: 600;
+            background: rgba(10, 132, 255, 0.12);
         }
     </style>
 </head>
@@ -211,25 +294,135 @@
                         <span class="metric-value" id="count-paragraphs">0</span>
                         <span class="metric-label">Párrafos</span>
                     </div>
-                    <div class="metric-card">
+                    
+                    <div class="metric-card interactive" id="reading-card" onclick="toggleReadingMenu(event)">
                         <span class="metric-value" id="count-reading">0m</span>
-                        <span class="metric-label">Lectura aprox.</span>
+                        <span class="metric-label">
+                            Lectura aprox.
+                            <i data-lucide="chevron-down" size="14"></i>
+                        </span>
+                        <span class="metric-sublabel" id="reading-mode-label">Mental (Normal)</span>
                     </div>
                 </div>
             </div>
         </main>
     </div>
 
+    <!-- Menú desplegable flotante adaptativo -->
+    <div class="reading-menu" id="reading-menu" onclick="event.stopPropagation()">
+        <div class="menu-section-title">Lectura Oral</div>
+        <div class="menu-options-group">
+            <div class="menu-option" onclick="setReadingMode('oral', 'lento', 110, event)">Lento <span>110 ppm</span></div>
+            <div class="menu-option" onclick="setReadingMode('oral', 'normal', 140, event)">Normal <span>140 ppm</span></div>
+            <div class="menu-option" onclick="setReadingMode('oral', 'rápido', 170, event)">Rápido <span>170 ppm</span></div>
+        </div>
+        
+        <div class="menu-section-title" style="margin-top: 4px;">Lectura Mental</div>
+        <div class="menu-options-group">
+            <div class="menu-option" onclick="setReadingMode('mental', 'lento', 180, event)">Lento <span>180 ppm</span></div>
+            <div class="menu-option selected" id="opt-default" onclick="setReadingMode('mental', 'normal', 230, event)">Normal <span>230 ppm</span></div>
+            <div class="menu-option" onclick="setReadingMode('mental', 'rápido', 300, event)">Rápido <span>300 ppm</span></div>
+        </div>
+    </div>
+
     <script>
+        let currentWPM = 230; // Palabras por minuto por defecto (Mental Normal)
+        let currentType = 'Mental';
+        let currentSpeed = 'Normal';
+
         window.onload = () => {
             lucide.createIcons();
             document.getElementById('text-input').focus();
+            
+            // Cerrar menú al hacer clic fuera o reescalar pantalla
+            document.addEventListener('click', (e) => {
+                const menu = document.getElementById('reading-menu');
+                const card = document.getElementById('reading-card');
+                if (!card.contains(e.target) && !menu.contains(e.target)) {
+                    menu.classList.remove('active');
+                }
+            });
+
+            window.addEventListener('resize', () => {
+                const menu = document.getElementById('reading-menu');
+                if (menu.classList.contains('active')) {
+                    positionMenu();
+                }
+            });
         };
+
+        function toggleReadingMenu(event) {
+            event.stopPropagation();
+            const menu = document.getElementById('reading-menu');
+            const isActive = menu.classList.contains('active');
+            
+            if (isActive) {
+                menu.classList.remove('active');
+            } else {
+                positionMenu();
+                menu.classList.add('active');
+            }
+        }
+
+        function positionMenu() {
+            const card = document.getElementById('reading-card');
+            const menu = document.getElementById('reading-menu');
+            const rect = card.getBoundingClientRect();
+            
+            const padding = 12;
+            const menuWidth = 260;
+            const menuHeight = 300;
+
+            let top = rect.top;
+            let left = rect.left - menuWidth - 10; // Posición ideal: a la izquierda de la tarjeta
+
+            // Si no entra a la izquierda o estamos en pantalla móvil, posicionar arriba/abajo
+            if (left < padding || window.innerWidth < 768) {
+                left = Math.max(padding, Math.min(rect.left, window.innerWidth - menuWidth - padding));
+                
+                // Evaluar si cabe arriba o abajo
+                if (rect.top - menuHeight - 10 > padding) {
+                    top = rect.top - menuHeight - 10;
+                } else {
+                    top = rect.bottom + 10;
+                }
+            }
+
+            // Ajustes finales de colisión con los bordes de la pantalla
+            if (top + menuHeight > window.innerHeight - padding) {
+                top = window.innerHeight - menuHeight - padding;
+            }
+            if (top < padding) {
+                top = padding;
+            }
+
+            menu.style.top = `${top}px`;
+            menu.style.left = `${left}px`;
+        }
+
+        function setReadingMode(type, speed, wpm, event) {
+            currentWPM = wpm;
+            currentType = type.charAt(0).toUpperCase() + type.slice(1);
+            currentSpeed = speed.charAt(0).toUpperCase() + speed.slice(1);
+
+            // Actualizar etiqueta
+            document.getElementById('reading-mode-label').innerText = `${currentType} (${currentSpeed})`;
+
+            // Actualizar clase seleccionada en el menú
+            document.querySelectorAll('.menu-option').forEach(opt => opt.classList.remove('selected'));
+            if (event && event.currentTarget) {
+                event.currentTarget.classList.add('selected');
+            }
+
+            // Cerrar menú y reanalizar
+            document.getElementById('reading-menu').classList.remove('active');
+            analyzeText();
+        }
 
         function analyzeText() {
             const text = document.getElementById('text-input').value;
 
-            // Procesamiento de Palabras sin fallos ópticos
+            // Procesamiento de Palabras
             const trimmed = text.trim();
             const wordCount = trimmed === "" ? 0 : (trimmed.match(/\s+/g) ? trimmed.match(/\s+/g).length + 1 : 1);
             
@@ -239,9 +432,16 @@
             // Párrafos
             const paragraphCount = text.split(/\n+/).filter(p => p.trim().length > 0).length;
             
-            // Tiempo de lectura (Media de 200 palabras por minuto)
-            const readTime = Math.ceil(wordCount / 200);
-            const readingDisplay = readTime === 0 ? "0m" : `${readTime}m`;
+            // Tiempo de lectura calculado con el WPM dinámico
+            const readMinutes = wordCount / currentWPM;
+            let readingDisplay = "0m";
+
+            if (readMinutes > 0 && readMinutes < 1) {
+                const readSeconds = Math.ceil(readMinutes * 60);
+                readingDisplay = `${readSeconds}s`;
+            } else if (readMinutes >= 1) {
+                readingDisplay = `${Math.ceil(readMinutes)}m`;
+            }
 
             // Renderizado en DOM
             document.getElementById('count-words').innerText = wordCount;

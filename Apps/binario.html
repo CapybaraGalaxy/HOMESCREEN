@@ -87,6 +87,14 @@
             gap: 14px;
         }
 
+        .header-stats {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            font-size: 0.8rem;
+            color: var(--text-muted);
+        }
+
         .app-icon-badge {
             width: 40px;
             height: 40px;
@@ -255,7 +263,13 @@
                 </div>
                 <h1 class="app-title">Conversor Binario</h1>
             </div>
-            <div style="font-size: 0.8rem; color: var(--text-muted);" id="char-count">0 caracteres</div>
+            <div class="header-stats">
+                <span id="char-count">0 caracteres</span>
+                <span>•</span>
+                <span id="zero-count">0 ceros</span>
+                <span>•</span>
+                <span id="one-count">0 unos</span>
+            </div>
         </header>
 
         <main class="main-content">
@@ -305,6 +319,8 @@
         const textInput = document.getElementById('text-input');
         const binaryInput = document.getElementById('binary-input');
         const charCount = document.getElementById('char-count');
+        const zeroCount = document.getElementById('zero-count');
+        const oneCount = document.getElementById('one-count');
         const binaryPanel = document.getElementById('binary-panel');
         const playBtn = document.getElementById('play-btn');
 
@@ -319,7 +335,7 @@
             const text = textInput.value;
             const binary = textToBinary(text);
             binaryInput.value = binary;
-            updateMeta(text.length);
+            updateMeta(text.length, binary);
             isUpdating = false;
         });
 
@@ -329,7 +345,7 @@
             const binary = binaryInput.value;
             const text = binaryToText(binary);
             textInput.value = text;
-            updateMeta(text.length);
+            updateMeta(text.length, binary);
             isUpdating = false;
         });
 
@@ -352,8 +368,12 @@
             }
         }
 
-        function updateMeta(len) {
+        function updateMeta(len, binary = '') {
             charCount.textContent = `${len} caracteres`;
+            const zeros = (binary.match(/0/g) || []).length;
+            const ones = (binary.match(/1/g) || []).length;
+            zeroCount.textContent = `${zeros} ceros`;
+            oneCount.textContent = `${ones} unos`;
         }
 
         function clearText(type) {
@@ -364,7 +384,7 @@
                 binaryInput.value = '';
                 textInput.value = '';
             }
-            updateMeta(0);
+            updateMeta(0, '');
             stopBinaryAudio();
         }
 

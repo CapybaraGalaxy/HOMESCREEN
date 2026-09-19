@@ -56,7 +56,7 @@
         <div><strong>VERSIÓN LOCAL</strong> <span>· Ir a web</span></div>
     </a>
 
-    <div class="version-tag" id="versionTag">1.6.3</div>
+    <div class="version-tag" id="versionTag">1.7 - Neo Drop 1</div>
 
     <div class="ui-layer">
         <header class="header">
@@ -129,10 +129,11 @@
             <label class="app-form-field"><span>Nombre</span><input id="editAppName" type="text" maxlength="60"></label>
             <label class="app-form-field"><span>Enlace</span><input id="editAppUrl" type="url"></label>
             <label class="app-form-field"><span>Carpeta</span><div class="custom-dropdown app-form-dropdown" id="editAppFolder"><div class="dropdown-select"><span></span><i data-lucide="chevron-down"></i></div><div class="dropdown-options"></div></div></label>
-            <label class="app-form-field"><span>Icono</span><div class="custom-dropdown app-form-dropdown" id="editAppIconType"><div class="dropdown-select"><span></span><i data-lucide="chevron-down"></i></div><div class="dropdown-options"><div class="dropdown-option" data-value="lucide">Icono Lucide</div><div class="dropdown-option" data-value="favicon">Favicon del enlace</div><div class="dropdown-option" data-value="svg">Path SVG manual</div><div class="dropdown-option" data-value="upload">SVG o PNG</div></div></div></label>
+            <label class="app-form-field"><span>Icono</span><div class="custom-dropdown app-form-dropdown" id="editAppIconType"><div class="dropdown-select"><span></span><i data-lucide="chevron-down"></i></div><div class="dropdown-options"><div class="dropdown-option" data-value="lucide"><i data-lucide="sparkles"></i><span>Icono Lucide</span></div><div class="dropdown-option" data-value="favicon"><i data-lucide="globe"></i><span>Favicon del enlace</span></div><div class="dropdown-option" data-value="svg"><i data-lucide="pen-tool"></i><span>Path SVG manual</span></div><div class="dropdown-option" data-value="upload"><i data-lucide="image-plus"></i><span>SVG o PNG</span></div></div></div></label>
             <label class="app-form-field" id="editLucideField"><span>Nombre del icono Lucide</span><input id="editAppIcon" type="text"></label>
+            <button class="btn-select-icon btn-icon-gallery" id="editIconGalleryBtn" type="button"><i data-lucide="gallery-horizontal-end" class="btn-icon"></i><span>Ver galería de iconos</span></button>
             <label class="app-form-field" id="editSvgField" hidden><span>Path SVG (`d`)</span><textarea id="editAppSvgPath" rows="2"></textarea></label>
-            <label class="app-form-field" id="editUploadField" hidden><span>Reemplazar SVG o PNG</span><input id="editAppIconFile" type="file" accept="image/svg+xml,image/png,.svg,.png"></label>
+            <label class="app-form-field" id="editUploadField" hidden><span>Reemplazar SVG o PNG</span><button class="btn-select-icon" id="editSelectIconBtn" type="button"><i data-lucide="image-plus" class="btn-icon"></i><span id="editIconFileName">Seleccionar icono</span></button><input id="editAppIconFile" type="file" accept="image/svg+xml,image/png,.svg,.png" hidden></label>
         </div>
         <div class="app-preview"><span class="app-preview-label">Vista previa</span><div class="app-preview-card" id="editAppPreviewCard"></div></div>
         <div class="modal-buttons"><button class="modal-btn secondary" onclick="closeModal('appEditorModal')">Cancelar</button><button class="modal-btn primary" id="saveAppEditBtn">Guardar cambios</button></div>
@@ -1057,7 +1058,7 @@ const frases = {
                    <i data-lucide="folders"> </i> <span>Carpetas</span>
                 </button>
                 <button class="settings-tab" type="button" data-tab="apps" aria-selected="false">
-                    <i data-lucide="app-window"> </i><span>Apps</span>
+                    <i data-lucide="LayoutGrid"> </i><span>Apps</span>
                 </button>
                 <button class="settings-tab" type="button" data-tab="apariencia" aria-selected="false">
                    <i data-lucide="palette"> </i> <span>Apariencia</span>
@@ -1157,7 +1158,7 @@ const frases = {
                             <div class="switch" id="toggleDock"></div>
                         </div>
                             <div class="setting-item-row">
-                                <div class="setting-item-meta"><i data-lucide="app-window"></i><div><span class="setting-label">Apps añadidas</span><span class="setting-desc">Mostrar la carpeta de apps creadas manualmente</span></div></div>
+                                <div class="setting-item-meta"><i data-lucide="Layout-Grid"></i><div><span class="setting-label">Apps añadidas</span><span class="setting-desc">Mostrar la carpeta de apps creadas manualmente</span></div></div>
                                 <div class="switch" id="toggleCustomApps"></div>
                             </div>
                         <span class="settings-section-title">Preferencias</span>
@@ -1197,10 +1198,11 @@ const frases = {
                             <label class="app-form-field"><span>Nombre</span><input id="customAppName" type="text" maxlength="60" placeholder="Mi herramienta"></label>
                             <label class="app-form-field"><span>Enlace</span><input id="customAppUrl" type="url" placeholder="https://ejemplo.com"></label>
                             <label class="app-form-field"><span>Carpeta</span><div class="custom-dropdown app-form-dropdown" id="customAppFolder"><div class="dropdown-select"><span></span><i data-lucide="chevron-down"></i></div><div class="dropdown-options"></div></div></label>
-                            <label class="app-form-field"><span>Icono</span><div class="custom-dropdown app-form-dropdown" id="customAppIconType"><div class="dropdown-select"><span></span><i data-lucide="chevron-down"></i></div><div class="dropdown-options"><div class="dropdown-option" data-value="lucide">Icono Lucide</div><div class="dropdown-option" data-value="favicon">Favicon del enlace</div><div class="dropdown-option" data-value="svg">Path SVG manual</div><div class="dropdown-option" data-value="upload">SVG o PNG</div></div></div></label>
-                            <label class="app-form-field" id="customLucideField"><span>Nombre del icono Lucide</span><input id="customAppIcon" type="text" value="link" placeholder="link"></label>
+                            <label class="app-form-field"><span>Icono</span><div class="custom-dropdown app-form-dropdown" id="customAppIconType"><div class="dropdown-select"><span></span><i data-lucide="chevron-down"></i></div><div class="dropdown-options"><div class="dropdown-option" data-value="lucide"><i data-lucide="sparkles"></i><span>Icono Lucide</span></div><div class="dropdown-option" data-value="favicon"><i data-lucide="globe"></i><span>Favicon del enlace</span></div><div class="dropdown-option" data-value="svg"><i data-lucide="pen-tool"></i><span>Path SVG manual</span></div><div class="dropdown-option" data-value="upload"><i data-lucide="image-plus"></i><span>SVG o PNG</span></div></div></div></label>
+                                                        <label class="app-form-field" id="customLucideField"><span>Nombre del icono Lucide</span><input id="customAppIcon" type="text" value="link" placeholder="link"></label>
+                                                        <button class="btn-select-icon btn-icon-gallery" id="customIconGalleryBtn" type="button"><i data-lucide="gallery-horizontal-end" class="btn-icon"></i><span>Ver galería de iconos</span></button>
                             <label class="app-form-field" id="customSvgField" hidden><span>Path SVG (`d`)</span><textarea id="customAppSvgPath" rows="2" placeholder="M12 5v14M5 12h14"></textarea></label>
-                            <label class="app-form-field" id="customUploadField" hidden><span>Archivo de icono</span><input id="customAppIconFile" type="file" accept="image/svg+xml,image/png,.svg,.png"></label>
+                                                        <label class="app-form-field" id="customUploadField" hidden><span>Archivo de icono</span><button class="btn-select-icon" id="customSelectIconBtn" type="button"><i data-lucide="image-plus" class="btn-icon"></i><span id="customIconFileName">Seleccionar icono</span></button><input id="customAppIconFile" type="file" accept="image/svg+xml,image/png,.svg,.png" hidden></label>
                         </div>
                         <div class="app-preview" id="customAppPreview"><span class="app-preview-label">Vista previa</span><div class="app-preview-card" id="customAppPreviewCard"><i data-lucide="link"></i><span>Mi herramienta</span></div></div>
                         <button class="settings-action-btn app-add-btn" id="addCustomAppBtn" type="button"><i data-lucide="plus" style="width: 14px;"></i> Añadir app</button>
@@ -1250,6 +1252,17 @@ const frases = {
                         <div class="setting-item-row">
                             <div class="setting-item-meta"><i data-lucide="gauge"></i><div><span class="setting-label">Modo super rendimiento</span><span class="setting-desc">Desactiva efectos, partículas y animaciones pesadas</span></div></div>
                             <div class="switch" id="toggleSuperPerformance"></div>
+                        </div>
+                        <div class="setting-item-row">
+                            <div class="setting-item-meta"><i data-lucide="scan-line"></i><div><span class="setting-label">Animación del panel de ajustes</span><span class="setting-desc">Efecto al abrir y cerrar este panel</span></div></div>
+                            <div class="custom-dropdown" id="settingsAnimationDropdown">
+                                <div class="dropdown-select"><span id="currentSettingsAnimation">Fade</span><i data-lucide="chevron-down"></i></div>
+                                <div class="dropdown-options">
+                                    <div class="dropdown-option selected" data-value="fade">Fade</div>
+                                    <div class="dropdown-option" data-value="slide">Slide</div>
+                                    <div class="dropdown-option" data-value="zoom">Zoom</div>
+                                </div>
+                            </div>
                         </div>
                         <div class="performance-suggestion" id="performanceSuggestion" hidden>
                             <div class="performance-suggestion-title"><i data-lucide="triangle-alert"></i><span>Homescreen detecta un rendimiento bajo</span></div>
@@ -1326,6 +1339,47 @@ const frases = {
 
         const settingsTabs = document.querySelectorAll('.settings-tab');
         const settingsPanels = document.querySelectorAll('.settings-tab-panel');
+
+        function setSettingsAnimationMode(value) {
+            const mode = ['fade', 'slide', 'zoom'].includes(value) ? value : 'fade';
+            if (!setPanel) return;
+            setPanel.classList.remove('settings-animation-fade', 'settings-animation-slide', 'settings-animation-zoom');
+            setPanel.classList.add(`settings-animation-${mode}`);
+        }
+
+        function initSettingsAnimationDropdown() {
+            const dropdown = document.getElementById('settingsAnimationDropdown');
+            const selectedText = document.getElementById('currentSettingsAnimation');
+            if (!dropdown || !selectedText) return;
+
+            const labels = { fade: 'Fade', slide: 'Slide', zoom: 'Zoom' };
+            const applySelection = (value) => {
+                const mode = ['fade', 'slide', 'zoom'].includes(value) ? value : 'fade';
+                dropdown.querySelectorAll('.dropdown-option').forEach(option => {
+                    option.classList.toggle('selected', option.dataset.value === mode);
+                });
+                selectedText.innerText = labels[mode];
+                localStorage.setItem('settingsAnimation', mode);
+                setSettingsAnimationMode(mode);
+            };
+
+            applySelection(localStorage.getItem('settingsAnimation') || 'fade');
+            dropdown.querySelectorAll('.dropdown-option').forEach(option => {
+                option.addEventListener('click', (e) => {
+                    e.stopPropagation();
+                    playSound('click');
+                    applySelection(option.dataset.value);
+                    dropdown.classList.remove('active');
+                });
+            });
+            dropdown.querySelector('.dropdown-select').addEventListener('click', (e) => {
+                e.stopPropagation();
+                dropdown.classList.toggle('active');
+            });
+            document.addEventListener('click', () => dropdown.classList.remove('active'));
+        }
+
+        initSettingsAnimationDropdown();
 
         function resizeSettingsPanel() {
             if (!setPanel) return;
@@ -1549,7 +1603,7 @@ const frases = {
             const customApps = getVisibleApps(getCustomApps()).filter(app => (app.folder || 'Apps añadidas') === 'Apps añadidas');
             if (localStorage.getItem('showCustomApps') !== 'false' && customApps.length) {
                 const delay = animationIndex++ * 0.05;
-                gridHTML += `<div class="tool-card" onclick="playSound('click'); openFolder({name: 'Apps añadidas', apps: getVisibleApps(getCustomAppsFolder('Apps añadidas'))})" style="animation-delay:${delay}s"><i data-lucide="app-window"></i><span>Apps añadidas</span></div>`;
+                gridHTML += `<div class="tool-card" onclick="playSound('click'); openFolder({name: 'Apps añadidas', apps: getVisibleApps(getCustomAppsFolder('Apps añadidas'))})" style="animation-delay:${delay}s"><i data-lucide="LayoutGrid"></i><span>Apps añadidas</span></div>`;
             }
             grid.innerHTML = gridHTML;
             if(window.lucide) lucide.createIcons();
@@ -2203,9 +2257,11 @@ const frases = {
 
         function populateAppFolderSelect(dropdown, value = 'Apps añadidas') {
             if (!dropdown) return;
-            dropdown.querySelector('.dropdown-options').innerHTML = ['Apps añadidas', ...tools.map(folder => folder.name)].map(folder => `<div class="dropdown-option" data-value="${escapeHtml(folder)}">${escapeHtml(folder)}</div>`).join('');
+            const folders = [{ name: 'Apps añadidas', icon: 'LayoutGrid' }, ...tools.map(folder => ({ name: folder.name, icon: folder.icon }))];
+            dropdown.querySelector('.dropdown-options').innerHTML = folders.map(folder => `<div class="dropdown-option" data-value="${escapeHtml(folder.name)}">${appIconMarkup({ icon: folder.icon })}<span>${escapeHtml(folder.name)}</span></div>`).join('');
             initAppDropdown(dropdown.id);
             setCustomDropdownValue(dropdown.id, value);
+            if (window.lucide) lucide.createIcons();
         }
 
         function getFormApp(typePrefix = 'custom') {
@@ -2213,7 +2269,7 @@ const frases = {
             return {
                 name: document.getElementById(`${id}AppName`).value.trim(),
                 url: document.getElementById(`${id}AppUrl`).value.trim(),
-                folder: document.getElementById(`${id}AppFolder`).value,
+                folder: getCustomDropdownValue(`${id}AppFolder`) || 'Apps añadidas',
                 iconType: getCustomDropdownValue(`${id}AppIconType`),
                 icon: document.getElementById(`${id}AppIcon`).value.trim() || 'link',
                 svgPath: document.getElementById(`${id}AppSvgPath`).value.trim()
@@ -2233,16 +2289,48 @@ const frases = {
             const lucideField = document.getElementById(`${id}LucideField`);
             const svgField = document.getElementById(`${id}SvgField`);
             const uploadField = document.getElementById(`${id}UploadField`);
+            const fileInput = document.getElementById(`${id}AppIconFile`);
+            const fileButton = document.getElementById(`${id}SelectIconBtn`);
+            const fileName = document.getElementById(`${id}IconFileName`);
+            const galleryButton = document.getElementById(`${id}IconGalleryBtn`);
             const update = () => {
                 const iconType = getCustomDropdownValue(`${id}AppIconType`) || 'lucide';
                 lucideField.hidden = iconType !== 'lucide';
                 svgField.hidden = iconType !== 'svg';
                 uploadField.hidden = iconType !== 'upload';
+                if (galleryButton) galleryButton.hidden = iconType === 'favicon';
                 renderAppPreview(getFormApp(prefix), id === 'edit' ? 'editAppPreviewCard' : 'customAppPreviewCard');
             };
             initAppDropdown(`${id}AppIconType`, update);
+            type._updateIconFields = update;
+            if (galleryButton && galleryButton.dataset.bound !== 'true') {
+                galleryButton.dataset.bound = 'true';
+                galleryButton.addEventListener('click', event => {
+                    event.preventDefault();
+                    event.stopPropagation();
+                    window.location.href = 'Apps/icons.html';
+                });
+            }
+            if (fileButton && fileInput && fileButton.dataset.bound !== 'true') {
+                fileButton.dataset.bound = 'true';
+                fileButton.addEventListener('click', event => {
+                    event.preventDefault();
+                    event.stopPropagation();
+                    fileInput.click();
+                });
+                fileInput.addEventListener('change', () => {
+                    const selectedFile = fileInput.files[0];
+                    if (fileName) fileName.textContent = selectedFile?.name || 'Seleccionar icono';
+                    renderAppPreview(getFormApp(prefix), id === 'edit' ? 'editAppPreviewCard' : 'customAppPreviewCard');
+                });
+            }
             if (!getCustomDropdownValue(`${id}AppIconType`)) setCustomDropdownValue(`${id}AppIconType`, 'lucide');
-            [`${id}AppName`, `${id}AppUrl`, `${id}AppIcon`, `${id}AppSvgPath`].forEach(fieldId => document.getElementById(fieldId)?.addEventListener('input', () => renderAppPreview(getFormApp(prefix), id === 'edit' ? 'editAppPreviewCard' : 'customAppPreviewCard')));
+            [`${id}AppName`, `${id}AppUrl`, `${id}AppIcon`, `${id}AppSvgPath`].forEach(fieldId => {
+                const field = document.getElementById(fieldId);
+                if (!field || field.dataset.previewBound === 'true') return;
+                field.dataset.previewBound = 'true';
+                field.addEventListener('input', () => renderAppPreview(getFormApp(prefix), id === 'edit' ? 'editAppPreviewCard' : 'customAppPreviewCard'));
+            });
             update();
         }
 
@@ -2253,6 +2341,7 @@ const frases = {
             document.getElementById('editAppSvgPath').value = app.svgPath || '';
             setCustomDropdownValue('editAppIconType', app.iconType || 'lucide');
             document.getElementById('editAppIconFile').value = '';
+            document.getElementById('editIconFileName').textContent = 'Seleccionar icono';
             populateAppFolderSelect(document.getElementById('editAppFolder'), app.folder || 'Apps añadidas');
             bindIconFields('edit');
             document.getElementById('saveAppEditBtn').onclick = () => {
@@ -2264,7 +2353,10 @@ const frases = {
                     closeModal('appEditorModal'); renderAppsSettings(); renderMainGrid(); buildPersistentSearchDOM(); renderDock();
                 };
                 const file = document.getElementById('editAppIconFile').files[0];
-                if (values.iconType === 'upload' && file) { const reader = new FileReader(); reader.onload = event => finish(event.target.result); reader.readAsDataURL(file); } else finish();
+                if (values.iconType === 'upload' && file) {
+                    if (!['image/svg+xml', 'image/png'].includes(file.type) && !/\.(svg|png)$/i.test(file.name)) { showToast('El icono debe ser SVG o PNG', 'alert-circle'); return; }
+                    const reader = new FileReader(); reader.onload = event => finish(event.target.result); reader.readAsDataURL(file);
+                } else finish();
             };
             openModal('appEditorModal');
         }
@@ -2287,13 +2379,19 @@ const frases = {
                     localStorage.setItem('customApps', JSON.stringify(apps));
                     document.getElementById('customAppName').value = '';
                     document.getElementById('customAppUrl').value = '';
+                    document.getElementById('customAppIcon').value = 'link';
+                    document.getElementById('customAppSvgPath').value = '';
                     document.getElementById('customAppIconFile').value = '';
+                    document.getElementById('customIconFileName').textContent = 'Seleccionar icono';
+                    setCustomDropdownValue('customAppIconType', 'lucide');
+                    document.getElementById('customAppIconType')._updateIconFields?.();
                     renderAppsSettings(); renderMainGrid(); buildPersistentSearchDOM(); renderDock();
                     showToast('App añadida', 'check');
                 };
                 if (iconType === 'upload') {
                     const file = document.getElementById('customAppIconFile').files[0];
                     if (!file) { showToast('Selecciona un SVG o PNG', 'upload'); return; }
+                    if (!['image/svg+xml', 'image/png'].includes(file.type) && !/\.(svg|png)$/i.test(file.name)) { showToast('El icono debe ser SVG o PNG', 'alert-circle'); return; }
                     const reader = new FileReader();
                     reader.onload = event => saveApp(event.target.result);
                     reader.readAsDataURL(file);
@@ -2501,6 +2599,8 @@ const frases = {
                 showDock: 'false',
                 showRecentFolder: 'false',
                 showCustomApps: 'true',
+                customApps: '[]',
+                hiddenAppUrls: '[]',
                 showBattery: 'false',
                 sounds: 'false',
                 haptics: 'false',
@@ -2508,15 +2608,16 @@ const frases = {
                 hideWelcome: 'false',
                 welcomeAnimation: 'blur',
                 folderAnimation: 'slide',
+                settingsAnimation: 'fade',
                 hideFolderCloseBtn: 'false'
             };
 
             const settingsKeys = Object.keys(settingsDefaults);
 
             function serializeSettingsValue(key, value) {
-                if (key === 'favorites' || key === 'appUsageStats') {
+                if (['favorites', 'appUsageStats', 'customApps', 'hiddenAppUrls'].includes(key)) {
                     if (typeof value === 'string') {
-                        try { value = JSON.parse(value); } catch (error) { value = key === 'favorites' ? [] : {}; }
+                        try { value = JSON.parse(value); } catch (error) { value = key === 'appUsageStats' ? {} : []; }
                     }
                     return JSON.stringify(value);
                 }
@@ -2577,8 +2678,9 @@ const frases = {
                         if (source[key] !== undefined) config[key] = serializeSettingsValue(key, source[key]);
                     });
 
-                    if (config.favorites !== undefined) JSON.parse(config.favorites);
-                    if (config.appUsageStats !== undefined) JSON.parse(config.appUsageStats);
+                    ['favorites', 'appUsageStats', 'customApps', 'hiddenAppUrls'].forEach(key => {
+                        if (config[key] !== undefined) JSON.parse(config[key]);
+                    });
 
                     Object.entries(config).forEach(([key, value]) => localStorage.setItem(key, value));
                     markSetupComplete('import');
@@ -2748,7 +2850,7 @@ const frases = {
             }
             
             document.addEventListener('click', (e) => { 
-                if(setPanel && setPanel.classList.contains('active') && !setPanel.contains(e.target)) {
+                if(setPanel && setPanel.classList.contains('active') && !setPanel.contains(e.target) && !e.target.closest('.custom-modal') && !e.target.closest('.settings-action-menu')) {
                     setPanel.classList.remove('active');
                     if(history.state && history.state.panel==='settings') history.back();
                 }

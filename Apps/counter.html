@@ -717,7 +717,7 @@
 
             el.innerHTML = `
                 <i data-lucide="${iconName}" class="mini-icon"></i>
-                <span style="flex:1; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;">${item.amount !== 0 ? (item.type === 'up' ? '+' : (item.type === 'down' ? '-' : '')) + item.amount : ''} ${item.result}</span>
+                <span style="flex:1; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;">${item.amount !== 0 ? (item.type === 'up' ? '+' : (item.type === 'down' ? '-' : '')) + item.amount : ''}        Total:  ${item.result}</span>
             `;
 
             // Insertar al inicio

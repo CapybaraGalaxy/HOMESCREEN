@@ -204,6 +204,67 @@
             touch-action: none;
         }
 
+        .color-input-row {
+            display: flex;
+            gap: 8px;
+        }
+
+        .color-input-row input {
+            min-width: 0;
+            flex: 1;
+            padding: 10px 12px;
+            border: 1px solid var(--glass-border);
+            border-radius: 10px;
+            background: var(--surface-hover);
+            color: var(--text-main);
+            font: inherit;
+            outline: none;
+        }
+
+        .color-input-row input:focus {
+            border-color: rgba(255,255,255,0.2);
+        }
+
+        .color-action {
+            border: 1px solid var(--glass-border);
+            border-radius: 10px;
+            padding: 0 12px;
+            background: var(--surface-hover);
+            color: var(--text-main);
+            cursor: pointer;
+        }
+
+        .color-action:hover {
+            background: rgba(255,255,255,0.06);
+        }
+
+        .palette-list {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px;
+            min-height: 36px;
+        }
+
+        .palette-empty {
+            width: 100%;
+            color: var(--text-muted);
+            font-size: 0.8rem;
+        }
+
+        .palette-color {
+            position: relative;
+            width: 34px;
+            height: 34px;
+            border: 1px solid var(--glass-border);
+            border-radius: 9px;
+            cursor: pointer;
+            box-shadow: inset 0 0 0 1px rgba(0,0,0,0.18);
+        }
+
+        .palette-color:hover {
+            transform: translateY(-1px);
+        }
+
         .alpha-slider-row {
             display: flex;
             align-items: center;
@@ -317,7 +378,7 @@
                 </div>
                 <h1 class="app-title">Selector de Color</h1>
             </div>
-            <div style="font-size: 0.8rem; color: var(--text-muted);" id="char-count">Activo</div>
+            <div style="font-size: 0.8rem; color: var(--text-muted);" id="char-count"></div>
         </header>
 
         <main class="main-content">
@@ -342,6 +403,14 @@
                     </div>
 
                     <div class="control-group">
+                        <label>Pegar formato de color</label>
+                        <div class="color-input-row">
+                            <input type="text" id="color-text-input" placeholder="#0a84ff, rgb(...), hsl(...)" spellcheck="false">
+                            <button class="color-action" id="parse-color-button" type="button" aria-label="Aplicar color">Aplicar</button>
+                        </div>
+                    </div>
+
+                    <div class="control-group">
                         <label>Círculo Cromático Interactivo</label>
                         <div class="wheel-container">
                             <canvas id="color-wheel" width="200" height="200"></canvas>
@@ -351,6 +420,15 @@
                                 <span id="alpha-val" style="width: 35px; text-align: right;">1.00</span>
                             </div>
                         </div>
+                    </div>
+
+                    <div class="control-group">
+                        <label>Paleta guardada</label>
+                        <div class="native-picker-row">
+                            <button class="color-action" id="save-color-button" type="button">Guardar color</button>
+                            <span style="font-size: 0.8rem; color: var(--text-muted);">Clic en un color para seleccionarlo y copiarlo</span>
+                        </div>
+                        <div class="palette-list" id="palette-list"></div>
                     </div>
                 </div>
 
@@ -378,6 +456,17 @@
         const alphaVal = document.getElementById('alpha-val');
         const formatsContainer = document.getElementById('formats-container');
         const charCount = document.getElementById('char-count');
+        const colorTextInput = document.getElementById('color-text-input');
+        const parseColorButton = document.getElementById('parse-color-button');
+        const saveColorButton = document.getElementById('save-color-button');
+        const paletteList = document.getElementById('palette-list');
+        const paletteStorageKey = 'color-selector-palette';
+        let savedColors;
+        try {
+            savedColors = JSON.parse(localStorage.getItem(paletteStorageKey) || '[]');
+        } catch (error) {
+            savedColors = [];
+        }
 
         let currentColor = { r: 10, g: 132, b: 255, a: 1 };
 
@@ -413,6 +502,27 @@
             ctx.putImageData(imagedata, 0, 0);
         }
 
+        function drawWheelIndicator() {
+            const hsv = rgbToHsv(currentColor.r, currentColor.g, currentColor.b);
+            const radius = colorWheel.width / 2;
+            const angle = (hsv.h * Math.PI) / 180;
+            const x = radius + Math.cos(angle) * hsv.s * radius;
+            const y = radius + Math.sin(angle) * hsv.s * radius;
+
+            ctx.save();
+            ctx.beginPath();
+            ctx.arc(x, y, 8, 0, Math.PI * 2);
+            ctx.fillStyle = `rgba(${currentColor.r}, ${currentColor.g}, ${currentColor.b}, ${currentColor.a})`;
+            ctx.fill();
+            ctx.lineWidth = 3;
+            ctx.strokeStyle = '#ffffff';
+            ctx.stroke();
+            ctx.lineWidth = 1;
+            ctx.strokeStyle = '#000000';
+            ctx.stroke();
+            ctx.restore();
+        }
+
         function updateFromRGB(r, g, b, a) {
             currentColor = { r, g, b, a };
             const hex = rgbToHex(r, g, b);
@@ -422,6 +532,9 @@
             alphaVal.value = a;
             alphaRange.value = a;
             alphaVal.textContent = Number(a).toFixed(2);
+            colorTextInput.value = hex8.toUpperCase();
+            drawWheel();
+            drawWheelIndicator();
 
             const hsv = rgbToHsv(r, g, b);
             renderFormats(r, g, b, a, hex, hex8, hsv);
@@ -446,6 +559,64 @@
                 r: (num >> 16) & 255,
                 g: (num >> 8) & 255,
                 b: num & 255
+            };
+        }
+
+        function parseColor(value) {
+            const input = value.trim().replace(/^--[\w-]+\s*:\s*/, '').replace(/;$/, '');
+            const hexMatch = input.match(/^#?([\da-f]{3,8})$/i);
+            if (hexMatch && [3, 4, 6, 8].includes(hexMatch[1].length)) {
+                let hex = hexMatch[1];
+                if (hex.length === 3 || hex.length === 4) hex = hex.split('').map(c => c + c).join('');
+                const rgb = hexToRgb(hex.slice(0, 6));
+                return { ...rgb, a: hex.length === 8 ? parseInt(hex.slice(6), 16) / 255 : 1 };
+            }
+
+            const rgbMatch = input.match(/^rgba?\(\s*([\d.]+)[,\s]+([\d.]+)[,\s]+([\d.]+)(?:\s*[,/]\s*([\d.]+%?))?\s*\)$/i);
+            if (rgbMatch) {
+                return { r: Math.round(parseFloat(rgbMatch[1])), g: Math.round(parseFloat(rgbMatch[2])), b: Math.round(parseFloat(rgbMatch[3])), a: parseAlpha(rgbMatch[4]) };
+            }
+
+            const hslMatch = input.match(/^hsla?\(\s*([\d.]+)(?:deg)?[,\s]+([\d.]+)%[,\s]+([\d.]+)%(?:\s*[,/]\s*([\d.]+%?))?\s*\)$/i);
+            if (hslMatch) {
+                const h = ((parseFloat(hslMatch[1]) % 360) + 360) % 360 / 360;
+                const s = Math.min(100, parseFloat(hslMatch[2])) / 100;
+                const l = Math.min(100, parseFloat(hslMatch[3])) / 100;
+                const rgb = hslToRgb(h, s, l);
+                return { ...rgb, a: parseAlpha(hslMatch[4]) };
+            }
+
+            const cmykMatch = input.match(/^cmyk\(\s*([\d.]+)%?[,\s]+([\d.]+)%?[,\s]+([\d.]+)%?[,\s]+([\d.]+)%?\s*\)$/i);
+            if (cmykMatch) {
+                const c = parseFloat(cmykMatch[1]) / 100, m = parseFloat(cmykMatch[2]) / 100;
+                const y = parseFloat(cmykMatch[3]) / 100, k = parseFloat(cmykMatch[4]) / 100;
+                return { r: Math.round(255 * (1 - c) * (1 - k)), g: Math.round(255 * (1 - m) * (1 - k)), b: Math.round(255 * (1 - y) * (1 - k)), a: 1 };
+            }
+
+            const decimal = input.match(/^\d+$/);
+            if (decimal) {
+                const number = Number(decimal[0]);
+                if (number >= 0 && number <= 16777215) return { r: number >> 16 & 255, g: number >> 8 & 255, b: number & 255, a: 1 };
+            }
+
+            const scratchMatch = input.match(/^Color:\s*([\d.]+),\s*Sat:\s*([\d.]+),\s*Brill:\s*([\d.]+)$/i);
+            if (scratchMatch) return { ...hsvToRgb(Number(scratchMatch[1]) / 200, Number(scratchMatch[2]) / 100, Number(scratchMatch[3]) / 100), a: 1 };
+            return null;
+        }
+
+        function parseAlpha(value) {
+            if (value === undefined) return 1;
+            const alpha = parseFloat(value);
+            return Math.max(0, Math.min(1, value.includes('%') ? alpha / 100 : alpha));
+        }
+
+        function hslToRgb(h, s, l) {
+            const hue = (n) => (n + h * 12) % 12;
+            const a = s * Math.min(l, 1 - l);
+            return {
+                r: Math.round(255 * (l - a * Math.max(-1, Math.min(hue(0) - 3, Math.min(9 - hue(0), 1))))),
+                g: Math.round(255 * (l - a * Math.max(-1, Math.min(hue(8) - 3, Math.min(9 - hue(8), 1))))),
+                b: Math.round(255 * (l - a * Math.max(-1, Math.min(hue(4) - 3, Math.min(9 - hue(4), 1)))))
             };
         }
 
@@ -556,20 +727,59 @@
             });
         }
 
+        function renderPalette() {
+            paletteList.innerHTML = '';
+            if (!savedColors.length) {
+                paletteList.innerHTML = '<span class="palette-empty">Todavía no hay colores guardados.</span>';
+                return;
+            }
+            savedColors.forEach((color, index) => {
+                const swatch = document.createElement('button');
+                swatch.className = 'palette-color';
+                swatch.type = 'button';
+                swatch.style.backgroundColor = `rgba(${color.r}, ${color.g}, ${color.b}, ${color.a})`;
+                swatch.title = `${rgbToHex8(color.r, color.g, color.b, color.a).toUpperCase()} - clic para seleccionar y copiar`;
+                swatch.setAttribute('aria-label', `Seleccionar color ${swatch.title}`);
+                swatch.onclick = () => {
+                    updateFromRGB(color.r, color.g, color.b, color.a);
+                    navigator.clipboard.writeText(rgbToHex8(color.r, color.g, color.b, color.a).toUpperCase());
+                    triggerPulse();
+                };
+                swatch.oncontextmenu = (event) => {
+                    event.preventDefault();
+                    savedColors.splice(index, 1);
+                    localStorage.setItem(paletteStorageKey, JSON.stringify(savedColors));
+                    renderPalette();
+                };
+                paletteList.appendChild(swatch);
+            });
+        }
+
+        function applyTextColor() {
+            const color = parseColor(colorTextInput.value);
+            if (!color) {
+                colorTextInput.setCustomValidity('Formato de color no reconocido');
+                colorTextInput.reportValidity();
+                return;
+            }
+            colorTextInput.setCustomValidity('');
+            updateFromRGB(color.r, color.g, color.b, color.a);
+        }
+
         function triggerPulse() {
             charCount.classList.add('pulse');
             charCount.textContent = "¡Copiado!";
             setTimeout(() => {
                 charCount.classList.remove('pulse');
-                charCount.textContent = "Activo";
+                charCount.textContent = "";
             }, 800);
         }
 
         function handleWheelClick(e) {
             const rect = colorWheel.getBoundingClientRect();
-            const x = e.clientX - rect.left;
-            const y = e.clientY - rect.top;
-            const radius = colorWheel.width / 2;
+            const x = (e.clientX - rect.left) * colorWheel.width / rect.width;
+            const y = (e.clientY - rect.top) * colorWheel.height / rect.height;
+            const radius = Math.min(colorWheel.width, colorWheel.height) / 2;
             const dx = x - radius;
             const dy = y - radius;
             const distance = Math.sqrt(dx * dx + dy * dy);
@@ -601,10 +811,27 @@
             updateFromRGB(currentColor.r, currentColor.g, currentColor.b, parseFloat(e.target.value));
         });
 
+        parseColorButton.addEventListener('click', applyTextColor);
+        colorTextInput.addEventListener('keydown', (e) => {
+            if (e.key === 'Enter') applyTextColor();
+        });
+
+        saveColorButton.addEventListener('click', () => {
+            const color = { ...currentColor };
+            const exists = savedColors.some(saved => saved.r === color.r && saved.g === color.g && saved.b === color.b && saved.a === color.a);
+            if (!exists) {
+                savedColors.push(color);
+                localStorage.setItem(paletteStorageKey, JSON.stringify(savedColors));
+                renderPalette();
+                triggerPulse();
+            }
+        });
+
         window.onload = () => {
             lucide.createIcons();
             drawWheel();
             updateFromRGB(10, 132, 255, 1);
+            renderPalette();
         };
     </script>
 </body>

@@ -11,30 +11,25 @@
     <script src="https://unpkg.com/lucide@latest"></script>
     <style>
         :root {
-            /* Colores Limpios y Orgánicos del Ecosistema de Medidas */
             --bg: #000000;
             --surface: #121212;
             --surface-hover: #1c1c1e;
             
-            /* Neo-Glass Pure de Medidas */
             --glass: rgba(15, 15, 15, 0.4);
             --glass-border: rgba(255, 255, 255, 0.08);
             --blur-val: 30px;
 
-            /* Textos */
             --text-main: #FFFFFF;
             --text-muted: #8E8E93;
 
-            /* Acentos */
             --accent-danger: #FF453A;
             --accent-success: #34C759;
+            --accent-warning: #FF9F0A;
 
-            /* Curvas de Animación Fluidas de Medidas */
             --bezier: cubic-bezier(0.16, 1, 0.3, 1);
             --spring: cubic-bezier(0.34, 1.56, 0.64, 1);
         }
 
-        /* Reset Estricto de Medidas */
         * {
             box-sizing: border-box;
             margin: 0;
@@ -52,13 +47,12 @@
             position: relative;
         }
 
-        /* Contenedor Adaptativo Multidispositivo de Medidas */
         .app-container {
             height: 100dvh;
             display: flex;
             flex-direction: column;
             padding: env(safe-area-inset-top) 24px calc(env(safe-area-inset-bottom) + 16px) 24px;
-            max-width: 1400px; /* Incrementado para PC panorámicos */
+            max-width: 1400px;
             margin: 0 auto;
             will-change: transform, opacity;
             transition: transform 0.4s var(--bezier), opacity 0.4s var(--bezier);
@@ -70,7 +64,6 @@
             pointer-events: none;
         }
 
-        /* Cabecera Avanzada de Medidas */
         header {
             padding: 20px 0;
             display: flex;
@@ -123,7 +116,6 @@
             align-items: center;
         }
 
-        /* Cuerpo de Contenido Principal con Layout de Escritorio */
         .main-content {
             flex: 1;
             overflow-y: auto;
@@ -135,7 +127,6 @@
         }
         .main-content::-webkit-scrollbar { display: none; }
 
-        /* Distribución en Dashboard lateral para pantallas grandes */
         @media (min-width: 1024px) {
             .main-content {
                 display: grid;
@@ -145,7 +136,6 @@
             }
         }
 
-        /* Contenedor de Navegación de Carpetas Horizontal / Vertical */
         .folders-container-wrapper {
             display: flex;
             flex-direction: column;
@@ -163,7 +153,6 @@
         }
         .folders-scroll-area::-webkit-scrollbar { display: none; }
 
-        /* En PC se transforma en una barra lateral vertical fija */
         @media (min-width: 1024px) {
             .folders-scroll-area {
                 flex-direction: column;
@@ -175,7 +164,6 @@
             }
         }
 
-        /* Píldoras de Carpeta Ergonómicas */
         .folder-pill {
             background: var(--glass);
             backdrop-filter: blur(var(--blur-val));
@@ -205,6 +193,12 @@
             border-color: rgba(255, 255, 255, 0.3);
         }
 
+        .folder-pill.drag-over {
+            border-color: var(--accent-success);
+            background: rgba(52, 199, 89, 0.15);
+            transform: scale(1.02);
+        }
+
         .folder-pill span {
             font-size: 0.9rem;
             font-weight: 500;
@@ -214,14 +208,13 @@
         .folder-pill-actions {
             display: flex;
             align-items: center;
-            margin-left: auto; /* Empuja la acción al extremo en PC */
+            margin-left: auto;
             color: var(--text-muted);
             opacity: 0.6;
             transition: opacity 0.2s;
         }
         .folder-pill-actions:hover { opacity: 1; }
 
-        /* Encabezados de Sección */
         .section-header {
             display: flex;
             justify-content: space-between;
@@ -237,14 +230,12 @@
             font-weight: 600;
         }
 
-        /* Espacio de trabajo derecho */
         .items-workspace {
             display: flex;
             flex-direction: column;
             gap: 20px;
         }
 
-        /* Lista de Contenidos Adaptativa Multi-columna */
         .item-list-layout {
             display: grid;
             grid-template-columns: 1fr;
@@ -264,15 +255,16 @@
             display: flex;
             justify-content: space-between;
             align-items: center;
-            cursor: pointer;
+            cursor: grab;
             transition: background 0.2s var(--bezier), transform 0.2s var(--bezier);
         }
 
+        .item-row-card:active { cursor: grabbing; transform: scale(0.98); }
         .item-row-card:hover { background: var(--surface-hover); border-color: rgba(255,255,255,0.15); }
-        .item-row-card:active { transform: scale(0.98); }
+        .item-row-card.dragging { opacity: 0.4; }
 
         .item-text-info { min-width: 0; flex: 1; padding-right: 12px; }
-        .item-text-info h4 { font-size: 0.98rem; font-weight: 500; letter-spacing: -0.1px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+        .item-text-info h4 { font-size: 0.98rem; font-weight: 500; letter-spacing: -0.1px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; display: flex; align-items: center; gap: 6px; }
         .item-text-info p { font-size: 0.78rem; color: var(--text-muted); margin-top: 2px; }
 
         .item-badge-spec {
@@ -290,7 +282,19 @@
             white-space: nowrap;
         }
 
-        /* Modales Inmersivos Adaptativos estilo Side-Drawer para PC */
+        .chat-disabled-tag {
+            display: inline-flex;
+            align-items: center;
+            gap: 4px;
+            font-size: 0.7rem;
+            color: var(--accent-warning);
+            background: rgba(255, 159, 10, 0.12);
+            border: 1px solid rgba(255, 159, 10, 0.3);
+            padding: 2px 8px;
+            border-radius: 100px;
+            font-weight: 500;
+        }
+
         .view-modal {
             position: absolute;
             top: 0;
@@ -312,7 +316,6 @@
             border-left: 1px solid var(--glass-border);
         }
 
-        /* Panel lateral elegante en PC */
         @media (min-width: 600px) {
             .view-modal {
                 width: 460px;
@@ -348,7 +351,6 @@
         }
         .modal-body::-webkit-scrollbar { display: none; }
 
-        /* Inputs Estilo Neo-Píldora */
         .input-block-wrapper { display: flex; flex-direction: column; gap: 8px; width: 100%; }
         .input-native-label { font-size: 0.75rem; text-transform: uppercase; letter-spacing: 0.05em; color: var(--text-muted); font-weight: 500; padding-left: 4px; }
 
@@ -371,27 +373,60 @@
         .input-native-field { background: transparent; border: none; color: var(--text-main); font-size: 1rem; width: 100%; outline: none; }
         .input-native-select { background: var(--surface); border: 1px solid var(--glass-border); color: var(--text-main); font-size: 0.95rem; padding: 10px 14px; border-radius: 14px; outline: none; }
 
-        /* Segmented Control */
+        .toggle-switch-wrapper {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 14px 18px;
+            background: var(--surface);
+            border: 1px solid var(--glass-border);
+            border-radius: 16px;
+            cursor: pointer;
+        }
+
+        .toggle-switch {
+            position: relative;
+            width: 44px;
+            height: 24px;
+            background: rgba(255,255,255,0.1);
+            border-radius: 100px;
+            transition: background 0.2s;
+        }
+
+        .toggle-switch::after {
+            content: '';
+            position: absolute;
+            top: 2px;
+            left: 2px;
+            width: 20px;
+            height: 20px;
+            background: var(--text-main);
+            border-radius: 50%;
+            transition: transform 0.2s var(--bezier);
+        }
+
+        .toggle-checkbox { display: none; }
+        .toggle-checkbox:checked + .toggle-switch { background: var(--accent-success); }
+        .toggle-checkbox:checked + .toggle-switch::after { transform: translateX(20px); }
+
         .slider-segmented-control { display: flex; position: relative; width: 100%; background: var(--surface); border: 1px solid var(--glass-border); border-radius: 100px; padding: 4px; }
         .slider-segment-btn { flex: 1; padding: 12px; border: none; background: none; color: var(--text-muted); font-size: 0.9rem; font-weight: 500; cursor: pointer; z-index: 1; transition: color 0.25s; display: flex; align-items: center; justify-content: center; gap: 8px; }
         .slider-segment-btn.segment-active { color: var(--text-main); }
         .slider-sliding-indicator { position: absolute; top: 4px; bottom: 4px; left: 4px; width: calc(50% - 4px); background: rgba(255, 255, 255, 0.08); border: 1px solid var(--glass-border); border-radius: 100px; transition: transform 0.3s var(--bezier); z-index: 0; will-change: transform; }
 
-        /* Ficha Técnica Pura */
         .detail-badge-box { background: var(--glass); border: 1px solid var(--glass-border); border-radius: 28px; padding: 40px 24px; text-align: center; backdrop-filter: blur(var(--blur-val)); }
-        .detail-dimension-display { font-size: 1.4rem; font-weight: 400; color: var(--text-main); margin: 14px 0; background: rgba(0,0,0,0.4); padding: 16px; border-radius: 16px; border: 1px solid var(--glass-border); word-break: break-all; word-wrap: break-word; white-space: pre-wrap; letter-spacing: -0.3px; }
+        .detail-dimension-display { font-size: 1.4rem; font-weight: 400; color: var(--text-main); margin: 14px 0; background: rgba(0,0,0,0.4); padding: 16px; border-radius: 16px; border: 1px solid var(--glass-border); word-break: break-all; word-wrap: break-word; white-space: pre-wrap; letter-spacing: -0.3px; cursor: pointer; }
 
-        /* Botones de Acción de Anclaje Inferior */
         .dock-action-area { position: absolute; bottom: 0; left: 0; padding: 20px 24px calc(env(safe-area-inset-bottom) + 16px); background: linear-gradient(to top, #000000 85%, transparent); display: flex; justify-content: center; width: 100%; z-index: 5; gap: 12px; }
         .btn-dock-action { background: var(--text-main); color: #000000; font-weight: 500; font-size: 0.95rem; padding: 16px 32px; border-radius: 100px; border: none; cursor: pointer; display: flex; align-items: center; gap: 8px; width: 100%; justify-content: center; transition: transform 0.15s ease; }
         .btn-dock-action:active { transform: scale(0.97); }
         .btn-dock-action.danger-zone { background: rgba(255, 69, 58, 0.08); border: 1px solid rgba(255, 69, 58, 0.2); color: var(--accent-danger); }
+        .btn-dock-action.secondary { background: var(--surface); color: var(--text-main); border: 1px solid var(--glass-border); }
 
         .btn-icon-circular-round { background: var(--glass); border: 1px solid var(--glass-border); color: var(--text-muted); width: 42px; height: 42px; border-radius: 50%; display: flex; align-items: center; justify-content: center; cursor: pointer; flex-shrink: 0; transition: transform 0.15s ease, color 0.2s, border-color 0.2s; backdrop-filter: blur(var(--blur-val)); }
         .btn-icon-circular-round:active { transform: scale(0.93); }
         .btn-icon-circular-round:hover { color: var(--text-main); border-color: rgba(255,255,255,0.2); }
 
-        /* FAB Expansible de Búsqueda Centrado en el Layout */
         .fab-search-container {
             position: absolute;
             bottom: 30px;
@@ -463,7 +498,6 @@
         }
         .search-expand-bar.expanded .fab-trigger-btn { background: transparent; color: var(--text-muted); }
 
-        /* Toast de Alertas */
         .toast-notification {
             position: fixed;
             top: 30px;
@@ -488,10 +522,7 @@
 
         .toast-notification.visible { transform: translate3d(-50%, 0, 0); }
 
-        @keyframes pulseUp {
-            50% { transform: scale(1.05); }
-        }
-        
+        @keyframes pulseUp { 50% { transform: scale(1.05); } }
         .error-shake { animation: shake 0.3s var(--bezier); }
         @keyframes shake {
             25% { transform: translate3d(-4px, 0, 0); }
@@ -601,6 +632,70 @@
         </div>
     </div>
 
+    <div class="view-modal" id="edit-item-modal">
+        <div class="modal-header">
+            <button class="btn-icon-circular-round" onclick="closeActiveModal('edit-item-modal')">
+                <i data-lucide="arrow-left" size="18"></i>
+            </button>
+            <h2 style="font-weight: 500; font-size: 1.1rem;">Editar Comando</h2>
+            <div style="width: 42px;"></div>
+        </div>
+        <div class="modal-body">
+            <input type="hidden" id="edit-item-id">
+            <div class="input-block-wrapper" id="w-edit-item-name">
+                <label class="input-native-label">Alias del Comando</label>
+                <div class="input-glass-container">
+                    <i data-lucide="terminal" style="color:var(--text-muted);width:18px;"></i>
+                    <input type="text" id="edit-item-name" class="input-native-field" />
+                </div>
+            </div>
+            <div class="input-block-wrapper" id="w-edit-item-syntax">
+                <label class="input-native-label">Sintaxis (/comando)</label>
+                <div class="input-glass-container">
+                    <i data-lucide="code-2" style="color:var(--text-muted);width:18px;"></i>
+                    <input type="text" id="edit-item-syntax" class="input-native-field" />
+                </div>
+            </div>
+            <div class="input-block-wrapper">
+                <label class="input-native-label">Propósito / Descripción corta</label>
+                <div class="input-glass-container">
+                    <i data-lucide="align-left" style="color:var(--text-muted);width:18px;"></i>
+                    <input type="text" id="edit-item-desc" class="input-native-field" />
+                </div>
+            </div>
+            <div class="input-block-wrapper">
+                <label class="input-native-label">Asignar a Clúster/Servidor</label>
+                <div class="input-glass-container">
+                    <select id="edit-item-folder" class="input-native-select" style="width:100%; border:none; background:transparent;"></select>
+                </div>
+            </div>
+            <div class="input-block-wrapper">
+                <label class="input-native-label">Permiso / Tag Visual</label>
+                <div class="input-glass-container">
+                    <select id="edit-item-unit" class="input-native-select" style="width:100%; border:none; background:transparent;">
+                        <option value="Admin">Admin (OP)</option>
+                        <option value="Mod">Moderación</option>
+                        <option value="User">Usuario Común</option>
+                        <option value="Build">Constructor</option>
+                    </select>
+                </div>
+            </div>
+            <label class="toggle-switch-wrapper">
+                <div>
+                    <div style="font-size:0.95rem; font-weight:500;">Ejecutable en Chat</div>
+                    <div style="font-size:0.75rem; color:var(--text-muted);">Desactiva si requiere Command Block o Consola</div>
+                </div>
+                <input type="checkbox" id="edit-item-chat" class="toggle-checkbox" checked>
+                <span class="toggle-switch"></span>
+            </label>
+        </div>
+        <div class="dock-action-area">
+            <button class="btn-dock-action" onclick="handleUpdateItem()">
+                Guardar Cambios
+            </button>
+        </div>
+    </div>
+
     <div class="view-modal" id="detail-modal">
         <div class="modal-header">
             <button class="btn-icon-circular-round" onclick="closeActiveModal('detail-modal')">
@@ -659,23 +754,26 @@
                 </div>
             </div>
         </div>
-        <div class="dock-action-area">
-            <button class="btn-dock-action" onclick="handleUpdateFolder()">
+        <div class="dock-action-area" style="display:flex; gap:12px;">
+            <button class="btn-dock-action secondary danger-zone" style="flex:1;" onclick="handleDeleteFolderFromModal()">
+                Eliminar
+            </button>
+            <button class="btn-dock-action" style="flex:2;" onclick="handleUpdateFolder()">
                 Guardar Cambios
             </button>
         </div>
     </div>
 
     <script>
-        // --- CORE DATA ENGINE MIGRADO A MC PALETTE ---
         const DEFAULT_DATA = {
             folders: [
                 { id: "f-1", name: "Survival Técnico", color: "#34C759", icon: "cpu" },
                 { id: "f-2", name: "Servidor de Pruebas (Op)", color: "#6c5ce7", icon: "shield-alert" }
             ],
             items: [
-                { id: "i-1", name: "Optimizar Entidades (Lag)", syntax: "/kill @e[type=item]", unit: "Admin", description: "Limpia de manera forzada todos los items sueltos del mapa para mitigar caídas de TPS.", folderId: "f-1" },
-                { id: "i-2", name: "Obtener Bloque de Estructuras", syntax: "/give @s structure_block", unit: "Build", description: "Generador directo del buffer de estructuras vanilla.", folderId: "f-2" }
+                { id: "i-1", name: "Optimizar Entidades (Lag)", syntax: "/kill @e[type=item]", unit: "Admin", description: "Limpia de manera forzada todos los items sueltos del mapa para mitigar caídas de TPS.", folderId: "f-1", chatExecutable: true },
+                { id: "i-2", name: "Obtener Bloque de Estructuras", syntax: "/give @s structure_block", unit: "Build", description: "Generador directo del buffer de estructuras vanilla.", folderId: "f-2", chatExecutable: true },
+                { id: "i-3", name: "Bucle de Ticks Forzado", syntax: "execute as @e[type=armor_stand] run tp @s ~ ~0.1 ~", unit: "Admin", description: "Requiere ejecutor de bloque de comandos o consola continua.", folderId: "f-2", chatExecutable: false }
             ],
             trash: []
         };
@@ -685,11 +783,14 @@
         let currentFormMode = 1; 
         let searchQuery = "";
         let activeModalsStack = [];
+        let draggedItemId = null;
+        let toastTimeout = null;
 
         window.onload = () => {
             const stored = localStorage.getItem('craftpalette_ultra_v4');
             appData = stored ? JSON.parse(stored) : DEFAULT_DATA;
             if(!appData.trash) appData.trash = [];
+            appData.items.forEach(i => { if(i.chatExecutable === undefined) i.chatExecutable = true; });
             renderApp();
             toggleFormMode(1); 
         };
@@ -700,6 +801,23 @@
                 executeModalCloseAnimation(topModalId);
             }
         });
+
+        window.addEventListener('keydown', (e) => {
+            if (e.key === 'Escape' && activeModalsStack.length > 0) {
+                const topModal = activeModalsStack[activeModalsStack.length - 1];
+                closeActiveModal(topModal);
+            }
+        });
+
+        function showToast(msg) {
+            const toast = document.getElementById('toast');
+            const toastText = document.getElementById('toast-text');
+            if (!toast || !toastText) return;
+            toastText.textContent = msg;
+            toast.classList.add('visible');
+            clearTimeout(toastTimeout);
+            toastTimeout = setTimeout(() => toast.classList.remove('visible'), 2200);
+        }
 
         function saveData() {
             localStorage.setItem('craftpalette_ultra_v4', JSON.stringify(appData));
@@ -717,13 +835,31 @@
         }
 
         function closeActiveModal(modalId) {
-            if (activeModalsStack.includes(modalId)) {
+            const idx = activeModalsStack.lastIndexOf(modalId);
+            if (idx !== -1) {
                 window.history.back();
             }
         }
 
+        function switchModal(fromModalId, toModalId) {
+            document.getElementById(fromModalId).classList.remove('active');
+            document.getElementById(toModalId).classList.add('active');
+            
+            const idx = activeModalsStack.lastIndexOf(fromModalId);
+            if (idx !== -1) {
+                activeModalsStack[idx] = toModalId;
+                window.history.replaceState({ modalId: toModalId }, "");
+            } else {
+                activeModalsStack.push(toModalId);
+                window.history.pushState({ modalId: toModalId }, "");
+            }
+
+            if (toModalId === 'trash-modal') renderTrash();
+        }
+
         function executeModalCloseAnimation(modalId) {
-            document.getElementById(modalId).classList.remove('active');
+            const el = document.getElementById(modalId);
+            if (el) el.classList.remove('active');
             if (activeModalsStack.length === 0) {
                 document.getElementById('main-view').classList.remove('backgrounded');
                 document.getElementById('global-search-fab').classList.remove('hidden-state'); 
@@ -740,7 +876,6 @@
             }
         }
 
-        // --- SISTEMA DE RENDERIZADO CALCADO DE MEDIDAS ---
         function renderApp() {
             const counter = document.getElementById('total-counter');
             updateDisplayCounter(counter, appData.items.length);
@@ -749,7 +884,6 @@
             trashBtn.style.color = appData.trash.length > 0 ? 'var(--accent-danger)' : 'var(--text-muted)';
             trashBtn.style.borderColor = appData.trash.length > 0 ? 'rgba(255, 69, 58, 0.2)' : 'var(--glass-border)';
 
-            // Renderizado de Servidores en Formato Horizontal / Vertical según dispositivo
             const pillsContainer = document.getElementById('folders-pills-container');
             
             let pillsHTML = `
@@ -763,7 +897,11 @@
                 const isSelected = activeFolderFilter === f.id ? 'active-pill' : '';
                 const iconName = f.icon || 'server';
                 return `
-                    <div class="folder-pill ${isSelected}" onclick="setFolderFilter('${f.id}')">
+                    <div class="folder-pill ${isSelected}" 
+                         onclick="setFolderFilter('${f.id}')"
+                         ondragover="handleDragOver(event)"
+                         ondragleave="handleDragLeave(event)"
+                         ondrop="handleDrop(event, '${f.id}')">
                         <i data-lucide="${iconName}" size="16" style="color: ${f.color || 'var(--text-muted)'};"></i>
                         <span>${f.name}</span>
                         <div class="folder-pill-actions" onclick="event.stopPropagation(); openEditFolderModal('${f.id}');">
@@ -775,7 +913,6 @@
 
             pillsContainer.innerHTML = pillsHTML;
 
-            // Renderizado de Lista de Macros / Comandos
             const itemsContainer = document.getElementById('items-container');
             let matched = appData.items;
 
@@ -787,13 +924,19 @@
             } else {
                 itemsContainer.innerHTML = matched.map(item => {
                     const fObj = appData.folders.find(f => f.id === item.folderId);
+                    const notChatBadge = !item.chatExecutable ? `<span class="chat-disabled-tag"><i data-lucide="alert-triangle" size="10"></i> No Chat</span>` : '';
+                    const escapedSyntax = item.syntax.replace(/'/g, "\\'");
                     return `
-                        <div class="item-row-card" onclick="openDetailItem('${item.id}')">
+                        <div class="item-row-card" 
+                             draggable="true" 
+                             ondragstart="handleDragStart(event, '${item.id}')"
+                             ondragend="handleDragEnd(event)"
+                             onclick="openDetailItem('${item.id}')">
                             <div class="item-text-info">
-                                <h4>${item.name}</h4>
-                                <p style="color: ${fObj ? fObj.color : 'var(--text-muted)'}">${fObj ? fObj.name : 'Mundo Desconocido'}</p>
+                                <h4>${item.name} ${notChatBadge}</h4>
+                                <p style="color: ${fObj ? fObj.color : 'var(--text-muted)'}">${fObj ? fObj.name : 'Sin Servidor'}</p>
                             </div>
-                            <div class="item-badge-spec" onclick="event.stopPropagation(); fastCopyToClipboard('${item.syntax}')">${item.syntax}</div>
+                            <div class="item-badge-spec" onclick="event.stopPropagation(); fastCopyToClipboard('${escapedSyntax}')">${item.syntax}</div>
                         </div>
                     `;
                 }).join('');
@@ -801,19 +944,52 @@
             lucide.createIcons();
         }
 
+        function handleDragStart(e, id) {
+            draggedItemId = id;
+            e.currentTarget.classList.add('dragging');
+            e.dataTransfer.setData('text/plain', id);
+            e.dataTransfer.effectAllowed = 'move';
+        }
+
+        function handleDragEnd(e) {
+            e.currentTarget.classList.remove('dragging');
+            draggedItemId = null;
+        }
+
+        function handleDragOver(e) {
+            e.preventDefault();
+            e.dataTransfer.dropEffect = 'move';
+            e.currentTarget.classList.add('drag-over');
+        }
+
+        function handleDragLeave(e) {
+            e.currentTarget.classList.remove('drag-over');
+        }
+
+        function handleDrop(e, targetFolderId) {
+            e.preventDefault();
+            e.currentTarget.classList.remove('drag-over');
+            if (!draggedItemId) return;
+
+            const item = appData.items.find(i => i.id === draggedItemId);
+            if (item && item.folderId !== targetFolderId) {
+                item.folderId = targetFolderId;
+                saveData();
+                renderApp();
+                
+                const fObj = appData.folders.find(f => f.id === targetFolderId);
+                showToast(`Movido a ${fObj ? fObj.name : 'Servidor'}`);
+            }
+        }
+
         function setFolderFilter(id) { activeFolderFilter = id; renderApp(); }
 
-        // --- FEEDBACK DE COPIADO RÁPIDO DE CRAFTPALETTE ---
         function fastCopyToClipboard(text) {
             navigator.clipboard.writeText(text).then(() => {
-                const toast = document.getElementById('toast');
-                document.getElementById('toast-text').textContent = "Comando copiado al portapapeles";
-                toast.classList.add('visible');
-                setTimeout(() => toast.classList.remove('visible'), 2000);
+                showToast("Comando copiado al portapapeles");
             });
         }
 
-        // --- SEARCH CONTROL ---
         function toggleSearchFAB() {
             const wrapper = document.getElementById('search-wrapper');
             const input = document.getElementById('search-input');
@@ -837,7 +1013,6 @@
 
         function handleSearch(val) { searchQuery = val; renderApp(); }
 
-        // --- MANEJO DE FORMULARIOS MULTI-ENTIDAD ---
         function openAddModal() { openModal('add-modal'); }
 
         function toggleFormMode(mode) {
@@ -856,6 +1031,14 @@
                     <div class="input-block-wrapper"><label class="input-native-label">Propósito / Descripción corta</label><div class="input-glass-container"><i data-lucide="align-left" style="color:var(--text-muted);width:18px;"></i><input type="text" id="obj-desc" placeholder="Añadir notas sobre banderas opcionales..." class="input-native-field" /></div></div>
                     <div class="input-block-wrapper"><label class="input-native-label">Asignar a Clúster/Servidor</label><div class="input-glass-container"><select id="obj-folder" class="input-native-select" style="width:100%; border:none; background:transparent;">${appData.folders.map(f => `<option value="${f.id}">${f.name}</option>`).join('')}</select></div></div>
                     <div class="input-block-wrapper"><label class="input-native-label">Permiso / Tag Visual</label><div class="input-glass-container"><select id="obj-unit" class="input-native-select" style="width:100%; border:none; background:transparent;"><option value="Admin">Admin (OP)</option><option value="Mod">Moderación</option><option value="User">Usuario Común</option><option value="Build">Constructor</option></select></div></div>
+                    <label class="toggle-switch-wrapper">
+                        <div>
+                            <div style="font-size:0.95rem; font-weight:500;">Ejecutable en Chat</div>
+                            <div style="font-size:0.75rem; color:var(--text-muted);">Desactiva si requiere Command Block o Consola</div>
+                        </div>
+                        <input type="checkbox" id="obj-chat" class="toggle-checkbox" checked>
+                        <span class="toggle-switch"></span>
+                    </label>
                 `;
             } else {
                 container.innerHTML = `
@@ -902,8 +1085,6 @@
         function handleUpdateFolder() {
             const id = document.getElementById('edit-folder-id').value;
             const nameInput = document.getElementById('edit-folder-name');
-            const iconInput = document.getElementById('edit-folder-icon');
-            const colorInput = document.getElementById('edit-folder-color');
 
             if (!nameInput.value.trim()) { 
                 triggerError(document.getElementById('w-edit-fname')); 
@@ -913,12 +1094,64 @@
             const folder = appData.folders.find(f => f.id === id);
             if (folder) {
                 folder.name = nameInput.value.trim();
-                folder.icon = iconInput.value.trim() || 'server';
-                folder.color = colorInput.value;
+                folder.icon = document.getElementById('edit-folder-icon').value.trim() || 'server';
+                folder.color = document.getElementById('edit-folder-color').value;
                 
                 saveData();
                 renderApp();
                 closeActiveModal('edit-folder-modal');
+                showToast("Servidor actualizado");
+            }
+        }
+
+        function handleDeleteFolderFromModal() {
+            const id = document.getElementById('edit-folder-id').value;
+            if (confirm("¿Mover este servidor y sus comandos asociados a la papelera?")) {
+                trashAction(id, 'folder');
+                closeActiveModal('edit-folder-modal');
+            }
+        }
+
+        function openEditItemModal(id) {
+            const item = appData.items.find(i => i.id === id);
+            if (!item) return;
+
+            document.getElementById('edit-item-id').value = item.id;
+            document.getElementById('edit-item-name').value = item.name;
+            document.getElementById('edit-item-syntax').value = item.syntax;
+            document.getElementById('edit-item-desc').value = item.description || '';
+            document.getElementById('edit-item-unit').value = item.unit || 'Admin';
+            document.getElementById('edit-item-chat').checked = item.chatExecutable !== false;
+
+            const folderSelect = document.getElementById('edit-item-folder');
+            folderSelect.innerHTML = appData.folders.map(f => `<option value="${f.id}" ${f.id === item.folderId ? 'selected' : ''}>${f.name}</option>`).join('');
+
+            switchModal('detail-modal', 'edit-item-modal');
+        }
+
+        function handleUpdateItem() {
+            const id = document.getElementById('edit-item-id').value;
+            const nameInput = document.getElementById('edit-item-name');
+            const syntaxInput = document.getElementById('edit-item-syntax');
+
+            let err = false;
+            if(!nameInput.value.trim()) { triggerError(document.getElementById('w-edit-item-name')); err = true; }
+            if(!syntaxInput.value.trim()) { triggerError(document.getElementById('w-edit-item-syntax')); err = true; }
+            if(err) return;
+
+            const item = appData.items.find(i => i.id === id);
+            if (item) {
+                item.name = nameInput.value.trim();
+                item.syntax = syntaxInput.value.trim();
+                item.description = document.getElementById('edit-item-desc').value.trim();
+                item.folderId = document.getElementById('edit-item-folder').value;
+                item.unit = document.getElementById('edit-item-unit').value;
+                item.chatExecutable = document.getElementById('edit-item-chat').checked;
+
+                saveData();
+                renderApp();
+                closeActiveModal('edit-item-modal');
+                showToast("Comando actualizado");
             }
         }
 
@@ -927,6 +1160,7 @@
                 const name = document.getElementById('folder-name');
                 if(!name.value.trim()) { triggerError(document.getElementById('w-fname')); return; }
                 appData.folders.push({ id: 'f-'+Date.now(), name: name.value.trim(), color: document.getElementById('folder-color').value, icon: document.getElementById('folder-icon').value.trim() || 'server' });
+                showToast("Servidor registrado");
             } else {
                 const name = document.getElementById('obj-name');
                 const syntax = document.getElementById('obj-syntax');
@@ -938,29 +1172,40 @@
                 if(!folder) { alert('Es obligatorio registrar un servidor primero.'); return; }
                 if(err) return;
 
-                appData.items.push({ id: 'i-'+Date.now(), name: name.value.trim(), syntax: syntax.value.trim(), unit: document.getElementById('obj-unit').value, description: document.getElementById('obj-desc').value.trim(), folderId: folder });
+                appData.items.push({ 
+                    id: 'i-'+Date.now(), 
+                    name: name.value.trim(), 
+                    syntax: syntax.value.trim(), 
+                    unit: document.getElementById('obj-unit').value, 
+                    description: document.getElementById('obj-desc').value.trim(), 
+                    folderId: folder,
+                    chatExecutable: document.getElementById('obj-chat').checked
+                });
+                showToast("Comando creado");
             }
             saveData(); renderApp(); closeActiveModal('add-modal');
         }
 
-        // --- DETALLES E INSPECTOR ADAPTADO ---
         function openDetailItem(id) {
             const item = appData.items.find(i => i.id === id);
             if(!item) return;
             const fObj = appData.folders.find(f => f.id === item.folderId);
+            const chatStatusText = item.chatExecutable ? "Sí (Ejecución Directa)" : "<span style='color:var(--accent-warning); font-weight:500;'>No (Requiere Bloque de Comandos / Consola)</span>";
+            const escapedSyntax = item.syntax.replace(/'/g, "\\'");
 
             document.getElementById('detail-modal-title').textContent = "Inspección de Comando";
             document.getElementById('detail-modal-body').innerHTML = `
                 <div class="detail-badge-box">
                     <span class="counter-badge-inline" style="color:${fObj?.color || 'var(--text-main)'}; font-weight:500;">${fObj?.name || 'Global Cluster'}</span>
-                    <div class="detail-dimension-display" onclick="fastCopyToClipboard('${item.syntax}')">${item.syntax}</div>
+                    <div class="detail-dimension-display" onclick="fastCopyToClipboard('${escapedSyntax}')">${item.syntax}</div>
                     <p style="font-size:0.75rem; color:var(--text-muted); margin-top:-6px; margin-bottom:4px; cursor:pointer;">Presiona arriba para copiar la sintaxis</p>
                     <h3 style="font-weight:500; font-size:1.2rem; letter-spacing:-0.1px;">${item.name}</h3>
                 </div>
                 <div class="input-block-wrapper">
-                    <label class="input-native-label">Nivel / Rango Ámbito</label>
-                    <div class="input-glass-container" style="background:transparent;">
-                        <p style="font-size:0.95rem; color: var(--text-main);">Rango requerido: <strong>${item.unit}</strong></p>
+                    <label class="input-native-label">Propiedades y Requisitos</label>
+                    <div class="input-glass-container" style="background:transparent; flex-direction:column; align-items:flex-start; gap:6px;">
+                        <p style="font-size:0.9rem; color: var(--text-main);">Rango requerido: <strong>${item.unit}</strong></p>
+                        <p style="font-size:0.9rem; color: var(--text-main);">¿Soporta Chat?: ${chatStatusText}</p>
                     </div>
                 </div>
                 <div class="input-block-wrapper">
@@ -971,8 +1216,8 @@
                 </div>
             `;
             document.getElementById('detail-modal-actions').innerHTML = `
-                <button class="btn-dock-action" style="background:var(--text-main); color:#000000; width:auto;" onclick="fastCopyToClipboard('${item.syntax}')"><i data-lucide="copy" size="16"></i> Copiar</button>
-                <button class="btn-dock-action danger-zone" onclick="trashAction('${item.id}', 'item')">Mover a Papelera</button>
+                <button class="btn-dock-action secondary" onclick="openEditItemModal('${item.id}')"><i data-lucide="edit-3" size="16"></i> Editar</button>
+                <button class="btn-dock-action danger-zone" onclick="trashAction('${item.id}', 'item')">Papelera</button>
             `;
             openModal('detail-modal');
             lucide.createIcons();
@@ -993,6 +1238,7 @@
                 if(activeFolderFilter === id) activeFolderFilter = null;
             }
             saveData(); renderApp(); closeActiveModal('detail-modal');
+            showToast("Enviado a la papelera");
         }
 
         function renderTrash() {
@@ -1020,21 +1266,36 @@
             if(idx === -1) return;
             const target = appData.trash.splice(idx, 1)[0];
             
-            if(target.schema === 'folder') { delete target.schema; appData.folders.push(target); }
-            else { delete target.schema; appData.items.push(target); }
+            if(target.schema === 'folder') { 
+                delete target.schema; 
+                appData.folders.push(target); 
+            } else { 
+                delete target.schema; 
+                if (target.folderId && !appData.folders.some(f => f.id === target.folderId) && appData.folders.length > 0) {
+                    target.folderId = appData.folders[0].id;
+                }
+                appData.items.push(target); 
+            }
             
             saveData(); renderApp(); renderTrash();
+            showToast("Elemento restaurado");
         }
 
-        function purgeTrash() { appData.trash = []; saveData(); renderApp(); closeActiveModal('trash-modal'); }
+        function purgeTrash() { 
+            appData.trash = []; 
+            saveData(); 
+            renderApp(); 
+            closeActiveModal('trash-modal'); 
+            showToast("Papelera vaciada");
+        }
 
         function triggerError(wrap) {
             const el = wrap.querySelector('.input-glass-container');
+            if(!el) return;
             el.classList.add('error-shake'); el.style.borderColor = 'var(--accent-danger)';
             setTimeout(() => { el.classList.remove('error-shake'); el.style.borderColor = 'var(--glass-border)'; }, 300);
         }
 
-        // --- SISTEMA Copia JSON de Craftpalette ---
         function exportJSON() {
             const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(appData));
             const dlAnchor = document.createElement('a');
@@ -1043,11 +1304,7 @@
             document.body.appendChild(dlAnchor);
             dlAnchor.click();
             dlAnchor.remove();
-            
-            const toast = document.getElementById('toast');
-            document.getElementById('toast-text').textContent = "Configuración JSON Exportada";
-            toast.classList.add('visible');
-            setTimeout(() => toast.classList.remove('visible'), 2000);
+            showToast("Configuración JSON Exportada");
         }
 
         function importJSON(event) {
@@ -1061,13 +1318,10 @@
                     if (parsed.folders && parsed.items) {
                         appData = parsed;
                         if(!appData.trash) appData.trash = [];
+                        appData.items.forEach(i => { if(i.chatExecutable === undefined) i.chatExecutable = true; });
                         saveData();
                         renderApp();
-                        
-                        const toast = document.getElementById('toast');
-                        document.getElementById('toast-text').textContent = "Datos Sincronizados con Éxito";
-                        toast.classList.add('visible');
-                        setTimeout(() => toast.classList.remove('visible'), 2000);
+                        showToast("Datos Sincronizados con Éxito");
                     } else {
                         alert("Estructura de respaldo inválida.");
                     }
