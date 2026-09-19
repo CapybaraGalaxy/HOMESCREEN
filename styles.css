@@ -375,15 +375,16 @@ body.zen-mode .welcome-message {
 }
 
 .tools-container.list-mode { 
-    flex-direction: column; 
-    align-items: center; 
-    flex-wrap: nowrap; 
+    display: grid;
+    grid-template-columns: repeat(var(--list-columns, 1), minmax(0, 1fr));
+    align-items: stretch;
+    width: 100%;
     padding-top: 10px;
     padding-bottom: 20px;
 }
 .tools-container.list-mode .tool-card { 
     width: 100%; 
-    max-width: 500px; 
+    max-width: none; 
     justify-content: flex-start; 
     border-radius: 16px;
     padding: 14px 24px;
@@ -391,12 +392,13 @@ body.zen-mode .welcome-message {
 
 .tools-container.grid-mode {
     display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(110px, 1fr));
+    grid-template-columns: repeat(var(--grid-columns, 5), minmax(0, 1fr));
     gap: 16px;
     justify-content: center;
     align-content: start;
     width: 100%;
-    max-width: 700px;
+    width: min(100%, var(--grid-width, 700px));
+    max-width: var(--grid-width, 700px);
     padding: 20px;
     margin: 0 auto;
 }
@@ -431,10 +433,10 @@ body.folder-size-1 .tools-container .tool-card { padding: 9px 17px; gap: 8px; fo
 body.folder-size-2 .tools-container .tool-card { padding: 10px 20px; gap: 10px; font-size: 0.88rem; }
 body.folder-size-4 .tools-container .tool-card { padding: 14px 28px; gap: 14px; font-size: 1rem; }
 body.folder-size-5 .tools-container .tool-card { padding: 16px 32px; gap: 16px; font-size: 1.06rem; }
-body.folder-size-1 .tools-container.grid-mode { grid-template-columns: repeat(auto-fill, minmax(92px, 1fr)); gap: 11px; }
-body.folder-size-2 .tools-container.grid-mode { grid-template-columns: repeat(auto-fill, minmax(100px, 1fr)); gap: 13px; }
-body.folder-size-4 .tools-container.grid-mode { grid-template-columns: repeat(auto-fill, minmax(122px, 1fr)); gap: 18px; }
-body.folder-size-5 .tools-container.grid-mode { grid-template-columns: repeat(auto-fill, minmax(136px, 1fr)); gap: 20px; }
+body.folder-size-1 .tools-container.grid-mode { gap: 11px; }
+body.folder-size-2 .tools-container.grid-mode { gap: 13px; }
+body.folder-size-4 .tools-container.grid-mode { gap: 18px; }
+body.folder-size-5 .tools-container.grid-mode { gap: 20px; }
 body.folder-size-1 .tools-container.grid-mode .tool-card { padding: 11px 8px; }
 body.folder-size-2 .tools-container.grid-mode .tool-card { padding: 13px 9px; }
 body.folder-size-4 .tools-container.grid-mode .tool-card { padding: 18px 11px; }

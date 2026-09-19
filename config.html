@@ -776,7 +776,10 @@
             hideWelcome: getStoredConfigValue('hideWelcome', 'false'),
             welcomeAnimation: getStoredConfigValue('welcomeAnimation', 'blur'),
             folderAnimation: getStoredConfigValue('folderAnimation', 'slide'),
-            settingsAnimation: getStoredConfigValue('settingsAnimation', 'fade')
+            settingsAnimation: getStoredConfigValue('settingsAnimation', 'fade'),
+            gridWidth: getStoredConfigValue('gridWidth', '700'),
+            listColumns: getStoredConfigValue('listColumns', '1'),
+            gridColumns: getStoredConfigValue('gridColumns', '5')
         };
 
         const userNameInput = document.getElementById('userNameInput');

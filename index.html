@@ -1237,6 +1237,18 @@ const frases = {
                                 </button>
                             </div>
                         </div>
+                        <div class="setting-item-row setting-range-row">
+                            <div class="setting-item-meta"><i data-lucide="stretch-horizontal"></i><div><span class="setting-label">Ancho de cuadrícula</span><span class="setting-desc">Estira la cuadrícula para una composición más apaisada</span></div></div>
+                            <label class="settings-range-control"><output id="gridWidthValue">700 px</output><input type="range" id="gridWidthRange" min="560" max="1100" value="700" step="10" aria-label="Ancho de cuadrícula"></label>
+                        </div>
+                        <div class="setting-item-row setting-range-row">
+                            <div class="setting-item-meta"><i data-lucide="columns-3"></i><div><span class="setting-label">Columnas en modo lista</span><span class="setting-desc">Organiza los accesos en varias columnas</span></div></div>
+                            <label class="settings-range-control"><output id="listColumnsValue">1</output><input type="range" id="listColumnsRange" min="1" max="4" value="1" step="1" aria-label="Columnas en modo lista"></label>
+                        </div>
+                        <div class="setting-item-row setting-range-row">
+                            <div class="setting-item-meta"><i data-lucide="grid-3x3"></i><div><span class="setting-label">Columnas en cuadrícula</span><span class="setting-desc">Elige cuántos accesos aparecen por fila</span></div></div>
+                            <label class="settings-range-control"><output id="gridColumnsValue">5</output><input type="range" id="gridColumnsRange" min="2" max="8" value="5" step="1" aria-label="Columnas en cuadrícula"></label>
+                        </div>
                         <div class="setting-item-row">
                             <div class="setting-item-meta"><i data-lucide="sparkles"></i><div><span class="setting-label">Fondo animado</span><span class="setting-desc">Partículas interactivas flotando</span></div></div>
                             <div class="switch" id="toggleBg"></div>
@@ -2027,6 +2039,45 @@ const frases = {
             });
         }
 
+        function applyLayoutDimensionSettings() {
+            const gridWidth = Math.max(560, Math.min(1100, Number(localStorage.getItem('gridWidth')) || 700));
+            const listColumns = Math.max(1, Math.min(4, Number(localStorage.getItem('listColumns')) || 1));
+            const gridColumns = Math.max(2, Math.min(8, Number(localStorage.getItem('gridColumns')) || 5));
+            grid.style.setProperty('--grid-width', `${gridWidth}px`);
+            grid.style.setProperty('--list-columns', listColumns);
+            grid.style.setProperty('--grid-columns', gridColumns);
+
+            const controls = [
+                ['gridWidthRange', 'gridWidthValue', gridWidth, value => `${value} px`],
+                ['listColumnsRange', 'listColumnsValue', listColumns, value => value],
+                ['gridColumnsRange', 'gridColumnsValue', gridColumns, value => value]
+            ];
+            controls.forEach(([rangeId, outputId, value, format]) => {
+                const range = document.getElementById(rangeId);
+                const output = document.getElementById(outputId);
+                if (range) range.value = value;
+                if (output) output.value = format(value);
+            });
+        }
+
+        function applyGridWidth(value) {
+            const width = Math.max(560, Math.min(1100, Math.round(Number(value) || 700)));
+            localStorage.setItem('gridWidth', width);
+            applyLayoutDimensionSettings();
+        }
+
+        function applyListColumns(value) {
+            const columns = Math.max(1, Math.min(4, Math.round(Number(value) || 1)));
+            localStorage.setItem('listColumns', columns);
+            applyLayoutDimensionSettings();
+        }
+
+        function applyGridColumns(value) {
+            const columns = Math.max(2, Math.min(8, Math.round(Number(value) || 5)));
+            localStorage.setItem('gridColumns', columns);
+            applyLayoutDimensionSettings();
+        }
+
         function applySuperPerformanceMode(enabled) {
             body.classList.toggle('super-performance', enabled);
             const toggle = document.getElementById('toggleSuperPerformance');
@@ -2436,9 +2487,13 @@ const frases = {
             applyFolderSize(localStorage.getItem('folderSize') || 3);
             applyFolderAppsSize(localStorage.getItem('folderAppsSize') || 3);
             applyGlassOpacity(localStorage.getItem('glassOpacity') || 50);
+            applyLayoutDimensionSettings();
             bindSmoothSnapRange('folderSizeRange', applyFolderSize, 1, 5);
             bindSmoothSnapRange('folderAppsSizeRange', applyFolderAppsSize, 1, 5);
             bindSmoothSnapRange('glassOpacityRange', applyGlassOpacity, 10, 90);
+            bindSmoothSnapRange('gridWidthRange', applyGridWidth, 560, 1100);
+            bindSmoothSnapRange('listColumnsRange', applyListColumns, 1, 4);
+            bindSmoothSnapRange('gridColumnsRange', applyGridColumns, 2, 8);
             setupToggle('toggleFolderLabels', 'hideFolderLabels', (isHidden) => {
                 body.classList.toggle('hide-folder-labels', isHidden);
             }, 'false');
@@ -2609,6 +2664,9 @@ const frases = {
                 welcomeAnimation: 'blur',
                 folderAnimation: 'slide',
                 settingsAnimation: 'fade',
+                gridWidth: '700',
+                listColumns: '1',
+                gridColumns: '5',
                 hideFolderCloseBtn: 'false'
             };
 

@@ -1,9 +1,8 @@
 {
   "version": "1.7 - Neo Drop 1",
-  "date": "29 de Agosto 2026",
+  "date": "19 de Septiembre 2026",
   "changes": [
-[
-   "✦ Novedades de la versión 1.7 - Neo Drop 1 (Septiembre 2026)",
+    "✦ Novedades de la versión 1.7 - Neo Drop 1 (Septiembre 2026)",
   "Novedades del homescreen:",
   "Los neo drops son una nueva forma de mejorar Homescreen, no son estrictamente periódicos, pero sí marcan actualizaciones grandes.",
   "Apps personalizables (Ajustes > Apps ¡Nueva categoría!): ahora puedes ocultar apps del sistema que no uses, también puedes crear accesos directos a otras webs y colocarlos en carpetas junto a otras apps. Puedes elegir el nombre, URL e icono (Lucide, favicon de la web, path SVG o archivo PNG/SVG). Planeamos expandir esta función en el futuro. Además, desde Ajustes > Carpetas > Navegación y carpetas > Apps añadidas: opcionalmente puedes mostrar u ocultar la carpeta de apps creadas manualmente.",
@@ -11,6 +10,9 @@
   "Modo super rendimiento: Ajustes > Apariencia y rendimiento > Modo super rendimiento. Desactiva efectos, partículas y animaciones pesadas.",
   "Accesos directos: se han corregido accesos directos que estaban rotos.",
   "Animación del panel de ajustes: puedes personalizar la animación de entrada del panel de ajustes entre Fade (comportamiento habitual), Zoom (parecido al de las carpetas y los antiguos ajustes) y Slide (igual que el de las carpetas). Ruta: Ajustes > Apariencia y rendimiento > Animación del panel de ajustes.",
+  "Ancho de cuadrícula: ahora puedes estirar la cuadrícula para una composición más apaisada.",
+  "Columnas en modo lista: Ahora puedes configurar el número de columnas al usar el modo lista.",
+  "Columnas en cuadrícula: Ahora puedes configurar el número de columnas al usar el modo cuadrícula.",
   "Labs: nueva aplicación 'Day Briefing'. Revisa tus tareas pendientes, calendario y estado del tiempo para hoy.",
   "Cambios en aplicaciones:",
   "Ruleta aleatoria: UI optimizada con una nueva sidebar y ruleta más grande. Ahora hay más opciones, como modo sin blur o posicionamiento personalizable de la sidebar.",
