@@ -1,0 +1,448 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+    <title>Compatibilidad & Transparencia - Homescreen</title>
+    <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20width%3D%2224%22%20height%3D%2224%22%20viewBox%3D%220%200%2024%2024%22%20fill%3D%22none%22%20stroke%3D%22currentColor%22%20stroke-width%3D%222%22%20stroke-linecap%3D%22round%22%20stroke-linejoin%3D%22round%22%3E%3Ccircle%20cx%3D%2212%22%20cy%3D%2212%22%20r%3D%2210%22%2F%3E%3Cpath%20d%3D%22M12%2016v-4%22%2F%3E%3Cpath%20d%3D%22M12%208h.01%22%2F%3E%3C%2Fsvg%3E">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@200;300;400;500;600;700&display=swap" rel="stylesheet">
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <style>
+        :root {
+            --bg: #000000;
+            --surface: #0e0e11;
+            --surface-hover: #16161d;
+            --glass: rgba(18, 18, 24, 0.6);
+            --glass-border: rgba(255, 255, 255, 0.08);
+            --blur-val: 30px;
+            --text-main: #FFFFFF;
+            --text-muted: #8E8E93;
+            --accent: #007AFF;
+            --accent-glow: rgba(0, 122, 255, 0.25);
+            --accent-success: #34C759;
+            --bezier: cubic-bezier(0.16, 1, 0.3, 1);
+            --spring: cubic-bezier(0.34, 1.56, 0.64, 1);
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            user-select: none;
+            -webkit-font-smoothing: antialiased;
+        }
+
+        body {
+            background-color: var(--bg);
+            color: var(--text-main);
+            font-family: 'Outfit', sans-serif;
+            overflow-x: hidden;
+            overflow-y: auto;
+        }
+
+        #particles-bg {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: 1;
+            pointer-events: none;
+        }
+
+        .app-container {
+            position: relative;
+            z-index: 2;
+            max-width: 800px;
+            margin: 0 auto;
+            min-height: 100dvh;
+            padding: env(safe-area-inset-top) 24px calc(env(safe-area-inset-bottom) + 40px) 24px;
+            display: flex;
+            flex-direction: column;
+            gap: 40px;
+        }
+
+        /* Cabecera Principal */
+        header {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            text-align: center;
+            padding-top: 60px;
+            gap: 18px;
+            animation: fadeInHero 1.2s var(--bezier) forwards;
+        }
+
+        .app-icon-badge {
+            width: 76px;
+            height: 76px;
+            border-radius: 24px;
+            background: radial-gradient(circle at center, rgba(0, 122, 255, 0.2) 0%, rgba(0,0,0,0) 80%);
+            border: 1px solid var(--glass-border);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5), inset 0 1px 2px rgba(255,255,255,0.2);
+            transition: transform 0.5s var(--spring);
+        }
+
+        .app-icon-badge:hover {
+            transform: scale(1.08) rotate(5deg);
+        }
+
+        .app-icon-badge i {
+            color: var(--accent);
+        }
+
+        h1 {
+            font-size: 2.6rem;
+            font-weight: 700;
+            letter-spacing: -0.03em;
+            background: linear-gradient(180deg, #FFFFFF 0%, #A2A2A7 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            line-height: 1.2;
+        }
+
+        h1 span {
+            color: var(--accent);
+            -webkit-text-fill-color: var(--accent);
+        }
+
+        .hero-subtitle {
+            font-size: 1.15rem;
+            color: var(--text-muted);
+            font-weight: 300;
+            max-width: 620px;
+            line-height: 1.6;
+        }
+
+        .hero-subtitle strong {
+            color: var(--text-main);
+            font-weight: 500;
+        }
+
+        .scroll-indicator {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            font-size: 0.9rem;
+            color: var(--accent);
+            background: rgba(0, 122, 255, 0.1);
+            border: 1px solid rgba(0, 122, 255, 0.25);
+            padding: 8px 18px;
+            border-radius: 100px;
+            margin-top: 10px;
+            backdrop-filter: blur(var(--blur-val));
+            animation: pulseScroll 2s infinite ease-in-out;
+        }
+
+        /* Secciones */
+        .section-box {
+            background: var(--glass);
+            border: 1px solid var(--glass-border);
+            border-radius: 24px;
+            padding: 32px;
+            backdrop-filter: blur(var(--blur-val));
+            -webkit-backdrop-filter: blur(var(--blur-val));
+            opacity: 0;
+            animation: scaleInCards 0.8s var(--bezier) 0.3s forwards;
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.3);
+        }
+
+        .section-title {
+            font-size: 1.3rem;
+            font-weight: 600;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            letter-spacing: -0.01em;
+            color: var(--text-main);
+        }
+
+        .section-title i {
+            color: var(--accent);
+        }
+
+        .section-content {
+            color: var(--text-muted);
+            font-size: 1rem;
+            line-height: 1.6;
+            font-weight: 300;
+        }
+
+        .section-content strong {
+            color: var(--text-main);
+            font-weight: 500;
+        }
+
+        /* Imagen de Previsualización */
+        .preview-image-wrapper {
+            width: 100%;
+            border-radius: 18px;
+            overflow: hidden;
+            border: 1px solid var(--glass-border);
+            background: rgba(0, 0, 0, 0.4);
+            box-shadow: 0 15px 35px rgba(0, 0, 0, 0.5);
+            margin-top: 8px;
+        }
+
+        .preview-image-wrapper img {
+            width: 100%;
+            height: auto;
+            display: block;
+            object-fit: cover;
+            transition: transform 0.5s var(--bezier);
+        }
+
+        .preview-image-wrapper:hover img {
+            transform: scale(1.02);
+        }
+
+        /* Enlace/Botón Destacado Guía */
+        .guide-card-link {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            background: rgba(255, 255, 255, 0.03);
+            border: 1px solid var(--glass-border);
+            padding: 20px 24px;
+            border-radius: 20px;
+            text-decoration: none;
+            color: var(--text-main);
+            transition: all 0.4s var(--bezier);
+            margin-top: 10px;
+        }
+
+        .guide-card-link:hover {
+            background: var(--surface-hover);
+            border-color: var(--accent);
+            transform: translateY(-2px);
+            box-shadow: 0 8px 25px var(--accent-glow);
+        }
+
+        .guide-info {
+            display: flex;
+            align-items: center;
+            gap: 16px;
+        }
+
+        .guide-info i {
+            color: var(--accent);
+        }
+
+        .guide-text h4 {
+            font-size: 1rem;
+            font-weight: 600;
+            margin-bottom: 2px;
+        }
+
+        .guide-text p {
+            font-size: 0.85rem;
+            color: var(--text-muted);
+            line-height: 1.4;
+        }
+
+        /* Ruta de Configuración */
+        .path-badge {
+            display: inline-block;
+            background: rgba(255, 255, 255, 0.06);
+            border: 1px solid var(--glass-border);
+            padding: 4px 10px;
+            border-radius: 8px;
+            font-size: 0.85rem;
+            color: #E5E5EA;
+            font-weight: 400;
+        }
+
+        /* Botón de Retorno */
+        .back-action-container {
+            display: flex;
+            justify-content: center;
+            opacity: 0;
+            animation: scaleInCards 0.8s var(--bezier) 0.5s forwards;
+        }
+
+        .btn {
+            display: inline-flex;
+            align-items: center;
+            gap: 10px;
+            background: var(--accent);
+            color: #FFFFFF;
+            border: none;
+            padding: 14px 28px;
+            border-radius: 100px;
+            font-family: 'Outfit', sans-serif;
+            font-size: 1rem;
+            font-weight: 500;
+            cursor: pointer;
+            text-decoration: none;
+            box-shadow: 0 4px 20px var(--accent-glow);
+            transition: transform 0.3s var(--spring), background 0.3s ease;
+        }
+
+        .btn:hover {
+            transform: scale(1.04);
+            background: #0062cc;
+        }
+
+        .btn:active {
+            transform: scale(0.98);
+        }
+
+        /* Animaciones */
+        @keyframes fadeInHero {
+            from { opacity: 0; transform: translateY(30px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        @keyframes scaleInCards {
+            from { opacity: 0; transform: translateY(20px) scale(0.98); }
+            to { opacity: 1; transform: translateY(0) scale(1); }
+        }
+
+        @keyframes pulseScroll {
+            0%, 100% { opacity: 0.8; transform: translateY(0); }
+            50% { opacity: 1; transform: translateY(4px); }
+        }
+
+        @media(max-width: 768px) {
+            h1 { font-size: 2.1rem; }
+            .hero-subtitle { font-size: 1rem; }
+            .section-box { padding: 24px; }
+            .guide-card-link { flex-direction: column; align-items: flex-start; gap: 14px; }
+        }
+    </style>
+</head>
+<body>
+
+    <canvas id="particles-bg"></canvas>
+
+    <div class="app-container">
+        <!-- Cabecera -->
+        <header>
+            <div class="app-icon-badge">
+                <i data-lucide="layers" size="32"></i>
+            </div>
+            <div>
+                <h1>Integración con <span>Zen Internet</span></h1>
+                <p class="hero-subtitle">
+                    Homescreen está preparado para integrarse perfectamente con navegadores con soporte de fondos transparentes.
+                </p>
+                <div class="scroll-indicator">
+                    ⬇️ Sigue bajando para descubrir más...
+                </div>
+            </div>
+        </header>
+
+        <!-- Previsualización -->
+        <div class="preview-image-wrapper">
+            <img src="https://i.imgur.com/uDg9lYq.png" alt="Previsualización de Homescreen en Zen Internet">
+        </div>
+
+        <!-- Compatibilidad y extensiones -->
+        <section class="section-box">
+            <h3 class="section-title">
+                <i data-lucide="sliders" size="20"></i> Compatibilidad y extensiones
+            </h3>
+            <div class="section-content">
+                <p>
+                    Existe soporte nativo para extensiones de fondo transparente en navegadores como <strong>Zen Internet</strong>.
+                </p>
+                <br>
+                <p>
+                    Si desactivas la opción <em>''Fondo Oscuro Solido''</em> en la ruta <span class="path-badge">Ajustes > Sistema y Datos > Opciones Avanzadas</span>, se aplicará un fondo blanco en caso de no contar con extensiones de transparencia activas.
+                </p>
+            </div>
+
+            <!-- Guía de configuración externa -->
+            <a href="https://sameerasw.com/zen" target="_blank" rel="noopener noreferrer" class="guide-card-link">
+                <div class="guide-info">
+                    <i data-lucide="compass" size="24"></i>
+                    <div class="guide-text">
+                        <h4>Guía de configuración en Zen Browser</h4>
+                        <p>Aprende a configurar el navegador transparente en Zen, un navegador basado en Firefox pero más minimalista.</p>
+                    </div>
+                </div>
+                <i data-lucide="external-link" size="18" style="color: var(--text-muted);"></i>
+            </a>
+        </section>
+
+        <!-- Conclusión -->
+        <section class="section-box">
+            <h3 class="section-title">
+                <i data-lucide="sparkles" size="20"></i> Conclusión
+            </h3>
+            <div class="section-content">
+                <p>
+                    Integra la estética de tu navegador directamente con la interfaz para disfrutar de una experiencia totalmente fluida, minimalista y personalizada.
+                </p>
+            </div>
+        </section>
+
+<!-- Botón de acción -->
+        <div class="back-action-container">
+            <a href="../index.html" class="btn">
+                <i data-lucide="arrow-right-circle" size="18"></i>
+                Ir al Homescreen
+            </a>
+        </div>
+
+    <script>
+        // Inicializar Iconos Lucide
+        lucide.createIcons();
+
+        // Canvas de Partículas
+        const canvas = document.getElementById('particles-bg');
+        const ctx = canvas.getContext('2d');
+        let particles = [];
+
+        function resizeCanvas() {
+            canvas.width = window.innerWidth;
+            canvas.height = window.innerHeight;
+        }
+        window.addEventListener('resize', resizeCanvas);
+        resizeCanvas();
+
+        class Particle {
+            constructor() { this.reset(); }
+            reset() {
+                this.x = Math.random() * canvas.width;
+                this.y = Math.random() * canvas.height;
+                this.size = Math.random() * 1.5 + 0.5;
+                this.speedY = Math.random() * -0.3 - 0.1;
+                this.opacity = Math.random() * 0.4 + 0.1;
+            }
+            update() {
+                this.y += this.speedY;
+                if (this.y < 0) this.reset();
+            }
+            draw() {
+                ctx.fillStyle = `rgba(255, 255, 255, ${this.opacity})`;
+                ctx.beginPath();
+                ctx.arc(this.x, this.y, this.size, 0, Math.PI * 2);
+                ctx.fill();
+            }
+        }
+
+        function initParticles() {
+            particles = [];
+            const count = Math.min(Math.floor(window.innerWidth / 15), 60);
+            for(let i=0; i<count; i++) particles.push(new Particle());
+        }
+        initParticles();
+
+        function animateParticles() {
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+            particles.forEach(p => { p.update(); p.draw(); });
+            requestAnimationFrame(animateParticles);
+        }
+        animateParticles();
+    </script>
+</body>
+</html>

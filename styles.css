@@ -259,6 +259,8 @@ body.zen-mode .battery-status { opacity: 0; pointer-events: none; }
     visibility: hidden;
     pointer-events: none;
 }
+.switch.disabled, .custom-dropdown.disabled { opacity: 0.4; pointer-events: none; }
+.setting-item-row:has(.switch.disabled) { opacity: 0.65; }
 
 .welcome-message {
     font-size: 2.5rem;
@@ -532,6 +534,7 @@ body.no-blur .tool-card.keyboard-active {
     z-index: 5;
     outline: none;
 }
+body.hide-app-stars .tool-card .star-btn { display: none !important; }
 .tool-card .star-btn:hover {
     color: #FFD60A !important;
     transform: scale(1.2);
@@ -735,6 +738,22 @@ body.super-performance .settings-panel {
     padding: 4px 4px 12px;
     border-bottom: 1px solid rgba(255,255,255,0.08);
 }
+.settings-close-btn {
+    width: 34px;
+    height: 34px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    border: 1px solid rgba(255,255,255,0.1);
+    border-radius: 50%;
+    background: rgba(255,255,255,0.05);
+    color: var(--text-muted);
+    cursor: pointer;
+    transition: color 0.2s ease, background 0.2s ease, transform 0.2s ease;
+    flex: 0 0 auto;
+}
+.settings-close-btn:hover { color: var(--text-main); background: rgba(255,255,255,0.12); transform: scale(1.05); }
+.settings-close-btn svg { width: 17px; height: 17px; }
 .settings-title-wrap {
     display: flex;
     align-items: center;
@@ -1184,6 +1203,14 @@ body.super-performance .settings-panel {
 
 .custom-modal.grid-active { max-width: 650px; }
 
+body.folder-modal-size-1 #folderModal, body.folder-modal-size-1 #hiddenFolderModal { max-width: 420px; }
+body.folder-modal-size-2 #folderModal, body.folder-modal-size-2 #hiddenFolderModal { max-width: 480px; }
+body.folder-modal-size-3 #folderModal, body.folder-modal-size-3 #hiddenFolderModal { max-width: 560px; }
+body.folder-modal-size-4 #folderModal, body.folder-modal-size-4 #hiddenFolderModal { max-width: 680px; }
+body.folder-modal-size-5 #folderModal, body.folder-modal-size-5 #hiddenFolderModal { max-width: 800px; }
+#changelogModal { width: min(94vw, 900px); max-width: 900px; max-height: 90vh; }
+#changelogContent { flex: 1; min-height: 0; max-height: none !important; overflow-y: auto; }
+
 .welcome-modal { max-width: 430px; padding: 22px; }
 .welcome-modal .modal-title { position: relative; padding-right: 28px; font-size: 1.15rem; }
 .welcome-modal .modal-buttons { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-top: 4px; }
@@ -1531,3 +1558,17 @@ body.folder-apps-size-1 #folderApps .tool-card i, body.folder-apps-size-1 #folde
 body.folder-apps-size-2 #folderApps .tool-card i, body.folder-apps-size-2 #folderApps .tool-card svg { width: 17px !important; height: 17px !important; }
 body.folder-apps-size-4 #folderApps .tool-card i, body.folder-apps-size-4 #folderApps .tool-card svg { width: 22px !important; height: 22px !important; }
 body.folder-apps-size-5 #folderApps .tool-card i, body.folder-apps-size-5 #folderApps .tool-card svg { width: 25px !important; height: 25px !important; }
+
+/* Selección personalizada */
+*::selection {
+  background: #FFFFFF;
+  color: #000000;
+}
+*::-moz-selection {
+  background: #FFFFFF;
+  color: #000000;
+}
+*::-webkit-selection {
+  background: #FFFFFF;
+  color: #000000;
+}

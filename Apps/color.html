@@ -283,6 +283,24 @@
             accent-color: var(--accent-primary);
         }
 
+        .brightness-slider-row {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            width: 100%;
+        }
+
+        .brightness-slider-row span {
+            font-size: 0.8rem;
+            width: 50px;
+            color: var(--text-muted);
+        }
+
+        .brightness-slider-row input[type="range"] {
+            flex: 1;
+            accent-color: var(--accent-primary);
+        }
+
         .native-picker-row {
             display: flex;
             align-items: center;
@@ -414,6 +432,11 @@
                         <label>Círculo Cromático Interactivo</label>
                         <div class="wheel-container">
                             <canvas id="color-wheel" width="200" height="200"></canvas>
+                            <div class="brightness-slider-row">
+                                <span>Brillo</span>
+                                <input type="range" id="brightness-range" min="0" max="1" step="0.01" value="1" aria-label="Brillo">
+                                <span id="brightness-val" style="width: 35px; text-align: right;">1.00</span>
+                            </div>
                             <div class="alpha-slider-row">
                                 <span>Alfa</span>
                                 <input type="range" id="alpha-range" min="0" max="1" step="0.01" value="1">
@@ -452,6 +475,8 @@
         const nativePicker = document.getElementById('native-color-picker');
         const colorWheel = document.getElementById('color-wheel');
         const ctx = colorWheel.getContext('2d');
+        const brightnessRange = document.getElementById('brightness-range');
+        const brightnessVal = document.getElementById('brightness-val');
         const alphaRange = document.getElementById('alpha-range');
         const alphaVal = document.getElementById('alpha-val');
         const formatsContainer = document.getElementById('formats-container');
@@ -469,6 +494,7 @@
         }
 
         let currentColor = { r: 10, g: 132, b: 255, a: 1 };
+        let currentHsv = { h: 210, s: 0.96, v: 1 };
 
         function drawWheel() {
             const width = colorWheel.width;
@@ -503,7 +529,7 @@
         }
 
         function drawWheelIndicator() {
-            const hsv = rgbToHsv(currentColor.r, currentColor.g, currentColor.b);
+            const hsv = currentHsv;
             const radius = colorWheel.width / 2;
             const angle = (hsv.h * Math.PI) / 180;
             const x = radius + Math.cos(angle) * hsv.s * radius;
@@ -523,12 +549,16 @@
             ctx.restore();
         }
 
-        function updateFromRGB(r, g, b, a) {
+        function updateFromRGB(r, g, b, a, hsvOverride = null) {
             currentColor = { r, g, b, a };
+            const hsv = hsvOverride || rgbToHsv(r, g, b);
+            currentHsv = hsv;
             const hex = rgbToHex(r, g, b);
             const hex8 = rgbToHex8(r, g, b, a);
             previewInner.style.backgroundColor = `rgba(${r}, ${g}, ${b}, ${a})`;
             nativePicker.value = hex;
+            brightnessRange.value = hsv.v;
+            brightnessVal.textContent = Number(hsv.v).toFixed(2);
             alphaVal.value = a;
             alphaRange.value = a;
             alphaVal.textContent = Number(a).toFixed(2);
@@ -536,8 +566,13 @@
             drawWheel();
             drawWheelIndicator();
 
-            const hsv = rgbToHsv(r, g, b);
             renderFormats(r, g, b, a, hex, hex8, hsv);
+        }
+
+        function updateFromHSV(h, s, v, a) {
+            const hsv = { h, s, v };
+            const rgb = hsvToRgb(h / 360, s, v);
+            updateFromRGB(rgb.r, rgb.g, rgb.b, a, hsv);
         }
 
         function rgbToHex(r, g, b) {
@@ -788,19 +823,19 @@
                 const angle = Math.atan2(dy, dx);
                 let hue = (angle * 180 / Math.PI + 360) % 360;
                 let saturation = distance / radius;
-                let rgb = hsvToRgb(hue / 360, saturation, 1);
-                updateFromRGB(rgb.r, rgb.g, rgb.b, currentColor.a);
+                updateFromHSV(hue, saturation, currentHsv.v, currentColor.a);
             }
         }
 
         let isDragging = false;
-        colorWheel.addEventListener('mousedown', (e) => { isDragging = true; handleWheelClick(e); });
-        window.addEventListener('mousemove', (e) => { if (isDragging) handleWheelClick(e); });
-        window.addEventListener('mouseup', () => { isDragging = false; });
-
-        colorWheel.addEventListener('touchstart', (e) => { isDragging = true; handleWheelClick(e.touches[0]); e.preventDefault(); });
-        window.addEventListener('touchmove', (e) => { if (isDragging) handleWheelClick(e.touches[0]); });
-        window.addEventListener('touchend', () => { isDragging = false; });
+        colorWheel.addEventListener('pointerdown', (e) => {
+            isDragging = true;
+            colorWheel.setPointerCapture(e.pointerId);
+            handleWheelClick(e);
+        });
+        colorWheel.addEventListener('pointermove', (e) => { if (isDragging) handleWheelClick(e); });
+        colorWheel.addEventListener('pointerup', () => { isDragging = false; });
+        colorWheel.addEventListener('pointercancel', () => { isDragging = false; });
 
         nativePicker.addEventListener('input', (e) => {
             const rgb = hexToRgb(e.target.value);
@@ -809,6 +844,10 @@
 
         alphaRange.addEventListener('input', (e) => {
             updateFromRGB(currentColor.r, currentColor.g, currentColor.b, parseFloat(e.target.value));
+        });
+
+        brightnessRange.addEventListener('input', (e) => {
+            updateFromHSV(currentHsv.h, currentHsv.s, parseFloat(e.target.value), currentColor.a);
         });
 
         parseColorButton.addEventListener('click', applyTextColor);
