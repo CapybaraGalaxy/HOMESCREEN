@@ -1,0 +1,2921 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+    <title>Generador de Números Pro</title>
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;600;700&display=swap" rel="stylesheet">
+    <script src="../lucide.min.js"></script>
+    
+    <style>
+        *, *::before, *::after {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            -webkit-tap-highlight-color: transparent;
+            user-select: none;
+            backdrop-filter: none !important;
+            -webkit-backdrop-filter: none !important;
+        }
+
+        :root {
+            --bg: #0d0d11;
+            --surface: #16161a;
+            --surface-hover: #212126;
+            --glass-card: #16161a;
+            --glass-border: #2a2a32;
+            --glass-border-hover: #3f3f4c;
+
+            --text-main: #FFFFFF;
+            --text-muted: #8E8E93;
+
+            --num-color: #FFFFFF;
+            --num-weight: 700;
+            --num-font-family: 'Outfit', sans-serif;
+
+            --accent-danger: #FF453A;
+            --accent-success: #34C759;
+            --accent-primary: #0A84FF;
+
+            --bezier: cubic-bezier(0.16, 1, 0.3, 1);
+            --spring: cubic-bezier(0.34, 1.56, 0.64, 1);
+            --spring-bounce: cubic-bezier(0.175, 0.885, 0.32, 1.275);
+        }
+
+        html {
+            height: 100%;
+            overflow-x: hidden;
+            background-color: var(--bg);
+        }
+
+        body {
+            width: 100%;
+            min-height: 100dvh;
+            background-color: var(--bg);
+            color: var(--text-main);
+            font-family: 'Outfit', sans-serif;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            overflow-x: hidden;
+            overflow-y: auto;
+            -webkit-overflow-scrolling: touch;
+        }
+
+        .app-container {
+            width: 100%;
+            max-width: 1040px;
+            min-height: 100dvh;
+            display: flex;
+            flex-direction: column;
+            padding: max(12px, env(safe-area-inset-top)) 16px max(24px, env(safe-area-inset-bottom)) 16px;
+            margin: 0 auto;
+            position: relative;
+        }
+
+        header {
+            display: flex;
+            flex-direction: row;
+            align-items: center;
+            justify-content: space-between;
+            gap: 12px;
+            padding: 8px 0 16px 0;
+            width: 100%;
+            flex-shrink: 0;
+        }
+
+        .brand-title {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            min-width: 0;
+        }
+
+        .app-icon-badge {
+            width: 38px;
+            height: 38px;
+            border-radius: 12px;
+            background: #212126;
+            border: 1px solid var(--glass-border);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            flex-shrink: 0;
+            transition: transform 0.3s var(--spring-bounce), border-color 0.3s ease;
+        }
+
+        .app-icon-badge:active {
+            transform: scale(0.9) rotate(-8deg);
+        }
+
+        .app-title-text {
+            font-size: 1.05rem;
+            font-weight: 700;
+            letter-spacing: -0.01em;
+            color: var(--text-main);
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+
+        @media (max-width: 420px) {
+            .app-title-text {
+                display: none;
+            }
+        }
+
+        .nav-switch {
+            display: flex;
+            background: #1c1c22;
+            border: 1px solid var(--glass-border);
+            padding: 3px;
+            border-radius: 100px;
+            flex-shrink: 0;
+        }
+
+        .nav-item {
+            padding: 6px 10px;
+            font-size: 0.78rem;
+            font-weight: 500;
+            border-radius: 100px;
+            color: var(--text-muted);
+            text-decoration: none;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 5px;
+            cursor: pointer;
+            white-space: nowrap;
+            border: none;
+            background: transparent;
+            transition: all 0.25s var(--bezier);
+        }
+
+        .nav-item.active {
+            background: #ffffff;
+            color: #000000;
+            font-weight: 700;
+            box-shadow: 0 4px 12px rgba(255,255,255,0.15);
+            transform: scale(1.02);
+        }
+
+        .nav-item:active {
+            transform: scale(0.95);
+        }
+
+        .main-layout {
+            display: grid;
+            grid-template-columns: 1fr;
+            gap: 16px;
+            width: 100%;
+            align-items: start;
+            padding-bottom: 24px;
+        }
+
+        @media (min-width: 820px) {
+            .main-layout {
+                grid-template-columns: 1.2fr 0.8fr;
+                gap: 20px;
+            }
+        }
+
+        /* TARJETA PRINCIPAL DEL NÚMERO */
+        .display-card {
+            background: var(--glass-card);
+            border: 1px solid var(--glass-border);
+            border-radius: 24px;
+            padding: 20px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: space-between;
+            min-height: 340px;
+            flex: 1;
+            width: 100%;
+            position: relative;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
+            cursor: pointer;
+            transition: transform 0.2s var(--spring-bounce), border-color 0.25s ease, box-shadow 0.25s ease;
+            overflow: hidden;
+        }
+
+        .display-card::before {
+            content: '';
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            width: 70%;
+            height: 70%;
+            transform: translate(-50%, -50%);
+            background: radial-gradient(circle, rgba(255, 255, 255, 0.05) 0%, transparent 70%);
+            border-radius: 50%;
+            pointer-events: none;
+            transition: opacity 0.3s ease;
+            opacity: 0.5;
+        }
+
+        .display-card:hover::before {
+            opacity: 1;
+        }
+
+        .display-card:active {
+            transform: scale(0.985);
+            border-color: var(--glass-border-hover);
+        }
+
+        .display-header-actions {
+            width: 100%;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            z-index: 5;
+            gap: 8px;
+        }
+
+        .hint-badge {
+            font-size: 0.72rem;
+            color: var(--text-muted);
+            background: #212126;
+            border: 1px solid var(--glass-border);
+            padding: 4px 10px;
+            border-radius: 100px;
+            display: flex;
+            align-items: center;
+            gap: 5px;
+            pointer-events: none;
+            transition: transform 0.2s var(--bezier);
+            white-space: nowrap;
+            min-width: 0;
+        }
+
+        .actions-right {
+            display: flex;
+            gap: 6px;
+            flex-shrink: 0;
+        }
+
+        .icon-btn {
+            background: #212126;
+            border: 1px solid var(--glass-border);
+            color: var(--text-muted);
+            width: 36px;
+            height: 36px;
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            transition: all 0.2s var(--spring-bounce);
+            z-index: 10;
+            flex-shrink: 0;
+        }
+
+        .icon-btn:hover {
+            background: #2c2c34;
+            color: var(--text-main);
+            transform: translateY(-2px);
+        }
+
+        .icon-btn:active {
+            transform: scale(0.88);
+        }
+
+        .number-wrapper {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            width: 100%;
+            padding: 16px 0;
+            overflow: hidden;
+            position: relative;
+            min-height: 140px;
+        }
+
+        .number-display {
+            font-variant-numeric: tabular-nums;
+            color: var(--num-color);
+            font-weight: var(--num-weight);
+            font-family: var(--num-font-family);
+            line-height: 1.1;
+            text-align: center;
+            word-break: break-all;
+            max-width: 100%;
+            font-size: clamp(3rem, 12vw, 7rem);
+            letter-spacing: -0.03em;
+            transition: color 0.3s ease, transform 0.2s ease, opacity 0.2s ease, filter 0.2s ease;
+        }
+
+        .size-sm { font-size: clamp(2.2rem, 9vw, 4.2rem) !important; }
+        .size-md { font-size: clamp(3rem, 12vw, 6.8rem) !important; }
+        .size-lg { font-size: clamp(3.8rem, 15vw, 8rem) !important; }
+        .size-xl { font-size: clamp(4.5rem, 18vw, 10rem) !important; }
+
+        .number-display.pop {
+            animation: numberPop 0.35s var(--spring-bounce);
+        }
+
+        .number-display.rolling {
+            opacity: 0.75;
+            filter: blur(1.5px);
+            transform: scale(0.96) translateY(-2px);
+        }
+
+        @keyframes numberPop {
+            0% { transform: scale(0.75) translateY(10px); opacity: 0.5; filter: blur(2px); }
+            60% { transform: scale(1.12) translateY(-2px); filter: blur(0); }
+            100% { transform: scale(1) translateY(0); opacity: 1; }
+        }
+
+        /* MULTI-NUMBER CHIPS */
+        .multi-results {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px;
+            justify-content: center;
+            align-items: center;
+            padding: 8px 0;
+            width: 100%;
+            overflow: hidden;
+        }
+
+        .multi-chip {
+            background: #212126;
+            border: 1px solid var(--glass-border);
+            color: var(--num-color);
+            font-weight: 700;
+            font-family: var(--num-font-family);
+            padding: 8px 16px;
+            border-radius: 12px;
+            font-size: clamp(1.1rem, 5vw, 1.6rem);
+            animation: chipFadeIn 0.3s var(--spring-bounce) both;
+            cursor: pointer;
+            transition: transform 0.2s var(--spring-bounce), background 0.2s ease;
+            max-width: 100%;
+            word-break: break-all;
+        }
+
+        .multi-chip:active {
+            transform: scale(0.9);
+        }
+
+        .multi-chip:hover {
+            background: #2c2c34;
+        }
+
+        @keyframes chipFadeIn {
+            from { opacity: 0; transform: scale(0.5) translateY(10px); }
+            to { opacity: 1; transform: scale(1) translateY(0); }
+        }
+
+        .generate-btn-wrapper {
+            width: 100%;
+            padding-top: 8px;
+            z-index: 5;
+        }
+
+        .btn-primary, .btn-generate {
+            width: 100%;
+            box-sizing: border-box;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            padding: 14px 20px;
+            font-size: 1rem;
+            background: #FFFFFF;
+            color: #000000;
+            border: none;
+            border-radius: 16px;
+            font-weight: 700;
+            font-family: 'Outfit', sans-serif;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            transition: transform 0.2s var(--spring-bounce), background-color 0.2s ease, box-shadow 0.2s ease;
+            box-shadow: 0 4px 15px rgba(255,255,255,0.12);
+        }
+
+        .btn-generate:hover, .btn-primary:hover {
+            box-shadow: 0 6px 20px rgba(255,255,255,0.2);
+            transform: translateY(-1px);
+        }
+
+        .btn-generate:active, .btn-primary:active {
+            transform: scale(0.96) translateY(1px);
+            background: #e2e2e2;
+        }
+
+        .controls-panel {
+            display: flex;
+            flex-direction: column;
+            gap: 14px;
+            width: 100%;
+        }
+
+        /* COLLAPSIBLE CARDS */
+        .panel-card {
+            background: var(--glass-card);
+            border: 1px solid var(--glass-border);
+            border-radius: 20px;
+            padding: 16px;
+            display: flex;
+            flex-direction: column;
+            gap: 14px;
+            width: 100%;
+            transition: border-color 0.25s ease, transform 0.2s ease;
+            overflow: hidden;
+        }
+
+        .panel-card.collapsed {
+            gap: 0;
+            padding-bottom: 14px;
+        }
+
+        .card-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            cursor: pointer;
+            width: 100%;
+            gap: 8px;
+            user-select: none;
+        }
+
+        .card-header-label {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            font-size: 0.72rem;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            color: var(--text-muted);
+            min-width: 0;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+        }
+
+        .card-header-actions {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            flex-shrink: 0;
+        }
+
+        .collapse-chevron {
+            width: 28px;
+            height: 28px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: var(--text-muted);
+            transition: transform 0.3s var(--bezier), color 0.2s ease;
+            flex-shrink: 0;
+        }
+
+        .panel-card.collapsed .collapse-chevron {
+            transform: rotate(-90deg);
+        }
+
+        .collapse-chevron:active {
+            transform: scale(0.85);
+        }
+
+        .panel-card.collapsed .collapse-chevron:active {
+            transform: rotate(-90deg) scale(0.85);
+        }
+
+        .card-body {
+            display: flex;
+            flex-direction: column;
+            gap: 14px;
+            overflow: hidden;
+            transition: max-height 0.35s var(--bezier), opacity 0.25s ease, margin-top 0.3s ease;
+            max-height: 600px;
+            opacity: 1;
+        }
+
+        .panel-card.collapsed .card-body {
+            max-height: 0;
+            opacity: 0;
+            margin-top: 0;
+        }
+
+        /* HISTORY ACTION BTNS - compact */
+        .history-action-btn {
+            background: transparent;
+            border: none;
+            color: var(--accent-primary);
+            cursor: pointer;
+            transition: opacity 0.2s ease, transform 0.15s var(--spring-bounce);
+            flex-shrink: 0;
+            width: 28px;
+            height: 28px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 8px;
+        }
+
+        .history-action-btn:active {
+            transform: scale(0.85);
+            opacity: 0.6;
+        }
+
+        .history-action-btn.danger {
+            color: var(--accent-danger);
+        }
+
+        .input-group-row {
+            display: flex;
+            gap: 10px;
+            width: 100%;
+        }
+
+        .input-group-row > div {
+            flex: 1;
+            min-width: 0;
+        }
+
+        .input-group {
+            display: flex;
+            flex-direction: column;
+            gap: 6px;
+            width: 100%;
+        }
+
+        .input-label {
+            font-size: 0.72rem;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            color: var(--text-muted);
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+
+        .input-field {
+            width: 100%;
+            background: #0d0d11;
+            border: 1px solid var(--glass-border);
+            border-radius: 12px;
+            padding: 10px 12px;
+            color: var(--text-main);
+            font-family: 'Outfit', sans-serif;
+            font-size: 16px; /* Evita auto-zoom en iOS */
+            font-weight: 600;
+            outline: none;
+            transition: border-color 0.2s ease, box-shadow 0.2s ease;
+        }
+
+        .input-field:focus {
+            border-color: #555566;
+            box-shadow: 0 0 0 3px rgba(255,255,255,0.05);
+        }
+
+        /* CUSTOM NUMBER INPUT WITH STEPPER */
+        .stepper-input-wrapper {
+            position: relative;
+            display: flex;
+            align-items: center;
+            width: 100%;
+        }
+
+        .stepper-input-wrapper .input-field {
+            padding-right: 64px;
+        }
+
+        .stepper-btns {
+            position: absolute;
+            right: 4px;
+            display: flex;
+            flex-direction: column;
+            gap: 2px;
+        }
+
+        .stepper-btn {
+            background: #212126;
+            border: 1px solid var(--glass-border);
+            color: var(--text-muted);
+            width: 26px;
+            height: 22px;
+            border-radius: 6px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            font-size: 0.7rem;
+            font-weight: 700;
+            transition: all 0.15s var(--spring-bounce);
+            user-select: none;
+        }
+
+        .stepper-btn:hover {
+            background: #2c2c34;
+            color: var(--text-main);
+        }
+
+        .stepper-btn:active {
+            transform: scale(0.85);
+        }
+
+        .presets-carousel {
+            display: flex;
+            gap: 8px;
+            overflow-x: auto;
+            padding: 2px 2px 6px 2px;
+            scrollbar-width: none;
+            -webkit-overflow-scrolling: touch;
+            width: 100%;
+        }
+
+        .presets-carousel::-webkit-scrollbar { display: none; }
+
+        .preset-chip {
+            background: #212126;
+            border: 1px solid var(--glass-border);
+            padding: 8px 14px;
+            border-radius: 100px;
+            font-size: 0.8rem;
+            font-weight: 600;
+            color: var(--text-main);
+            white-space: nowrap;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            flex-shrink: 0;
+            transition: all 0.2s var(--spring-bounce);
+        }
+
+        .preset-chip:hover {
+            background: #2a2a32;
+            transform: translateY(-1px);
+        }
+
+        .preset-chip:active {
+            transform: scale(0.92);
+        }
+
+        .preset-chip-add {
+            background: #ffffff;
+            color: #000000;
+            font-weight: 700;
+            border: none;
+        }
+
+        .segmented-control {
+            display: flex;
+            background: #0d0d11;
+            padding: 3px;
+            border-radius: 12px;
+            border: 1px solid var(--glass-border);
+            gap: 4px;
+            width: 100%;
+        }
+
+        .segment-btn {
+            flex: 1;
+            padding: 8px 0;
+            background: transparent;
+            border: none;
+            color: var(--text-muted);
+            font-family: 'Outfit', sans-serif;
+            font-size: 0.85rem;
+            font-weight: 600;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.2s var(--bezier);
+            text-align: center;
+        }
+
+        .segment-btn.active {
+            background-color: #ffffff !important;
+            color: #000000 !important;
+            font-weight: 700 !important;
+            box-shadow: 0 2px 6px rgba(0,0,0,0.2);
+        }
+
+        /* CUSTOM TOGGLE SWITCH */
+        .toggle-switch {
+            position: relative;
+            width: 44px;
+            height: 26px;
+            background: #2a2a32;
+            border-radius: 100px;
+            cursor: pointer;
+            transition: background 0.25s var(--bezier);
+            flex-shrink: 0;
+            border: 1px solid var(--glass-border);
+        }
+
+        .toggle-switch.active {
+            background: var(--accent-primary);
+            border-color: var(--accent-primary);
+        }
+
+        .toggle-switch::after {
+            content: '';
+            position: absolute;
+            top: 2px;
+            left: 2px;
+            width: 20px;
+            height: 20px;
+            background: #fff;
+            border-radius: 50%;
+            transition: transform 0.25s var(--spring-bounce);
+            box-shadow: 0 2px 4px rgba(0,0,0,0.3);
+        }
+
+        .toggle-switch.active::after {
+            transform: translateX(18px);
+        }
+
+        .toggle-switch:active::after {
+            transform: scale(0.9);
+        }
+
+        .toggle-switch.active:active::after {
+            transform: translateX(18px) scale(0.9);
+        }
+
+        .history-header {
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            width: 100%;
+            color: var(--text-muted);
+            font-size: 0.72rem;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            gap: 8px;
+        }
+
+        .history-header-label {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            min-width: 0;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+        }
+
+        .history-actions {
+            display: flex;
+            gap: 6px;
+            flex-shrink: 0;
+        }
+
+        .text-action-btn {
+            background: transparent;
+            border: none;
+            color: var(--accent-primary);
+            font-size: 0.72rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: opacity 0.2s ease;
+            white-space: nowrap;
+            padding: 2px 0;
+        }
+
+        .text-action-btn:active {
+            opacity: 0.6;
+        }
+
+        .history-chips {
+            display: flex;
+            gap: 6px;
+            flex-wrap: wrap;
+            align-items: center;
+            margin-top: 10px;
+            max-height: 120px;
+            overflow-y: auto;
+        }
+
+        .chip {
+            background: #212126;
+            border: 1px solid var(--glass-border);
+            padding: 6px 12px;
+            border-radius: 8px;
+            font-size: 0.85rem;
+            font-weight: 600;
+            color: var(--text-main);
+            cursor: pointer;
+            transition: transform 0.2s var(--spring-bounce), background-color 0.2s ease;
+            animation: chipFadeIn 0.25s var(--spring-bounce);
+            max-width: 100%;
+            word-break: break-all;
+        }
+
+        @keyframes chipFadeIn {
+            from { opacity: 0; transform: scale(0.7); }
+            to { opacity: 1; transform: scale(1); }
+        }
+
+        .chip:active {
+            transform: scale(0.9);
+        }
+
+        .empty-history {
+            font-size: 0.78rem;
+            color: var(--text-muted);
+            font-style: italic;
+        }
+
+        /* MODAL Y PANTALLA COMPLETA MEJORADOS */
+        .fullscreen-container {
+            position: fixed;
+            inset: 0;
+            width: 100vw;
+            height: 100dvh;
+            background-color: var(--bg);
+            z-index: 9999;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            flex-direction: column;
+            padding: 20px;
+            opacity: 0;
+            pointer-events: none;
+            transform: scale(0.96);
+            transition: opacity 0.25s var(--bezier), transform 0.25s var(--spring-bounce);
+            cursor: pointer;
+            overflow: hidden;
+        }
+
+        .fullscreen-container.active {
+            opacity: 1;
+            pointer-events: auto;
+            transform: scale(1);
+        }
+
+        .fullscreen-content {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            gap: 16px;
+            width: 100%;
+            max-width: 900px;
+            flex: 1;
+            overflow: hidden;
+        }
+
+        .fullscreen-number {
+            font-size: clamp(5rem, 25vw, 15rem);
+            font-weight: 800;
+            color: var(--num-color, #ffffff);
+            font-family: var(--num-font-family);
+            text-align: center;
+            line-height: 1;
+            word-break: break-all;
+            transition: transform 0.15s var(--spring-bounce), filter 0.2s ease;
+            pointer-events: none;
+            max-width: 100%;
+            overflow: hidden;
+        }
+
+        .fullscreen-number.pop {
+            animation: fullscreenPop 0.3s var(--spring-bounce);
+        }
+
+        .fullscreen-number.rolling {
+            opacity: 0.75;
+            filter: blur(1.5px);
+            transform: scale(0.96);
+        }
+
+        @keyframes fullscreenPop {
+            0% { transform: scale(0.8); opacity: 0.7; }
+            50% { transform: scale(1.1); }
+            100% { transform: scale(1); opacity: 1; }
+        }
+
+        .fullscreen-multi {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+            justify-content: center;
+            align-items: center;
+            width: 100%;
+            overflow: hidden;
+        }
+
+        .fullscreen-multi .multi-chip {
+            font-size: clamp(1.5rem, 8vw, 3rem);
+            padding: 12px 24px;
+            border-radius: 16px;
+            animation: chipFadeIn 0.3s var(--spring-bounce) both;
+        }
+
+        .fullscreen-close {
+            position: absolute;
+            top: max(20px, env(safe-area-inset-top));
+            right: 20px;
+            background: #212126;
+            border: 1px solid var(--glass-border);
+            color: #ffffff;
+            padding: 10px 18px;
+            border-radius: 100px;
+            font-size: 0.85rem;
+            font-weight: 700;
+            cursor: pointer;
+            z-index: 10000;
+            transition: transform 0.2s var(--spring-bounce), background-color 0.2s ease;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .fullscreen-close:active {
+            transform: scale(0.9);
+        }
+
+        .fullscreen-hint {
+            position: absolute;
+            bottom: max(30px, env(safe-area-inset-bottom));
+            font-size: 0.8rem;
+            color: var(--text-muted);
+            background: rgba(33, 33, 38, 0.8);
+            border: 1px solid var(--glass-border);
+            padding: 6px 14px;
+            border-radius: 100px;
+            pointer-events: none;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .modal-overlay {
+            position: fixed;
+            inset: 0;
+            width: 100vw;
+            height: 100dvh;
+            background: rgba(0, 0, 0, 0.75);
+            z-index: 1000;
+            display: flex;
+            align-items: flex-end;
+            justify-content: center;
+            opacity: 0;
+            pointer-events: none;
+            transition: opacity 0.25s ease;
+        }
+
+        @media (min-width: 600px) {
+            .modal-overlay { align-items: center; }
+        }
+
+        .modal-overlay.active {
+            opacity: 1;
+            pointer-events: auto;
+        }
+
+        .modal-card {
+            background: var(--surface);
+            border: 1px solid var(--glass-border);
+            width: 100%;
+            max-width: 480px;
+            border-radius: 28px 28px 0 0;
+            padding: 20px;
+            display: flex;
+            flex-direction: column;
+            gap: 16px;
+            max-height: 85vh;
+            overflow-y: auto;
+            transform: translateY(100%);
+            transition: transform 0.35s var(--bezier);
+        }
+
+        @media (min-width: 600px) {
+            .modal-card { 
+                border-radius: 24px;
+                transform: translateY(20px) scale(0.95);
+            }
+        }
+
+        .modal-overlay.active .modal-card {
+            transform: translateY(0) scale(1);
+        }
+
+        .modal-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .modal-title {
+            font-size: 1rem;
+            font-weight: 700;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .color-grid {
+            display: grid;
+            grid-template-columns: repeat(6, 1fr);
+            gap: 8px;
+        }
+
+        .color-option {
+            aspect-ratio: 1;
+            border-radius: 50%;
+            cursor: pointer;
+            border: 2px solid transparent;
+            transition: transform 0.2s var(--spring-bounce);
+        }
+
+        .color-option.selected {
+            border-color: #FFFFFF;
+            transform: scale(1.15);
+        }
+
+        .toggle-row {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 6px 0;
+            font-size: 0.9rem;
+            font-weight: 600;
+            gap: 12px;
+        }
+
+        /* CUSTOM PROMPT/CONFIRM MODAL */
+        .dialog-modal {
+            background: var(--surface);
+            border: 1px solid var(--glass-border);
+            width: calc(100% - 48px);
+            max-width: 400px;
+            border-radius: 20px;
+            padding: 20px;
+            display: flex;
+            flex-direction: column;
+            gap: 16px;
+            transform: scale(0.9);
+            opacity: 0;
+            transition: transform 0.25s var(--spring-bounce), opacity 0.25s ease;
+        }
+
+        .modal-overlay.active .dialog-modal {
+            transform: scale(1);
+            opacity: 1;
+        }
+
+        .dialog-title {
+            font-size: 1.05rem;
+            font-weight: 700;
+            color: var(--text-main);
+        }
+
+        .dialog-message {
+            font-size: 0.88rem;
+            color: var(--text-muted);
+            line-height: 1.5;
+        }
+
+        .dialog-input {
+            width: 100%;
+            background: #0d0d11;
+            border: 1px solid var(--glass-border);
+            border-radius: 12px;
+            padding: 12px 14px;
+            color: var(--text-main);
+            font-family: 'Outfit', sans-serif;
+            font-size: 16px;
+            font-weight: 600;
+            outline: none;
+            transition: border-color 0.2s ease, box-shadow 0.2s ease;
+        }
+
+        .dialog-input:focus {
+            border-color: #555566;
+            box-shadow: 0 0 0 3px rgba(255,255,255,0.05);
+        }
+
+        .dialog-actions {
+            display: flex;
+            gap: 10px;
+            justify-content: flex-end;
+        }
+
+        .btn-secondary {
+            padding: 10px 20px;
+            font-size: 0.9rem;
+            background: #212126;
+            color: var(--text-main);
+            border: 1px solid var(--glass-border);
+            border-radius: 12px;
+            font-weight: 600;
+            font-family: 'Outfit', sans-serif;
+            cursor: pointer;
+            transition: all 0.2s var(--bezier);
+        }
+
+        .btn-secondary:active {
+            transform: scale(0.95);
+        }
+
+        .btn-dialog-primary {
+            padding: 10px 20px;
+            font-size: 0.9rem;
+            background: #FFFFFF;
+            color: #000000;
+            border: none;
+            border-radius: 12px;
+            font-weight: 700;
+            font-family: 'Outfit', sans-serif;
+            cursor: pointer;
+            transition: all 0.2s var(--bezier);
+        }
+
+        .btn-dialog-primary:active {
+            transform: scale(0.95);
+        }
+
+        .btn-dialog-danger {
+            padding: 10px 20px;
+            font-size: 0.9rem;
+            background: var(--accent-danger);
+            color: #FFFFFF;
+            border: none;
+            border-radius: 12px;
+            font-weight: 700;
+            font-family: 'Outfit', sans-serif;
+            cursor: pointer;
+            transition: all 0.2s var(--bezier);
+        }
+
+        .btn-dialog-danger:active {
+            transform: scale(0.95);
+        }
+
+        /* VISTAS Y TRANSICIONES */
+        .view-section {
+            display: none;
+            width: 100%;
+            opacity: 0;
+            transform: translateY(8px);
+            transition: opacity 0.25s ease, transform 0.25s var(--bezier);
+        }
+
+        .view-section.active {
+            display: block;
+            opacity: 1;
+            transform: translateY(0);
+        }
+
+        .adivinar-card {
+            background: var(--glass-card);
+            border: 1px solid var(--glass-border);
+            border-radius: 24px;
+            padding: 20px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 18px;
+            width: 100%;
+            min-height: 380px;
+        }
+
+        .big-placeholder {
+            font-size: clamp(4rem, 18vw, 8rem);
+            font-weight: 800;
+            color: var(--text-main);
+            line-height: 1;
+        }
+
+        .guess-feedback {
+            font-size: 1.1rem;
+            font-weight: 700;
+            color: var(--accent-primary);
+            text-align: center;
+            min-height: 28px;
+        }
+
+        .toast {
+            position: fixed;
+            bottom: max(20px, env(safe-area-inset-bottom));
+            left: 50%;
+            transform: translateX(-50%) translateY(80px) scale(0.9);
+            background: #FFFFFF;
+            color: #000000;
+            padding: 10px 20px;
+            border-radius: 100px;
+            font-size: 0.85rem;
+            font-weight: 700;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            opacity: 0;
+            transition: all 0.3s var(--spring-bounce);
+            z-index: 10000;
+            pointer-events: none;
+            box-shadow: 0 10px 25px rgba(0,0,0,0.5);
+            max-width: 90vw;
+            text-align: center;
+        }
+
+        .toast.show {
+            transform: translateX(-50%) translateY(0) scale(1);
+            opacity: 1;
+        }
+
+        /* SHIMMER ANIMATION ON GENERATE BUTTON */
+        .btn-generate::after {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(0,0,0,0.1), transparent);
+            transition: left 0.5s ease;
+        }
+
+        .btn-generate {
+            position: relative;
+            overflow: hidden;
+        }
+
+        .btn-generate:hover::after {
+            left: 100%;
+        }
+
+        /* ADVANCED PANEL */
+        .advanced-panel-inner {
+            margin-top: 10px;
+            padding: 12px;
+            border: 1px solid var(--glass-border);
+            border-radius: 12px;
+            background: #0d0d11;
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+
+        .advanced-toggle-row {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 12px;
+            font-size: 0.85rem;
+            cursor: pointer;
+        }
+
+        .advanced-divider {
+            margin-top: 10px;
+            border-top: 1px solid var(--glass-border);
+            padding-top: 10px;
+        }
+
+        .advanced-btn {
+            background: transparent;
+            border: none;
+            color: var(--text-muted);
+            font-size: 0.8rem;
+            font-weight: 600;
+            cursor: pointer;
+            text-decoration: underline;
+            text-align: left;
+            padding: 0;
+        }
+
+        /* GUESS MODE STYLES */
+        .guess-attempt {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 8px 12px;
+            background: #212126;
+            border-radius: 10px;
+            font-size: 0.85rem;
+            animation: chipFadeIn 0.2s var(--spring-bounce);
+        }
+
+        .guess-exit-btn {
+            position: absolute;
+            top: 16px;
+            right: 16px;
+            width: auto !important;
+            padding: 0 10px !important;
+        }
+
+        .guess-input-row {
+            display: flex;
+            gap: 8px;
+            width: 100%;
+            max-width: 320px;
+        }
+
+        .guess-attempts-list {
+            display: flex;
+            flex-direction: column;
+            gap: 6px;
+            width: 100%;
+            max-height: 140px;
+            overflow-y: auto;
+            margin-top: 10px;
+        }
+    </style>
+</head>
+<body>
+
+    <!-- MODO PANTALLA COMPLETA -->
+    <div id="fullscreen-overlay" class="fullscreen-container">
+        <button class="fullscreen-close" id="btn-close-fullscreen">
+            <i data-lucide="x" size="16"></i> Salir
+        </button>
+        <div class="fullscreen-content" id="fullscreen-content">
+            <div class="fullscreen-number" id="fullscreen-number-output">--</div>
+            <div class="fullscreen-multi" id="fullscreen-multi-container" style="display:none;"></div>
+        </div>
+        <div class="fullscreen-hint">
+            <i data-lucide="pointer" size="14"></i> Toca en cualquier parte para generar
+        </div>
+    </div>
+
+    <div class="app-container" id="main-view">
+        <!-- Cabecera -->
+        <header>
+            <div class="brand-title">
+                <div class="app-icon-badge">
+                    <i data-lucide="dices" size="20" style="color: var(--text-main);"></i>
+                </div>
+                <div class="app-title-text">Generador Pro</div>
+            </div>
+
+            <nav class="nav-switch">
+                <button class="nav-item active" id="nav-btn-numbers">
+                    <i data-lucide="dices" size="14"></i>
+                    <span>Números</span>
+                </button>
+                <button class="nav-item" id="nav-btn-ruleta">
+                    <i data-lucide="circle-dot-dashed" size="14"></i>
+                    <span>Ruleta</span>
+                </button>
+            </nav>
+        </header>
+
+        <!-- VISTA 1: GENERADOR -->
+        <div class="view-section active" id="section-numbers">
+            <main class="main-layout">
+                
+                <section class="display-card" id="display-card-tap">
+                    <div class="display-header-actions">
+                        <div class="hint-badge">
+                            <i data-lucide="hand" size="12"></i>
+                            Toca o Espacio
+                        </div>
+
+                        <div class="actions-right">
+                            <button class="icon-btn" id="btn-fullscreen" title="Pantalla Completa">
+                                <i data-lucide="maximize-2" size="16"></i>
+                            </button>
+                            <button class="icon-btn" id="btn-copy" title="Copiar">
+                                <i data-lucide="copy" size="16"></i>
+                            </button>
+                            <button class="icon-btn" id="btn-settings" title="Ajustes">
+                                <i data-lucide="sliders" size="16"></i>
+                            </button>
+                        </div>
+                    </div>
+
+                    <div class="number-wrapper" id="number-wrapper">
+                        <div class="number-display size-md" id="number-output">--</div>
+                    </div>
+                    <div class="multi-results" id="multi-results-container" style="display:none;"></div>
+
+                    <div class="generate-btn-wrapper">
+                        <button class="btn-generate" id="btn-generate">
+                            <i data-lucide="sparkles" size="18"></i>
+                            Generar Número
+                        </button>
+                    </div>
+                </section>
+
+                <!-- CONTROLES -->
+                <section class="controls-panel">
+                    
+                    <div class="panel-card">
+                        <div class="input-group-row">
+                            <div class="input-group">
+                                <span class="input-label">Mínimo</span>
+                                <div class="stepper-input-wrapper">
+                                    <input type="number" id="input-min" class="input-field" value="1" step="any">
+                                    <div class="stepper-btns">
+                                        <div class="stepper-btn" data-stepper="input-min" data-dir="up">▲</div>
+                                        <div class="stepper-btn" data-stepper="input-min" data-dir="down">▼</div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="input-group">
+                                <span class="input-label">Máximo</span>
+                                <div class="stepper-input-wrapper">
+                                    <input type="number" id="input-max" class="input-field" value="100" step="any">
+                                    <div class="stepper-btns">
+                                        <div class="stepper-btn" data-stepper="input-max" data-dir="up">▲</div>
+                                        <div class="stepper-btn" data-stepper="input-max" data-dir="down">▼</div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="input-group-row">
+                            <div class="input-group">
+                                <span class="input-label">Cantidad</span>
+                                <div class="stepper-input-wrapper">
+                                    <input type="number" id="input-count" class="input-field" value="1" min="1" max="50">
+                                    <div class="stepper-btns">
+                                        <div class="stepper-btn" data-stepper="input-count" data-dir="up">▲</div>
+                                        <div class="stepper-btn" data-stepper="input-count" data-dir="down">▼</div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="input-group">
+                                <span class="input-label">Decimales</span>
+                                <div class="segmented-control" id="decimals-segment">
+                                    <button class="segment-btn active" data-decimals="0">0</button>
+                                    <button class="segment-btn" data-decimals="1">1</button>
+                                    <button class="segment-btn" data-decimals="2">2</button>
+                                    <button class="segment-btn" data-decimals="3">3</button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- PRESETS RÁPIDOS (colapsable) -->
+                    <div class="panel-card" id="card-presets">
+                        <div class="card-header" id="header-presets">
+                            <span class="card-header-label">
+                                <i data-lucide="bookmark" size="14"></i> Presets Rápidos
+                            </span>
+                            <div class="card-header-actions">
+                                <div class="collapse-chevron">
+                                    <i data-lucide="chevron-down" size="16"></i>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="card-body">
+                            <div class="presets-carousel" id="presets-carousel-container"></div>
+                        </div>
+                    </div>
+
+                    <!-- HISTORIAL (colapsable) -->
+                    <div class="panel-card" id="card-history">
+                        <div class="card-header" id="header-history">
+                            <span class="card-header-label">
+                                <i data-lucide="history" size="14"></i> Historial Reciente
+                            </span>
+                            <div class="card-header-actions">
+                                <button class="history-action-btn" id="btn-copy-history" title="Copiar todo">
+                                    <i data-lucide="copy" size="15"></i>
+                                </button>
+                                <button class="history-action-btn danger" id="btn-clear-history" title="Borrar">
+                                    <i data-lucide="trash-2" size="15"></i>
+                                </button>
+                                <div class="collapse-chevron">
+                                    <i data-lucide="chevron-down" size="16"></i>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="card-body">
+                            <div class="history-chips" id="history-container" style="margin-top:0;">
+                                <span class="empty-history">Sin historial</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- ADIVINAR (colapsable) -->
+                    <div class="panel-card" id="card-guess">
+                        <div class="card-header" id="header-guess">
+                            <span class="card-header-label">
+                                <i data-lucide="help-circle" size="14"></i> Adivina el Número
+                            </span>
+                            <div class="card-header-actions">
+                                <div class="collapse-chevron">
+                                    <i data-lucide="chevron-down" size="16"></i>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="card-body" id="guess-card-body">
+                            <div id="adivinar-container"></div>
+                        </div>
+                    </div>
+
+                </section>
+            </main>
+        </div>
+
+    </div>
+
+    <!-- MODAL DE AJUSTES -->
+    <div class="modal-overlay" id="modal-settings">
+        <div class="modal-card">
+            <div class="modal-header">
+                <div class="modal-title">
+                    <i data-lucide="sliders" size="18"></i>
+                    Ajustes de la Aplicación
+                </div>
+                <button class="icon-btn" id="btn-close-modal">
+                    <i data-lucide="x" size="16"></i>
+                </button>
+            </div>
+
+            <!-- Color -->
+            <div class="input-group">
+                <span class="input-label">Color del Número</span>
+                <div class="color-grid" id="color-picker-grid">
+                    <div class="color-option selected" data-color="#FFFFFF" style="background: #FFFFFF;"></div>
+                    <div class="color-option" data-color="#34C759" style="background: #34C759;"></div>
+                    <div class="color-option" data-color="#FF453A" style="background: #FF453A;"></div>
+                    <div class="color-option" data-color="#0A84FF" style="background: #0A84FF;"></div>
+                    <div class="color-option" data-color="#FFD60A" style="background: #FFD60A;"></div>
+                    <div class="color-option" data-color="#BF5AF2" style="background: #BF5AF2;"></div>
+                </div>
+            </div>
+
+            <!-- Escala -->
+            <div class="input-group">
+                <span class="input-label">Escala</span>
+                <div class="segmented-control" id="size-segment">
+                    <button class="segment-btn" data-size="size-sm">S</button>
+                    <button class="segment-btn active" data-size="size-md">M</button>
+                    <button class="segment-btn" data-size="size-lg">L</button>
+                    <button class="segment-btn" data-size="size-xl">XL</button>
+                </div>
+            </div>
+
+            <!-- Fuente -->
+            <div class="input-group">
+                <span class="input-label">Estilo Tipográfico</span>
+                <div class="segmented-control" id="font-segment">
+                    <button class="segment-btn active" data-font="'Outfit', sans-serif">Sans</button>
+                    <button class="segment-btn" data-font="'JetBrains Mono', monospace">Mono</button>
+                </div>
+            </div>
+
+            <!-- Filtros Avanzados -->
+            <div class="input-group">
+                <span class="input-label">Excluir Números (Separados por coma)</span>
+                <input type="text" id="input-exclude" class="input-field" placeholder="ej: 13, 7, 66">
+            </div>
+
+            <div class="toggle-row">
+                <span>Sin Números Repetidos</span>
+                <div class="toggle-switch" id="toggle-no-repeat" role="switch" tabindex="0"></div>
+            </div>
+
+            <div class="toggle-row">
+                <span>Sonido y Vibración</span>
+                <div class="toggle-switch active" id="toggle-sound" role="switch" tabindex="0"></div>
+            </div>
+
+            <div class="toggle-row">
+                <span>Auto-ajustar tamaño</span>
+                <div class="toggle-switch active" id="toggle-autofit" role="switch" tabindex="0"></div>
+            </div>
+
+            <!-- Modo Forzar Avanzado -->
+            <div class="advanced-divider">
+                <button id="btn-toggle-advanced" class="advanced-btn">Ajustes Avanzados</button>
+                <div id="advanced-panel" style="display: none;">
+                    <div class="advanced-panel-inner">
+                        <div class="advanced-toggle-row">
+                            <span>Activar Modo Forzar</span>
+                            <div class="toggle-switch" id="toggle-force-mode" role="switch" tabindex="0"></div>
+                        </div>
+                        <div id="force-mode-controls" style="display: none;">
+                            <input type="number" id="input-forced-val" class="input-field" placeholder="Número forzado">
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- CUSTOM DIALOG MODAL (reemplaza confirm/prompt nativos) -->
+    <div class="modal-overlay" id="modal-dialog">
+        <div class="dialog-modal" id="dialog-card">
+            <div class="dialog-title" id="dialog-title"></div>
+            <div class="dialog-message" id="dialog-message"></div>
+            <input type="text" class="dialog-input" id="dialog-input" style="display:none;">
+            <div class="dialog-actions" id="dialog-actions"></div>
+        </div>
+    </div>
+
+    <!-- Toast Notification -->
+    <div class="toast" id="toast">
+        <i data-lucide="check" size="16"></i>
+        <span id="toast-message">Copiado</span>
+    </div>
+
+    <script>
+        const STORAGE_KEY = 'neo_random_generator_v7';
+
+        let appState = {
+            min: 1,
+            max: 100,
+            count: 1,
+            decimals: 0,
+            noRepeat: false,
+            excludeStr: '',
+            soundEnabled: true,
+            autoFit: true,
+            history: [],
+            isHistoryOpen: true,
+            forcedNumberEnabled: false,
+            forcedNumberVal: 10,
+            presets: [
+                { id: 1, name: 'Dado (1-6)', min: 1, max: 6, decimals: 0, icon: 'dice-5' },
+                { id: 2, name: 'Porcentaje', min: 0, max: 100, decimals: 0, icon: 'percent' },
+                { id: 3, name: 'Moneda (0-10)', min: 0, max: 10, decimals: 2, icon: 'coins' }
+            ],
+            visuals: {
+                color: '#FFFFFF',
+                size: 'size-md',
+                weight: '700',
+                font: "'Outfit', sans-serif"
+            },
+            guessMode: {
+                gameState: 'SETUP',
+                min: 1,
+                max: 100,
+                targetNumber: null,
+                attempts: [],
+                lastGuessStatus: ''
+            }
+        };
+
+        let isRolling = false;
+        let timerRef = null;
+        let audioCtx = null;
+        let lastResults = [];
+        let dialogResolver = null;
+
+        window.onload = () => {
+            loadState();
+            setupEventListeners();
+            setupCollapsibleCards();
+            applyVisuals();
+            renderPresets();
+            renderHistory();
+            renderAdivinar();
+            lucide.createIcons();
+        };
+
+        function initAudio() {
+            if (!audioCtx) {
+                audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+            }
+        }
+
+        function playRollSound() {
+            if (!appState.soundEnabled) return;
+            initAudio();
+            try {
+                let osc = audioCtx.createOscillator();
+                let gain = audioCtx.createGain();
+                osc.type = 'sine';
+                osc.frequency.setValueAtTime(300, audioCtx.currentTime);
+                osc.frequency.exponentialRampToValueAtTime(800, audioCtx.currentTime + 0.04);
+                gain.gain.setValueAtTime(0.03, audioCtx.currentTime);
+                gain.gain.linearRampToValueAtTime(0, audioCtx.currentTime + 0.04);
+                osc.connect(gain);
+                gain.connect(audioCtx.destination);
+                osc.start();
+                osc.stop(audioCtx.currentTime + 0.04);
+            } catch(e){}
+        }
+
+        function playSnapSound() {
+            if (!appState.soundEnabled) return;
+            initAudio();
+            try {
+                let osc = audioCtx.createOscillator();
+                let gain = audioCtx.createGain();
+                osc.type = 'triangle';
+                osc.frequency.setValueAtTime(600, audioCtx.currentTime);
+                osc.frequency.exponentialRampToValueAtTime(200, audioCtx.currentTime + 0.08);
+                gain.gain.setValueAtTime(0.08, audioCtx.currentTime);
+                gain.gain.linearRampToValueAtTime(0, audioCtx.currentTime + 0.08);
+                osc.connect(gain);
+                gain.connect(audioCtx.destination);
+                osc.start();
+                osc.stop(audioCtx.currentTime + 0.08);
+            } catch(e){}
+        }
+
+        function triggerHaptic() {
+            if (appState.soundEnabled && navigator.vibrate) {
+                navigator.vibrate(12);
+            }
+        }
+
+        let localStorageAvailable = false;
+        try {
+            localStorage.setItem('__test__', '1');
+            localStorage.removeItem('__test__');
+            localStorageAvailable = true;
+        } catch (e) {
+            localStorageAvailable = false;
+        }
+
+        function saveState() {
+            if (!localStorageAvailable) return;
+            try {
+                localStorage.setItem(STORAGE_KEY, JSON.stringify(appState));
+            } catch (e) { console.error(e); }
+        }
+
+        function loadState() {
+            if (!localStorageAvailable) return;
+            const saved = localStorage.getItem(STORAGE_KEY);
+            if (saved) {
+                try {
+                    const parsed = JSON.parse(saved);
+                    // Migración: si no tiene autoFit, lo añadimos
+                    if (parsed.autoFit === undefined) parsed.autoFit = true;
+                    appState = { ...appState, ...parsed };
+                    document.getElementById('input-min').value = appState.min;
+                    document.getElementById('input-max').value = appState.max;
+                    document.getElementById('input-count').value = appState.count || 1;
+                    document.getElementById('input-exclude').value = appState.excludeStr || '';
+                    document.getElementById('toggle-no-repeat').classList.toggle('active', !!appState.noRepeat);
+                    document.getElementById('toggle-sound').classList.toggle('active', appState.soundEnabled !== false);
+                    document.getElementById('toggle-autofit').classList.toggle('active', appState.autoFit !== false);
+                    updateDecimalsUI(appState.decimals);
+                } catch (e) { console.error(e); }
+            }
+        }
+
+        function updateDecimalsUI(dec) {
+            document.querySelectorAll('#decimals-segment .segment-btn').forEach(btn => {
+                btn.classList.toggle('active', parseInt(btn.dataset.decimals) === dec);
+            });
+        }
+
+        /* AUTO-FIT: Ajusta el tamaño de fuente para que quepa en el contenedor */
+        function autoFitText(el, container) {
+            if (!appState.autoFit || !el || !container) return;
+            
+            // Reset a tamaño base
+            el.style.fontSize = '';
+            
+            let containerWidth = container.clientWidth - 20; // padding
+            let containerHeight = container.clientHeight - 20;
+            
+            // Intentar con el tamaño base primero
+            let computed = window.getComputedStyle(el);
+            let fontSize = parseFloat(computed.fontSize);
+            
+            // Reducir hasta que quepa
+            let minSize = 12;
+            let maxIterations = 50;
+            
+            while (el.scrollWidth > containerWidth || el.scrollHeight > containerHeight) {
+                if (fontSize <= minSize || maxIterations <= 0) break;
+                fontSize -= 2;
+                el.style.fontSize = fontSize + 'px';
+                maxIterations--;
+            }
+        }
+
+        /* GENERACIÓN CON ANIMACIÓN DE RODILLO (ROLL) */
+        function generateRandomNumber() {
+            if (isRolling) return;
+
+            const minInput = document.getElementById('input-min');
+            const maxInput = document.getElementById('input-max');
+            const countInput = document.getElementById('input-count');
+
+            let min = parseFloat(minInput.value);
+            let max = parseFloat(maxInput.value);
+            let count = Math.min(50, Math.max(1, parseInt(countInput.value) || 1));
+
+            if (isNaN(min) || isNaN(max) || min >= max) {
+                showToast('Mínimo debe ser menor que Máximo');
+                return;
+            }
+
+            appState.min = min;
+            appState.max = max;
+            appState.count = count;
+            saveState();
+
+            const excluded = (appState.excludeStr || '').split(',')
+                .map(n => parseFloat(n.trim()))
+                .filter(n => !isNaN(n));
+
+            let results = [];
+            let attempts = 0;
+            let maxAttempts = count * 100 + 1000;
+
+            while (results.length < count && attempts < maxAttempts) {
+                attempts++;
+                let val;
+                if (appState.forcedNumberEnabled && appState.forcedNumberVal !== null) {
+                    val = parseFloat(appState.forcedNumberVal);
+                } else {
+                    val = parseFloat((Math.random() * (max - min) + min).toFixed(appState.decimals));
+                }
+
+                if (excluded.includes(val)) continue;
+                if (appState.noRepeat && results.includes(val)) continue;
+
+                results.push(val);
+            }
+
+            if (results.length === 0) {
+                showToast('No se pudieron generar números con esos filtros');
+                return;
+            }
+
+            lastResults = results;
+            const isMulti = results.length > 1;
+
+            // ANIMACIÓN DE ROLL
+            isRolling = true;
+            const outputEl = document.getElementById('number-output');
+            const multiContainer = document.getElementById('multi-results-container');
+            const numberWrapper = document.getElementById('number-wrapper');
+            const fsOutputEl = document.getElementById('fullscreen-number-output');
+            const fsMultiEl = document.getElementById('fullscreen-multi-container');
+            const fsContent = document.getElementById('fullscreen-content');
+            
+            // Configurar vista multi vs single
+            if (isMulti) {
+                outputEl.style.display = 'none';
+                multiContainer.style.display = 'flex';
+                fsOutputEl.style.display = 'none';
+                fsMultiEl.style.display = 'flex';
+            } else {
+                outputEl.style.display = '';
+                multiContainer.style.display = 'none';
+                fsOutputEl.style.display = '';
+                fsMultiEl.style.display = 'none';
+            }
+            
+            outputEl.classList.add('rolling');
+            fsOutputEl.classList.add('rolling');
+            
+            let rollDuration = 350;
+            let startTime = null;
+
+            function step(timestamp) {
+                if (!startTime) startTime = timestamp;
+                let progress = timestamp - startTime;
+
+                if (progress < rollDuration) {
+                    playRollSound();
+                    if (isMulti) {
+                        // Mostrar números aleatorios temporales en chips
+                        let tempHtml = '';
+                        for (let i = 0; i < results.length; i++) {
+                            let randTemp = (Math.random() * (max - min) + min).toFixed(appState.decimals);
+                            tempHtml += `<span class="multi-chip" style="animation:none;">${randTemp}</span>`;
+                        }
+                        multiContainer.innerHTML = tempHtml;
+                        fsMultiEl.innerHTML = tempHtml;
+                    } else {
+                        let randTemp = (Math.random() * (max - min) + min).toFixed(appState.decimals);
+                        outputEl.textContent = randTemp;
+                        fsOutputEl.textContent = randTemp;
+                    }
+                    requestAnimationFrame(step);
+                } else {
+                    // Resultado final
+                    if (isMulti) {
+                        let finalHtml = results.map((val, idx) => 
+                            `<span class="multi-chip" style="animation-delay: ${idx * 0.05}s;" onclick="copyTextToClipboard('${val.toFixed(appState.decimals)}')">${val.toFixed(appState.decimals)}</span>`
+                        ).join('');
+                        multiContainer.innerHTML = finalHtml;
+                        fsMultiEl.innerHTML = finalHtml;
+                    } else {
+                        outputEl.textContent = results[0].toFixed(appState.decimals);
+                        fsOutputEl.textContent = results[0].toFixed(appState.decimals);
+                    }
+                    
+                    outputEl.classList.remove('rolling');
+                    outputEl.classList.remove('pop');
+                    fsOutputEl.classList.remove('rolling');
+                    fsOutputEl.classList.remove('pop');
+                    
+                    void outputEl.offsetWidth;
+                    outputEl.classList.add('pop');
+                    fsOutputEl.classList.add('pop');
+                    
+                    // Auto-fit del número
+                    if (!isMulti) {
+                        autoFitText(outputEl, numberWrapper);
+                        autoFitText(fsOutputEl, fsContent);
+                    }
+
+                    playSnapSound();
+                    triggerHaptic();
+                    
+                    const displayStr = isMulti 
+                        ? results.map(v => v.toFixed(appState.decimals)).join(', ')
+                        : results[0].toFixed(appState.decimals);
+                    addToHistory(displayStr);
+                    isRolling = false;
+                }
+            }
+
+            requestAnimationFrame(step);
+        }
+
+        /* RENDERS & INTERFAZ */
+        function renderPresets() {
+            const container = document.getElementById('presets-carousel-container');
+            container.innerHTML = '';
+
+            const addBtn = document.createElement('button');
+            addBtn.className = 'preset-chip preset-chip-add';
+            addBtn.innerHTML = '+ Nuevo';
+            addBtn.onclick = handleAddPreset;
+            container.appendChild(addBtn);
+
+            appState.presets.forEach((preset) => {
+                const btn = document.createElement('button');
+                btn.className = 'preset-chip';
+                const iconHtml = preset.icon ? `<i data-lucide="${preset.icon}" size="14"></i> ` : '';
+                btn.innerHTML = iconHtml + preset.name;
+
+                btn.onclick = () => {
+                    appState.min = preset.min;
+                    appState.max = preset.max;
+                    appState.decimals = preset.decimals;
+                    document.getElementById('input-min').value = preset.min;
+                    document.getElementById('input-max').value = preset.max;
+                    updateDecimalsUI(preset.decimals);
+                    saveState();
+                    generateRandomNumber();
+                };
+
+                const startHold = () => {
+                    timerRef = setTimeout(() => {
+                        showConfirm(`¿Eliminar preset "${preset.name}"?`, 'Eliminar preset', 'Eliminar', 'Cancelar').then(confirmed => {
+                            if (confirmed) {
+                                appState.presets = appState.presets.filter(p => p.id !== preset.id);
+                                saveState();
+                                renderPresets();
+                            }
+                        });
+                    }, 600);
+                };
+
+                const clearHold = () => { if (timerRef) clearTimeout(timerRef); };
+
+                btn.addEventListener('touchstart', startHold, { passive: true });
+                btn.addEventListener('touchend', clearHold);
+                btn.addEventListener('mousedown', startHold);
+                btn.addEventListener('mouseup', clearHold);
+                btn.addEventListener('mouseleave', clearHold);
+
+                container.appendChild(btn);
+            });
+            lucide.createIcons();
+        }
+
+        function handleAddPreset() {
+            showPrompt('Nombre del preset:', 'Nuevo preset', '').then(name => {
+                if (!name) return;
+
+                const newPreset = {
+                    id: Date.now(),
+                    name,
+                    min: parseFloat(document.getElementById('input-min').value) || 1,
+                    max: parseFloat(document.getElementById('input-max').value) || 100,
+                    decimals: appState.decimals
+                };
+
+                appState.presets.push(newPreset);
+                saveState();
+                renderPresets();
+            });
+        }
+
+        function renderHistory() {
+            const container = document.getElementById('history-container');
+            if (appState.history.length === 0) {
+                container.innerHTML = '<span class="empty-history">Sin historial</span>';
+                return;
+            }
+
+            container.innerHTML = appState.history.map(item => 
+                `<span class="chip" onclick="copyTextToClipboard('${item.replace(/'/g, "\\'")}')">${item}</span>`
+            ).join('');
+        }
+
+        function addToHistory(val) {
+            appState.history.unshift(val);
+            if (appState.history.length > 10) appState.history.pop();
+            renderHistory();
+            saveState();
+        }
+
+        function renderAdivinar() {
+            const container = document.getElementById('adivinar-container');
+            if (!container) return;
+            const { gameState, min, max, attempts, lastGuessStatus } = appState.guessMode;
+
+            if (gameState === 'SETUP') {
+                container.innerHTML = `
+                    <div style="display: flex; flex-direction: column; gap: 14px; width: 100%;">
+                        <div class="input-group-row">
+                            <div class="input-group">
+                                <span class="input-label">Mínimo</span>
+                                <input type="number" id="guess-setup-min" class="input-field" value="${min}">
+                            </div>
+                            <div class="input-group">
+                                <span class="input-label">Máximo</span>
+                                <input type="number" id="guess-setup-max" class="input-field" value="${max}">
+                            </div>
+                        </div>
+                        <button class="btn-primary" id="btn-start-guess">Empezar Juego</button>
+                    </div>
+                `;
+
+                document.getElementById('btn-start-guess').onclick = () => {
+                    const gMin = parseInt(document.getElementById('guess-setup-min').value) || 1;
+                    const gMax = parseInt(document.getElementById('guess-setup-max').value) || 100;
+                    
+                    appState.guessMode.min = gMin;
+                    appState.guessMode.max = gMax;
+                    appState.guessMode.targetNumber = Math.floor(Math.random() * (gMax - gMin + 1)) + gMin;
+                    appState.guessMode.attempts = [];
+                    appState.guessMode.lastGuessStatus = '¡Introduce tu primer intento!';
+                    appState.guessMode.gameState = 'PLAYING';
+                    saveState();
+                    renderAdivinar();
+                    lucide.createIcons();
+                };
+            } else {
+                container.innerHTML = `
+                    <div style="display: flex; flex-direction: column; align-items: center; gap: 14px; width: 100%; position: relative;">
+                        <button class="icon-btn" id="btn-exit-guess" style="position: absolute; top: -4px; right: -4px; width: 28px; height: 28px;" title="Salir">
+                            <i data-lucide="x" size="14"></i>
+                        </button>
+                        
+                        <div style="display: flex; flex-direction: column; align-items: center; gap: 6px;">
+                            <span style="font-size: clamp(2.5rem, 12vw, 4rem); font-weight: 800; line-height: 1;">?</span>
+                            <div class="guess-feedback" style="font-size: 0.95rem;">${lastGuessStatus}</div>
+                        </div>
+
+                        <div class="guess-input-row">
+                            <input type="number" id="guess-input-num" class="input-field" placeholder="Número..." style="text-align: center; font-size: 1.1rem;" />
+                            <button class="btn-primary" id="btn-submit-guess" style="width: 100px;">Adivinar</button>
+                        </div>
+
+                        <div class="guess-attempts-list" style="max-height: 120px;">
+                            ${attempts.map(att => `
+                                <div class="guess-attempt">
+                                    <strong>${att.val}</strong>
+                                    <span>${att.hint}</span>
+                                </div>
+                            `).join('')}
+                        </div>
+                    </div>
+                `;
+
+                document.getElementById('btn-exit-guess').onclick = () => {
+                    appState.guessMode.gameState = 'SETUP';
+                    saveState();
+                    renderAdivinar();
+                    lucide.createIcons();
+                };
+
+                const handleGuess = () => {
+                    const input = document.getElementById('guess-input-num');
+                    const val = parseInt(input.value);
+                    if (isNaN(val)) return;
+
+                    const target = appState.guessMode.targetNumber;
+                    let hint = '';
+
+                    if (val === target) {
+                        hint = '🎉 ¡CORRECTO!';
+                        playSnapSound();
+                    } else if (val < target) {
+                        hint = 'Es Mayor ⬆️';
+                        playRollSound();
+                    } else {
+                        hint = 'Es Menor ⬇️';
+                        playRollSound();
+                    }
+
+                    appState.guessMode.lastGuessStatus = hint;
+                    appState.guessMode.attempts.unshift({ val, hint });
+                    input.value = '';
+                    saveState();
+                    renderAdivinar();
+                    lucide.createIcons();
+                };
+
+                document.getElementById('btn-submit-guess').onclick = handleGuess;
+                document.getElementById('guess-input-num').onkeydown = (e) => {
+                    if (e.key === 'Enter') handleGuess();
+                };
+                document.getElementById('guess-input-num').focus();
+            }
+        }
+
+        /* CUSTOM DIALOG SYSTEM (reemplaza confirm/prompt nativos) */
+        function showConfirm(message, title = 'Confirmar', confirmText = 'Aceptar', cancelText = 'Cancelar') {
+            return new Promise((resolve) => {
+                const overlay = document.getElementById('modal-dialog');
+                const titleEl = document.getElementById('dialog-title');
+                const msgEl = document.getElementById('dialog-message');
+                const inputEl = document.getElementById('dialog-input');
+                const actionsEl = document.getElementById('dialog-actions');
+
+                titleEl.textContent = title;
+                msgEl.textContent = message;
+                msgEl.style.display = '';
+                inputEl.style.display = 'none';
+                actionsEl.innerHTML = '';
+
+                const cancelBtn = document.createElement('button');
+                cancelBtn.className = 'btn-secondary';
+                cancelBtn.textContent = cancelText;
+                cancelBtn.onclick = () => {
+                    overlay.classList.remove('active');
+                    resolve(false);
+                };
+
+                const confirmBtn = document.createElement('button');
+                confirmBtn.className = title.toLowerCase().includes('eliminar') ? 'btn-dialog-danger' : 'btn-dialog-primary';
+                confirmBtn.textContent = confirmText;
+                confirmBtn.onclick = () => {
+                    overlay.classList.remove('active');
+                    resolve(true);
+                };
+
+                actionsEl.appendChild(cancelBtn);
+                actionsEl.appendChild(confirmBtn);
+
+                overlay.classList.add('active');
+                confirmBtn.focus();
+            });
+        }
+
+        function showPrompt(message, title = 'Introducir', defaultValue = '', placeholder = '') {
+            return new Promise((resolve) => {
+                const overlay = document.getElementById('modal-dialog');
+                const titleEl = document.getElementById('dialog-title');
+                const msgEl = document.getElementById('dialog-message');
+                const inputEl = document.getElementById('dialog-input');
+                const actionsEl = document.getElementById('dialog-actions');
+
+                titleEl.textContent = title;
+                msgEl.textContent = message;
+                msgEl.style.display = '';
+                inputEl.style.display = '';
+                inputEl.value = defaultValue;
+                inputEl.placeholder = placeholder;
+                actionsEl.innerHTML = '';
+
+                const cancelBtn = document.createElement('button');
+                cancelBtn.className = 'btn-secondary';
+                cancelBtn.textContent = 'Cancelar';
+                cancelBtn.onclick = () => {
+                    overlay.classList.remove('active');
+                    resolve(null);
+                };
+
+                const confirmBtn = document.createElement('button');
+                confirmBtn.className = 'btn-dialog-primary';
+                confirmBtn.textContent = 'Aceptar';
+                confirmBtn.onclick = () => {
+                    overlay.classList.remove('active');
+                    resolve(inputEl.value.trim());
+                };
+
+                actionsEl.appendChild(cancelBtn);
+                actionsEl.appendChild(confirmBtn);
+
+                overlay.classList.add('active');
+                inputEl.focus();
+                
+                inputEl.onkeydown = (e) => {
+                    if (e.key === 'Enter') {
+                        overlay.classList.remove('active');
+                        resolve(inputEl.value.trim());
+                    }
+                };
+            });
+        }
+
+        /* EVENT LISTENERS */
+        function setupEventListeners() {
+            document.getElementById('nav-btn-numbers').onclick = () => switchView('numbers');
+            document.getElementById('nav-btn-ruleta').onclick = () => {
+                window.open('aleatorio.html', '_blank');
+            };
+
+            document.getElementById('btn-generate').onclick = (e) => {
+                e.stopPropagation();
+                generateRandomNumber();
+            };
+
+            document.getElementById('display-card-tap').onclick = (e) => {
+                if (e.target.closest('.icon-btn') || e.target.closest('.btn-generate') || e.target.closest('.multi-chip')) return;
+                generateRandomNumber();
+            };
+
+            // MODO PANTALLA COMPLETA - TAP PARA GENERAR
+            const fullscreenOverlay = document.getElementById('fullscreen-overlay');
+            fullscreenOverlay.onclick = (e) => {
+                if (e.target.closest('#btn-close-fullscreen')) return;
+                generateRandomNumber();
+            };
+
+            window.onkeydown = (e) => {
+                if (e.code === 'Space' && document.activeElement.tagName !== 'INPUT' && !document.getElementById('modal-dialog').classList.contains('active')) {
+                    e.preventDefault();
+                    generateRandomNumber();
+                }
+            };
+
+            document.getElementById('btn-fullscreen').onclick = (e) => {
+                e.stopPropagation();
+                fullscreenOverlay.classList.add('active');
+                // Auto-fit en fullscreen
+                setTimeout(() => {
+                    if (!lastResults.length || lastResults.length === 1) {
+                        autoFitText(document.getElementById('fullscreen-number-output'), document.getElementById('fullscreen-content'));
+                    }
+                }, 300);
+            };
+
+            document.getElementById('btn-close-fullscreen').onclick = (e) => {
+                e.stopPropagation();
+                fullscreenOverlay.classList.remove('active');
+            };
+
+            // STEPPER BUTTONS
+            document.querySelectorAll('.stepper-btn').forEach(btn => {
+                let holdTimer = null;
+                let repeatTimer = null;
+
+                const doStep = () => {
+                    const targetId = btn.dataset.stepper;
+                    const dir = btn.dataset.dir;
+                    const input = document.getElementById(targetId);
+                    let val = parseFloat(input.value) || 0;
+                    const step = input.step && input.step !== 'any' ? parseFloat(input.step) : 1;
+                    
+                    if (dir === 'up') {
+                        val += step;
+                        const max = parseFloat(input.max);
+                        if (!isNaN(max) && val > max) val = max;
+                    } else {
+                        val -= step;
+                        const min = parseFloat(input.min);
+                        if (!isNaN(min) && val < min) val = min;
+                    }
+                    input.value = val;
+                    input.dispatchEvent(new Event('input', { bubbles: true }));
+                };
+
+                const startRepeat = () => {
+                    holdTimer = setTimeout(() => {
+                        repeatTimer = setInterval(doStep, 80);
+                    }, 400);
+                };
+
+                const stopRepeat = () => {
+                    if (holdTimer) { clearTimeout(holdTimer); holdTimer = null; }
+                    if (repeatTimer) { clearInterval(repeatTimer); repeatTimer = null; }
+                };
+
+                btn.addEventListener('mousedown', (e) => {
+                    e.preventDefault();
+                    e.stopPropagation();
+                    doStep();
+                    startRepeat();
+                });
+                btn.addEventListener('mouseup', stopRepeat);
+                btn.addEventListener('mouseleave', stopRepeat);
+                btn.addEventListener('touchstart', (e) => {
+                    e.preventDefault();
+                    e.stopPropagation();
+                    doStep();
+                    startRepeat();
+                }, { passive: false });
+                btn.addEventListener('touchend', stopRepeat);
+                btn.addEventListener('touchcancel', stopRepeat);
+            });
+
+            document.querySelectorAll('#decimals-segment .segment-btn').forEach(btn => {
+                btn.onclick = () => {
+                    appState.decimals = parseInt(btn.dataset.decimals);
+                    updateDecimalsUI(appState.decimals);
+                    saveState();
+                };
+            });
+
+            // INPUT LISTENERS
+            document.getElementById('input-min').oninput = (e) => {
+                appState.min = parseFloat(e.target.value) || 0;
+                saveState();
+            };
+
+            document.getElementById('input-max').oninput = (e) => {
+                appState.max = parseFloat(e.target.value) || 100;
+                saveState();
+            };
+
+            document.getElementById('input-count').oninput = (e) => {
+                appState.count = parseInt(e.target.value) || 1;
+                saveState();
+            };
+
+            document.getElementById('btn-copy').onclick = (e) => {
+                e.stopPropagation();
+                const text = lastResults.length > 0 
+                    ? (lastResults.length === 1 
+                        ? lastResults[0].toFixed(appState.decimals)
+                        : lastResults.map(v => v.toFixed(appState.decimals)).join(', '))
+                    : document.getElementById('number-output').textContent.trim();
+                if (text !== '--') copyTextToClipboard(text);
+            };
+
+            document.getElementById('btn-copy-history').onclick = () => {
+                if (appState.history.length === 0) return;
+                copyTextToClipboard(appState.history.join(', '));
+            };
+
+            document.getElementById('btn-clear-history').onclick = () => {
+                if (appState.history.length === 0) return;
+                showConfirm('¿Borrar todo el historial?', 'Borrar historial', 'Borrar', 'Cancelar').then(confirmed => {
+                    if (confirmed) {
+                        appState.history = [];
+                        renderHistory();
+                        saveState();
+                        showToast('Historial borrado');
+                    }
+                });
+            };
+
+            document.getElementById('btn-settings').onclick = (e) => {
+                e.stopPropagation();
+                document.getElementById('modal-settings').classList.add('active');
+            };
+
+            document.getElementById('btn-close-modal').onclick = () => {
+                document.getElementById('modal-settings').classList.remove('active');
+            };
+
+            // Close modals on overlay click
+            document.getElementById('modal-settings').onclick = (e) => {
+                if (e.target.id === 'modal-settings') {
+                    document.getElementById('modal-settings').classList.remove('active');
+                }
+            };
+
+            document.getElementById('modal-dialog').onclick = (e) => {
+                if (e.target.id === 'modal-dialog') {
+                    document.getElementById('modal-dialog').classList.remove('active');
+                    if (dialogResolver) { dialogResolver(null); dialogResolver = null; }
+                }
+            };
+
+            // Color picker
+            document.querySelectorAll('#color-picker-grid .color-option').forEach(opt => {
+                opt.onclick = () => {
+                    document.querySelectorAll('#color-picker-grid .color-option').forEach(o => o.classList.remove('selected'));
+                    opt.classList.add('selected');
+                    appState.visuals.color = opt.dataset.color;
+                    applyVisuals();
+                    saveState();
+                };
+            });
+
+            // Size segment
+            document.querySelectorAll('#size-segment .segment-btn').forEach(btn => {
+                btn.onclick = () => {
+                    appState.visuals.size = btn.dataset.size;
+                    document.querySelectorAll('#size-segment .segment-btn').forEach(b => b.classList.remove('active'));
+                    btn.classList.add('active');
+                    applyVisuals();
+                    saveState();
+                };
+            });
+
+            // Font segment
+            document.querySelectorAll('#font-segment .segment-btn').forEach(btn => {
+                btn.onclick = () => {
+                    appState.visuals.font = btn.dataset.font;
+                    document.querySelectorAll('#font-segment .segment-btn').forEach(b => b.classList.remove('active'));
+                    btn.classList.add('active');
+                    applyVisuals();
+                    saveState();
+                };
+            });
+
+            document.getElementById('input-exclude').oninput = (e) => {
+                appState.excludeStr = e.target.value;
+                saveState();
+            };
+
+            // CUSTOM TOGGLE SWITCHES
+            const setupToggle = (id, stateKey, callback) => {
+                const toggle = document.getElementById(id);
+                const handler = () => {
+                    toggle.classList.toggle('active');
+                    const isActive = toggle.classList.contains('active');
+                    appState[stateKey] = isActive;
+                    saveState();
+                    if (callback) callback(isActive);
+                };
+                toggle.onclick = handler;
+                toggle.onkeydown = (e) => {
+                    if (e.key === 'Enter' || e.key === ' ') {
+                        e.preventDefault();
+                        handler();
+                    }
+                };
+            };
+
+            setupToggle('toggle-no-repeat', 'noRepeat');
+            setupToggle('toggle-sound', 'soundEnabled');
+            setupToggle('toggle-autofit', 'autoFit', (isActive) => {
+                if (isActive && lastResults.length === 1) {
+                    autoFitText(document.getElementById('number-output'), document.getElementById('number-wrapper'));
+                }
+            });
+
+            // Advanced panel
+            const btnAdvanced = document.getElementById('btn-toggle-advanced');
+            const advancedPanel = document.getElementById('advanced-panel');
+
+            btnAdvanced.onclick = () => {
+                advancedPanel.style.display = advancedPanel.style.display === 'none' ? 'block' : 'none';
+            };
+
+            // Force mode toggle
+            const toggleForceMode = document.getElementById('toggle-force-mode');
+            const forceControls = document.getElementById('force-mode-controls');
+
+            toggleForceMode.onclick = () => {
+                if (!toggleForceMode.classList.contains('active')) {
+                    showConfirm(
+                        'DESCARGO DE RESPONSABILIDAD:\n\nEl Modo Forzar permite manipular los resultados. Su uso es responsabilidad exclusiva del usuario.',
+                        'Modo Forzar',
+                        'Activar',
+                        'Cancelar'
+                    ).then(accepted => {
+                        if (accepted) {
+                            toggleForceMode.classList.add('active');
+                            appState.forcedNumberEnabled = true;
+                            forceControls.style.display = 'block';
+                            saveState();
+                        }
+                    });
+                } else {
+                    toggleForceMode.classList.remove('active');
+                    appState.forcedNumberEnabled = false;
+                    forceControls.style.display = 'none';
+                    saveState();
+                }
+            };
+
+            document.getElementById('input-forced-val').oninput = (e) => {
+                appState.forcedNumberVal = parseFloat(e.target.value) || 0;
+                saveState();
+            };
+        }
+
+        function switchView(view) {
+            // Only numbers view remains; ruleta opens external link
+            document.getElementById('nav-btn-numbers').classList.toggle('active', view === 'numbers');
+        }
+
+        /* COLLAPSE / EXPAND CARDS */
+        function setupCollapsibleCards() {
+            const cards = [
+                { headerId: 'header-presets', cardId: 'card-presets', stateKey: 'presetsOpen' },
+                { headerId: 'header-history', cardId: 'card-history', stateKey: 'historyOpen' },
+                { headerId: 'header-guess', cardId: 'card-guess', stateKey: 'guessOpen' }
+            ];
+
+            // Default states
+            if (appState.presetsOpen === undefined) appState.presetsOpen = true;
+            if (appState.historyOpen === undefined) appState.historyOpen = true;
+            if (appState.guessOpen === undefined) appState.guessOpen = false;
+
+            cards.forEach(({ headerId, cardId, stateKey }) => {
+                const header = document.getElementById(headerId);
+                const card = document.getElementById(cardId);
+                if (!header || !card) return;
+
+                // Apply initial state
+                if (!appState[stateKey]) {
+                    card.classList.add('collapsed');
+                }
+
+                header.onclick = (e) => {
+                    // Don't toggle if clicking on action buttons
+                    if (e.target.closest('.history-action-btn')) return;
+                    card.classList.toggle('collapsed');
+                    appState[stateKey] = !card.classList.contains('collapsed');
+                    saveState();
+                };
+            });
+        }
+
+        function applyVisuals() {
+            const root = document.documentElement;
+            const outputEl = document.getElementById('number-output');
+
+            root.style.setProperty('--num-color', appState.visuals.color);
+            root.style.setProperty('--num-weight', appState.visuals.weight);
+            root.style.setProperty('--num-font-family', appState.visuals.font);
+
+            outputEl.className = `number-display ${appState.visuals.size}`;
+        }
+
+        function copyTextToClipboard(text) {
+            if (navigator.clipboard && navigator.clipboard.writeText) {
+                navigator.clipboard.writeText(text).then(() => showToast(`Copiado: ${text}`));
+            } else {
+                const textarea = document.createElement('textarea');
+                textarea.value = text;
+                textarea.style.position = 'fixed';
+                textarea.style.opacity = '0';
+                document.body.appendChild(textarea);
+                textarea.select();
+                try {
+                    document.execCommand('copy');
+                    showToast(`Copiado: ${text}`);
+                } catch (err) {
+                    showToast('Error al copiar');
+                } finally {
+                    document.body.removeChild(textarea);
+                }
+            }
+        }
+
+        function showToast(msg) {
+            const toast = document.getElementById('toast');
+            document.getElementById('toast-message').textContent = msg;
+            toast.classList.add('show');
+            clearTimeout(toast._timer);
+            toast._timer = setTimeout(() => toast.classList.remove('show'), 2000);
+        }
+
+        // Resize handler para re-fit
+        let resizeTimer = null;
+        window.addEventListener('resize', () => {
+            if (resizeTimer) clearTimeout(resizeTimer);
+            resizeTimer = setTimeout(() => {
+                if (lastResults.length === 1) {
+                    autoFitText(document.getElementById('number-output'), document.getElementById('number-wrapper'));
+                    if (document.getElementById('fullscreen-overlay').classList.contains('active')) {
+                        autoFitText(document.getElementById('fullscreen-number-output'), document.getElementById('fullscreen-content'));
+                    }
+                }
+            }, 150);
+        });
+    </script>
+<script data-pplx-inline-edit>
+(function () {
+  if (window === window.top) return;
+
+  const allowedParentOrigins = ["https://www.perplexity.ai","https://perplexity.ai","https://testing.perplexity.ai","https://staging.perplexity.ai","https://*.preview.i.perplexity.ai","http://perplexity.localhost","http://localhost:1420","http://127.0.0.1:1420","http://localhost:3000","http://127.0.0.1:3000","http://localhost:5173","http://127.0.0.1:5173"];
+  const MAX_FONT_BYTES = 500 * 1024;
+  const MAX_TOTAL_FONT_BYTES = 2 * 1024 * 1024;
+  let scrollForwarding = false;
+  let scrollRaf = 0;
+  let trustedTopOrigin = null;
+
+  // Allow entries like "https://*.preview.i.perplexity.ai" — the wildcard
+  // matches a single DNS label (no dots), so "https://*.foo" cannot stretch
+  // across multiple labels.
+  function matchesAllowedOrigin(origin) {
+    if (!origin) return false;
+    for (const entry of allowedParentOrigins) {
+      if (!entry.includes("*")) {
+        if (entry === origin) return true;
+        continue;
+      }
+      const pattern = new RegExp(
+        "^" +
+          entry.replace(/[.+?^${}()|[\]\\]/g, "\\$&").replace(/\*/g, "[^.]+") +
+          "$",
+      );
+      if (pattern.test(origin)) return true;
+    }
+    return false;
+  }
+
+  // Trust decision: when the sender is same-origin-visible (event.origin is a
+  // real origin like https://www.perplexity.ai) we trust event.origin directly.
+  // When event.origin is "null" (opaque broker srcdoc), we fall back to the
+  // broker's stamped `parentOrigin` to identify the top window. The fallback
+  // is claim-only — we rely on the browser's native `targetOrigin` enforcement
+  // on the response path (see postToTrustedTop) to ensure replies can't be
+  // delivered to anyone but the actual top window of that claimed origin.
+  function getTrustedParentOrigin(event) {
+    const forwardedParentOrigin =
+      typeof event.data.parentOrigin === "string" ? event.data.parentOrigin : null;
+    const parentOrigin = event.origin === "null" ? forwardedParentOrigin : event.origin;
+    return matchesAllowedOrigin(parentOrigin) ? parentOrigin : null;
+  }
+
+  // All responses go to window.top with targetOrigin = the allowlisted origin.
+  // An attacker that iframes us inside their own null-origin broker can claim
+  // any parentOrigin they like, but the browser will drop the reply whenever
+  // the real top's origin doesn't match — so the screenshot never leaves.
+  function postToTrustedTop(message) {
+    if (!trustedTopOrigin) return;
+    try {
+      window.top.postMessage(message, trustedTopOrigin);
+    } catch (_error) {}
+  }
+
+  function inlineAll(original, clone) {
+    if (original.nodeType !== 1 || clone.nodeType !== 1) return;
+
+    try {
+      const computedStyle = getComputedStyle(original);
+      // cssText on a computed style is the serialized declaration in modern
+      // Chromium/Safari — a single read beats enumerating ~400 longhand
+      // properties. Firefox returns "" here, so we fall back on empty.
+      const serialized = computedStyle.cssText;
+      if (serialized) {
+        clone.style.cssText = serialized;
+      } else {
+        const parts = new Array(computedStyle.length);
+        for (let index = 0; index < computedStyle.length; index += 1) {
+          const property = computedStyle[index];
+          parts[index] = `${property}:${computedStyle.getPropertyValue(property)};`;
+        }
+        clone.style.cssText = parts.join("");
+      }
+    } catch (_error) {}
+
+    const originalChildren = original.children;
+    const clonedChildren = clone.children;
+    for (
+      let index = 0;
+      index < originalChildren.length && index < clonedChildren.length;
+      index += 1
+    ) {
+      inlineAll(originalChildren[index], clonedChildren[index]);
+    }
+  }
+
+  function extractFontUrl(srcValue) {
+    const matches = [
+      ...srcValue.matchAll(
+        /url\(["']?([^"')]+)["']?\)(?:\s*format\(["']?([^"')]+)["']?\))?/gi,
+      ),
+    ];
+    if (matches.length === 0) return null;
+    const woff2 = matches.find((m) => m[2] && m[2].toLowerCase().includes("woff2"));
+    if (woff2) return woff2[1];
+    const woff = matches.find((m) => m[2] && m[2].toLowerCase().includes("woff"));
+    if (woff) return woff[1];
+    return matches[0][1];
+  }
+
+  // Cache resolved font URL -> data URI across captures. Fonts on a page
+  // essentially never change, and a batch run emits multiple captures back to
+  // back — without this we'd refetch + re-base64 every time.
+  const fontDataUriCache = new Map();
+  const SRC_DECLARATION_RE = /src\s*:\s*[^;}]+/i;
+
+  async function fetchAsDataUri(url) {
+    if (fontDataUriCache.has(url)) return fontDataUriCache.get(url);
+    let dataUri = null;
+    try {
+      const response = await fetch(url, { mode: "cors", credentials: "omit" });
+      if (response.ok) {
+        const blob = await response.blob();
+        if (blob.size <= MAX_FONT_BYTES) {
+          dataUri = await new Promise((resolve) => {
+            const reader = new FileReader();
+            reader.onloadend = () =>
+              resolve(typeof reader.result === "string" ? reader.result : null);
+            reader.onerror = () => resolve(null);
+            reader.readAsDataURL(blob);
+          });
+        }
+      }
+    } catch (_error) {
+      dataUri = null;
+    }
+    fontDataUriCache.set(url, dataUri);
+    return dataUri;
+  }
+
+  function collectFontFaceRuleTexts() {
+    const rules = [];
+    for (const sheet of document.styleSheets) {
+      let cssRules;
+      try {
+        cssRules = sheet.cssRules;
+      } catch (_error) {
+        continue;
+      }
+      if (!cssRules) continue;
+      for (const rule of cssRules) {
+        const cssText = rule.cssText || "";
+        if (cssText.startsWith("@font-face")) rules.push(cssText);
+      }
+    }
+    return rules;
+  }
+
+  async function buildInlinedFontCss() {
+    const ruleTexts = collectFontFaceRuleTexts();
+    if (ruleTexts.length === 0) return null;
+
+    const resolved = ruleTexts.map((cssText) => {
+      if (!SRC_DECLARATION_RE.test(cssText)) return null;
+      const srcMatch = cssText.match(/src\s*:\s*([^;}]+)[;}]/i);
+      if (!srcMatch) return null;
+      const url = extractFontUrl(srcMatch[1]);
+      if (!url) return null;
+      try {
+        return { cssText, url: new URL(url, document.baseURI).href };
+      } catch (_error) {
+        return null;
+      }
+    });
+
+    const dataUris = await Promise.all(
+      resolved.map((entry) => (entry ? fetchAsDataUri(entry.url) : Promise.resolve(null))),
+    );
+
+    const inlined = [];
+    let totalBytes = 0;
+    for (let index = 0; index < resolved.length; index += 1) {
+      const entry = resolved[index];
+      const dataUri = dataUris[index];
+      if (!entry || !dataUri) continue;
+      const approxBytes = dataUri.length * 0.75;
+      if (totalBytes + approxBytes > MAX_TOTAL_FONT_BYTES) break;
+      totalBytes += approxBytes;
+      inlined.push(entry.cssText.replace(SRC_DECLARATION_RE, `src: url("${dataUri}")`));
+    }
+    return inlined.length > 0 ? inlined.join("\n") : null;
+  }
+
+  function stripExternal(clone) {
+    const images = clone.querySelectorAll("img");
+    for (let index = 0; index < images.length; index += 1) {
+      const src = images[index].getAttribute("src");
+      if (src && !src.startsWith("data:")) images[index].removeAttribute("src");
+    }
+
+    const elements = clone.querySelectorAll("*");
+    for (let index = 0; index < elements.length; index += 1) {
+      const style = elements[index].style.cssText;
+      if (style && style.includes("url(")) {
+        elements[index].style.cssText = style.replace(
+          /url\(["']?(?!data:)[^)"']*["']?\)/gi,
+          "none",
+        );
+      }
+    }
+  }
+
+  function emitScroll() {
+    scrollRaf = 0;
+    if (!scrollForwarding) return;
+    postToTrustedTop({
+      type: "INLINE_EDIT_SCROLL",
+      scrollX: window.scrollX,
+      scrollY: window.scrollY,
+    });
+  }
+
+  window.addEventListener(
+    "scroll",
+    function () {
+      if (!scrollForwarding || scrollRaf) return;
+      scrollRaf = requestAnimationFrame(emitScroll);
+    },
+    { passive: true, capture: true },
+  );
+
+  async function handleCaptureRequest(event) {
+    const requestId = event.data.requestId;
+    const scrollX = window.scrollX;
+    const scrollY = window.scrollY;
+    const width = window.innerWidth;
+    const height = window.innerHeight;
+
+    function postResult(dataUrl) {
+      postToTrustedTop({
+        type: "INLINE_EDIT_SCREENSHOT_RESULT",
+        requestId,
+        dataUrl,
+        scrollX,
+        scrollY,
+      });
+    }
+
+    try {
+      // Wait for any pending web fonts to resolve so both inline metrics and
+      // the @font-face inlining below see the same loaded faces.
+      if (document.fonts && document.fonts.ready) {
+        try {
+          await document.fonts.ready;
+        } catch (_error) {}
+      }
+
+      const clone = document.documentElement.cloneNode(true);
+      inlineAll(document.documentElement, clone);
+
+      const removedNodes = clone.querySelectorAll("script,link[rel=\"stylesheet\"],style");
+      for (let index = 0; index < removedNodes.length; index += 1) {
+        removedNodes[index].remove();
+      }
+
+      stripExternal(clone);
+
+      // Re-embed web fonts as data-URI @font-face rules so the SVG rasterizer
+      // can resolve them — external font URLs aren't fetched during
+      // foreignObject rendering, which would otherwise force a fallback face
+      // and change text metrics.
+      const inlinedFontCss = await buildInlinedFontCss();
+      if (inlinedFontCss) {
+        const styleEl = document.createElement("style");
+        styleEl.textContent = inlinedFontCss;
+        const head = clone.querySelector("head");
+        if (head) head.appendChild(styleEl);
+        else clone.insertBefore(styleEl, clone.firstChild);
+      }
+
+      const html = new XMLSerializer().serializeToString(clone);
+      const svg =
+        `<svg xmlns="http://www.w3.org/2000/svg" width="${width}" height="${height}">` +
+        '<foreignObject width="100%" height="100%">' +
+        `<div xmlns="http://www.w3.org/1999/xhtml" style="width:${width}px;height:${height}px;overflow:hidden">` +
+        `<div style="position:relative;left:-${scrollX}px;top:-${scrollY}px">` +
+        html +
+        "</div></div></foreignObject></svg>";
+      const svgUrl = `data:image/svg+xml;charset=utf-8,${encodeURIComponent(svg)}`;
+      const image = new Image();
+      image.onload = function () {
+        const canvas = document.createElement("canvas");
+        canvas.width = width;
+        canvas.height = height;
+        canvas.getContext("2d").drawImage(image, 0, 0);
+        postResult(canvas.toDataURL("image/png"));
+      };
+      image.onerror = function () {
+        postResult(null);
+      };
+      image.src = svgUrl;
+    } catch (_error) {
+      postResult(null);
+    }
+  }
+
+  window.addEventListener("message", function (event) {
+    if (!event.data) return;
+    // Only accept messages from the direct parent frame. Blocks sibling /
+    // unrelated-window postMessage senders that could otherwise reach us.
+    if (event.source !== window.parent) return;
+
+    const trustedParentOrigin = getTrustedParentOrigin(event);
+    if (!trustedParentOrigin) return;
+    trustedTopOrigin = trustedParentOrigin;
+
+    if (event.data.type === "INLINE_EDIT_SCROLL_START") {
+      scrollForwarding = true;
+      emitScroll();
+      return;
+    }
+
+    if (event.data.type === "INLINE_EDIT_SCROLL_STOP") {
+      scrollForwarding = false;
+      if (scrollRaf) cancelAnimationFrame(scrollRaf);
+      scrollRaf = 0;
+      return;
+    }
+
+    if (event.data.type !== "INLINE_EDIT_CAPTURE_REQUEST") return;
+
+    handleCaptureRequest(event);
+  });
+})();
+
+
+</script></body>
+</html>

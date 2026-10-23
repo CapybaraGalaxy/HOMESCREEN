@@ -1,0 +1,1090 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+    <title>Generador de Degradados</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <script src="../lucide.min.js"></script>
+    <style>
+        :root {
+            --bg: #09090b;
+            --surface: #121215;
+            --surface-card: #18181c;
+            --surface-hover: #222228;
+            --glass-border: rgba(255, 255, 255, 0.08);
+            --text-main: #FFFFFF;
+            --text-muted: #8E8E93;
+            --accent-primary: #3B82F6;
+            --accent-danger: #EF4444;
+            --bezier: cubic-bezier(0.16, 1, 0.3, 1);
+            --spring: cubic-bezier(0.34, 1.56, 0.64, 1);
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: 'Outfit', sans-serif;
+            -webkit-tap-highlight-color: transparent;
+        }
+
+        body {
+            background-color: var(--bg);
+            color: var(--text-main);
+            min-height: 100dvh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            overflow-x: hidden;
+            padding: 16px;
+        }
+
+        .app-container {
+            width: 100%;
+            max-width: 1100px;
+            max-height: 100dvh;
+            display: flex;
+            flex-direction: column;
+            gap: 16px;
+        }
+
+        /* HEADER */
+        header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            flex-wrap: wrap;
+            gap: 12px;
+            flex-shrink: 0;
+        }
+
+        .header-title-area {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .app-icon-badge {
+            width: 38px;
+            height: 38px;
+            border-radius: 10px;
+            background: linear-gradient(135deg, rgba(59, 130, 246, 0.25), rgba(255,255,255,0.03));
+            border: 1px solid var(--glass-border);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            box-shadow: 0 8px 20px rgba(0,0,0,0.3);
+        }
+
+        h1 {
+            font-size: 1.25rem;
+            font-weight: 600;
+            letter-spacing: -0.02em;
+        }
+
+        .header-actions {
+            display: flex;
+            gap: 8px;
+            align-items: center;
+            flex-wrap: wrap;
+        }
+
+        .btn-action {
+            background: var(--surface-card);
+            border: 1px solid var(--glass-border);
+            color: var(--text-main);
+            padding: 8px 14px;
+            border-radius: 10px;
+            font-size: 0.82rem;
+            font-weight: 500;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            transition: all 0.2s var(--bezier);
+        }
+
+        .btn-action:hover {
+            background: var(--surface-hover);
+            border-color: rgba(255,255,255,0.18);
+            transform: translateY(-1px);
+        }
+
+        .btn-action.primary {
+            background: var(--text-main);
+            color: var(--bg);
+            border-color: var(--text-main);
+            font-weight: 600;
+        }
+
+        .btn-action.primary:hover {
+            background: #e4e4e7;
+        }
+
+        /* MAIN LAYOUT WITH STRICT OVERFLOW HANDLING */
+        .main-content {
+            display: grid;
+            grid-template-columns: 1fr;
+            gap: 16px;
+            overflow: hidden;
+        }
+
+        @media (min-width: 900px) {
+            .main-content {
+                grid-template-columns: 1.15fr 0.85fr;
+                align-items: start;
+            }
+        }
+
+        .panel {
+            background: var(--surface);
+            border: 1px solid var(--glass-border);
+            border-radius: 18px;
+            padding: 20px;
+            display: flex;
+            flex-direction: column;
+            gap: 16px;
+            box-shadow: 0 16px 36px rgba(0,0,0,0.4);
+            max-width: 100%;
+            overflow: hidden;
+        }
+
+        /* FLEXIBLE CANVAS WRAPPER - PREVENTS OVERFLOW ALWAYS */
+        .preview-wrapper {
+            width: 100%;
+            height: 48vh;
+            max-height: 420px;
+            min-height: 220px;
+            border-radius: 14px;
+            border: 1px solid var(--glass-border);
+            position: relative;
+            overflow: hidden;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background-color: #0d0d10;
+            padding: 16px;
+            box-sizing: border-box;
+        }
+
+        .preview-wrapper.checkerboard {
+            background-image: linear-gradient(45deg, #16161a 25%, transparent 25%), 
+                              linear-gradient(-45deg, #16161a 25%, transparent 25%), 
+                              linear-gradient(45deg, transparent 75%, #16161a 75%), 
+                              linear-gradient(-45deg, transparent 75%, #16161a 75%);
+            background-size: 20px 20px;
+            background-position: 0 0, 0 10px, 10px -10px, -10px 0px;
+        }
+
+        .canvas-container {
+            position: relative;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            width: 100%;
+            height: 100%;
+            overflow: hidden;
+        }
+
+        .preview-canvas-element {
+            border-radius: 10px;
+            box-shadow: 0 16px 36px rgba(0,0,0,0.6);
+            transition: width 0.25s var(--bezier), height 0.25s var(--bezier), background 0.1s;
+            max-width: 100%;
+            max-height: 100%;
+            object-fit: contain;
+        }
+
+        .dimension-badge {
+            position: absolute;
+            bottom: 10px;
+            right: 10px;
+            background: rgba(0,0,0,0.7);
+            backdrop-filter: blur(8px);
+            border: 1px solid rgba(255,255,255,0.12);
+            color: rgba(255,255,255,0.85);
+            font-size: 0.7rem;
+            padding: 4px 8px;
+            border-radius: 6px;
+            pointer-events: none;
+            font-weight: 500;
+        }
+
+        /* LÍNEA DE COLOR */
+        .color-track-container {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+            background: var(--surface-card);
+            border: 1px solid var(--glass-border);
+            border-radius: 12px;
+            padding: 14px;
+        }
+
+        .section-label {
+            font-size: 0.72rem;
+            color: var(--text-muted);
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            font-weight: 600;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .gradient-track-wrapper {
+            position: relative;
+            height: 32px;
+            margin: 0 6px;
+            cursor: pointer;
+        }
+
+        .gradient-track {
+            position: absolute;
+            top: 6px;
+            left: 0;
+            right: 0;
+            height: 18px;
+            border-radius: 6px;
+            border: 1px solid rgba(255,255,255,0.15);
+        }
+
+        .gradient-stop-handle {
+            position: absolute;
+            top: 2px;
+            width: 16px;
+            height: 26px;
+            border-radius: 5px;
+            background: #ffffff;
+            border: 2px solid #000;
+            transform: translateX(-50%);
+            cursor: grab;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.5);
+            transition: transform 0.1s, border-color 0.15s;
+        }
+
+        .gradient-stop-handle:hover {
+            transform: translateX(-50%) scale(1.1);
+        }
+
+        .gradient-stop-handle.active {
+            border-color: var(--accent-primary);
+            z-index: 10;
+        }
+
+        /* CONTROLES Y SELECTORES */
+        .control-group {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+        }
+
+        .control-row {
+            display: flex;
+            gap: 10px;
+            align-items: center;
+        }
+
+        select, input[type="text"], input[type="number"] {
+            width: 100%;
+            background: var(--surface-card);
+            border: 1px solid var(--glass-border);
+            color: var(--text-main);
+            padding: 9px 12px;
+            border-radius: 10px;
+            font-size: 0.85rem;
+            outline: none;
+            transition: border-color 0.2s var(--bezier);
+        }
+
+        select:focus, input[type="text"]:focus, input[type="number"]:focus {
+            border-color: var(--accent-primary);
+        }
+
+        .range-slider {
+            -webkit-appearance: none;
+            width: 100%;
+            height: 5px;
+            border-radius: 3px;
+            background: var(--surface-card);
+            outline: none;
+        }
+
+        .range-slider::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            width: 16px;
+            height: 16px;
+            border-radius: 50%;
+            background: var(--text-main);
+            cursor: pointer;
+            box-shadow: 0 2px 6px rgba(0,0,0,0.4);
+            transition: transform 0.1s var(--spring);
+        }
+
+        .range-slider::-webkit-slider-thumb:hover {
+            transform: scale(1.15);
+        }
+
+        /* PRESETS DE TAMAÑO SCROLLABLE */
+        .size-presets-scroll {
+            display: flex;
+            gap: 8px;
+            overflow-x: auto;
+            padding-bottom: 4px;
+            scrollbar-width: none;
+        }
+        .size-presets-scroll::-webkit-scrollbar { display: none; }
+
+        .size-preset-chip {
+            background: var(--surface-card);
+            border: 1px solid var(--glass-border);
+            border-radius: 10px;
+            padding: 8px 12px;
+            cursor: pointer;
+            white-space: nowrap;
+            transition: all 0.2s var(--bezier);
+            display: flex;
+            flex-direction: column;
+            gap: 2px;
+            min-width: 110px;
+            flex-shrink: 0;
+        }
+
+        .size-preset-chip:hover, .size-preset-chip.active {
+            background: var(--surface-hover);
+            border-color: var(--accent-primary);
+        }
+
+        .size-preset-chip .title {
+            font-size: 0.75rem;
+            font-weight: 600;
+            color: var(--text-main);
+        }
+
+        .size-preset-chip .subtitle {
+            font-size: 0.65rem;
+            color: var(--text-muted);
+        }
+
+        /* MODALES */
+        .modal-overlay {
+            position: fixed;
+            top: 0; left: 0; width: 100vw; height: 100vh;
+            background: rgba(0, 0, 0, 0.75);
+            backdrop-filter: blur(10px);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            opacity: 0;
+            pointer-events: none;
+            transition: opacity 0.25s var(--bezier);
+            z-index: 200;
+        }
+
+        .modal-overlay.active { opacity: 1; pointer-events: auto; }
+
+        .modal-card {
+            background: var(--surface);
+            border: 1px solid var(--glass-border);
+            border-radius: 18px;
+            padding: 22px;
+            width: 90%;
+            max-width: 480px;
+            display: flex;
+            flex-direction: column;
+            gap: 16px;
+            transform: scale(0.96);
+            transition: transform 0.25s var(--spring);
+            box-shadow: 0 20px 50px rgba(0,0,0,0.6);
+        }
+
+        .modal-overlay.active .modal-card { transform: scale(1); }
+
+        /* TABS DESARROLLADOR */
+        .export-tabs {
+            display: flex;
+            gap: 6px;
+            overflow-x: auto;
+            padding-bottom: 4px;
+        }
+
+        .tab-btn {
+            background: var(--surface-card);
+            border: 1px solid var(--glass-border);
+            color: var(--text-muted);
+            padding: 6px 12px;
+            border-radius: 8px;
+            font-size: 0.75rem;
+            font-weight: 500;
+            cursor: pointer;
+            white-space: nowrap;
+            transition: all 0.2s;
+        }
+
+        .tab-btn.active {
+            background: var(--text-main);
+            color: var(--bg);
+            border-color: var(--text-main);
+        }
+
+        .code-preview {
+            background: var(--surface-card);
+            border: 1px solid var(--glass-border);
+            border-radius: 10px;
+            padding: 12px;
+            font-family: monospace;
+            font-size: 0.78rem;
+            color: var(--text-muted);
+            word-break: break-all;
+            max-height: 140px;
+            overflow-y: auto;
+        }
+
+        /* MODO VISOR */
+        .viewer-container {
+            position: fixed;
+            top: 0; left: 0; width: 100vw; height: 100vh;
+            background: #000;
+            z-index: 1000;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+            padding: 30px;
+            box-sizing: border-box;
+        }
+
+        .viewer-bg {
+            position: absolute;
+            top: 0; left: 0; width: 100%; height: 100%;
+            z-index: 1;
+        }
+
+        .viewer-content {
+            position: relative;
+            z-index: 2;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            flex: 1;
+            gap: 12px;
+            text-align: center;
+        }
+
+        .viewer-title {
+            font-size: 2.2rem;
+            font-weight: 700;
+            color: #ffffff;
+            text-shadow: 0 4px 20px rgba(0,0,0,0.6);
+        }
+
+        .viewer-footer {
+            position: relative;
+            z-index: 2;
+            display: flex;
+            justify-content: center;
+        }
+
+        .hidden { display: none !important; }
+    </style>
+</head>
+<body>
+
+    <!-- MODO VISOR ENLACE COMPARTIDO -->
+    <div id="viewer-view" class="viewer-container hidden">
+        <div class="viewer-bg" id="viewer-bg-element"></div>
+        <div class="viewer-content">
+            <h2 class="viewer-title" id="viewer-title-text">Degradado Personalizado</h2>
+            <p style="color: rgba(255,255,255,0.7); font-size: 0.95rem;">Creado con Generador de Degradados</p>
+        </div>
+        <div class="viewer-footer">
+            <button class="btn-action primary" style="padding: 12px 24px;" onclick="exitViewerMode()">
+                <i data-lucide="edit-3" size="16"></i> Editar este Degradado
+            </button>
+        </div>
+    </div>
+
+    <!-- APP PRINCIPAL -->
+    <div class="app-container" id="main-app">
+        <header>
+            <div class="header-title-area">
+                <div class="app-icon-badge">
+                    <i data-lucide="palette" size="18" style="color: var(--accent-primary);"></i>
+                </div>
+                <div>
+                    <h1>Generador de Degradados - BETA</h1>
+                </div>
+            </div>
+            <div class="header-actions">
+                <button class="btn-action" onclick="openDevModal()">
+                    <i data-lucide="code-2" size="14"></i> Desarrollador
+                </button>
+                <button class="btn-action" onclick="openShareModal()">
+                    <i data-lucide="share-2" size="14"></i> Compartir
+                </button>
+                <button class="btn-action primary" onclick="exportStaticImage()">
+                    <i data-lucide="download" size="14"></i> Exportar Imagen
+                </button>
+            </div>
+        </header>
+
+        <main class="main-content">
+            <!-- PANEL IZQUIERDO: PREVIEW A ESCALA QUE NUNCA SE SALE Y LÍNEA DE COLOR -->
+            <section class="panel">
+                <div class="preview-wrapper checkerboard" id="preview-wrapper">
+                    <div class="canvas-container" id="canvas-container">
+                        <div id="preview-element" class="preview-canvas-element"></div>
+                    </div>
+                    <div class="dimension-badge" id="dimension-badge">1080 × 1920 px</div>
+                </div>
+
+                <!-- LÍNEA DE COLOR -->
+                <div class="color-track-container">
+                    <div class="section-label">
+                        <span>Línea de Color</span>
+                        <span style="font-size: 0.7rem; color: var(--text-muted); text-transform: none;">Clic para añadir parada de color</span>
+                    </div>
+                    <div class="gradient-track-wrapper" id="track-wrapper">
+                        <div class="gradient-track" id="gradient-track"></div>
+                    </div>
+                </div>
+
+                <div class="control-row">
+                    <div class="control-group" style="flex: 1;">
+                        <span class="section-label">Título del Proyecto</span>
+                        <input type="text" id="gradient-title-input" value="Mi Degradado" oninput="updateTitle(this.value)">
+                    </div>
+                </div>
+            </section>
+
+            <!-- PANEL DERECHO: CONTROLES DE DIMENSIÓN Y PARADAS -->
+            <section class="panel">
+                <!-- PRESETS DE TAMAÑO -->
+                <div class="control-group">
+                    <span class="section-label">Presets de Tamaño</span>
+                    <div class="size-presets-scroll">
+                        <div class="size-preset-chip active" id="preset-phone" onclick="selectPreset(1080, 1920, 'preset-phone')">
+                            <span class="title">Teléfono / Story</span>
+                            <span class="subtitle">1080 × 1920 px</span>
+                        </div>
+                        <div class="size-preset-chip" id="preset-portrait" onclick="selectPreset(1080, 1350, 'preset-portrait')">
+                            <span class="title">Instagram Post</span>
+                            <span class="subtitle">1080 × 1350 px</span>
+                        </div>
+                        <div class="size-preset-chip" id="preset-square" onclick="selectPreset(1080, 1080, 'preset-square')">
+                            <span class="title">Cuadrado</span>
+                            <span class="subtitle">1080 × 1080 px</span>
+                        </div>
+                        <div class="size-preset-chip" id="preset-desktop" onclick="selectPreset(1920, 1080, 'preset-desktop')">
+                            <span class="title">Desktop Full HD</span>
+                            <span class="subtitle">1920 × 1080 px</span>
+                        </div>
+                        <div class="size-preset-chip" id="preset-twitter" onclick="selectPreset(1500, 500, 'preset-twitter')">
+                            <span class="title">Header X / Twitter</span>
+                            <span class="subtitle">1500 × 500 px</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- TAMAÑO PERSONALIZADO (PX) -->
+                <div class="control-group">
+                    <span class="section-label">Dimensiones Personalizadas (px)</span>
+                    <div class="control-row">
+                        <div>
+                            <span style="font-size:0.7rem; color:var(--text-muted)">Ancho</span>
+                            <input type="number" id="canvas-width-input" value="1080" min="10" max="10000" oninput="onCustomDimensionChange()">
+                        </div>
+                        <div>
+                            <span style="font-size:0.7rem; color:var(--text-muted)">Alto</span>
+                            <input type="number" id="canvas-height-input" value="1920" min="10" max="10000" oninput="onCustomDimensionChange()">
+                        </div>
+                    </div>
+                </div>
+
+                <!-- CONTROLES DE PARADA Y ESTILO DE DEGRADADO -->
+                <div class="control-group">
+                    <div class="section-label">
+                        <span>Parada Seleccionada</span>
+                        <button class="btn-action" style="padding: 2px 6px; font-size: 0.7rem; color: var(--accent-danger); border: none; background: transparent;" onclick="removeActiveStop()">
+                            <i data-lucide="trash-2" size="12"></i> Eliminar Parada
+                        </button>
+                    </div>
+                    <div class="control-row">
+                        <input type="color" id="active-color-picker" style="width: 40px; height: 36px; border: none; border-radius: 8px; cursor: pointer; background: none;" onchange="updateActiveColor(this.value)">
+                        <input type="text" id="active-color-hex" style="width: 85px;" onchange="updateActiveColor(this.value)">
+                        <input type="range" class="range-slider" id="active-pos-slider" min="0" max="100" style="flex: 1;" oninput="updateActivePos(this.value)">
+                    </div>
+                </div>
+
+                <div class="control-row">
+                    <div class="control-group" style="flex: 1;">
+                        <span class="section-label">Tipo</span>
+                        <select id="geo-mode" onchange="updateGeoMode()">
+                            <option value="linear">Lineal</option>
+                            <option value="radial">Radial</option>
+                            <option value="conic">Cónico</option>
+                        </select>
+                    </div>
+                    <div class="control-group" style="flex: 1;" id="angle-group">
+                        <div class="section-label">
+                            <span>Ángulo</span>
+                            <span id="angle-val">135°</span>
+                        </div>
+                        <input type="range" class="range-slider" id="angle-slider" min="0" max="360" value="135" oninput="updateGradientPreview()">
+                    </div>
+                </div>
+
+                <div style="margin-top: auto; padding-top: 6px;">
+                    <button class="btn-action primary" style="width: 100%; justify-content: center; padding: 10px;" onclick="exportStaticImage()">
+                        <i data-lucide="image" size="15"></i> Descargar Imagen PNG
+                    </button>
+                </div>
+            </section>
+        </main>
+    </div>
+
+    <!-- MODAL HERRAMIENTAS DE DESARROLLADOR -->
+    <div class="modal-overlay" id="dev-modal">
+        <div class="modal-card">
+            <div class="section-label">
+                <span>Herramientas de Desarrollador</span>
+                <button class="btn-action" style="border:none; background:none; padding:0;" onclick="closeModal('dev-modal')"><i data-lucide="x" size="18"></i></button>
+            </div>
+
+            <div class="control-group">
+                <div class="export-tabs">
+                    <button class="tab-btn active" onclick="setExportFormat('css')" id="fmt-css">CSS</button>
+                    <button class="tab-btn" onclick="setExportFormat('tailwind')" id="fmt-tailwind">Tailwind</button>
+                    <button class="tab-btn" onclick="setExportFormat('svg')" id="fmt-svg">SVG</button>
+                    <button class="tab-btn" onclick="setExportFormat('swiftui')" id="fmt-swiftui">SwiftUI</button>
+                    <button class="tab-btn" onclick="setExportFormat('flutter')" id="fmt-flutter">Flutter</button>
+                    <button class="tab-btn" onclick="setExportFormat('json')" id="fmt-json">JSON</button>
+                </div>
+                <div class="code-preview" id="code-output"></div>
+            </div>
+
+            <div class="control-row">
+                <button class="btn-action primary" style="flex:1; justify-content: center;" onclick="copyCode()">
+                    <i data-lucide="copy" size="14"></i> Copiar Código
+                </button>
+                <button class="btn-action" style="flex:1; justify-content: center;" onclick="importFromJsonPrompt()">
+                    <i data-lucide="file-json" size="14"></i> Importar JSON
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- MODAL DE COMPARTIR -->
+    <div class="modal-overlay" id="share-modal">
+        <div class="modal-card">
+            <div class="section-label">
+                <span>Compartir Degradado</span>
+                <button class="btn-action" style="border:none; background:none; padding:0;" onclick="closeModal('share-modal')"><i data-lucide="x" size="18"></i></button>
+            </div>
+            <p style="font-size: 0.85rem; color: var(--text-muted);">Enlace directo para visualizar o continuar editando este degradado.</p>
+            <input type="text" id="share-url-input" readonly>
+            <button class="btn-action primary" style="justify-content: center;" onclick="copyShareUrl()">
+                <i data-lucide="link" size="15"></i> Copiar Enlace
+            </button>
+        </div>
+    </div>
+
+    <canvas id="canvas-export" class="hidden"></canvas>
+
+    <script>
+        // ESTADO DE LA APLICACIÓN
+        let appState = {
+            title: "Mi Degradado",
+            geoMode: "linear",
+            angle: 135,
+            canvasWidth: 1080,
+            canvasHeight: 1920,
+            exportFormat: "css",
+            activeStopIndex: 0,
+            stops: [
+                { color: "#3B82F6", position: 0 },
+                { color: "#8B5CF6", position: 100 }
+            ]
+        };
+
+        let draggingIndex = null;
+
+        window.onload = () => {
+            const urlParams = new URLSearchParams(window.location.search);
+            const encodedData = urlParams.get('data');
+            if (encodedData) {
+                try {
+                    const decoded = JSON.parse(decodeURIComponent(atob(encodedData)));
+                    appState = decoded;
+                    initViewerMode();
+                    return;
+                } catch(e) {
+                    console.error("Error al decodificar enlace URL", e);
+                }
+            }
+
+            renderApp();
+            window.addEventListener('resize', updateCanvasScale);
+            lucide.createIcons();
+        };
+
+        function renderApp() {
+            document.getElementById('gradient-title-input').value = appState.title;
+            document.getElementById('angle-slider').value = appState.angle;
+            document.getElementById('angle-val').textContent = `${appState.angle}°`;
+            document.getElementById('geo-mode').value = appState.geoMode;
+            document.getElementById('canvas-width-input').value = appState.canvasWidth;
+            document.getElementById('canvas-height-input').value = appState.canvasHeight;
+
+            document.getElementById('angle-group').style.display = appState.geoMode === 'radial' ? 'none' : 'flex';
+
+            renderColorTrack();
+
+            const activeStop = appState.stops[appState.activeStopIndex] || appState.stops[0];
+            document.getElementById('active-color-picker').value = activeStop.color;
+            document.getElementById('active-color-hex').value = activeStop.color;
+            document.getElementById('active-pos-slider').value = activeStop.position;
+
+            updateCanvasScale();
+            updateGradientPreview();
+            updateCodeOutput();
+            lucide.createIcons();
+        }
+
+        /* LÍNEA DE COLOR INTERACTIVA */
+        function renderColorTrack() {
+            const track = document.getElementById('gradient-track');
+            const wrapper = document.getElementById('track-wrapper');
+
+            appState.stops.sort((a,b) => a.position - b.position);
+
+            const sortedStopsCSS = appState.stops.map(s => `${s.color} ${s.position}%`).join(', ');
+            track.style.background = `linear-gradient(90deg, ${sortedStopsCSS})`;
+
+            wrapper.querySelectorAll('.gradient-stop-handle').forEach(el => el.remove());
+
+            appState.stops.forEach((stop, index) => {
+                const handle = document.createElement('div');
+                handle.className = `gradient-stop-handle ${index === appState.activeStopIndex ? 'active' : ''}`;
+                handle.style.left = `${stop.position}%`;
+                handle.style.backgroundColor = stop.color;
+                
+                handle.onmousedown = (e) => startDragStop(e, index);
+                handle.ontouchstart = (e) => startDragStop(e, index);
+
+                handle.onclick = (e) => {
+                    e.stopPropagation();
+                    appState.activeStopIndex = index;
+                    renderApp();
+                };
+
+                wrapper.appendChild(handle);
+            });
+        }
+
+        document.getElementById('track-wrapper').addEventListener('click', (e) => {
+            if (e.target.classList.contains('gradient-stop-handle')) return;
+            const rect = e.currentTarget.getBoundingClientRect();
+            const clickX = e.clientX - rect.left;
+            const percentage = Math.max(0, Math.min(100, Math.round((clickX / rect.width) * 100)));
+
+            appState.stops.push({ color: '#ffffff', position: percentage });
+            appState.stops.sort((a,b) => a.position - b.position);
+            appState.activeStopIndex = appState.stops.findIndex(s => s.position === percentage);
+            renderApp();
+        });
+
+        function startDragStop(e, index) {
+            e.stopPropagation();
+            draggingIndex = index;
+            appState.activeStopIndex = index;
+            renderApp();
+
+            const onMove = (moveEvent) => {
+                if (draggingIndex === null) return;
+                const wrapper = document.getElementById('track-wrapper');
+                const rect = wrapper.getBoundingClientRect();
+                const clientX = moveEvent.touches ? moveEvent.touches[0].clientX : moveEvent.clientX;
+                const x = clientX - rect.left;
+                let pos = Math.round((x / rect.width) * 100);
+                pos = Math.max(0, Math.min(100, pos));
+                appState.stops[draggingIndex].position = pos;
+                renderApp();
+            };
+
+            const onEnd = () => {
+                draggingIndex = null;
+                window.removeEventListener('mousemove', onMove);
+                window.removeEventListener('mouseup', onEnd);
+                window.removeEventListener('touchmove', onMove);
+                window.removeEventListener('touchend', onEnd);
+            };
+
+            window.addEventListener('mousemove', onMove);
+            window.addEventListener('mouseup', onEnd);
+            window.addEventListener('touchmove', onMove);
+            window.addEventListener('touchend', onEnd);
+        }
+
+        /* ESCALADO DINÁMICO GARANTIZADO DE LA PREVIEW */
+        function updateCanvasScale() {
+            const container = document.getElementById('preview-wrapper');
+            const element = document.getElementById('preview-element');
+            const badge = document.getElementById('dimension-badge');
+
+            const w = appState.canvasWidth || 1080;
+            const h = appState.canvasHeight || 1920;
+            badge.textContent = `${w} × ${h} px`;
+
+            // Calcular las dimensiones disponibles del contenedor restando padding
+            const padding = 32;
+            const availableWidth = Math.max(container.clientWidth - padding, 100);
+            const availableHeight = Math.max(container.clientHeight - padding, 100);
+
+            const targetRatio = w / h;
+            const containerRatio = availableWidth / availableHeight;
+
+            let finalW, finalH;
+
+            if (targetRatio > containerRatio) {
+                // El degradado es más ancho proporcionalmente que el contenedor
+                finalW = availableWidth;
+                finalH = availableWidth / targetRatio;
+            } else {
+                // El degradado es más alto proporcionalmente que el contenedor
+                finalH = availableHeight;
+                finalW = availableHeight * targetRatio;
+            }
+
+            element.style.width = `${Math.round(finalW)}px`;
+            element.style.height = `${Math.round(finalH)}px`;
+        }
+
+        function selectPreset(w, h, presetId) {
+            appState.canvasWidth = w;
+            appState.canvasHeight = h;
+            document.getElementById('canvas-width-input').value = w;
+            document.getElementById('canvas-height-input').value = h;
+
+            document.querySelectorAll('.size-preset-chip').forEach(b => b.classList.remove('active'));
+            if (presetId) {
+                const btn = document.getElementById(presetId);
+                if (btn) btn.classList.add('active');
+            }
+
+            updateCanvasScale();
+        }
+
+        function onCustomDimensionChange() {
+            const w = parseInt(document.getElementById('canvas-width-input').value) || 1080;
+            const h = parseInt(document.getElementById('canvas-height-input').value) || 1080;
+            appState.canvasWidth = w;
+            appState.canvasHeight = h;
+
+            document.querySelectorAll('.size-preset-chip').forEach(b => b.classList.remove('active'));
+            updateCanvasScale();
+        }
+
+        function updateTitle(val) {
+            appState.title = val;
+        }
+
+        function updateGeoMode() {
+            appState.geoMode = document.getElementById('geo-mode').value;
+            renderApp();
+        }
+
+        function updateActiveColor(color) {
+            if (/^#[0-9A-F]{6}$/i.test(color)) {
+                appState.stops[appState.activeStopIndex].color = color;
+                renderApp();
+            }
+        }
+
+        function updateActivePos(pos) {
+            appState.stops[appState.activeStopIndex].position = parseInt(pos);
+            renderApp();
+        }
+
+        function removeActiveStop() {
+            if (appState.stops.length <= 2) return;
+            appState.stops.splice(appState.activeStopIndex, 1);
+            appState.activeStopIndex = Math.max(0, appState.activeStopIndex - 1);
+            renderApp();
+        }
+
+        function generateCSSGradientString() {
+            const currentAngle = parseInt(appState.angle);
+            const sortedStops = [...appState.stops].sort((a,b) => a.position - b.position);
+            const stopsStr = sortedStops.map(s => `${s.color} ${s.position}%`).join(', ');
+
+            if (appState.geoMode === 'linear') {
+                return `linear-gradient(${currentAngle}deg, ${stopsStr})`;
+            } else if (appState.geoMode === 'radial') {
+                return `radial-gradient(circle at center, ${stopsStr})`;
+            } else {
+                return `conic-gradient(from ${currentAngle}deg at 50% 50%, ${stopsStr})`;
+            }
+        }
+
+        function updateGradientPreview() {
+            appState.angle = document.getElementById('angle-slider').value;
+            document.getElementById('angle-val').textContent = `${appState.angle}°`;
+
+            const cssGrad = generateCSSGradientString();
+            const element = document.getElementById('preview-element');
+            element.style.background = cssGrad;
+
+            updateCodeOutput();
+        }
+
+        /* MODO DESARROLLADOR */
+        function openDevModal() {
+            document.getElementById('dev-modal').classList.add('active');
+            lucide.createIcons();
+        }
+
+        function closeModal(id) {
+            document.getElementById(id).classList.remove('active');
+        }
+
+        function setExportFormat(fmt) {
+            appState.exportFormat = fmt;
+            document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+            const activeBtn = document.getElementById(`fmt-${fmt}`);
+            if (activeBtn) activeBtn.classList.add('active');
+            updateCodeOutput();
+        }
+
+        function updateCodeOutput() {
+            const codeOutput = document.getElementById('code-output');
+            const cssGrad = generateCSSGradientString();
+            let text = "";
+
+            if (appState.exportFormat === 'css') {
+                text = `background: ${cssGrad};`;
+            } else if (appState.exportFormat === 'tailwind') {
+                const fromColor = appState.stops[0].color;
+                const toColor = appState.stops[appState.stops.length - 1].color;
+                text = `bg-gradient-to-r from-['${fromColor}'] to-['${toColor}']`;
+            } else if (appState.exportFormat === 'svg') {
+                const stopsSVG = appState.stops.map(s => `<stop offset="${s.position}%" stop-color="${s.color}" />`).join('\n  ');
+                text = `<svg width="${appState.canvasWidth}" height="${appState.canvasHeight}">\n<defs>\n<linearGradient id="grad">\n  ${stopsSVG}\n</linearGradient>\n</defs>\n<rect width="100%" height="100%" fill="url(#grad)" />\n</svg>`;
+            } else if (appState.exportFormat === 'swiftui') {
+                const cols = appState.stops.map(s => `Color(hex: "${s.color}")`).join(', ');
+                text = `LinearGradient(colors: [${cols}], startPoint: .top, endPoint: .bottom)`;
+            } else if (appState.exportFormat === 'flutter') {
+                const cols = appState.stops.map(s => `Color(0xFF${s.color.replace('#','')})`).join(', ');
+                text = `LinearGradient(colors: [${cols}])`;
+            } else if (appState.exportFormat === 'json') {
+                text = JSON.stringify(appState, null, 2);
+            }
+
+            codeOutput.textContent = text;
+        }
+
+        function copyCode() {
+            const text = document.getElementById('code-output').textContent;
+            navigator.clipboard.writeText(text);
+            const btn = event.currentTarget;
+            const orig = btn.innerHTML;
+            btn.innerHTML = `<i data-lucide="check" size="14"></i> Copiado`;
+            lucide.createIcons();
+            setTimeout(() => { btn.innerHTML = orig; lucide.createIcons(); }, 1500);
+        }
+
+        function importFromJsonPrompt() {
+            const jsonInput = prompt("Pega el JSON del degradado:");
+            if (jsonInput) {
+                try {
+                    const parsed = JSON.parse(jsonInput);
+                    if (parsed.stops) {
+                        appState = parsed;
+                        renderApp();
+                        closeModal('dev-modal');
+                    }
+                } catch(e) {
+                    alert("Formato JSON no válido.");
+                }
+            }
+        }
+
+        /* EXPORTACIÓN DE IMAGEN HD A TAMAÑO REAL */
+        function exportStaticImage() {
+            const w = appState.canvasWidth || 1080;
+            const h = appState.canvasHeight || 1920;
+            const canvas = document.getElementById('canvas-export');
+            canvas.width = w;
+            canvas.height = h;
+            const ctx = canvas.getContext('2d');
+
+            let grad;
+            if (appState.geoMode === 'radial') {
+                grad = ctx.createRadialGradient(w/2, h/2, 0, w/2, h/2, Math.max(w, h)/2);
+            } else if (appState.geoMode === 'conic') {
+                grad = ctx.createConicGradient((appState.angle * Math.PI) / 180, w/2, h/2);
+            } else {
+                const angleRad = (appState.angle - 90) * (Math.PI / 180);
+                const x1 = w/2 - Math.cos(angleRad) * w/2;
+                const y1 = h/2 - Math.sin(angleRad) * h/2;
+                const x2 = w/2 + Math.cos(angleRad) * w/2;
+                const y2 = h/2 + Math.sin(angleRad) * h/2;
+                grad = ctx.createLinearGradient(x1, y1, x2, y2);
+            }
+
+            appState.stops.forEach(s => {
+                grad.addColorStop(s.position / 100, s.color);
+            });
+
+            ctx.fillStyle = grad;
+            ctx.fillRect(0, 0, w, h);
+
+            const a = document.createElement('a');
+            const safeTitle = (appState.title || 'degradado').toLowerCase().replace(/\s+/g, '-');
+            a.download = `${safeTitle}-${w}x${h}.png`;
+            a.href = canvas.toDataURL('image/png');
+            a.click();
+        }
+
+        /* COMPARTIR */
+        function openShareModal() {
+            const jsonStr = JSON.stringify(appState);
+            const encoded = btoa(encodeURIComponent(jsonStr));
+            const shareUrl = `${window.location.origin}${window.location.pathname}?data=${encoded}`;
+            document.getElementById('share-url-input').value = shareUrl;
+            document.getElementById('share-modal').classList.add('active');
+            lucide.createIcons();
+        }
+
+        function copyShareUrl() {
+            const input = document.getElementById('share-url-input');
+            input.select();
+            document.execCommand('copy');
+            const btn = event.currentTarget;
+            const orig = btn.innerHTML;
+            btn.innerHTML = `<i data-lucide="check" size="15"></i> ¡Copiado!`;
+            lucide.createIcons();
+            setTimeout(() => { btn.innerHTML = orig; lucide.createIcons(); }, 1500);
+        }
+
+        /* VIEWER MODE */
+        function initViewerMode() {
+            document.getElementById('viewer-view').classList.remove('hidden');
+            document.getElementById('main-app').classList.add('hidden');
+
+            document.getElementById('viewer-title-text').textContent = appState.title || "Degradado";
+            const sortedStops = [...appState.stops].sort((a,b) => a.position - b.position);
+            const stopsStr = sortedStops.map(s => `${s.color} ${s.position}%`).join(', ');
+            const bgGrad = `linear-gradient(${appState.angle}deg, ${stopsStr})`;
+            document.getElementById('viewer-bg-element').style.background = bgGrad;
+        }
+
+        function exitViewerMode() {
+            window.location.href = window.location.pathname;
+        }
+    </script>
+</body>
+</html>

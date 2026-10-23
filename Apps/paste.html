@@ -6,8 +6,8 @@
     <title>Homescreen</title>
     <link rel="manifest" href="data:application/manifest+json,%7B%22name%22%3A%22Homescreen%22%2C%22short_name%22%3A%22Homescreen%22%2C%22start_url%22%3A%22.%2F%22%2C%22display%22%3A%22standalone%22%2C%22background_color%22%3A%22%23121212%22%2C%22theme_color%22%3A%22%23121212%22%7D">
     <meta name="theme-color" content="#121212">
-    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Material+Symbols+Rounded:opsz,wght,FILL,GRAD@24,400,0,0" />
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+    <script src="../lucide.min.js"></script>
     <style>
         :root {
             --md-sys-color-background: #121212;
@@ -256,7 +256,7 @@
             font-size: 0.85rem;
         }
 
-        .card-header .material-symbols-rounded { font-size: 18px; }
+        .card-header [data-lucide] { width: 18px; height: 18px; }
 
         .card-text {
             font-size: 0.95rem;
@@ -418,8 +418,9 @@
             text-align: center;
             color: var(--md-sys-color-primary);
         }
-        .drop-zone-content .material-symbols-rounded {
-            font-size: 64px;
+        .drop-zone-content [data-lucide] {
+            width: 64px;
+            height: 64px;
             margin-bottom: 16px;
         }
 
@@ -585,17 +586,17 @@
         <!-- Sidebar Navigation -->
         <nav id="sidebar">
             <div class="sidebar-header">
-                <span class="material-symbols-rounded logo-icon">home</span>
+                <i data-lucide="house" class="logo-icon"></i>
                 <span class="logo-text">Homescreen</span>
             </div>
             
             <div class="nav-group">
                 <button class="nav-item active" data-view="inbox" data-project-id="null">
-                    <span class="material-symbols-rounded">inbox</span>
+                    <i data-lucide="inbox"></i>
                     <span class="nav-label">Inbox</span>
                 </button>
                 <button class="nav-item" data-view="search">
-                    <span class="material-symbols-rounded">search</span>
+                    <i data-lucide="search"></i>
                     <span class="nav-label">Buscar</span>
                 </button>
             </div>
@@ -604,7 +605,7 @@
                 <div class="section-header">
                     <span>Proyectos</span>
                     <button class="icon-btn" id="btn-new-project" title="Nuevo Proyecto">
-                        <span class="material-symbols-rounded">add</span>
+                        <i data-lucide="plus"></i>
                     </button>
                 </div>
                 <div id="projects-list" class="nav-group"></div>
@@ -612,7 +613,7 @@
 
             <div class="sidebar-footer">
                 <button class="nav-item" id="btn-settings" title="Ajustes / Respaldo">
-                    <span class="material-symbols-rounded">settings</span>
+                    <i data-lucide="settings"></i>
                     <span class="nav-label">Ajustes</span>
                 </button>
             </div>
@@ -624,7 +625,7 @@
                 <h1 id="current-view-title">Inbox</h1>
                 <div class="header-actions">
                     <div class="search-bar hidden" id="search-container">
-                        <span class="material-symbols-rounded">search</span>
+                        <i data-lucide="search"></i>
                         <input type="text" id="search-input" placeholder="Buscar contenido...">
                     </div>
                 </div>
@@ -632,7 +633,7 @@
 
             <div id="drop-zone-overlay" class="hidden">
                 <div class="drop-zone-content">
-                    <span class="material-symbols-rounded">download</span>
+                    <i data-lucide="download"></i>
                     <h2>Suelta para guardar en <span id="drop-target-name">Inbox</span></h2>
                 </div>
             </div>
@@ -640,7 +641,7 @@
             <div id="items-grid" class="grid-container"></div>
             
             <div id="empty-state" class="hidden">
-                <span class="material-symbols-rounded empty-icon">inventory_2</span>
+                <i data-lucide="archive" class="empty-icon"></i>
                 <p>No hay elementos aquí.</p>
                 <small>Usa Ctrl+V para pegar contenido desde el portapapeles.</small>
             </div>
@@ -651,22 +652,22 @@
             <header class="detail-header">
                 <h2>Detalle</h2>
                 <button class="icon-btn" id="btn-close-detail">
-                    <span class="material-symbols-rounded">close</span>
+                    <i data-lucide="x"></i>
                 </button>
             </header>
             <div id="detail-content" class="detail-body"></div>
             <div class="detail-actions">
                 <button class="action-btn" id="btn-detail-copy">
-                    <span class="material-symbols-rounded">content_copy</span> Copiar
+                    <i data-lucide="copy"></i> Copiar
                 </button>
                 <button class="action-btn" id="btn-detail-move">
-                    <span class="material-symbols-rounded">move_item</span> Mover
+                    <i data-lucide="arrow-right-left"></i> Mover
                 </button>
                 <button class="action-btn" id="btn-detail-download">
-                    <span class="material-symbols-rounded">download</span> Descargar
+                    <i data-lucide="download"></i> Descargar
                 </button>
                 <button class="action-btn danger" id="btn-detail-delete">
-                    <span class="material-symbols-rounded">delete</span> Eliminar
+                    <i data-lucide="trash-2"></i> Eliminar
                 </button>
             </div>
         </aside>
@@ -696,10 +697,10 @@
         <h3>Ajustes y Respaldo</h3>
         <div class="settings-options">
             <button class="filled-btn" id="btn-export-data">
-                <span class="material-symbols-rounded">download</span> Exportar Datos
+                <i data-lucide="download"></i> Exportar Datos
             </button>
             <button class="filled-btn tonal" id="btn-import-data">
-                <span class="material-symbols-rounded">upload</span> Importar Datos
+                <i data-lucide="upload"></i> Importar Datos
             </button>
             <input type="file" id="input-import-file" accept=".json" class="hidden">
         </div>
@@ -899,6 +900,7 @@
                 await loadCurrentView();
                 setupEventListeners();
                 registerServiceWorker();
+                lucide.createIcons();
             } catch (e) {
                 console.error("Failed to init database", e);
                 showToast("Error al inicializar la base de datos.");
@@ -936,13 +938,14 @@
                 btn.dataset.projectId = p.id;
                 
                 btn.innerHTML = `
-                    <span class="material-symbols-rounded">folder</span>
+                    <i data-lucide="folder"></i>
                     <span class="nav-label">${escapeHtml(p.name)}</span>
                 `;
                 
                 btn.addEventListener('click', () => switchContext('project', p.id, p.name));
                 els.projectsList.appendChild(btn);
             });
+            lucide.createIcons();
         }
 
         function renderItems(filterText = '') {
@@ -975,13 +978,13 @@
                     if (item.type === 'text') {
                         card.innerHTML = `
                             <div class="card-content">
-                                <div class="card-header"><span class="material-symbols-rounded">notes</span> Texto</div>
+                                <div class="card-header"><i data-lucide="file-text"></i> Texto</div>
                                 <div class="card-text">${escapeHtml(item.content)}</div>
                             </div>`;
                     } else if (item.type === 'url') {
                         card.innerHTML = `
                             <div class="card-content">
-                                <div class="card-header"><span class="material-symbols-rounded">link</span> ${escapeHtml(item.metadata.domain || 'URL')}</div>
+                                <div class="card-header"><i data-lucide="link"></i> ${escapeHtml(item.metadata.domain || 'URL')}</div>
                                 <div class="card-url-title">${escapeHtml(item.metadata.domain || 'Enlace')}</div>
                                 <div class="card-url-link">${escapeHtml(item.content)}</div>
                             </div>`;
@@ -996,7 +999,7 @@
                     } else if (item.type === 'file') {
                         card.innerHTML = `
                             <div class="card-content">
-                                <div class="card-header"><span class="material-symbols-rounded">insert_drive_file</span> Archivo</div>
+                                <div class="card-header"><i data-lucide="file"></i> Archivo</div>
                                 <div class="card-file-name">${escapeHtml(item.metadata.name)}</div>
                                 <div class="card-file-meta">${formatBytes(item.metadata.size)} • ${escapeHtml(item.metadata.mimeType || 'Desconocido')}</div>
                             </div>`;
@@ -1005,6 +1008,7 @@
                     els.grid.appendChild(card);
                 });
             }
+            lucide.createIcons();
         }
 
         function switchContext(view, projectId = null, projectName = 'Inbox') {
@@ -1067,7 +1071,7 @@
             } else if (item.type === 'file') {
                 els.detailContent.innerHTML = `
                     <div style="text-align: center; margin-bottom: 24px; color: var(--md-sys-color-primary);">
-                        <span class="material-symbols-rounded" style="font-size: 64px;">insert_drive_file</span>
+                        <i data-lucide="file" style="width: 64px; height: 64px;"></i>
                     </div>
                     <div class="detail-meta-group">
                         <span class="detail-meta-label">Nombre</span>
@@ -1085,6 +1089,7 @@
             }
             
             els.detailPanel.classList.remove('hidden');
+            lucide.createIcons();
         }
 
         function closeDetailPanel() {
@@ -1144,7 +1149,7 @@
             
             els.moveProjectList.innerHTML = `
                 <div class="list-item" data-id="null">
-                    <span class="material-symbols-rounded">inbox</span> Inbox
+                    <i data-lucide="inbox"></i> Inbox
                 </div>
             `;
             
@@ -1152,9 +1157,10 @@
                 const div = document.createElement('div');
                 div.className = 'list-item';
                 div.dataset.id = p.id;
-                div.innerHTML = `<span class="material-symbols-rounded">folder</span> ${escapeHtml(p.name)}`;
+                div.innerHTML = `<i data-lucide="folder"></i> ${escapeHtml(p.name)}`;
                 els.moveProjectList.appendChild(div);
             });
+            lucide.createIcons();
             
             document.querySelectorAll('#move-project-list .list-item').forEach(el => {
                 el.addEventListener('click', async () => {

@@ -1,0 +1,1375 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+    <title>Teleprompter</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <script src="../lucide.min.js"></script>
+    <style>
+        :root {
+            --bg: #000000;
+            --surface: #121212;
+            --surface-hover: #1c1c1e;
+            --glass: rgba(18, 18, 18, 0.75);
+            --glass-border: rgba(255, 255, 255, 0.12);
+            --blur-val: 20px;
+            --text-main: #FFFFFF;
+            --text-muted: #8E8E93;
+            --accent-danger: #FF453A;
+            --accent-warning: #FF9F0A;
+            --accent-success: #34C759;
+            --accent-primary: #0A84FF;
+            --bezier: cubic-bezier(0.16, 1, 0.3, 1);
+            --spring: cubic-bezier(0.34, 1.56, 0.64, 1);
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            -webkit-tap-highlight-color: transparent;
+            user-select: none;
+        }
+
+        body {
+            background-color: var(--bg);
+            color: var(--text-main);
+            font-family: 'Outfit', sans-serif;
+            height: 100dvh;
+            overflow: hidden;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .app-container {
+            width: 100%;
+            max-width: 900px;
+            height: 100dvh;
+            display: flex;
+            flex-direction: column;
+            position: relative;
+            padding: env(safe-area-inset-top) 20px calc(env(safe-area-inset-bottom) + 16px) 20px;
+            background-color: var(--bg);
+            transition: opacity 0.4s var(--bezier);
+        }
+
+        /* MODO ZEN (AUTO-HIDE) */
+        .app-container.zen-active header,
+        .app-container.zen-active .controls-card {
+            opacity: 0.15;
+            pointer-events: none;
+            transition: opacity 0.5s ease;
+        }
+
+        .app-container.zen-active header:hover,
+        .app-container.zen-active .controls-card:hover {
+            opacity: 1;
+            pointer-events: auto;
+        }
+
+        /* HEADER & BADGE */
+        header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 12px 0;
+            z-index: 10;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+            transition: opacity 0.3s ease;
+        }
+
+        .brand-section {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .app-icon-badge {
+            width: 40px;
+            height: 40px;
+            border-radius: 12px;
+            background: radial-gradient(circle at 30% 30%, rgba(255, 255, 255, 0.15), rgba(255, 255, 255, 0.02));
+            border: 1px solid var(--glass-border);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.5);
+        }
+
+        .title-container h1 {
+            font-size: 1.1rem;
+            font-weight: 600;
+            letter-spacing: -0.01em;
+            color: var(--text-main);
+        }
+
+        .meta-counter {
+            font-size: 0.8rem;
+            color: var(--text-muted);
+            font-variant-numeric: tabular-nums;
+            transition: color 0.2s ease;
+        }
+
+        .meta-counter.active {
+            color: var(--accent-success);
+        }
+
+        .header-actions {
+            display: flex;
+            gap: 8px;
+        }
+
+        .btn-icon {
+            background: var(--surface);
+            border: 1px solid var(--glass-border);
+            color: var(--text-main);
+            width: 38px;
+            height: 38px;
+            border-radius: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            transition: all 0.2s var(--bezier);
+        }
+
+        .btn-icon:active {
+            transform: scale(0.92);
+            background: var(--surface-hover);
+        }
+
+        /* DISPLAY VIEWER AREA */
+        .viewport-wrapper {
+            flex: 1;
+            position: relative;
+            margin: 16px 0;
+            border-radius: 20px;
+            background: rgba(10, 10, 10, 0.6);
+            border: 1px solid var(--glass-border);
+            overflow: hidden;
+            box-shadow: inset 0 0 20px rgba(0, 0, 0, 0.8);
+            transition: border-color 0.3s ease, box-shadow 0.3s ease;
+        }
+
+        /* TRAMO FINAL / 10% RESTANTE WARNING */
+        .viewport-wrapper.final-stretch {
+            border-color: var(--accent-warning);
+            box-shadow: inset 0 0 25px rgba(255, 159, 10, 0.25), 0 0 15px rgba(255, 159, 10, 0.2);
+            animation: pulse-border 2s infinite alternate;
+        }
+
+        @keyframes pulse-border {
+            0% { border-color: rgba(255, 159, 10, 0.4); }
+            100% { border-color: rgba(255, 159, 10, 0.9); }
+        }
+
+        /* DRAG & DROP OVERLAY */
+        .drop-overlay {
+            position: absolute;
+            inset: 0;
+            background: rgba(10, 132, 255, 0.2);
+            border: 2px dashed var(--accent-primary);
+            border-radius: 20px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            gap: 12px;
+            z-index: 30;
+            opacity: 0;
+            pointer-events: none;
+            transition: opacity 0.2s ease;
+            backdrop-filter: blur(5px);
+        }
+
+        .drop-overlay.active {
+            opacity: 1;
+            pointer-events: auto;
+        }
+
+        /* Indicador de Línea de Lectura */
+        .reading-guide {
+            position: absolute;
+            top: 30%;
+            left: 0;
+            right: 0;
+            height: 48px;
+            border-top: 1px solid rgba(255, 69, 58, 0.25);
+            border-bottom: 1px solid rgba(255, 69, 58, 0.25);
+            background: rgba(255, 69, 58, 0.03);
+            pointer-events: none;
+            z-index: 2;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 0 8px;
+        }
+
+        .reading-guide::before, .reading-guide::after {
+            content: '';
+            width: 0;
+            height: 0;
+            border-top: 5px solid transparent;
+            border-bottom: 5px solid transparent;
+        }
+        .reading-guide::before { border-left: 6px solid var(--accent-danger); }
+        .reading-guide::after { border-right: 6px solid var(--accent-danger); }
+
+        .prompter-screen {
+            height: 100%;
+            width: 100%;
+            overflow-y: scroll;
+            scrollbar-width: none;
+            padding: 0 24px;
+            position: relative;
+            cursor: grab;
+        }
+
+        .prompter-screen::-webkit-scrollbar {
+            display: none;
+        }
+
+        .prompter-content {
+            font-weight: 500;
+            line-height: 1.5;
+            color: var(--text-main);
+            white-space: pre-wrap;
+            word-wrap: break-word;
+            transition: transform 0.2s ease;
+            transform-origin: center center;
+            user-select: none;
+        }
+
+        .prompter-content.mirrored {
+            transform: scaleX(-1);
+        }
+
+        /* ESTILOS DE FORMATO & MARKDOWN */
+        .prompter-content strong {
+            color: #FFD60A;
+            font-weight: 700;
+        }
+
+        .prompter-content em.script-note {
+            color: var(--accent-primary);
+            font-style: italic;
+            font-weight: 400;
+        }
+
+        .pause-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 4px;
+            background: rgba(255, 159, 10, 0.2);
+            border: 1px solid var(--accent-warning);
+            color: var(--accent-warning);
+            font-size: 0.85em;
+            padding: 2px 8px;
+            border-radius: 6px;
+            font-weight: 600;
+            margin: 0 4px;
+            vertical-align: middle;
+        }
+
+        .word-token {
+            display: inline;
+            transition: color 0.15s ease, background 0.15s ease;
+            border-radius: 4px;
+        }
+
+        .word-token.matched {
+            color: var(--accent-success);
+        }
+
+        /* Spacer para permitir un desplazamiento completo limpio */
+        .scroll-spacer-top { height: 30vh; }
+        .scroll-spacer-bottom { height: 70vh; }
+
+        /* PANEL DE CONTROL EN TIEMPO REAL */
+        .controls-card {
+            background: var(--glass);
+            backdrop-filter: blur(var(--blur-val));
+            -webkit-backdrop-filter: blur(var(--blur-val));
+            border: 1px solid var(--glass-border);
+            border-radius: 20px;
+            padding: 16px;
+            display: flex;
+            flex-direction: column;
+            gap: 14px;
+            z-index: 10;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.5);
+            transition: opacity 0.3s ease;
+        }
+
+        .control-row {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 12px;
+            flex-wrap: wrap;
+        }
+
+        .control-group {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            background: rgba(255, 255, 255, 0.04);
+            padding: 6px 12px;
+            border-radius: 12px;
+            border: 1px solid rgba(255,255,255,0.05);
+            flex: 1;
+            min-width: 140px;
+        }
+
+        .control-group label {
+            font-size: 0.75rem;
+            color: var(--text-muted);
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            display: flex;
+            align-items: center;
+            gap: 4px;
+        }
+
+        .slider-control {
+            -webkit-appearance: none;
+            appearance: none;
+            width: 100%;
+            height: 4px;
+            border-radius: 2px;
+            background: rgba(255, 255, 255, 0.2);
+            outline: none;
+        }
+
+        .slider-control::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            appearance: none;
+            width: 18px;
+            height: 18px;
+            border-radius: 50%;
+            background: var(--text-main);
+            cursor: pointer;
+            box-shadow: 0 0 8px rgba(0,0,0,0.5);
+            transition: transform 0.1s var(--spring);
+        }
+
+        .slider-control::-webkit-slider-thumb:active {
+            transform: scale(1.3);
+        }
+
+        .btn-play {
+            background: var(--text-main);
+            color: var(--bg);
+            border: none;
+            border-radius: 14px;
+            height: 48px;
+            padding: 0 24px;
+            font-weight: 600;
+            font-size: 0.95rem;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            cursor: pointer;
+            transition: all 0.2s var(--bezier);
+            box-shadow: 0 4px 15px rgba(255,255,255,0.2);
+            flex: 1.2;
+            min-width: 120px;
+        }
+
+        .btn-play.active {
+            background: var(--accent-danger);
+            color: var(--text-main);
+            box-shadow: 0 4px 15px rgba(255, 69, 58, 0.4);
+        }
+
+        .btn-play:active {
+            transform: scale(0.96);
+        }
+
+        .toggle-btn {
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid var(--glass-border);
+            color: var(--text-muted);
+            padding: 8px 12px;
+            border-radius: 10px;
+            font-size: 0.8rem;
+            font-weight: 500;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            flex: 1;
+            justify-content: center;
+            white-space: nowrap;
+        }
+
+        .toggle-btn.active {
+            background: rgba(255, 255, 255, 0.15);
+            color: var(--text-main);
+            border-color: rgba(255, 255, 255, 0.3);
+        }
+
+        .toggle-btn.active-voice {
+            background: var(--accent-primary);
+            color: var(--text-main);
+            border-color: rgba(255, 255, 255, 0.5);
+            animation: pulse-voice 1.5s infinite;
+        }
+
+        @keyframes pulse-voice {
+            0% { box-shadow: 0 0 0 0 rgba(10, 132, 255, 0.4); }
+            70% { box-shadow: 0 0 0 8px rgba(10, 132, 255, 0); }
+            100% { box-shadow: 0 0 0 0 rgba(10, 132, 255, 0); }
+        }
+
+        /* MODAL DE EDICIÓN Y GESTIÓN */
+        .modal-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0, 0, 0, 0.8);
+            backdrop-filter: blur(15px);
+            -webkit-backdrop-filter: blur(15px);
+            z-index: 100;
+            display: flex;
+            justify-content: center;
+            align-items: flex-end;
+            opacity: 0;
+            pointer-events: none;
+            transition: opacity 0.3s var(--bezier);
+        }
+
+        @media (min-width: 600px) {
+            .modal-overlay {
+                align-items: center;
+            }
+        }
+
+        .modal-overlay.active {
+            opacity: 1;
+            pointer-events: auto;
+        }
+
+        .modal-card {
+            background: var(--surface);
+            border: 1px solid var(--glass-border);
+            width: 100%;
+            max-width: 700px;
+            height: 85vh;
+            border-radius: 24px 24px 0 0;
+            display: flex;
+            flex-direction: column;
+            padding: 20px;
+            gap: 16px;
+            transform: translateY(30px);
+            transition: transform 0.3s var(--bezier);
+            box-shadow: 0 -10px 40px rgba(0,0,0,0.8);
+        }
+
+        @media (min-width: 600px) {
+            .modal-card {
+                height: 75vh;
+                border-radius: 24px;
+                transform: translateY(0) scale(0.95);
+            }
+        }
+
+        .modal-overlay.active .modal-card {
+            transform: translateY(0) scale(1);
+        }
+
+        .modal-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .modal-title {
+            font-size: 1.1rem;
+            font-weight: 600;
+        }
+
+        .text-editor {
+            width: 100%;
+            flex: 1;
+            background: rgba(0, 0, 0, 0.5);
+            border: 1px solid var(--glass-border);
+            border-radius: 14px;
+            padding: 16px;
+            color: var(--text-main);
+            font-family: 'Outfit', sans-serif;
+            font-size: 1rem;
+            line-height: 1.5;
+            resize: none;
+            outline: none;
+            transition: border-color 0.2s ease;
+        }
+
+        .text-editor:focus {
+            border-color: rgba(255, 255, 255, 0.3);
+        }
+
+        /* SHAKE VALIDATION ERROR */
+        .error-shake {
+            animation: shake 0.3s cubic-bezier(.36,.07,.19,.97) both;
+            border-color: var(--accent-danger) !important;
+        }
+
+        @keyframes shake {
+            10%, 90% { transform: translate3d(-1px, 0, 0); }
+            20%, 80% { transform: translate3d(2px, 0, 0); }
+            30%, 50%, 70% { transform: translate3d(-4px, 0, 0); }
+            40%, 60% { transform: translate3d(4px, 0, 0); }
+        }
+
+        .modal-actions {
+            display: flex;
+            justify-content: flex-end;
+            gap: 10px;
+        }
+
+        .btn-primary {
+            background: var(--text-main);
+            color: var(--bg);
+            border: none;
+            padding: 10px 20px;
+            border-radius: 10px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: transform 0.1s var(--bezier);
+        }
+
+        .btn-primary:active {
+            transform: scale(0.95);
+        }
+
+        /* PRESETS / SCRIPT LIST */
+        .script-list {
+            display: flex;
+            gap: 8px;
+            overflow-x: auto;
+            padding-bottom: 4px;
+            scrollbar-width: none;
+        }
+        .script-list::-webkit-scrollbar { display: none; }
+
+        .script-chip {
+            background: rgba(255,255,255,0.05);
+            border: 1px solid var(--glass-border);
+            padding: 6px 12px;
+            border-radius: 8px;
+            font-size: 0.8rem;
+            white-space: nowrap;
+            cursor: pointer;
+            color: var(--text-muted);
+            transition: all 0.2s ease;
+        }
+
+        .script-chip.active {
+            background: rgba(255,255,255,0.15);
+            color: var(--text-main);
+            border-color: rgba(255,255,255,0.3);
+        }
+    </style>
+</head>
+<body>
+
+    <div class="app-container" id="main-view">
+        <header>
+            <div class="brand-section">
+                <div class="app-icon-badge">
+                    <i data-lucide="scroll-text" size="20" style="color: var(--text-main);"></i>
+                </div>
+                <div class="title-container">
+                    <h1>Teleprompter</h1>
+                    <span class="meta-counter" id="status-counter">Listo • 0 palabras</span>
+                </div>
+            </div>
+            <div class="header-actions">
+                <button class="btn-icon" onclick="toggleFullscreen()" title="Pantalla Completa (F)">
+                    <i data-lucide="expand" size="18" id="fullscreen-icon"></i>
+                </button>
+                <button class="btn-icon" onclick="togglePip()" title="Ventana Flotante (PiP)">
+                    <i data-lucide="grid" size="18"></i>
+                </button>
+                <button class="btn-icon" onclick="openModal('editor-modal')" title="Editar Guión">
+                    <i data-lucide="file-edit" size="18"></i>
+                </button>
+                <button class="btn-icon" onclick="resetScroll()" title="Reiniciar Posición (R)">
+                    <i data-lucide="rotate-ccw" size="18"></i>
+                </button>
+            </div>
+        </header>
+
+        <main class="viewport-wrapper" id="viewport-wrapper">
+            <div class="drop-overlay" id="drop-overlay">
+                <i data-lucide="file-up" size="48" style="color: var(--accent-primary);"></i>
+                <span style="font-weight: 600;">Suelta tu archivo .txt o .md para cargar</span>
+            </div>
+            <div class="reading-guide"></div>
+            <div class="prompter-screen" id="prompter-screen">
+                <div class="scroll-spacer-top"></div>
+                <div class="prompter-content" id="prompter-text"></div>
+                <div class="scroll-spacer-bottom"></div>
+            </div>
+        </main>
+
+        <div class="controls-card">
+            <div class="script-list" id="script-chips">
+                <!-- Inyectado dinámicamente -->
+            </div>
+
+            <div class="control-row">
+                <div class="control-group">
+                    <label><i data-lucide="gauge" size="14"></i> Vel</label>
+                    <input type="range" id="speed-slider" class="slider-control" min="1" max="10" value="3">
+                </div>
+
+                <div class="control-group">
+                    <label><i data-lucide="type" size="14"></i> Tam</label>
+                    <input type="range" id="size-slider" class="slider-control" min="24" max="72" value="40">
+                </div>
+            </div>
+
+            <div class="control-row">
+                <button class="toggle-btn" id="voice-btn" onclick="toggleVoiceControl()">
+                    <i data-lucide="mic" size="16"></i> Voz
+                </button>
+
+                <button class="toggle-btn" id="mirror-btn" onclick="toggleMirror()">
+                    <i data-lucide="flip-horizontal" size="16"></i> Espejo
+                </button>
+                
+                <button class="toggle-btn" id="bounce-btn" onclick="toggleBounce()">
+                    <i data-lucide="repeat" size="16"></i> Bucle
+                </button>
+
+                <button class="btn-play" id="play-btn" onclick="togglePlay()">
+                    <i data-lucide="play" size="20" id="play-icon"></i>
+                    <span id="play-text">Iniciar</span>
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- MODAL DE EDICIÓN -->
+    <div class="modal-overlay" id="editor-modal">
+        <div class="modal-card">
+            <div class="modal-header">
+                <span class="modal-title">Editar Guión</span>
+                <button class="btn-icon" onclick="closeActiveModal('editor-modal')">
+                    <i data-lucide="x" size="18"></i>
+                </button>
+            </div>
+            <textarea class="text-editor" id="script-input" placeholder="Escribe o pega tu guión aquí...Puedes usar **negritas**, *acotaciones* y [pausa: 3s]"></textarea>
+            <div class="modal-actions">
+                <button class="btn-primary" onclick="saveCurrentScript()">Guardar y Aplicar</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // ARCHITECTURE STATE MANAGEMENT
+        const DEFAULT_SCRIPTS = [
+            {
+                id: '1',
+                title: 'Bienvenida Demo',
+                content: '¡Hola y bienvenido a **Teleprompter**!\n\nEsta herramienta está optimizada para grabaciones de vídeo profesionales.\n\n*mirar a cámara con una sonrisa*\n\nPuedes incluir etiquetas de descanso como [pausa: 3s] para detener el desplazamiento temporalmente.\n\nPrueba los atajos de teclado:\n- **Espacio**: Iniciar / Pausar\n- **Flecha Arriba/Abajo**: Ajustar velocidad\n- **F**: Pantalla completa'
+            },
+            {
+                id: '2',
+                title: 'Pitch Presentación',
+                content: 'Nuestra plataforma optimiza el tiempo de producción audiovisual hasta en un 50%.\n\n[pausa: 2s]\n\nAl eliminar la necesidad de memorizar largos discursos, los creadores pueden centrarse puramente en su **lenguaje corporal** y tono de voz.\n\nPuedes arrastrar archivos .txt o .md directamente sobre la pantalla para cargarlos al instante.'
+            }
+        ];
+
+        let appState = {
+            scripts: [],
+            activeScriptId: '1',
+            speed: 3,
+            fontSize: 40,
+            isMirrored: false,
+            isBounce: false,
+            isPlaying: false,
+            isVoiceActive: false,
+            isFullscreen: false
+        };
+
+        let scrollInterval = null;
+        let activeModalsStack = [];
+        let zenTimeout = null;
+        let activePauseTimeout = null;
+        let isPausedForTag = false;
+        
+        // SPEECH RECOGNITION VARS
+        let recognition = null;
+        let wordElements = [];
+        let cleanWords = [];
+        let currentWordIndex = 0;
+        let pipWindow = null;
+
+        // INITIALIZATION
+        window.onload = () => {
+            loadData();
+            initLucide();
+            setupEventListeners();
+            setupDragAndDrop();
+            setupKeyboardShortcuts();
+            setupZenMode();
+            initSpeechRecognition();
+            renderApp();
+        };
+
+        function initLucide() {
+            if (window.lucide) {
+                lucide.createIcons();
+            }
+        }
+
+        function loadData() {
+            const stored = localStorage.getItem('neo_teleprompter_data');
+            if (stored) {
+                try {
+                    appState = { ...appState, ...JSON.parse(stored) };
+                    appState.isPlaying = false; 
+                    appState.isVoiceActive = false;
+                } catch(e) {
+                    appState.scripts = DEFAULT_SCRIPTS;
+                }
+            } else {
+                appState.scripts = DEFAULT_SCRIPTS;
+            }
+        }
+
+        function saveData() {
+            localStorage.setItem('neo_teleprompter_data', JSON.stringify({
+                scripts: appState.scripts,
+                activeScriptId: appState.activeScriptId,
+                speed: appState.speed,
+                fontSize: appState.fontSize,
+                isMirrored: appState.isMirrored,
+                isBounce: appState.isBounce
+            }));
+        }
+
+        // RENDER ENGINE
+        function renderApp() {
+            const currentScript = getCurrentScript();
+            const prompterText = document.getElementById('prompter-text');
+            
+            // Format text for Speech Recognition Tracking + Markdown + Pauses
+            formatTextWithTokensAndMarkdown(prompterText, currentScript ? currentScript.content : '');
+            prompterText.style.fontSize = `${appState.fontSize}px`;
+            
+            // Mirror Mode
+            if (appState.isMirrored) {
+                prompterText.classList.add('mirrored');
+                document.getElementById('mirror-btn').classList.add('active');
+            } else {
+                prompterText.classList.remove('mirrored');
+                document.getElementById('mirror-btn').classList.remove('active');
+            }
+
+            // Bounce UI
+            document.getElementById('bounce-btn').classList.toggle('active', appState.isBounce);
+
+            // Voice Control UI
+            document.getElementById('voice-btn').classList.toggle('active-voice', appState.isVoiceActive);
+
+            // Sliders
+            document.getElementById('speed-slider').value = appState.speed;
+            document.getElementById('size-slider').value = appState.fontSize;
+
+            // Stats & Remaining Time Calculation
+            updateStatsAndCalculations();
+
+            // Render Script Chips
+            renderChips();
+            
+            // Update Play Button
+            updatePlayButton();
+
+            initLucide();
+        }
+
+        function formatTextWithTokensAndMarkdown(container, text) {
+            container.innerHTML = '';
+            wordElements = [];
+            cleanWords = [];
+            currentWordIndex = 0;
+
+            // Regular Expressions for formatting
+            const pauseRegex = /\[pausa(?::\s*(\d+)s?)?\]/gi;
+            
+            // Process lines
+            const lines = text.split('\n');
+            lines.forEach((lineText, lineIdx) => {
+                const lineSpan = document.createElement('div');
+                lineSpan.className = 'prompter-line';
+
+                // Process line content with Markdown and Tokens
+                let processedHtml = lineText
+                    .replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>')
+                    .replace(/\*(.*?)\*/g, '<em class="script-note">$1</em>')
+                    .replace(pauseRegex, (match, p1) => {
+                        const sec = p1 ? parseInt(p1) : 3;
+                        return `<span class="pause-badge" data-duration="${sec}"><i data-lucide="timer" size="14"></i> Pausa ${sec}s</span>`;
+                    });
+
+                // Convert text into word tokens without breaking HTML tags
+                const tempDiv = document.createElement('div');
+                tempDiv.innerHTML = processedHtml;
+
+                traverseAndTokenize(tempDiv, lineSpan);
+
+                container.appendChild(lineSpan);
+            });
+        }
+
+        function traverseAndTokenize(node, parentSpan) {
+            node.childNodes.forEach((child) => {
+                if (child.nodeType === Node.TEXT_NODE) {
+                    const tokens = child.textContent.split(/(\s+)/);
+                    tokens.forEach((token) => {
+                        if (token.trim().length === 0) {
+                            parentSpan.appendChild(document.createTextNode(token));
+                        } else {
+                            const span = document.createElement('span');
+                            span.className = 'word-token';
+                            span.innerText = token;
+                            parentSpan.appendChild(span);
+                            wordElements.push(span);
+                            cleanWords.push(token.toLowerCase().replace(/[^a-záéíóúñ0-9]/gi, ''));
+                        }
+                    });
+                } else {
+                    const cloneNode = child.cloneNode(false);
+                    parentSpan.appendChild(cloneNode);
+                    traverseAndTokenize(child, cloneNode);
+                }
+            });
+        }
+
+        function updateStatsAndCalculations() {
+            const currentScript = getCurrentScript();
+            const words = currentScript ? currentScript.content.trim().split(/\s+/).filter(Boolean).length : 0;
+            
+            // Estimated WPM (Words Per Minute) based on speed slider
+            const estimatedWPM = appState.speed * 30; // Speed 1=30wpm, 5=150wpm, 10=300wpm
+            const totalMinutes = words / Math.max(estimatedWPM, 1);
+            
+            const screen = document.getElementById('prompter-screen');
+            const maxScroll = screen.scrollHeight - screen.clientHeight;
+            const progress = maxScroll > 0 ? Math.min(1, Math.max(0, screen.scrollTop / maxScroll)) : 0;
+            const remainingMinutes = Math.ceil(totalMinutes * (1 - progress) * 60);
+
+            const counterEl = document.getElementById('status-counter');
+            let modeText = 'Listo';
+            if (isPausedForTag) modeText = 'Pausado (Etiqueta)';
+            else if (appState.isVoiceActive) modeText = 'Escuchando...';
+            else if (appState.isPlaying) modeText = 'En curso';
+
+            const timeStr = remainingMinutes > 60 ? `${Math.floor(remainingMinutes/60)}m ${remainingMinutes%60}s` : `${remainingMinutes}s`;
+
+            counterEl.innerText = `${modeText} • ${words} pal • Restante: ~${timeStr} (${estimatedWPM} WPM)`;
+            counterEl.classList.toggle('active', appState.isPlaying || appState.isVoiceActive);
+
+            // Tramo Final Warning (10% restante)
+            const viewport = document.getElementById('viewport-wrapper');
+            if (progress >= 0.90 && appState.isPlaying) {
+                viewport.classList.add('final-stretch');
+            } else {
+                viewport.classList.remove('final-stretch');
+            }
+        }
+
+        function renderChips() {
+            const container = document.getElementById('script-chips');
+            container.innerHTML = '';
+            
+            appState.scripts.forEach(script => {
+                const chip = document.createElement('div');
+                chip.className = `script-chip ${script.id === appState.activeScriptId ? 'active' : ''}`;
+                chip.innerText = script.title;
+                chip.onclick = () => selectScript(script.id);
+                container.appendChild(chip);
+            });
+        }
+
+        function getCurrentScript() {
+            return appState.scripts.find(s => s.id === appState.activeScriptId) || appState.scripts[0];
+        }
+
+        // AUTO-HIDE & ZEN MODE
+        function setupZenMode() {
+            const app = document.getElementById('main-view');
+            const resetInactivity = () => {
+                app.classList.remove('zen-active');
+                clearTimeout(zenTimeout);
+                if (appState.isPlaying) {
+                    zenTimeout = setTimeout(() => {
+                        app.classList.add('zen-active');
+                    }, 3000);
+                }
+            };
+
+            window.onmousemove = resetInactivity;
+            window.ontouchstart = resetInactivity;
+            window.onkeydown = resetInactivity;
+        }
+
+        // FULLSCREEN API
+        function toggleFullscreen() {
+            if (!document.fullscreenElement) {
+                document.documentElement.requestFullscreen().then(() => {
+                    appState.isFullscreen = true;
+                    document.getElementById('fullscreen-icon').setAttribute('data-lucide', 'shrink');
+                    initLucide();
+                }).catch(err => console.warn(err));
+            } else {
+                if (document.exitFullscreen) {
+                    document.exitFullscreen().then(() => {
+                        appState.isFullscreen = false;
+                        document.getElementById('fullscreen-icon').setAttribute('data-lucide', 'expand');
+                        initLucide();
+                    });
+                }
+            }
+        }
+
+        // DRAG & DROP FILE IMPORT
+        function setupDragAndDrop() {
+            const viewport = document.getElementById('viewport-wrapper');
+            const overlay = document.getElementById('drop-overlay');
+
+            window.addEventListener('dragover', (e) => {
+                e.preventDefault();
+                overlay.classList.add('active');
+            });
+
+            window.addEventListener('dragleave', (e) => {
+                if (e.clientX === 0 && e.clientY === 0) {
+                    overlay.classList.remove('active');
+                }
+            });
+
+            window.addEventListener('drop', (e) => {
+                e.preventDefault();
+                overlay.classList.remove('active');
+
+                const files = e.dataTransfer.files;
+                if (files.length > 0) {
+                    const file = files[0];
+                    if (file.name.endsWith('.txt') || file.name.endsWith('.md')) {
+                        const reader = new FileReader();
+                        reader.onload = (event) => {
+                            const newScript = {
+                                id: Date.now().toString(),
+                                title: file.name.replace(/\.[^/.]+$/, ""),
+                                content: event.target.result
+                            };
+                            appState.scripts.push(newScript);
+                            appState.activeScriptId = newScript.id;
+                            saveData();
+                            renderApp();
+                            resetScroll();
+                        };
+                        reader.readAsText(file);
+                    } else {
+                        alert('Por favor, arrastra un archivo de texto (.txt o .md)');
+                    }
+                }
+            });
+        }
+
+        // KEYBOARD SHORTCUTS
+        function setupKeyboardShortcuts() {
+            window.addEventListener('keydown', (e) => {
+                // Ignore shortcuts if editing text in modal
+                if (document.activeElement.tagName === 'TEXTAREA' || document.activeElement.tagName === 'INPUT') {
+                    return;
+                }
+
+                if (e.code === 'Space') {
+                    e.preventDefault();
+                    togglePlay();
+                } else if (e.code === 'ArrowUp') {
+                    e.preventDefault();
+                    appState.speed = Math.min(10, appState.speed + 1);
+                    document.getElementById('speed-slider').value = appState.speed;
+                    saveData();
+                    updateStatsAndCalculations();
+                } else if (e.code === 'ArrowDown') {
+                    e.preventDefault();
+                    appState.speed = Math.max(1, appState.speed - 1);
+                    document.getElementById('speed-slider').value = appState.speed;
+                    saveData();
+                    updateStatsAndCalculations();
+                } else if (e.code === 'KeyR') {
+                    resetScroll();
+                } else if (e.code === 'KeyF') {
+                    toggleFullscreen();
+                }
+            });
+        }
+
+        // SPEECH RECOGNITION LOGIC
+        function initSpeechRecognition() {
+            const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+            if (!SpeechRecognition) {
+                document.getElementById('voice-btn').style.display = 'none';
+                return;
+            }
+
+            recognition = new SpeechRecognition();
+            recognition.continuous = true;
+            recognition.interimResults = true;
+            recognition.lang = 'es-ES';
+
+            recognition.onresult = (event) => {
+                if (!appState.isVoiceActive) return;
+
+                let transcript = '';
+                for (let i = event.resultIndex; i < event.results.length; i++) {
+                    transcript += event.results[i][0].transcript;
+                }
+
+                const spokenWords = transcript.toLowerCase().trim().split(/\s+/);
+                const lastSpoken = spokenWords[spokenWords.length - 1];
+
+                if (!lastSpoken) return;
+
+                const searchWindow = 8;
+                for (let i = currentWordIndex; i < Math.min(currentWordIndex + searchWindow, cleanWords.length); i++) {
+                    if (cleanWords[i] && cleanWords[i] === lastSpoken.replace(/[^a-záéíóúñ0-9]/gi, '')) {
+                        highlightAndScrollToWord(i);
+                        currentWordIndex = i + 1;
+                        break;
+                    }
+                }
+            };
+
+            recognition.onerror = (event) => {
+                if (appState.isVoiceActive && event.error !== 'no-speech') {
+                    stopVoiceControl();
+                }
+            };
+
+            recognition.onend = () => {
+                if (appState.isVoiceActive) {
+                    recognition.start();
+                }
+            };
+        }
+
+        function toggleVoiceControl() {
+            if (!recognition) {
+                alert('Tu navegador no soporta el reconocimiento de voz.');
+                return;
+            }
+
+            if (appState.isVoiceActive) {
+                stopVoiceControl();
+            } else {
+                if (appState.isPlaying) stopAutoScroll();
+                appState.isVoiceActive = true;
+                appState.isPlaying = false;
+                try { recognition.start(); } catch(e) {}
+            }
+            renderApp();
+        }
+
+        function stopVoiceControl() {
+            appState.isVoiceActive = false;
+            if (recognition) {
+                try { recognition.stop(); } catch(e) {}
+            }
+        }
+
+        function highlightAndScrollToWord(index) {
+            if (!wordElements[index]) return;
+
+            wordElements.forEach((el, idx) => {
+                if (idx <= index) {
+                    el.classList.add('matched');
+                }
+            });
+
+            const targetEl = wordElements[index];
+            const screen = document.getElementById('prompter-screen');
+            const targetY = targetEl.offsetTop - (screen.clientHeight * 0.3);
+
+            screen.scrollTo({
+                top: targetY,
+                behavior: 'smooth'
+            });
+            updateStatsAndCalculations();
+        }
+
+        // DOCUMENT PIP
+        async function togglePip() {
+            if (!('documentPictureInPicture' in window)) {
+                alert('Tu navegador no soporta la API Document Picture-in-Picture. Prueba en Chrome o Edge.');
+                return;
+            }
+
+            if (pipWindow) {
+                pipWindow.close();
+                pipWindow = null;
+                return;
+            }
+
+            try {
+                pipWindow = await window.documentPictureInPicture.requestWindow({
+                    width: 500,
+                    height: 400
+                });
+
+                [...document.styleSheets].forEach((styleSheet) => {
+                    try {
+                        const cssRules = [...styleSheet.cssRules].map((rule) => rule.cssText).join('');
+                        const style = document.createElement('style');
+                        style.textContent = cssRules;
+                        pipWindow.document.head.appendChild(style);
+                    } catch (e) {
+                        const link = document.createElement('link');
+                        link.rel = 'stylesheet';
+                        link.type = styleSheet.type;
+                        link.href = styleSheet.href;
+                        pipWindow.document.head.appendChild(link);
+                    }
+                });
+
+                const viewport = document.querySelector('.viewport-wrapper');
+                pipWindow.document.body.style.margin = '0';
+                pipWindow.document.body.style.backgroundColor = '#000';
+                pipWindow.document.body.appendChild(viewport);
+
+                pipWindow.addEventListener('pagehide', () => {
+                    document.getElementById('main-view').insertBefore(viewport, document.querySelector('.controls-card'));
+                    pipWindow = null;
+                });
+            } catch (err) {
+                console.error("Error abriendo ventana PiP:", err);
+            }
+        }
+
+        // SCROLL & PAUSE TAGS ENGINE
+        function togglePlay() {
+            if (appState.isVoiceActive) {
+                stopVoiceControl();
+            }
+
+            appState.isPlaying = !appState.isPlaying;
+            if (appState.isPlaying) {
+                startAutoScroll();
+            } else {
+                stopAutoScroll();
+            }
+            renderApp();
+        }
+
+        function updatePlayButton() {
+            const btn = document.getElementById('play-btn');
+            const icon = document.getElementById('play-icon');
+            const text = document.getElementById('play-text');
+
+            if (appState.isPlaying) {
+                btn.classList.add('active');
+                icon.setAttribute('data-lucide', 'pause');
+                text.innerText = 'Pausar';
+            } else {
+                btn.classList.remove('active');
+                icon.setAttribute('data-lucide', 'play');
+                text.innerText = 'Iniciar';
+            }
+        }
+
+        function startAutoScroll() {
+            stopAutoScroll();
+            const screen = document.getElementById('prompter-screen');
+            
+            scrollInterval = setInterval(() => {
+                if (!appState.isPlaying || isPausedForTag) return;
+
+                const scrollStep = appState.speed * 0.4;
+                screen.scrollTop += scrollStep;
+
+                updateStatsAndCalculations();
+                checkPauseBadges(screen);
+
+                const maxScroll = screen.scrollHeight - screen.clientHeight;
+                if (screen.scrollTop >= maxScroll - 2) {
+                    if (appState.isBounce) {
+                        screen.scrollTop = 0;
+                    } else {
+                        togglePlay();
+                    }
+                }
+            }, 16);
+        }
+
+        function checkPauseBadges(screen) {
+            const badges = screen.querySelectorAll('.pause-badge:not([data-triggered="true"])');
+            const guideY = screen.clientHeight * 0.3;
+
+            badges.forEach(badge => {
+                const rect = badge.getBoundingClientRect();
+                const screenRect = screen.getBoundingClientRect();
+                const relativeY = rect.top - screenRect.top;
+
+                if (relativeY <= guideY + 20 && relativeY >= guideY - 20) {
+                    badge.setAttribute('data-triggered', 'true');
+                    triggerPauseTag(parseInt(badge.getAttribute('data-duration') || '3'));
+                }
+            });
+        }
+
+        function triggerPauseTag(seconds) {
+            isPausedForTag = true;
+            updateStatsAndCalculations();
+
+            activePauseTimeout = setTimeout(() => {
+                isPausedForTag = false;
+                updateStatsAndCalculations();
+            }, seconds * 1000);
+        }
+
+        function stopAutoScroll() {
+            if (scrollInterval) {
+                clearInterval(scrollInterval);
+                scrollInterval = null;
+            }
+            if (activePauseTimeout) {
+                clearTimeout(activePauseTimeout);
+            }
+            isPausedForTag = false;
+        }
+
+        function resetScroll() {
+            const screen = document.getElementById('prompter-screen');
+            screen.scrollTo({ top: 0, behavior: 'smooth' });
+            if (appState.isPlaying) togglePlay();
+            if (appState.isVoiceActive) stopVoiceControl();
+            
+            currentWordIndex = 0;
+            wordElements.forEach(el => el.classList.remove('matched'));
+            
+            // Reset pause badges status
+            screen.querySelectorAll('.pause-badge').forEach(b => b.removeAttribute('data-triggered'));
+            updateStatsAndCalculations();
+        }
+
+        function toggleMirror() {
+            appState.isMirrored = !appState.isMirrored;
+            saveData();
+            renderApp();
+        }
+
+        function toggleBounce() {
+            appState.isBounce = !appState.isBounce;
+            saveData();
+            renderApp();
+        }
+
+        function selectScript(id) {
+            if (appState.isPlaying) togglePlay();
+            if (appState.isVoiceActive) stopVoiceControl();
+            appState.activeScriptId = id;
+            saveData();
+            renderApp();
+            resetScroll();
+        }
+
+        // EVENT LISTENERS
+        function setupEventListeners() {
+            const speedSlider = document.getElementById('speed-slider');
+            const sizeSlider = document.getElementById('size-slider');
+            const screen = document.getElementById('prompter-screen');
+
+            speedSlider.oninput = (e) => {
+                appState.speed = parseInt(e.target.value);
+                saveData();
+                updateStatsAndCalculations();
+            };
+
+            sizeSlider.oninput = (e) => {
+                appState.fontSize = parseInt(e.target.value);
+                document.getElementById('prompter-text').style.fontSize = `${appState.fontSize}px`;
+                saveData();
+            };
+
+            screen.addEventListener('wheel', () => {
+                if (appState.isPlaying) togglePlay();
+                updateStatsAndCalculations();
+            }, { passive: true });
+
+            screen.addEventListener('touchstart', () => {
+                if (appState.isPlaying) togglePlay();
+            }, { passive: true });
+        }
+
+        // MODAL SYSTEM
+        function openModal(modalId) {
+            if (appState.isPlaying) togglePlay();
+            if (appState.isVoiceActive) stopVoiceControl();
+            
+            const currentScript = getCurrentScript();
+            document.getElementById('script-input').value = currentScript ? currentScript.content : '';
+
+            document.getElementById(modalId).classList.add('active');
+            activeModalsStack.push(modalId);
+            window.history.pushState({ modalId: modalId }, "");
+        }
+
+        function closeActiveModal(modalId) {
+            if (activeModalsStack.includes(modalId)) {
+                window.history.back();
+            }
+        }
+
+        window.addEventListener('popstate', () => {
+            if (activeModalsStack.length > 0) {
+                const topModalId = activeModalsStack.pop();
+                document.getElementById(topModalId).classList.remove('active');
+            }
+        });
+
+        function saveCurrentScript() {
+            const input = document.getElementById('script-input');
+            const val = input.value.trim();
+
+            if (!val) {
+                const card = input.parentElement;
+                card.classList.add('error-shake');
+                setTimeout(() => card.classList.remove('error-shake'), 300);
+                return;
+            }
+
+            const currentScript = getCurrentScript();
+            if (currentScript) {
+                currentScript.content = val;
+            } else {
+                appState.scripts.push({
+                    id: Date.now().toString(),
+                    title: 'Nuevo Guión',
+                    content: val
+                });
+            }
+
+            saveData();
+            renderApp();
+            closeActiveModal('editor-modal');
+        }
+    </script>
+</body>
+</html>

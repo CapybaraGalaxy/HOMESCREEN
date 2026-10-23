@@ -1,122 +1,256 @@
 {
-  "version": "1.7 - Neo Drop 1",
-  "date": "19 de Septiembre 2026",
-  "changes": [
-    "✦ Novedades de la versión 1.7 - Neo Drop 1 (Septiembre 2026)",
-  "Novedades del homescreen:",
-  "Los neo drops son una nueva forma de mejorar Homescreen, no son estrictamente periódicos, pero sí marcan actualizaciones grandes.",
-  "Apps personalizables (Ajustes > Apps ¡Nueva categoría!): ahora puedes ocultar apps del sistema que no uses, también puedes crear accesos directos a otras webs y colocarlos en carpetas junto a otras apps. Puedes elegir el nombre, URL e icono (Lucide, favicon de la web, path SVG o archivo PNG/SVG). Planeamos expandir esta función en el futuro. Además, desde Ajustes > Carpetas > Navegación y carpetas > Apps añadidas: opcionalmente puedes mostrar u ocultar la carpeta de apps creadas manualmente.",
-  "Sliders mejorados: ahora los sliders tienen un estilo más unificado y animaciones más smooth.",
-  "Modo super rendimiento: Ajustes > Apariencia y rendimiento > Modo super rendimiento. Desactiva efectos, partículas y animaciones pesadas.",
-  "Accesos directos: se han corregido accesos directos que estaban rotos.",
-  "Animación del panel de ajustes: puedes personalizar la animación de entrada del panel de ajustes entre Fade (comportamiento habitual), Zoom (parecido al de las carpetas y los antiguos ajustes) y Slide (igual que el de las carpetas). Ruta: Ajustes > Apariencia y rendimiento > Animación del panel de ajustes.",
-  "Ancho de cuadrícula: ahora puedes estirar la cuadrícula para una composición más apaisada.",
-  "Columnas en modo lista: Ahora puedes configurar el número de columnas al usar el modo lista.",
-  "Columnas en cuadrícula: Ahora puedes configurar el número de columnas al usar el modo cuadrícula.",
-  "Labs: nueva aplicación 'Day Briefing'. Revisa tus tareas pendientes, calendario y estado del tiempo para hoy.",
-  "Cambios en aplicaciones:",
-  "Ruleta aleatoria: UI optimizada con una nueva sidebar y ruleta más grande. Ahora hay más opciones, como modo sin blur o posicionamiento personalizable de la sidebar.",
-  "Base64: la zona de drag and drop y subida de archivos ya no se corta al ejecutar la animación de zoom.",
-  "Binario: se añadió un contador de 0 y 1.",
-  "Bocetos: se solucionó un error donde el patrón del fondo interfería con el cubo de pintura. Además, se mejoró el rendimiento general.",
-  "Calculadora de descarga: se ocultaron las flechas selectoras nativas (incremento/decremento).",
-  "Selector de color: se añadió un indicador del color seleccionado en la rueda cromática y un campo de texto para pegar códigos de color directamente.",
-  "Combos: se han añadido 31 nuevos combos de texto.",
-  "Comparador de texto: se integraron filtros para ignorar mayúsculas, espacios, acentos o líneas en blanco. Incluye modos de vista unificada o pantalla dividida, botones de navegación entre diferencias ('Siguiente' / 'Anterior'), panel de estadísticas en tiempo real (modificaciones, añadidos, eliminados), soporte para carga de archivos (.txt, .docx via Mammoth, .pdf via PDF.js, .csv, .json) y exportación de resultados (.diff, .html o impresión PDF).",
-  "Contador de palabras: se añadió un selector de modalidades (Lectura Oral y Lectura Mental) con ajuste de velocidad en tres niveles (Lento, Normal y Rápido).",
-  "Conversor: se ocultaron las flechas selectoras nativas (incremento/decremento).",
-  "Countdown: nuevas funciones en la vista detallada de eventos (Fecha Inicio, Fecha Objetivo, Horas Restantes, Semanas Restantes y edición de eventos).",
-  "Counter: se ha mejorado la claridad del texto que indica los cambios.",
-  "CraftPalette: editor de comandos, advertencia si el comando es ejecutable en chat y función drag and drop para cambiar de servidores.",
-    "✦ Novedades de la versión 1.6.3",
-  "Se ha arreglado un error que dificultaba la visualización del panel de ajustes en pantallas verticales.",
-    "✦ Novedades de la versión 1.6",
-  "Ajustes mejorados, ahora no es un popup lateral, es un popup a pantala completa navegable con pestañas. (Pronto se mejorará la interfaz para pantallas verticales)",
-  "Nuevas opciones en Pantalla>Opciones de visualización: Tamaño de carpetas (Ajusta los accesos de la pantalla de inicio), Apps dentro de carpetas (Tamaño de texto e iconos) y Ocultar texto de carpetas (Mostrar solo iconos en la pantalla de inicio).",
-  "Nueva opción en Carpetas>Preferencias: Ocultar botón cerrar de carpetas (Ocultar botón dentro de las carpetas).",
-  "¡Por fin se ha arreglado el bug de la barra de búsqueda que causaba esa animación tan rara al salir! :)",
-  "3 Nuevas apps (no son nuevas, pero estaban ocultas en el código): Editor de fotos, Conversor zonas horarias y Visort HTML (preview html). Además de una oculta, un editor de markdown en progreso. Apps/markdown.html.",
-  "Labs ahora es visible en la carpeta sistema, pronto habrán apps disponibles dentro",
-  "Ahora algo pasa si haces click varias veces en el nº de versión en ajustes.",
-  "Ahora todo es un poco menos transparente que en la versión anterior",
-  "Nuevo ajuste, slider de transparencia va desde 10% hasta 90%.",
-  "Ahora el ícono para el PWA es el favicon normal. De momento será así, puede que luego cambie",
-    "✦ Novedades de la versión 1.5.1",
-  "Gestión de Caché y Versionamiento Dinámico:",
-  "Se implementó una constante de versión (VERSION = \"1.5.1\") en el Service Worker para renombrar dinámicamente la caché (homescreen-v1.5.1).",
-  "Se añadió un mecanismo automático en el evento activate que detecta y elimina versiones antiguas de la caché para garantizar que los usuarios reciban los archivos más recientes sin residuos almacenados.",
-  "Sincronización de Iconos y PWA (WebAPK):",
-  "Se corrigió la estructura del archivo manifest.json resolviendo un problema de sintaxis JSON que impedía la lectura correcta de la configuración en Android.",
-  "Se agregó la propiedad \"purpose\": \"any maskable\" a los iconos en el manifest para mejorar la adaptación visual y compatibilidad del logo en la pantalla de inicio de Android.",
-  "Rendimiento Offline:",
-  "Se optimizó la lista de recursos críticos (CORE) en el Service Worker para asegurar el correcto funcionamiento sin conexión de la app.",
-    "✦ Novedades de la versión 1.5",
-  "He añadido una frase de bienvenida que saluda al usuario, aparece al entrar, se puede activar y desactivar que la frase se quede fija o que desaparezca tras unos segundos, tu nombre también se puede cambiar. Además se puede elegir el efecto entre blur y fade",
-  "Se ha añadido config.html: Un asistente de configuración pensado para nuevos usuarios que pretende ayudarles a personalizar la app la primera vez. Es accesible mediante un botón en ajustes, aunque aún estoy pensando como hacerlo más intuitivo para nuevos usuarios.",
-  "Se han añadido iconos favicon para TODAS las herramientas y paginas, salvo las apps en beta.",
-  "Se han sincronizado los íconos de las herramientas internamente con su ícono en el homescreen: ahora son los mismos.",
-  "El chip de búsqueda ya no se muestra en el modo ZEN (podría convertirse en una opción en el futuro)",
-  "Los íconos ahora son más pequeños dentro de las carpetas en el modo cuadrícula. Esto podría ser una opción configurable en el futuro",
-  "Ahora se puede elegir la animación de las carpetas entre Zoom y Slide",
-  "El dock ahora se muestra encima de la barra de búsqueda. Las animaciones del dock y barra de búsqueda se han mejorado.",
-  "Ahora en el menu de exportación e importación se puede elegir entre subir archivo o pegar del portapapeles",
-  "Se actualizó el archivo manifest.json con nueva información del proyecto (descripción, idioma, categorías y accesos directos).",
-  "Se actualizó el icono de la app para que sea diferente al FAVICON.",
-  "✦ Novedades de la versión 1.4.1",
-  "Se añadió otro acceso mediante Cloudflare (homescreen.guilleplayer.workers.dev)",
-  "Se corrigió un error que provocaba que la card no cambiara de color al seleccionarse al tener activada la opción Desactivar Blur.",
-   "✦ Novedades de la versión 1.4",
-  "Se añadieron varios traductores y conversores: Binario, Morse, Wingdins, Zonas horarias, Números a Números romanos y Números a pronunciación.",
-  "Se añadió una app de Texto a voz (TTS) con las voces del navegador.",
-  "Se añadió una app de Creador de Posts de Noticias.",
-  "Apps en BETA: Se añadió un editor de fotos experimental.",
-  "Se rediseño la app Material You para permitir la generación y guardado de paletas. La nueva ruta es Apps/Material-you-new.html. La antigua app aún es accesible mediante su antiguo enlace Apps/material-you.html. El acceso del Homescreen ahora redirige a la nueva versión.",
-  "Se añadió la app Labs, pero aún no es accesible mediante la interfaz.",
-   "✦ Novedades de la versión 1.3",
-  "🚀 Homescreen NEO v1.3: Una actualización centrada en la experiencia de uso, con más personalización, automatización y una interfaz mucho más inteligente.",
-  "🧠 Dock Inteligente: Se ha añadido un dock dinámico que aprende de tu uso y muestra automáticamente las aplicaciones que más utilizas.",
-  "🎵 Sonidos e Interacción Háptica: Activa efectos de sonido y vibración para conseguir una experiencia mucho más inmersiva y cercana a una aplicación nativa.",
-  "⭐ Sistema de Favoritos Renovado: Añade aplicaciones a Favoritos con un solo toque o arrástralas directamente para organizarlas de forma más rápida.",
-  "📂 Carpetas Mucho Más Potentes: Las carpetas respetan automáticamente tu modo de visualización (Burbuja, Lista o Cuadrícula) y cuentan con mejores animaciones y navegación.",
-  "🔎 Buscador Mejorado: Animaciones completamente renovadas, resultados más rápidos y una búsqueda mucho más fluida entre todas las aplicaciones.",
-  "🛠️ Nuevas Herramientas: Se incorporan nuevas utilidades como Bocetos, Generador de Memes, Quiz Studio, Rosco, CraftPalette y muchas mejoras en las aplicaciones existentes.",
-  "🎨 Interfaz Refinada: Decenas de pequeños ajustes visuales, nuevas transiciones, mejores modales, panel de ajustes rediseñado y una experiencia mucho más consistente.",
-  "⚡ Mayor Rendimiento: Optimizaciones generales del código, mejor respuesta de la interfaz, reducción de pequeños bloqueos y animaciones más suaves.",
-  "🛡️ Más Estabilidad: Corregidos numerosos errores internos y mejorado el sistema de detección de fallos para ofrecer una experiencia mucho más fiable.",
-   "✦ Novedades de la versión 1.2.1 (29 de Julio 2026)",
-  "Se añadieron Keywords, que permiten encontrar apps más rápido y de forma más precisa. (Ejemplo: 'ruleta' o 'sorteo' para la app Ruleta Aleatoria).",
-  "Se añadió la app Tier List que per mite crear listas de clasificación personalizadas y exportarlas como imagen.",
-  "Se añadió Bocetos, una app para dibujar rápidamente tus ideas",
-   "✦ Novedades de la versión 1.2 (19 de Julio 2026)",
-  "Se corrigió un fallo visual al seleccionar apps en teléfonos.",
-   "✦ Novedades de la versión 1.1",
-  "Se añadió la app Conversor de Unidades, que permite convertir entre diferentes unidades de medida de manera rápida y sencilla.",
-  "Se añadió la app QR, que te permite generar códigos QR personalizados para compartir información de manera rápida y eficiente.",
-  "Se añadió la app GlassNotes en BETA, que te permite tomar notas rápidas y organizarlas de manera visual y atractiva.",
-  "Se añadió Material, una app que me permite acceder a mi paleta de colores material you. Esta app podría recibir mejoras en el futuro, como la posibilidad de crear y guardar paletas personalizadas y exportarlas a otros formatos.",
-  "Se añadió una sección de 'Acerca del Homescreen' en la que se explica el propósito y las características de la app.",
-  "Se añadió una avertencia en Lucide icons para indicar que puede que necesites añadir guiones entre cada palabra para que funcione correctamente.",
-  "Se corrigieron errores menores en la interfaz y se mejoró la experiencia de usuario en general.",
-  "Se añadió un nuevo sistema de drag and drop para añadir apps rápidamente a favoritos.",
-  "Se añadió la capacidad de exportar e importar la configuración del homescreen, incluyendo las apps favoritas y la disposición de las carpetas.",
-  "Se añadió la capacidad de navegar en el menu de búsqueda usando <kbd>↑</kbd> y <kbd>↓</kbd> para seleccionar resultados y <kbd>↵</kbd> para abrirlos.",
-  "✦ Novedades de la versión 1.0",
-  "🚀 Lanzamiento Oficial v1.0: ¡La suite definitiva de herramientas ya está aquí, totalmente estable y optimizada!",
-  "🛠️ Catálogo Completo de Apps: Utilidades de texto avanzadas, Ruleta aleatoria para sorteos y utilidades de desarrollo (App Maker y visor Lucide).",
-  "📱 Nueva Interfaz Adaptable: Cambia al instante entre tres modos de visualización (Burbuja, Lista o Cuadrícula) desde ajustes. ¡Las carpetas heredan tu diseño automáticamente!",
-  "⚡ Modo Anti-Fatiga (Sin Blur): Desactiva el desenfoque 'glassmorphism' para usar colores planos y sólidos oscuros. ¡Ideal para conseguir el máximo rendimiento en cualquier dispositivo!",
-  "🔋 Modo Oscuro Puro: Activa la opción de fondo negro absoluto (#121212) para ahorrar batería en pantallas OLED/AMOLED y descansar tu vista.",
-  "✨ Canvas de Partículas Interactivas: Disfruta de un fondo animado de partículas flotantes que reacciona a tu pantalla (con interruptor de apagado en ajustes).",
-  "⏱️ Reloj Central de 3 Estados: Haz un clic normal para entrar al 'Modo Zen' (reloj gigante sin distracciones) o mantén pulsado (>500ms) para activar el cronómetro de alta precisión.",
-  "⭐ Carpeta de Favoritos Persistente: Añade una estrella a tus apps preferidas para guardarlas localmente mediante localStorage y agrúpalas en una categoría dinámica.",
-  "🔍 Buscador Inteligente (Ctrl + K): Encuentra cualquier app al vuelo y realiza operaciones matemáticas de forma segura en la barra de búsqueda para copiar el resultado con un clic.",
-  "🛡️ Sistema Seguro (Safe-Engine): Incorpora un capturador visual de errores de código para evitar pantallas en blanco y un detector de entorno local offline con redirección web.",
-  "✦ Novedades de la versión DEV v0.9.9.19 (15 Julio 2026)",
-  "Se ha arreglado un error con la carga de la tipografía ''outfit''.",
-  "Se ha añadido un creador de memes a la lista de aplicaciones.",
-  "✦ Novedades de la versión 0.9.9.18.2 (12 Julio 2026)",
-  "Fixed some bugs in the update manager.",
-  "✦ Novedades de la versión 0.9.9.15 (12 Julio 2026)",
-  "Probando funcionamiento de actualizaciones automáticas"
-]
+    "releases":  [
+                     {
+                         "version":  "1.7 - Neo Drop 1",
+                         "date":  "19 de Septiembre 2026",
+                         "title":  "1.7 - Neo Drop 1",
+                         "header":  {
+                                        "enabled":  false,
+                                        "image":  "",
+                                        "alt":  ""
+                                    },
+                         "sections":  [
+                                          {
+                                              "title":  "Novedades del homescreen",
+                                              "content":  "- Los neo drops son una nueva forma de mejorar Homescreen, no son estrictamente periódicos, pero sí marcan actualizaciones grandes.\n- Apps personalizables (Ajustes \u003e Apps ¡Nueva categoría!): ahora puedes ocultar apps del sistema que no uses, también puedes crear accesos directos a otras webs y colocarlos en carpetas junto a otras apps. Puedes elegir el nombre, URL e icono (Lucide, favicon de la web, path SVG o archivo PNG/SVG). Planeamos expandir esta función en el futuro. Además, desde Ajustes \u003e Carpetas \u003e Navegación y carpetas \u003e Apps añadidas: opcionalmente puedes mostrar u ocultar la carpeta de apps creadas manualmente.\n- Sliders mejorados: ahora los sliders tienen un estilo más unificado y animaciones más smooth.\n- Modo super rendimiento: Ajustes \u003e Apariencia y rendimiento \u003e Modo super rendimiento. Desactiva efectos, partículas y animaciones pesadas.\n- Accesos directos: se han corregido accesos directos que estaban rotos.\n- Animación del panel de ajustes: puedes personalizar la animación de entrada del panel de ajustes entre Fade (comportamiento habitual), Zoom (parecido al de las carpetas y los antiguos ajustes) y Slide (igual que el de las carpetas). Ruta: Ajustes \u003e Apariencia y rendimiento \u003e Animación del panel de ajustes.\n- Ancho de cuadrícula: ahora puedes estirar la cuadrícula para una composición más apaisada.\n- Columnas en modo lista: Ahora puedes configurar el número de columnas al usar el modo lista.\n- Columnas en cuadrícula: Ahora puedes configurar el número de columnas al usar el modo cuadrícula.\n- Labs: nueva aplicación \u0027Day Briefing\u0027. Revisa tus tareas pendientes, calendario y estado del tiempo para hoy."
+                                          },
+                                          {
+                                              "title":  "Cambios en aplicaciones",
+                                              "content":  "- Ruleta aleatoria: UI optimizada con una nueva sidebar y ruleta más grande. Ahora hay más opciones, como modo sin blur o posicionamiento personalizable de la sidebar.\n- Base64: la zona de drag and drop y subida de archivos ya no se corta al ejecutar la animación de zoom.\n- Binario: se añadió un contador de 0 y 1.\n- Bocetos: se solucionó un error donde el patrón del fondo interfería con el cubo de pintura. Además, se mejoró el rendimiento general.\n- Calculadora de descarga: se ocultaron las flechas selectoras nativas (incremento/decremento).\n- Selector de color: se añadió un indicador del color seleccionado en la rueda cromática y un campo de texto para pegar códigos de color directamente.\n- Combos: se han añadido 31 nuevos combos de texto.\n- Comparador de texto: se integraron filtros para ignorar mayúsculas, espacios, acentos o líneas en blanco. Incluye modos de vista unificada o pantalla dividida, botones de navegación entre diferencias (\u0027Siguiente\u0027 / \u0027Anterior\u0027), panel de estadísticas en tiempo real (modificaciones, añadidos, eliminados), soporte para carga de archivos (.txt, .docx via Mammoth, .pdf via PDF.js, .csv, .json) y exportación de resultados (.diff, .html o impresión PDF).\n- Contador de palabras: se añadió un selector de modalidades (Lectura Oral y Lectura Mental) con ajuste de velocidad en tres niveles (Lento, Normal y Rápido).\n- Conversor: se ocultaron las flechas selectoras nativas (incremento/decremento).\n- Countdown: nuevas funciones en la vista detallada de eventos (Fecha Inicio, Fecha Objetivo, Horas Restantes, Semanas Restantes y edición de eventos).\n- Counter: se ha mejorado la claridad del texto que indica los cambios.\n- CraftPalette: editor de comandos, advertencia si el comando es ejecutable en chat y función drag and drop para cambiar de servidores."
+                                          }
+                                      ]
+                     },
+                     {
+                         "version":  "1.6.3",
+                         "date":  null,
+                         "title":  "1.6.3",
+                         "header":  {
+                                        "enabled":  false,
+                                        "image":  "",
+                                        "alt":  ""
+                                    },
+                         "sections":  [
+                                          {
+                                              "title":  "Novedades",
+                                              "content":  "- Se ha arreglado un error que dificultaba la visualización del panel de ajustes en pantallas verticales."
+                                          }
+                                      ]
+                     },
+                     {
+                         "version":  "1.6",
+                         "date":  null,
+                         "title":  "1.6",
+                         "header":  {
+                                        "enabled":  false,
+                                        "image":  "",
+                                        "alt":  ""
+                                    },
+                         "sections":  [
+                                          {
+                                              "title":  "Novedades",
+                                              "content":  "- Ajustes mejorados, ahora no es un popup lateral, es un popup a pantala completa navegable con pestañas. (Pronto se mejorará la interfaz para pantallas verticales)\n- Nuevas opciones en Pantalla\u003eOpciones de visualización: Tamaño de carpetas (Ajusta los accesos de la pantalla de inicio), Apps dentro de carpetas (Tamaño de texto e iconos) y Ocultar texto de carpetas (Mostrar solo iconos en la pantalla de inicio).\n- Nueva opción en Carpetas\u003ePreferencias: Ocultar botón cerrar de carpetas (Ocultar botón dentro de las carpetas).\n- ¡Por fin se ha arreglado el bug de la barra de búsqueda que causaba esa animación tan rara al salir! :)\n- 3 Nuevas apps (no son nuevas, pero estaban ocultas en el código): Editor de fotos, Conversor zonas horarias y Visort HTML (preview html). Además de una oculta, un editor de markdown en progreso. Apps/markdown.html.\n- Labs ahora es visible en la carpeta sistema, pronto habrán apps disponibles dentro\n- Ahora algo pasa si haces click varias veces en el nº de versión en ajustes.\n- Ahora todo es un poco menos transparente que en la versión anterior\n- Nuevo ajuste, slider de transparencia va desde 10% hasta 90%.\n- Ahora el ícono para el PWA es el favicon normal. De momento será así, puede que luego cambie"
+                                          }
+                                      ]
+                     },
+                     {
+                         "version":  "1.5.1",
+                         "date":  null,
+                         "title":  "1.5.1",
+                         "header":  {
+                                        "enabled":  false,
+                                        "image":  "",
+                                        "alt":  ""
+                                    },
+                         "sections":  [
+                                          {
+                                              "title":  "Gestión de Caché y Versionamiento Dinámico",
+                                              "content":  "- Se implementó una constante de versión (VERSION = \"1.5.1\") en el Service Worker para renombrar dinámicamente la caché (homescreen-v1.5.1).\n- Se añadió un mecanismo automático en el evento activate que detecta y elimina versiones antiguas de la caché para garantizar que los usuarios reciban los archivos más recientes sin residuos almacenados."
+                                          },
+                                          {
+                                              "title":  "Sincronización de Iconos y PWA (WebAPK)",
+                                              "content":  "- Se corrigió la estructura del archivo manifest.json resolviendo un problema de sintaxis JSON que impedía la lectura correcta de la configuración en Android.\n- Se agregó la propiedad \"purpose\": \"any maskable\" a los iconos en el manifest para mejorar la adaptación visual y compatibilidad del logo en la pantalla de inicio de Android."
+                                          },
+                                          {
+                                              "title":  "Rendimiento Offline",
+                                              "content":  "- Se optimizó la lista de recursos críticos (CORE) en el Service Worker para asegurar el correcto funcionamiento sin conexión de la app."
+                                          }
+                                      ]
+                     },
+                     {
+                         "version":  "1.5",
+                         "date":  null,
+                         "title":  "1.5",
+                         "header":  {
+                                        "enabled":  false,
+                                        "image":  "",
+                                        "alt":  ""
+                                    },
+                         "sections":  [
+                                          {
+                                              "title":  "Novedades",
+                                              "content":  "- He añadido una frase de bienvenida que saluda al usuario, aparece al entrar, se puede activar y desactivar que la frase se quede fija o que desaparezca tras unos segundos, tu nombre también se puede cambiar. Además se puede elegir el efecto entre blur y fade\n- Se ha añadido config.html: Un asistente de configuración pensado para nuevos usuarios que pretende ayudarles a personalizar la app la primera vez. Es accesible mediante un botón en ajustes, aunque aún estoy pensando como hacerlo más intuitivo para nuevos usuarios.\n- Se han añadido iconos favicon para TODAS las herramientas y paginas, salvo las apps en beta.\n- Se han sincronizado los íconos de las herramientas internamente con su ícono en el homescreen: ahora son los mismos.\n- El chip de búsqueda ya no se muestra en el modo ZEN (podría convertirse en una opción en el futuro)\n- Los íconos ahora son más pequeños dentro de las carpetas en el modo cuadrícula. Esto podría ser una opción configurable en el futuro\n- Ahora se puede elegir la animación de las carpetas entre Zoom y Slide\n- El dock ahora se muestra encima de la barra de búsqueda. Las animaciones del dock y barra de búsqueda se han mejorado.\n- Ahora en el menu de exportación e importación se puede elegir entre subir archivo o pegar del portapapeles\n- Se actualizó el archivo manifest.json con nueva información del proyecto (descripción, idioma, categorías y accesos directos).\n- Se actualizó el icono de la app para que sea diferente al FAVICON."
+                                          }
+                                      ]
+                     },
+                     {
+                         "version":  "1.4.1",
+                         "date":  null,
+                         "title":  "1.4.1",
+                         "header":  {
+                                        "enabled":  false,
+                                        "image":  "",
+                                        "alt":  ""
+                                    },
+                         "sections":  [
+                                          {
+                                              "title":  "Novedades",
+                                              "content":  "- Se añadió otro acceso mediante Cloudflare (homescreen.guilleplayer.workers.dev)\n- Se corrigió un error que provocaba que la card no cambiara de color al seleccionarse al tener activada la opción Desactivar Blur."
+                                          }
+                                      ]
+                     },
+                     {
+                         "version":  "1.4",
+                         "date":  null,
+                         "title":  "1.4",
+                         "header":  {
+                                        "enabled":  false,
+                                        "image":  "",
+                                        "alt":  ""
+                                    },
+                         "sections":  [
+                                          {
+                                              "title":  "Novedades",
+                                              "content":  "- Se añadieron varios traductores y conversores: Binario, Morse, Wingdins, Zonas horarias, Números a Números romanos y Números a pronunciación.\n- Se añadió una app de Texto a voz (TTS) con las voces del navegador.\n- Se añadió una app de Creador de Posts de Noticias.\n- Apps en BETA: Se añadió un editor de fotos experimental.\n- Se rediseño la app Material You para permitir la generación y guardado de paletas. La nueva ruta es Apps/Material-you-new.html. La antigua app aún es accesible mediante su antiguo enlace Apps/material-you.html. El acceso del Homescreen ahora redirige a la nueva versión.\n- Se añadió la app Labs, pero aún no es accesible mediante la interfaz."
+                                          }
+                                      ]
+                     },
+                     {
+                         "version":  "1.3",
+                         "date":  null,
+                         "title":  "1.3",
+                         "header":  {
+                                        "enabled":  false,
+                                        "image":  "",
+                                        "alt":  ""
+                                    },
+                         "sections":  [
+                                          {
+                                              "title":  "Novedades",
+                                              "content":  "- 🚀 Homescreen NEO v1.3: Una actualización centrada en la experiencia de uso, con más personalización, automatización y una interfaz mucho más inteligente.\n- 🧠 Dock Inteligente: Se ha añadido un dock dinámico que aprende de tu uso y muestra automáticamente las aplicaciones que más utilizas.\n- 🎵 Sonidos e Interacción Háptica: Activa efectos de sonido y vibración para conseguir una experiencia mucho más inmersiva y cercana a una aplicación nativa.\n- ⭐ Sistema de Favoritos Renovado: Añade aplicaciones a Favoritos con un solo toque o arrástralas directamente para organizarlas de forma más rápida.\n- 📂 Carpetas Mucho Más Potentes: Las carpetas respetan automáticamente tu modo de visualización (Burbuja, Lista o Cuadrícula) y cuentan con mejores animaciones y navegación.\n- 🔎 Buscador Mejorado: Animaciones completamente renovadas, resultados más rápidos y una búsqueda mucho más fluida entre todas las aplicaciones.\n- 🛠️ Nuevas Herramientas: Se incorporan nuevas utilidades como Bocetos, Generador de Memes, Quiz Studio, Rosco, CraftPalette y muchas mejoras en las aplicaciones existentes.\n- 🎨 Interfaz Refinada: Decenas de pequeños ajustes visuales, nuevas transiciones, mejores modales, panel de ajustes rediseñado y una experiencia mucho más consistente.\n- ⚡ Mayor Rendimiento: Optimizaciones generales del código, mejor respuesta de la interfaz, reducción de pequeños bloqueos y animaciones más suaves.\n- 🛡️ Más Estabilidad: Corregidos numerosos errores internos y mejorado el sistema de detección de fallos para ofrecer una experiencia mucho más fiable."
+                                          }
+                                      ]
+                     },
+                     {
+                         "version":  "1.2.1",
+                         "date":  "29 de Julio 2026",
+                         "title":  "1.2.1",
+                         "header":  {
+                                        "enabled":  false,
+                                        "image":  "",
+                                        "alt":  ""
+                                    },
+                         "sections":  [
+                                          {
+                                              "title":  "Novedades",
+                                              "content":  "- Se añadieron Keywords, que permiten encontrar apps más rápido y de forma más precisa. (Ejemplo: \u0027ruleta\u0027 o \u0027sorteo\u0027 para la app Ruleta Aleatoria).\n- Se añadió la app Tier List que per mite crear listas de clasificación personalizadas y exportarlas como imagen.\n- Se añadió Bocetos, una app para dibujar rápidamente tus ideas"
+                                          }
+                                      ]
+                     },
+                     {
+                         "version":  "1.2",
+                         "date":  "19 de Julio 2026",
+                         "title":  "1.2",
+                         "header":  {
+                                        "enabled":  false,
+                                        "image":  "",
+                                        "alt":  ""
+                                    },
+                         "sections":  [
+                                          {
+                                              "title":  "Novedades",
+                                              "content":  "- Se corrigió un fallo visual al seleccionar apps en teléfonos."
+                                          }
+                                      ]
+                     },
+                     {
+                         "version":  "1.1",
+                         "date":  null,
+                         "title":  "1.1",
+                         "header":  {
+                                        "enabled":  false,
+                                        "image":  "",
+                                        "alt":  ""
+                                    },
+                         "sections":  [
+                                          {
+                                              "title":  "Novedades",
+                                              "content":  "- Se añadió la app Conversor de Unidades, que permite convertir entre diferentes unidades de medida de manera rápida y sencilla.\n- Se añadió la app QR, que te permite generar códigos QR personalizados para compartir información de manera rápida y eficiente.\n- Se añadió la app GlassNotes en BETA, que te permite tomar notas rápidas y organizarlas de manera visual y atractiva.\n- Se añadió Material, una app que me permite acceder a mi paleta de colores material you. Esta app podría recibir mejoras en el futuro, como la posibilidad de crear y guardar paletas personalizadas y exportarlas a otros formatos.\n- Se añadió una sección de \u0027Acerca del Homescreen\u0027 en la que se explica el propósito y las características de la app.\n- Se añadió una avertencia en Lucide icons para indicar que puede que necesites añadir guiones entre cada palabra para que funcione correctamente.\n- Se corrigieron errores menores en la interfaz y se mejoró la experiencia de usuario en general.\n- Se añadió un nuevo sistema de drag and drop para añadir apps rápidamente a favoritos.\n- Se añadió la capacidad de exportar e importar la configuración del homescreen, incluyendo las apps favoritas y la disposición de las carpetas.\n- Se añadió la capacidad de navegar en el menu de búsqueda usando `↑` y `↓` para seleccionar resultados y `↵` para abrirlos."
+                                          }
+                                      ]
+                     },
+                     {
+                         "version":  "1.0",
+                         "date":  null,
+                         "title":  "1.0",
+                         "header":  {
+                                        "enabled":  false,
+                                        "image":  "",
+                                        "alt":  ""
+                                    },
+                         "sections":  [
+                                          {
+                                              "title":  "Novedades",
+                                              "content":  "- 🚀 Lanzamiento Oficial v1.0: ¡La suite definitiva de herramientas ya está aquí, totalmente estable y optimizada!\n- 🛠️ Catálogo Completo de Apps: Utilidades de texto avanzadas, Ruleta aleatoria para sorteos y utilidades de desarrollo (App Maker y visor Lucide).\n- 📱 Nueva Interfaz Adaptable: Cambia al instante entre tres modos de visualización (Burbuja, Lista o Cuadrícula) desde ajustes. ¡Las carpetas heredan tu diseño automáticamente!\n- ⚡ Modo Anti-Fatiga (Sin Blur): Desactiva el desenfoque \u0027glassmorphism\u0027 para usar colores planos y sólidos oscuros. ¡Ideal para conseguir el máximo rendimiento en cualquier dispositivo!\n- 🔋 Modo Oscuro Puro: Activa la opción de fondo negro absoluto (#121212) para ahorrar batería en pantallas OLED/AMOLED y descansar tu vista.\n- ✨ Canvas de Partículas Interactivas: Disfruta de un fondo animado de partículas flotantes que reacciona a tu pantalla (con interruptor de apagado en ajustes).\n- ⏱️ Reloj Central de 3 Estados: Haz un clic normal para entrar al \u0027Modo Zen\u0027 (reloj gigante sin distracciones) o mantén pulsado (\u003e500ms) para activar el cronómetro de alta precisión.\n- ⭐ Carpeta de Favoritos Persistente: Añade una estrella a tus apps preferidas para guardarlas localmente mediante localStorage y agrúpalas en una categoría dinámica.\n- 🔍 Buscador Inteligente (Ctrl + K): Encuentra cualquier app al vuelo y realiza operaciones matemáticas de forma segura en la barra de búsqueda para copiar el resultado con un clic.\n- 🛡️ Sistema Seguro (Safe-Engine): Incorpora un capturador visual de errores de código para evitar pantallas en blanco y un detector de entorno local offline con redirección web."
+                                          }
+                                      ]
+                     },
+                     {
+                         "version":  "DEV v0.9.9.19",
+                         "date":  "15 Julio 2026",
+                         "title":  "DEV v0.9.9.19",
+                         "header":  {
+                                        "enabled":  false,
+                                        "image":  "",
+                                        "alt":  ""
+                                    },
+                         "sections":  [
+                                          {
+                                              "title":  "Novedades",
+                                              "content":  "- Se ha arreglado un error con la carga de la tipografía \u0027\u0027outfit\u0027\u0027.\n- Se ha añadido un creador de memes a la lista de aplicaciones."
+                                          }
+                                      ]
+                     },
+                     {
+                         "version":  "0.9.9.18.2",
+                         "date":  "12 Julio 2026",
+                         "title":  "0.9.9.18.2",
+                         "header":  {
+                                        "enabled":  false,
+                                        "image":  "",
+                                        "alt":  ""
+                                    },
+                         "sections":  [
+                                          {
+                                              "title":  "Novedades",
+                                              "content":  "- Fixed some bugs in the update manager."
+                                          }
+                                      ]
+                     },
+                     {
+                         "version":  "0.9.9.15",
+                         "date":  "12 Julio 2026",
+                         "title":  "0.9.9.15",
+                         "header":  {
+                                        "enabled":  false,
+                                        "image":  "",
+                                        "alt":  ""
+                                    },
+                         "sections":  [
+                                          {
+                                              "title":  "Novedades",
+                                              "content":  "- Probando funcionamiento de actualizaciones automáticas"
+                                          }
+                                      ]
+                     }
+                 ]
 }

@@ -7,7 +7,7 @@
     <link rel="icon" type="image/png" href="favicon.png">
     <link rel="manifest" href="manifest.json">
     <!-- SEO Estándar -->
-    <meta name="description" content="Programming for life">
+    <meta name="description" content="Una colección de apps, herramientas y recursos útiles, reunidos en un solo lugar">
 
     <!-- Open Graph (Facebook, WhatsApp, LinkedIn) -->
     <meta name="og:type" content="website">
@@ -18,8 +18,9 @@
     <meta name="og:locale" content="es_ES">
 
     <meta name="theme-color" content="#121212">
-    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@200;400;500&display=swap" rel="stylesheet">
-    <script src="https://unpkg.com/lucide@latest"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@200;400;500&family=JetBrains+Mono:wght@200;400;500&family=Outfit:wght@200;400;500&family=Roboto:wght@200;400;500&display=swap" rel="stylesheet">
+    <script src="./lucide.min.js"></script>
+    <script src="./changelog.js"></script>
     <link rel="stylesheet" href="styles.css">
     <style>
         body.hide-folder-close-btn #folderModal .modal-buttons .secondary,
@@ -68,11 +69,20 @@
         <div><strong>VERSIÓN LOCAL</strong> <span>· Ir a web</span></div>
     </a>
 
-    <div class="version-tag" id="versionTag">1.7 - Neo Drop 1</div>
+    <div class="version-tag" id="versionTag">TEST 1.8.0 - Neo Drop 2</div>
 
     <div class="ui-layer">
         <header class="header">
-            <div class="clock" id="clock">00:00</div>
+<div class="clock clock-digital" id="clock">
+    <span id="digitalClock">00:00</span>
+    <svg class="analog-clock" viewBox="0 0 200 80" aria-label="Reloj analógico">
+        <rect class="clock-face" x="6" y="6" width="188" height="68" rx="16" ry="16"></rect>
+        <g id="hourHandGroup"><line class="clock-hand hour-hand" x1="100" y1="40" x2="100" y2="20"></line></g>
+        <g id="minuteHandGroup"><line class="clock-hand minute-hand" x1="100" y1="40" x2="100" y2="12"></line></g>
+        <g id="secondHandGroup"><line class="clock-hand second-hand" x1="100" y1="40" x2="100" y2="10"></line></g>
+        <circle cx="100" cy="40" r="3"></circle>
+    </svg>
+</div>
             <div class="date" id="date">--</div>
             <div id="batteryStatus" class="battery-status" style="display:none;"><i data-lucide="battery"></i> <span>--%</span></div>
         </header>
@@ -119,7 +129,19 @@
 
     <div class="custom-modal" id="changelogModal">
         <div class="modal-title"><i data-lucide="history"></i> Changelog</div>
-        <div id="changelogContent" style="text-align:left; max-height:280px; overflow-y:auto; margin-bottom:20px;"></div>
+        <div id="changelogContent" class="changelog-browser">
+            <aside class="changelog-sidebar" aria-label="Navegación por versiones">
+                <label class="changelog-search">
+                    <i data-lucide="search" aria-hidden="true"></i>
+                    <input id="changelogSearch" type="search" placeholder="Buscar versión" autocomplete="off" aria-label="Buscar versiones">
+                </label>
+                <nav id="changelogReleaseList" class="changelog-release-list" aria-label="Versiones"></nav>
+            </aside>
+            <div class="changelog-main">
+                <nav id="changelogBreadcrumbs" class="changelog-breadcrumbs" aria-label="Ruta de versión"></nav>
+                <article id="changelogReleaseDetail" class="changelog-release-detail" aria-live="polite"></article>
+            </div>
+        </div>
         <div class="modal-buttons">
             <button class="modal-btn secondary" onclick="closeModal('changelogModal')">Cerrar</button>
         </div>
@@ -191,7 +213,8 @@ const tools = [
             { name: 'Bocetos', icon: 'Pencil-Line', url: 'Apps/bocetos.html' },
             { name: 'Selector de color', icon: 'pipette', url: 'Apps/color.html' },
             { name: 'Editor de fotos', icon: 'image', url: 'Apps/editor-fotos.html' },
-            { name: 'Conversor zonas horarias', icon: 'globe', url: 'Apps/horarios.html' }
+            { name: 'Conversor zonas horarias', icon: 'globe', url: 'Apps/horarios.html' },
+            { name: 'Visor de metadatos', icon: 'file-edit', url: 'Apps/metadata.html' }
         ]
     },
     {
@@ -277,52 +300,6 @@ const tools = [
 const hiddenApp = { name: 'Neo GameCenter', icon: 'Gamepad2', url: 'games.html' };
 const hiddenApps = [hiddenApp];
 
-function getHiddenAppUrls() {
-    try { return new Set(JSON.parse(localStorage.getItem('hiddenAppUrls') || '[]')); } catch (error) { return new Set(); }
-}
-
-function getCustomApps() {
-    try {
-        const apps = JSON.parse(localStorage.getItem('customApps') || '[]');
-        return Array.isArray(apps) ? apps.map(app => ({ ...app, isCustom: true })) : [];
-    } catch (error) { return []; }
-}
-
-function getAllAppEntries() {
-    const apps = [];
-    tools.forEach(folder => (folder.apps || []).forEach(app => apps.push({ ...app, source: folder.name })));
-    getCustomApps().forEach(app => apps.push({ ...app, source: 'Apps añadidas' }));
-    return apps;
-}
-
-function getSearchAppEntries() {
-    return [...getAllAppEntries(), ...hiddenApps.map(app => ({ ...app, source: 'Carpetas ocultas' }))];
-}
-
-function getCustomAppsFolder(name) {
-    return getCustomApps().filter(app => (app.folder || 'Apps añadidas') === name);
-}
-
-function getFolderApps(folder) {
-    const customApps = localStorage.getItem('showCustomApps') === 'false' ? [] : getCustomAppsFolder(folder.name);
-    return [...(folder.apps || []), ...customApps];
-}
-
-function getVisibleApps(apps) {
-    const hiddenUrls = getHiddenAppUrls();
-    return apps.filter(app => !hiddenUrls.has(app.url) && !(app.isCustom && localStorage.getItem('showCustomApps') === 'false'));
-}
-
-function appIconMarkup(app) {
-    if (app.iconType === 'favicon') {
-        const faviconUrl = `https://www.google.com/s2/favicons?domain=${encodeURIComponent(app.url)}&sz=64`;
-        return `<img class="app-custom-icon" src="${faviconUrl}" alt="">`;
-    }
-    if (app.iconType === 'upload' && app.iconData) return `<img class="app-custom-icon" src="${app.iconData}" alt="">`;
-    if (app.iconType === 'svg' && app.svgPath) return `<svg class="app-custom-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="${escapeHtml(app.svgPath)}"></path></svg>`;
-    return `<i data-lucide="${app.icon || 'link'}"></i>`;
-}
-
 const appKeywords = {
     'Apps/dinero.html': [
         'dinero', 'moneda', 'efectivo', 'finanzas', 'presupuesto', 'gastos', 'ingresos', 'calculadora', 'cuenta', 'ahorrar',
@@ -384,6 +361,10 @@ const appKeywords = {
         'hora', 'zonas', 'horarias', 'conversor', 'reloj', 'mundial', 'tiempo', 'utc', 'gmt', 'timezone',
         'convertidor', 'internacional', 'paises', 'ciudades', 'desfase', 'diferencia', 'calendario', 'agenda', 'reunion', 'horario',
         'verano', 'invierno', 'programar', 'sincronizar', 'epoch', 'timestamp', 'local', 'militar', 'am', 'pm'
+    ],
+    'Apps/metadata.html': [
+        'metadatos', 'exif', 'viewer', 'visor', 'fotos', 'imágenes', 'privacidad', 'ubicación', 'editor', 'lector',
+        'raw', 'iptc', 'xmp', 'vídeo', 'datos', 'cámara', 'gps', 'propiedades', 'seguridad', 'extractor'
     ],
     'Apps/calendario.html': [
         'calendario', 'fechas', 'meses', 'dias', 'semanas', 'año', 'agenda', 'citas', 'eventos', 'reuniones',
@@ -557,11 +538,6 @@ const appKeywords = {
         'aprender', 'manual', 'paso a paso', 'pantalla de inicio', 'ajustes', 'restaurar', 'copia de seguridad', 'problemas', 'actualizacion', 'comunidad',
         'trucos', 'primeros pasos', 'personalizar', 'interfaz', 'widgets', 'iconos', 'herramientas', 'soporte tecnico', 'funciones', 'inicio rapido'
     ],
-    'html-preview.html': [
-        'html', 'preview', 'visor', 'editor', 'vivo', 'live', 'render', 'codigo', 'code', 'ver',
-        'renderizar', 'web', 'diseño', 'frontend', 'css', 'js', 'programacion', 'utilidades', 'herramientas', 'archivo',
-        'file', 'abrir', 'test', 'probar', 'sandbox', 'maquetar', 'visualizador', 'visor-html', 'previewer', 'live-preview'
-    ],
     'labs.html': [
         'experimentos', 'beta', 'pruebas', 'homescreen', 'interno'
     ],
@@ -571,6 +547,53 @@ const appKeywords = {
         'coleccion', 'online', 'browser games', 'minijuegos', 'partidas', 'puntuacion', 'records', 'habilidad', 'estrategia', 'accion'
     ]
 };
+
+
+function getHiddenAppUrls() {
+    try { return new Set(JSON.parse(localStorage.getItem('hiddenAppUrls') || '[]')); } catch (error) { return new Set(); }
+}
+
+function getCustomApps() {
+    try {
+        const apps = JSON.parse(localStorage.getItem('customApps') || '[]');
+        return Array.isArray(apps) ? apps.map(app => ({ ...app, isCustom: true })) : [];
+    } catch (error) { return []; }
+}
+
+function getAllAppEntries() {
+    const apps = [];
+    tools.forEach(folder => (folder.apps || []).forEach(app => apps.push({ ...app, source: folder.name })));
+    getCustomApps().forEach(app => apps.push({ ...app, source: 'Apps añadidas' }));
+    return apps;
+}
+
+function getSearchAppEntries() {
+    return [...getAllAppEntries(), ...hiddenApps.map(app => ({ ...app, source: 'Carpetas ocultas' }))];
+}
+
+function getCustomAppsFolder(name) {
+    return getCustomApps().filter(app => (app.folder || 'Apps añadidas') === name);
+}
+
+function getFolderApps(folder) {
+    const customApps = localStorage.getItem('showCustomApps') === 'false' ? [] : getCustomAppsFolder(folder.name);
+    return [...(folder.apps || []), ...customApps];
+}
+
+function getVisibleApps(apps) {
+    const hiddenUrls = getHiddenAppUrls();
+    return apps.filter(app => !hiddenUrls.has(app.url) && !(app.isCustom && localStorage.getItem('showCustomApps') === 'false'));
+}
+
+function appIconMarkup(app) {
+    if (app.iconType === 'favicon') {
+        const faviconUrl = `https://www.google.com/s2/favicons?domain=${encodeURIComponent(app.url)}&sz=64`;
+        return `<img class="app-custom-icon" src="${faviconUrl}" alt="">`;
+    }
+    if (app.iconType === 'upload' && app.iconData) return `<img class="app-custom-icon" src="${app.iconData}" alt="">`;
+    if (app.iconType === 'svg' && app.svgPath) return `<svg class="app-custom-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="${escapeHtml(app.svgPath)}"></path></svg>`;
+    return `<i data-lucide="${app.icon || 'link'}"></i>`;
+}
 
 
         let currentSearchIndex = -1;
@@ -647,7 +670,7 @@ const appKeywords = {
             const hour = new Date().getHours();
             
             // Configuración fácil de añadir frases. Utiliza {user} para el nombre.
-const frases = {
+            const frases = {
     manana: [
         "Buenos días, {user}",
         "¡Arriba, {user}!",
@@ -695,8 +718,18 @@ const frases = {
         "Manos a la obra, {user}",
         "¿Qué gran idea tienes hoy?, {user}",
         "Siempre un gusto tenerte por aquí, {user}"
-    ]
+                ],
+                citas: [
+                    "La mejor manera de predecir el futuro es crearlo. - Peter Drucker",
+                    "La simplicidad es la máxima sofisticación. - Leonardo da Vinci",
+                    "El éxito es la suma de pequeños esfuerzos repetidos. - Robert Collier",
+                    "Lo que haces cada día importa más que lo que haces de vez en cuando."
+                ]
 };
+
+            if (localStorage.getItem('greetingPack') === 'quotes') {
+                currentPhraseTemplate = frases.citas[Math.floor(Math.random() * frases.citas.length)];
+            }
 
             if (!currentPhraseTemplate) {
                 let frasesDelMomento = [];
@@ -997,6 +1030,7 @@ const frases = {
             const selectedText = document.getElementById('currentWelcomeAnimation');
             if (!dropdown || !selectedText) return;
 
+            setAnimationControlsDisabled(body.classList.contains('super-performance'));
             const applySelection = (value) => {
                 const options = dropdown.querySelectorAll('.dropdown-option');
                 options.forEach(option => {
@@ -1017,6 +1051,7 @@ const frases = {
             dropdown.querySelectorAll('.dropdown-option').forEach(option => {
                 option.addEventListener('click', (e) => {
                     e.stopPropagation();
+                    if (body.classList.contains('super-performance')) return;
                     playSound('click');
                     applySelection(option.getAttribute('data-value'));
                     dropdown.classList.remove('active');
@@ -1025,6 +1060,7 @@ const frases = {
 
             dropdown.querySelector('.dropdown-select').addEventListener('click', (e) => {
                 e.stopPropagation();
+                if (body.classList.contains('super-performance')) return;
                 dropdown.classList.toggle('active');
             });
 
@@ -1043,6 +1079,7 @@ const frases = {
             const selectedText = document.getElementById('currentFolderAnimation');
             if (!dropdown || !selectedText) return;
 
+            setAnimationControlsDisabled(body.classList.contains('super-performance'));
             const applySelection = (value) => {
                 const selectedValue = value === 'zoom' ? 'zoom' : 'slide';
                 dropdown.querySelectorAll('.dropdown-option').forEach(option => {
@@ -1057,6 +1094,7 @@ const frases = {
             dropdown.querySelectorAll('.dropdown-option').forEach(option => {
                 option.addEventListener('click', (e) => {
                     e.stopPropagation();
+                    if (body.classList.contains('super-performance')) return;
                     playSound('click');
                     applySelection(option.getAttribute('data-value'));
                     dropdown.classList.remove('active');
@@ -1064,6 +1102,7 @@ const frases = {
             });
             dropdown.querySelector('.dropdown-select').addEventListener('click', (e) => {
                 e.stopPropagation();
+                if (body.classList.contains('super-performance')) return;
                 dropdown.classList.toggle('active');
             });
             document.addEventListener('click', () => dropdown.classList.remove('active'));
@@ -1159,6 +1198,7 @@ const frases = {
                     <button class="quick-access" type="button" data-tab-target="apariencia"><i data-lucide="sparkles"></i><span>Cambiar <strong>Modo de visualización</strong></span></button>
                     <button class="quick-access" type="button" data-tab-target="apariencia"><i data-lucide="gauge"></i><span>Ajustar <strong>Rendimiento</strong></span></button>
                     <button class="quick-access" type="button" data-tab-target="apps"><i data-lucide="plus"></i><span>Añadir <strong>Nueva App</strong></span></button>
+                     <button class="quick-access" type="button" data-tab-target="sistema"><i data-lucide="rotate-cw-clock"></i><span>Hacer o cargar una <strong>copia de seguridad</strong></span></button>
                     <button class="quick-access" type="button" data-url="Apps/consejos.html"><i data-lucide="lightbulb"></i><span>Ver <strong>Consejos</strong></span></button>
                 </div>
             </div>
@@ -1183,9 +1223,12 @@ const frases = {
                     <div class="setting-item-meta"><i data-lucide="message-square-off"></i><div><span class="setting-label">No mostrar saludo nunca</span><span class="setting-desc">Oculta el saludo permanentemente y desactiva sus demás opciones</span></div></div>
                     <div class="switch" id="toggleHideWelcomeAlways"></div>
                 </div>
-                    <div class="setting-item-meta">
-                        <i data-lucide="palette"></i>
-                        <div><span class="setting-label">Personaliza la animación del saludo en la pestaña <strong>Apariencia</strong> </span><span class="setting-desc">Elige entre Fade y Blur</span></div>
+                    <div class="setting-item-row welcome-animation-hint">
+                        <div class="setting-item-meta">
+                            <i data-lucide="palette"></i>
+                            <div><span class="setting-label">Personaliza la animación del saludo en la pestaña <strong>Apariencia</strong></span><span class="setting-desc">Elige entre Fade y Blur</span></div>
+                        </div>
+                        <button class="settings-action-btn" id="goToWelcomeAnimationBtn" type="button"><i data-lucide="arrow-right" style="width: 14px;"></i> Ir al ajuste</button>
                     </div>
                 <span class="settings-section-title">Elementos Visibles en Inicio</span>
                 <div class="setting-item-row">
@@ -1313,13 +1356,17 @@ const frases = {
                     <div class="setting-item-meta"><i data-lucide="droplet"></i><div><span class="setting-label">Desactivar Blur (Desenfoque)</span><span class="setting-desc">Mejora la fluidez en equipos lentos</span></div></div>
                     <div class="switch" id="toggleBlur"></div>
                 </div>
+                <div class="setting-item-row"><div class="setting-item-meta"><i data-lucide="type"></i><div><span class="setting-label">Fuente principal</span><span class="setting-desc">Outfit, Inter, Roboto, JetBrains Mono o sistema</span></div></div><div class="custom-dropdown preference-dropdown" id="settingFontFamily"><div class="dropdown-select"><span>Outfit</span><i data-lucide="chevron-down"></i></div><div class="dropdown-options"><div class="dropdown-option" data-value="Outfit">Outfit</div><div class="dropdown-option" data-value="Inter">Inter</div><div class="dropdown-option" data-value="Roboto">Roboto</div><div class="dropdown-option" data-value="JetBrains Mono">JetBrains Mono</div><div class="dropdown-option" data-value="system">Sistema</div></div></div></div>
+                <div class="setting-item-row"><div class="setting-item-meta"><i data-lucide="clock-3"></i><div><span class="setting-label">Reloj</span><span class="setting-desc">Formato, segundos y estilo visual</span></div></div><div class="settings-select-group"><div class="custom-dropdown preference-dropdown" id="settingTimeFormat"><div class="dropdown-select"><span>24 h</span><i data-lucide="chevron-down"></i></div><div class="dropdown-options"><div class="dropdown-option" data-value="24">24 h</div><div class="dropdown-option" data-value="12">12 h (AM/PM)</div></div></div><div class="custom-dropdown preference-dropdown" id="settingClockStyle"><div class="dropdown-select"><span>Digital</span><i data-lucide="chevron-down"></i></div><div class="dropdown-options"><div class="dropdown-option" data-value="digital">Digital</div><div class="dropdown-option" data-value="analog-wide">Analógico horizontal</div><div class="dropdown-option" data-value="analog-hands">Analógico solo agujas</div></div></div></div></div>
+                <div class="setting-item-row"><div class="setting-item-meta"><i data-lucide="timer"></i><div><span class="setting-label">Mostrar segundos</span><span class="setting-desc">Incluye los segundos en tiempo real</span></div></div><div class="switch" id="toggleShowSeconds"></div></div>
+                <div class="setting-item-row"><div class="setting-item-meta"><i data-lucide="quote"></i><div><span class="setting-label">Pack de saludos</span><span class="setting-desc">Saludos o citas famosas</span></div></div><div class="custom-dropdown preference-dropdown" id="settingGreetingPack"><div class="dropdown-select"><span>Saludos</span><i data-lucide="chevron-down"></i></div><div class="dropdown-options"><div class="dropdown-option" data-value="greetings">Saludos</div><div class="dropdown-option" data-value="quotes">Citas famosas</div></div></div></div>
                 <div class="setting-item-row">
                     <div class="setting-item-meta"><i data-lucide="gauge"></i><div><span class="setting-label">Modo Máximo Rendimiento</span><span class="setting-desc">Desactiva todas las animaciones y partículas para conseguir el máximo rendimiento</span></div></div>
                     <div class="switch" id="toggleSuperPerformance"></div>
                 </div>
 
                 <span class="settings-section-title">Estilos de Animación</span>
-                <div class="setting-item-row">
+                <div class="setting-item-row" id="welcomeAnimationSetting">
                     <div class="setting-item-meta"><i data-lucide="sparkles"></i><div><span class="setting-label">Animación del Saludo</span><span class="setting-desc">Efecto de entrada/salida</span></div></div>
                     <div class="custom-dropdown" id="welcomeAnimationDropdown">
                         <div class="dropdown-select"><span id="currentWelcomeAnimation">Blur</span><i data-lucide="chevron-down"></i></div>
@@ -1399,14 +1446,14 @@ const frases = {
                     Versión actual: <strong><span>Cargando...</span></strong>
                 </div>
                 <div class="settings-actions-grid">
-                    <button class="settings-action-btn" id="checkUpdatesBtn" type="button"><i data-lucide="refresh-cw" style="width: 14px;"></i> Comprobar</button>
-                    <button class="settings-action-btn" id="showChangelogBtn" type="button"><i data-lucide="history" style="width: 14px;"></i> Historial</button>
+                    <button class="settings-action-btn" id="checkUpdatesBtn" type="button"><i data-lucide="refresh-cw" style="width: 14px;"></i> Comprobar actualizaciones</button>
+                    <button class="settings-action-btn" id="showChangelogBtn" type="button"><i data-lucide="history" style="width: 14px;"></i> Historial de cambios</button>
                 </div>
 
                 <span class="settings-section-title">Copias de Seguridad</span>
                 <div class="settings-actions-grid" style="margin-bottom: 8px;">
-                    <button class="settings-action-btn" id="exportSettingsBtn" type="button"><i data-lucide="download" style="width: 14px;"></i> Exportar Config</button>
-                    <button class="settings-action-btn" id="importSettingsBtn" type="button"><i data-lucide="upload" style="width: 14px;"></i> Importar Config</button>
+                    <button class="settings-action-btn" id="exportSettingsBtn" type="button"><i data-lucide="download" style="width: 14px;"></i> Exportar Copia de seguridad</button>
+                    <button class="settings-action-btn" id="importSettingsBtn" type="button"><i data-lucide="upload" style="width: 14px;"></i> Importar Copia de seguridad</button>
                     <input type="file" id="importSettingsFile" accept=".json,.html,application/json,text/plain" style="display: none;">
                 </div>
 
@@ -1458,11 +1505,22 @@ const frases = {
             setPanel.classList.add(`settings-animation-${mode}`);
         }
 
+        function setAnimationControlsDisabled(disabled) {
+            ['welcomeAnimationDropdown', 'folderAnimationDropdown', 'settingsAnimationDropdown'].forEach(id => {
+                const dropdown = document.getElementById(id);
+                if (!dropdown) return;
+                dropdown.classList.toggle('disabled', disabled);
+                dropdown.setAttribute('aria-disabled', String(disabled));
+                if (disabled) dropdown.classList.remove('active');
+            });
+        }
+
         function initSettingsAnimationDropdown() {
             const dropdown = document.getElementById('settingsAnimationDropdown');
             const selectedText = document.getElementById('currentSettingsAnimation');
             if (!dropdown || !selectedText) return;
 
+            setAnimationControlsDisabled(body.classList.contains('super-performance'));
             const labels = { fade: 'Fade', slide: 'Slide', zoom: 'Zoom' };
             const applySelection = (value) => {
                 const mode = ['fade', 'slide', 'zoom'].includes(value) ? value : 'fade';
@@ -1478,6 +1536,7 @@ const frases = {
             dropdown.querySelectorAll('.dropdown-option').forEach(option => {
                 option.addEventListener('click', (e) => {
                     e.stopPropagation();
+                    if (body.classList.contains('super-performance')) return;
                     playSound('click');
                     applySelection(option.dataset.value);
                     dropdown.classList.remove('active');
@@ -1485,6 +1544,7 @@ const frases = {
             });
             dropdown.querySelector('.dropdown-select').addEventListener('click', (e) => {
                 e.stopPropagation();
+                if (body.classList.contains('super-performance')) return;
                 dropdown.classList.toggle('active');
             });
             document.addEventListener('click', () => dropdown.classList.remove('active'));
@@ -1531,6 +1591,20 @@ const frases = {
                 activePanel.scrollTop = 0;
             }
         }
+
+        document.getElementById('goToWelcomeAnimationBtn')?.addEventListener('click', () => {
+            activateSettingsTab('apariencia');
+            const setting = document.getElementById('welcomeAnimationSetting');
+            if (!setting) return;
+            setting.scrollIntoView({
+                behavior: body.classList.contains('super-performance') ? 'auto' : 'smooth',
+                block: 'center'
+            });
+            setting.classList.remove('setting-highlight');
+            void setting.offsetWidth;
+            setting.classList.add('setting-highlight');
+            setTimeout(() => setting.classList.remove('setting-highlight'), 1800);
+        });
 
         window.addEventListener('resize', resizeSettingsPanel);
 
@@ -1595,6 +1669,11 @@ const frases = {
             return `${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}.${tenths}`;
         }
 
+        function setClockText(text) {
+            const digitalClock = document.getElementById('digitalClock');
+            if (digitalClock) digitalClock.innerText = text;
+        }
+
         clock.onclick = () => {
             if (!isChronometerMode) return; 
             if (chronoInterval) {
@@ -1603,19 +1682,40 @@ const frases = {
             } else {
                 if (chronoTime > 0) {
                     chronoTime = 0;
-                    clock.innerText = formatChrono(chronoTime);
+                    setClockText(formatChrono(chronoTime));
                 } else {
-                    chronoInterval = setInterval(() => { chronoTime++; clock.innerText = formatChrono(chronoTime); }, 100);
+                chronoInterval = setInterval(() => { chronoTime++; setClockText(formatChrono(chronoTime)); }, 100);
                 }
             }
         };
 
-        clock.ondblclick = () => {
-            if (isChronometerMode) return; 
+        function enterZenMode() {
+            if (body.classList.contains('zen-mode')) return;
             body.classList.add('zen-mode');
             setPanel.classList.remove('active'); 
             history.pushState({ mode: 'zen' }, "");
+        }
+
+        clock.ondblclick = () => {
+            if (isChronometerMode) return;
+            enterZenMode();
         };
+
+        let backgroundTouchStart = null;
+        document.addEventListener('touchstart', (event) => {
+            if (isEditableTarget(event.target) || event.touches.length !== 1) return;
+            backgroundTouchStart = { x: event.touches[0].clientX, y: event.touches[0].clientY };
+        }, { passive: true });
+        document.addEventListener('touchend', (event) => {
+            if (backgroundTouchStart === null || isEditableTarget(event.target)) return;
+            const deltaY = event.changedTouches[0].clientY - backgroundTouchStart.y;
+            const deltaX = event.changedTouches[0].clientX - backgroundTouchStart.x;
+            backgroundTouchStart = null;
+            if (deltaY > 70 && deltaY > Math.abs(deltaX)) toggleSearch(true);
+        }, { passive: true });
+        document.addEventListener('dblclick', (event) => {
+            if (event.target === document.body || event.target === document.getElementById('bgCanvas')) enterZenMode();
+        });
 
         const startPress = (e) => { if (clockPressTimer) clearTimeout(clockPressTimer); clockPressTimer = setTimeout(toggleClockMode, 1200); };
         const cancelPress = () => { if (clockPressTimer) { clearTimeout(clockPressTimer); clockPressTimer = null; } };
@@ -1626,7 +1726,7 @@ const frases = {
             triggerHaptic(30); playSound('click');
             if (isChronometerMode) {
                 clock.style.color = '#FFD60A'; 
-                chronoTime = 0; clock.innerText = formatChrono(chronoTime);
+                chronoTime = 0; setClockText(formatChrono(chronoTime));
                 document.getElementById('date').style.opacity = '0';
                 document.getElementById('date').style.pointerEvents = 'none';
             } else {
@@ -1740,22 +1840,44 @@ const frases = {
 
         async function showChangelogModal() {
             playSound('click');
-            const changelogBox = document.getElementById('changelogContent');
-            if (!changelogBox) return;
-            changelogBox.innerHTML = '<div style="color: var(--text-muted);">Cargando changelog...</div>';
+            const releaseList = document.getElementById('changelogReleaseList');
+            const releaseDetail = document.getElementById('changelogReleaseDetail');
+            const search = document.getElementById('changelogSearch');
+            const breadcrumbs = document.getElementById('changelogBreadcrumbs');
+            if (!releaseList || !releaseDetail || !search || !breadcrumbs) return;
             openModal('changelogModal');
-            const versionInfo = await window.getVersionInfo?.();
-            const version = versionInfo?.version || 'Sin versión';
-            const changes = Array.isArray(versionInfo?.changes) && versionInfo.changes.length ? versionInfo.changes : [
-                `Obtén la última versión disponible en <a href="https://github.com/CapybaraGalaxy/HOMESCREEN" target="_blank" rel="noopener noreferrer" style="color: #8ab4f8; text-decoration: none;">GITHUB</a>.`
-            ];
-            const date = versionInfo?.date ? ` · ${versionInfo.date}` : '';
-            changelogBox.innerHTML = `
-                <div style="margin-bottom: 10px; color: var(--text-main); font-weight: 500;">${version}${date}</div>
-                <div style="display:flex; flex-direction:column; gap:8px;">
-                    ${changes.map(item => `<div style="padding:10px 12px; border-radius:12px; background: rgba(255,255,255,0.06); border: 1px solid rgba(255,255,255,0.08);">✓ ${item}</div>`).join('')}
-                </div>
-            `;
+            releaseDetail.textContent = 'Cargando historial...';
+            const versionInfo = await window.getVersionInfo();
+            const releases = versionInfo.releases;
+            if (!releases.length) {
+                releaseList.replaceChildren();
+                releaseDetail.textContent = 'No se encontraron versiones en version.json.';
+                return;
+            }
+
+            let selected = releases[0];
+            const render = query => {
+                const filtered = window.HomescreenChangelog.filterReleases(releases, query);
+                if (!filtered.includes(selected)) selected = filtered[0] || null;
+                window.HomescreenChangelog.renderReleaseList(releaseList, filtered, selected?.version, release => {
+                    selected = release;
+                    search.value = '';
+                    render('');
+                });
+                window.HomescreenChangelog.renderReleaseDetail(releaseDetail, selected);
+                if (selected) {
+                    window.HomescreenChangelog.renderBreadcrumbs(breadcrumbs, selected, prefix => {
+                        search.value = prefix;
+                        render(prefix);
+                    });
+                } else {
+                    breadcrumbs.replaceChildren();
+                }
+                lucide.createIcons();
+            };
+            search.value = '';
+            search.oninput = () => render(search.value);
+            render('');
             lucide.createIcons();
         }
 
@@ -1867,9 +1989,10 @@ const frases = {
             if (!settingsVersionInfo) return;
             settingsVersionInfo.innerHTML = '<strong>Versión actual</strong><span>Cargando...</span>';
             try {
-                const info = await window.getVersionInfo?.();
-                const versionLabel = info?.version ? `v${info.version}` : 'Sin datos';
-                const dateLabel = info?.date ? ` · ${info.date}` : '';
+                const info = await window.getVersionInfo();
+                const latestRelease = info.releases[0];
+                const versionLabel = latestRelease ? `v${latestRelease.version}` : 'Sin datos';
+                const dateLabel = latestRelease?.date ? ` · ${latestRelease.date}` : '';
                 settingsVersionInfo.innerHTML = `<strong>Versión actual</strong><span>${versionLabel}${dateLabel}</span>`;
             } catch (error) { settingsVersionInfo.innerHTML = '<strong>Versión actual</strong><span>No disponible</span>'; }
         }
@@ -2183,13 +2306,61 @@ const frases = {
             }
         }
 
+        let analogClockFrame = null;
+
+        function updateAnalogClock() {
+            if (!clock?.classList.contains('clock-analog-wide') && !clock?.classList.contains('clock-analog-hands')) {
+                analogClockFrame = null;
+                return;
+            }
+
+            if (!document.hidden && !isChronometerMode) {
+                const n = new Date();
+                const seconds = n.getSeconds() + n.getMilliseconds() / 1000;
+                const minutes = n.getMinutes() + seconds / 60;
+                const hourAngle = ((n.getHours() % 12) + minutes / 60) * 30;
+                const minuteAngle = minutes * 6;
+                const secondAngle = seconds * 6;
+                document.getElementById('hourHandGroup')?.setAttribute('transform', `rotate(${hourAngle} 100 40)`);
+                document.getElementById('minuteHandGroup')?.setAttribute('transform', `rotate(${minuteAngle} 100 40)`);
+                document.getElementById('secondHandGroup')?.setAttribute('transform', `rotate(${secondAngle} 100 40)`);
+            }
+
+            analogClockFrame = requestAnimationFrame(updateAnalogClock);
+        }
+
+        function syncAnalogClockAnimation() {
+            const isAnalog = clock?.classList.contains('clock-analog-wide') || clock?.classList.contains('clock-analog-hands');
+            if (isAnalog && analogClockFrame === null) {
+                analogClockFrame = requestAnimationFrame(updateAnalogClock);
+            } else if (!isAnalog && analogClockFrame !== null) {
+                cancelAnimationFrame(analogClockFrame);
+                analogClockFrame = null;
+            }
+        }
+
         function updateClock() {
             if (isChronometerMode) return; 
             const n = new Date();
-            document.getElementById('clock').innerText = n.toLocaleTimeString('es-ES', {hour:'2-digit', minute:'2-digit'});
+            const use12Hour = localStorage.getItem('timeFormat') === '12';
+            const showSeconds = localStorage.getItem('showSeconds') !== 'false';
+            const clockText = n.toLocaleTimeString('es-ES', { hour: '2-digit', minute: '2-digit', second: showSeconds ? '2-digit' : undefined, hour12: use12Hour });
+            const digitalClock = document.getElementById('digitalClock');
+            if (digitalClock) digitalClock.innerText = clockText;
             document.getElementById('date').innerText = n.toLocaleDateString('es-ES', {weekday:'long', day:'numeric', month:'long'});
         }
         setInterval(updateClock, 1000);
+
+        function applyVisualPreferences() {
+            const font = localStorage.getItem('fontFamily') || 'Outfit';
+            const fontValue = font === 'system' ? 'system-ui, sans-serif' : `'${font}', sans-serif`;
+            document.documentElement.style.setProperty('--font-main', fontValue);
+            const clockStyle = localStorage.getItem('clockStyle') || 'digital';
+            const clock = document.getElementById('clock');
+            clock?.classList.remove('clock-digital', 'clock-analog-wide', 'clock-analog-hands');
+            clock?.classList.add(`clock-${clockStyle}`);
+            syncAnalogClockAnimation();
+        }
 
         function setBgColor(isDark) {
             if (isDark) { document.documentElement.style.setProperty('--bg', '#121212'); } else { document.documentElement.style.setProperty('--bg', '#ffffff00'); }
@@ -2245,6 +2416,7 @@ const frases = {
 
         function applySuperPerformanceMode(enabled) {
             body.classList.toggle('super-performance', enabled);
+            setAnimationControlsDisabled(enabled);
             const toggle = document.getElementById('toggleSuperPerformance');
             const blurToggle = document.getElementById('toggleBlur');
             const backgroundToggle = document.getElementById('toggleBg');
@@ -2630,6 +2802,7 @@ const frases = {
 
         /* --- INICIALIZADOR DE INTERFAZ (INIT) --- */
         function init() {
+            applyVisualPreferences();
             updateClock();
             updateWelcomeMessage();
             if(window.hasHubError) return;
@@ -2662,6 +2835,32 @@ const frases = {
                 return stored === 'true';
             };
 
+            const setupPreferenceDropdown = (id, key, fallback, callback) => {
+                const dropdown = document.getElementById(id);
+                if (!dropdown) return;
+                const label = dropdown.querySelector('.dropdown-select span');
+                const options = [...dropdown.querySelectorAll('.dropdown-option')];
+                const applySelection = (value) => {
+                    const selected = options.find(option => option.dataset.value === value) || options[0];
+                    options.forEach(option => option.classList.toggle('selected', option === selected));
+                    label.textContent = selected.textContent;
+                    localStorage.setItem(key, selected.dataset.value);
+                    if (callback) callback(selected.dataset.value);
+                };
+                applySelection(localStorage.getItem(key) || fallback);
+                dropdown.querySelector('.dropdown-select').addEventListener('click', (event) => {
+                    event.stopPropagation();
+                    dropdown.classList.toggle('active');
+                });
+                options.forEach(option => option.addEventListener('click', (event) => {
+                    event.stopPropagation();
+                    playSound('click');
+                    applySelection(option.dataset.value);
+                    dropdown.classList.remove('active');
+                }));
+                document.addEventListener('click', () => dropdown.classList.remove('active'));
+            };
+
             applyFolderSize(localStorage.getItem('folderSize') || 3);
             applyFolderAppsSize(localStorage.getItem('folderAppsSize') || 3);
             applyGlassOpacity(localStorage.getItem('glassOpacity') || 50);
@@ -2684,6 +2883,11 @@ const frases = {
             setupToggle('toggleCustomApps', 'showCustomApps', renderMainGrid, 'true');
             setupToggle('toggleSounds', 'sounds', null, 'false');
             setupToggle('toggleHaptics', 'haptics', null, 'false');
+            setupToggle('toggleShowSeconds', 'showSeconds', updateClock, 'true');
+            setupPreferenceDropdown('settingFontFamily', 'fontFamily', 'Outfit', applyVisualPreferences);
+            setupPreferenceDropdown('settingTimeFormat', 'timeFormat', '24', updateClock);
+            setupPreferenceDropdown('settingClockStyle', 'clockStyle', 'digital', applyVisualPreferences);
+            setupPreferenceDropdown('settingGreetingPack', 'greetingPack', 'greetings', () => { currentPhraseTemplate = null; updateWelcomeMessage(); });
             setupToggle('toggleHideWelcome', 'hideWelcome', () => updateWelcomeMessage(), 'false');
             const updateWelcomeControls = () => {
                 const disabled = localStorage.getItem('hideWelcomeAlways') === 'true';

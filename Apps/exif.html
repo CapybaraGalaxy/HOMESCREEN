@@ -1,0 +1,1055 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+    <title>Visor de Metadatos Avanzado Pro</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@200;300;400;500;600;700&display=swap" rel="stylesheet">
+    <script src="../lucide.min.js"></script>
+
+    <!-- Librería EXIFR potente para EXIF, GPS, IPTC, XMP e ICC -->
+    <script src="https://cdn.jsdelivr.net/npm/exifr/dist/full.umd.js"></script>
+
+    <style>
+        :root {
+            /* Paleta Neo-Glass Oscura Orgánica */
+            --bg: #060608;
+            --surface: #121217;
+            --surface-hover: #1a1a22;
+            --surface-card: rgba(255, 255, 255, 0.03);
+            
+            /* Glassmorphism */
+            --glass: rgba(18, 18, 23, 0.7);
+            --glass-border: rgba(255, 255, 255, 0.08);
+            --glass-border-active: rgba(10, 132, 255, 0.4);
+            --blur-val: 24px;
+
+            /* Tipografía */
+            --text-main: #FFFFFF;
+            --text-muted: #8E8E93;
+            --text-subtle: #55555e;
+
+            /* Colores de Sistema */
+            --accent-danger: #FF453A;
+            --accent-success: #30D158;
+            --accent-primary: #0A84FF;
+            --accent-primary-glow: rgba(10, 132, 255, 0.25);
+            --accent-purple: #BF5AF2;
+
+            /* Físicas de Animación */
+            --bezier: cubic-bezier(0.16, 1, 0.3, 1);
+            --spring: cubic-bezier(0.34, 1.56, 0.64, 1);
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            user-select: none;
+            -webkit-user-select: none;
+        }
+
+        body {
+            background-color: var(--bg);
+            color: var(--text-main);
+            font-family: 'Outfit', -apple-system, BlinkMacSystemFont, sans-serif;
+            min-height: 100dvh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            overflow-x: hidden;
+            -webkit-font-smoothing: antialiased;
+        }
+
+        .app-container {
+            width: 100%;
+            max-width: 1180px;
+            height: 100dvh;
+            padding: env(safe-area-inset-top) 24px calc(env(safe-area-inset-bottom) + 16px) 24px;
+            display: flex;
+            flex-direction: column;
+            gap: 16px;
+            margin: 0 auto;
+        }
+
+        /* HEADER & BARRA DE CONTROL */
+        header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding-top: 14px;
+            padding-bottom: 12px;
+            border-bottom: 1px solid var(--glass-border);
+            gap: 12px;
+            flex-wrap: wrap;
+        }
+
+        .header-brand {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .app-icon-badge {
+            width: 42px;
+            height: 42px;
+            border-radius: 12px;
+            background: linear-gradient(135deg, rgba(10, 132, 255, 0.2), rgba(255, 255, 255, 0.03));
+            border: 1px solid var(--glass-border);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            backdrop-filter: blur(var(--blur-val));
+            box-shadow: 0 4px 20px rgba(0,0,0,0.5);
+        }
+
+        h1 {
+            font-size: 1.25rem;
+            font-weight: 600;
+            letter-spacing: -0.02em;
+        }
+
+        .header-controls {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        /* Conmutador de Vistas */
+        .view-switcher {
+            display: flex;
+            background: rgba(255, 255, 255, 0.05);
+            padding: 3px;
+            border-radius: 12px;
+            border: 1px solid var(--glass-border);
+            gap: 2px;
+        }
+
+        .switch-btn {
+            background: transparent;
+            border: none;
+            color: var(--text-muted);
+            padding: 6px 14px;
+            font-family: inherit;
+            font-size: 0.82rem;
+            font-weight: 500;
+            border-radius: 9px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            transition: all 0.25s var(--bezier);
+        }
+
+        .switch-btn.active {
+            background: var(--accent-primary);
+            color: #ffffff;
+            box-shadow: 0 2px 10px var(--accent-primary-glow);
+        }
+
+        .status-badge {
+            font-size: 0.82rem;
+            color: var(--text-muted);
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            padding: 6px 12px;
+            border-radius: 20px;
+            background: var(--surface-card);
+            border: 1px solid var(--glass-border);
+        }
+
+        .status-dot {
+            width: 7px;
+            height: 7px;
+            border-radius: 50%;
+            background-color: var(--accent-success);
+            transition: background-color 0.3s var(--bezier);
+        }
+
+        .status-dot.processing {
+            background-color: var(--accent-primary);
+            animation: pulse-ring 1.2s infinite var(--bezier);
+        }
+
+        @keyframes pulse-ring {
+            0% { transform: scale(0.9); opacity: 0.7; }
+            50% { transform: scale(1.3); opacity: 1; }
+            100% { transform: scale(0.9); opacity: 0.7; }
+        }
+
+        /* CONTENIDO PRINCIPAL */
+        .main-content {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            gap: 16px;
+            overflow-y: auto;
+            padding-bottom: 12px;
+            scrollbar-width: none;
+        }
+
+        .main-content::-webkit-scrollbar {
+            display: none;
+        }
+
+        /* ZONA DROP DE ARCHIVOS MULTIPLES */
+        .drop-zone {
+            border: 1.5px dashed var(--glass-border);
+            border-radius: 24px;
+            background: var(--surface-card);
+            padding: 48px 20px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            gap: 16px;
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.35s var(--bezier);
+            position: relative;
+            min-height: 240px;
+        }
+
+        .drop-zone:hover, .drop-zone.drag-over {
+            border-color: var(--accent-primary);
+            background: rgba(10, 132, 255, 0.04);
+            box-shadow: 0 0 30px var(--accent-primary-glow);
+        }
+
+        .drop-zone input[type="file"] {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            opacity: 0;
+            cursor: pointer;
+        }
+
+        .drop-icon {
+            width: 64px;
+            height: 64px;
+            border-radius: 20px;
+            background: rgba(255, 255, 255, 0.04);
+            border: 1px solid var(--glass-border);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: var(--text-muted);
+            transition: transform 0.4s var(--spring), color 0.3s var(--bezier), background 0.3s var(--bezier);
+        }
+
+        .drop-zone:hover .drop-icon {
+            transform: scale(1.12) translateY(-4px);
+            color: var(--accent-primary);
+            background: rgba(10, 132, 255, 0.1);
+        }
+
+        .drop-title {
+            font-size: 1.05rem;
+            font-weight: 500;
+        }
+
+        .drop-subtitle {
+            font-size: 0.85rem;
+            color: var(--text-muted);
+        }
+
+        /* MODO VISTA INDIVIDUAL */
+        .workspace-grid {
+            display: grid;
+            grid-template-columns: 1fr;
+            gap: 20px;
+            animation: fadeInUp 0.4s var(--bezier);
+        }
+
+        @media (min-width: 850px) {
+            .workspace-grid {
+                grid-template-columns: 320px 1fr;
+            }
+        }
+
+        /* Panel lateral de selección de imágenes */
+        .sidebar-panel {
+            display: flex;
+            flex-direction: column;
+            gap: 14px;
+        }
+
+        .preview-card {
+            background: var(--surface);
+            border: 1px solid var(--glass-border);
+            border-radius: 20px;
+            padding: 16px;
+            display: flex;
+            flex-direction: column;
+            gap: 14px;
+            align-items: center;
+        }
+
+        .image-container {
+            width: 100%;
+            aspect-ratio: 1 / 1;
+            border-radius: 14px;
+            overflow: hidden;
+            background: #000;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border: 1px solid rgba(255, 255, 255, 0.05);
+            position: relative;
+        }
+
+        .image-container img {
+            max-width: 100%;
+            max-height: 100%;
+            object-fit: contain;
+            transition: transform 0.3s var(--bezier);
+        }
+
+        /* Carrusel / Lista de imágenes cargadas */
+        .thumb-list-title {
+            font-size: 0.78rem;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            color: var(--text-muted);
+            margin-bottom: 6px;
+        }
+
+        .thumb-strip {
+            display: flex;
+            gap: 8px;
+            overflow-x: auto;
+            width: 100%;
+            padding-bottom: 4px;
+            scrollbar-width: none;
+        }
+
+        .thumb-strip::-webkit-scrollbar { display: none; }
+
+        .thumb-item {
+            width: 58px;
+            height: 58px;
+            flex-shrink: 0;
+            border-radius: 10px;
+            overflow: hidden;
+            border: 2px solid transparent;
+            cursor: pointer;
+            opacity: 0.6;
+            transition: all 0.25s var(--bezier);
+            position: relative;
+        }
+
+        .thumb-item img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+
+        .thumb-item:hover {
+            opacity: 0.9;
+            transform: scale(1.04);
+        }
+
+        .thumb-item.active {
+            opacity: 1;
+            border-color: var(--accent-primary);
+            box-shadow: 0 0 12px var(--accent-primary-glow);
+        }
+
+        .action-buttons {
+            display: flex;
+            gap: 8px;
+            width: 100%;
+        }
+
+        .btn-action {
+            flex: 1;
+            padding: 10px 12px;
+            border-radius: 12px;
+            border: 1px solid var(--glass-border);
+            background: rgba(255,255,255,0.03);
+            color: var(--text-main);
+            font-family: inherit;
+            font-size: 0.85rem;
+            font-weight: 500;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 6px;
+            transition: all 0.25s var(--bezier);
+        }
+
+        .btn-action:hover {
+            background: rgba(255, 255, 255, 0.08);
+            border-color: rgba(255, 255, 255, 0.15);
+        }
+
+        .btn-danger {
+            color: var(--accent-danger);
+        }
+
+        .btn-danger:hover {
+            background: rgba(255, 69, 58, 0.12);
+            border-color: rgba(255, 69, 58, 0.3);
+        }
+
+        /* PANELES DE METADATOS */
+        .metadata-panels {
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+        }
+
+        .section-title {
+            font-size: 0.82rem;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.06em;
+            color: var(--text-muted);
+            margin-bottom: 10px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .meta-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(190px, 1fr));
+            gap: 12px;
+        }
+
+        .meta-card {
+            background: var(--surface);
+            border: 1px solid var(--glass-border);
+            border-radius: 14px;
+            padding: 12px 14px;
+            display: flex;
+            flex-direction: column;
+            gap: 6px;
+            transition: all 0.25s var(--bezier);
+            animation: fadeInUp 0.3s var(--bezier) backwards;
+        }
+
+        .meta-card:hover {
+            border-color: var(--glass-border-active);
+            transform: translateY(-2px);
+            box-shadow: 0 4px 16px rgba(0,0,0,0.3);
+        }
+
+        .meta-label {
+            font-size: 0.78rem;
+            color: var(--text-muted);
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .meta-value {
+            font-size: 0.92rem;
+            font-weight: 500;
+            color: var(--text-main);
+            font-variant-numeric: tabular-nums;
+            word-break: break-all;
+        }
+
+        .meta-value.highlight {
+            color: var(--accent-primary);
+        }
+
+        /* MODO COMPARADOR */
+        .compare-view {
+            width: 100%;
+            overflow-x: auto;
+            animation: fadeInUp 0.4s var(--bezier);
+            background: var(--surface);
+            border: 1px solid var(--glass-border);
+            border-radius: 20px;
+            padding: 20px;
+        }
+
+        .compare-table {
+            width: 100%;
+            border-collapse: collapse;
+            text-align: left;
+            min-width: 600px;
+        }
+
+        .compare-table th, .compare-table td {
+            padding: 12px 16px;
+            border-bottom: 1px solid var(--glass-border);
+            font-size: 0.88rem;
+        }
+
+        .compare-table th {
+            color: var(--text-muted);
+            font-weight: 600;
+            text-transform: uppercase;
+            font-size: 0.75rem;
+            letter-spacing: 0.05em;
+            background: rgba(255,255,255,0.02);
+        }
+
+        .compare-table tr:last-child td {
+            border-bottom: none;
+        }
+
+        .compare-thumb {
+            width: 64px;
+            height: 64px;
+            border-radius: 10px;
+            object-fit: cover;
+            border: 1px solid var(--glass-border);
+        }
+
+        .map-btn {
+            display: inline-flex;
+            align-items: center;
+            gap: 4px;
+            color: var(--accent-primary);
+            text-decoration: none;
+            font-size: 0.82rem;
+            margin-top: 4px;
+            transition: opacity 0.2s;
+        }
+
+        .map-btn:hover {
+            text-decoration: underline;
+            opacity: 0.85;
+        }
+
+        /* ANIMACIONES */
+        @keyframes fadeInUp {
+            from {
+                opacity: 0;
+                transform: translateY(12px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .error-shake {
+            animation: shake 0.35s var(--bezier);
+            border-color: var(--accent-danger) !important;
+        }
+
+        @keyframes shake {
+            0%, 100% { transform: translateX(0); }
+            20%, 60% { transform: translateX(-6px); }
+            40%, 80% { transform: translateX(6px); }
+        }
+
+        .hidden {
+            display: none !important;
+        }
+
+        .empty-state-text {
+            color: var(--text-muted);
+            font-size: 0.85rem;
+            padding: 16px;
+            background: var(--surface);
+            border: 1px solid var(--glass-border);
+            border-radius: 14px;
+        }
+    </style>
+</head>
+<body>
+
+    <div class="app-container" id="main-view">
+        <header>
+            <div class="header-brand">
+                <div class="app-icon-badge">
+                    <i data-lucide="layers" size="22" style="color: var(--accent-primary);"></i>
+                </div>
+                <div>
+                    <h1>Visor de Metadatos</h1>
+                </div>
+            </div>
+
+            <div class="header-controls">
+                <div class="view-switcher hidden" id="view-switcher">
+                    <button class="switch-btn active" id="btn-view-single">
+                        <i data-lucide="image" size="14"></i> Detalle
+                    </button>
+                    <button class="switch-btn" id="btn-view-compare">
+                        <i data-lucide="columns" size="14"></i> Comparar
+                    </button>
+                </div>
+
+                <div class="status-badge" id="status-indicator">
+                    <span class="status-dot" id="status-dot"></span>
+                    <span id="status-text">Listo</span>
+                </div>
+            </div>
+        </header>
+
+        <main class="main-content">
+            <!-- Zona Drop para subir imágenes -->
+            <div class="drop-zone" id="drop-zone">
+                <input type="file" id="file-input" accept="image/*" multiple>
+                <div class="drop-icon">
+                    <i data-lucide="upload-cloud" size="30"></i>
+                </div>
+                <div>
+                    <div class="drop-title">Arrastra una o varias fotos aquí</div>
+                    <div class="drop-subtitle">Soporta EXIF, GPS, XMP e IPTC. Procesamiento 100% local e instantáneo</div>
+                </div>
+            </div>
+
+            <!-- VISTA DETALLE INDIVIDUAL -->
+            <div class="workspace-grid hidden" id="workspace-single">
+                <div class="sidebar-panel">
+                    <div class="preview-card">
+                        <div class="image-container">
+                            <img id="image-preview" src="" alt="Previsualización">
+                        </div>
+                        
+                        <div style="width: 100%;">
+                            <div class="thumb-list-title" id="thumb-count-title">Imágenes cargadas</div>
+                            <div class="thumb-strip" id="thumb-strip"></div>
+                        </div>
+
+                        <div class="action-buttons">
+                            <button class="btn-action" id="btn-add-more">
+                                <i data-lucide="plus" size="15"></i> Añadir
+                            </button>
+                            <button class="btn-action btn-danger" id="btn-clear-all">
+                                <i data-lucide="trash-2" size="15"></i> Limpiar
+                            </button>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="metadata-panels">
+                    <div>
+                        <div class="section-title">
+                            <i data-lucide="info" size="16"></i> Propiedades Básicas
+                        </div>
+                        <div class="meta-grid" id="basic-metadata"></div>
+                    </div>
+
+                    <div>
+                        <div class="section-title">
+                            <i data-lucide="camera" size="16"></i> Datos de Cámara y Disparo (EXIF)
+                        </div>
+                        <div id="exif-container">
+                            <div class="meta-grid" id="exif-metadata"></div>
+                        </div>
+                    </div>
+
+                    <div>
+                        <div class="section-title">
+                            <i data-lucide="map-pin" size="16"></i> Ubicación y Ajustes Avanzados (GPS / XMP)
+                        </div>
+                        <div id="advanced-container">
+                            <div class="meta-grid" id="advanced-metadata"></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- MODO COMPARADOR -->
+            <div class="compare-view hidden" id="workspace-compare">
+                <div style="margin-bottom: 16px; display: flex; justify-content: space-between; align-items: center;">
+                    <div class="section-title" style="margin: 0;">
+                        <i data-lucide="git-compare" size="16"></i> Tabla Comparativa de Fotos
+                    </div>
+                    <button class="btn-action" id="btn-add-more-compare" style="width: auto; padding: 6px 12px;">
+                        <i data-lucide="plus" size="14"></i> Añadir fotos
+                    </button>
+                </div>
+                <div id="compare-table-container"></div>
+            </div>
+        </main>
+    </div>
+
+    <script>
+        // Estado global de la aplicación
+        let loadedImages = []; // { id, file, url, width, height, metadata }
+        let activeIndex = 0;
+        let currentMode = 'single'; // 'single' | 'compare'
+
+        // Elementos DOM
+        const dropZone = document.getElementById('drop-zone');
+        const fileInput = document.getElementById('file-input');
+        const workspaceSingle = document.getElementById('workspace-single');
+        const workspaceCompare = document.getElementById('workspace-compare');
+        const viewSwitcher = document.getElementById('view-switcher');
+        const btnViewSingle = document.getElementById('btn-view-single');
+        const btnViewCompare = document.getElementById('btn-view-compare');
+        const imagePreview = document.getElementById('image-preview');
+        const thumbStrip = document.getElementById('thumb-strip');
+        const thumbCountTitle = document.getElementById('thumb-count-title');
+        const btnClearAll = document.getElementById('btn-clear-all');
+        const btnAddMore = document.getElementById('btn-add-more');
+        const btnAddMoreCompare = document.getElementById('btn-add-more-compare');
+        const basicMetaGrid = document.getElementById('basic-metadata');
+        const exifContainer = document.getElementById('exif-container');
+        const advancedContainer = document.getElementById('advanced-container');
+        const compareTableContainer = document.getElementById('compare-table-container');
+        const statusText = document.getElementById('status-text');
+        const statusDot = document.getElementById('status-dot');
+
+        window.onload = () => {
+            lucide.createIcons();
+            initEvents();
+        };
+
+        function initEvents() {
+            // Carga de archivos
+            fileInput.addEventListener('change', (e) => handleFiles(e.target.files));
+
+            dropZone.addEventListener('dragover', (e) => {
+                e.preventDefault();
+                dropZone.classList.add('drag-over');
+            });
+
+            dropZone.addEventListener('dragleave', () => dropZone.classList.remove('drag-over'));
+
+            dropZone.addEventListener('drop', (e) => {
+                e.preventDefault();
+                dropZone.classList.remove('drag-over');
+                handleFiles(e.dataTransfer.files);
+            });
+
+            // Botones adicionales para abrir el selector
+            btnAddMore.addEventListener('click', () => fileInput.click());
+            btnAddMoreCompare.addEventListener('click', () => fileInput.click());
+
+            btnClearAll.addEventListener('click', resetAll);
+
+            // Cambiador de Vistas
+            btnViewSingle.addEventListener('click', () => switchViewMode('single'));
+            btnViewCompare.addEventListener('click', () => switchViewMode('compare'));
+        }
+
+        function setStatus(text, isProcessing = false) {
+            statusText.textContent = text;
+            if (isProcessing) {
+                statusDot.classList.add('processing');
+            } else {
+                statusDot.classList.remove('processing');
+            }
+        }
+
+        function triggerErrorShake() {
+            dropZone.classList.add('error-shake');
+            setTimeout(() => dropZone.classList.remove('error-shake'), 350);
+        }
+
+        async function handleFiles(files) {
+            const validFiles = Array.from(files).filter(f => f.type.startsWith('image/'));
+            if (validFiles.length === 0) {
+                triggerErrorShake();
+                return;
+            }
+
+            setStatus('Analizando metadatos con EXIFR...', true);
+
+            for (const file of validFiles) {
+                await processImageFile(file);
+            }
+
+            setStatus(`${loadedImages.length} foto(s) cargada(s)`);
+            
+            // Mostrar interfaz si es la primera carga
+            dropZone.classList.add('hidden');
+            viewSwitcher.classList.remove('hidden');
+
+            renderCurrentView();
+        }
+
+        async function processImageFile(file) {
+            return new Promise((resolve) => {
+                const reader = new FileReader();
+                reader.onload = async (e) => {
+                    const imgUrl = e.target.result;
+                    const img = new Image();
+                    
+                    img.onload = async () => {
+                        let metadata = {};
+                        try {
+                            // Extraer metadatos completos con exifr (EXIF, GPS, IPTC, XMP)
+                            metadata = await exifr.parse(file, {
+                                xmp: true,
+                                iptc: true,
+                                icc: true,
+                                gps: true,
+                                tiff: true,
+                                exif: true
+                            }) || {};
+                        } catch (err) {
+                            console.warn("No se pudieron leer metadatos avanzados para", file.name, err);
+                        }
+
+                        loadedImages.push({
+                            id: Math.random().toString(36).substr(2, 9),
+                            file: file,
+                            url: imgUrl,
+                            width: img.naturalWidth,
+                            height: img.naturalHeight,
+                            metadata: metadata
+                        });
+
+                        resolve();
+                    };
+                    img.src = imgUrl;
+                };
+                reader.readAsDataURL(file);
+            });
+        }
+
+        function renderCurrentView() {
+            if (loadedImages.length === 0) return;
+
+            if (currentMode === 'single') {
+                workspaceSingle.classList.remove('hidden');
+                workspaceCompare.classList.add('hidden');
+                renderSingleView();
+            } else {
+                workspaceSingle.classList.add('hidden');
+                workspaceCompare.classList.remove('hidden');
+                renderCompareView();
+            }
+            lucide.createIcons();
+        }
+
+        function switchViewMode(mode) {
+            currentMode = mode;
+            if (mode === 'single') {
+                btnViewSingle.classList.add('active');
+                btnViewCompare.classList.remove('active');
+            } else {
+                btnViewSingle.classList.remove('active');
+                btnViewCompare.classList.add('active');
+            }
+            renderCurrentView();
+        }
+
+        /* RENDEREAR VISTA INDIVIDUAL DETALLADA */
+        function renderSingleView() {
+            const item = loadedImages[activeIndex];
+            if (!item) return;
+
+            imagePreview.src = item.url;
+            thumbCountTitle.textContent = `Imágenes (${loadedImages.length})`;
+
+            // Renderear carrusel de miniaturas
+            thumbStrip.innerHTML = loadedImages.map((img, idx) => `
+                <div class="thumb-item ${idx === activeIndex ? 'active' : ''}" onclick="selectActiveImage(${idx})">
+                    <img src="${img.url}" alt="thumb">
+                </div>
+            `).join('');
+
+            // Propiedades Básicas
+            const basicData = [
+                { label: 'Nombre', value: item.file.name, icon: 'file-text' },
+                { label: 'Dimensiones', value: `${item.width} × ${item.height} px`, icon: 'maximize' },
+                { label: 'Relación Aspecto', value: getAspectRatio(item.width, item.height), icon: 'layout' },
+                { label: 'Tamaño de Archivo', value: formatBytes(item.file.size), icon: 'hard-drive' },
+                { label: 'Tipo MIME', value: item.file.type || 'image/jpeg', icon: 'file' },
+                { label: 'Última Modificación', value: new Date(item.file.lastModified).toLocaleDateString(), icon: 'calendar' }
+            ];
+            renderGrid(basicMetaGrid, basicData);
+
+            // Datos EXIF de Disparo
+            const meta = item.metadata;
+            const exifData = [];
+
+            const make = meta.Make || '';
+            const model = meta.Model || '';
+            if (make || model) {
+                exifData.push({ label: 'Cámara', value: `${make} ${model}`.trim(), icon: 'camera' });
+            }
+            if (meta.LensModel) {
+                exifData.push({ label: 'Lente / Objetivo', value: meta.LensModel, icon: 'disc' });
+            }
+            if (meta.ExposureTime) {
+                let expStr = meta.ExposureTime < 1 ? `1/${Math.round(1 / meta.ExposureTime)}s` : `${meta.ExposureTime}s`;
+                exifData.push({ label: 'Tiempo Exposición', value: expStr, icon: 'clock' });
+            }
+            if (meta.FNumber) {
+                exifData.push({ label: 'Apertura Diafragma', value: `f/${meta.FNumber}`, icon: 'aperture' });
+            }
+            if (meta.ISO) {
+                exifData.push({ label: 'Sensibilidad ISO', value: meta.ISO, icon: 'zap' });
+            }
+            if (meta.FocalLength) {
+                exifData.push({ label: 'Distancia Focal', value: `${meta.FocalLength} mm`, icon: 'sliders' });
+            }
+            if (meta.FocalLengthIn35mmFormat) {
+                exifData.push({ label: 'Equiv. en 35mm', value: `${meta.FocalLengthIn35mmFormat} mm`, icon: 'zoom-in' });
+            }
+
+            if (exifData.length === 0) {
+                exifContainer.innerHTML = '<div class="empty-state-text">Sin información de disparo EXIF detectada.</div>';
+            } else {
+                exifContainer.innerHTML = '<div class="meta-grid" id="exif-metadata"></div>';
+                renderGrid(document.getElementById('exif-metadata'), exifData);
+            }
+
+            // Datos Avanzados / GPS / Fechas / Software
+            const advData = [];
+            if (meta.DateTimeOriginal) {
+                advData.push({ label: 'Fecha Captura', value: new Date(meta.DateTimeOriginal).toLocaleString(), icon: 'calendar' });
+            }
+            if (meta.Software) {
+                advData.push({ label: 'Software / Edición', value: meta.Software, icon: 'edit-3' });
+            }
+            if (meta.latitude && meta.longitude) {
+                const lat = meta.latitude.toFixed(5);
+                const lon = meta.longitude.toFixed(5);
+                const mapUrl = `https://www.google.com/maps?q=${lat},${lon}`;
+                advData.push({ 
+                    label: 'Coordenadas GPS', 
+                    value: `${lat}, ${lon} <br><a href="${mapUrl}" target="_blank" class="map-btn"><i data-lucide="external-link" size="12"></i> Ver en Mapa</a>`, 
+                    icon: 'map-pin' 
+                });
+            }
+            if (meta.GPSAltitude) {
+                advData.push({ label: 'Altitud GPS', value: `${Math.round(meta.GPSAltitude)} m`, icon: 'navigation' });
+            }
+            if (meta.ColorSpace) {
+                advData.push({ label: 'Espacio de Color', value: meta.ColorSpace === 1 ? 'sRGB' : 'Uncalibrated / P3', icon: 'palette' });
+            }
+            if (meta.Orientation) {
+                advData.push({ label: 'Orientación Sensor', value: `Grado ${meta.Orientation}`, icon: 'rotate-cw' });
+            }
+
+            if (advData.length === 0) {
+                advancedContainer.innerHTML = '<div class="empty-state-text">Sin metadatos avanzadas de GPS o software.</div>';
+            } else {
+                advancedContainer.innerHTML = '<div class="meta-grid" id="advanced-metadata"></div>';
+                renderGrid(document.getElementById('advanced-metadata'), advData);
+            }
+        }
+
+        /* RENDEREAR TABLA DE COMPARACIÓN */
+        function renderCompareView() {
+            let html = `
+                <table class="compare-table">
+                    <thead>
+                        <tr>
+                            <th>Propiedad</th>
+                            ${loadedImages.map(img => `
+                                <th>
+                                    <img src="${img.url}" class="compare-thumb" alt="preview"><br>
+                                    <span style="color: var(--text-main); font-size: 0.8rem; font-weight: 500;">${truncate(img.file.name, 16)}</span>
+                                </th>
+                            `).join('')}
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td><strong>Dimensiones</strong></td>
+                            ${loadedImages.map(img => `<td>${img.width} × ${img.height} px</td>`).join('')}
+                        </tr>
+                        <tr>
+                            <td><strong>Tamaño Archivo</strong></td>
+                            ${loadedImages.map(img => `<td>${formatBytes(img.file.size)}</td>`).join('')}
+                        </tr>
+                        <tr>
+                            <td><strong>Cámara</strong></td>
+                            ${loadedImages.map(img => `<td>${(img.metadata.Make || '') + ' ' + (img.metadata.Model || 'Desconocida')}</td>`).join('')}
+                        </tr>
+                        <tr>
+                            <td><strong>Apertura</strong></td>
+                            ${loadedImages.map(img => `<td>${img.metadata.FNumber ? 'f/' + img.metadata.FNumber : 'N/A'}</td>`).join('')}
+                        </tr>
+                        <tr>
+                            <td><strong>Tiempo Exposición</strong></td>
+                            ${loadedImages.map(img => {
+                                const exp = img.metadata.ExposureTime;
+                                const str = exp ? (exp < 1 ? `1/${Math.round(1/exp)}s` : `${exp}s`) : 'N/A';
+                                return `<td>${str}</td>`;
+                            }).join('')}
+                        </tr>
+                        <tr>
+                            <td><strong>ISO</strong></td>
+                            ${loadedImages.map(img => `<td>${img.metadata.ISO || 'N/A'}</td>`).join('')}
+                        </tr>
+                        <tr>
+                            <td><strong>Focal</strong></td>
+                            ${loadedImages.map(img => `<td>${img.metadata.FocalLength ? img.metadata.FocalLength + ' mm' : 'N/A'}</td>`).join('')}
+                        </tr>
+                        <tr>
+                            <td><strong>Ubicación GPS</strong></td>
+                            ${loadedImages.map(img => {
+                                if (img.metadata.latitude && img.metadata.longitude) {
+                                    return `<td><a href="https://www.google.com/maps?q=${img.metadata.latitude},${img.metadata.longitude}" target="_blank" class="map-btn"><i data-lucide="map-pin" size="12"></i> Ver Mapa</a></td>`;
+                                }
+                                return `<td>No disponible</td>`;
+                            }).join('')}
+                        </tr>
+                    </tbody>
+                </table>
+            `;
+            compareTableContainer.innerHTML = html;
+        }
+
+        function selectActiveImage(index) {
+            activeIndex = index;
+            renderSingleView();
+            lucide.createIcons();
+        }
+
+        function renderGrid(container, items) {
+            container.innerHTML = items.map((item, index) => `
+                <div class="meta-card" style="animation-delay: ${index * 0.04}s">
+                    <div class="meta-label">
+                        <i data-lucide="${item.icon}" size="14"></i>
+                        ${item.label}
+                    </div>
+                    <div class="meta-value">${item.value}</div>
+                </div>
+            `).join('');
+            lucide.createIcons();
+        }
+
+        function resetAll() {
+            loadedImages = [];
+            activeIndex = 0;
+            fileInput.value = '';
+            workspaceSingle.classList.add('hidden');
+            workspaceCompare.classList.add('hidden');
+            viewSwitcher.classList.add('hidden');
+            dropZone.classList.remove('hidden');
+            setStatus('Listo');
+        }
+
+        // Funciones auxiliares
+        function formatBytes(bytes) {
+            if (bytes === 0) return '0 Bytes';
+            const k = 1024;
+            const sizes = ['Bytes', 'KB', 'MB', 'GB'];
+            const i = Math.floor(Math.log(bytes) / Math.log(k));
+            return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + ' ' + sizes[i];
+        }
+
+        function gcd(a, b) {
+            return b === 0 ? a : gcd(b, a % b);
+        }
+
+        function getAspectRatio(width, height) {
+            const divisor = gcd(width, height);
+            const wRatio = width / divisor;
+            const hRatio = height / divisor;
+            if (wRatio > 25 || hRatio > 25) {
+                return (width / height).toFixed(2) + ':1';
+            }
+            return `${wRatio}:${hRatio}`;
+        }
+
+        function truncate(str, n) {
+            return (str.length > n) ? str.substr(0, n-1) + '…' : str;
+        }
+    </script>
+</body>
+</html>

@@ -1,4 +1,3 @@
-let isUpdating = false;
 let newWorker = null;
 let currentRegistration = null;
 
@@ -24,15 +23,26 @@ function showHomescreenToast(message, duration = 2600) {
 }
 
 async function getVersionInfo() {
-    try {
-        const response = await fetch("./version.json", { cache: "no-store" });
-        if (!response.ok) {
-            throw new Error("No se pudo cargar version.json");
-        }
-        return await response.json();
-    } catch (error) {
-        return { version: "", changes: [] };
+    const response = await fetch("./version.json", { cache: "no-store" });
+    if (!response.ok) {
+        throw new Error(`No se pudo cargar version.json: ${response.status}`);
     }
+    const info = await response.json();
+    if (!info || typeof info !== "object" || !Array.isArray(info.releases)) {
+        throw new Error("version.json no contiene el array releases");
+    }
+    return info;
+}
+
+function getUpdateHighlights(info) {
+    const latestRelease = info.releases[0];
+    if (!latestRelease) return [];
+    return latestRelease.sections
+        .flatMap(section => String(section.content || "").split(/\n+/))
+        .map(line => line.trim())
+        .filter(Boolean)
+        .map(line => line.replace(/^[-*+]\s+/, ""))
+        .slice(0, 3);
 }
 
 async function showUpdateBanner(info = null) {
@@ -45,20 +55,44 @@ async function showUpdateBanner(info = null) {
     banner.className = "update-banner";
     banner.id = "updateBanner";
 
-    banner.innerHTML = `
-        <div class="update-title">
-            🚀 HOMESCREEN ${versionInfo.version || ""}
-        </div>
-
-        <div class="update-text">
-            Nueva versión disponible
-            ${versionInfo.changes?.length ? "<br><br>" + versionInfo.changes.map(c => "✓ " + c).join("<br>") : ""}
-        </div>
-
-        <button id="updateNow">
-            Actualizar
-        </button>
-    `;
+    const title = document.createElement("div");
+    title.className = "update-title";
+    const currentVersion = document.getElementById("versionTag")?.textContent.trim();
+    const latestRelease = versionInfo.releases[0];
+    const isNewRelease = latestRelease?.version && latestRelease.version !== currentVersion;
+    title.textContent = isNewRelease
+        ? `Nueva versión ${latestRelease.version}`
+        : "Actualización de Homescreen disponible";
+    const description = document.createElement("div");
+    description.className = "update-text";
+    description.textContent = "La actualización está descargada y lista para instalar.";
+    const highlights = getUpdateHighlights(versionInfo);
+    if (highlights.length) {
+        const list = document.createElement("ul");
+        list.className = "update-highlights";
+        highlights.forEach(highlight => {
+            const item = document.createElement("li");
+            item.textContent = highlight;
+            list.appendChild(item);
+        });
+        description.appendChild(list);
+    }
+    const actions = document.createElement("div");
+    actions.className = "update-banner-actions";
+    const updateButton = document.createElement("button");
+    updateButton.id = "updateNow";
+    updateButton.type = "button";
+    updateButton.textContent = "Actualizar ahora";
+    const changelogButton = document.createElement("button");
+    changelogButton.className = "update-secondary";
+    changelogButton.type = "button";
+    changelogButton.textContent = "Ver cambios";
+    changelogButton.addEventListener("click", () => {
+        document.getElementById("updateBanner")?.remove();
+        document.getElementById("showChangelogBtn")?.click();
+    });
+    actions.append(updateButton, changelogButton);
+    banner.append(title, description, actions);
 
     document.body.appendChild(banner);
 
@@ -66,11 +100,17 @@ async function showUpdateBanner(info = null) {
         banner.classList.add("show");
     });
 
-    document.getElementById("updateNow").onclick = () => {
-        if (newWorker) {
-            newWorker.postMessage("SKIP_WAITING");
+    updateButton.addEventListener("click", () => {
+        const waitingWorker = newWorker || currentRegistration?.waiting;
+        if (!waitingWorker) {
+            showHomescreenToast("La actualización ya no está disponible. Vuelve a comprobar.");
+            banner.remove();
+            return;
         }
-    };
+        updateButton.disabled = true;
+        updateButton.textContent = "Instalando…";
+        waitingWorker.postMessage("SKIP_WAITING");
+    });
 }
 
 function canUseServiceWorker() {
@@ -115,7 +155,7 @@ async function checkForUpdates(options = {}) {
     if (!canUseServiceWorker()) {
         if (showToast) {
             await new Promise(resolve => setTimeout(resolve, 700));
-            showHomescreenToast("✓ Ya tienes la última versión");
+            showHomescreenToast("No se pueden comprobar actualizaciones en este navegador.");
         }
         return { available: false, checked: false };
     }
@@ -125,7 +165,7 @@ async function checkForUpdates(options = {}) {
     if (!activeRegistration) {
         if (showToast) {
             await new Promise(resolve => setTimeout(resolve, 700));
-            showHomescreenToast("✓ Ya tienes la última versión");
+            showHomescreenToast("No se encontró el servicio de actualizaciones.");
         }
         return { available: false, checked: false };
     }
@@ -134,6 +174,10 @@ async function checkForUpdates(options = {}) {
         await activeRegistration.update();
     } catch (error) {
         console.warn("No se pudo comprobar la actualización:", error);
+        if (showToast) {
+            showHomescreenToast("No se pudo comprobar si hay actualizaciones. Revisa tu conexión.");
+        }
+        return { available: false, checked: false };
     }
 
     if (activeRegistration.waiting) {
@@ -158,6 +202,12 @@ window.getVersionInfo = getVersionInfo;
     if (!("serviceWorker" in navigator)) {
         return;
     }
+
+    navigator.serviceWorker.addEventListener("message", event => {
+        if (event.data === "RELOAD_AFTER_UPDATE") {
+            window.location.reload();
+        }
+    });
 
     ensureRegistration()
         .then(registration => {
@@ -188,9 +238,4 @@ window.getVersionInfo = getVersionInfo;
             console.warn("No se pudo inicializar el gestor de actualizaciones:", error);
         });
 
-    navigator.serviceWorker.addEventListener("controllerchange", () => {
-        if (isUpdating) {
-            window.location.reload();
-        }
-    });
 })();

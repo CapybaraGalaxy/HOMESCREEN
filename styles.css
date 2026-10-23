@@ -2,16 +2,31 @@
    1. VARIABLES GLOBALES Y CONFIGURACIÓN BASE
    ========================================== */
 :root {
+    /* ✏️ VALOR CLAVE: Color de fondo general de la aplicación */
     --bg: #121212; 
+
+    /* ✏️ VALOR CLAVE: Color del texto principal y secundario */
     --text-main: #ffffff;
     --text-muted: #888888;
+
+    /* ✏️ VALOR CLAVE: Transparencia del cristal (El último número '0.5' controla la opacidad) */
     --glass: rgba(15, 15, 15, 0.5);
     --glass-border: rgba(255, 255, 255, 0.1);
+
+    /* ✏️ VALOR CLAVE: Curva y velocidad de suavizado para animaciones */
     --bezier: cubic-bezier(0.16, 1, 0.3, 1);
+
+    /* ✏️ VALOR CLAVE PRINCIPAL: Intensidad del desenfoque Blur global (Aumenta o disminuye los 'px') */
     --blur-val: 30px; 
+
+    /* ✏️ VALOR CLAVE: Tipografía principal */
+    --font-main: 'Outfit', sans-serif;
 }
 
+/* Modo sin Blur (Se activa desde ajustes o cuando se deshabilita la opción) */
 body.no-blur { --blur-val: 0px; }
+
+/* Modo Máximo Rendimiento (Desactiva animaciones y convierte fondos a opacos) */
 body.super-performance {
     --blur-val: 0px;
     --bezier: linear;
@@ -43,12 +58,7 @@ body.super-performance .dock-container {
     box-shadow: none !important;
 }
 
-body.super-performance .tool-card:hover,
-body.super-performance .tool-card.keyboard-active,
-body.super-performance .tool-card:active {
-    transform: none !important;
-}
-
+/* Cuadro de sugerencia de rendimiento en Ajustes */
 .performance-suggestion {
     margin: 4px 0 14px;
     padding: 12px;
@@ -72,6 +82,7 @@ body.super-performance .tool-card:active {
 .performance-suggestion-actions { display: flex; flex-wrap: wrap; gap: 8px; }
 .performance-suggestion-actions .settings-action-btn { flex: 1 1 150px; font-size: 0.75rem; }
 
+/* Anulación de Blur en elementos clave cuando body.no-blur está activo */
 body.no-blur .overlay,
 body.no-blur .search-panel,
 body.no-blur .settings-panel,
@@ -80,6 +91,7 @@ body.no-blur .local-chip,
 body.no-blur .custom-modal,
 body.no-blur .dock-container {
     backdrop-filter: none !important;
+    -webkit-backdrop-filter: none !important;
     background: #111 !important;
 }
 
@@ -119,7 +131,7 @@ body.no-blur .tool-card.keyboard-active .star-btn.active {
 body {
     margin: 0;
     background-color: var(--bg);
-    font-family: 'Outfit', sans-serif;
+    font-family: var(--font-main);
     color: var(--text-main);
     min-height: 100vh;
     display: flex;
@@ -129,6 +141,7 @@ body {
     transition: background-color 0.4s var(--bezier);
 }
 
+/* Lienzo de partículas de fondo */
 #bgCanvas {
     position: fixed;
     top: 0; left: 0;
@@ -140,13 +153,17 @@ body {
 }
 body.bg-active #bgCanvas { opacity: 0.6; }
 
-
+/* Etiqueta de aviso versión local (Arriba a la izquierda) */
 .local-chip {
     position: fixed;
     top: 25px;
     left: 25px;
     background: var(--glass);
+
+    /* ✏️ VALOR CLAVE: Desenfoque del botón de versión local */
     backdrop-filter: blur(var(--blur-val));
+    -webkit-backdrop-filter: blur(var(--blur-val));
+
     border: 1px solid var(--glass-border);
     border-radius: 20px;
     padding: 10px 16px;
@@ -203,7 +220,7 @@ body.bg-active #bgCanvas { opacity: 0.6; }
     align-items: center;
 }
 
-/* ESTADO BATERÍA */
+/* Estado de la batería debajo del reloj */
 .battery-status {
     display: inline-flex;
     align-items: center;
@@ -220,6 +237,7 @@ body.bg-active #bgCanvas { opacity: 0.6; }
 .battery-status i { width: 16px; height: 16px; }
 body.zen-mode .battery-status { opacity: 0; pointer-events: none; }
 
+/* ✏️ VALOR CLAVE: Tamaño y estilo del reloj digital */
 .clock { 
     font-size: 6rem; 
     font-weight: 200; 
@@ -268,7 +286,10 @@ body.zen-mode .battery-status { opacity: 0; pointer-events: none; }
     text-align: center;
     margin-bottom: 25px;
     opacity: 0;
+
+    /* ✏️ VALOR CLAVE: Duración de la animación de entrada del mensaje */
     animation: welcomeEnter 0.9s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+
     will-change: transform, opacity;
     color: var(--text-main);
     letter-spacing: -0.5px;
@@ -322,6 +343,7 @@ body.no-blur .word.fade-out {
     filter: none;
 }
 
+/* ✏️ VALOR CLAVE: Animación de desenfoque de palabras individuales */
 @keyframes wordBlurIn {
     0% { opacity: 0; filter: blur(10px); transform: translateY(6px); }
     100% { opacity: 1; filter: blur(0); transform: translateY(0); }
@@ -347,6 +369,7 @@ body.zen-mode .welcome-message {
     pointer-events: none;
     transition: opacity 0.4s ease;
 }
+
 /* ==========================================
    3. CONTENEDORES Y TARJETAS DE APLICACIONES
    ========================================== */
@@ -431,6 +454,7 @@ body.zen-mode .welcome-message {
     overflow: hidden;
 }
 
+/* Modificadores dinámicos de tamaño para carpetas (escala de 1 a 5) */
 body.folder-size-1 .tools-container .tool-card { padding: 9px 17px; gap: 8px; font-size: 0.82rem; }
 body.folder-size-2 .tools-container .tool-card { padding: 10px 20px; gap: 10px; font-size: 0.88rem; }
 body.folder-size-4 .tools-container .tool-card { padding: 14px 28px; gap: 14px; font-size: 1rem; }
@@ -447,6 +471,7 @@ body.hide-folder-labels .tools-container .tool-card span { display: none; }
 body.hide-folder-labels .tools-container .tool-card { gap: 0; }
 body.hide-folder-labels .tools-container.list-mode .tool-card { justify-content: center; }
 
+/* ✏️ VALOR CLAVE: Tarjeta individual de aplicación / carpeta */
 .tool-card {
     display: flex;
     align-items: center;
@@ -454,12 +479,17 @@ body.hide-folder-labels .tools-container.list-mode .tool-card { justify-content:
     gap: 12px;
     padding: 12px 24px;
     background: var(--glass);
+
+    /* ✏️ VALOR CLAVE: Desenfoque de las tarjetas de aplicaciones */
     backdrop-filter: blur(var(--blur-val));
+    -webkit-backdrop-filter: blur(var(--blur-val));
+
     border: 1px solid var(--glass-border);
     border-radius: 50px;
     text-decoration: none;
     color: var(--text-main);
-    /* Mejorado con curva spring */
+
+    /* ✏️ VALOR CLAVE: Transición suave de animación física (Efecto Muelle / Spring) */
     transition: transform 0.4s cubic-bezier(0.34, 1.56, 0.64, 1), background 0.3s, border-color 0.3s, box-shadow 0.3s;
     animation: fadeInItem 0.6s var(--bezier) both;
     flex-shrink: 0; 
@@ -467,7 +497,7 @@ body.hide-folder-labels .tools-container.list-mode .tool-card { justify-content:
     position: relative;
 }
 
-/* Clase de selección para la navegación por teclado */
+/* Estado activo mediante teclado */
 .tool-card.keyboard-active {
     background: rgba(255,255,255,0.15);
     transform: translateY(-2px);
@@ -481,12 +511,12 @@ body.no-blur .tool-card.keyboard-active {
     border-color: rgba(255,255,255,0.45);
 }
 
-/* EFECTOS COHESIVOS EXCLUSIVOS PARA DISPOSITIVOS CON RATÓN (PC) */
+/* ✏️ VALOR CLAVE: Efecto al pasar el cursor (Hover) */
 @media (hover: hover) {
     .tool-card:hover { 
         background: #fff; 
         color: #000; 
-        transform: scale(1.05) translateY(-4px); 
+        transform: scale(1.05) translateY(-4px); /* Escala y elevación */
         box-shadow: 0 8px 20px rgba(255,255,255,0.2);
     }
     .tool-card:hover .star-btn {
@@ -500,7 +530,7 @@ body.no-blur .tool-card.keyboard-active {
     }
 }
 
-/* EFECTO DE TOQUE EN MÓVILES */
+/* Efecto al pulsar en pantalla táctil */
 .tool-card:active { 
     transform: scale(0.95); 
     background: rgba(255, 255, 255, 0.15); 
@@ -543,6 +573,7 @@ body.hide-app-stars .tool-card .star-btn { display: none !important; }
     color: #FFD60A !important;
 }
 
+/* Tarjeta de error si falla la sintaxis de JavaScript */
 .error-card {
     display: flex;
     flex-direction: column;
@@ -550,7 +581,11 @@ body.hide-app-stars .tool-card .star-btn { display: none !important; }
     gap: 10px;
     padding: 20px 30px;
     background: rgba(255, 59, 48, 0.15);
+
+    /* ✏️ VALOR CLAVE: Desenfoque de la tarjeta de error */
     backdrop-filter: blur(var(--blur-val));
+    -webkit-backdrop-filter: blur(var(--blur-val));
+
     border: 1px solid rgba(255, 59, 48, 0.3);
     border-radius: 20px;
     color: #ff453a;
@@ -575,22 +610,26 @@ body.hide-app-stars .tool-card .star-btn { display: none !important; }
     align-items: flex-end;
     gap: 12px;
     z-index: 100;
-    pointer-events: none; /* Deja pasar clicks al lienzo */
+    pointer-events: none;
     transition: bottom 0.5s var(--bezier);
 }
 .bottom-ui-wrapper > * { 
     pointer-events: auto; 
 }
 
-/* DOCK PÍLDORA INFERIOR */
+/* ✏️ VALOR CLAVE: Dock inferior de aplicaciones rápidas */
 .dock-container {
     position: fixed;
     left: 50%;
     bottom: 96px;
-    height: 48px; /* Iguala altura con panel de busqueda */
+    height: 48px;
     padding: 0 10px;
     background: var(--glass);
+
+    /* ✏️ VALOR CLAVE: Desenfoque del Dock */
     backdrop-filter: blur(var(--blur-val));
+    -webkit-backdrop-filter: blur(var(--blur-val));
+
     border: 1px solid var(--glass-border);
     border-radius: 24px;
     display: flex;
@@ -619,40 +658,43 @@ body.search-open .dock-container {
 .dock-container .tool-card span, 
 .dock-container .tool-card .star-btn { display: none; }
 
-
+/* ✏️ VALOR CLAVE: Panel desplegable de búsqueda */
 .search-panel {
     position: fixed;
     left: 50%;
     bottom: 40px;
     width: 160px; 
-    max-width: 160px; /* 1. Añadido para que la salida sea simétrica */
+    max-width: 160px;
     height: 48px;
     background: var(--glass);
+
+    /* ✏️ VALOR CLAVE: Desenfoque de la barra de búsqueda */
     backdrop-filter: blur(var(--blur-val));
+    -webkit-backdrop-filter: blur(var(--blur-val));
+
     border: 1px solid var(--glass-border);
     border-radius: 24px;
-    /* Simplificado: usa 'all' o agrupa mejor para evitar tirones */
     transition: all 0.5s var(--bezier); 
     overflow: hidden;
     display: flex; 
     flex-direction: column;
     box-shadow: 0 20px 50px rgba(0, 0, 0, 0.703);
-    transform: translateX(-50%) translateY(0); /* 2. Inicializado explícitamente */
+    transform: translateX(-50%) translateY(0);
     transform-origin: center bottom;
     will-change: width, height, bottom, transform;
 }
 
+/* ✏️ VALOR CLAVE: Dimensiones del buscador desplegado */
 .search-panel.expanded {
     bottom: 15vh;
     width: 90%; 
-    max-width: 500px; /* Ahora la transición entre 500px y 160px es fluida */
+    max-width: 500px;
     height: 400px;
     border-radius: 28px;
     z-index: 150;
     transform: translateX(-50%) translateY(0);
 }
 
-/* Evita que esta regla rompa el transform del panel durante el cierre */
 body.modal-open .search-panel { 
     opacity: 0;
     pointer-events: none;
@@ -674,9 +716,30 @@ body.modal-open .search-panel { transform: translateX(-50%) translateY(18px); }
 .results-area { padding: 10px; overflow-y: auto; opacity: 0; flex: 1; transition: opacity 0.3s; }
 .search-panel.expanded .results-area { opacity: 1; transition-delay: 0.2s; }
 
+/* ✏️ VALOR CLAVE: Botón flotante de Ajustes (Engranaje) */
+.settings-btn { 
+    position: fixed; 
+    bottom: 25px; 
+    right: 25px; 
+    background: var(--glass); 
 
-.settings-btn { position: fixed; bottom: 25px; right: 25px; background: var(--glass); border: 1px solid var(--glass-border); width: 45px; height: 45px; border-radius: 50%; display: flex; align-items: center; justify-content: center; cursor: pointer; z-index: 160; transition: all 0.4s var(--bezier); }
+    /* ✏️ VALOR CLAVE: Desenfoque del botón de Ajustes */
+    backdrop-filter: blur(var(--blur-val)); 
+    -webkit-backdrop-filter: blur(var(--blur-val));
 
+    border: 1px solid var(--glass-border); 
+    width: 45px; 
+    height: 45px; 
+    border-radius: 50%; 
+    display: flex; 
+    align-items: center; 
+    justify-content: center; 
+    cursor: pointer; 
+    z-index: 160; 
+    transition: all 0.4s var(--bezier); 
+}
+
+/* ✏️ VALOR CLAVE: Modal principal del Panel de Ajustes */
 .settings-panel { 
     position: fixed; 
     left: 50%;
@@ -688,8 +751,14 @@ body.modal-open .search-panel { transform: translateX(-50%) translateY(18px); }
     min-height: 320px;
     max-height: none;
     overflow: hidden;
-    background: linear-gradient(180deg, rgba(18, 18, 18, 0.96), rgba(12, 12, 14, 0.92));
+
+    /* ✏️ VALOR CLAVE: Fondo traslúcido para permitir el efecto blur tras de sí */
+    background: linear-gradient(180deg, rgba(18, 18, 18, 0.85), rgba(12, 12, 14, 0.80));
+
+    /* ✏️ VALOR CLAVE: Desenfoque del Panel de Ajustes */
     backdrop-filter: blur(var(--blur-val)); 
+    -webkit-backdrop-filter: blur(var(--blur-val));
+
     border: 1px solid rgba(255,255,255,0.1);
     border-radius: 24px; 
     padding: 16px;
@@ -705,7 +774,7 @@ body.modal-open .search-panel { transform: translateX(-50%) translateY(18px); }
     isolation: isolate;
 }
 body.super-performance .settings-panel {
-    transition-duration: 0.35s, 0.7s !important;
+    transition: none !important;
 }
 .settings-panel::before {
     content: "";
@@ -829,7 +898,7 @@ body.super-performance .settings-panel {
     touch-action: manipulation;
     display: flex;
     align-items: center;
-    gap: 8px; /* Controla la separación horizontal entre el ícono y el texto */
+    gap: 8px;
 }
 .settings-tab:hover { background: rgba(255,255,255,0.05); color: var(--text-main); }
 .settings-tab.active {
@@ -928,7 +997,7 @@ body.super-performance .settings-panel {
     padding: 10px 12px;
     cursor: pointer;
     transition: transform 0.2s ease, background 0.2s ease, border-color 0.2s ease;
-        font-family: 'Outfit', sans-serif;
+    font-family: 'Outfit', sans-serif;
 }
 .quick-access:hover {
     background: rgba(255,255,255,0.07);
@@ -957,6 +1026,15 @@ body.super-performance .settings-panel {
     transition: background 0.25s ease, border-color 0.25s ease, transform 0.25s ease;
 }
 .setting-item-row:hover { background: rgba(255, 255, 255, 0.05); border-color: rgba(255,255,255,0.08); }
+.welcome-animation-hint .settings-action-btn { flex: 0 0 auto; }
+.setting-item-row.setting-highlight { animation: setting-highlight 1.8s ease-out; }
+@keyframes setting-highlight {
+    0%, 25% { background: rgba(255,214,10,0.2); border-color: rgba(255,214,10,0.8); box-shadow: 0 0 0 3px rgba(255,214,10,0.15); }
+    100% { background: rgba(255,255,255,0.02); border-color: rgba(255,255,255,0.04); box-shadow: none; }
+}
+.settings-select-group { display: flex; gap: 8px; flex-wrap: wrap; justify-content: flex-end; }
+.preference-dropdown { width: 150px; }
+.setting-item-row .preference-dropdown { flex: 0 0 auto; }
 .setting-item-meta {
     display: flex;
     align-items: center;
@@ -1031,7 +1109,6 @@ body.super-performance .settings-panel {
   border-radius: 999px;
 }
 
-/* Opcional: para que simulen pastillas de distinta longitud como en la imagen */
 .preview-pill span:nth-child(1) { width: 70%; }
 .preview-pill span:nth-child(2) { width: 80%; }
 .preview-pill span:nth-child(3) { width: 30%; }
@@ -1055,7 +1132,11 @@ body.super-performance .settings-panel {
     font-size: 0.85rem;
     cursor: pointer;
     transition: all 0.25s var(--bezier);
+
+    /* ✏️ VALOR CLAVE: Desenfoque de los botones de acción */
     backdrop-filter: blur(var(--blur-val));
+    -webkit-backdrop-filter: blur(var(--blur-val));
+
     white-space: nowrap;
     display: inline-flex;
     align-items: center;
@@ -1065,17 +1146,21 @@ body.super-performance .settings-panel {
 .settings-action-btn:hover { background: rgba(255,255,255,0.12); transform: translateY(-1px); }
 .settings-action-btn:disabled { opacity: 0.6; cursor: wait; }
 .settings-action-btn .spinner { display: inline-flex; animation: spin 0.9s linear infinite; }
+
 .settings-action-menu {
     position: absolute;
     min-width: 180px;
-    background: rgba(18, 18, 18, 0.96);
+    background: rgba(18, 18, 18, 0.85);
     border: 1px solid var(--glass-border);
     border-radius: 16px;
     box-shadow: 0 18px 35px rgba(0,0,0,0.35);
     padding: 8px;
     display: none;
     z-index: 240;
+
+    /* ✏️ VALOR CLAVE: Desenfoque de menús contextuales en Ajustes */
     backdrop-filter: blur(var(--blur-val));
+    -webkit-backdrop-filter: blur(var(--blur-val));
 }
 .settings-action-menu.show {
     display: block;
@@ -1142,6 +1227,7 @@ body.super-performance .settings-panel {
 #homescreenToast i, #homescreenToast svg { width: 16px; height: 16px; }
 #homescreenToast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
 
+/* Switch (Interruptor tipo iOS/Android) */
 .switch { width: 42px; height: 24px; background: rgba(255,255,255,0.12); border: 1px solid rgba(255,255,255,0.08); border-radius: 999px; position: relative; cursor: pointer; transition: all 0.32s cubic-bezier(0.22, 1, 0.36, 1); flex-shrink: 0; box-shadow: inset 0 1px 2px rgba(0,0,0,0.28); }
 .switch::before {
     content: "";
@@ -1153,28 +1239,50 @@ body.super-performance .settings-panel {
     transition: opacity 0.28s ease;
 }
 .switch::after { content:''; position:absolute; width:18px; height:18px; background: linear-gradient(180deg, #ffffff, #dfe7f2); border-radius: 50%; top:2px; left:2px; box-shadow: 0 2px 6px rgba(0,0,0,0.35), 0 0 0 2px rgba(255,255,255,0.08); transition: transform 0.32s cubic-bezier(0.22, 1, 0.36, 1), box-shadow 0.32s ease, background 0.32s ease; }
+
+/* ✏️ VALOR CLAVE: Color verde del interruptor al activarse */
 .switch.on { background: linear-gradient(135deg, #34c759, #5ad76d); border-color: rgba(90,215,109,0.8); }
 .switch.on::before { opacity: 1; }
 .switch.on::after { transform: translateX(18px); box-shadow: 0 2px 8px rgba(0,0,0,0.35), 0 0 0 2px rgba(255,255,255,0.14); }
 
-/* ANIMACIONES */
+/* ANIMACIONES GLOBALES */
 @keyframes fadeInItem { from { opacity: 0; transform: translateY(15px); } to { opacity: 1; transform: translateY(0); } }
 @keyframes slideUp { from { opacity: 0; transform: translateY(30px); } to { opacity: 1; transform: translateY(0); } }
 @keyframes clockScale { 0% { transform: scale(0.9); opacity: 0; } 100% { transform: scale(1); opacity: 1; } }
 
 /* ==========================================
-   MODALES Y OVERLAY
+   MODALES Y OVERLAY (VENTANAS EMERGENTES)
    ========================================== */
-.overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.4); opacity: 0; pointer-events: none; transition: opacity 0.4s var(--bezier); z-index: 90; }
+/* ✏️ VALOR CLAVE: Capa oscura de fondo al abrir carpetas o modales */
+.overlay { 
+    position: fixed; 
+    top: 0; left: 0; 
+    width: 100%; height: 100%; 
+    background: rgba(0,0,0,0.4); 
+
+    /* ✏️ VALOR CLAVE: Desenfoque Blur aplicado al fondo completo tras la ventana emergente */
+    backdrop-filter: blur(15px); 
+    -webkit-backdrop-filter: blur(15px);
+
+    opacity: 0; 
+    pointer-events: none; 
+    transition: opacity 0.4s var(--bezier); 
+    z-index: 90; 
+}
 .overlay.active { opacity: 1; pointer-events: auto; }
 
+/* ✏️ VALOR CLAVE: Ventana modal de carpetas */
 .custom-modal {
     position: fixed;
     top: 50%; left: 50%;
     transform: translate(-50%, -40%);
     width: 90%; max-width: 400px;
     background: rgba(18, 18, 18, 0.85);
+
+    /* ✏️ VALOR CLAVE: Desenfoque de las ventanas emergentes / carpetas */
     backdrop-filter: blur(var(--blur-val));
+    -webkit-backdrop-filter: blur(var(--blur-val));
+
     border: 1px solid var(--glass-border);
     border-radius: 24px;
     padding: 24px;
@@ -1208,8 +1316,139 @@ body.folder-modal-size-2 #folderModal, body.folder-modal-size-2 #hiddenFolderMod
 body.folder-modal-size-3 #folderModal, body.folder-modal-size-3 #hiddenFolderModal { max-width: 560px; }
 body.folder-modal-size-4 #folderModal, body.folder-modal-size-4 #hiddenFolderModal { max-width: 680px; }
 body.folder-modal-size-5 #folderModal, body.folder-modal-size-5 #hiddenFolderModal { max-width: 800px; }
-#changelogModal { width: min(94vw, 900px); max-width: 900px; max-height: 90vh; }
-#changelogContent { flex: 1; min-height: 0; max-height: none !important; overflow-y: auto; }
+#changelogModal { width: min(96vw, 1180px); max-width: 1180px; height: min(86vh, 820px); max-height: 90vh; }
+#changelogModal > .modal-title { flex: 0 0 auto; }
+#changelogContent { flex: 1; min-height: 0; max-height: none !important; overflow: hidden; margin-bottom: 16px; }
+.changelog-browser {
+    display: grid;
+    grid-template-columns: minmax(220px, 280px) minmax(0, 1fr);
+    border: 1px solid var(--glass-border);
+    border-radius: 18px;
+    background: rgba(0, 0, 0, 0.18);
+}
+.changelog-sidebar {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    min-height: 0;
+    padding: 14px;
+    border-right: 1px solid var(--glass-border);
+}
+.changelog-search {
+    display: flex;
+    align-items: center;
+    gap: 9px;
+    flex: 0 0 auto;
+    padding: 10px 12px;
+    border: 1px solid var(--glass-border);
+    border-radius: 12px;
+    background: rgba(255, 255, 255, 0.045);
+    color: var(--text-muted);
+}
+.changelog-search svg { width: 16px; height: 16px; flex: 0 0 auto; }
+.changelog-search input {
+    width: 100%;
+    min-width: 0;
+    border: 0;
+    outline: 0;
+    background: transparent;
+    color: var(--text-main);
+    font: inherit;
+    font-size: 0.82rem;
+}
+.changelog-search input::placeholder { color: var(--text-muted); }
+.changelog-release-list,
+.changelog-main {
+    min-height: 0;
+    overflow-y: auto;
+    scrollbar-width: thin;
+    scrollbar-color: rgba(255, 255, 255, 0.24) transparent;
+}
+.changelog-release-list::-webkit-scrollbar,
+.changelog-main::-webkit-scrollbar { width: 8px; }
+.changelog-release-list::-webkit-scrollbar-thumb,
+.changelog-main::-webkit-scrollbar-thumb {
+    border: 2px solid transparent;
+    border-radius: 99px;
+    background: rgba(255, 255, 255, 0.24);
+    background-clip: padding-box;
+}
+.changelog-release-list { display: flex; flex-direction: column; gap: 6px; padding-right: 4px; }
+.changelog-release-link {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+    width: 100%;
+    padding: 11px 12px;
+    border: 1px solid transparent;
+    border-radius: 12px;
+    background: transparent;
+    color: var(--text-muted);
+    text-align: left;
+    cursor: pointer;
+    transition: background 0.2s ease, border-color 0.2s ease, color 0.2s ease;
+}
+.changelog-release-link strong { color: var(--text-main); font-size: 0.86rem; font-weight: 600; }
+.changelog-release-link span { font-size: 0.72rem; }
+.changelog-release-link:hover { background: rgba(255, 255, 255, 0.055); color: var(--text-main); }
+.changelog-release-link.is-selected {
+    border-color: rgba(255, 214, 10, 0.28);
+    background: rgba(255, 214, 10, 0.09);
+    color: var(--text-main);
+}
+.changelog-main { padding: 18px 22px 28px; }
+.changelog-breadcrumbs {
+    display: flex;
+    align-items: center;
+    gap: 7px;
+    min-height: 24px;
+    margin-bottom: 14px;
+    color: var(--text-muted);
+    font-size: 0.78rem;
+}
+.changelog-breadcrumbs button {
+    padding: 2px 5px;
+    border: 0;
+    border-radius: 6px;
+    background: transparent;
+    color: inherit;
+    font: inherit;
+    cursor: pointer;
+}
+.changelog-breadcrumbs button:hover { background: rgba(255,255,255,0.08); color: var(--text-main); }
+.changelog-breadcrumb-separator { opacity: 0.5; }
+.changelog-release-detail { max-width: 760px; margin: 0 auto; }
+.changelog-release-heading { padding: 0 0 18px; border-bottom: 1px solid var(--glass-border); }
+.changelog-release-heading h2 { margin: 0 0 7px; color: var(--text-main); font-size: clamp(1.35rem, 2.5vw, 1.8rem); font-weight: 600; }
+.changelog-release-heading p { margin: 0; color: var(--text-muted); font-size: 0.8rem; }
+.changelog-hero { margin: 0 0 18px; overflow: hidden; border: 1px solid var(--glass-border); border-radius: 14px; background: rgba(255,255,255,0.04); }
+.changelog-hero img { display: block; width: 100%; max-height: 260px; object-fit: cover; }
+.changelog-section { padding: 18px 0 2px; }
+.changelog-section + .changelog-section { border-top: 1px solid rgba(255,255,255,0.06); }
+.changelog-section h3 { margin: 0 0 12px; color: var(--text-main); font-size: 0.98rem; font-weight: 600; }
+.changelog-markdown { color: var(--text-muted); font-size: 0.86rem; line-height: 1.65; overflow-wrap: anywhere; }
+.changelog-markdown p { margin: 0 0 10px; }
+.changelog-markdown h3,
+.changelog-markdown h4,
+.changelog-markdown h5,
+.changelog-markdown h6 { margin: 14px 0 7px; color: var(--text-main); font-size: 0.9rem; }
+.changelog-markdown ul,
+.changelog-markdown ol { display: grid; gap: 6px; margin: 8px 0 14px; padding-left: 22px; }
+.changelog-markdown li { padding-left: 2px; }
+.changelog-markdown a { color: #8ab4f8; text-decoration: underline; text-underline-offset: 2px; }
+.changelog-markdown code { padding: 2px 5px; border: 1px solid var(--glass-border); border-radius: 5px; background: rgba(255,255,255,0.06); color: var(--text-main); font-family: 'JetBrains Mono', monospace; font-size: 0.8em; }
+.changelog-markdown pre { overflow-x: auto; margin: 10px 0; padding: 12px; border: 1px solid var(--glass-border); border-radius: 10px; background: rgba(0,0,0,0.28); }
+.changelog-markdown pre code { padding: 0; border: 0; background: transparent; }
+.changelog-markdown blockquote { margin: 10px 0; padding: 4px 12px; border-left: 2px solid rgba(255,214,10,0.6); color: var(--text-muted); }
+.changelog-empty-state { padding: 40px 12px; color: var(--text-muted); text-align: center; }
+@media (max-width: 680px) {
+    #changelogModal { width: 96vw; height: min(88dvh, 800px); padding: 17px; }
+    .changelog-browser { grid-template-columns: minmax(0, 1fr); grid-template-rows: auto minmax(0, 1fr); }
+    .changelog-sidebar { gap: 8px; padding: 10px; border-right: 0; border-bottom: 1px solid var(--glass-border); }
+    .changelog-release-list { flex-direction: row; overflow-x: auto; overflow-y: hidden; padding: 0 0 4px; }
+    .changelog-release-link { flex: 0 0 auto; width: auto; min-width: 108px; padding: 8px 10px; }
+    .changelog-main { padding: 12px 14px 22px; }
+}
 
 .welcome-modal { max-width: 430px; padding: 22px; }
 .welcome-modal .modal-title { position: relative; padding-right: 28px; font-size: 1.15rem; }
@@ -1256,6 +1495,8 @@ body.folder-modal-size-5 #folderModal, body.folder-modal-size-5 #hiddenFolderMod
 .modal-btn { padding: 10px 18px; border-radius: 999px; font-family: 'Outfit'; font-size: 0.9rem; cursor: pointer; transition: all 0.25s var(--bezier); border: none; font-weight: 500; }
 .modal-btn.secondary { background: rgba(255,255,255,0.08); color: var(--text-main); }
 .modal-btn.secondary:hover { background: rgba(255,255,255,0.15); }
+
+/* ✏️ VALOR CLAVE: Color del botón de acción primario (Rojo/Aviso) */
 .modal-btn.primary { background: #FF453A; color: #fff; }
 .modal-btn.primary:hover { background: #ff5e55; }
 .modal-btn:disabled { opacity: 0.5; cursor: not-allowed; }
@@ -1266,13 +1507,18 @@ body.folder-modal-size-5 #folderModal, body.folder-modal-size-5 #hiddenFolderMod
     .privacy-corner-notice { right: 14px; bottom: 14px; width: calc(100% - 28px); }
 }
 
+/* ✏️ VALOR CLAVE: Botón circular para salir de Modo Zen */
 .exit-zen-btn {
     position: fixed;
     bottom: 30px;
     left: 50%;
     transform: translateX(-50%) translateY(20px);
     background: rgba(255, 255, 255, 0.1);
+
+    /* ✏️ VALOR CLAVE: Desenfoque del botón de salida Zen */
     backdrop-filter: blur(var(--blur-val));
+    -webkit-backdrop-filter: blur(var(--blur-val));
+
     border: 1px solid var(--glass-border);
     border-radius: 50%;
     width: 50px;
@@ -1289,7 +1535,7 @@ body.folder-modal-size-5 #folderModal, body.folder-modal-size-5 #hiddenFolderMod
 .exit-zen-btn:hover { background: rgba(255, 255, 255, 0.2); transform: translateX(-50%) scale(1.1); }
 body.zen-mode .exit-zen-btn { opacity: 1; pointer-events: auto; transform: translateX(-50%) translateY(0); }
 
-/* MODO ZEN */
+/* MODO ZEN (Oculta la interfaz innecesaria) */
 body.zen-mode .bottom-ui-wrapper,
 body.zen-mode .scroll-wrapper,
 body.zen-mode .settings-btn,
@@ -1301,12 +1547,21 @@ body.zen-mode .version-tag {
 body.zen-mode .header { transform: translateY(30vh); }
 body.zen-mode #bgCanvas { opacity: 0 !important; }
 
-/* ACTUALIZADOR UI */
-.update-banner { position: fixed; top: 16px; left: 50%; transform: translateX(-50%); z-index: 9999; box-sizing: border-box; width: min(90vw, 420px); padding: 12px 20px; background: rgba(30, 30, 30, 0.95); border: 1px solid rgba(52, 199, 89, 0.3); border-radius: 12px; box-shadow: 0 4px 20px rgba(0, 0, 0, 0.25); color: #fff; text-align: center; display: flex; flex-direction: column; align-items: center; gap: 8px; opacity: 0; pointer-events: none; transition: opacity 0.3s ease, transform 0.5s cubic-bezier(0.16, 1, 0.3, 1); }
+/* Banner del gestor de actualizaciones */
+.update-banner { position: fixed; top: 16px; left: 50%; transform: translate(-50%, -10px); z-index: 9999; box-sizing: border-box; width: min(92vw, 460px); max-height: min(80vh, 620px); overflow-y: auto; padding: 16px 18px; background: rgba(25, 25, 25, 0.97); border: 1px solid rgba(52, 199, 89, 0.3); border-radius: 16px; box-shadow: 0 12px 36px rgba(0, 0, 0, 0.38); color: #fff; text-align: left; display: flex; flex-direction: column; align-items: stretch; gap: 9px; opacity: 0; pointer-events: none; transition: opacity 0.3s ease, transform 0.5s cubic-bezier(0.16, 1, 0.3, 1); }
 .update-banner.show { opacity: 1; pointer-events: auto; }
-.update-title { font-weight: bold; line-height: 1.2; color: #34C759; }
-.update-text { font-size: 0.9em; opacity: 0.8; margin-bottom: 8px; }
-#updateNow { background: #34C759; color: #000; border: none; padding: 8px 20px; border-radius: 20px; font-family: 'Outfit'; font-weight: 500; cursor: pointer; transition: transform 0.2s; }
+.update-title { font-weight: 600; line-height: 1.3; color: #34C759; }
+.update-text { color: var(--text-muted); font-size: 0.84rem; line-height: 1.45; }
+.update-highlights { display: grid; gap: 5px; margin: 10px 0 0; padding-left: 19px; text-align: left; color: var(--text-main); }
+.update-highlights li { display: -webkit-box; overflow: hidden; -webkit-box-orient: vertical; -webkit-line-clamp: 2; }
+.update-banner-actions { display: flex; flex-wrap: wrap; justify-content: flex-end; gap: 8px; margin-top: 3px; }
+#updateNow,
+.update-secondary { border: 0; padding: 9px 16px; border-radius: 20px; font-family: 'Outfit'; font-size: 0.82rem; font-weight: 500; cursor: pointer; transition: transform 0.2s, opacity 0.2s; }
+#updateNow { background: #34C759; color: #000; }
+.update-secondary { background: rgba(255,255,255,0.09); color: var(--text-main); }
+#updateNow:hover,
+.update-secondary:hover { transform: scale(1.04); }
+#updateNow:disabled { cursor: wait; opacity: 0.65; transform: none; }
 #updateNow:hover { transform: scale(1.05); }
 
 /* ==========================================
@@ -1317,13 +1572,19 @@ body.zen-mode #bgCanvas { opacity: 0 !important; }
 .dropdown-select:hover { background: rgba(255,255,255,0.1); border-color: rgba(255,255,255,0.12); }
 .dropdown-select i { width: 14px; height: 14px; opacity: 0.7; transition: transform 0.3s; }
 .custom-dropdown.active .dropdown-select i { transform: rotate(180deg); }
+
+/* ✏️ VALOR CLAVE: Desplegable con desenfoqueBlur de opciones */
 .dropdown-options {
     position: absolute;
     top: calc(100% + 6px);
     left: 0;
     width: 100%;
-    background: rgba(30,30,30,0.96);
+    background: rgba(30,30,30,0.85);
+
+    /* ✏️ VALOR CLAVE: Desenfoque del menú desplegable */
     backdrop-filter: blur(20px);
+    -webkit-backdrop-filter: blur(20px);
+
     border: 1px solid rgba(255,255,255,0.08);
     border-radius: 12px;
     overflow: hidden;
@@ -1349,7 +1610,7 @@ body.zen-mode #bgCanvas { opacity: 0 !important; }
 .search-exit { max-height: 0; opacity: 0; transform: translateY(-8px); margin-top: 0; margin-bottom: 0; padding-top: 0; padding-bottom: 0; pointer-events: none; visibility: hidden; }
 .web-search-item { margin-top: 10px; }
 
-/* MEDIA QUERIES */
+/* MEDIA QUERIES (REGLAS RESPONSIVAS PARA MÓVILES Y PANTALLAS PEQUEÑAS) */
 @media (max-width: 720px) {
     .settings-panel {
         width: min(94vw, 760px);
@@ -1415,6 +1676,8 @@ body.zen-mode #bgCanvas { opacity: 0 !important; }
     0% { opacity: 1; transform: translateY(0); }
     100% { opacity: 0; transform: translateY(-4px); }
 }
+
+/* ✏️ VALOR CLAVE: Estilo para los controles deslizantes (Sliders de Ajustes) */
 .settings-range-control {
     display: flex;
     align-items: center;
@@ -1478,23 +1741,24 @@ body.zen-mode #bgCanvas { opacity: 0 !important; }
 .app-visibility-toggle, .app-edit-btn, .app-remove-btn { border: 1px solid var(--glass-border); background: rgba(255,255,255,0.07); color: var(--text-main); border-radius: 10px; min-height: 30px; padding: 6px 10px; font: inherit; font-size: 0.72rem; cursor: pointer; transition: background 0.2s ease, border-color 0.2s ease, transform 0.2s var(--bezier); }
 .app-edit-btn, .app-remove-btn { width: 30px; padding: 0; display: inline-flex; align-items: center; justify-content: center; }
 .app-edit-btn svg, .app-remove-btn svg { width: 14px; height: 14px; }
+
 .btn-select-icon {
     width: 100%;
     min-height: 36px;
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  gap: 8px;
-  padding: 10px 16px;
-  background-color: #2b2d31;
-  color: #dbdee1;
-  border: 1px solid #3f4147;
-  border-radius: 8px;
-  font-family: inherit;
-  font-size: 14px;
-  font-weight: 500;
-  cursor: pointer;
-  transition: background-color 0.2s ease, border-color 0.2s ease;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    padding: 10px 16px;
+    background-color: #2b2d31;
+    color: #dbdee1;
+    border: 1px solid #3f4147;
+    border-radius: 8px;
+    font-family: inherit;
+    font-size: 14px;
+    font-weight: 500;
+    cursor: pointer;
+    transition: background-color 0.2s ease, border-color 0.2s ease;
 }
 
 .btn-select-icon span {
@@ -1505,18 +1769,18 @@ body.zen-mode #bgCanvas { opacity: 0 !important; }
 }
 
 .btn-select-icon:hover {
-  background-color: #35373c;
-  border-color: #4e5058;
+    background-color: #35373c;
+    border-color: #4e5058;
 }
 
 .btn-select-icon:active {
-  background-color: #1e1f22;
+    background-color: #1e1f22;
 }
 
 .btn-select-icon .btn-icon {
-  width: 18px;
-  height: 18px;
-  flex-shrink: 0;
+    width: 18px;
+    height: 18px;
+    flex-shrink: 0;
 }
 .app-visibility-toggle:hover, .app-edit-btn:hover, .app-remove-btn:hover { background: rgba(255,255,255,0.14); border-color: rgba(255,255,255,0.2); transform: translateY(-1px); }
 .apps-toolbar { display: flex; gap: 8px; align-items: center; margin-bottom: 4px; }
@@ -1550,6 +1814,7 @@ body.zen-mode #bgCanvas { opacity: 0 !important; }
 .custom-app-row span { flex: 1; font-size: 0.82rem; }
 .app-remove-btn { width: 30px; height: 30px; padding: 0; display: inline-flex; align-items: center; justify-content: center; }
 
+/* Escalas dinámicas de los elementos dentro de carpetas */
 body.folder-apps-size-1 #folderApps .tool-card { padding: 10px 16px; font-size: 0.78rem; }
 body.folder-apps-size-2 #folderApps .tool-card { padding: 12px 18px; font-size: 0.84rem; }
 body.folder-apps-size-4 #folderApps .tool-card { padding: 16px 22px; font-size: 0.98rem; }
@@ -1559,7 +1824,7 @@ body.folder-apps-size-2 #folderApps .tool-card i, body.folder-apps-size-2 #folde
 body.folder-apps-size-4 #folderApps .tool-card i, body.folder-apps-size-4 #folderApps .tool-card svg { width: 22px !important; height: 22px !important; }
 body.folder-apps-size-5 #folderApps .tool-card i, body.folder-apps-size-5 #folderApps .tool-card svg { width: 25px !important; height: 25px !important; }
 
-/* Selección personalizada */
+/* ✏️ VALOR CLAVE: Resaltado y selección personalizada de texto */
 *::selection {
   background: #FFFFFF;
   color: #000000;
@@ -1572,3 +1837,20 @@ body.folder-apps-size-5 #folderApps .tool-card i, body.folder-apps-size-5 #folde
   background: #FFFFFF;
   color: #000000;
 }
+
+/* Estilos para las variantes de reloj analógico */
+.analog-clock { display: none; width: min(78vw, 520px); height: auto; overflow: visible; }
+.clock-face { fill: rgba(255,255,255,0.04); stroke: currentColor; stroke-width: 1.5; }
+.analog-clock circle:last-child { fill: currentColor; }
+.clock-hand { stroke: currentColor; stroke-linecap: round; }
+.hour-hand { stroke-width: 4; }
+.minute-hand { stroke-width: 2.5; }
+
+/* ✏️ VALOR CLAVE: Color del segundero en el reloj analógico */
+.second-hand { stroke: #515151; stroke-width: 1.2; }
+
+.clock-analog-wide .analog-clock,
+.clock-analog-hands .analog-clock { display: block; }
+.clock-analog-hands .clock-face { display: none; }
+.clock-analog-hands #digitalClock { display: none; }
+.clock-analog-wide #digitalClock { display: none; }

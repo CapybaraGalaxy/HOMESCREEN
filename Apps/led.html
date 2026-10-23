@@ -1,0 +1,1836 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+    <title>Marquesina LED</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Bungee&family=Cinzel:wght@700&family=JetBrains+Mono:wght@700&family=Monoton&family=Outfit:wght@300;400;500;600;700;800&family=Pacifico&family=Press+Start+2P&family=Rubik+Glitch&family=Share+Tech+Mono&family=Silkscreen:wght@700&family=VT323&display=swap" rel="stylesheet">
+    <script src="../lucide.min.js"></script>
+    <style>
+        :root {
+            --bg: #000000;
+            --surface: #121215;
+            --surface-hover: #1c1c22;
+            --glass: rgba(18, 18, 22, 0.75);
+            --glass-border: rgba(255, 255, 255, 0.08);
+            --glass-border-focus: rgba(255, 255, 255, 0.22);
+            --text-main: #FFFFFF;
+            --text-muted: #8E8E93;
+            --accent-danger: #FF453A;
+            --accent-success: #34C759;
+            --accent-primary: #0A84FF;
+            --bezier: cubic-bezier(0.16, 1, 0.3, 1);
+            --spring: cubic-bezier(0.34, 1.56, 0.64, 1);
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            -webkit-tap-highlight-color: transparent;
+            user-select: none;
+        }
+
+        body {
+            background-color: var(--bg);
+            color: var(--text-main);
+            font-family: 'Outfit', -apple-system, BlinkMacSystemFont, sans-serif;
+            overflow: hidden;
+            height: 100dvh;
+            width: 100vw;
+        }
+
+        .app-container {
+            display: flex;
+            flex-direction: column;
+            height: 100dvh;
+            max-width: 920px;
+            margin: 0 auto;
+            padding: env(safe-area-inset-top) 16px calc(env(safe-area-inset-bottom) + 16px) 16px;
+            gap: 12px;
+            transition: opacity 0.3s var(--bezier);
+        }
+
+        .app-container.backgrounded {
+            opacity: 0.4;
+            pointer-events: none;
+        }
+
+        header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 4px 0;
+            flex-shrink: 0;
+        }
+
+        .header-title {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .app-icon-badge {
+            width: 38px;
+            height: 38px;
+            border-radius: 12px;
+            background: radial-gradient(circle at 30% 30%, rgba(255,255,255,0.15), rgba(255,255,255,0.03));
+            border: 1px solid var(--glass-border);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.5);
+        }
+
+        h1 {
+            font-size: 1.15rem;
+            font-weight: 700;
+            letter-spacing: -0.01em;
+            background: linear-gradient(180deg, #FFFFFF 0%, #A1A1AA 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .live-status {
+            font-size: 0.72rem;
+            color: var(--text-muted);
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            margin-top: 2px;
+            font-variant-numeric: tabular-nums;
+        }
+
+        .status-dot {
+            width: 6px;
+            height: 6px;
+            border-radius: 50%;
+            background-color: var(--accent-success);
+            box-shadow: 0 0 8px var(--accent-success);
+        }
+
+        .viewport-wrapper {
+            position: relative;
+            width: 100%;
+            flex: 1;
+            min-height: 180px;
+            max-height: 36vh;
+            background-color: #000000;
+            border-radius: 18px;
+            border: 1px solid var(--glass-border);
+            overflow: hidden;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            flex-shrink: 0;
+            box-shadow: inset 0 0 20px rgba(0,0,0,0.8), 0 8px 32px rgba(0,0,0,0.4);
+        }
+
+        canvas#ledCanvas {
+            width: 100%;
+            height: 100%;
+            display: block;
+        }
+
+        .crt-overlay {
+            position: absolute;
+            inset: 0;
+            background: linear-gradient(rgba(18, 16, 16, 0) 50%, rgba(0, 0, 0, 0.4) 50%);
+            background-size: 100% 4px;
+            pointer-events: none;
+            opacity: 0;
+            transition: opacity 0.3s ease;
+            z-index: 2;
+        }
+
+        .crt-overlay.active {
+            opacity: 1;
+        }
+
+        .viewport-actions {
+            position: absolute;
+            top: 12px;
+            right: 12px;
+            display: flex;
+            gap: 8px;
+            z-index: 4;
+        }
+
+        .icon-btn {
+            background: var(--glass);
+            backdrop-filter: blur(16px);
+            -webkit-backdrop-filter: blur(16px);
+            border: 1px solid var(--glass-border);
+            color: var(--text-main);
+            width: 36px;
+            height: 36px;
+            border-radius: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            transition: transform 0.15s var(--spring), background-color 0.2s ease, border-color 0.2s ease;
+        }
+
+        .icon-btn:hover {
+            border-color: var(--glass-border-focus);
+            background: rgba(255, 255, 255, 0.15);
+        }
+
+        .icon-btn:active {
+            transform: scale(0.92);
+        }
+
+        .icon-btn.active {
+            background: var(--text-main);
+            color: var(--bg);
+            border-color: var(--text-main);
+            box-shadow: 0 0 12px rgba(255,255,255,0.3);
+        }
+
+        .folders-scroll-area {
+            display: flex;
+            gap: 8px;
+            overflow-x: auto;
+            padding: 2px 0;
+            scrollbar-width: none;
+            -webkit-overflow-scrolling: touch;
+            flex-shrink: 0;
+        }
+
+        .folders-scroll-area::-webkit-scrollbar { display: none; }
+
+        .nav-pill {
+            background: var(--surface);
+            border: 1px solid var(--glass-border);
+            color: var(--text-muted);
+            padding: 8px 16px;
+            border-radius: 100px;
+            font-size: 0.82rem;
+            font-weight: 600;
+            white-space: nowrap;
+            cursor: pointer;
+            transition: all 0.2s var(--bezier);
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .nav-pill:hover {
+            color: var(--text-main);
+            border-color: var(--glass-border-focus);
+        }
+
+        .nav-pill.active {
+            background: var(--text-main);
+            color: var(--bg);
+            border-color: var(--text-main);
+            box-shadow: 0 2px 10px rgba(255,255,255,0.2);
+        }
+
+        .main-content {
+            flex: 1;
+            overflow-y: auto;
+            scrollbar-width: none;
+            position: relative;
+            padding-bottom: 8px;
+        }
+
+        .main-content::-webkit-scrollbar { display: none; }
+
+        .tab-panel {
+            display: none;
+            flex-direction: column;
+            gap: 12px;
+            animation: fadeIn 0.25s var(--bezier) forwards;
+        }
+
+        .tab-panel.active {
+            display: flex;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(6px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .control-card {
+            background: var(--surface);
+            border: 1px solid var(--glass-border);
+            border-radius: 14px;
+            padding: 14px 16px;
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+        }
+
+        .control-row {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 12px;
+        }
+
+        .control-label {
+            font-size: 0.85rem;
+            font-weight: 600;
+            color: var(--text-main);
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .styled-input {
+            width: 100%;
+            background: rgba(0, 0, 0, 0.5);
+            border: 1px solid var(--glass-border);
+            border-radius: 10px;
+            padding: 11px 14px;
+            color: var(--text-main);
+            font-family: inherit;
+            font-size: 0.92rem;
+            outline: none;
+            transition: border-color 0.2s ease, box-shadow 0.2s ease;
+        }
+
+        .styled-input:focus {
+            border-color: var(--glass-border-focus);
+            box-shadow: 0 0 0 2px rgba(255, 255, 255, 0.08);
+        }
+
+        .error-shake {
+            animation: shake 0.35s var(--bezier) forwards;
+            border-color: var(--accent-danger) !important;
+        }
+
+        @keyframes shake {
+            0%, 100% { transform: translateX(0); }
+            20%, 60% { transform: translateX(-5px); }
+            40%, 80% { transform: translateX(5px); }
+        }
+
+        .grid-options {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(80px, 1fr));
+            gap: 8px;
+            width: 100%;
+        }
+
+        .font-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(130px, 1fr));
+            gap: 8px;
+            width: 100%;
+        }
+
+        .opt-btn {
+            background: rgba(0, 0, 0, 0.4);
+            border: 1px solid var(--glass-border);
+            border-radius: 10px;
+            padding: 10px 8px;
+            color: var(--text-muted);
+            font-size: 0.78rem;
+            font-weight: 600;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            gap: 6px;
+            cursor: pointer;
+            transition: all 0.2s var(--bezier);
+            text-align: center;
+        }
+
+        .opt-btn:hover {
+            background: var(--surface-hover);
+            color: var(--text-main);
+            border-color: var(--glass-border-focus);
+        }
+
+        .opt-btn.active {
+            background: var(--text-main);
+            color: var(--bg);
+            border-color: var(--text-main);
+            box-shadow: 0 2px 8px rgba(255,255,255,0.25);
+        }
+
+        .btn-action {
+            background: var(--surface-hover);
+            border: 1px solid var(--glass-border);
+            color: var(--text-main);
+            padding: 9px 14px;
+            border-radius: 10px;
+            font-size: 0.82rem;
+            font-weight: 600;
+            cursor: pointer;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            transition: all 0.2s var(--bezier);
+            white-space: nowrap;
+        }
+
+        .btn-action:hover {
+            border-color: var(--glass-border-focus);
+            background: rgba(255, 255, 255, 0.12);
+        }
+
+        .btn-action:active {
+            transform: scale(0.97);
+        }
+
+        .btn-action.primary {
+            background: var(--text-main);
+            border-color: var(--text-main);
+            color: var(--bg);
+        }
+
+        .btn-action.primary:hover {
+            background: rgba(255, 255, 255, 0.9);
+        }
+
+        .btn-action.danger {
+            background: rgba(255, 69, 58, 0.15);
+            border-color: rgba(255, 69, 58, 0.3);
+            color: var(--accent-danger);
+        }
+
+        .btn-action.danger:hover {
+            background: rgba(255, 69, 58, 0.3);
+        }
+
+        .slider-container {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            width: 100%;
+        }
+
+        .styled-slider {
+            flex: 1;
+            -webkit-appearance: none;
+            appearance: none;
+            height: 6px;
+            border-radius: 3px;
+            background: rgba(255, 255, 255, 0.12);
+            outline: none;
+        }
+
+        .styled-slider::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            appearance: none;
+            width: 18px;
+            height: 18px;
+            border-radius: 50%;
+            background: var(--text-main);
+            cursor: pointer;
+            box-shadow: 0 2px 6px rgba(0,0,0,0.5);
+            transition: transform 0.15s var(--spring);
+        }
+
+        .styled-slider::-webkit-slider-thumb:hover {
+            transform: scale(1.15);
+        }
+
+        .slider-val {
+            font-size: 0.8rem;
+            font-family: 'Outfit', sans-serif;
+            font-variant-numeric: tabular-nums;
+            color: var(--text-muted);
+            min-width: 42px;
+            text-align: right;
+        }
+
+        .color-picker-row {
+            display: flex;
+            gap: 10px;
+            overflow-x: auto;
+            padding: 4px 2px;
+        }
+
+        .color-dot {
+            width: 32px;
+            height: 32px;
+            border-radius: 50%;
+            border: 2px solid transparent;
+            cursor: pointer;
+            flex-shrink: 0;
+            transition: transform 0.2s var(--spring), border-color 0.2s ease;
+        }
+
+        .color-dot:hover {
+            transform: scale(1.1);
+        }
+
+        .color-dot.active {
+            border-color: var(--text-main);
+            transform: scale(1.15);
+            box-shadow: 0 0 10px rgba(255,255,255,0.3);
+        }
+
+        /* --- PRESET INTERFACE REDESIGN --- */
+        .preset-toolbar {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+
+        .preset-filter-row {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 10px;
+            flex-wrap: wrap;
+        }
+
+        .preset-pills {
+            display: flex;
+            gap: 6px;
+            background: rgba(0, 0, 0, 0.4);
+            padding: 3px;
+            border-radius: 100px;
+            border: 1px solid var(--glass-border);
+        }
+
+        .preset-pill-btn {
+            background: transparent;
+            border: none;
+            color: var(--text-muted);
+            padding: 5px 12px;
+            border-radius: 100px;
+            font-size: 0.75rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s var(--bezier);
+        }
+
+        .preset-pill-btn.active {
+            background: rgba(255, 255, 255, 0.15);
+            color: var(--text-main);
+        }
+
+        .preset-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+            gap: 10px;
+        }
+
+        .preset-card-neo {
+            background: rgba(0, 0, 0, 0.3);
+            border: 1px solid var(--glass-border);
+            border-radius: 12px;
+            padding: 12px 14px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 12px;
+            cursor: pointer;
+            transition: all 0.2s var(--bezier);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .preset-card-neo:hover {
+            border-color: var(--glass-border-focus);
+            background: var(--surface-hover);
+            transform: translateY(-1px);
+        }
+
+        .preset-card-neo:active {
+            transform: scale(0.98);
+        }
+
+        .preset-card-neo.active-preset {
+            border-color: var(--text-main);
+            background: rgba(255, 255, 255, 0.05);
+            box-shadow: inset 0 0 12px rgba(255, 255, 255, 0.05);
+        }
+
+        .preset-left {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            min-width: 0;
+        }
+
+        .preset-color-badge {
+            width: 14px;
+            height: 14px;
+            border-radius: 50%;
+            flex-shrink: 0;
+            box-shadow: 0 0 10px currentColor;
+        }
+
+        .preset-details {
+            display: flex;
+            flex-direction: column;
+            gap: 2px;
+            min-width: 0;
+        }
+
+        .preset-name {
+            font-size: 0.86rem;
+            font-weight: 600;
+            color: var(--text-main);
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+
+        .preset-meta-tags {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            font-size: 0.7rem;
+            color: var(--text-muted);
+        }
+
+        .preset-meta-badge {
+            background: rgba(255, 255, 255, 0.06);
+            padding: 1px 6px;
+            border-radius: 4px;
+            font-size: 0.65rem;
+            font-weight: 500;
+        }
+
+        .preset-right-actions {
+            display: flex;
+            align-items: center;
+            gap: 4px;
+            opacity: 0.6;
+            transition: opacity 0.2s ease;
+        }
+
+        .preset-card-neo:hover .preset-right-actions {
+            opacity: 1;
+        }
+
+        .mini-icon-btn {
+            background: transparent;
+            border: none;
+            color: var(--text-muted);
+            width: 26px;
+            height: 26px;
+            border-radius: 6px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            transition: all 0.15s ease;
+        }
+
+        .mini-icon-btn:hover {
+            color: var(--text-main);
+            background: rgba(255, 255, 255, 0.1);
+        }
+
+        .mini-icon-btn.danger:hover {
+            color: var(--accent-danger);
+            background: rgba(255, 69, 58, 0.15);
+        }
+
+        .toggle-wrap {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            width: 100%;
+        }
+
+        .switch {
+            position: relative;
+            display: inline-block;
+            width: 42px;
+            height: 24px;
+        }
+
+        .switch input { opacity: 0; width: 0; height: 0; }
+
+        .slider-round {
+            position: absolute;
+            cursor: pointer;
+            inset: 0;
+            background-color: rgba(255, 255, 255, 0.15);
+            transition: .25s var(--bezier);
+            border-radius: 20px;
+        }
+
+        .slider-round:before {
+            position: absolute;
+            content: "";
+            height: 18px;
+            width: 18px;
+            left: 3px;
+            bottom: 3px;
+            background-color: white;
+            transition: .25s var(--bezier);
+            border-radius: 50%;
+        }
+
+        input:checked + .slider-round { background-color: var(--accent-success); }
+        input:checked + .slider-round:before { transform: translateX(18px); }
+
+        /* MODAL SYSTEM (HISTORY API INTEGRATED) */
+        .modal-overlay {
+            position: fixed;
+            inset: 0;
+            background: rgba(0, 0, 0, 0.75);
+            backdrop-filter: blur(16px);
+            -webkit-backdrop-filter: blur(16px);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+            z-index: 100;
+            opacity: 0;
+            pointer-events: none;
+            transition: opacity 0.25s var(--bezier);
+        }
+
+        .modal-overlay.active {
+            opacity: 1;
+            pointer-events: auto;
+        }
+
+        .modal-container {
+            background: var(--surface);
+            border: 1px solid var(--glass-border);
+            border-radius: 18px;
+            padding: 20px;
+            width: 100%;
+            max-width: 400px;
+            display: flex;
+            flex-direction: column;
+            gap: 16px;
+            box-shadow: 0 20px 40px rgba(0,0,0,0.6);
+            transform: translateY(12px) scale(0.97);
+            transition: transform 0.25s var(--spring);
+        }
+
+        .modal-overlay.active .modal-container {
+            transform: translateY(0) scale(1);
+        }
+
+        .modal-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+
+        .modal-title {
+            font-size: 1rem;
+            font-weight: 700;
+            color: var(--text-main);
+        }
+
+        .file-upload-btn {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            padding: 12px;
+            border: 1px dashed var(--glass-border-focus);
+            border-radius: 10px;
+            background: rgba(255, 255, 255, 0.03);
+            color: var(--text-main);
+            font-size: 0.85rem;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+
+        .file-upload-btn:hover {
+            background: rgba(255, 255, 255, 0.08);
+            border-color: var(--text-main);
+        }
+
+        /* FULLSCREEN & RESPONSIVE LANDSCAPE */
+        body.fullscreen-mode .app-container > *:not(.viewport-wrapper) {
+            display: none !important;
+        }
+
+        body.fullscreen-mode .app-container {
+            padding: 0;
+            max-width: none;
+            height: 100dvh;
+        }
+
+        body.fullscreen-mode .viewport-wrapper {
+            height: 100dvh;
+            max-height: none;
+            border-radius: 0;
+            border: none;
+        }
+
+        @media (orientation: landscape) and (max-height: 550px) {
+            .app-container {
+                flex-direction: row;
+                padding: 10px;
+            }
+            .viewport-wrapper {
+                flex: 1.3;
+                height: 100%;
+                max-height: none;
+            }
+            .main-content {
+                flex: 1;
+            }
+            .folders-scroll-area {
+                flex-direction: column;
+            }
+        }
+    </style>
+</head>
+<body>
+
+    <div class="app-container" id="main-view">
+        <header>
+            <div class="header-title">
+                <div class="app-icon-badge">
+                    <i data-lucide="grid" size="20" style="color: var(--text-main);"></i>
+                </div>
+                <div>
+                    <h1>Marquesina LED</h1>
+                    <div class="live-status">
+                        <div class="status-dot"></div>
+                        <span id="statusText">En vivo</span>
+                    </div>
+                </div>
+            </div>
+            <button class="icon-btn" id="fullScreenBtn" title="Pantalla Completa">
+                <i data-lucide="maximize-2" size="18"></i>
+            </button>
+        </header>
+
+        <!-- DISPLAY VIEWPORT -->
+        <div class="viewport-wrapper" id="viewport">
+            <div class="crt-overlay" id="crtOverlay"></div>
+            <canvas id="ledCanvas"></canvas>
+            <div class="viewport-actions" id="viewportActions">
+                <button class="icon-btn" id="mirrorHBtn" title="Espejo Horizontal"><i data-lucide="flip-horizontal" size="16"></i></button>
+                <button class="icon-btn" id="mirrorVBtn" title="Espejo Vertical"><i data-lucide="flip-vertical" size="16"></i></button>
+                <button class="icon-btn" id="audioSyncBtn" title="Reactivo por Micro"><i data-lucide="mic" size="16"></i></button>
+            </div>
+        </div>
+
+        <!-- NAVIGATION TAB PILLS -->
+        <nav class="folders-scroll-area">
+            <button class="nav-pill active" data-tab="text"><i data-lucide="type" size="14"></i> Texto</button>
+            <button class="nav-pill" data-tab="fonts"><i data-lucide="type" size="14"></i> Fuentes</button>
+            <button class="nav-pill" data-tab="matrix"><i data-lucide="sliders" size="14"></i> Matriz</button>
+            <button class="nav-pill" data-tab="fx"><i data-lucide="sparkles" size="14"></i> Efectos</button>
+            <button class="nav-pill" data-tab="presets"><i data-lucide="bookmark" size="14"></i> Presets</button>
+        </nav>
+
+        <!-- MAIN PANELS -->
+        <main class="main-content">
+            <!-- TEXT PANEL -->
+            <section class="tab-panel active" id="tab-text">
+                <div class="control-card">
+                    <div class="control-label"><i data-lucide="message-square" size="15"></i> Mensaje</div>
+                    <input type="text" id="textInput" class="styled-input" placeholder="Escribe tu mensaje..." value="MARQUESINA LED">
+                </div>
+
+                <div class="control-card">
+                    <div class="control-row">
+                        <div class="control-label"><i data-lucide="scaling" size="15"></i> Escala / Tamaño</div>
+                        <div class="slider-container">
+                            <input type="range" id="textSizeSlider" class="styled-slider" min="20" max="150" value="65">
+                            <span class="slider-val" id="textSizeVal">65%</span>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="control-card">
+                    <div class="control-label"><i data-lucide="move" size="15"></i> Dirección de Movimiento</div>
+                    <div class="grid-options">
+                        <button class="opt-btn active" data-dir="left"><i data-lucide="arrow-left" size="15"></i> Izq</button>
+                        <button class="opt-btn" data-dir="right"><i data-lucide="arrow-right" size="15"></i> Der</button>
+                        <button class="opt-btn" data-dir="up"><i data-lucide="arrow-up" size="15"></i> Arriba</button>
+                        <button class="opt-btn" data-dir="down"><i data-lucide="arrow-down" size="15"></i> Abajo</button>
+                        <button class="opt-btn" data-dir="bounce"><i data-lucide="repeat" size="15"></i> Rebote</button>
+                        <button class="opt-btn" data-dir="static"><i data-lucide="pause" size="15"></i> Fijo</button>
+                    </div>
+                </div>
+
+                <div class="control-card">
+                    <div class="control-row">
+                        <div class="control-label"><i data-lucide="zap" size="15"></i> Velocidad</div>
+                        <div class="slider-container">
+                            <input type="range" id="speedSlider" class="styled-slider" min="1" max="60" value="25">
+                            <span class="slider-val" id="speedVal">25</span>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- FONTS PANEL -->
+            <section class="tab-panel" id="tab-fonts">
+                <div class="control-card">
+                    <div class="control-label"><i data-lucide="type" size="15"></i> Tipografías Incorporadas</div>
+                    <div class="font-grid">
+                        <button class="opt-btn active" data-font="Outfit" style="font-family: 'Outfit', sans-serif;">Outfit</button>
+                        <button class="opt-btn" data-font="JetBrains Mono" style="font-family: 'JetBrains Mono', monospace;">JetBrains</button>
+                        <button class="opt-btn" data-font="Press Start 2P" style="font-family: 'Press Start 2P', cursive;">Arcade 8-Bit</button>
+                        <button class="opt-btn" data-font="VT323" style="font-family: 'VT323', monospace;">VT323 Retro</button>
+                        <button class="opt-btn" data-font="Silkscreen" style="font-family: 'Silkscreen', cursive;">Silkscreen</button>
+                        <button class="opt-btn" data-font="Monoton" style="font-family: 'Monoton', cursive;">Monoton Neon</button>
+                        <button class="opt-btn" data-font="Bungee" style="font-family: 'Bungee', cursive;">Bungee Bold</button>
+                        <button class="opt-btn" data-font="Rubik Glitch" style="font-family: 'Rubik Glitch', cursive;">Rubik Glitch</button>
+                        <button class="opt-btn" data-font="Share Tech Mono" style="font-family: 'Share Tech Mono', monospace;">Share Tech</button>
+                        <button class="opt-btn" data-font="Cinzel" style="font-family: 'Cinzel', serif;">Cinzel</button>
+                        <button class="opt-btn" data-font="Pacifico" style="font-family: 'Pacifico', cursive;">Pacifico</button>
+                    </div>
+                </div>
+
+                <div class="control-card">
+                    <div class="control-label"><i data-lucide="search" size="15"></i> Cargar Google Font Por Nombre</div>
+                    <div style="display: flex; gap: 8px;">
+                        <input type="text" id="customFontInput" class="styled-input" placeholder="Ej: Roboto, Impact, Orbitron...">
+                        <button class="btn-action primary" id="applyCustomFontBtn"><i data-lucide="check" size="16"></i></button>
+                    </div>
+                </div>
+
+                <div class="control-card">
+                    <div class="control-label"><i data-lucide="upload" size="15"></i> Importar Archivo de Fuente (.ttf, .otf, .woff)</div>
+                    <label class="file-upload-btn">
+                        <i data-lucide="file-up" size="18"></i>
+                        <span id="fileNameLabel">Seleccionar fuente local...</span>
+                        <input type="file" id="fontFileInput" accept=".ttf,.otf,.woff,.woff2" style="display: none;">
+                    </label>
+                </div>
+            </section>
+
+            <!-- MATRIX PANEL -->
+            <section class="tab-panel" id="tab-matrix">
+                <div class="control-card">
+                    <div class="control-label"><i data-lucide="shapes" size="15"></i> Geometría LED</div>
+                    <div class="grid-options">
+                        <button class="opt-btn" data-shape="none"><i data-lucide="minus" size="15"></i> Directo</button>
+                        <button class="opt-btn active" data-shape="circle"><i data-lucide="circle" size="15"></i> Círculo</button>
+                        <button class="opt-btn" data-shape="square"><i data-lucide="square" size="15"></i> Cuadrado</button>
+                        <button class="opt-btn" data-shape="diamond"><i data-lucide="diamond" size="15"></i> Diamante</button>
+                    </div>
+                </div>
+
+                <div class="control-card">
+                    <div class="control-row">
+                        <div class="control-label"><i data-lucide="grid" size="15"></i> Densidad de Píxel</div>
+                        <div class="slider-container">
+                            <input type="range" id="densitySlider" class="styled-slider" min="6" max="40" step="2" value="16">
+                            <span class="slider-val" id="densityVal">16px</span>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="control-card">
+                    <div class="control-row">
+                        <div class="control-label"><i data-lucide="sun" size="15"></i> Resplandor / Glow</div>
+                        <div class="slider-container">
+                            <input type="range" id="glowSlider" class="styled-slider" min="0" max="25" value="4">
+                            <span class="slider-val" id="glowVal">4</span>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- FX PANEL -->
+            <section class="tab-panel" id="tab-fx">
+                <div class="control-card">
+                    <div class="control-label"><i data-lucide="palette" size="15"></i> Paleta Cromática</div>
+                    <div class="color-picker-row">
+                        <div class="color-dot active" style="background: #FF3B30; color: #FF3B30;" data-color="#FF3B30"></div>
+                        <div class="color-dot" style="background: #30D158; color: #30D158;" data-color="#30D158"></div>
+                        <div class="color-dot" style="background: #0A84FF; color: #0A84FF;" data-color="#0A84FF"></div>
+                        <div class="color-dot" style="background: #FFD60A; color: #FFD60A;" data-color="#FFD60A"></div>
+                        <div class="color-dot" style="background: #BF5AF2; color: #BF5AF2;" data-color="#BF5AF2"></div>
+                        <div class="color-dot" style="background: #FF9F0A; color: #FF9F0A;" data-color="#FF9F0A"></div>
+                        <div class="color-dot" style="background: #FFFFFF; color: #FFFFFF;" data-color="#FFFFFF"></div>
+                    </div>
+                </div>
+
+                <div class="control-card">
+                    <div class="toggle-wrap">
+                        <div class="control-label"><i data-lucide="tv" size="15"></i> Scanlines CRT</div>
+                        <label class="switch">
+                            <input type="checkbox" id="crtToggle">
+                            <span class="slider-round"></span>
+                        </label>
+                    </div>
+                </div>
+
+                <div class="control-card">
+                    <div class="toggle-wrap">
+                        <div class="control-label"><i data-lucide="cpu" size="15"></i> Glitch Cyberpunk</div>
+                        <label class="switch">
+                            <input type="checkbox" id="glitchToggle">
+                            <span class="slider-round"></span>
+                        </label>
+                    </div>
+                </div>
+            </section>
+
+            <!-- PRESETS PANEL (OPTIMIZED UX & UI INTEGRATION) -->
+            <section class="tab-panel" id="tab-presets">
+                <div class="control-card">
+                    <div class="preset-toolbar">
+                        <div class="control-row">
+                            <div class="control-label"><i data-lucide="bookmark" size="15"></i> Biblioteca de Presets</div>
+                            <button class="btn-action primary" id="openSavePresetBtn"><i data-lucide="plus" size="14"></i> Guardar Estado Actual</button>
+                        </div>
+                        <div class="preset-filter-row">
+                            <div class="preset-pills">
+                                <button class="preset-pill-btn active" data-filter="all">Todos</button>
+                                <button class="preset-pill-btn" data-filter="system">Sistema</button>
+                                <button class="preset-pill-btn" data-filter="user">Mis Presets</button>
+                            </div>
+                            <div style="display: flex; gap: 6px;">
+                                <button class="btn-action" id="exportPresetsBtn" title="Exportar JSON"><i data-lucide="download" size="14"></i></button>
+                                <label class="btn-action" title="Importar JSON" style="cursor: pointer;">
+                                    <i data-lucide="upload" size="14"></i>
+                                    <input type="file" id="importPresetsInput" accept=".json" style="display: none;">
+                                </label>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="preset-grid" id="presetsGridContainer">
+                    <!-- Dynamic Presets will be rendered here -->
+                </div>
+            </section>
+        </main>
+    </div>
+
+    <!-- MODAL FOR CREATING / EDITING PRESETS -->
+    <div class="modal-overlay" id="presetModal">
+        <div class="modal-container">
+            <div class="modal-header">
+                <div class="modal-title" id="presetModalTitle">Guardar Preset</div>
+                <button class="icon-btn" id="closePresetModalBtn"><i data-lucide="x" size="16"></i></button>
+            </div>
+            <div style="display: flex; flex-direction: column; gap: 10px;">
+                <label class="control-label">Nombre del Preset</label>
+                <input type="text" id="presetNameInput" class="styled-input" placeholder="Ej: Neón Retro Cyber">
+            </div>
+            <div style="display: flex; justify-content: flex-end; gap: 8px; margin-top: 6px;">
+                <button class="btn-action" id="cancelPresetBtn">Cancelar</button>
+                <button class="btn-action primary" id="savePresetConfirmBtn">Guardar</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // SYSTEM PRESETS DATABASE
+        const systemPresets = [
+            {
+                id: 'sys-directo',
+                isSystem: true,
+                name: 'Directo / Suave',
+                settings: { text: "MARQUESINA LED", textSize: 65, dir: "left", speed: 25, shape: "none", density: 16, glow: 0, color: "#FFFFFF", crt: false, glitch: false, fontFamily: "Outfit" }
+            },
+            {
+                id: 'sys-classic',
+                isSystem: true,
+                name: 'Aeropuerto Retro',
+                settings: { text: "MARQUESINA LED", textSize: 65, dir: "left", speed: 22, shape: "circle", density: 16, glow: 4, color: "#FFD60A", crt: false, glitch: false, fontFamily: "VT323" }
+            },
+            {
+                id: 'sys-cyberpunk',
+                isSystem: true,
+                name: 'Cyberpunk Glitch',
+                settings: { text: "CYBERPUNK 2077", textSize: 65, dir: "left", speed: 38, shape: "square", density: 14, glow: 8, color: "#FFD60A", crt: true, glitch: true, fontFamily: "Press Start 2P" }
+            },
+            {
+                id: 'sys-matrix',
+                isSystem: true,
+                name: 'Matrix Rain',
+                settings: { text: "THE MATRIX", textSize: 65, dir: "down", speed: 18, shape: "circle", density: 14, glow: 6, color: "#30D158", crt: true, glitch: false, fontFamily: "Share Tech Mono" }
+            },
+            {
+                id: 'sys-arcade',
+                isSystem: true,
+                name: 'Arcade Neon',
+                settings: { text: "INSERT COIN", textSize: 70, dir: "bounce", speed: 28, shape: "diamond", density: 18, glow: 12, color: "#BF5AF2", crt: true, glitch: false, fontFamily: "Monoton" }
+            }
+        ];
+
+        // APPLICATION STATE
+        const appData = {
+            text: "MARQUESINA LED",
+            textSize: 65,
+            dir: "left",
+            speed: 25,
+            shape: "circle",
+            density: 16,
+            glow: 4,
+            color: "#FF3B30",
+            crt: false,
+            glitch: false,
+            mirrorH: false,
+            mirrorV: false,
+            audioSync: false,
+            fontFamily: "Outfit",
+            activePresetId: 'sys-classic',
+            customPresets: [],
+            editingPresetId: null,
+            presetFilter: 'all'
+        };
+
+        // HISTORY API MODAL STACK CONTROL
+        let activeModalsStack = [];
+
+        function openModal(modalId) {
+            document.getElementById('main-view').classList.add('backgrounded');
+            document.getElementById(modalId).classList.add('active');
+            activeModalsStack.push(modalId);
+            window.history.pushState({ modalId: modalId }, "");
+        }
+
+        function closeActiveModal() {
+            if (activeModalsStack.length > 0) {
+                window.history.back();
+            }
+        }
+
+        window.addEventListener('popstate', () => {
+            if (activeModalsStack.length > 0) {
+                const topModalId = activeModalsStack.pop();
+                document.getElementById(topModalId).classList.remove('active');
+                if (activeModalsStack.length === 0) {
+                    document.getElementById('main-view').classList.remove('backgrounded');
+                }
+            }
+        });
+
+        // CANVAS & RENDER ENGINE VARIABLES
+        const canvas = document.getElementById('ledCanvas');
+        const ctx = canvas.getContext('2d');
+        
+        let xPos = 0;
+        let yPos = 0;
+        let bounceVelX = 1;
+        let bounceVelY = 1;
+        let lastTime = performance.now();
+        let isDirResetNeeded = true;
+
+        // Audio mic sync state
+        let audioContext = null;
+        let analyser = null;
+        let microphoneStream = null;
+        let audioLevel = 1;
+
+        // Offscreen rasterization buffer
+        const offCanvas = document.createElement('canvas');
+        const offCtx = offCanvas.getContext('2d', { willReadFrequently: true });
+
+        function initCanvas() {
+            const rect = canvas.parentElement.getBoundingClientRect();
+            canvas.width = Math.max(100, Math.floor(rect.width));
+            canvas.height = Math.max(50, Math.floor(rect.height));
+            isDirResetNeeded = true;
+        }
+
+        function resetPosition() {
+            const w = canvas.width;
+            const h = canvas.height;
+            const computedFontSize = Math.floor(h * (appData.textSize / 100));
+            const fontStr = `800 ${computedFontSize}px '${appData.fontFamily}', sans-serif`;
+            
+            ctx.font = fontStr;
+            const textWidth = ctx.measureText(appData.text || " ").width;
+
+            if (appData.dir === "left") {
+                xPos = w;
+                yPos = 0;
+            } else if (appData.dir === "right") {
+                xPos = -textWidth;
+                yPos = 0;
+            } else if (appData.dir === "up") {
+                xPos = (w - textWidth) / 2;
+                yPos = h;
+            } else if (appData.dir === "down") {
+                xPos = (w - textWidth) / 2;
+                yPos = -computedFontSize;
+            } else if (appData.dir === "bounce") {
+                xPos = Math.max(0, (w - textWidth) / 2);
+                yPos = (h - computedFontSize) / 2;
+                bounceVelX = Math.random() > 0.5 ? 1 : -1;
+                bounceVelY = Math.random() > 0.5 ? 1 : -1;
+            } else { // Static
+                xPos = (w - textWidth) / 2;
+                yPos = 0;
+            }
+            isDirResetNeeded = false;
+        }
+
+        function renderFrame(now) {
+            const dt = Math.min(0.1, (now - lastTime) / 1000);
+            lastTime = now;
+
+            const w = canvas.width;
+            const h = canvas.height;
+
+            if (w === 0 || h === 0) {
+                requestAnimationFrame(renderFrame);
+                return;
+            }
+
+            if (isDirResetNeeded) {
+                resetPosition();
+            }
+
+            ctx.clearRect(0, 0, w, h);
+            ctx.save();
+
+            // MIRRORING TRANSFORMS
+            ctx.translate(appData.mirrorH ? w : 0, appData.mirrorV ? h : 0);
+            ctx.scale(appData.mirrorH ? -1 : 1, appData.mirrorV ? -1 : 1);
+
+            const fontSize = Math.floor(h * (appData.textSize / 100));
+            const textStr = appData.text || " ";
+            const fontStr = `800 ${fontSize}px '${appData.fontFamily}', sans-serif`;
+            
+            offCtx.font = fontStr;
+            const textMetrics = offCtx.measureText(textStr);
+            const textWidth = Math.max(1, textMetrics.width);
+            const textHeight = fontSize * 0.8;
+
+            const speedPixelsPerSec = appData.speed * 12;
+            const moveStep = speedPixelsPerSec * dt;
+
+            // MOTION LOGIC
+            if (appData.dir === "left") {
+                xPos -= moveStep;
+                if (xPos < -textWidth) xPos = w;
+            } else if (appData.dir === "right") {
+                xPos += moveStep;
+                if (xPos > w) xPos = -textWidth;
+            } else if (appData.dir === "up") {
+                yPos -= moveStep;
+                if (yPos < -fontSize) yPos = h;
+            } else if (appData.dir === "down") {
+                yPos += moveStep;
+                if (yPos > h) yPos = -fontSize;
+            } else if (appData.dir === "bounce") {
+                xPos += bounceVelX * moveStep;
+                yPos += bounceVelY * moveStep;
+
+                const minX = 0;
+                const maxX = Math.max(0, w - textWidth);
+                const minY = 0;
+                const maxY = Math.max(0, h - textHeight);
+
+                if (xPos <= minX) {
+                    xPos = minX;
+                    bounceVelX = Math.abs(bounceVelX);
+                } else if (xPos >= maxX && maxX > 0) {
+                    xPos = maxX;
+                    bounceVelX = -Math.abs(bounceVelX);
+                }
+
+                if (yPos <= minY) {
+                    yPos = minY;
+                    bounceVelY = Math.abs(bounceVelY);
+                } else if (yPos >= maxY && maxY > 0) {
+                    yPos = maxY;
+                    bounceVelY = -Math.abs(bounceVelY);
+                }
+            } else { // Static
+                xPos = (w - textWidth) / 2;
+                yPos = 0;
+            }
+
+            // AUDIO REACTIVITY LEVEL
+            if (appData.audioSync && analyser) {
+                const dataArray = new Uint8Array(analyser.frequencyBinCount);
+                analyser.getByteFrequencyData(dataArray);
+                let sum = 0;
+                for (let i = 0; i < dataArray.length; i++) sum += dataArray[i];
+                audioLevel = Math.max(0.2, (sum / dataArray.length) / 50);
+            } else {
+                audioLevel = 1;
+            }
+
+            // DIRECT VECTOR MODE
+            if (appData.shape === 'none') {
+                ctx.fillStyle = appData.color;
+                ctx.font = fontStr;
+                ctx.textBaseline = "top";
+                
+                if (appData.glow > 0) {
+                    ctx.shadowBlur = appData.glow * 2;
+                    ctx.shadowColor = appData.color;
+                } else {
+                    ctx.shadowBlur = 0;
+                }
+
+                const drawY = (appData.dir === "left" || appData.dir === "right" || appData.dir === "static") 
+                    ? (h - fontSize) / 2 
+                    : yPos;
+
+                ctx.fillText(textStr, xPos, drawY);
+            } 
+            // MATRIX LED MODE
+            else {
+                const ledSize = Math.max(6, appData.density);
+                const cols = Math.floor(w / ledSize);
+                const rows = Math.floor(h / ledSize);
+
+                if (cols > 0 && rows > 0) {
+                    offCanvas.width = cols;
+                    offCanvas.height = rows;
+
+                    offCtx.fillStyle = "#000000";
+                    offCtx.fillRect(0, 0, cols, rows);
+                    offCtx.fillStyle = "#FFFFFF";
+                    
+                    const matrixFontSize = Math.floor(rows * (appData.textSize / 100));
+                    offCtx.font = `800 ${matrixFontSize}px '${appData.fontFamily}', sans-serif`;
+                    offCtx.textBaseline = "top";
+
+                    const scaleX = cols / w;
+                    const scaleY = rows / h;
+
+                    const vx = xPos * scaleX;
+                    const vy = (appData.dir === "left" || appData.dir === "right" || appData.dir === "static")
+                        ? (rows - matrixFontSize) / 2
+                        : yPos * scaleY;
+
+                    offCtx.fillText(textStr, vx, vy);
+
+                    if (appData.glitch && Math.random() > 0.82) {
+                        const sliceY = Math.floor(Math.random() * rows);
+                        const sliceH = Math.floor(Math.random() * 3) + 1;
+                        const offsetX = Math.floor(Math.random() * 6) - 3;
+                        offCtx.drawImage(offCanvas, 0, sliceY, cols, sliceH, offsetX, sliceY, cols, sliceH);
+                    }
+
+                    const imgData = offCtx.getImageData(0, 0, cols, rows).data;
+
+                    for (let r = 0; r < rows; r++) {
+                        for (let c = 0; c < cols; c++) {
+                            const idx = (r * cols + c) * 4;
+                            const isLit = imgData[idx] > 120;
+
+                            const cx = c * ledSize + ledSize / 2;
+                            const cy = r * ledSize + ledSize / 2;
+                            const radius = (ledSize / 2) * 0.82 * (isLit ? Math.min(1.25, audioLevel) : 1);
+
+                            ctx.beginPath();
+                            if (isLit) {
+                                ctx.fillStyle = appData.color;
+                                if (appData.glow > 0) {
+                                    ctx.shadowBlur = appData.glow;
+                                    ctx.shadowColor = appData.color;
+                                }
+                            } else {
+                                ctx.fillStyle = "rgba(255, 255, 255, 0.04)";
+                                ctx.shadowBlur = 0;
+                            }
+
+                            if (appData.shape === "circle") {
+                                ctx.arc(cx, cy, radius, 0, Math.PI * 2);
+                            } else if (appData.shape === "square") {
+                                ctx.rect(cx - radius, cy - radius, radius * 2, radius * 2);
+                            } else if (appData.shape === "diamond") {
+                                ctx.moveTo(cx, cy - radius);
+                                ctx.lineTo(cx + radius, cy);
+                                ctx.lineTo(cx, cy + radius);
+                                ctx.lineTo(cx - radius, cy);
+                            }
+                            ctx.fill();
+                        }
+                    }
+                }
+            }
+
+            ctx.restore();
+            requestAnimationFrame(renderFrame);
+        }
+
+        async function initAudioMic() {
+            try {
+                microphoneStream = await navigator.mediaDevices.getUserMedia({ audio: true, video: false });
+                audioContext = new (window.AudioContext || window.webkitAudioContext)();
+                analyser = audioContext.createAnalyser();
+                const source = audioContext.createMediaStreamSource(microphoneStream);
+                source.connect(analyser);
+                analyser.fftSize = 64;
+                appData.audioSync = true;
+                document.getElementById('audioSyncBtn').classList.add('active');
+            } catch (err) {
+                triggerShake(document.getElementById('audioSyncBtn'));
+                appData.audioSync = false;
+            }
+        }
+
+        function triggerShake(element) {
+            element.classList.add('error-shake');
+            setTimeout(() => element.classList.remove('error-shake'), 350);
+        }
+
+        function toggleFullScreen() {
+            const vp = document.getElementById('viewport');
+            if (!document.fullscreenElement) {
+                if (vp.requestFullscreen) vp.requestFullscreen();
+                else if (vp.webkitRequestFullscreen) vp.webkitRequestFullscreen();
+                document.body.classList.add('fullscreen-mode');
+            } else {
+                if (document.exitFullscreen) document.exitFullscreen();
+                document.body.classList.remove('fullscreen-mode');
+            }
+            setTimeout(initCanvas, 120);
+        }
+
+        function applyFont(fontName) {
+            appData.fontFamily = fontName;
+            document.querySelectorAll('[data-font]').forEach(btn => {
+                btn.classList.toggle('active', btn.dataset.font === fontName);
+            });
+            isDirResetNeeded = true;
+            saveState();
+        }
+
+        // REDESIGNED INSTANT PRESET SYSTEM
+        function renderPresetsList() {
+            const container = document.getElementById('presetsGridContainer');
+            container.innerHTML = '';
+
+            let allPresets = [];
+            if (appData.presetFilter === 'all') {
+                allPresets = [...systemPresets, ...appData.customPresets];
+            } else if (appData.presetFilter === 'system') {
+                allPresets = systemPresets;
+            } else {
+                allPresets = appData.customPresets;
+            }
+
+            if (allPresets.length === 0) {
+                container.innerHTML = `
+                    <div style="grid-column: 1/-1; text-align: center; padding: 24px; color: var(--text-muted); font-size: 0.85rem;">
+                        No hay presets guardados en esta categoría.
+                    </div>
+                `;
+                return;
+            }
+
+            allPresets.forEach(preset => {
+                const isSystem = preset.isSystem;
+                const isActive = appData.activePresetId === preset.id;
+
+                const card = document.createElement('div');
+                card.className = `preset-card-neo ${isActive ? 'active-preset' : ''}`;
+
+                card.innerHTML = `
+                    <div class="preset-left">
+                        <div class="preset-color-badge" style="background: ${preset.settings.color}; color: ${preset.settings.color};"></div>
+                        <div class="preset-details">
+                            <div class="preset-name">${escapeHtml(preset.name)}</div>
+                            <div class="preset-meta-tags">
+                                <span class="preset-meta-badge">${preset.settings.fontFamily}</span>
+                                <span class="preset-meta-badge">${preset.settings.shape}</span>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="preset-right-actions">
+                        ${!isSystem ? `
+                            <button class="mini-icon-btn edit-preset-btn" title="Renombrar"><i data-lucide="pencil" size="13"></i></button>
+                            <button class="mini-icon-btn danger delete-preset-btn" title="Eliminar"><i data-lucide="trash-2" size="13"></i></button>
+                        ` : ''}
+                    </div>
+                `;
+
+                // INSTANT ONE-TAP APPLY UX
+                card.addEventListener('click', (e) => {
+                    if (e.target.closest('.edit-preset-btn') || e.target.closest('.delete-preset-btn')) return;
+                    appData.activePresetId = preset.id;
+                    loadPresetSettings(preset.settings);
+                    renderPresetsList();
+                });
+
+                if (!isSystem) {
+                    const editBtn = card.querySelector('.edit-preset-btn');
+                    if (editBtn) {
+                        editBtn.addEventListener('click', (e) => {
+                            e.stopPropagation();
+                            openEditPresetModal(preset);
+                        });
+                    }
+
+                    const delBtn = card.querySelector('.delete-preset-btn');
+                    if (delBtn) {
+                        delBtn.addEventListener('click', (e) => {
+                            e.stopPropagation();
+                            deleteCustomPreset(preset.id);
+                        });
+                    }
+                }
+
+                container.appendChild(card);
+            });
+
+            lucide.createIcons();
+        }
+
+        function loadPresetSettings(settings) {
+            Object.assign(appData, settings);
+
+            // Sync UI Controls
+            document.getElementById('textInput').value = appData.text;
+            document.getElementById('textSizeSlider').value = appData.textSize;
+            document.getElementById('textSizeVal').innerText = appData.textSize + '%';
+            document.getElementById('speedSlider').value = appData.speed;
+            document.getElementById('speedVal').innerText = appData.speed;
+            document.getElementById('densitySlider').value = appData.density;
+            document.getElementById('densityVal').innerText = appData.density + 'px';
+            document.getElementById('glowSlider').value = appData.glow;
+            document.getElementById('glowVal').innerText = appData.glow;
+            document.getElementById('crtToggle').checked = appData.crt;
+            document.getElementById('crtOverlay').classList.toggle('active', appData.crt);
+            document.getElementById('glitchToggle').checked = appData.glitch;
+
+            document.querySelectorAll('[data-shape]').forEach(b => {
+                b.classList.toggle('active', b.dataset.shape === appData.shape);
+            });
+            document.querySelectorAll('[data-dir]').forEach(b => {
+                b.classList.toggle('active', b.dataset.dir === appData.dir);
+            });
+            document.querySelectorAll('.color-dot').forEach(d => {
+                d.classList.toggle('active', d.dataset.color === appData.color);
+            });
+            document.querySelectorAll('[data-font]').forEach(b => {
+                b.classList.toggle('active', b.dataset.font === appData.fontFamily);
+            });
+
+            isDirResetNeeded = true;
+            saveState();
+        }
+
+        function openSavePresetModal() {
+            appData.editingPresetId = null;
+            document.getElementById('presetModalTitle').innerText = "Guardar Preset";
+            document.getElementById('presetNameInput').value = "";
+            openModal('presetModal');
+        }
+
+        function openEditPresetModal(preset) {
+            appData.editingPresetId = preset.id;
+            document.getElementById('presetModalTitle').innerText = "Editar Nombre";
+            document.getElementById('presetNameInput').value = preset.name;
+            openModal('presetModal');
+        }
+
+        function savePresetConfirm() {
+            const name = document.getElementById('presetNameInput').value.trim();
+
+            if (!name) {
+                triggerShake(document.getElementById('presetNameInput'));
+                return;
+            }
+
+            const currentSettings = {
+                text: appData.text,
+                textSize: appData.textSize,
+                dir: appData.dir,
+                speed: appData.speed,
+                shape: appData.shape,
+                density: appData.density,
+                glow: appData.glow,
+                color: appData.color,
+                crt: appData.crt,
+                glitch: appData.glitch,
+                fontFamily: appData.fontFamily
+            };
+
+            if (appData.editingPresetId) {
+                const idx = appData.customPresets.findIndex(p => p.id === appData.editingPresetId);
+                if (idx !== -1) {
+                    appData.customPresets[idx].name = name;
+                }
+            } else {
+                const newId = 'custom-' + Date.now();
+                appData.customPresets.push({
+                    id: newId,
+                    isSystem: false,
+                    name: name,
+                    settings: currentSettings
+                });
+                appData.activePresetId = newId;
+            }
+
+            saveState();
+            renderPresetsList();
+            closeActiveModal();
+        }
+
+        function deleteCustomPreset(id) {
+            appData.customPresets = appData.customPresets.filter(p => p.id !== id);
+            if (appData.activePresetId === id) {
+                appData.activePresetId = null;
+            }
+            saveState();
+            renderPresetsList();
+        }
+
+        function exportPresets() {
+            const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(appData.customPresets, null, 2));
+            const downloadAnchor = document.createElement('a');
+            downloadAnchor.setAttribute("href", dataStr);
+            downloadAnchor.setAttribute("download", "presets_marquesina.json");
+            document.body.appendChild(downloadAnchor);
+            downloadAnchor.click();
+            downloadAnchor.remove();
+        }
+
+        function importPresets(e) {
+            const file = e.target.files[0];
+            if (!file) return;
+
+            const reader = new FileReader();
+            reader.onload = (event) => {
+                try {
+                    const imported = JSON.parse(event.target.result);
+                    if (Array.isArray(imported)) {
+                        imported.forEach(p => {
+                            if (p.name && p.settings) {
+                                p.id = 'custom-' + Date.now() + '-' + Math.random().toString(36).substr(2, 4);
+                                p.isSystem = false;
+                                appData.customPresets.push(p);
+                            }
+                        });
+                        saveState();
+                        renderPresetsList();
+                    }
+                } catch (err) {
+                    triggerShake(e.target.parentElement);
+                }
+            };
+            reader.readAsText(file);
+        }
+
+        function escapeHtml(str) {
+            return String(str).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
+        }
+
+        window.onload = () => {
+            lucide.createIcons();
+            initCanvas();
+
+            // Load saved state
+            const saved = localStorage.getItem('neo_led_pro_v3');
+            if (saved) {
+                try {
+                    Object.assign(appData, JSON.parse(saved));
+                } catch(e) {}
+            }
+
+            // Sync UI State
+            document.getElementById('textInput').value = appData.text;
+            document.getElementById('textSizeSlider').value = appData.textSize;
+            document.getElementById('textSizeVal').innerText = appData.textSize + '%';
+            document.getElementById('speedSlider').value = appData.speed;
+            document.getElementById('speedVal').innerText = appData.speed;
+            document.getElementById('densitySlider').value = appData.density;
+            document.getElementById('densityVal').innerText = appData.density + 'px';
+            document.getElementById('glowSlider').value = appData.glow;
+            document.getElementById('glowVal').innerText = appData.glow;
+            document.getElementById('crtToggle').checked = appData.crt;
+            document.getElementById('crtOverlay').classList.toggle('active', appData.crt);
+            document.getElementById('glitchToggle').checked = appData.glitch;
+
+            document.querySelectorAll('[data-dir]').forEach(btn => {
+                btn.classList.toggle('active', btn.dataset.dir === appData.dir);
+            });
+
+            document.querySelectorAll('[data-shape]').forEach(btn => {
+                btn.classList.toggle('active', btn.dataset.shape === appData.shape);
+            });
+
+            document.querySelectorAll('.color-dot').forEach(dot => {
+                dot.classList.toggle('active', dot.dataset.color === appData.color);
+            });
+
+            document.querySelectorAll('[data-font]').forEach(btn => {
+                btn.classList.toggle('active', btn.dataset.font === appData.fontFamily);
+            });
+
+            renderPresetsList();
+            requestAnimationFrame(renderFrame);
+
+            window.addEventListener('resize', initCanvas);
+
+            // TAB NAVIGATION
+            document.querySelectorAll('.nav-pill').forEach(btn => {
+                btn.addEventListener('click', () => {
+                    document.querySelectorAll('.nav-pill').forEach(p => p.classList.remove('active'));
+                    document.querySelectorAll('.tab-panel').forEach(p => p.classList.remove('active'));
+                    btn.classList.add('active');
+                    document.getElementById(`tab-${btn.dataset.tab}`).classList.add('active');
+                });
+            });
+
+            // CONTROL LISTENERS
+            document.getElementById('textInput').addEventListener('input', (e) => {
+                appData.text = e.target.value;
+                appData.activePresetId = null;
+                isDirResetNeeded = true;
+                saveState();
+            });
+
+            document.getElementById('textSizeSlider').addEventListener('input', (e) => {
+                appData.textSize = parseInt(e.target.value);
+                document.getElementById('textSizeVal').innerText = appData.textSize + '%';
+                appData.activePresetId = null;
+                isDirResetNeeded = true;
+                saveState();
+            });
+
+            document.querySelectorAll('[data-dir]').forEach(btn => {
+                btn.addEventListener('click', () => {
+                    document.querySelectorAll('[data-dir]').forEach(b => b.classList.remove('active'));
+                    btn.classList.add('active');
+                    appData.dir = btn.dataset.dir;
+                    appData.activePresetId = null;
+                    isDirResetNeeded = true;
+                    saveState();
+                });
+            });
+
+            document.getElementById('speedSlider').addEventListener('input', (e) => {
+                appData.speed = parseInt(e.target.value);
+                document.getElementById('speedVal').innerText = appData.speed;
+                appData.activePresetId = null;
+                saveState();
+            });
+
+            document.querySelectorAll('[data-font]').forEach(btn => {
+                btn.addEventListener('click', () => {
+                    appData.activePresetId = null;
+                    applyFont(btn.dataset.font);
+                });
+            });
+
+            document.getElementById('applyCustomFontBtn').addEventListener('click', () => {
+                const fontName = document.getElementById('customFontInput').value.trim();
+                if (fontName) {
+                    const link = document.createElement('link');
+                    link.rel = 'stylesheet';
+                    link.href = `https://fonts.googleapis.com/css2?family=${encodeURIComponent(fontName)}:wght@400;700;800&display=swap`;
+                    document.head.appendChild(link);
+                    appData.activePresetId = null;
+                    applyFont(fontName);
+                }
+            });
+
+            document.getElementById('fontFileInput').addEventListener('change', async (e) => {
+                const file = e.target.files[0];
+                if (file) {
+                    try {
+                        const buffer = await file.arrayBuffer();
+                        const fontName = 'CustomFont_' + Date.now();
+                        const customFont = new FontFace(fontName, buffer);
+                        await customFont.load();
+                        document.fonts.add(customFont);
+                        document.getElementById('fileNameLabel').innerText = file.name;
+                        appData.activePresetId = null;
+                        applyFont(fontName);
+                    } catch (err) {
+                        triggerShake(e.target.parentElement);
+                    }
+                }
+            });
+
+            document.querySelectorAll('[data-shape]').forEach(btn => {
+                btn.addEventListener('click', () => {
+                    document.querySelectorAll('[data-shape]').forEach(b => b.classList.remove('active'));
+                    btn.classList.add('active');
+                    appData.shape = btn.dataset.shape;
+                    appData.activePresetId = null;
+                    saveState();
+                });
+            });
+
+            document.getElementById('densitySlider').addEventListener('input', (e) => {
+                appData.density = parseInt(e.target.value);
+                document.getElementById('densityVal').innerText = appData.density + 'px';
+                appData.activePresetId = null;
+                saveState();
+            });
+
+            document.getElementById('glowSlider').addEventListener('input', (e) => {
+                appData.glow = parseInt(e.target.value);
+                document.getElementById('glowVal').innerText = appData.glow;
+                appData.activePresetId = null;
+                saveState();
+            });
+
+            document.querySelectorAll('.color-dot').forEach(dot => {
+                dot.addEventListener('click', () => {
+                    document.querySelectorAll('.color-dot').forEach(d => d.classList.remove('active'));
+                    dot.classList.add('active');
+                    appData.color = dot.dataset.color;
+                    appData.activePresetId = null;
+                    saveState();
+                });
+            });
+
+            document.getElementById('crtToggle').addEventListener('change', (e) => {
+                appData.crt = e.target.checked;
+                document.getElementById('crtOverlay').classList.toggle('active', appData.crt);
+                appData.activePresetId = null;
+                saveState();
+            });
+
+            document.getElementById('glitchToggle').addEventListener('change', (e) => {
+                appData.glitch = e.target.checked;
+                appData.activePresetId = null;
+                saveState();
+            });
+
+            document.getElementById('fullScreenBtn').addEventListener('click', toggleFullScreen);
+
+            document.getElementById('mirrorHBtn').addEventListener('click', (e) => {
+                appData.mirrorH = !appData.mirrorH;
+                e.currentTarget.classList.toggle('active', appData.mirrorH);
+            });
+
+            document.getElementById('mirrorVBtn').addEventListener('click', (e) => {
+                appData.mirrorV = !appData.mirrorV;
+                e.currentTarget.classList.toggle('active', appData.mirrorV);
+            });
+
+            document.getElementById('audioSyncBtn').addEventListener('click', () => {
+                if (!appData.audioSync) initAudioMic();
+                else {
+                    appData.audioSync = false;
+                    document.getElementById('audioSyncBtn').classList.remove('active');
+                }
+            });
+
+            // PRESETS ACTIONS & FILTERS
+            document.querySelectorAll('.preset-pill-btn').forEach(btn => {
+                btn.addEventListener('click', () => {
+                    document.querySelectorAll('.preset-pill-btn').forEach(p => p.classList.remove('active'));
+                    btn.classList.add('active');
+                    appData.presetFilter = btn.dataset.filter;
+                    renderPresetsList();
+                });
+            });
+
+            document.getElementById('openSavePresetBtn').addEventListener('click', openSavePresetModal);
+            document.getElementById('closePresetModalBtn').addEventListener('click', closeActiveModal);
+            document.getElementById('cancelPresetBtn').addEventListener('click', closeActiveModal);
+            document.getElementById('savePresetConfirmBtn').addEventListener('click', savePresetConfirm);
+            document.getElementById('exportPresetsBtn').addEventListener('click', exportPresets);
+            document.getElementById('importPresetsInput').addEventListener('change', importPresets);
+        };
+
+        function saveState() {
+            localStorage.setItem('neo_led_pro_v3', JSON.stringify(appData));
+        }
+    </script>
+</body>
+</html>

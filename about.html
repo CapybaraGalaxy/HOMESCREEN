@@ -8,7 +8,8 @@
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@200;300;400;500;600;700&display=swap" rel="stylesheet">
-    <script src="https://unpkg.com/lucide@latest"></script>
+    <script src="./lucide.min.js"></script>
+    <script src="./changelog.js"></script>
     <style>
         :root {
             --bg: #000000;
@@ -335,30 +336,30 @@
             border-radius: 10px;
         }
 
-        .change-item {
-            padding: 12px 16px;
-            border-radius: 10px;
-            background: rgba(255,255,255,0.02);
-            border-left: 2px solid var(--glass-border);
-            font-size: 0.9rem;
-            line-height: 1.5;
-            color: #E5E5EA;
-            transition: border-color 0.3s var(--bezier), background 0.3s var(--bezier);
+        .change-release {
+            overflow: hidden;
+            border: 1px solid var(--glass-border);
+            border-radius: 14px;
+            background: rgba(255,255,255,0.025);
         }
-
-        .change-item:hover {
-            border-left-color: var(--text-main);
-            background: rgba(255,255,255,0.04);
-        }
-
-        .change-header-separator {
-            font-weight: 600;
+        .change-release summary {
+            padding: 13px 16px;
             color: var(--text-main);
-            padding-top: 10px;
-            border-left: none !important;
-            background: transparent !important;
-            font-size: 1rem;
+            font-size: 0.9rem;
+            font-weight: 600;
+            cursor: pointer;
         }
+        .change-release summary::marker { color: var(--text-muted); }
+        .change-release-content { padding: 0 16px 14px; }
+        .change-release-content .changelog-hero { margin-bottom: 12px; overflow: hidden; border-radius: 10px; }
+        .change-release-content .changelog-hero img { display: block; width: 100%; max-height: 200px; object-fit: cover; }
+        .change-release-content h4 { margin: 12px 0 6px; color: var(--text-main); font-size: 0.9rem; }
+        .change-release-content p { margin: 0 0 9px; color: #E5E5EA; font-size: 0.86rem; line-height: 1.55; }
+        .change-release-content ul,
+        .change-release-content ol { margin: 6px 0 10px; padding-left: 20px; color: #E5E5EA; font-size: 0.86rem; line-height: 1.55; }
+        .change-release-content code { padding: 2px 5px; border-radius: 5px; background: rgba(255,255,255,0.08); color: var(--text-main); font-family: monospace; }
+        .change-release-content pre { overflow-x: auto; padding: 10px; border-radius: 8px; background: rgba(0,0,0,0.28); }
+        .change-release-content a { color: #8ab4f8; }
 
         /* Botón de Retorno */
         .back-action-container {
@@ -692,7 +693,7 @@ const toolsData = [
             const versionText = document.getElementById('version-text');
             const versionDate = document.getElementById('version-date');
 
-            const isLocalEnv = window.location.protocol === 'file:' || window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1';
+            const isLocalEnv = window.location.protocol === 'file:';
             const fallbackMessage = `No se han encontrado cambios. Puede ser un error, revisa tu conexión o intenta más tarde. Obtén la última versión disponible en <a href="https://github.com/CapybaraGalaxy/HOMESCREEN" target="_blank" rel="noopener noreferrer" style="color: #8ab4f8; text-decoration: none;">GITHUB</a>.`;
 
             if (isLocalEnv) {
@@ -704,27 +705,23 @@ const toolsData = [
 
             try {
                 const response = await fetch('./version.json');
-                if (!response.ok) throw new Error();
+                if (!response.ok) throw new Error(`version.json devolvió ${response.status}`);
                 const data = await response.json();
                 
-                versionText.textContent = `v${data.version}`;
-                versionDate.textContent = data.date;
+                const releases = data.releases;
+                const latestRelease = releases[0];
+                if (!latestRelease) throw new Error('version.json no contiene versiones');
 
-                container.innerHTML = '';
-                data.changes.forEach(change => {
-                    const div = document.createElement('div');
-                    if (change.startsWith('✦') || change.startsWith('🚀') || change.includes('Novedades de')) {
-                        div.className = 'change-item change-header-separator';
-                    } else {
-                        div.className = 'change-item';
-                    }
-                    div.textContent = change;
-                    container.appendChild(div);
-                });
+                versionText.textContent = `v${latestRelease.version}`;
+                versionDate.textContent = latestRelease.date || '';
+                container.replaceChildren(...releases.map((release, index) =>
+                    window.HomescreenChangelog.renderReleaseCard(release, { open: index === 0 })
+                ));
             } catch (error) {
-                versionText.textContent = 'Versión local';
-                versionDate.textContent = 'Modo local';
-                container.innerHTML = `<div style="color:var(--text-muted); font-size:0.9rem; line-height:1.6;">${fallbackMessage}</div>`;
+                console.error('No se pudo cargar el historial de cambios:', error);
+                versionText.textContent = 'No disponible';
+                versionDate.textContent = '';
+                container.textContent = 'No se pudo cargar el historial. Revisa tu conexión o vuelve a intentarlo más tarde.';
             }
         }
 

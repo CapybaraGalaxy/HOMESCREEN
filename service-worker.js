@@ -1,102 +1,173 @@
-// Cambia este número cada vez que lances una nueva versión:
-const VERSION = "1.7"; // Cambia este número cada vez que lances una nueva versión
-const CACHE_NAME = `homescreen-v${VERSION}`;
-
-// Archivos esenciales para que la app cargue sin conexión
+const CACHE_NAME = "homescreen-cache-v6";
 const CORE = [
     "./",
     "./index.html",
+    "./about.html",
+    "./config.html",
+    "./games.html",
+    "./labs.html",
     "./manifest.json",
     "./favicon.png",
-    "./style.css",
-    "./pwa.png",
-    "./games.html",
-    "./version.json"
+    "./styles.css",
+    "./lucide.min.js",
+    "./changelog.js",
+    "./update-manager.js",
+    "./version.json",
+    "./vendor/canvas-confetti.min.js",
+    "./vendor/pdf.min.js",
+    "./vendor/pdf.worker.min.js",
+    "./vendor/mammoth.browser.min.js",
+    "./vendor/html2canvas.min.js",
+    "./vendor/qr-code-styling.js",
+    "./Apps/aleatorio.html",
+    "./Apps/appmaker.html",
+    "./Apps/base64.html",
+    "./Apps/binario.html",
+    "./Apps/bocetos.html",
+    "./Apps/calculadora-descarga.html",
+    "./Apps/calendario.html",
+    "./Apps/color.html",
+    "./Apps/combos.html",
+    "./Apps/comparador.html",
+    "./Apps/consejos.html",
+    "./Apps/contador-palabras.html",
+    "./Apps/conversor.html",
+    "./Apps/countdown.html",
+    "./Apps/counter.html",
+    "./Apps/craftpalette.html",
+    "./Apps/day-brief.html",
+    "./Apps/dinero.html",
+    "./Apps/duolingo.html",
+    "./Apps/editor-fotos.html",
+    "./Apps/estudio-ritmos.html",
+    "./Apps/horarios.html",
+    "./Apps/html-preview.html",
+    "./Apps/icons.html",
+    "./Apps/icontest.html",
+    "./Apps/kanban.html",
+    "./Apps/limpia-textos.html",
+    "./Apps/lorem-ipsum.html",
+    "./Apps/markdown.html",
+    "./Apps/material-you-new.html",
+    "./Apps/material-you.html",
+    "./Apps/mayus-minus.html",
+    "./Apps/medidas.html",
+    "./Apps/meme.html",
+    "./Apps/metadata.html",
+    "./Apps/modchecker.html",
+    "./Apps/morse.html",
+    "./Apps/notas.html",
+    "./Apps/noticias.html",
+    "./Apps/num-let.html",
+    "./Apps/num-romanos.html",
+    "./Apps/paste.html",
+    "./Apps/progreso.html",
+    "./Apps/qr.html",
+    "./Apps/quiz-studio.html",
+    "./Apps/rosco.html",
+    "./Apps/symbols.html",
+    "./Apps/tasks.html",
+    "./Apps/text.html",
+    "./Apps/tierlist.html",
+    "./Apps/tts.html",
+    "./Apps/typing.html",
+    "./Apps/wingdings.html",
+    "./Games/cybersort.html",
+    "./Games/memory.html",
+    "./Games/neon-blast.html",
+    "./Games/neon-corp.html",
+    "./Games/neon-match.html",
+    "./Games/zero-sum.html",
+    "./Media/terminal.html",
+    "./Media/transparency.html",
+    "./Media/Folder icon.ico",
+    "./Media/og.png",
+    "./Media/og large.png",
+    "./Media/pwa.png"
 ];
 
-// ---------- INSTALL ----------
 self.addEventListener("install", event => {
-    // Forzar a que el nuevo Service Worker se active lo antes posible
-    self.skipWaiting();
     event.waitUntil(
-        caches.open(CACHE_NAME).then(cache => cache.addAll(CORE))
+        caches.open(CACHE_NAME)
+            .then(cache => cache.addAll(CORE))
+            .catch(error => {
+                console.error("No se pudieron precargar los recursos offline:", error);
+                throw error;
+            })
     );
 });
 
-// ---------- ACTIVATE (Solución al Fallo 2) ----------
 self.addEventListener("activate", event => {
     event.waitUntil(
-        // Buscar todas las cachés guardadas
-        caches.keys().then(cacheNames => {
-            return Promise.all(
-                cacheNames.map(cache => {
-                    // Si el nombre de la caché no coincide con la versión actual, se elimina
-                    if (cache !== CACHE_NAME) {
-                        console.log("Eliminando caché antigua:", cache);
-                        return caches.delete(cache);
-                    }
-                })
-            );
-        }).then(() => self.clients.claim())
+        caches.keys()
+            .then(async cacheNames => {
+                const hasPreviousCache = cacheNames.some(cacheName =>
+                    (cacheName.startsWith("homescreen-cache-") || cacheName.startsWith("homescreen-v")) &&
+                    cacheName !== CACHE_NAME
+                );
+                await Promise.all(
+                    cacheNames
+                        .filter(cacheName =>
+                            (cacheName.startsWith("homescreen-cache-") || cacheName.startsWith("homescreen-v")) &&
+                            cacheName !== CACHE_NAME
+                        )
+                        .map(cacheName => caches.delete(cacheName))
+                );
+                await self.clients.claim();
+                if (!hasPreviousCache) return;
+                const clients = await self.clients.matchAll({ type: "window" });
+                clients.forEach(client => client.postMessage("RELOAD_AFTER_UPDATE"));
+            })
     );
 });
 
-// ---------- FETCH ----------
 self.addEventListener("fetch", event => {
-    if (event.request.method !== "GET") return;
+    const request = event.request;
+    if (request.method !== "GET") return;
 
-    const url = new URL(event.request.url);
-    const sameOrigin = url.origin === self.location.origin;
-    if (!sameOrigin) return;
+    const url = new URL(request.url);
+    if (url.origin !== self.location.origin) return;
 
-    // HTML siempre actualizado desde la red
-    if (event.request.headers.get("accept")?.includes("text/html")) {
+    const isVersionFile = url.pathname.endsWith("/version.json") || url.pathname.endsWith("version.json");
+    const isHtml = request.mode === "navigate" || request.headers.get("accept")?.includes("text/html");
+
+    if (isVersionFile || isHtml) {
         event.respondWith(
-            fetch(event.request)
+            fetch(request)
                 .then(response => {
-                    const clone = response.clone();
-                    caches.open(CACHE_NAME).then(cache => {
-                        cache.put(event.request, clone);
-                    });
+                    if (response.ok) {
+                        const responseToCache = response.clone();
+                        caches.open(CACHE_NAME).then(cache => cache.put(request, responseToCache));
+                    }
                     return response;
                 })
-                .catch(() => caches.match(event.request))
+                .catch(async () => {
+                    const cachedResponse = await caches.match(request);
+                    if (cachedResponse) return cachedResponse;
+                    if (request.mode === "navigate") {
+                        const homePage = await caches.match("./index.html");
+                        if (homePage) return homePage;
+                    }
+                    return Response.error();
+                })
         );
         return;
     }
 
-    // version.json siempre desde red sin guardar en caché persistente
-    if (url.pathname.endsWith("/version.json") || url.pathname.endsWith("version.json")) {
-        event.respondWith(
-            fetch(event.request, { cache: "no-store" })
-                .then(response => {
-                    const clone = response.clone();
-                    caches.open(CACHE_NAME).then(cache => cache.put(event.request, clone));
-                    return response;
-                })
-                .catch(() => caches.match(event.request))
-        );
-        return;
-    }
-
-    // Todo lo demás: busca en caché primero, si no está, va a la red
     event.respondWith(
-        caches.match(event.request).then(cachedResponse => {
-            if (cachedResponse) {
-                return cachedResponse;
-            }
-            return fetch(event.request).then(response => {
-                const clone = response.clone();
-                caches.open(CACHE_NAME).then(cache => {
-                    cache.put(event.request, clone);
-                });
+        caches.match(request).then(cachedResponse => {
+            if (cachedResponse) return cachedResponse;
+            return fetch(request).then(response => {
+                if (response.ok) {
+                    const responseToCache = response.clone();
+                    caches.open(CACHE_NAME).then(cache => cache.put(request, responseToCache));
+                }
                 return response;
             });
         })
     );
 });
 
-// ---------- UPDATE / MESSAGES ----------
 self.addEventListener("message", event => {
     if (event.data === "SKIP_WAITING") {
         self.skipWaiting();

@@ -8,7 +8,7 @@
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@200;300;400;500;600;700&display=swap" rel="stylesheet">
-    <script src="https://unpkg.com/lucide@latest"></script>
+    <script src="./lucide.min.js"></script>
     <style>
         :root {
             --bg: #000000;
@@ -19,7 +19,6 @@
             --blur-val: 40px;
             --text-main: #FFFFFF;
             --text-muted: #8E8E93;
-            /* Reemplazado el amarillo por azul */
             --accent: #007AFF;
             --accent-glow: rgba(0, 122, 255, 0.25);
             --accent-success: #34C759;
@@ -46,7 +45,6 @@
             overflow: hidden;
         }
 
-        /* Ocupa toda la pantalla en PC y móviles */
         .app-container {
             width: 100vw;
             height: 100dvh;
@@ -59,7 +57,6 @@
             -webkit-backdrop-filter: blur(var(--blur-val));
         }
 
-        /* Capa de Transición Cinemática Fullscreen */
         .cinematic-overlay {
             position: absolute;
             inset: 0;
@@ -120,7 +117,6 @@
             opacity: 1;
         }
 
-        /* Contenido Principal por Fases */
         .wizard-content {
             flex: 1;
             padding: 48px;
@@ -137,7 +133,7 @@
             flex-direction: column;
             gap: 24px;
             width: 100%;
-            max-width: 720px;
+            max-width: 760px;
             opacity: 0;
             transform: translateY(30px) scale(0.98);
             transition: opacity 0.6s var(--bezier), transform 0.6s var(--bezier);
@@ -207,7 +203,6 @@
             font-weight: 500;
         }
 
-        /* Tarjeta Informativa tipo About */
         .about-card {
             background: var(--glass);
             border: 1px solid var(--glass-border);
@@ -231,7 +226,6 @@
             margin-top: 3px;
         }
 
-        /* Inputs y Elementos Interactivos */
         .zen-input {
             background: rgba(255, 255, 255, 0.04);
             border: 1px solid var(--glass-border);
@@ -251,7 +245,6 @@
             box-shadow: 0 0 30px var(--accent-glow);
         }
 
-        /* Estilos Interactivos */
         .style-options {
             display: grid;
             grid-template-columns: repeat(3, 1fr);
@@ -295,7 +288,6 @@
             font-weight: 500;
         }
 
-        /* Selector de Buscador */
         .search-engine-grid {
             display: grid;
             grid-template-columns: repeat(2, 1fr);
@@ -323,12 +315,47 @@
             background: var(--accent-glow);
         }
 
-        /* Grid de Configuración general (Filas) */
+        .preference-grid {
+            display: grid;
+            grid-template-columns: repeat(2, minmax(0, 1fr));
+            gap: 14px;
+        }
+
+        .setting-card {
+            background: rgba(255, 255, 255, 0.03);
+            border: 1px solid var(--glass-border);
+            padding: 16px 20px;
+            border-radius: 18px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 16px;
+            transition: all 0.3s var(--bezier);
+        }
+
+        .setting-card:hover {
+            background: rgba(255, 255, 255, 0.06);
+        }
+
+        .preference-dropdown { position: relative; width: 170px; flex-shrink: 0; }
+        .preference-dropdown .dropdown-select { min-height: 42px; padding: 10px 14px; border: 1px solid var(--glass-border); border-radius: 14px; background: rgba(255, 255, 255, 0.06); display: flex; align-items: center; justify-content: space-between; gap: 8px; cursor: pointer; user-select: none; }
+        .preference-dropdown .dropdown-select i { width: 16px; height: 16px; color: var(--text-muted); flex-shrink: 0; }
+        .preference-dropdown .dropdown-options { position: absolute; z-index: 50; top: calc(100% + 6px); left: 0; right: 0; display: none; max-height: 200px; overflow-y: auto; border: 1px solid var(--glass-border); border-radius: 14px; background: #16161d; box-shadow: 0 12px 32px rgba(0,0,0,.6); }
+        .preference-dropdown.active .dropdown-options { display: block; }
+        .preference-dropdown .dropdown-option { padding: 10px 14px; cursor: pointer; color: var(--text-muted); font-size: 14px; transition: background 0.2s; }
+        .preference-dropdown .dropdown-option:hover, .preference-dropdown .dropdown-option.selected { background: rgba(255,255,255,.08); color: var(--text-main); }
+        .preference-dropdown .dropdown-option.selected { color: var(--accent); font-weight: 500; }
+
+        @media(max-width: 600px) {
+            .preference-grid { grid-template-columns: 1fr; }
+            .preference-dropdown { width: 140px; }
+        }
+
         .settings-grid {
             display: flex;
             flex-direction: column;
             gap: 12px;
-            max-height: 400px;
+            max-height: 420px;
             overflow-y: auto;
             padding-right: 6px;
         }
@@ -346,7 +373,6 @@
 
         .setting-row:hover {
             background: rgba(255, 255, 255, 0.06);
-            transform: translateX(4px);
         }
 
         .setting-meta {
@@ -357,6 +383,7 @@
 
         .setting-meta i {
             color: var(--text-muted);
+            flex-shrink: 0;
         }
 
         .setting-title {
@@ -402,7 +429,6 @@
             background: #fff;
         }
 
-        /* Pantalla Final */
         .success-badge-anim {
             width: 80px;
             height: 80px;
@@ -428,7 +454,6 @@
             height: 36px;
         }
 
-        /* Footer Cinemático */
         footer {
             padding: 24px 48px;
             display: flex;
@@ -471,7 +496,6 @@
             background: #0062cc;
             transform: translateY(-2px);
         }
-
     </style>
 </head>
 <body>
@@ -489,7 +513,7 @@
             <!-- FASE 1: Bienvenida -->
             <div class="wizard-step active" data-step="1" data-title="Bienvenida" data-icon="compass">
                 <h1 class="hero-title welcome-title"><span class="welcome-word">Bienvenido</span> <span class="welcome-word">a</span> <span class="welcome-word welcome-accent">Homescreen.</span></h1>
-                <p class="zen-desc"><strong>Homescreen reúne todas tus herramientas y utilidades en un <i></i>único lugar</i></strong> inteligente, fluido y sin distracciones.<br>Sin registros ni suscripciones, Homescreen es tu espacio personal de productividad.</p>
+                <p class="zen-desc"><strong>Homescreen reúne todas tus herramientas y utilidades en un <i>único lugar</i></strong> inteligente, fluido y sin distracciones.<br>Sin registros ni suscripciones, Homescreen es tu espacio personal de productividad.</p>
             </div>
 
             <!-- FASE 2: Información de la App (About) -->
@@ -541,11 +565,11 @@
                         <i data-lucide="shapes"></i>
                         <span>Pill Fluid</span>
                     </div>
-                    <div class="style-card selected" data-style="list" onclick="setStyle('list')">
+                    <div class="style-card" data-style="list" onclick="setStyle('list')">
                         <i data-lucide="list"></i>
                         <span>Lista Minimal</span>
                     </div>
-                    <div class="style-card" data-style="grid" onclick="setStyle('grid')">
+                    <div class="style-card selected" data-style="grid" onclick="setStyle('grid')">
                         <i data-lucide="grid"></i>
                         <span>Cuadrícula</span>
                     </div>
@@ -553,17 +577,17 @@
 
                 <p class="zen-desc" style="margin-top: 10px;">Motor de búsqueda predeterminado:</p>
                 <div class="search-engine-grid">
-                    <div class="engine-card" data-engine="google" onclick="setSearchEngine('google')">
+                    <div class="engine-card selected" data-engine="google" onclick="setSearchEngine('google')">
                         <i data-lucide="search"></i> Google
                     </div>
-                    <div class="engine-card selected" data-engine="bing" onclick="setSearchEngine('bing')">
+                    <div class="engine-card" data-engine="bing" onclick="setSearchEngine('bing')">
                         <i data-lucide="globe"></i> Bing
                     </div>
                     <div class="engine-card" data-engine="duckduckgo" onclick="setSearchEngine('duckduckgo')">
                         <i data-lucide="shield"></i> DuckDuckGo
                     </div>
-                    <div class="engine-card" data-engine="ecosia" onclick="setSearchEngine('ecosia')">
-                        <i data-lucide="leaf"></i> Ecosia
+                    <div class="engine-card" data-engine="yahoo" onclick="setSearchEngine('yahoo')">
+                        <i data-lucide="search"></i> Yahoo
                     </div>
                 </div>
             </div>
@@ -598,6 +622,17 @@
 
                     <div class="setting-row">
                         <div class="setting-meta">
+                            <i data-lucide="layout-grid"></i>
+                            <div>
+                                <div class="setting-title">Carpeta de Apps Añadidas</div>
+                                <div class="setting-desc">Muestra la carpeta con tus aplicaciones personalizadas</div>
+                            </div>
+                        </div>
+                        <div class="switch on" id="togShowCustomApps" onclick="toggleSwitch(this, 'showCustomApps')"></div>
+                    </div>
+
+                    <div class="setting-row">
+                        <div class="setting-meta">
                             <i data-lucide="panel-bottom"></i>
                             <div>
                                 <div class="setting-title">Mostrar Dock Inferior</div>
@@ -612,7 +647,7 @@
                             <i data-lucide="tag"></i>
                             <div>
                                 <div class="setting-title">Ocultar Local Chip</div>
-                                <div class="setting-desc">Oculta la etiqueta de indicador de estado local (solo se aplica si no estás usando la versión web)</div>
+                                <div class="setting-desc">Oculta la etiqueta de indicador de estado local (solo versión local)</div>
                             </div>
                         </div>
                         <div class="switch on" id="togHideLocalChip" onclick="toggleSwitch(this, 'hideLocalChip')"></div>
@@ -620,18 +655,140 @@
                 </div>
             </div>
 
-            <!-- FASE 6: Apariencia y Fondo -->
-            <div class="wizard-step" data-step="6" data-title="Apariencia y Fondo" data-icon="moon">
-                <h1 class="hero-title">Atmósfera <span>Visual</span></h1>
-                <p class="zen-desc">Ajusta los fondos, efectos de desenfoque y animación de bienvenida.</p>
+            <!-- FASE 6: Reloj, Fuente y Textos -->
+            <div class="wizard-step" data-step="6" data-title="Reloj y Tipografía" data-icon="type">
+                <h1 class="hero-title">Reloj y <span>Tipografía</span></h1>
+                <p class="zen-desc">Personaliza el aspecto del reloj central, fuente principal y textos de bienvenida.</p>
                 
+                <div class="preference-grid">
+                    <div class="setting-card">
+                        <div>
+                            <div class="setting-title">Fuente principal</div>
+                            <div class="setting-desc">Tipografía global</div>
+                        </div>
+                        <div class="preference-dropdown" id="fontFamilySelect">
+                            <div class="dropdown-select"><span>Outfit</span><i data-lucide="chevron-down"></i></div>
+                            <div class="dropdown-options">
+                                <div class="dropdown-option" data-value="Outfit">Outfit</div>
+                                <div class="dropdown-option" data-value="Inter">Inter</div>
+                                <div class="dropdown-option" data-value="Roboto">Roboto</div>
+                                <div class="dropdown-option" data-value="JetBrains Mono">JetBrains Mono</div>
+                                <div class="dropdown-option" data-value="system">Sistema</div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="setting-card">
+                        <div>
+                            <div class="setting-title">Formato de hora</div>
+                            <div class="setting-desc">Modo 12 h / 24 h</div>
+                        </div>
+                        <div class="preference-dropdown" id="timeFormatSelect">
+                            <div class="dropdown-select"><span>24 h</span><i data-lucide="chevron-down"></i></div>
+                            <div class="dropdown-options">
+                                <div class="dropdown-option" data-value="24">24 h</div>
+                                <div class="dropdown-option" data-value="12">12 h (AM/PM)</div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="setting-card">
+                        <div>
+                            <div class="setting-title">Estilo de reloj</div>
+                            <div class="setting-desc">Digital o analógico</div>
+                        </div>
+                        <div class="preference-dropdown" id="clockStyleSelect">
+                            <div class="dropdown-select"><span>Digital</span><i data-lucide="chevron-down"></i></div>
+                            <div class="dropdown-options">
+                                <div class="dropdown-option" data-value="digital">Digital</div>
+                                <div class="dropdown-option" data-value="analog-wide">Analógico horizontal</div>
+                                <div class="dropdown-option" data-value="analog-hands">Analógico solo agujas</div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="setting-card">
+                        <div>
+                            <div class="setting-title">Pack de saludos</div>
+                            <div class="setting-desc">Saludos o citas</div>
+                        </div>
+                        <div class="preference-dropdown" id="greetingPackSelect">
+                            <div class="dropdown-select"><span>Saludos</span><i data-lucide="chevron-down"></i></div>
+                            <div class="dropdown-options">
+                                <div class="dropdown-option" data-value="greetings">Saludos</div>
+                                <div class="dropdown-option" data-value="quotes">Citas famosas</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="settings-grid" style="margin-top: 10px;">
+                    <div class="setting-row">
+                        <div class="setting-meta">
+                            <i data-lucide="timer"></i>
+                            <div>
+                                <div class="setting-title">Mostrar segundos</div>
+                                <div class="setting-desc">Incluye los segundos en el reloj digital</div>
+                            </div>
+                        </div>
+                        <div class="switch on" id="togShowSeconds" onclick="toggleSwitch(this, 'showSeconds')"></div>
+                    </div>
+
+                    <div class="setting-row">
+                        <div class="setting-meta">
+                            <i data-lucide="sparkles"></i>
+                            <div>
+                                <div class="setting-title">Ocultar Saludo Automáticamente</div>
+                                <div class="setting-desc">Oculta el texto de bienvenida tras unos segundos</div>
+                            </div>
+                        </div>
+                        <div class="switch on" id="togHideWelcome" onclick="toggleSwitch(this, 'hideWelcome')"></div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- FASE 7: Fondo, Desenfoque y Animaciones -->
+            <div class="wizard-step" data-step="7" data-title="Animaciones y Fondo" data-icon="sparkles">
+                <h1 class="hero-title">Atmósfera y <span>Efectos</span></h1>
+                <p class="zen-desc">Ajusta los fondos, efectos de desenfoque y animaciones de la interfaz.</p>
+                
+                <div class="preference-grid" style="margin-bottom: 12px;">
+                    <div class="setting-card">
+                        <div>
+                            <div class="setting-title">Animación Saludo</div>
+                            <div class="setting-desc">Efecto de entrada</div>
+                        </div>
+                        <div class="preference-dropdown" id="welcomeAnimationSelect">
+                            <div class="dropdown-select"><span>Blur</span><i data-lucide="chevron-down"></i></div>
+                            <div class="dropdown-options">
+                                <div class="dropdown-option" data-value="blur">Blur</div>
+                                <div class="dropdown-option" data-value="fade">Fade</div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="setting-card">
+                        <div>
+                            <div class="setting-title">Animación Carpetas</div>
+                            <div class="setting-desc">Apertura de modal</div>
+                        </div>
+                        <div class="preference-dropdown" id="folderAnimationSelect">
+                            <div class="dropdown-select"><span>Slide</span><i data-lucide="chevron-down"></i></div>
+                            <div class="dropdown-options">
+                                <div class="dropdown-option" data-value="slide">Slide</div>
+                                <div class="dropdown-option" data-value="zoom">Zoom</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
                 <div class="settings-grid">
                     <div class="setting-row">
                         <div class="setting-meta">
                             <i data-lucide="image"></i>
                             <div>
                                 <div class="setting-title">Fondo Animado</div>
-                                <div class="setting-desc">Partículas interactivas flotando</div>
+                                <div class="setting-desc">Partículas interactivas flotando en el fondo</div>
                             </div>
                         </div>
                         <div class="switch on" id="togBg" onclick="toggleSwitch(this, 'bg')"></div>
@@ -641,8 +798,8 @@
                         <div class="setting-meta">
                             <i data-lucide="moon"></i>
                             <div>
-                                <div class="setting-title">Fondo</div>
-                                <div class="setting-desc">⚠ No desactives esta opción salvo que tu navegador o extensión soporte webs con fondo transparente</div>
+                                <div class="setting-title">Fondo Oscuro Sólido</div>
+                                <div class="setting-desc">⚠ No desactives esta opción salvo que utilices una extensión de fondo transparente</div>
                             </div>
                         </div>
                         <div class="switch on" id="togDarkbg" onclick="toggleSwitch(this, 'darkbg')"></div>
@@ -653,27 +810,16 @@
                             <i data-lucide="eye-off"></i>
                             <div>
                                 <div class="setting-title">Desactivar efectos de Desenfoque</div>
-                                <div class="setting-desc">Optimiza el rendimiento eliminando los efectos blur</div>
+                                <div class="setting-desc">Optimiza el rendimiento eliminando los efectos de desenfoque/blur</div>
                             </div>
                         </div>
                         <div class="switch on" id="togNoblur" onclick="toggleSwitch(this, 'noblur')"></div>
                     </div>
-
-                    <div class="setting-row">
-                        <div class="setting-meta">
-                            <i data-lucide="sparkles"></i>
-                            <div>
-                                <div class="setting-title">Ocultar Animación de Bienvenida</div>
-                                <div class="setting-desc">Oculta el texto de bienvenida después de unos segundos</div>
-                            </div>
-                        </div>
-                        <div class="switch on" id="togHideWelcome" onclick="toggleSwitch(this, 'hideWelcome')"></div>
-                    </div>
                 </div>
             </div>
 
-            <!-- FASE 7: Sistema, Háptica y Sonido -->
-            <div class="wizard-step" data-step="7" data-title="Sistema y Háptica" data-icon="sliders">
+            <!-- FASE 8: Sistema, Háptica y Sonido -->
+            <div class="wizard-step" data-step="8" data-title="Sistema y Háptica" data-icon="sliders">
                 <h1 class="hero-title">Hardware y <span>Sonido</span></h1>
                 <p class="zen-desc">Configura la retroalimentación háptica, sonidos e indicadores del sistema.</p>
                 
@@ -683,7 +829,7 @@
                             <i data-lucide="battery"></i>
                             <div>
                                 <div class="setting-title">Indicador de Batería</div>
-                                <div class="setting-desc">Muestra el estado de la batería en la barra superior (funciona en algunos navegadores móviles)</div>
+                                <div class="setting-desc">Muestra el estado de la batería en la barra superior (funciona en navegadores compatibles)</div>
                             </div>
                         </div>
                         <div class="switch" id="togShowBattery" onclick="toggleSwitch(this, 'showBattery')"></div>
@@ -711,11 +857,21 @@
                         <div class="switch" id="togHaptics" onclick="toggleSwitch(this, 'haptics')"></div>
                     </div>
 
+                    <div class="setting-row">
+                        <div class="setting-meta">
+                            <i data-lucide="gauge"></i>
+                            <div>
+                                <div class="setting-title">Modo Máximo Rendimiento</div>
+                                <div class="setting-desc">Desactiva animaciones pesadas y partículas para acelerar la interfaz al máximo</div>
+                            </div>
+                        </div>
+                        <div class="switch" id="togSuperPerformance" onclick="toggleSwitch(this, 'superPerformance')"></div>
+                    </div>
                 </div>
             </div>
 
-            <!-- FASE 8: Completado y Exportación de Config -->
-            <div class="wizard-step" data-step="8" data-title="Finalizado" data-icon="check-circle">
+            <!-- FASE 9: Completado y Exportación de Config -->
+            <div class="wizard-step" data-step="9" data-title="Finalizado" data-icon="check-circle">
                 <div class="success-badge-anim">
                     <i data-lucide="check"></i>
                 </div>
@@ -749,14 +905,14 @@
         lucide.createIcons();
 
         let currentStep = 1;
-        const totalSteps = 8;
+        const totalSteps = 9;
 
         function getStoredConfigValue(key, fallback) {
             const value = localStorage.getItem(key);
             return value === null ? fallback : value;
         }
 
-        // Estructura compatible con la importación de Homescreen.
+        // Estructura completa compatible con la importación de Homescreen NEO.
         const configState = {
             username: getStoredConfigValue('username', 'Usuario'),
             favorites: getStoredConfigValue('favorites', '[]'),
@@ -770,40 +926,139 @@
             appUsageStats: getStoredConfigValue('appUsageStats', '{}'),
             showDock: getStoredConfigValue('showDock', 'false'),
             showRecentFolder: getStoredConfigValue('showRecentFolder', 'false'),
+            showCustomApps: getStoredConfigValue('showCustomApps', 'true'),
+            customApps: getStoredConfigValue('customApps', '[]'),
+            hiddenAppUrls: getStoredConfigValue('hiddenAppUrls', '[]'),
             showBattery: getStoredConfigValue('showBattery', 'false'),
             sounds: getStoredConfigValue('sounds', 'false'),
             haptics: getStoredConfigValue('haptics', 'false'),
+            superPerformance: getStoredConfigValue('superPerformance', 'false'),
             hideWelcome: getStoredConfigValue('hideWelcome', 'false'),
+            hideWelcomeAlways: getStoredConfigValue('hideWelcomeAlways', 'false'),
+            hideAppStars: getStoredConfigValue('hideAppStars', 'false'),
             welcomeAnimation: getStoredConfigValue('welcomeAnimation', 'blur'),
             folderAnimation: getStoredConfigValue('folderAnimation', 'slide'),
             settingsAnimation: getStoredConfigValue('settingsAnimation', 'fade'),
             gridWidth: getStoredConfigValue('gridWidth', '700'),
             listColumns: getStoredConfigValue('listColumns', '1'),
-            gridColumns: getStoredConfigValue('gridColumns', '5')
+            gridColumns: getStoredConfigValue('gridColumns', '5'),
+            fontFamily: getStoredConfigValue('fontFamily', 'Outfit'),
+            timeFormat: getStoredConfigValue('timeFormat', '24'),
+            showSeconds: getStoredConfigValue('showSeconds', 'true'),
+            clockStyle: getStoredConfigValue('clockStyle', 'digital'),
+            greetingPack: getStoredConfigValue('greetingPack', 'greetings'),
+            hideFolderLabels: getStoredConfigValue('hideFolderLabels', 'false'),
+            hideFolderCloseBtn: getStoredConfigValue('hideFolderCloseBtn', 'false'),
+            folderSize: getStoredConfigValue('folderSize', '3'),
+            folderAppsSize: getStoredConfigValue('folderAppsSize', '3'),
+            folderModalSize: getStoredConfigValue('folderModalSize', '3'),
+            glassOpacity: getStoredConfigValue('glassOpacity', '50')
         };
 
         const userNameInput = document.getElementById('userNameInput');
+        userNameInput.value = configState.username !== 'Usuario' ? configState.username : '';
         userNameInput.addEventListener('input', (e) => {
             configState.username = e.target.value.trim() || "Usuario";
+            localStorage.setItem('username', configState.username);
         });
 
         function setStyle(mode) {
             configState.layoutMode = mode;
+            localStorage.setItem('layoutMode', mode);
             document.querySelectorAll('.style-card').forEach(c => c.classList.remove('selected'));
-            document.querySelector(`.style-card[data-style="${mode}"]`).classList.add('selected');
+            document.querySelector(`.style-card[data-style="${mode}"]`)?.classList.add('selected');
         }
 
         function setSearchEngine(engine) {
             configState.searchEngine = engine;
+            localStorage.setItem('searchEngine', engine);
             document.querySelectorAll('.engine-card').forEach(c => c.classList.remove('selected'));
-            document.querySelector(`.engine-card[data-engine="${engine}"]`).classList.add('selected');
+            document.querySelector(`.engine-card[data-engine="${engine}"]`)?.classList.add('selected');
         }
 
         function toggleSwitch(el, key) {
             el.classList.toggle('on');
             const isOn = el.classList.contains('on');
             configState[key] = isOn ? "true" : "false";
+            localStorage.setItem(key, configState[key]);
         }
+
+        function setPreference(key, value) {
+            configState[key] = value;
+            localStorage.setItem(key, value);
+        }
+
+        // Inicializar switches dinámicos según el estado cargado
+        const switchMappings = {
+            'togShowFavFolder': 'showFavFolder',
+            'togShowRecentFolder': 'showRecentFolder',
+            'togShowCustomApps': 'showCustomApps',
+            'togShowDock': 'showDock',
+            'togHideLocalChip': 'hideLocalChip',
+            'togShowSeconds': 'showSeconds',
+            'togBg': 'bg',
+            'togDarkbg': 'darkbg',
+            'togNoblur': 'noblur',
+            'togHideWelcome': 'hideWelcome',
+            'togShowBattery': 'showBattery',
+            'togSounds': 'sounds',
+            'togHaptics': 'haptics',
+            'togSuperPerformance': 'superPerformance'
+        };
+
+        Object.entries(switchMappings).forEach(([elementId, key]) => {
+            const el = document.getElementById(elementId);
+            if (el) {
+                el.classList.toggle('on', configState[key] === 'true');
+            }
+        });
+
+        // Inicializar desplegables/dropdowns de manera robusta
+        const dropdownKeys = ['fontFamily', 'timeFormat', 'clockStyle', 'greetingPack', 'welcomeAnimation', 'folderAnimation'];
+        
+        dropdownKeys.forEach((key) => {
+            const dropdown = document.getElementById(`${key}Select`);
+            if (!dropdown) return;
+
+            const trigger = dropdown.querySelector('.dropdown-select');
+            const label = trigger.querySelector('span');
+            const options = [...dropdown.querySelectorAll('.dropdown-option')];
+
+            const applySelection = (value) => {
+                const selectedOption = options.find(opt => opt.dataset.value === value) || options[0];
+                options.forEach(opt => opt.classList.toggle('selected', opt === selectedOption));
+                if (selectedOption) {
+                    label.textContent = selectedOption.textContent;
+                    setPreference(key, selectedOption.dataset.value);
+                }
+            };
+
+            // Aplicar valor inicial cargado
+            applySelection(configState[key]);
+
+            trigger.addEventListener('click', (e) => {
+                e.stopPropagation();
+                // Cerrar otros dropdowns abiertos
+                document.querySelectorAll('.preference-dropdown').forEach(d => {
+                    if (d !== dropdown) d.classList.remove('active');
+                });
+                dropdown.classList.toggle('active');
+            });
+
+            options.forEach(option => {
+                option.addEventListener('click', (e) => {
+                    e.stopPropagation();
+                    const value = option.dataset.value;
+                    applySelection(value);
+                    dropdown.classList.remove('active');
+                });
+            });
+        });
+
+        // Cerrar todos los desplegables al hacer clic fuera
+        document.addEventListener('click', () => {
+            document.querySelectorAll('.preference-dropdown').forEach(d => d.classList.remove('active'));
+        });
 
         function changeStep(direction) {
             const newStep = currentStep + direction;
@@ -864,7 +1119,6 @@
                 alert('¡Configuración copiada al portapapeles!');
             });
         }
-
     </script>
 </body>
 </html>

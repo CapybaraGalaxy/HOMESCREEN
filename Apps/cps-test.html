@@ -1,0 +1,1248 @@
+<!DOCTYPE html>
+<html lang="es" data-theme="green">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+    <title>Test de CPS Pro</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@200;300;400;500;600;700&display=swap" rel="stylesheet">
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <style>
+        :root {
+            --bg: #000000;
+            --surface: #121212;
+            --surface-hover: #1c1c1e;
+            --glass: rgba(15, 15, 15, 0.4);
+            --glass-border: rgba(255, 255, 255, 0.08);
+            --blur-val: 30px;
+            --text-main: #FFFFFF;
+            --text-muted: #8E8E93;
+            --accent: #34C759;
+            --accent-glow: rgba(52, 199, 89, 0.25);
+            --bezier: cubic-bezier(0.16, 1, 0.3, 1);
+            --spring: cubic-bezier(0.34, 1.56, 0.64, 1);
+        }
+
+        [data-theme="blue"] {
+            --accent: #00F0FF;
+            --accent-glow: rgba(0, 240, 255, 0.25);
+        }
+
+        [data-theme="purple"] {
+            --accent: #AF52DE;
+            --accent-glow: rgba(175, 82, 222, 0.25);
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: 'Outfit', sans-serif;
+            font-variant-numeric: tabular-nums;
+            -webkit-tap-highlight-color: transparent;
+        }
+
+        body {
+            background-color: var(--bg);
+            color: var(--text-main);
+            min-height: 100dvh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            overflow-x: hidden;
+        }
+
+        .app-container {
+            width: 100%;
+            max-width: 900px;
+            height: 100dvh;
+            display: flex;
+            flex-direction: column;
+            padding: env(safe-area-inset-top) 24px calc(env(safe-area-inset-bottom) + 16px) 24px;
+            background: var(--bg);
+            position: relative;
+        }
+
+        header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 16px 0;
+            border-bottom: 1px solid var(--glass-border);
+            margin-bottom: 16px;
+        }
+
+        .header-left {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .app-icon-badge {
+            width: 40px;
+            height: 40px;
+            border-radius: 12px;
+            background: radial-gradient(circle at 30% 30%, rgba(255,255,255,0.1), rgba(18,18,18,0.8));
+            border: 1px solid var(--glass-border);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            backdrop-filter: blur(var(--blur-val));
+        }
+
+        .app-title {
+            font-size: 1.1rem;
+            font-weight: 600;
+            letter-spacing: -0.01em;
+        }
+
+        .header-right {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .theme-selector {
+            display: flex;
+            gap: 6px;
+            background: var(--surface);
+            padding: 4px;
+            border-radius: 20px;
+            border: 1px solid var(--glass-border);
+        }
+
+        .theme-dot {
+            width: 20px;
+            height: 20px;
+            border-radius: 50%;
+            cursor: pointer;
+            border: 2px solid transparent;
+            transition: transform 0.2s var(--spring);
+        }
+
+        .theme-dot:hover {
+            transform: scale(1.15);
+        }
+
+        .theme-dot.green { background: #34C759; }
+        .theme-dot.blue { background: #00F0FF; }
+        .theme-dot.purple { background: #AF52DE; }
+
+        .header-stats {
+            display: flex;
+            gap: 12px;
+            font-size: 0.85rem;
+            color: var(--text-muted);
+        }
+
+        .stat-badge {
+            background: var(--surface);
+            padding: 6px 12px;
+            border-radius: 20px;
+            border: 1px solid var(--glass-border);
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .stat-badge span {
+            color: var(--text-main);
+            font-weight: 600;
+        }
+
+        .challenge-banner {
+            display: none;
+            background: var(--accent-glow);
+            border: 1px solid var(--accent);
+            padding: 12px 16px;
+            border-radius: 12px;
+            margin-bottom: 16px;
+            align-items: center;
+            justify-content: space-between;
+            font-size: 0.85rem;
+            color: var(--accent);
+        }
+
+        .controls-section {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+            margin-bottom: 16px;
+        }
+
+        .control-group {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .control-label {
+            font-size: 0.8rem;
+            color: var(--text-muted);
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            width: 75px;
+        }
+
+        .folders-scroll-area {
+            display: flex;
+            gap: 8px;
+            overflow-x: auto;
+            padding: 2px 0;
+            scrollbar-width: none;
+            -webkit-overflow-scrolling: touch;
+            flex: 1;
+        }
+
+        .folders-scroll-area::-webkit-scrollbar {
+            display: none;
+        }
+
+        .pill {
+            background: var(--surface);
+            border: 1px solid var(--glass-border);
+            color: var(--text-muted);
+            padding: 8px 16px;
+            border-radius: 100px;
+            font-size: 0.85rem;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.25s var(--bezier);
+            white-space: nowrap;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .pill:hover {
+            background: var(--surface-hover);
+            color: var(--text-main);
+        }
+
+        .pill.active {
+            background: var(--accent);
+            color: var(--bg);
+            border-color: var(--accent);
+            font-weight: 600;
+        }
+
+        .main-content {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            gap: 16px;
+            position: relative;
+        }
+
+        .metrics-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 12px;
+        }
+
+        .metric-card {
+            background: var(--surface);
+            border: 1px solid var(--glass-border);
+            border-radius: 16px;
+            padding: 14px 16px;
+            display: flex;
+            flex-direction: column;
+            gap: 4px;
+            backdrop-filter: blur(var(--blur-val));
+        }
+
+        .metric-title {
+            font-size: 0.75rem;
+            color: var(--text-muted);
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+        }
+
+        .metric-value {
+            font-size: 1.6rem;
+            font-weight: 700;
+            color: var(--text-main);
+        }
+
+        .click-arena {
+            flex: 1;
+            background: var(--surface);
+            border: 2px dashed var(--glass-border);
+            border-radius: 24px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            position: relative;
+            overflow: hidden;
+            transition: border-color 0.2s var(--bezier), background-color 0.2s var(--bezier);
+            user-select: none;
+            min-height: 220px;
+        }
+
+        .click-arena:hover {
+            background: var(--surface-hover);
+            border-color: rgba(255,255,255,0.2);
+        }
+
+        .click-arena-content {
+            text-align: center;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 10px;
+            padding: 24px;
+            z-index: 2;
+            pointer-events: none;
+        }
+
+        .click-arena-icon {
+            width: 56px;
+            height: 56px;
+            border-radius: 18px;
+            background: var(--glass);
+            border: 1px solid var(--glass-border);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: var(--accent);
+            margin-bottom: 2px;
+        }
+
+        .click-arena h2 {
+            font-size: 1.4rem;
+            font-weight: 600;
+            letter-spacing: -0.01em;
+        }
+
+        .click-arena p {
+            font-size: 0.85rem;
+            color: var(--text-muted);
+            max-width: 300px;
+        }
+
+        /* Objetivo Dinámico para Modo Aim */
+        .aim-target {
+            position: absolute;
+            width: 48px;
+            height: 48px;
+            border-radius: 50%;
+            background: var(--accent);
+            box-shadow: 0 0 15px var(--accent-glow);
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transform: scale(0);
+            animation: popIn 0.15s var(--spring) forwards;
+            z-index: 10;
+            border: 2px solid #ffffff;
+        }
+
+        .aim-target::after {
+            content: '';
+            width: 16px;
+            height: 16px;
+            background: var(--bg);
+            border-radius: 50%;
+        }
+
+        @keyframes popIn {
+            to { transform: scale(1); }
+        }
+
+        .click-ripple {
+            position: absolute;
+            width: 80px;
+            height: 80px;
+            border-radius: 50%;
+            background: var(--accent-glow);
+            transform: scale(0);
+            animation: rippleEffect 0.35s var(--bezier) forwards;
+            pointer-events: none;
+        }
+
+        @keyframes rippleEffect {
+            to { transform: scale(3.5); opacity: 0; }
+        }
+
+        .history-section {
+            background: var(--surface);
+            border: 1px solid var(--glass-border);
+            border-radius: 16px;
+            padding: 14px 16px;
+            max-height: 130px;
+            overflow-y: auto;
+            scrollbar-width: thin;
+        }
+
+        .history-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 10px;
+            font-size: 0.85rem;
+            font-weight: 600;
+            color: var(--text-muted);
+        }
+
+        .global-stats-bar {
+            display: flex;
+            gap: 16px;
+            font-size: 0.78rem;
+            color: var(--text-muted);
+            margin-bottom: 8px;
+        }
+
+        .global-stats-bar span {
+            color: var(--text-main);
+            font-weight: 600;
+        }
+
+        .history-list {
+            display: flex;
+            flex-direction: column;
+            gap: 6px;
+        }
+
+        .history-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 6px 10px;
+            background: var(--bg);
+            border-radius: 8px;
+            font-size: 0.82rem;
+            border: 1px solid var(--glass-border);
+        }
+
+        .history-item .mode-tag {
+            color: var(--text-muted);
+            font-size: 0.72rem;
+            background: var(--surface);
+            padding: 2px 6px;
+            border-radius: 4px;
+        }
+
+        /* Modal de Resultados */
+        .modal-overlay {
+            position: fixed;
+            inset: 0;
+            background: rgba(0,0,0,0.8);
+            backdrop-filter: blur(20px);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 100;
+            opacity: 0;
+            pointer-events: none;
+            transition: opacity 0.3s var(--bezier);
+        }
+
+        .modal-overlay.active {
+            opacity: 1;
+            pointer-events: auto;
+        }
+
+        .modal-card {
+            background: var(--surface);
+            border: 1px solid var(--glass-border);
+            border-radius: 24px;
+            padding: 28px;
+            width: 90%;
+            max-width: 420px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            text-align: center;
+            gap: 14px;
+            transform: scale(0.95);
+            transition: transform 0.3s var(--spring);
+            position: relative;
+        }
+
+        .modal-overlay.active .modal-card {
+            transform: scale(1);
+        }
+
+        .modal-close-corner {
+            position: absolute;
+            top: 16px;
+            right: 16px;
+            background: var(--bg);
+            border: 1px solid var(--glass-border);
+            color: var(--text-main);
+            width: 32px;
+            height: 32px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            transition: background 0.2s var(--bezier);
+        }
+
+        .modal-icon {
+            width: 56px;
+            height: 56px;
+            border-radius: 50%;
+            background: var(--accent-glow);
+            border: 1px solid var(--accent);
+            color: var(--accent);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-bottom: -2px;
+        }
+
+        .modal-title {
+            font-size: 1.3rem;
+            font-weight: 700;
+        }
+
+        .record-badge {
+            display: none;
+            background: var(--accent);
+            color: var(--bg);
+            font-size: 0.72rem;
+            font-weight: 700;
+            padding: 4px 10px;
+            border-radius: 20px;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            animation: pulseRecord 1.5s infinite;
+        }
+
+        @keyframes pulseRecord {
+            0%, 100% { opacity: 1; transform: scale(1); }
+            50% { opacity: 0.8; transform: scale(1.05); }
+        }
+
+        .modal-score-display {
+            display: flex;
+            flex-direction: column;
+            gap: 4px;
+            background: var(--bg);
+            padding: 12px 18px;
+            border-radius: 14px;
+            width: 100%;
+            border: 1px solid var(--glass-border);
+        }
+
+        .modal-score-label {
+            font-size: 0.72rem;
+            color: var(--text-muted);
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+        }
+
+        .modal-score-value {
+            font-size: 2rem;
+            font-weight: 800;
+            color: var(--text-main);
+        }
+
+        .modal-rank {
+            font-size: 0.85rem;
+            color: var(--accent);
+            font-weight: 600;
+        }
+
+        .perf-chart {
+            width: 100%;
+            height: 50px;
+            display: flex;
+            align-items: flex-end;
+            gap: 4px;
+            padding: 4px 8px;
+            background: var(--bg);
+            border-radius: 12px;
+            border: 1px solid var(--glass-border);
+        }
+
+        .perf-bar {
+            flex: 1;
+            background: var(--accent);
+            border-radius: 4px 4px 0 0;
+            min-height: 4px;
+            opacity: 0.8;
+            transition: height 0.3s var(--bezier);
+        }
+
+        .modal-input-group {
+            width: 100%;
+            display: flex;
+            flex-direction: column;
+            gap: 4px;
+            text-align: left;
+        }
+
+        .modal-input-group label {
+            font-size: 0.72rem;
+            color: var(--text-muted);
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+        }
+
+        .modal-input-group input {
+            background: var(--bg);
+            border: 1px solid var(--glass-border);
+            padding: 8px 12px;
+            border-radius: 10px;
+            color: var(--text-main);
+            font-size: 0.85rem;
+            outline: none;
+            width: 100%;
+        }
+
+        .modal-actions {
+            display: flex;
+            gap: 8px;
+            width: 100%;
+        }
+
+        .btn-primary {
+            background: var(--text-main);
+            color: var(--bg);
+            border: none;
+            padding: 10px 16px;
+            border-radius: 10px;
+            font-size: 0.85rem;
+            font-weight: 600;
+            cursor: pointer;
+            flex: 1;
+            transition: opacity 0.2s var(--bezier);
+        }
+
+        .btn-secondary {
+            background: var(--surface);
+            color: var(--text-main);
+            border: 1px solid var(--glass-border);
+            padding: 10px 16px;
+            border-radius: 10px;
+            font-size: 0.85rem;
+            font-weight: 600;
+            cursor: pointer;
+            flex: 1;
+            transition: background 0.2s var(--bezier);
+        }
+
+        .btn-primary:hover { opacity: 0.9; }
+        .btn-secondary:hover { background: var(--surface-hover); }
+
+        @media (max-width: 600px) {
+            .app-container { padding: 16px; height: 100vh; }
+            .metric-value { font-size: 1.3rem; }
+            .click-arena { min-height: 180px; }
+        }
+    </style>
+</head>
+<body>
+
+    <div class="app-container" id="main-view">
+        <header>
+            <div class="header-left">
+                <div class="app-icon-badge">
+                    <i data-lucide="gauge" size="20" style="color: var(--accent);"></i>
+                </div>
+                <h1 class="app-title">Test de CPS Pro</h1>
+            </div>
+            <div class="header-right">
+                <div class="theme-selector">
+                    <div class="theme-dot green" data-theme="green" title="Verde Neón"></div>
+                    <div class="theme-dot blue" data-theme="blue" title="Ciber Azul"></div>
+                    <div class="theme-dot purple" data-theme="purple" title="Púrpura Intenso"></div>
+                </div>
+                <div class="header-stats">
+                    <div class="stat-badge">
+                        <i data-lucide="trophy" size="14" style="color: var(--accent);"></i>
+                        Récord: <span id="header-highscore">0.0</span>
+                    </div>
+                </div>
+            </div>
+        </header>
+
+        <div class="challenge-banner" id="challenge-banner">
+            <span id="challenge-text">¡Te han retado!</span>
+            <button id="close-challenge" style="background: none; border: none; color: var(--accent); cursor: pointer;"><i data-lucide="x" size="16"></i></button>
+        </div>
+
+        <div class="controls-section">
+            <div class="control-group">
+                <span class="control-label">Modo</span>
+                <div class="folders-scroll-area" id="mode-pills">
+                    <button class="pill active" data-mode="mouse"><i data-lucide="mouse-pointer" size="14"></i> Ratón</button>
+                    <button class="pill" data-mode="space"><i data-lucide="keyboard" size="14"></i> Espacio</button>
+                    <button class="pill" data-mode="aim"><i data-lucide="crosshair" size="14"></i> Precisión</button>
+                    <button class="pill" data-mode="endurance"><i data-lucide="zap" size="14"></i> Resistencia</button>
+                </div>
+            </div>
+            <div class="control-group" id="time-group">
+                <span class="control-label">Tiempo</span>
+                <div class="folders-scroll-area" id="time-pills">
+                    <button class="pill" data-time="1">1s</button>
+                    <button class="pill active" data-time="5">5s</button>
+                    <button class="pill" data-time="10">10s</button>
+                </div>
+            </div>
+        </div>
+
+        <main class="main-content">
+            <div class="metrics-grid">
+                <div class="metric-card">
+                    <span class="metric-title" id="label-time-title">Tiempo</span>
+                    <span class="metric-value" id="stat-time">5.0s</span>
+                </div>
+                <div class="metric-card">
+                    <span class="metric-title" id="label-clicks-title">Clicks</span>
+                    <span class="metric-value" id="stat-clicks">0</span>
+                </div>
+                <div class="metric-card">
+                    <span class="metric-title" id="label-cps-title">CPS Actual</span>
+                    <span class="metric-value" id="stat-cps">0.0</span>
+                </div>
+            </div>
+
+            <div class="click-arena" id="click-arena">
+                <div class="click-arena-content" id="arena-content">
+                    <div class="click-arena-icon" id="arena-icon">
+                        <i data-lucide="mouse-pointer" size="28"></i>
+                    </div>
+                    <h2 id="arena-title">Haz clic aquí para empezar</h2>
+                    <p id="arena-subtitle">El cronómetro comenzará con tu primera interacción.</p>
+                </div>
+            </div>
+
+            <div class="history-section">
+                <div class="global-stats-bar">
+                    <div>Total Clicks: <span id="global-total-clicks">0</span></div>
+                    <div>Promedio General: <span id="global-avg-cps">0.0</span> CPS</div>
+                </div>
+                <div class="history-header">
+                    <span>Historial Reciente</span>
+                    <span id="history-count">0 tests</span>
+                </div>
+                <div class="history-list" id="history-list"></div>
+            </div>
+        </main>
+    </div>
+
+    <div class="modal-overlay" id="results-modal">
+        <div class="modal-card">
+            <button class="modal-close-corner" id="modal-retry-corner" title="Probar de nuevo">
+                <i data-lucide="rotate-ccw" size="16"></i>
+            </button>
+            <div class="modal-icon">
+                <i data-lucide="award" size="28"></i>
+            </div>
+            <div class="record-badge" id="record-badge">✨ ¡Nuevo Récord Personal! ✨</div>
+            <h3 class="modal-title">¡Test Completado!</h3>
+            <div class="modal-score-display">
+                <span class="modal-score-label" id="modal-score-label">Puntuación Final</span>
+                <span class="modal-score-value" id="modal-cps">0.0 CPS</span>
+                <span class="modal-rank" id="modal-rank">Rango: -</span>
+            </div>
+            
+            <div class="perf-chart" id="perf-chart" title="Rendimiento por segundo"></div>
+            <p id="modal-details" style="font-size: 0.78rem; color: var(--text-muted);">Has realizado 0 clics.</p>
+            
+            <div class="modal-input-group">
+                <label>Tu Nombre</label>
+                <input type="text" id="modal-name-input" placeholder="Ej. ProClicker99" value="Jugador">
+            </div>
+
+            <div class="modal-actions">
+                <button class="btn-primary" id="modal-retry-btn">Probar de nuevo</button>
+                <button class="btn-secondary" id="modal-share-btn">Compartir Reto 🔗</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        let appData = {
+            mode: 'mouse',
+            timeLimit: 5,
+            theme: 'green',
+            highScores: {
+                mouse: { 1: 0, 5: 0, 10: 0 },
+                space: { 1: 0, 5: 0, 10: 0 },
+                aim: { 1: 0, 5: 0, 10: 0 },
+                endurance: { 0: 0 }
+            },
+            history: []
+        };
+
+        let testState = {
+            status: 'IDLE',
+            clicks: 0,
+            aimMisses: 0,
+            timeLeft: 5,
+            timerInterval: null,
+            startTime: null,
+            lastClickTime: null,
+            secondClicks: []
+        };
+
+        const clickArena = document.getElementById('click-arena');
+        const arenaContent = document.getElementById('arena-content');
+        const arenaTitle = document.getElementById('arena-title');
+        const arenaSubtitle = document.getElementById('arena-subtitle');
+        const arenaIcon = document.getElementById('arena-icon');
+        const statTime = document.getElementById('stat-time');
+        const statClicks = document.getElementById('stat-clicks');
+        const statCps = document.getElementById('stat-cps');
+        const labelClicksTitle = document.getElementById('label-clicks-title');
+        const labelCpsTitle = document.getElementById('label-cps-title');
+        const headerHighscore = document.getElementById('header-highscore');
+        const historyList = document.getElementById('history-list');
+        const historyCount = document.getElementById('history-count');
+        const globalTotalClicks = document.getElementById('global-total-clicks');
+        const globalAvgCps = document.getElementById('global-avg-cps');
+        const timeGroup = document.getElementById('time-group');
+        
+        const resultsModal = document.getElementById('results-modal');
+        const modalCps = document.getElementById('modal-cps');
+        const modalScoreLabel = document.getElementById('modal-score-label');
+        const modalRank = document.getElementById('modal-rank');
+        const modalDetails = document.getElementById('modal-details');
+        const modalRetryBtn = document.getElementById('modal-retry-btn');
+        const modalRetryCorner = document.getElementById('modal-retry-corner');
+        const modalShareBtn = document.getElementById('modal-share-btn');
+        const modalNameInput = document.getElementById('modal-name-input');
+        const challengeBanner = document.getElementById('challenge-banner');
+        const closeChallenge = document.getElementById('close-challenge');
+        const recordBadge = document.getElementById('record-badge');
+        const perfChart = document.getElementById('perf-chart');
+
+        function loadData() {
+            const saved = localStorage.getItem('neo_cps_data_pro');
+            if (saved) {
+                try {
+                    appData = JSON.parse(saved);
+                    if (!appData.highScores.aim) {
+                        appData.highScores.aim = { 1: 0, 5: 0, 10: 0 };
+                    }
+                } catch (e) { console.error(e); }
+            }
+            const savedName = localStorage.getItem('neo_cps_username');
+            if (savedName) modalNameInput.value = savedName;
+
+            document.documentElement.setAttribute('data-theme', appData.theme || 'green');
+        }
+
+        function saveData() {
+            localStorage.setItem('neo_cps_data_pro', JSON.stringify(appData));
+            localStorage.setItem('neo_cps_username', modalNameInput.value.trim());
+        }
+
+        function renderApp() {
+            document.querySelectorAll('#mode-pills .pill').forEach(pill => {
+                pill.classList.toggle('active', pill.dataset.mode === appData.mode);
+            });
+
+            document.querySelectorAll('#time-pills .pill').forEach(pill => {
+                pill.classList.toggle('active', parseInt(pill.dataset.time) === appData.timeLimit);
+            });
+
+            document.querySelectorAll('.theme-dot').forEach(dot => {
+                dot.style.borderColor = dot.dataset.theme === appData.theme ? '#FFFFFF' : 'transparent';
+            });
+
+            if (appData.mode === 'endurance') {
+                timeGroup.style.display = 'none';
+            } else {
+                timeGroup.style.display = 'flex';
+            }
+
+            if (testState.status === 'IDLE') {
+                if (arenaContent) arenaContent.style.display = 'flex';
+                if (appData.mode === 'mouse') {
+                    arenaIcon.innerHTML = '<i data-lucide="mouse-pointer" size="28"></i>';
+                    arenaTitle.textContent = 'Haz clic aquí para empezar';
+                    arenaSubtitle.textContent = 'El cronómetro comenzará con tu primer clic.';
+                } else if (appData.mode === 'space') {
+                    arenaIcon.innerHTML = '<i data-lucide="keyboard" size="28"></i>';
+                    arenaTitle.textContent = 'Pulsa la barra espaciadora';
+                    arenaSubtitle.textContent = 'El cronómetro comenzará al presionar Espacio.';
+                } else if (appData.mode === 'aim') {
+                    if (arenaContent) arenaContent.style.display = 'none';
+                    if (!clickArena.querySelector('.aim-target')) {
+                        spawnAimTarget();
+                    }
+                } else if (appData.mode === 'endurance') {
+                    arenaIcon.innerHTML = '<i data-lucide="zap" size="28"></i>';
+                    arenaTitle.textContent = 'Modo Resistencia';
+                    arenaSubtitle.textContent = 'Sin límite de tiempo. Termina al desacelerar.';
+                }
+            }
+
+            let currentHigh = 0;
+            if (appData.mode === 'endurance') {
+                currentHigh = appData.highScores.endurance?.[0] || 0;
+            } else {
+                currentHigh = appData.highScores[appData.mode]?.[appData.timeLimit] || 0;
+            }
+            
+            if (appData.mode === 'aim') {
+                headerHighscore.textContent = currentHigh + ' dianas';
+            } else {
+                headerHighscore.textContent = currentHigh.toFixed(1);
+            }
+
+            if (appData.mode === 'endurance') {
+                statTime.textContent = testState.status === 'RUNNING' ? ((Date.now() - testState.startTime)/1000).toFixed(1) + 's' : '0.0s';
+            } else {
+                statTime.textContent = testState.status === 'RUNNING' ? testState.timeLeft.toFixed(1) + 's' : appData.timeLimit.toFixed(1) + 's';
+            }
+
+            statClicks.textContent = testState.clicks;
+
+            if (appData.mode === 'aim') {
+                labelClicksTitle.textContent = 'Aciertos';
+                labelCpsTitle.textContent = 'Precisión';
+                const totalAttempts = testState.clicks + testState.aimMisses;
+                const accuracy = totalAttempts > 0 ? Math.round((testState.clicks / totalAttempts) * 100) : 100;
+                statCps.textContent = accuracy + '%';
+            } else {
+                labelClicksTitle.textContent = 'Clicks';
+                labelCpsTitle.textContent = 'CPS Actual';
+                const elapsed = testState.status === 'RUNNING' ? 
+                    (appData.mode === 'endurance' ? (Date.now() - testState.startTime)/1000 : appData.timeLimit - testState.timeLeft) : 0;
+                const currentCps = elapsed > 0 ? (testState.clicks / elapsed).toFixed(1) : '0.0';
+                statCps.textContent = currentCps;
+            }
+
+            renderGlobalStats();
+            renderHistory();
+            if (window.lucide) lucide.createIcons();
+        }
+
+        function renderGlobalStats() {
+            const totalClicks = appData.history.reduce((sum, item) => sum + item.clicks, 0);
+            globalTotalClicks.textContent = totalClicks;
+
+            if (appData.history.length > 0) {
+                const validCpsItems = appData.history.filter(item => item.mode !== 'aim');
+                if (validCpsItems.length > 0) {
+                    const avg = validCpsItems.reduce((sum, item) => sum + item.cps, 0) / validCpsItems.length;
+                    globalAvgCps.textContent = avg.toFixed(1);
+                } else {
+                    globalAvgCps.textContent = '0.0';
+                }
+            } else {
+                globalAvgCps.textContent = '0.0';
+            }
+        }
+
+        function renderHistory() {
+            historyCount.textContent = `${appData.history.length} tests`;
+            if (appData.history.length === 0) {
+                historyList.innerHTML = `<div style="text-align: center; color: var(--text-muted); font-size: 0.78rem; padding: 8px;">No hay registros recientes.</div>`;
+                return;
+            }
+
+            historyList.innerHTML = appData.history.slice(0, 8).map(item => `
+                <div class="history-item">
+                    <div style="display: flex; align-items: center; gap: 6px;">
+                        <span class="mode-tag">${item.mode} (${item.timeLimit || 'Inf'}s)</span>
+                        <span style="font-weight: 600;">${item.mode === 'aim' ? item.clicks + ' dianas' : item.cps + ' CPS'}</span>
+                    </div>
+                    <span style="color: var(--text-muted); font-size: 0.72rem;">${item.mode === 'aim' ? (item.accuracy || 100) + '% acc' : item.clicks + ' clics'}</span>
+                </div>
+            `).join('');
+        }
+
+        function spawnAimTarget() {
+            const oldTarget = clickArena.querySelector('.aim-target');
+            if (oldTarget) oldTarget.remove();
+
+            const target = document.createElement('div');
+            target.className = 'aim-target';
+            
+            const arenaRect = clickArena.getBoundingClientRect();
+            const width = arenaRect.width || 300;
+            const height = arenaRect.height || 200;
+
+            const maxX = Math.max(10, width - 60);
+            const maxY = Math.max(10, height - 60);
+            const randomX = Math.floor(Math.random() * maxX) + 10;
+            const randomY = Math.floor(Math.random() * maxY) + 10;
+
+            target.style.left = `${randomX}px`;
+            target.style.top = `${randomY}px`;
+
+            target.addEventListener('mousedown', (ev) => {
+                ev.stopPropagation();
+                if (testState.status === 'IDLE') {
+                    startTest();
+                }
+                if (testState.status === 'RUNNING') {
+                    testState.clicks++;
+                    testState.lastClickTime = Date.now();
+                    const currentSec = Math.floor((Date.now() - testState.startTime) / 1000);
+                    testState.secondClicks[currentSec] = (testState.secondClicks[currentSec] || 0) + 1;
+                    
+                    target.remove();
+                    spawnAimTarget();
+                    renderApp();
+                }
+            });
+
+            clickArena.appendChild(target);
+        }
+
+        function handleInteraction(e) {
+            if (testState.status === 'IDLE') {
+                startTest();
+            }
+
+            if (testState.status === 'RUNNING') {
+                testState.clicks++;
+                testState.lastClickTime = Date.now();
+
+                const currentSec = Math.floor((Date.now() - testState.startTime) / 1000);
+                testState.secondClicks[currentSec] = (testState.secondClicks[currentSec] || 0) + 1;
+
+                if (e && e.clientX && e.clientY) {
+                    const rect = clickArena.getBoundingClientRect();
+                    const x = e.clientX - rect.left;
+                    const y = e.clientY - rect.top;
+                    
+                    const ripple = document.createElement('div');
+                    ripple.className = 'click-ripple';
+                    ripple.style.left = `${x - 40}px`;
+                    ripple.style.top = `${y - 40}px`;
+                    clickArena.appendChild(ripple);
+                    setTimeout(() => ripple.remove(), 350);
+                }
+
+                renderApp();
+            }
+        }
+
+        function startTest() {
+            testState.status = 'RUNNING';
+            testState.clicks = 0;
+            testState.aimMisses = 0;
+            testState.timeLeft = appData.timeLimit;
+            testState.startTime = Date.now();
+            testState.lastClickTime = Date.now();
+            testState.secondClicks = [];
+
+            if (appData.mode === 'aim') {
+                if (arenaContent) arenaContent.style.display = 'none';
+            } else {
+                arenaTitle.textContent = '¡RÁPIDO! ¡EN MARCHA!';
+                arenaSubtitle.textContent = '¡Sigue pulsando sin parar!';
+            }
+
+            const intervalMs = 50;
+            const decrement = intervalMs / 1000;
+
+            testState.timerInterval = setInterval(() => {
+                if (appData.mode === 'endurance') {
+                    if (Date.now() - testState.lastClickTime > 800 && testState.clicks > 0) {
+                        endTest();
+                        return;
+                    }
+                } else {
+                    testState.timeLeft -= decrement;
+                    if (testState.timeLeft <= 0) {
+                        testState.timeLeft = 0;
+                        endTest();
+                        return;
+                    }
+                }
+                renderApp();
+            }, intervalMs);
+        }
+
+        function endTest() {
+            clearInterval(testState.timerInterval);
+            testState.status = 'FINISHED';
+
+            const exactTime = appData.mode === 'endurance' ? 
+                Math.max(0.5, (Date.now() - testState.startTime) / 1000) : appData.timeLimit;
+
+            let finalValue = 0;
+            let accuracy = 100;
+
+            if (appData.mode === 'aim') {
+                finalValue = testState.clicks;
+                const totalAttempts = testState.clicks + testState.aimMisses;
+                accuracy = totalAttempts > 0 ? Math.round((testState.clicks / totalAttempts) * 100) : 100;
+            } else {
+                finalValue = parseFloat((testState.clicks / exactTime).toFixed(1));
+            }
+
+            let currentHigh = 0;
+            if (appData.mode === 'endurance') {
+                currentHigh = appData.highScores.endurance[0] || 0;
+                if (finalValue > currentHigh) appData.highScores.endurance[0] = finalValue;
+            } else if (appData.mode === 'aim') {
+                currentHigh = appData.highScores.aim[appData.timeLimit] || 0;
+                if (finalValue > currentHigh) appData.highScores.aim[appData.timeLimit] = finalValue;
+            } else {
+                currentHigh = appData.highScores[appData.mode][appData.timeLimit] || 0;
+                if (finalValue > currentHigh) appData.highScores[appData.mode][appData.timeLimit] = finalValue;
+            }
+
+            const isNewRecord = finalValue > currentHigh;
+
+            appData.history.unshift({
+                mode: appData.mode,
+                timeLimit: appData.mode === 'endurance' ? 'Inf' : appData.timeLimit,
+                cps: appData.mode === 'aim' ? 0 : finalValue,
+                clicks: testState.clicks,
+                accuracy: appData.mode === 'aim' ? accuracy : 100,
+                date: new Date().toLocaleTimeString()
+            });
+
+            saveData();
+
+            if (appData.mode === 'aim') {
+                modalScoreLabel.textContent = 'Dianas Acertadas';
+                modalCps.textContent = `${finalValue} Dianas`;
+                modalRank.textContent = `Precisión: ${accuracy}% — Rango: ${getAimRank(finalValue, accuracy)}`;
+                modalDetails.textContent = `Has acertado ${testState.clicks} dianas con un ${accuracy}% de precisión en ${exactTime.toFixed(1)}s.`;
+            } else {
+                modalScoreLabel.textContent = 'Puntuación Final';
+                modalCps.textContent = `${finalValue} CPS`;
+                modalRank.textContent = `Rango: ${getRank(finalValue)}`;
+                modalDetails.textContent = `Has realizado ${testState.clicks} clics en ${exactTime.toFixed(1)}s.`;
+            }
+
+            recordBadge.style.display = isNewRecord ? 'block' : 'none';
+            modalShareBtn.textContent = 'Compartir Reto 🔗';
+
+            renderPerfChart(testState.secondClicks);
+            resultsModal.classList.add('active');
+            renderApp();
+        }
+
+        function renderPerfChart(dataArray) {
+            perfChart.innerHTML = '';
+            if (!dataArray || dataArray.length === 0) {
+                perfChart.innerHTML = '<span style="font-size:0.75rem; color:var(--text-muted); margin:auto;">Sin datos suficientes</span>';
+                return;
+            }
+            const maxVal = Math.max(...dataArray, 1);
+            dataArray.forEach(val => {
+                const bar = document.createElement('div');
+                bar.className = 'perf-bar';
+                const heightPercent = Math.min(100, (val / maxVal) * 100);
+                bar.style.height = `${heightPercent}%`;
+                bar.title = `${val} acciones en este segundo`;
+                perfChart.appendChild(bar);
+            });
+        }
+
+        function getRank(cps) {
+            if (cps >= 30) return 'Tramposo ❌';
+            if (cps >= 19) return '¿Hacking? 🧑‍💻';
+            if (cps >= 16) return 'BOT 👾';
+            if (cps >= 14) return 'Velocidad de la Luz ⚡';
+            if (cps >= 12) return 'Maestro del Click 🚀';
+            if (cps >= 10) return 'Gamer Pro 🎮';
+            if (cps >= 8)  return 'Clicker Rápido 🔥';
+            if (cps >= 6)  return 'Jugador Promedio 👍';
+            return 'Casual ☕';
+        }
+
+        function getAimRank(score, accuracy) {
+            if (score >= 25 && accuracy > 90) return 'Dios del Aim 🎯';
+            if (score >= 18) return 'Francotirador Pro 🦅';
+            if (score >= 10) return 'Buen Pulso 🎮';
+            return 'Aprendiz 🔍';
+        }
+
+        function resetTest() {
+            clearInterval(testState.timerInterval);
+            testState.status = 'IDLE';
+            testState.clicks = 0;
+            testState.aimMisses = 0;
+            testState.timeLeft = appData.timeLimit;
+            resultsModal.classList.remove('active');
+
+            const oldTarget = clickArena.querySelector('.aim-target');
+            if (oldTarget) oldTarget.remove();
+
+            if (arenaContent) arenaContent.style.display = 'flex';
+            renderApp();
+        }
+
+        function shareChallenge() {
+            const name = modalNameInput.value.trim() || 'Jugador';
+            saveData();
+            
+            const url = new URL(window.location.origin + window.location.pathname);
+            url.searchParams.set('challenger', encodeURIComponent(name));
+            url.searchParams.set('score', modalCps.textContent);
+            url.searchParams.set('mode', appData.mode);
+            url.searchParams.set('time', appData.timeLimit);
+
+            navigator.clipboard.writeText(url.toString()).then(() => {
+                modalShareBtn.textContent = '¡Enlace copiado! 📋';
+                setTimeout(() => modalShareBtn.textContent = 'Compartir Reto 🔗', 2000);
+            });
+        }
+
+        clickArena.addEventListener('mousedown', (e) => {
+            if (appData.mode === 'mouse' || appData.mode === 'endurance') {
+                handleInteraction(e);
+            } else if (appData.mode === 'aim') {
+                if (testState.status === 'RUNNING' && e.target === clickArena) {
+                    testState.aimMisses++;
+                    renderApp();
+                }
+            }
+        });
+
+        window.addEventListener('keydown', (e) => {
+            if (e.code === 'Space') {
+                e.preventDefault();
+                if (appData.mode === 'space') {
+                    handleInteraction(e);
+                }
+            }
+        });
+
+        document.querySelectorAll('#mode-pills .pill').forEach(pill => {
+            pill.addEventListener('click', () => {
+                if (testState.status === 'RUNNING') return;
+                appData.mode = pill.dataset.mode;
+                resetTest();
+            });
+        });
+
+        document.querySelectorAll('#time-pills .pill').forEach(pill => {
+            pill.addEventListener('click', () => {
+                if (testState.status === 'RUNNING') return;
+                appData.timeLimit = parseInt(pill.dataset.time);
+                resetTest();
+            });
+        });
+
+        document.querySelectorAll('.theme-dot').forEach(dot => {
+            dot.addEventListener('click', () => {
+                appData.theme = dot.dataset.theme;
+                document.documentElement.setAttribute('data-theme', appData.theme);
+                saveData();
+                renderApp();
+            });
+        });
+
+        modalRetryBtn.addEventListener('click', resetTest);
+        modalRetryCorner.addEventListener('click', resetTest);
+        modalShareBtn.addEventListener('click', shareChallenge);
+        closeChallenge.addEventListener('click', () => challengeBanner.style.display = 'none');
+
+        window.onload = () => {
+            loadData();
+            renderApp();
+        };
+    </script>
+</body>
+</html>
