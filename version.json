@@ -5,9 +5,9 @@
     "date": "24 de Octubre 2026",
     "title": "1.8 - Neo Drop 2",
     "header": {
-        "enabled": false,
-        "image": "",
-        "alt": ""
+        "enabled": true,
+        "image": "https://github.com/CapybaraGalaxy/HOMESCREEN/blob/main/Media/Updates/1.8.png?raw=true",
+        "alt": "(1.8) Neo Drop 2"
     },
     "sections": [
         {
