@@ -128,6 +128,13 @@ body.no-blur .tool-card.keyboard-active .star-btn.active {
     -webkit-tap-highlight-color: transparent; 
 }
 
+button,
+input,
+select,
+textarea {
+    font-family: inherit;
+}
+
 body {
     margin: 0;
     background-color: var(--bg);
@@ -595,7 +602,7 @@ body.hide-app-stars .tool-card .star-btn { display: none !important; }
     z-index: 999;
 }
 .error-card span { font-size: 0.95rem; font-weight: 400; line-height: 1.4; }
-.error-card small { color: rgba(255, 255, 255, 0.6); font-family: monospace; font-size: 0.8rem; margin-top: 5px; display: block; background: rgba(0,0,0,0.2); padding: 5px 10px; border-radius: 6px; }
+.error-card small { color: rgba(255, 255, 255, 0.6); font-family: var(--font-main); font-size: 0.8rem; margin-top: 5px; display: block; background: rgba(0,0,0,0.2); padding: 5px 10px; border-radius: 6px; }
 
 /* ==========================================
    NUEVO UI INFERIOR: BUSCADOR + DOCK
@@ -707,7 +714,7 @@ body.modal-open .settings-btn {
 body.modal-open .search-panel { transform: translateX(-50%) translateY(18px); }
 
 .search-header { position: relative; display: flex; align-items: center; justify-content: center; padding: 0 20px; min-height: 48px; cursor: pointer; transition: min-height 0.5s var(--bezier); }
-.search-input { flex: 0 1 auto; width: 0; max-width: 0; background: transparent; border: none; outline: none; color: #fff; font-family: 'Outfit'; font-size: 1.1rem; opacity: 0; padding: 10px 0; transform: translateX(-8px); transition: width 0.4s var(--bezier), max-width 0.4s var(--bezier), opacity 0.25s ease, transform 0.4s var(--bezier); pointer-events: none; }
+.search-input { flex: 0 1 auto; width: 0; max-width: 0; background: transparent; border: none; outline: none; color: #fff; font-family: var(--font-main); font-size: 1.1rem; opacity: 0; padding: 10px 0; transform: translateX(-8px); transition: width 0.4s var(--bezier), max-width 0.4s var(--bezier), opacity 0.25s ease, transform 0.4s var(--bezier); pointer-events: none; }
 .search-panel.expanded .search-input { flex: 1; width: 100%; max-width: 100%; opacity: 1; transform: translateX(0); pointer-events: auto; }
 .search-panel.expanded .search-header { justify-content: flex-start; min-height: 48px; }
 .search-panel.expanded .chip-placeholder { opacity: 0; transform: translateY(5px) scale(0.96); pointer-events: none; visibility: hidden; }
@@ -890,7 +897,7 @@ body.super-performance .settings-panel {
     text-align: left;
     padding: 11px 12px;
     border-radius: 12px;
-    font-family: 'Outfit', sans-serif;
+    font-family: var(--font-main);
     font-size: 0.88rem;
     font-weight: 500;
     cursor: pointer;
@@ -973,7 +980,7 @@ body.super-performance .settings-panel {
     color: var(--text-muted);
     font-size: 0.8rem;
     line-height: 1.5;
-    font-family: 'Outfit', sans-serif;
+    font-family: var(--font-main);
 }
 .settings-icon-badge--large {
     width: 40px;
@@ -997,7 +1004,7 @@ body.super-performance .settings-panel {
     padding: 10px 12px;
     cursor: pointer;
     transition: transform 0.2s ease, background 0.2s ease, border-color 0.2s ease;
-    font-family: 'Outfit', sans-serif;
+    font-family: var(--font-main);
 }
 .quick-access:hover {
     background: rgba(255,255,255,0.07);
@@ -1069,7 +1076,7 @@ body.super-performance .settings-panel {
     border-radius: 12px;
     cursor: pointer;
     transition: all 0.3s var(--bezier);
-    font-family: 'Outfit', sans-serif;
+    font-family: var(--font-main);
     min-height: 92px;
 }
 .layout-opt i, .layout-opt svg { width: 16px; height: 16px; }
@@ -1128,7 +1135,7 @@ body.super-performance .settings-panel {
     color: var(--text-main);
     padding: 10px 12px;
     border-radius: 999px;
-    font-family: 'Outfit';
+    font-family: var(--font-main);
     font-size: 0.85rem;
     cursor: pointer;
     transition: all 0.25s var(--bezier);
@@ -1170,7 +1177,7 @@ body.super-performance .settings-panel {
     background: transparent;
     border: none;
     color: var(--text-main);
-    font-family: 'Outfit';
+    font-family: var(--font-main);
     font-size: 0.84rem;
     text-align: left;
     padding: 10px 12px;
@@ -1428,10 +1435,18 @@ body.folder-modal-size-5 #folderModal, body.folder-modal-size-5 #hiddenFolderMod
 .changelog-section h3 { margin: 0 0 12px; color: var(--text-main); font-size: 0.98rem; font-weight: 600; }
 .changelog-markdown { color: var(--text-muted); font-size: 0.86rem; line-height: 1.65; overflow-wrap: anywhere; }
 .changelog-markdown p { margin: 0 0 10px; }
+.changelog-markdown h1,
+.changelog-markdown h2,
 .changelog-markdown h3,
 .changelog-markdown h4,
 .changelog-markdown h5,
-.changelog-markdown h6 { margin: 14px 0 7px; color: var(--text-main); font-size: 0.9rem; }
+.changelog-markdown h6 { margin: 14px 0 7px; color: var(--text-main); }
+.changelog-markdown h1,
+.changelog-markdown h2 { font-size: 1.08rem; }
+.changelog-markdown h3,
+.changelog-markdown h4,
+.changelog-markdown h5,
+.changelog-markdown h6 { font-size: 0.9rem; }
 .changelog-markdown ul,
 .changelog-markdown ol { display: grid; gap: 6px; margin: 8px 0 14px; padding-left: 22px; }
 .changelog-markdown li { padding-left: 2px; }
@@ -1492,7 +1507,7 @@ body.folder-modal-size-5 #folderModal, body.folder-modal-size-5 #hiddenFolderMod
 #folderApps.grid-mode .tool-card .star-btn { position: absolute; top: 6px; right: 6px; padding: 2px; }
 
 .modal-buttons { display: flex; justify-content: flex-end; gap: 10px; margin-top: auto; }
-.modal-btn { padding: 10px 18px; border-radius: 999px; font-family: 'Outfit'; font-size: 0.9rem; cursor: pointer; transition: all 0.25s var(--bezier); border: none; font-weight: 500; }
+.modal-btn { padding: 10px 18px; border-radius: 999px; font-family: var(--font-main); font-size: 0.9rem; cursor: pointer; transition: all 0.25s var(--bezier); border: none; font-weight: 500; }
 .modal-btn.secondary { background: rgba(255,255,255,0.08); color: var(--text-main); }
 .modal-btn.secondary:hover { background: rgba(255,255,255,0.15); }
 
@@ -1556,7 +1571,7 @@ body.zen-mode #bgCanvas { opacity: 0 !important; }
 .update-highlights li { display: -webkit-box; overflow: hidden; -webkit-box-orient: vertical; -webkit-line-clamp: 2; }
 .update-banner-actions { display: flex; flex-wrap: wrap; justify-content: flex-end; gap: 8px; margin-top: 3px; }
 #updateNow,
-.update-secondary { border: 0; padding: 9px 16px; border-radius: 20px; font-family: 'Outfit'; font-size: 0.82rem; font-weight: 500; cursor: pointer; transition: transform 0.2s, opacity 0.2s; }
+.update-secondary { border: 0; padding: 9px 16px; border-radius: 20px; font-family: var(--font-main); font-size: 0.82rem; font-weight: 500; cursor: pointer; transition: transform 0.2s, opacity 0.2s; }
 #updateNow { background: #34C759; color: #000; }
 .update-secondary { background: rgba(255,255,255,0.09); color: var(--text-main); }
 #updateNow:hover,

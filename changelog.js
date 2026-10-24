@@ -78,11 +78,11 @@
                 continue;
             }
 
-            const heading = line.match(/^(#{1,4})\s+(.+)$/);
+            const heading = line.match(/^(#{1,6})\s+(.+)$/);
             if (heading) {
                 flushParagraph();
                 closeList();
-                const level = Math.min(heading[1].length + 2, 6);
+                const level = heading[1].length;
                 output.push(`<h${level}>${renderInline(heading[2])}</h${level}>`);
                 continue;
             }

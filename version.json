@@ -1,5 +1,33 @@
 {
     "releases":  [
+        {
+    "version": "1.8 - Neo Drop 2",
+    "date": "24 de Octubre 2026",
+    "title": "1.8 - Neo Drop 2",
+    "header": {
+        "enabled": false,
+        "image": "",
+        "alt": ""
+    },
+    "sections": [
+        {
+            "title": "",
+            "content": "# Introducción\n\nEste drop de Homescreen se centra en ofrecer una personalización mucho más profunda, además de pulir detalles para mejorar la experiencia del usuario."
+        },
+        {
+            "title": "",
+            "content": "# Nuevas Aplicaciones\n\n**Número aleatorio:** Generador de números aleatorios.\n\n**Gradients:** Generador de degradados con varias opciones de exportación.\n\n**Metadata:** Visor de metadatos de archivos.\n\n**Pastebin - BETA:** Aplicación para compartir texto y archivos.\n\n**LED:** Letrero LED de texto con varios modos.\n\n**Teleprompter:** Teleprompter con opciones de pausa, formato de texto y seguimiento de voz dinámico.\n\n**CPS test:** Prueba de velocidad de clics y espacio (modos click, espacio, precisión y resistencia), con soporte para desafíos a amigos mediante enlace."
+        },
+        {
+            "title": "",
+            "content": "# Nuevos Ajustes y Reorganización\n\nLos ajustes ahora están organizados en las categorías Pantalla de inicio, Aplicaciones, Apariencia, Sonido y tacto, y Sistema y datos.\n\n## Inicio\n\nAcceso rápido para **\"Añadir Nueva App\"** y para **\"Hacer o cargar una copia de seguridad\"**.\n\n## 🏠 Pantalla de Inicio\n\nNueva opción **\"No mostrar saludo nunca\"** para ocultar el saludo permanentemente, además de un atajo directo a la animación del saludo en la pestaña de Apariencia. También se pueden ocultar los iconos de estrella de las aplicaciones sin perder el gesto para arrastrarlas a Favoritos. Se añadió un control deslizante para ajustar el **tamaño de la ventana de carpetas**.\n\n## 🎨 Apariencia y Rendimiento\n\nSe añadieron controles para el **Ancho Máximo** del contenedor principal y el número de **Columnas** en las vistas Lista y Cuadrícula (con una advertencia para dispositivos móviles). También se puede elegir la **Fuente principal** (Outfit, Inter, Roboto, JetBrains Mono o la fuente del sistema).\n\nLa **Personalización del Reloj** permite elegir el formato de hora (12 h/24 h), entre los estilos Digital, Analógico horizontal y Analógico solo agujas, y activar la opción para **mostrar segundos** en tiempo real. También se puede elegir el **Pack de saludos**, con saludos tradicionales o citas famosas.\n\n## Sistema y datos\n\nNueva guía para configurar la transparencia en el navegador. El historial de cambios también se ha renovado con búsqueda de versiones, formato enriquecido e imágenes en los encabezados."
+        },
+        {
+            "title": "",
+            "content": "# Otras Mejoras y Rendimiento\n\n**Librería de iconos Lucide local:** Se eliminó la dependencia externa por CDN para evitar fallos de carga si está bloqueada.\n\nSe corrigieron las animaciones del panel de ajustes en modo rendimiento.\n\n## SEO y Redes Sociales\n\nSe añadieron `meta name=\"description\"` y etiquetas **Open Graph** (`og:title`, `og:description`, `og:image`, `og:url`, `og:locale`) para mejorar la compartición en redes sociales.\n\n## Búsqueda difusa y sin tildes\n\nEl buscador ahora tolera faltas de ortografía leves y omisión de tildes con puntuación de relevancia precisa.\n\n## Apertura y búsqueda inteligente\n\nPulsar cualquier letra o número en el homescreen abre el buscador y agrupa la entrada tras una breve fracción de segundo para completar la palabra.\n\nSe solucionó el problema del fondo desenfocado (requiere tener activada la opción de fondo oscuro sólido)."
+        }
+    ]
+},
                      {
                          "version":  "1.7 - Neo Drop 1",
                          "date":  "19 de Septiembre 2026",
