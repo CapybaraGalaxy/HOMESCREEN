@@ -1,10 +1,27 @@
 <div align="center">
 
+<p align="center">
+  <img
+    src="https://raw.githubusercontent.com/CapybaraGalaxy/HOMESCREEN/main/favicon.png"
+    alt="Homescreen NEO"
+    width="180"
+  >
+</p>
+
 # Homescreen NEO
 
 **Tu espacio digital, reunido en un solo lugar.**
 
 Una interfaz personalizable para acceder a herramientas, aplicaciones, juegos y recursos desde una única pantalla.
+
+<p align="center">
+  <img
+    src="https://raw.githubusercontent.com/CapybaraGalaxy/HOMESCREEN/main/Media/og.png"
+    alt="Homescreen NEO"
+    width="180"
+  >
+</p>
+
 
 [**Abrir Homescreen NEO**](https://capybaragalaxy.github.io/HOMESCREEN/)
 
