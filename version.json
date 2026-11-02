@@ -11,6 +11,10 @@
     },
     "sections": [
         {
+            "title": "Novedades del 2 de noviembre",
+            "content": "- **Confirmación antes de salir:** al abrir enlaces externos desde el perfil o la guía de transparencia, Homescreen muestra la dirección de destino y permite volver o continuar.\n- **Acceso a carpetas ocultas:** mantén pulsado el indicador de versión para abrirlas. Un clic normal en la versión muestra este registro de cambios desde la última versión.\n- **Perfil y repositorio oficial:** nueva tarjeta en Ajustes > Sistema y datos con información de [CapybaraGalaxy](https://github.com/CapybaraGalaxy), desarrollador principal, y acceso al [repositorio oficial de Homescreen](https://github.com/CapybaraGalaxy/HOMESCREEN)."
+        },
+        {
             "title": "",
             "content": "# Introducción\n\nEste drop de Homescreen se centra en ofrecer una personalización mucho más profunda, además de pulir detalles para mejorar la experiencia del usuario."
         },

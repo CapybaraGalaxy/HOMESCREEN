@@ -69,7 +69,7 @@
         <div><strong>VERSIÓN LOCAL</strong> <span>· Ir a web</span></div>
     </a>
 
-    <div class="version-tag" id="versionTag">TEST 1.8.0 - Neo Drop 2</div>
+    <div class="version-tag" id="versionTag" role="button" tabindex="0" aria-label="Versión actual. Pulsa para ver el registro de cambios o mantén pulsado para abrir las carpetas ocultas">TEST 1.8.0 - Neo Drop 2</div>
 
     <div class="ui-layer">
         <header class="header">
@@ -144,6 +144,17 @@
         </div>
         <div class="modal-buttons">
             <button class="modal-btn secondary" onclick="closeModal('changelogModal')">Cerrar</button>
+        </div>
+    </div>
+
+    <div class="external-exit-backdrop" id="externalExitBackdrop" aria-hidden="true"></div>
+    <div class="custom-modal external-exit-modal" id="externalExitModal" role="dialog" aria-modal="true" aria-labelledby="externalExitTitle">
+        <div class="external-exit-icon"><i data-lucide="external-link"></i></div>
+        <p class="modal-title" id="externalExitTitle">Estás a punto de salir de Homescreen</p>
+        <p class="external-exit-url" id="externalExitUrl"></p>
+        <div class="modal-buttons">
+            <button class="modal-btn secondary" id="externalExitBackBtn" type="button">Volver</button>
+            <button class="modal-btn primary" id="externalExitContinueBtn" type="button">Seguir</button>
         </div>
     </div>
 
@@ -1457,6 +1468,25 @@ function appIconMarkup(app) {
                     <input type="file" id="importSettingsFile" accept=".json,.html,application/json,text/plain" style="display: none;">
                 </div>
 
+                <div class="creator-card">
+                    <a class="creator-project-icon external-warning-link" href="https://github.com/CapybaraGalaxy/HOMESCREEN" target="_blank" rel="noopener noreferrer" aria-label="Visitar el código de Homescreen">
+                        <img src="favicon.png" alt="Logo de Homescreen">
+                    </a>
+                    <div class="creator-project-info">
+                        <div class="creator-heading"><i data-lucide="code-2"></i><span>Homescreen es<br>de <strong>código abierto</strong></span></div>
+                        <a class="creator-visit external-warning-link" href="https://github.com/CapybaraGalaxy/HOMESCREEN" target="_blank" rel="noopener noreferrer"><i data-lucide="cat"></i> Visitar código</a>
+                    </div>
+                    <div class="creator-profile">
+                        <div class="creator-profile-info">
+                            <div class="creator-heading"><i data-lucide="code-2"></i><span><strong>CapybaraGalaxy</strong><br>Desarrollador principal</span></div>
+                            <a class="creator-visit external-warning-link" href="https://github.com/CapybaraGalaxy" target="_blank" rel="noopener noreferrer"><i data-lucide="cat"></i> Visita mi perfil</a>
+                        </div>
+                        <a class="creator-avatar external-warning-link" href="https://github.com/CapybaraGalaxy" target="_blank" rel="noopener noreferrer" aria-label="Visitar el perfil de CapybaraGalaxy">
+                            <img src="Media/gp.png" alt="Avatar de CapybaraGalaxy">
+                        </a>
+                    </div>
+                </div>
+
                 <span class="settings-section-title">Opciones Avanzadas</span>
 <div class="setting-item-row">
     <div class="setting-item-meta">
@@ -1625,7 +1655,9 @@ function appIconMarkup(app) {
         });
 
         let settingsVersionClicks = 0;
-        let versionClicks = 0;
+        let versionPressStartedAt = 0;
+        let suppressVersionClick = false;
+        const hiddenFolderHoldDuration = 700;
         let warningTimer = null;
         let draggedUrl = null;
         let isDraggingFromFavorites = false;
@@ -1648,13 +1680,30 @@ function appIconMarkup(app) {
             isDraggingFromFavorites = false;
         }
 
-        document.getElementById('versionTag').onclick = () => {
-            versionClicks++;
-            if (versionClicks === 5) {
-                versionClicks = 0;
-                openModal('hiddenFolderModal');
-            }
-        };
+        const versionTag = document.getElementById('versionTag');
+        versionTag.addEventListener('pointerdown', (event) => {
+            if (!event.isPrimary || event.button !== 0) return;
+            versionPressStartedAt = Date.now();
+            suppressVersionClick = false;
+        });
+        versionTag.addEventListener('pointerup', (event) => {
+            if (!versionPressStartedAt || !event.isPrimary) return;
+            const pressDuration = Date.now() - versionPressStartedAt;
+            versionPressStartedAt = 0;
+            if (pressDuration < hiddenFolderHoldDuration) return;
+            suppressVersionClick = true;
+            openModal('hiddenFolderModal');
+        });
+        versionTag.addEventListener('pointercancel', () => { versionPressStartedAt = 0; });
+        document.addEventListener('click', (event) => {
+            if (!suppressVersionClick || event.detail === 0) return;
+            suppressVersionClick = false;
+            event.preventDefault();
+            event.stopImmediatePropagation();
+        }, true);
+        versionTag.addEventListener('click', (event) => {
+            showChangelogModal();
+        });
 
         /* --- CONTROL DEL RELOJ --- */
         let clockPressTimer = null;
@@ -1838,6 +1887,45 @@ function appIconMarkup(app) {
             history.pushState({ modalId: id }, "");
         }
 
+        let pendingExternalUrl = null;
+        document.addEventListener('click', (event) => {
+            const link = event.target.closest('.external-warning-link');
+            if (!link) return;
+            event.preventDefault();
+            pendingExternalUrl = link.href;
+            document.getElementById('externalExitUrl').textContent = pendingExternalUrl;
+            document.getElementById('externalExitBackdrop').classList.add('active');
+            openModal('externalExitModal');
+            document.getElementById('externalExitBackBtn').focus();
+            if (window.lucide) lucide.createIcons();
+        }, true);
+
+        document.getElementById('externalExitModal').addEventListener('keydown', (event) => {
+            if (event.key !== 'Tab') return;
+            const actions = document.querySelectorAll('#externalExitModal button');
+            const firstAction = actions[0];
+            const lastAction = actions[actions.length - 1];
+            if (event.shiftKey && document.activeElement === firstAction) {
+                event.preventDefault();
+                lastAction.focus();
+            } else if (!event.shiftKey && document.activeElement === lastAction) {
+                event.preventDefault();
+                firstAction.focus();
+            }
+        });
+        document.getElementById('externalExitBackdrop').addEventListener('wheel', (event) => event.preventDefault(), { passive: false });
+
+        document.getElementById('externalExitBackBtn').addEventListener('click', () => {
+            pendingExternalUrl = null;
+            closeModal('externalExitModal');
+        });
+        document.getElementById('externalExitContinueBtn').addEventListener('click', () => {
+            const url = pendingExternalUrl;
+            pendingExternalUrl = null;
+            closeModal('externalExitModal');
+            if (url) window.open(url, '_blank', 'noopener,noreferrer');
+        });
+
         async function showChangelogModal() {
             playSound('click');
             const releaseList = document.getElementById('changelogReleaseList');
@@ -1975,6 +2063,10 @@ function appIconMarkup(app) {
             const hasSettings = Boolean(setPanel?.classList.contains('active'));
             const hasSearch = Boolean(searchPanel?.classList.contains('expanded'));
             overlay.classList.toggle('active', hasModal || hasSettings || hasSearch);
+            document.getElementById('externalExitBackdrop').classList.toggle(
+                'active',
+                document.getElementById('externalExitModal').classList.contains('active')
+            );
         }
 
         function closeSettings() {
@@ -2124,17 +2216,21 @@ function appIconMarkup(app) {
         });
 
         document.getElementById('trigger').onclick = () => toggleSearch(true);
-        overlay.onclick = () => { 
+        overlay.onclick = () => {
             if (searchPanel.classList.contains('expanded')) toggleSearch(false); 
-            if (setPanel.classList.contains('active')) {
+            const activeModals = document.querySelectorAll('.custom-modal.active');
+            if (activeModals.length) {
+                activeModals.forEach(m => closeModal(m.id));
+            } else if (setPanel.classList.contains('active')) {
                 closeSettings();
             }
-            document.querySelectorAll('.custom-modal').forEach(m => { 
-                if(m.classList.contains('active')) closeModal(m.id); 
-            });
         };
         
         window.onkeydown = (e) => {
+            if (document.getElementById('externalExitModal').classList.contains('active')) {
+                if (e.key === 'Escape') closeModal('externalExitModal');
+                return;
+            }
             if (isEditableTarget(e.target)) return;
             if (handleGlobalBufferedKey(e)) return;
 
@@ -3321,7 +3417,7 @@ function appIconMarkup(app) {
             }
             
             document.addEventListener('click', (e) => { 
-                if(setPanel && setPanel.classList.contains('active') && !setPanel.contains(e.target) && !e.target.closest('.custom-modal') && !e.target.closest('.settings-action-menu')) {
+                if(setPanel && setPanel.classList.contains('active') && e.target !== overlay && !setPanel.contains(e.target) && !e.target.closest('.custom-modal') && !e.target.closest('.settings-action-menu')) {
                     setPanel.classList.remove('active');
                     if(history.state && history.state.panel==='settings') history.back();
                 }

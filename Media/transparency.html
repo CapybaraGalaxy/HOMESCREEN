@@ -219,6 +219,64 @@
             margin-top: 10px;
         }
 
+        .exit-warning-backdrop {
+            position: fixed;
+            inset: 0;
+            z-index: 10000;
+            display: grid;
+            place-items: center;
+            padding: 20px;
+            background: rgba(0, 0, 0, 0.62);
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+            opacity: 0;
+            pointer-events: none;
+            touch-action: none;
+            transition: opacity 0.25s ease;
+        }
+        .exit-warning-backdrop.active { opacity: 1; pointer-events: auto; }
+        .exit-warning {
+            width: min(100%, 360px);
+            padding: 24px;
+            border: 1px solid var(--glass-border);
+            border-radius: 24px;
+            background: rgba(18, 18, 24, 0.94);
+            box-shadow: 0 20px 45px rgba(0,0,0,0.6);
+            text-align: center;
+            transform: translateY(10px);
+            transition: transform 0.25s var(--bezier);
+        }
+        .exit-warning-backdrop.active .exit-warning { transform: translateY(0); }
+        .exit-warning-icon {
+            display: grid;
+            place-items: center;
+            width: 52px;
+            height: 52px;
+            margin: 0 auto 16px;
+            border-radius: 50%;
+            background: rgba(255,255,255,0.1);
+        }
+        .exit-warning-icon svg { width: 24px; height: 24px; }
+        .exit-warning h2 { margin-bottom: 20px; font-size: 1.1rem; font-weight: 500; }
+        .exit-warning-url {
+            margin: -8px 0 20px;
+            color: var(--text-muted);
+            font-size: 0.85rem;
+            overflow-wrap: anywhere;
+        }
+        .exit-warning-actions { display: flex; gap: 10px; }
+        .exit-warning-actions button {
+            flex: 1;
+            min-height: 42px;
+            border: 1px solid var(--glass-border);
+            border-radius: 999px;
+            color: var(--text-main);
+            background: rgba(255,255,255,0.08);
+            font: inherit;
+            cursor: pointer;
+        }
+        .exit-warning-actions button:last-child { background: var(--accent); border-color: var(--accent); }
+
         .guide-card-link:hover {
             background: var(--surface-hover);
             border-color: var(--accent);
@@ -361,7 +419,7 @@
             </div>
 
             <!-- Guía de configuración externa -->
-            <a href="https://sameerasw.com/zen" target="_blank" rel="noopener noreferrer" class="guide-card-link">
+            <a href="https://sameerasw.com/zen" target="_blank" rel="noopener noreferrer" class="guide-card-link external-warning-link">
                 <div class="guide-info">
                     <i data-lucide="compass" size="24"></i>
                     <div class="guide-text">
@@ -393,9 +451,64 @@
             </a>
         </div>
 
-    <script>
-        // Inicializar Iconos Lucide
-        lucide.createIcons();
+        <div class="exit-warning-backdrop" id="exitWarningBackdrop">
+            <div class="exit-warning" role="dialog" aria-modal="true" aria-labelledby="exitWarningTitle">
+                <div class="exit-warning-icon"><i data-lucide="external-link"></i></div>
+                <h2 id="exitWarningTitle">Estás a punto de salir de Homescreen</h2>
+                <p class="exit-warning-url" id="exitWarningUrl"></p>
+                <div class="exit-warning-actions">
+                    <button type="button" id="exitWarningBack">Volver</button>
+                    <button type="button" id="exitWarningContinue">Seguir</button>
+                </div>
+            </div>
+        </div>
+
+        <script>
+            // Inicializar Iconos Lucide
+            lucide.createIcons();
+
+            const exitWarning = document.getElementById('exitWarningBackdrop');
+            let pendingExternalUrl = null;
+            document.addEventListener('click', event => {
+                const link = event.target.closest('.external-warning-link');
+                if (!link) return;
+                event.preventDefault();
+                pendingExternalUrl = link.href;
+                document.getElementById('exitWarningUrl').textContent = pendingExternalUrl;
+                exitWarning.classList.add('active');
+                document.getElementById('exitWarningBack').focus();
+            });
+            window.addEventListener('keydown', event => {
+                if (!exitWarning.classList.contains('active')) return;
+                if (event.key === 'Escape') {
+                    event.preventDefault();
+                    closeExitWarning();
+                    event.stopPropagation();
+                    return;
+                }
+                if (event.key === 'Tab') {
+                    event.preventDefault();
+                    const backButton = document.getElementById('exitWarningBack');
+                    const continueButton = document.getElementById('exitWarningContinue');
+                    if (event.shiftKey) {
+                        (document.activeElement === backButton ? continueButton : backButton).focus();
+                    } else {
+                        (document.activeElement === continueButton ? backButton : continueButton).focus();
+                    }
+                }
+                event.stopPropagation();
+            }, true);
+            exitWarning.addEventListener('wheel', event => event.preventDefault(), { passive: false });
+            function closeExitWarning() {
+                pendingExternalUrl = null;
+                exitWarning.classList.remove('active');
+            }
+            document.getElementById('exitWarningBack').addEventListener('click', closeExitWarning);
+            document.getElementById('exitWarningContinue').addEventListener('click', () => {
+                const url = pendingExternalUrl;
+                closeExitWarning();
+                if (url) window.open(url, '_blank', 'noopener,noreferrer');
+            });
 
         // Canvas de Partículas
         const canvas = document.getElementById('particles-bg');
