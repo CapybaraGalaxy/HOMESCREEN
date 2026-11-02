@@ -949,6 +949,7 @@ body.super-performance .settings-panel {
     border: 1px solid rgba(255,255,255,0.06);
     box-shadow: inset 0 1px 0 rgba(255,255,255,0.02);
 }
+.settings-tab-panel > .settings-section + .settings-section { margin-top: 12px; }
 .settings-section-title {
     font-size: 0.7rem;
     text-transform: uppercase;
@@ -1153,6 +1154,8 @@ body.super-performance .settings-panel {
 .settings-action-btn:hover { background: rgba(255,255,255,0.12); transform: translateY(-1px); }
 .settings-action-btn:disabled { opacity: 0.6; cursor: wait; }
 .settings-action-btn .spinner { display: inline-flex; animation: spin 0.9s linear infinite; }
+.settings-gist-actions { grid-template-columns: repeat(auto-fit, minmax(min(100%, 230px), 1fr)); }
+.settings-gist-actions .settings-action-btn { min-width: 0; white-space: normal; }
 
 .settings-action-menu {
     position: absolute;
@@ -1965,6 +1968,7 @@ body.folder-apps-size-5 #folderApps .tool-card i, body.folder-apps-size-5 #folde
 
 .clock-analog-wide .analog-clock,
 .clock-analog-hands .analog-clock { display: block; }
+.clock-hide-seconds #secondHandGroup { display: none; }
 .clock-analog-hands .clock-face { display: none; }
 .clock-analog-hands #digitalClock { display: none; }
 .clock-analog-wide #digitalClock { display: none; }

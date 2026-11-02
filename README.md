@@ -92,7 +92,8 @@ Entre los ámbitos de configuración del proyecto se encuentran:
 - Aplicaciones y accesos.
 - Apariencia.
 - Sonido y respuesta táctil.
-- Sistema y datos.
+- Copia de seguridad y sincronización en la nube.
+- Sistema e información de la aplicación.
 
 Los nombres, opciones y controles pueden evolucionar. Consulta la propia aplicación para conocer los ajustes disponibles en cada momento.
 
@@ -123,6 +124,8 @@ Esto tiene varias implicaciones:
 - Los datos y preferencias que la aplicación gestione localmente pueden permanecer en el almacenamiento del navegador del dispositivo.
 - Los datos locales no se sincronizan automáticamente entre dispositivos salvo que una función específica indique lo contrario.
 - Borrar los datos del sitio, el almacenamiento del navegador o el perfil del navegador puede eliminar información guardada localmente.
+
+La sincronización opcional de **Ajustes → Sistema y Datos → Sincronización con GitHub Gist** permite guardar la configuración en un Gist; los Gists nuevos se crean como privados y los existentes mantienen su visibilidad actual. Requiere un Personal Access Token de GitHub con permiso de lectura y escritura para Gists. El token se guarda únicamente en el almacenamiento local de ese navegador, se envía a la API de GitHub para las operaciones de sincronización y no se incluye en el archivo de configuración. Protege el token como una credencial y revócalo desde GitHub cuando ya no lo necesites.
 
 **Importante:** “local” no significa que todos los datos estén garantizados frente a pérdidas. El almacenamiento del navegador puede borrarse, limitarse o quedar inaccesible. Si la aplicación ofrece herramientas de copia de seguridad o exportación, utilízalas periódicamente para conservar la información que te importe.
 

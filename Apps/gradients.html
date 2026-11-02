@@ -59,27 +59,30 @@
             display: flex;
             align-items: center;
             justify-content: space-between;
-            flex-wrap: wrap;
+            padding: 14px 0 12px;
+            border-bottom: 1px solid var(--glass-border);
             gap: 12px;
+            flex-wrap: wrap;
             flex-shrink: 0;
         }
 
-        .header-title-area {
+        .header-brand {
             display: flex;
             align-items: center;
             gap: 12px;
         }
 
         .app-icon-badge {
-            width: 38px;
-            height: 38px;
-            border-radius: 10px;
-            background: linear-gradient(135deg, rgba(59, 130, 246, 0.25), rgba(255,255,255,0.03));
+            width: 42px;
+            height: 42px;
+            border-radius: 12px;
+            background: linear-gradient(135deg, rgba(10, 132, 255, 0.2), rgba(255, 255, 255, 0.03));
             border: 1px solid var(--glass-border);
             display: flex;
             align-items: center;
             justify-content: center;
-            box-shadow: 0 8px 20px rgba(0,0,0,0.3);
+            backdrop-filter: blur(var(--blur-val));
+            box-shadow: 0 4px 20px rgba(0,0,0,0.5);
         }
 
         h1 {
@@ -88,10 +91,10 @@
             letter-spacing: -0.02em;
         }
 
-        .header-actions {
+        .header-controls {
             display: flex;
-            gap: 8px;
             align-items: center;
+            gap: 12px;
             flex-wrap: wrap;
         }
 
@@ -513,7 +516,7 @@
     <!-- APP PRINCIPAL -->
     <div class="app-container" id="main-app">
         <header>
-            <div class="header-title-area">
+            <div class="header-brand">
                 <div class="app-icon-badge">
                     <i data-lucide="palette" size="18" style="color: var(--accent-primary);"></i>
                 </div>
@@ -521,7 +524,7 @@
                     <h1>Generador de Degradados - BETA</h1>
                 </div>
             </div>
-            <div class="header-actions">
+            <div class="header-controls">
                 <button class="btn-action" onclick="openDevModal()">
                     <i data-lucide="code-2" size="14"></i> Desarrollador
                 </button>

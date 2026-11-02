@@ -225,7 +225,10 @@ const tools = [
             { name: 'Selector de color', icon: 'pipette', url: 'Apps/color.html' },
             { name: 'Editor de fotos', icon: 'image', url: 'Apps/editor-fotos.html' },
             { name: 'Conversor zonas horarias', icon: 'globe', url: 'Apps/horarios.html' },
-            { name: 'Visor de metadatos', icon: 'file-edit', url: 'Apps/metadata.html' }
+            { name: 'Gradients', icon: 'palette', url: 'Apps/gradients.html' },
+            { name: 'Metadata', icon: 'layers', url: 'Apps/exif.html' },
+            { name: 'Pastebin - BETA', icon: 'clipboard', url: 'Apps/pastebin.html' },
+            { name: 'LED', icon: 'grid', url: 'Apps/led.html' }
         ]
     },
     {
@@ -251,7 +254,8 @@ const tools = [
             { name: 'Mayúsculas - minúsculas', icon: 'case-sensitive', url: 'Apps/mayus-minus.html' },
             { name: 'Generador Lorem Ipsum', icon: 'Newspaper', url: 'Apps/lorem-ipsum.html' },
             { name: 'Fancy Text', icon: 'Letter-Text', url: 'Apps/text.html' },
-            { name: 'Combos', icon: 'Pencil-Sparkles', url: 'Apps/combos.html' }
+            { name: 'Combos', icon: 'Pencil-Sparkles', url: 'Apps/combos.html' },
+            { name: 'Teleprompter', icon: 'scroll-text', url: 'Apps/teleprompter.html' }
         ]
     },
     {
@@ -260,6 +264,8 @@ const tools = [
         folder: true,
         apps: [
             { name: 'Ruleta aleatoria', icon: 'Ferris-Wheel', url: 'Apps/aleatorio.html' },
+            { name: 'Número aleatorio', icon: 'dices', url: 'Apps/n-aleatorio.html' },
+            { name: 'CPS test', icon: 'gauge', url: 'Apps/cps-test.html' },
             { name: 'Creador de memes', icon: 'Laugh', url: 'Apps/meme.html' },
             { name: 'Creador de Tierlist', icon: 'list-ordered', url: 'Apps/tierlist.html' },
             { name: 'Estudio de Ritmos', icon: 'music', url: 'Apps/estudio-ritmos.html' },
@@ -373,9 +379,34 @@ const appKeywords = {
         'convertidor', 'internacional', 'paises', 'ciudades', 'desfase', 'diferencia', 'calendario', 'agenda', 'reunion', 'horario',
         'verano', 'invierno', 'programar', 'sincronizar', 'epoch', 'timestamp', 'local', 'militar', 'am', 'pm'
     ],
-    'Apps/metadata.html': [
-        'metadatos', 'exif', 'viewer', 'visor', 'fotos', 'imágenes', 'privacidad', 'ubicación', 'editor', 'lector',
+    'Apps/gradients.html': [
+        'gradients', 'gradient', 'degradados', 'degradado', 'generador', 'fondo', 'background', 'colores', 'color',
+        'css', 'diseño', 'web', 'gradiente lineal', 'gradiente radial', 'imagen', 'exportar', 'paleta', 'transiciones'
+    ],
+    'Apps/exif.html': [
+        'metadata', 'metadatos', 'exif', 'viewer', 'visor', 'fotos', 'imágenes', 'privacidad', 'ubicación', 'lector',
         'raw', 'iptc', 'xmp', 'vídeo', 'datos', 'cámara', 'gps', 'propiedades', 'seguridad', 'extractor'
+    ],
+    'Apps/pastebin.html': [
+        'pastebin', 'paste', 'código', 'codigo', 'compartir', 'texto', 'snippet', 'fragmento', 'programación',
+        'programacion', 'archivos', 'enlace', 'url', 'clipboard', 'portapapeles', 'guardar', 'historial', 'desarrollador'
+    ],
+    'Apps/led.html': [
+        'led', 'marquesina', 'cartel', 'texto', 'desplazamiento', 'scroll', 'ticker', 'display', 'pantalla',
+        'mensaje', 'letrero', 'matriz', 'publicidad', 'fuentes', 'animación', 'animacion', 'texto luminoso'
+    ],
+    'Apps/teleprompter.html': [
+        'teleprompter', 'teleprónter', 'telepronter', 'prompter', 'guion', 'guión', 'lectura', 'leer', 'texto',
+        'desplazamiento', 'scroll', 'presentación', 'presentacion', 'discurso', 'locución', 'locucion', 'oratoria', 'escritor'
+    ],
+    'Apps/cps-test.html': [
+        'cps', 'clicks', 'clicks por segundo', 'test', 'prueba', 'ratón', 'mouse', 'velocidad', 'clic', 'click',
+        'pulsaciones', 'récord', 'record', 'puntuación', 'puntuacion', 'juego', 'reflejos', 'click speed test'
+    ],
+    'Apps/n-aleatorio.html': [
+        'número aleatorio', 'numeros aleatorios', 'números aleatorios', 'azar', 'aleatorio', 'generador de números',
+        'random number', 'randomizer', 'rango', 'mínimo', 'maximo', 'máximo', 'min', 'max', 'adivinar', 'sorteo',
+        'dados', 'generar números'
     ],
     'Apps/calendario.html': [
         'calendario', 'fechas', 'meses', 'dias', 'semanas', 'año', 'agenda', 'citas', 'eventos', 'reuniones',
@@ -687,7 +718,7 @@ function appIconMarkup(app) {
         "¡Arriba, {user}!",
         "A por todas hoy, {user}",
         "Excelente mañana, {user}",
-        "Café en mano y a triunfar, {user}",
+        "Día nuevo, {user}",
         "El día apenas comienza, {user}",
         "Energía al máximo, {user}",
         "Nuevas metas te esperan, {user}",
@@ -734,7 +765,33 @@ function appIconMarkup(app) {
                     "La mejor manera de predecir el futuro es crearlo. - Peter Drucker",
                     "La simplicidad es la máxima sofisticación. - Leonardo da Vinci",
                     "El éxito es la suma de pequeños esfuerzos repetidos. - Robert Collier",
-                    "Lo que haces cada día importa más que lo que haces de vez en cuando."
+                    "Lo que haces cada día importa más que lo que haces de vez en cuando.",
+                    "El único modo de hacer un gran trabajo es amar lo que haces. - Steve Jobs",
+"No cuentes los días, haz que los días cuenten. - Muhammad Ali",
+"La creatividad es la inteligencia divirtiéndose. - Albert Einstein",
+"El futuro pertenece a quienes creen en la belleza de sus sueños. - Eleanor Roosevelt",
+"Haz hoy lo que otros no quieren, haz mañana lo que otros no pueden. - Jerry Rice",
+"La acción es la clave fundamental de todo éxito. - Pablo Picasso",
+"Cree que puedes y ya estarás a mitad de camino. - Theodore Roosevelt",
+"No importa lo lento que vayas mientras no te detengas. - Confucio",
+"La vida es 10% lo que te pasa y 90% cómo reaccionas ante ello. - Charles R. Swindoll",
+"El optimismo es la fe que conduce al logro. - Helen Keller",
+"Empieza donde estás, usa lo que tienes, haz lo que puedes. - Arthur Ashe",
+"El secreto para salir adelante es comenzar. - Mark Twain",
+"Cada logro comienza con la decisión de intentar. - Gail Devers",
+"No esperes el momento oportuno, créalo. - George Bernard Shaw",
+"La perseverancia no es una larga carrera; son muchas carreras cortas una tras otra. - Walter Elliot",
+"El conocimiento habla, pero la sabiduría escucha. - Jimi Hendrix",
+"El coraje no siempre ruge. A veces es la voz tranquila al final del día que dice 'lo intentaré de nuevo mañana'. - Mary Anne Radmacher",
+"La mente es como un paracaídas, solo funciona si se abre. - Frank Zappa",
+"Con esfuerzo y perseverancia podrás alcanzar tus metas. - Esopo",
+"Lo único imposible es aquello que no intentas. - Julio Verne",
+"La paciencia y el tiempo hacen más que la fuerza o la pasión. - Jean de La Fontaine",
+"Si puedes soñarlo, puedes hacerlo. - Walt Disney",
+"El fracaso es la oportunidad de empezar de nuevo, esta vez de forma más inteligente. - Henry Ford",
+"Nuestra mayor debilidad radica en renunciar. La forma más segura de tener éxito es siempre intentarlo una vez más. - Thomas A. Edison",
+"La educación es el arma más poderosa que puedes usar para cambiar el mundo. - Nelson Mandela",
+"Jamás consideres el estudio como una obligación, sino como una oportunidad para penetrar en el bello y maravilloso mundo del saber. - Albert Einstein"
                 ]
 };
 
@@ -1182,8 +1239,11 @@ function appIconMarkup(app) {
         <button class="settings-tab" type="button" data-tab="tactil" aria-selected="false">
             <i data-lucide="volume-2"></i><span>Sonido y Tacto</span>
         </button>
+        <button class="settings-tab" type="button" data-tab="backup" aria-selected="false">
+            <i data-lucide="cloud"></i><span>Copia de seguridad</span>
+        </button>
         <button class="settings-tab" type="button" data-tab="sistema" aria-selected="false">
-            <i data-lucide="monitor-cog"></i><span>Sistema y Datos</span>
+            <i data-lucide="monitor-cog"></i><span>Sistema</span>
         </button>
     </aside>
 
@@ -1209,7 +1269,7 @@ function appIconMarkup(app) {
                     <button class="quick-access" type="button" data-tab-target="apariencia"><i data-lucide="sparkles"></i><span>Cambiar <strong>Modo de visualización</strong></span></button>
                     <button class="quick-access" type="button" data-tab-target="apariencia"><i data-lucide="gauge"></i><span>Ajustar <strong>Rendimiento</strong></span></button>
                     <button class="quick-access" type="button" data-tab-target="apps"><i data-lucide="plus"></i><span>Añadir <strong>Nueva App</strong></span></button>
-                     <button class="quick-access" type="button" data-tab-target="sistema"><i data-lucide="rotate-cw-clock"></i><span>Hacer o cargar una <strong>copia de seguridad</strong></span></button>
+                    <button class="quick-access" type="button" data-tab-target="backup"><i data-lucide="rotate-cw-clock"></i><span>Hacer o cargar una <strong>copia de seguridad</strong></span></button>
                     <button class="quick-access" type="button" data-url="Apps/consejos.html"><i data-lucide="lightbulb"></i><span>Ver <strong>Consejos</strong></span></button>
                 </div>
             </div>
@@ -1435,7 +1495,38 @@ function appIconMarkup(app) {
             </div>
         </div>
 
-        <!-- 6. SISTEMA Y DATOS -->
+        <!-- 6. COPIA DE SEGURIDAD -->
+        <div class="settings-tab-panel" data-panel="backup">
+            <div class="settings-section">
+                <span class="settings-section-title">Copias de Seguridad</span>
+                <div class="settings-actions-grid" style="margin-bottom: 8px;">
+                    <button class="settings-action-btn" id="exportSettingsBtn" type="button"><i data-lucide="download" style="width: 14px;"></i> Exportar Copia de seguridad</button>
+                    <button class="settings-action-btn" id="importSettingsBtn" type="button"><i data-lucide="upload" style="width: 14px;"></i> Importar Copia de seguridad</button>
+                    <input type="file" id="importSettingsFile" accept=".json,.html,application/json,text/plain" style="display: none;">
+                </div>
+            </div>
+            <div class="settings-section">
+                <span class="settings-section-title">Sincronización con GitHub Gist</span>
+                <p class="setting-desc" style="margin: -4px 0 12px;">Guarda una copia de tu configuración en GitHub. Los Gists nuevos se crean como privados; si usas uno existente, se conserva su visibilidad. El token se almacena solo en este navegador y no se incluye en la copia.</p>
+                <div class="app-form-grid">
+                    <label class="app-form-field" for="githubGistToken">
+                        <span>Personal Access Token (permiso Gist)</span>
+                        <input type="password" id="githubGistToken" autocomplete="off" spellcheck="false" placeholder="ghp_…">
+                    </label>
+                    <label class="app-form-field" for="githubGistId">
+                        <span>ID del Gist</span>
+                        <input type="text" id="githubGistId" autocomplete="off" spellcheck="false" placeholder="Se completará al crear un Gist">
+                    </label>
+                </div>
+                <div class="settings-actions-grid settings-gist-actions" style="margin-top: 10px;">
+                    <button class="settings-action-btn" id="createGithubGistBtn" type="button"><i data-lucide="file-plus-2" style="width: 14px;"></i> Crear nuevo Gist</button>
+                    <button class="settings-action-btn" id="uploadGithubGistBtn" type="button"><i data-lucide="cloud-upload" style="width: 14px;"></i> Subir a la nube (Actualizar Gist)</button>
+                    <button class="settings-action-btn" id="downloadGithubGistBtn" type="button"><i data-lucide="cloud-download" style="width: 14px;"></i> Descargar de la nube (Restaurar Gist)</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- 7. SISTEMA -->
         <div class="settings-tab-panel" data-panel="sistema">
             <div class="settings-section">
                 <span class="settings-section-title">Motor de Búsqueda</span>
@@ -1451,7 +1542,8 @@ function appIconMarkup(app) {
                         </div>
                     </div>
                 </div>
-
+            </div>
+            <div class="settings-section">
                 <span class="settings-section-title">Actualizaciones y Cambios</span>
                 <div class="settings-info" id="settingsVersionInfo">
                     Versión actual: <strong><span>Cargando...</span></strong>
@@ -1460,14 +1552,9 @@ function appIconMarkup(app) {
                     <button class="settings-action-btn" id="checkUpdatesBtn" type="button"><i data-lucide="refresh-cw" style="width: 14px;"></i> Comprobar actualizaciones</button>
                     <button class="settings-action-btn" id="showChangelogBtn" type="button"><i data-lucide="history" style="width: 14px;"></i> Historial de cambios</button>
                 </div>
-
-                <span class="settings-section-title">Copias de Seguridad</span>
-                <div class="settings-actions-grid" style="margin-bottom: 8px;">
-                    <button class="settings-action-btn" id="exportSettingsBtn" type="button"><i data-lucide="download" style="width: 14px;"></i> Exportar Copia de seguridad</button>
-                    <button class="settings-action-btn" id="importSettingsBtn" type="button"><i data-lucide="upload" style="width: 14px;"></i> Importar Copia de seguridad</button>
-                    <input type="file" id="importSettingsFile" accept=".json,.html,application/json,text/plain" style="display: none;">
-                </div>
-
+            </div>
+            <div class="settings-section">
+                <span class="settings-section-title">Homescreen NEO</span>
                 <div class="creator-card">
                     <a class="creator-project-icon external-warning-link" href="https://github.com/CapybaraGalaxy/HOMESCREEN" target="_blank" rel="noopener noreferrer" aria-label="Visitar el código de Homescreen">
                         <img src="favicon.png" alt="Logo de Homescreen">
@@ -1502,7 +1589,8 @@ function appIconMarkup(app) {
                     <div class="setting-item-meta"><i data-lucide="alert-circle"></i><div><span class="setting-label">Ocultar Aviso Local</span><span class="setting-desc">Oculta el chip informativo web</span></div></div>
                     <div class="switch" id="toggleLocalChip"></div>
                 </div>
-
+            </div>
+            <div class="settings-section">
                 <span class="settings-section-title">Información y Restablecimiento</span>
                 <div class="settings-actions-grid" style="margin-bottom: 8px;">
                     <button class="settings-action-btn" id="showAboutBtn" type="button" onclick="window.location.href='about.html'"><i data-lucide="badge-info" style="width: 14px;"></i> Acerca de</button>
@@ -2436,10 +2524,11 @@ function appIconMarkup(app) {
         }
 
         function updateClock() {
+            const showSeconds = localStorage.getItem('showSeconds') !== 'false';
+            clock?.classList.toggle('clock-hide-seconds', !showSeconds);
             if (isChronometerMode) return; 
             const n = new Date();
             const use12Hour = localStorage.getItem('timeFormat') === '12';
-            const showSeconds = localStorage.getItem('showSeconds') !== 'false';
             const clockText = n.toLocaleTimeString('es-ES', { hour: '2-digit', minute: '2-digit', second: showSeconds ? '2-digit' : undefined, hour12: use12Hour });
             const digitalClock = document.getElementById('digitalClock');
             if (digitalClock) digitalClock.innerText = clockText;
@@ -3253,9 +3342,196 @@ function appIconMarkup(app) {
                     markSetupComplete('import');
                     showToast('Configuración importada', 'refresh-cw');
                     setTimeout(() => { location.reload(); }, 1200);
+                    return true;
                 } catch (err) {
                     showToast('Error al importar el JSON', 'alert-circle');
+                    return false;
                 }
+            }
+
+            const githubGistTokenInput = document.getElementById('githubGistToken');
+            const githubGistIdInput = document.getElementById('githubGistId');
+            const createGithubGistBtn = document.getElementById('createGithubGistBtn');
+            const uploadGithubGistBtn = document.getElementById('uploadGithubGistBtn');
+            const downloadGithubGistBtn = document.getElementById('downloadGithubGistBtn');
+            const githubGistTokenKey = 'githubGistToken';
+            const githubGistIdKey = 'githubGistId';
+            const githubGistFilename = 'homescreen-config.json';
+
+            if (githubGistTokenInput && githubGistIdInput) {
+                githubGistTokenInput.value = localStorage.getItem(githubGistTokenKey) || '';
+                githubGistIdInput.value = localStorage.getItem(githubGistIdKey) || '';
+            }
+
+            function saveGithubGistCredentials() {
+                const token = githubGistTokenInput?.value.trim() || '';
+                const gistId = githubGistIdInput?.value.trim() || '';
+                if (token) localStorage.setItem(githubGistTokenKey, token);
+                else localStorage.removeItem(githubGistTokenKey);
+                if (gistId) localStorage.setItem(githubGistIdKey, gistId);
+                else localStorage.removeItem(githubGistIdKey);
+                return { token, gistId };
+            }
+
+            function getGithubGistError(response, details) {
+                if (response.status === 401) return 'Token de GitHub no válido o caducado';
+                if (response.status === 404) return 'Gist no encontrado o sin permisos para acceder';
+                if (response.status === 403) return 'GitHub ha denegado la solicitud; comprueba el permiso Gist y los límites de la API';
+                if (response.status === 422) return 'GitHub no pudo procesar la configuración enviada';
+                return details?.message || `Error de GitHub (${response.status})`;
+            }
+
+            async function readGithubGistResponse(response) {
+                try {
+                    return await response.json();
+                } catch (error) {
+                    return {};
+                }
+            }
+
+            function setGithubGistButtonsDisabled(disabled, activeButton = null) {
+                [createGithubGistBtn, uploadGithubGistBtn, downloadGithubGistBtn].forEach(button => {
+                    if (!button) return;
+                    if (disabled && !button.dataset.idleContent) {
+                        button.dataset.idleContent = button.innerHTML;
+                    }
+                    button.disabled = disabled;
+                    if (disabled && button === activeButton) {
+                        button.setAttribute('aria-busy', 'true');
+                        button.innerHTML = '<i data-lucide="loader-circle" class="spinner" style="width: 14px;" aria-hidden="true"></i> Procesando…';
+                    } else {
+                        button.removeAttribute('aria-busy');
+                        if (!disabled && button.dataset.idleContent) {
+                            button.innerHTML = button.dataset.idleContent;
+                        }
+                    }
+                });
+                if (window.lucide) lucide.createIcons();
+            }
+
+            async function uploadSettingsToGithubGist(createNew = false) {
+                const { token, gistId } = saveGithubGistCredentials();
+                if (!token) {
+                    showToast('Introduce un Personal Access Token con permiso Gist', 'alert-circle');
+                    return;
+                }
+
+                const targetGistId = createNew ? '' : gistId;
+                const endpoint = targetGistId
+                    ? `https://api.github.com/gists/${encodeURIComponent(targetGistId)}`
+                    : 'https://api.github.com/gists';
+                const method = targetGistId ? 'PATCH' : 'POST';
+                const payload = {
+                    files: {
+                        [githubGistFilename]: {
+                            content: JSON.stringify(getSettingsConfig(), null, 2)
+                        }
+                    }
+                };
+                if (!targetGistId) {
+                    payload.description = 'Homescreen NEO - Configuración';
+                    payload.public = false;
+                }
+
+                setGithubGistButtonsDisabled(true, createNew ? createGithubGistBtn : uploadGithubGistBtn);
+                try {
+                    const response = await fetch(endpoint, {
+                        method,
+                        headers: {
+                            Accept: 'application/vnd.github+json',
+                            Authorization: `Bearer ${token}`,
+                            'Content-Type': 'application/json',
+                            'X-GitHub-Api-Version': '2022-11-28'
+                        },
+                        body: JSON.stringify(payload)
+                    });
+                    const result = await readGithubGistResponse(response);
+                    if (!response.ok) {
+                        showToast(getGithubGistError(response, result), 'alert-circle');
+                        return;
+                    }
+                    if (!result.id) {
+                        showToast('GitHub no devolvió el ID del Gist', 'alert-circle');
+                        return;
+                    }
+
+                    githubGistIdInput.value = result.id;
+                    saveGithubGistCredentials();
+                    showToast(createNew || !targetGistId ? 'Nuevo Gist privado creado' : 'Configuración sincronizada con GitHub', 'cloud');
+                } catch (error) {
+                    showToast('No se pudo conectar con GitHub. Comprueba tu conexión e inténtalo de nuevo', 'wifi-off');
+                } finally {
+                    setGithubGistButtonsDisabled(false);
+                }
+            }
+
+            async function downloadSettingsFromGithubGist() {
+                const { token, gistId } = saveGithubGistCredentials();
+                if (!token) {
+                    showToast('Introduce un Personal Access Token con permiso Gist', 'alert-circle');
+                    return;
+                }
+                if (!gistId) {
+                    showToast('Introduce el ID del Gist que quieres restaurar', 'alert-circle');
+                    return;
+                }
+
+                setGithubGistButtonsDisabled(true, downloadGithubGistBtn);
+                try {
+                    const response = await fetch(`https://api.github.com/gists/${encodeURIComponent(gistId)}`, {
+                        headers: {
+                            Accept: 'application/vnd.github+json',
+                            Authorization: `Bearer ${token}`,
+                            'X-GitHub-Api-Version': '2022-11-28'
+                        }
+                    });
+                    const gist = await readGithubGistResponse(response);
+                    if (!response.ok) {
+                        showToast(getGithubGistError(response, gist), 'alert-circle');
+                        return;
+                    }
+
+                    const configFile = gist.files?.[githubGistFilename];
+                    if (!configFile || typeof configFile.content !== 'string') {
+                        showToast('El Gist no contiene el archivo de configuración esperado', 'alert-circle');
+                        return;
+                    }
+
+                    let config;
+                    try {
+                        config = JSON.parse(configFile.content);
+                    } catch (error) {
+                        showToast('El archivo del Gist no contiene JSON válido', 'alert-circle');
+                        return;
+                    }
+                    if (!config || typeof config !== 'object' || Array.isArray(config) ||
+                        !settingsKeys.some(key => Object.prototype.hasOwnProperty.call(config, key))) {
+                        showToast('El Gist no contiene una configuración compatible', 'alert-circle');
+                        return;
+                    }
+
+                    importSettingsFromJsonString(configFile.content);
+                } catch (error) {
+                    showToast('No se pudo conectar con GitHub. Comprueba tu conexión e inténtalo de nuevo', 'wifi-off');
+                } finally {
+                    setGithubGistButtonsDisabled(false);
+                }
+            }
+
+            if (githubGistTokenInput) {
+                githubGistTokenInput.addEventListener('change', saveGithubGistCredentials);
+            }
+            if (githubGistIdInput) {
+                githubGistIdInput.addEventListener('change', saveGithubGistCredentials);
+            }
+            if (createGithubGistBtn) {
+                createGithubGistBtn.onclick = () => uploadSettingsToGithubGist(true);
+            }
+            if (uploadGithubGistBtn) {
+                uploadGithubGistBtn.onclick = () => uploadSettingsToGithubGist();
+            }
+            if (downloadGithubGistBtn) {
+                downloadGithubGistBtn.onclick = downloadSettingsFromGithubGist;
             }
 
             function openPasteSettingsModal(prefill = '') {
