@@ -69,7 +69,7 @@
         <div><strong>VERSIÓN LOCAL</strong> <span>· Ir a web</span></div>
     </a>
 
-    <div class="version-tag" id="versionTag" role="button" tabindex="0" aria-label="Versión actual. Pulsa para ver el registro de cambios o mantén pulsado para abrir las carpetas ocultas">1.8.0 - Neo Drop 2</div>
+    <div class="version-tag" id="versionTag" role="button" tabindex="0" aria-label="Versión actual. Pulsa para ver el registro de cambios o mantén pulsado para abrir las carpetas ocultas">1.8.1 TEST</div>
 
     <div class="ui-layer">
         <header class="header">
@@ -1506,8 +1506,43 @@ function appIconMarkup(app) {
                 </div>
             </div>
             <div class="settings-section">
-                <span class="settings-section-title">Sincronización con GitHub Gist</span>
-                <p class="setting-desc" style="margin: -4px 0 12px;">Guarda una copia de tu configuración en GitHub. Los Gists nuevos se crean como privados; si usas uno existente, se conserva su visibilidad. El token se almacena solo en este navegador y no se incluye en la copia.</p>
+                <div class="gist-sync-header">
+                    <img src="Media/SVG/gist-sync.svg" alt="" aria-hidden="true">
+                    <div>
+                        <span class="settings-section-title">Sincronización con GitHub Gist</span>
+                        <p class="setting-desc">Guarda y combina tus datos con un Gist. Los Gists nuevos son privados; los existentes conservan su visibilidad. El token solo se almacena en este navegador y nunca se incluye en la copia.</p>
+                    </div>
+                </div>
+                <div class="gist-sync-options">
+                    <span class="settings-section-title settings-section-title--inline">Qué sincronizar</span>
+                    <label class="gist-sync-option">
+                        <input type="checkbox" id="githubGistSyncSettings" checked>
+                        <span>Ajustes generales</span>
+                    </label>
+                    <div class="gist-sync-radio-group" id="githubGistSettingsModes">
+                        <label class="gist-sync-option gist-sync-option--nested">
+                            <input type="radio" name="githubGistSettingsMode" value="all" checked>
+                            <span>Todos los ajustes</span>
+                        </label>
+                        <label class="gist-sync-option gist-sync-option--nested">
+                            <input type="radio" name="githubGistSettingsMode" value="basic">
+                            <span>Solo ajustes sin rendimiento (excluye blur, modo rendimiento y fondo/transparencia)</span>
+                        </label>
+                    </div>
+                    <label class="gist-sync-option">
+                        <input type="checkbox" id="githubGistSyncUsage" checked>
+                        <span>Datos de uso de apps</span>
+                    </label>
+                    <label class="gist-sync-option">
+                        <input type="checkbox" id="githubGistSyncFavorites" checked>
+                        <span>Favoritos</span>
+                    </label>
+                    <p class="setting-desc gist-sync-note">Favoritos y datos de uso se eligen por separado. Al fusionar, se unen las listas guardadas sin duplicados. Para el uso se conserva el contador mayor de cada app; nunca se suman contadores, así que resincronizar no lo duplica ni representa estadísticas globales acumuladas.</p>
+                </div>
+                <div class="gist-sync-status" aria-live="polite">
+                    <span id="githubGistLastSync">Todavía no hay sincronizaciones en este navegador.</span>
+                    <a id="githubGistLink" target="_blank" rel="noopener noreferrer" hidden>Ver Gist</a>
+                </div>
                 <div class="app-form-grid">
                     <label class="app-form-field" for="githubGistToken">
                         <span>Personal Access Token (permiso Gist)</span>
@@ -3257,13 +3292,22 @@ function appIconMarkup(app) {
                 superPerformance: 'false',
                 hideWelcome: 'false',
                 hideWelcomeAlways: 'false',
+                hideFolderLabels: 'false',
                 hideAppStars: 'false',
                 welcomeAnimation: 'blur',
                 folderAnimation: 'slide',
                 settingsAnimation: 'fade',
+                fontFamily: 'Outfit',
+                timeFormat: '24',
+                clockStyle: 'digital',
+                showSeconds: 'true',
+                greetingPack: 'greetings',
                 gridWidth: '700',
                 listColumns: '1',
                 gridColumns: '5',
+                folderSize: '3',
+                folderAppsSize: '3',
+                glassOpacity: '50',
                 hideFolderCloseBtn: 'false',
                 folderModalSize: '3'
             };
@@ -3324,7 +3368,7 @@ function appIconMarkup(app) {
                 document.body.removeChild(helper);
             }
 
-            function importSettingsFromJsonString(jsonString) {
+            function importSettingsFromJsonString(jsonString, successMessage = 'Configuración importada') {
                 try {
                     const source = JSON.parse(jsonString);
                     if (!source || typeof source !== 'object' || Array.isArray(source)) throw new Error('Formato inválido');
@@ -3340,7 +3384,7 @@ function appIconMarkup(app) {
 
                     Object.entries(config).forEach(([key, value]) => localStorage.setItem(key, value));
                     markSetupComplete('import');
-                    showToast('Configuración importada', 'refresh-cw');
+                    showToast(successMessage, 'refresh-cw');
                     setTimeout(() => { location.reload(); }, 1200);
                     return true;
                 } catch (err) {
@@ -3357,11 +3401,183 @@ function appIconMarkup(app) {
             const githubGistTokenKey = 'githubGistToken';
             const githubGistIdKey = 'githubGistId';
             const githubGistFilename = 'homescreen-config.json';
+            const githubGistSettingsInput = document.getElementById('githubGistSyncSettings');
+            const githubGistUsageInput = document.getElementById('githubGistSyncUsage');
+            const githubGistFavoritesInput = document.getElementById('githubGistSyncFavorites');
+            const githubGistSettingsModes = document.getElementById('githubGistSettingsModes');
+            const githubGistLastSync = document.getElementById('githubGistLastSync');
+            const githubGistLink = document.getElementById('githubGistLink');
+            const githubGistSyncPreferenceKeys = {
+                settings: 'githubGistSyncSettings',
+                usage: 'githubGistSyncUsage',
+                favorites: 'githubGistSyncFavorites',
+                mode: 'githubGistSyncSettingsMode',
+                lastSync: 'githubGistLastSyncAt'
+            };
+            const githubGistPerformanceSettings = new Set(['noblur', 'superPerformance', 'bg', 'darkbg', 'glassOpacity']);
+
+            function updateGithubGistSettingsModeAvailability() {
+                const disabled = !githubGistSettingsInput?.checked;
+                githubGistSettingsModes?.querySelectorAll('input').forEach(input => { input.disabled = disabled; });
+                githubGistSettingsModes?.classList.toggle('is-disabled', disabled);
+            }
+
+            function saveGithubGistSyncPreferences() {
+                if (githubGistSettingsInput) localStorage.setItem(githubGistSyncPreferenceKeys.settings, String(githubGistSettingsInput.checked));
+                if (githubGistUsageInput) localStorage.setItem(githubGistSyncPreferenceKeys.usage, String(githubGistUsageInput.checked));
+                if (githubGistFavoritesInput) localStorage.setItem(githubGistSyncPreferenceKeys.favorites, String(githubGistFavoritesInput.checked));
+                const selectedMode = document.querySelector('input[name="githubGistSettingsMode"]:checked')?.value || 'all';
+                localStorage.setItem(githubGistSyncPreferenceKeys.mode, selectedMode);
+                updateGithubGistSettingsModeAvailability();
+            }
+
+            if (githubGistSettingsInput && githubGistUsageInput && githubGistFavoritesInput) {
+                githubGistSettingsInput.checked = localStorage.getItem(githubGistSyncPreferenceKeys.settings) !== 'false';
+                githubGistUsageInput.checked = localStorage.getItem(githubGistSyncPreferenceKeys.usage) !== 'false';
+                githubGistFavoritesInput.checked = localStorage.getItem(githubGistSyncPreferenceKeys.favorites) !== 'false';
+                const savedMode = localStorage.getItem(githubGistSyncPreferenceKeys.mode);
+                const modeInput = document.querySelector(`input[name="githubGistSettingsMode"][value="${savedMode === 'basic' ? 'basic' : 'all'}"]`);
+                if (modeInput) modeInput.checked = true;
+                [githubGistSettingsInput, githubGistUsageInput, githubGistFavoritesInput].forEach(input => {
+                    input.addEventListener('change', saveGithubGistSyncPreferences);
+                });
+                document.querySelectorAll('input[name="githubGistSettingsMode"]').forEach(input => {
+                    input.addEventListener('change', saveGithubGistSyncPreferences);
+                });
+                updateGithubGistSettingsModeAvailability();
+            }
+
+            function getGithubGistSyncSelection() {
+                return {
+                    settings: githubGistSettingsInput?.checked === true,
+                    mode: document.querySelector('input[name="githubGistSettingsMode"]:checked')?.value === 'basic' ? 'basic' : 'all',
+                    usage: githubGistUsageInput?.checked === true,
+                    favorites: githubGistFavoritesInput?.checked === true
+                };
+            }
+
+            function setGithubGistSyncStatus(timestamp, gistId) {
+                if (timestamp) localStorage.setItem(githubGistSyncPreferenceKeys.lastSync, timestamp);
+                const savedTimestamp = localStorage.getItem(githubGistSyncPreferenceKeys.lastSync);
+                if (githubGistLastSync) {
+                    const date = savedTimestamp ? new Date(savedTimestamp) : null;
+                    githubGistLastSync.textContent = date && !Number.isNaN(date.getTime())
+                        ? `Última sincronización: ${date.toLocaleString()}`
+                        : 'Todavía no hay sincronizaciones en este navegador.';
+                }
+                const id = gistId || localStorage.getItem(githubGistIdKey);
+                if (githubGistLink) {
+                    if (id) {
+                        githubGistLink.href = `https://gist.github.com/${encodeURIComponent(id)}`;
+                        githubGistLink.hidden = false;
+                    } else {
+                        githubGistLink.removeAttribute('href');
+                        githubGistLink.hidden = true;
+                    }
+                }
+            }
+
+            function buildGithubGistSyncConfig(selection) {
+                const currentConfig = getSettingsConfig();
+                const config = {};
+                if (selection.settings) {
+                    settingsKeys.forEach(key => {
+                        if (key === 'favorites' || key === 'appUsageStats') return;
+                        if (selection.mode === 'basic' && githubGistPerformanceSettings.has(key)) return;
+                        config[key] = currentConfig[key];
+                    });
+                }
+                if (selection.usage) config.appUsageStats = currentConfig.appUsageStats;
+                if (selection.favorites) config.favorites = currentConfig.favorites;
+                return config;
+            }
+
+            function parseGithubGistArraySetting(key, value) {
+                const parsed = typeof value === 'string' ? JSON.parse(value) : value;
+                if (!Array.isArray(parsed)) throw new Error(`El ajuste ${key} no contiene una lista válida`);
+                return parsed;
+            }
+
+            function mergeGithubGistArraySetting(key, localValue, remoteValue) {
+                const localItems = parseGithubGistArraySetting(key, localValue);
+                const remoteItems = parseGithubGistArraySetting(key, remoteValue);
+                const merged = new Map();
+                [...localItems, ...remoteItems].forEach(item => {
+                    if (key === 'customApps') {
+                        if (!item || typeof item !== 'object' || Array.isArray(item)) {
+                            throw new Error('Las apps personalizadas del Gist no tienen un formato válido');
+                        }
+                        const identity = item.url || item.id || JSON.stringify(item);
+                        merged.set(identity, { ...(merged.get(identity) || {}), ...item });
+                    } else {
+                        if (typeof item !== 'string') throw new Error(`El ajuste ${key} contiene un elemento no válido`);
+                        merged.set(item, item);
+                    }
+                });
+                return JSON.stringify([...merged.values()]);
+            }
+
+            function mergeGithubGistUsage(localValue, remoteValue) {
+                const localStats = typeof localValue === 'string' ? JSON.parse(localValue) : localValue;
+                const remoteStats = typeof remoteValue === 'string' ? JSON.parse(remoteValue) : remoteValue;
+                if (!localStats || typeof localStats !== 'object' || Array.isArray(localStats) ||
+                    !remoteStats || typeof remoteStats !== 'object' || Array.isArray(remoteStats)) {
+                    throw new Error('Los datos de uso del Gist no tienen un formato válido');
+                }
+                const parseCount = value => {
+                    if (typeof value === 'number') return value;
+                    if (typeof value === 'string' && value.trim()) return Number(value);
+                    return NaN;
+                };
+                const merged = {};
+                Object.entries(localStats).forEach(([appUrl, value]) => {
+                    const count = parseCount(value);
+                    if (!Number.isFinite(count) || count < 0) {
+                        throw new Error('Los contadores de uso deben ser números no negativos');
+                    }
+                    merged[appUrl] = count;
+                });
+                Object.entries(remoteStats).forEach(([appUrl, remoteCount]) => {
+                    const count = parseCount(remoteCount);
+                    if (!Number.isFinite(count) || count < 0) {
+                        throw new Error('Los contadores de uso deben ser números no negativos');
+                    }
+                    merged[appUrl] = Math.max(merged[appUrl] || 0, count);
+                });
+                return JSON.stringify(merged);
+            }
+
+            function mergeGithubGistConfig(remoteConfig, selection, currentConfig = getSettingsConfig()) {
+                if (!remoteConfig || typeof remoteConfig !== 'object' || Array.isArray(remoteConfig)) {
+                    throw new Error('El archivo del Gist no contiene una configuración válida');
+                }
+                const config = {};
+                if (selection.settings) {
+                    settingsKeys.forEach(key => {
+                        if (key === 'favorites' || key === 'appUsageStats' ||
+                            (selection.mode === 'basic' && githubGistPerformanceSettings.has(key)) ||
+                            !Object.prototype.hasOwnProperty.call(remoteConfig, key)) return;
+                        if (key === 'customApps' || key === 'hiddenAppUrls') {
+                            config[key] = mergeGithubGistArraySetting(key, currentConfig[key] ?? settingsDefaults[key], remoteConfig[key]);
+                        } else {
+                            config[key] = serializeSettingsValue(key, remoteConfig[key]);
+                        }
+                    });
+                }
+                if (selection.favorites && Object.prototype.hasOwnProperty.call(remoteConfig, 'favorites')) {
+                    config.favorites = mergeGithubGistArraySetting('favorites', currentConfig.favorites ?? settingsDefaults.favorites, remoteConfig.favorites);
+                }
+                if (selection.usage && Object.prototype.hasOwnProperty.call(remoteConfig, 'appUsageStats')) {
+                    config.appUsageStats = mergeGithubGistUsage(currentConfig.appUsageStats ?? settingsDefaults.appUsageStats, remoteConfig.appUsageStats);
+                }
+                return config;
+            }
 
             if (githubGistTokenInput && githubGistIdInput) {
                 githubGistTokenInput.value = localStorage.getItem(githubGistTokenKey) || '';
                 githubGistIdInput.value = localStorage.getItem(githubGistIdKey) || '';
             }
+            setGithubGistSyncStatus(null, localStorage.getItem(githubGistIdKey));
 
             function saveGithubGistCredentials() {
                 const token = githubGistTokenInput?.value.trim() || '';
@@ -3416,25 +3632,81 @@ function appIconMarkup(app) {
                     return;
                 }
 
+                const selection = getGithubGistSyncSelection();
+                const syncConfig = buildGithubGistSyncConfig(selection);
+                if (!Object.keys(syncConfig).length) {
+                    showToast('Selecciona al menos un tipo de dato para sincronizar', 'alert-circle');
+                    return;
+                }
+                const syncAt = new Date().toISOString();
                 const targetGistId = createNew ? '' : gistId;
                 const endpoint = targetGistId
                     ? `https://api.github.com/gists/${encodeURIComponent(targetGistId)}`
                     : 'https://api.github.com/gists';
                 const method = targetGistId ? 'PATCH' : 'POST';
-                const payload = {
-                    files: {
-                        [githubGistFilename]: {
-                            content: JSON.stringify(getSettingsConfig(), null, 2)
-                        }
-                    }
-                };
-                if (!targetGistId) {
-                    payload.description = 'Homescreen NEO - Configuración';
-                    payload.public = false;
-                }
-
                 setGithubGistButtonsDisabled(true, createNew ? createGithubGistBtn : uploadGithubGistBtn);
                 try {
+                    let existingConfig = {};
+                    if (targetGistId) {
+                        const existingResponse = await fetch(endpoint, {
+                            headers: {
+                                Accept: 'application/vnd.github+json',
+                                Authorization: `token ${token}`,
+                                'X-GitHub-Api-Version': '2022-11-28'
+                            }
+                        });
+                        const existingGist = await readGithubGistResponse(existingResponse);
+                        if (!existingResponse.ok) {
+                            showToast(getGithubGistError(existingResponse, existingGist), 'alert-circle');
+                            return;
+                        }
+                        const existingFile = existingGist.files?.[githubGistFilename];
+                        if (existingFile) {
+                            if (typeof existingFile.content !== 'string') {
+                                showToast('No se pudo leer el archivo del Gist para fusionar los datos', 'alert-circle');
+                                return;
+                            }
+                            try {
+                                existingConfig = JSON.parse(existingFile.content);
+                            } catch (error) {
+                                showToast('El archivo existente del Gist no contiene JSON válido', 'alert-circle');
+                                return;
+                            }
+                            if (!existingConfig || typeof existingConfig !== 'object' || Array.isArray(existingConfig)) {
+                                showToast('El archivo existente del Gist no contiene una configuración válida', 'alert-circle');
+                                return;
+                            }
+                        }
+                    }
+
+                    let mergedSettings;
+                    try {
+                        mergedSettings = mergeGithubGistConfig(syncConfig, selection, existingConfig);
+                    } catch (error) {
+                        showToast(error.message || 'No se pudieron combinar los datos del Gist', 'alert-circle');
+                        return;
+                    }
+                    const uploadConfig = {
+                        ...existingConfig,
+                        ...mergedSettings,
+                        _homescreenSync: {
+                            lastSyncAt: syncAt,
+                            included: Object.keys(syncConfig),
+                            usageMergeStrategy: 'max-per-app'
+                        }
+                    };
+                    const payload = {
+                        files: {
+                            [githubGistFilename]: {
+                                content: JSON.stringify(uploadConfig, null, 2)
+                            }
+                        }
+                    };
+                    if (!targetGistId) {
+                        payload.description = 'Homescreen NEO - Configuración';
+                        payload.public = false;
+                    }
+
                     const response = await fetch(endpoint, {
                         method,
                         headers: {
@@ -3457,6 +3729,7 @@ function appIconMarkup(app) {
 
                     githubGistIdInput.value = result.id;
                     saveGithubGistCredentials();
+                    setGithubGistSyncStatus(syncAt, result.id);
                     showToast(createNew || !targetGistId ? 'Nuevo Gist privado creado' : 'Configuración sincronizada con GitHub', 'cloud');
                 } catch (error) {
                     showToast('No se pudo conectar con GitHub. Comprueba tu conexión e inténtalo de nuevo', 'wifi-off');
@@ -3510,7 +3783,21 @@ function appIconMarkup(app) {
                         return;
                     }
 
-                    importSettingsFromJsonString(configFile.content);
+                    const selection = getGithubGistSyncSelection();
+                    let mergedConfig;
+                    try {
+                        mergedConfig = mergeGithubGistConfig(config, selection);
+                    } catch (error) {
+                        showToast(error.message || 'No se pudieron combinar los datos del Gist', 'alert-circle');
+                        return;
+                    }
+                    if (!Object.keys(mergedConfig).length) {
+                        showToast('Elige al menos un tipo de dato que restaurar', 'alert-circle');
+                        return;
+                    }
+                    if (importSettingsFromJsonString(JSON.stringify(mergedConfig), 'Configuración fusionada con GitHub')) {
+                        setGithubGistSyncStatus(new Date().toISOString(), gist.id || gistId);
+                    }
                 } catch (error) {
                     showToast('No se pudo conectar con GitHub. Comprueba tu conexión e inténtalo de nuevo', 'wifi-off');
                 } finally {

@@ -151,7 +151,7 @@
             const version = document.createElement("strong");
             version.textContent = release.version;
             const date = document.createElement("span");
-            date.textContent = release.date || "Fecha no indicada";
+            date.textContent = release.date || "Fecha desconocida";
             button.append(version, date);
             button.addEventListener("click", () => onSelect(release));
             container.appendChild(button);
