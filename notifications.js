@@ -174,13 +174,16 @@
             let imagePosition = "top";
             let imageAlt = "";
             if (image) {
-                imageUrl = resolveNotificationImage(image.url);
-                if (!imageUrl || (image.position !== undefined && !["top", "bottom"].includes(image.position)) ||
-                    (image.alt !== undefined && (typeof image.alt !== "string" || image.alt.length > 180))) {
-                    throw new Error("Imagen de notificación no válida");
+                const resolvedImageUrl = resolveNotificationImage(image.url);
+                const validImagePosition = image.position === undefined || ["top", "bottom"].includes(image.position);
+                const validImageAlt = image.alt === undefined || (typeof image.alt === "string" && image.alt.length <= 180);
+                if (resolvedImageUrl && validImagePosition && validImageAlt) {
+                    imageUrl = resolvedImageUrl;
+                    imagePosition = image.position || "top";
+                    imageAlt = image.alt || "";
+                } else {
+                    console.warn(`La imagen de la notificación "${item.id}" no es válida; se mostrará sin foto.`);
                 }
-                imagePosition = image.position || "top";
-                imageAlt = image.alt || "";
             }
             return {
                 id: item.id,
@@ -456,11 +459,15 @@
         const image = notification.imageUrl ? document.createElement("img") : null;
         if (image) {
             image.className = `notification-image notification-image--${notification.imagePosition}`;
-            image.src = notification.imageUrl;
             image.alt = notification.imageAlt;
             image.loading = "lazy";
             image.decoding = "async";
             image.referrerPolicy = "no-referrer";
+            image.addEventListener("error", () => {
+                notification.imageUrl = null;
+                image.remove();
+            }, { once: true });
+            image.src = notification.imageUrl;
         }
         content.append(heading);
         if (image?.classList.contains("notification-image--top")) content.append(image);
