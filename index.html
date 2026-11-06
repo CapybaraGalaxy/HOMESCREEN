@@ -22,6 +22,7 @@
     <script src="./lucide.min.js"></script>
     <script src="./changelog.js"></script>
     <link rel="stylesheet" href="styles.css">
+    <link rel="stylesheet" href="notifications.css">
     <style>
         body.hide-folder-close-btn #folderModal .modal-buttons .secondary,
         body.hide-folder-close-btn #hiddenFolderModal .modal-buttons .secondary,
@@ -1201,6 +1202,30 @@ function appIconMarkup(app) {
         </div>
     </div>
 
+    <div class="notifications-anchor" id="notificationsAnchor">
+        <button class="notifications-trigger" id="notificationsTrigger" type="button" aria-label="Notificaciones" aria-expanded="false" aria-controls="notificationsPanel">
+            <i data-lucide="bell" aria-hidden="true"></i>
+        </button>
+        <section class="notifications-panel" id="notificationsPanel" role="dialog" aria-modal="false" aria-labelledby="notificationsTitle" hidden>
+            <header class="notifications-header">
+                <div>
+                    <h2 id="notificationsTitle">Notificaciones</h2>
+                    <p id="notificationsSummary">Avisos de Homescreen NEO</p>
+                </div>
+                <div class="notifications-header-actions">
+                    <span class="notifications-refresh-status" id="notificationsRefreshStatus" aria-live="polite"></span>
+                    <button class="notifications-mark-all" id="notificationsMarkAll" type="button">Marcar todas como leídas</button>
+                    <button class="notifications-refresh" id="notificationsRefresh" type="button" aria-label="Buscar nuevas noticias" title="Buscar nuevas noticias">
+                        <i data-lucide="refresh-cw" aria-hidden="true"></i>
+                    </button>
+                    <button class="notifications-close" id="notificationsClose" type="button" aria-label="Cerrar notificaciones" title="Cerrar notificaciones">
+                        <i data-lucide="x" aria-hidden="true"></i>
+                    </button>
+                </div>
+            </header>
+            <div class="notifications-list" id="notificationsList" role="list" aria-live="polite"></div>
+        </section>
+    </div>
     <div class="settings-btn" id="setBtn"><i data-lucide="settings" style="width: 20px;"></i></div>
     
     <div class="settings-panel" id="setPanel">
@@ -1215,15 +1240,29 @@ function appIconMarkup(app) {
                     <span class="settings-subtitle">Personalización</span>
                 </div>
             </div>
-            <button class="settings-close-btn" id="settingsCloseBtn" type="button" aria-label="Cerrar ajustes" title="Cerrar ajustes">
-                <i data-lucide="x"></i>
-            </button>
+            <div class="settings-header-actions">
+                <button class="settings-notifications-btn" id="settingsNotificationsBtn" type="button">
+                    <i data-lucide="bell" aria-hidden="true"></i><span>Notificaciones</span>
+                </button>
+                <button class="settings-close-btn" id="settingsCloseBtn" type="button" aria-label="Cerrar ajustes" title="Cerrar ajustes">
+                    <i data-lucide="x"></i>
+                </button>
+            </div>
         </div>
 
 <div class="settings-layout">
     <!-- BARRA LATERAL (PESTAÑAS) -->
     <aside class="settings-sidebar" aria-label="Pestañas de configuración">
+        <div class="settings-search-wrap">
+            <label class="settings-global-search" for="settingsGlobalSearch">
+                <i data-lucide="search" aria-hidden="true"></i>
+                <input id="settingsGlobalSearch" type="search" placeholder="Buscar ajustes…" autocomplete="off" aria-controls="settingsSearchResults" aria-autocomplete="list">
+                <kbd>Esc</kbd>
+            </label>
+            <div class="settings-search-results" id="settingsSearchResults" role="listbox" aria-label="Resultados de ajustes" hidden></div>
+        </div>
         <div class="settings-sidebar-title">Configuración</div>
+        <div class="settings-sidebar-tabs">
         <button class="settings-tab active" type="button" data-tab="welcome" aria-selected="true">
             <i data-lucide="house"></i><span>Inicio</span>
         </button>
@@ -1245,6 +1284,7 @@ function appIconMarkup(app) {
         <button class="settings-tab" type="button" data-tab="sistema" aria-selected="false">
             <i data-lucide="monitor-cog"></i><span>Sistema</span>
         </button>
+        </div>
     </aside>
 
     <!-- CONTENIDO DE PESTAÑAS -->
@@ -1395,6 +1435,10 @@ function appIconMarkup(app) {
                     </div>
                 </div>
                 <div class="setting-item-row setting-range-row">
+                    <div class="setting-item-meta"><i data-lucide="scaling"></i><div><span class="setting-label">Tamaño de apps (Pill)</span><span class="setting-desc">Escala los accesos del inicio cuando usas el modo Pill</span></div></div>
+                    <label class="settings-range-control"><output id="pillAppSizeValue">100%</output><input type="range" id="pillAppSizeRange" min="75" max="130" value="100" step="5" aria-label="Tamaño de apps en modo Pill"></label>
+                </div>
+                <div class="setting-item-row setting-range-row">
                     <div class="setting-item-meta"><i data-lucide="stretch-horizontal"></i><div><span class="setting-label">Ancho Máximo</span><span class="setting-desc">Ancho del contenedor en la pantalla principal</span></div></div>
                     <label class="settings-range-control"><output id="gridWidthValue">700 px</output><input type="range" id="gridWidthRange" min="560" max="1100" value="700" step="10" aria-label="Ancho de cuadrícula"></label>
                 </div>
@@ -1458,12 +1502,24 @@ function appIconMarkup(app) {
                     </div>
                 </div>
                 <div class="setting-item-row">
-                    <div class="setting-item-meta"><i data-lucide="scan-line"></i><div><span class="setting-label">Animación de Ajustes</span><span class="setting-desc">Efecto de este mismo panel</span></div></div>
+                    <div class="setting-item-meta"><i data-lucide="bell-ring"></i><div><span class="setting-label">Animación de Notificaciones</span><span class="setting-desc">Elige cómo aparece el panel de notificaciones</span></div></div>
+                    <div class="custom-dropdown" id="notificationsAnimationDropdown">
+                        <div class="dropdown-select"><span id="currentNotificationsAnimation">Fade</span><i data-lucide="chevron-down"></i></div>
+                        <div class="dropdown-options">
+                            <div class="dropdown-option selected" data-value="fade">Fade</div>
+                            <div class="dropdown-option" data-value="slide-up">Slide (abajo &gt; arriba)</div>
+                            <div class="dropdown-option" data-value="slide-right">Slide (derecha &gt; izquierda)</div>
+                            <div class="dropdown-option" data-value="zoom">Zoom</div>
+                        </div>
+                    </div>
+                </div>
+                <div class="setting-item-row">
+                    <div class="setting-item-meta"><i data-lucide="scan-line"></i><div><span class="setting-label">Animación de Ajustes</span><span class="setting-desc">Elige cómo aparece este panel</span></div></div>
                     <div class="custom-dropdown" id="settingsAnimationDropdown">
                         <div class="dropdown-select"><span id="currentSettingsAnimation">Fade</span><i data-lucide="chevron-down"></i></div>
                         <div class="dropdown-options">
                             <div class="dropdown-option selected" data-value="fade">Fade</div>
-                            <div class="dropdown-option" data-value="slide">Slide</div>
+                            <div class="dropdown-option" data-value="slide">Slide (derecha)</div>
                             <div class="dropdown-option" data-value="zoom">Zoom</div>
                         </div>
                     </div>
@@ -1577,6 +1633,10 @@ function appIconMarkup(app) {
                         </div>
                     </div>
                 </div>
+                <div class="setting-item-row">
+                    <div class="setting-item-meta"><i data-lucide="bell-off"></i><div><span class="setting-label">Desactivar botón de notificaciones</span><span class="setting-desc">Oculta el botón flotante de notificaciones en la pantalla principal.</span></div></div>
+                    <div class="switch" id="toggleNotificationsButton" role="switch" aria-label="Desactivar botón de notificaciones" aria-checked="false" tabindex="0"></div>
+                </div>
             </div>
             <div class="settings-section">
                 <span class="settings-section-title">Actualizaciones y Cambios</span>
@@ -1653,13 +1713,21 @@ function appIconMarkup(app) {
 
         function setSettingsAnimationMode(value) {
             const mode = ['fade', 'slide', 'zoom'].includes(value) ? value : 'fade';
-            if (!setPanel) return;
-            setPanel.classList.remove('settings-animation-fade', 'settings-animation-slide', 'settings-animation-zoom');
-            setPanel.classList.add(`settings-animation-${mode}`);
+            setPanel?.classList.remove('settings-animation-fade', 'settings-animation-slide', 'settings-animation-zoom');
+            setPanel?.classList.add(`settings-animation-${mode}`);
+        }
+
+        function setNotificationsAnimationMode(value) {
+            const modes = ['fade', 'slide-up', 'slide-right', 'zoom'];
+            const mode = modes.includes(value) ? value : 'fade';
+            const notificationsPanel = document.getElementById('notificationsPanel');
+            if (!notificationsPanel) return;
+            notificationsPanel.classList.remove(...modes.map(name => `notifications-animation-${name}`));
+            notificationsPanel.classList.add(`notifications-animation-${mode}`);
         }
 
         function setAnimationControlsDisabled(disabled) {
-            ['welcomeAnimationDropdown', 'folderAnimationDropdown', 'settingsAnimationDropdown'].forEach(id => {
+            ['welcomeAnimationDropdown', 'folderAnimationDropdown', 'settingsAnimationDropdown', 'notificationsAnimationDropdown'].forEach(id => {
                 const dropdown = document.getElementById(id);
                 if (!dropdown) return;
                 dropdown.classList.toggle('disabled', disabled);
@@ -1674,8 +1742,8 @@ function appIconMarkup(app) {
             if (!dropdown || !selectedText) return;
 
             setAnimationControlsDisabled(body.classList.contains('super-performance'));
-            const labels = { fade: 'Fade', slide: 'Slide', zoom: 'Zoom' };
-            const applySelection = (value) => {
+            const labels = { fade: 'Fade', slide: 'Slide (derecha)', zoom: 'Zoom' };
+            const applySelection = value => {
                 const mode = ['fade', 'slide', 'zoom'].includes(value) ? value : 'fade';
                 dropdown.querySelectorAll('.dropdown-option').forEach(option => {
                     option.classList.toggle('selected', option.dataset.value === mode);
@@ -1686,6 +1754,46 @@ function appIconMarkup(app) {
             };
 
             applySelection(localStorage.getItem('settingsAnimation') || 'fade');
+            dropdown.querySelectorAll('.dropdown-option').forEach(option => {
+                option.addEventListener('click', event => {
+                    event.stopPropagation();
+                    if (body.classList.contains('super-performance')) return;
+                    playSound('click');
+                    applySelection(option.dataset.value);
+                    dropdown.classList.remove('active');
+                });
+            });
+            dropdown.querySelector('.dropdown-select').addEventListener('click', event => {
+                event.stopPropagation();
+                if (body.classList.contains('super-performance')) return;
+                dropdown.classList.toggle('active');
+            });
+            document.addEventListener('click', () => dropdown.classList.remove('active'));
+        }
+
+        function initNotificationsAnimationDropdown() {
+            const dropdown = document.getElementById('notificationsAnimationDropdown');
+            const selectedText = document.getElementById('currentNotificationsAnimation');
+            if (!dropdown || !selectedText) return;
+
+            setAnimationControlsDisabled(body.classList.contains('super-performance'));
+            const labels = {
+                fade: 'Fade',
+                'slide-up': 'Slide (abajo > arriba)',
+                'slide-right': 'Slide (derecha > izquierda)',
+                zoom: 'Zoom'
+            };
+            const applySelection = (value) => {
+                const mode = ['fade', 'slide-up', 'slide-right', 'zoom'].includes(value) ? value : 'fade';
+                dropdown.querySelectorAll('.dropdown-option').forEach(option => {
+                    option.classList.toggle('selected', option.dataset.value === mode);
+                });
+                selectedText.innerText = labels[mode];
+                localStorage.setItem('notificationsAnimation', mode);
+                setNotificationsAnimationMode(mode);
+            };
+
+            applySelection(localStorage.getItem('notificationsAnimation') || 'fade');
             dropdown.querySelectorAll('.dropdown-option').forEach(option => {
                 option.addEventListener('click', (e) => {
                     e.stopPropagation();
@@ -1704,6 +1812,7 @@ function appIconMarkup(app) {
         }
 
         initSettingsAnimationDropdown();
+        initNotificationsAnimationDropdown();
 
         function resizeSettingsPanel() {
             if (!setPanel) return;
@@ -1745,7 +1854,176 @@ function appIconMarkup(app) {
             }
         }
 
-        document.getElementById('goToWelcomeAnimationBtn')?.addEventListener('click', () => {
+        const settingsGlobalSearch = document.getElementById('settingsGlobalSearch');
+        const settingsSearchResults = document.getElementById('settingsSearchResults');
+        const settingsSearchEntries = new Map();
+        const SETTINGS_SEARCH_EXIT_MS = 180;
+        let settingsSearchCloseTimer = null;
+
+        function closeSettingsSearchResults() {
+            if (!settingsSearchResults || settingsSearchResults.hidden) return;
+            settingsGlobalSearch?.setAttribute('aria-expanded', 'false');
+            settingsSearchResults.classList.add('is-closing');
+            window.clearTimeout(settingsSearchCloseTimer);
+            settingsSearchCloseTimer = window.setTimeout(() => {
+                settingsSearchEntries.forEach(entry => window.clearTimeout(entry.timer));
+                settingsSearchEntries.clear();
+                settingsSearchResults.replaceChildren();
+                settingsSearchResults.hidden = true;
+                settingsSearchResults.classList.remove('is-closing');
+            }, SETTINGS_SEARCH_EXIT_MS);
+        }
+
+            function normalizeSettingsSearchText(value) {
+                return String(value || '').normalize('NFD').replace(/[\u0300-\u036f]/g, '').toLocaleLowerCase('es').replace(/\s+/g, ' ').trim();
+            }
+
+            function findSettingsSearchResults(query) {
+                const normalizedQuery = normalizeSettingsSearchText(query);
+                if (!normalizedQuery) return [];
+                const results = [];
+                settingsPanels.forEach(panel => {
+                    const tab = [...settingsTabs].find(item => item.dataset.tab === panel.dataset.panel);
+                    const tabName = tab?.textContent.trim() || 'Ajustes';
+                    panel.querySelectorAll('.setting-item-row').forEach(row => {
+                        if (!normalizeSettingsSearchText(row.textContent).includes(normalizedQuery)) return;
+                        const title = row.querySelector('.setting-label')?.textContent.trim() || row.textContent.trim();
+                        results.push({ target: row, panel: panel.dataset.panel, title, tabName });
+                    });
+                    panel.querySelectorAll('.settings-section').forEach(section => {
+                        if (section.querySelector('.setting-item-row') ||
+                            !normalizeSettingsSearchText(section.textContent).includes(normalizedQuery)) return;
+                        const title = section.querySelector('.settings-section-title')?.textContent.trim() || 'Más opciones';
+                        results.push({ target: section, panel: panel.dataset.panel, title, tabName });
+                    });
+                });
+                return results.slice(0, 12);
+            }
+
+            function renderSettingsSearchResults() {
+                if (!settingsGlobalSearch || !settingsSearchResults) return;
+                window.clearTimeout(settingsSearchCloseTimer);
+                settingsSearchResults.classList.remove('is-closing');
+                const query = settingsGlobalSearch.value.trim();
+                const results = findSettingsSearchResults(query);
+                const activeTargets = new Set(results.map(result => result.target));
+                settingsSearchResults.hidden = !query && settingsSearchEntries.size === 0;
+                settingsGlobalSearch.setAttribute('aria-expanded', String(Boolean(query)));
+
+                settingsSearchEntries.forEach((entry, target) => {
+                    if (activeTargets.has(target) || entry.leaving) return;
+                    entry.leaving = true;
+                    entry.button.disabled = true;
+                    entry.button.classList.remove('is-present', 'is-entering');
+                    entry.button.classList.add('is-leaving');
+                    entry.timer = window.setTimeout(() => {
+                        if (!entry.leaving) return;
+                        settingsSearchEntries.delete(target);
+                        entry.button.remove();
+                        if (!settingsGlobalSearch.value.trim() && settingsSearchEntries.size === 0) {
+                            settingsSearchResults.hidden = true;
+                        }
+                    }, SETTINGS_SEARCH_EXIT_MS);
+                });
+
+                results.forEach((result, index) => {
+                    let entry = settingsSearchEntries.get(result.target);
+                    if (entry?.leaving) {
+                        window.clearTimeout(entry.timer);
+                        entry.leaving = false;
+                        entry.button.disabled = false;
+                        entry.button.classList.remove('is-leaving');
+                        entry.button.classList.add('is-present');
+                    }
+                    if (!entry) {
+                        const button = document.createElement('button');
+                        button.type = 'button';
+                        button.className = 'settings-search-result is-entering';
+                        button.setAttribute('role', 'option');
+                        const title = document.createElement('span');
+                        const location = document.createElement('small');
+                        button.append(title, location);
+                        button.addEventListener('click', () => {
+                            activateSettingsTab(result.panel);
+                            settingsSearchResults.hidden = true;
+                            settingsSearchResults.classList.remove('is-closing');
+                            window.clearTimeout(settingsSearchCloseTimer);
+                            settingsGlobalSearch.setAttribute('aria-expanded', 'false');
+                            result.target.scrollIntoView({
+                                behavior: body.classList.contains('super-performance') ? 'auto' : 'smooth',
+                                block: 'center'
+                            });
+                            result.target.classList.remove('setting-highlight');
+                            void result.target.offsetWidth;
+                            result.target.classList.add('setting-highlight');
+                            const focusTarget = result.target.matches('button, input, select, textarea')
+                                ? result.target
+                                : result.target.querySelector('button, input:not([type="hidden"]), select, textarea');
+                            if (focusTarget) {
+                                focusTarget.focus({ preventScroll: true });
+                            } else {
+                                if (!result.target.hasAttribute('tabindex')) result.target.setAttribute('tabindex', '-1');
+                                result.target.focus({ preventScroll: true });
+                            }
+                        });
+                        entry = { button, title, location, timer: null, leaving: false };
+                        settingsSearchEntries.set(result.target, entry);
+                        settingsSearchResults.appendChild(button);
+                        requestAnimationFrame(() => {
+                            if (!entry.leaving && entry.button.isConnected) {
+                                entry.button.classList.remove('is-entering');
+                                entry.button.classList.add('is-present');
+                            }
+                        });
+                    }
+                    entry.title.textContent = result.title;
+                    entry.location.textContent = result.tabName;
+                    entry.button.style.setProperty('--result-order', index);
+                });
+
+                let emptyState = settingsSearchResults.querySelector('.settings-search-empty');
+                if (query && results.length === 0) {
+                    if (!emptyState) {
+                        emptyState = document.createElement('div');
+                        emptyState.className = 'settings-search-empty is-entering';
+                        emptyState.textContent = 'No se encontraron ajustes.';
+                        settingsSearchResults.appendChild(emptyState);
+                        requestAnimationFrame(() => {
+                            if (emptyState.isConnected) {
+                                emptyState.classList.remove('is-entering');
+                                emptyState.classList.add('is-present');
+                            }
+                        });
+                    }
+                } else if (emptyState) {
+                    emptyState.remove();
+                }
+            }
+
+            settingsGlobalSearch?.addEventListener('input', renderSettingsSearchResults);
+            settingsGlobalSearch?.addEventListener('focus', () => {
+                if (settingsGlobalSearch.value.trim()) renderSettingsSearchResults();
+            });
+            document.querySelector('.settings-search-wrap')?.addEventListener('click', event => {
+                if (!settingsSearchResults.contains(event.target) && settingsGlobalSearch?.value.trim()) {
+                    renderSettingsSearchResults();
+                }
+            });
+            settingsGlobalSearch?.addEventListener('keydown', event => {
+                if (event.key === 'Escape') {
+                    event.preventDefault();
+                    closeSettingsSearchResults();
+                } else if (event.key === 'Enter') {
+                    settingsSearchResults.querySelector('.settings-search-result')?.click();
+                }
+            });
+            document.addEventListener('click', event => {
+                if (!(event.target instanceof Element) || !event.target.closest('.settings-search-wrap')) {
+                    closeSettingsSearchResults();
+                }
+            }, true);
+
+            document.getElementById('goToWelcomeAnimationBtn')?.addEventListener('click', () => {
             activateSettingsTab('apariencia');
             const setting = document.getElementById('welcomeAnimationSetting');
             if (!setting) return;
@@ -1863,8 +2141,19 @@ function appIconMarkup(app) {
 
         function enterZenMode() {
             if (body.classList.contains('zen-mode')) return;
+            if (searchPanel?.classList.contains('expanded')) {
+                searchPanel.classList.remove('expanded');
+                body.classList.remove('search-open');
+                if (searchInput) {
+                    searchInput.value = '';
+                    searchInput.blur();
+                }
+                if (typeof filterSearchPersistent === 'function') filterSearchPersistent('');
+            }
+            window.closeHomescreenNotifications?.();
             body.classList.add('zen-mode');
             setPanel.classList.remove('active'); 
+            syncOverlayState();
             history.pushState({ mode: 'zen' }, "");
         }
 
@@ -2049,8 +2338,9 @@ function appIconMarkup(app) {
             if (url) window.open(url, '_blank', 'noopener,noreferrer');
         });
 
-        async function showChangelogModal() {
+        async function showChangelogModal(version = '') {
             playSound('click');
+            const requestedVersion = typeof version === 'string' ? version.trim() : '';
             const releaseList = document.getElementById('changelogReleaseList');
             const releaseDetail = document.getElementById('changelogReleaseDetail');
             const search = document.getElementById('changelogSearch');
@@ -2058,7 +2348,16 @@ function appIconMarkup(app) {
             if (!releaseList || !releaseDetail || !search || !breadcrumbs) return;
             openModal('changelogModal');
             releaseDetail.textContent = 'Cargando historial...';
-            const versionInfo = await window.getVersionInfo();
+            let versionInfo;
+            try {
+                versionInfo = await window.getVersionInfo();
+            } catch (error) {
+                releaseList.replaceChildren();
+                breadcrumbs.replaceChildren();
+                releaseDetail.textContent = 'No se pudo cargar el historial de versiones.';
+                showToast('No se pudo cargar el historial de versiones', 'alert-circle');
+                return;
+            }
             const releases = versionInfo.releases;
             if (!releases.length) {
                 releaseList.replaceChildren();
@@ -2066,7 +2365,22 @@ function appIconMarkup(app) {
                 return;
             }
 
-            let selected = releases[0];
+            const normalizeVersion = value => {
+                const match = String(value || '').match(/^\s*v?(\d+(?:\.\d+)*)/i);
+                if (!match) return '';
+                const parts = match[1].split('.').map(part => String(Number(part)));
+                while (parts.length > 1 && parts[parts.length - 1] === '0') parts.pop();
+                return parts.join('.');
+            };
+            const normalizedRequestedVersion = normalizeVersion(requestedVersion);
+            const matchingRelease = normalizedRequestedVersion
+                ? releases.find(release => normalizedRequestedVersion === normalizeVersion(release.version))
+                : null;
+            const selectedRelease = requestedVersion ? matchingRelease : releases[0];
+            if (requestedVersion && !matchingRelease) {
+                showToast('No se encontró la versión solicitada; se muestra el historial normal', 'info');
+            }
+            let selected = selectedRelease || releases[0];
             const render = query => {
                 const filtered = window.HomescreenChangelog.filterReleases(releases, query);
                 if (!filtered.includes(selected)) selected = filtered[0] || null;
@@ -2587,7 +2901,9 @@ function appIconMarkup(app) {
         }
 
         function setLayoutMode(mode) {
+            mode = ['pill', 'list', 'grid'].includes(mode) ? mode : 'pill';
             grid.classList.remove('list-mode', 'grid-mode');
+            body.classList.toggle('layout-pill', mode === 'pill');
             if (mode === 'list') { grid.classList.add('list-mode'); } else if (mode === 'grid') { grid.classList.add('grid-mode'); }
             localStorage.setItem('layoutMode', mode);
             document.querySelectorAll('.layout-opt').forEach(btn => {
@@ -2614,6 +2930,19 @@ function appIconMarkup(app) {
                 if (range) range.value = value;
                 if (output) output.value = format(value);
             });
+        }
+
+        function applyPillAppSize(value) {
+            const size = Math.max(75, Math.min(130, Number(value) || 100));
+            const range = document.getElementById('pillAppSizeRange');
+            const output = document.getElementById('pillAppSizeValue');
+            body.style.setProperty('--pill-app-scale', String(size / 100));
+            if (range) {
+                range.value = size;
+                range.style.setProperty('--range-progress', `${((size - 75) / 55) * 100}%`);
+            }
+            if (output) output.value = `${size}%`;
+            localStorage.setItem('pillAppSize', String(size));
         }
 
         function applyGridWidth(value) {
@@ -3046,10 +3375,12 @@ function appIconMarkup(app) {
                 if (!el) return;
                 const stored = localStorage.getItem(localStorageKey) || defaultVal;
                 if (stored === 'true') el.classList.add('on');
+                if (el.getAttribute('role') === 'switch') el.setAttribute('aria-checked', String(stored === 'true'));
                 el.onclick = () => {
                     playSound('click'); triggerHaptic();
                     const act = el.classList.toggle('on');
                     localStorage.setItem(localStorageKey, act);
+                    if (el.getAttribute('role') === 'switch') el.setAttribute('aria-checked', String(act));
                     if (callback) callback(act);
                 };
                 return stored === 'true';
@@ -3083,10 +3414,12 @@ function appIconMarkup(app) {
 
             applyFolderSize(localStorage.getItem('folderSize') || 3);
             applyFolderAppsSize(localStorage.getItem('folderAppsSize') || 3);
+            applyPillAppSize(localStorage.getItem('pillAppSize') || 100);
             applyGlassOpacity(localStorage.getItem('glassOpacity') || 50);
             applyLayoutDimensionSettings();
             bindSmoothSnapRange('folderSizeRange', applyFolderSize, 1, 5);
             bindSmoothSnapRange('folderAppsSizeRange', applyFolderAppsSize, 1, 5);
+            document.getElementById('pillAppSizeRange')?.addEventListener('input', event => applyPillAppSize(event.target.value));
             applyFolderModalSize(localStorage.getItem('folderModalSize') || 3);
             bindSmoothSnapRange('folderModalSizeRange', applyFolderModalSize, 1, 5);
             bindSmoothSnapRange('glassOpacityRange', applyGlassOpacity, 10, 90);
@@ -3103,6 +3436,16 @@ function appIconMarkup(app) {
             setupToggle('toggleCustomApps', 'showCustomApps', renderMainGrid, 'true');
             setupToggle('toggleSounds', 'sounds', null, 'false');
             setupToggle('toggleHaptics', 'haptics', null, 'false');
+            setupToggle('toggleNotificationsButton', 'disableNotificationsButton', disabled => {
+                body.classList.toggle('notifications-button-disabled', disabled);
+            }, 'false');
+            document.getElementById('toggleNotificationsButton')?.addEventListener('keydown', event => {
+                if (event.key === 'Enter' || event.key === ' ') {
+                    event.preventDefault();
+                    event.currentTarget.click();
+                }
+            });
+            body.classList.toggle('notifications-button-disabled', localStorage.getItem('disableNotificationsButton') === 'true');
             setupToggle('toggleShowSeconds', 'showSeconds', updateClock, 'true');
             setupPreferenceDropdown('settingFontFamily', 'fontFamily', 'Outfit', applyVisualPreferences);
             setupPreferenceDropdown('settingTimeFormat', 'timeFormat', '24', updateClock);
@@ -3214,6 +3557,7 @@ function appIconMarkup(app) {
             if(isBgActive) { body.classList.add('bg-active'); if(sBg) sBg.classList.add('on'); initParticles(); }
 
             const setBtn = document.getElementById('setBtn');
+            const settingsNotificationsBtn = document.getElementById('settingsNotificationsBtn');
             const checkUpdatesBtn = document.getElementById('checkUpdatesBtn');
             const showChangelogBtn = document.getElementById('showChangelogBtn');
             const settingsVersionInfo = document.getElementById('settingsVersionInfo');
@@ -3245,6 +3589,12 @@ function appIconMarkup(app) {
                     }
                 };
             }
+
+            settingsNotificationsBtn?.addEventListener('click', event => {
+                event.stopPropagation();
+                closeSettings();
+                requestAnimationFrame(() => window.openHomescreenNotifications?.());
+            });
 
             document.getElementById('settingsCloseBtn')?.addEventListener('click', (e) => {
                 e.stopPropagation();
@@ -3279,6 +3629,7 @@ function appIconMarkup(app) {
                 darkbg: 'true',
                 noblur: 'false',
                 hideLocalChip: 'false',
+                disableNotificationsButton: 'false',
                 searchEngine: 'google',
                 appUsageStats: '{}',
                 showDock: 'false',
@@ -3296,7 +3647,7 @@ function appIconMarkup(app) {
                 hideAppStars: 'false',
                 welcomeAnimation: 'blur',
                 folderAnimation: 'slide',
-                settingsAnimation: 'fade',
+                notificationsAnimation: 'fade',
                 fontFamily: 'Outfit',
                 timeFormat: '24',
                 clockStyle: 'digital',
@@ -3305,6 +3656,7 @@ function appIconMarkup(app) {
                 gridWidth: '700',
                 listColumns: '1',
                 gridColumns: '5',
+                pillAppSize: '100',
                 folderSize: '3',
                 folderAppsSize: '3',
                 glassOpacity: '50',
@@ -4003,5 +4355,6 @@ function appIconMarkup(app) {
         window.onload = init;
     </script>
     <script src="update-manager.js"></script>
+    <script src="notifications.js"></script>
 </body>
 </html>
