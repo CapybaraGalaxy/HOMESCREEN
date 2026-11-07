@@ -134,6 +134,22 @@
         "type": "external",
         "url": "https://github.com/CapybaraGalaxy/HOMESCREEN"
       }
-    }
+    },
+    {
+  "id": "2026-11-banner-actualizacion",
+  "type": "update",
+  "title": "Nuevo diseño de interfaz",
+  "message": "Hemos renovado por completo la experiencia visual.",
+  "date": "2026-11-06T12:00:00Z",
+  "expiresAt": null,
+  "icon": "image",
+  "important": false,
+  "imageUrl": "https://plsn.com/site/wp-content/uploads/fig-2.-1920px-SMPTE_Color_Bars_16x9.png",
+  "imagePosition": "top",
+  "imageAlt": "Captura de pantalla del nuevo diseño de interfaz",
+  "action": {
+    "type": "none"
+  }
+}
   ]
 }
