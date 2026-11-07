@@ -2163,15 +2163,15 @@ function appIconMarkup(app) {
             enterZenMode();
         };
 
-        let backgroundTouchStart = null;
+let backgroundTouchStart = null;
         document.addEventListener('touchstart', (event) => {
             if (isEditableTarget(event.target) || event.touches.length !== 1) return;
             backgroundTouchStart = { x: event.touches[0].clientX, y: event.touches[0].clientY };
         }, { passive: true });
         document.addEventListener('touchend', (event) => {
             if (backgroundTouchStart === null || isEditableTarget(event.target)) return;
-            const deltaY = event.changedTouches[0].clientY - backgroundTouchStart.y;
-            const deltaX = event.changedTouches[0].clientX - backgroundTouchStart.x;
+            const deltaY = backgroundTouchStart.y - event.changedTouches[0].clientY;
+            const deltaX = backgroundTouchStart.x - event.changedTouches[0].clientX;
             backgroundTouchStart = null;
             if (deltaY > 70 && deltaY > Math.abs(deltaX)) toggleSearch(true);
         }, { passive: true });
