@@ -1,4 +1,4 @@
-const CACHE_NAME = "homescreen-cache-v7";
+const CACHE_NAME = "homescreen-cache-v8";
 const CORE = [
     "./",
     "./index.html",
@@ -13,6 +13,7 @@ const CORE = [
     "./changelog.js",
     "./update-manager.js",
     "./version.json",
+    "./notifications.json",
     "./vendor/canvas-confetti.min.js",
     "./vendor/pdf.min.js",
     "./vendor/pdf.worker.min.js",

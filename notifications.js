@@ -1,5 +1,6 @@
 (() => {
     const FEED_URL = "https://raw.githubusercontent.com/CapybaraGalaxy/homescreen-notifications/main/notifications.json";
+    const FALLBACK_FEED_URL = "./notifications.json";
     const FEED_STORAGE_KEY = "homescreen.notifications.feed.v1";
     const STATES_STORAGE_KEY = "homescreen.notifications.states.v1";
     const REFRESH_INTERVAL = 30 * 60 * 1000;
@@ -26,7 +27,12 @@
     let refreshStatusTimer = null;
     let suppressCardClickUntil = 0;
     const notificationAnimationModes = ["fade", "slide-up", "slide-right", "zoom"];
-    const savedAnimationMode = localStorage.getItem("notificationsAnimation");
+    let savedAnimationMode = null;
+    try {
+        savedAnimationMode = localStorage.getItem("notificationsAnimation");
+    } catch (error) {
+        console.warn("No se pudo leer la animación de notificaciones guardada.", error);
+    }
     panel.classList.add(`notifications-animation-${notificationAnimationModes.includes(savedAnimationMode) ? savedAnimationMode : "fade"}`);
 
     function setRefreshIcon(name) {
@@ -363,7 +369,7 @@
             if (event.target === card && ["max-height", "opacity"].includes(event.propertyName)) finishDismiss();
         };
         card.addEventListener("transitionend", onTransitionEnd);
-        if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) finishDismiss();
+        if (window.matchMedia?.("(prefers-reduced-motion: reduce)").matches) finishDismiss();
         else window.setTimeout(() => finishDismiss(), 360);
     }
 
@@ -375,7 +381,7 @@
         panel.classList.remove("is-open");
         trigger.setAttribute("aria-expanded", "false");
         window.clearTimeout(closeTimer);
-        const closeDelay = window.matchMedia("(prefers-reduced-motion: reduce)").matches ||
+        const closeDelay = window.matchMedia?.("(prefers-reduced-motion: reduce)").matches ||
             document.body.classList.contains("super-performance") ? 0 : 720;
         closeTimer = window.setTimeout(() => {
             if (!isOpen) panel.hidden = true;
@@ -540,7 +546,9 @@
         lastCheckAt = now;
         inFlightCheck = (async () => {
             try {
-                const response = await fetch(FEED_URL, {
+                const latestFeedUrl = new URL(FEED_URL);
+                latestFeedUrl.searchParams.set("_", String(now));
+                const response = await fetch(latestFeedUrl.href, {
                     cache: "no-store",
                     headers: { Accept: "application/json" }
                 });
@@ -549,7 +557,20 @@
                 applyFeed(nextFeed);
                 return true;
             } catch (error) {
-                console.warn("No se pudieron actualizar las notificaciones; se conserva la última copia válida.", error);
+                console.warn("No se pudieron actualizar las notificaciones en línea.", error);
+                try {
+                    const response = await fetch(FALLBACK_FEED_URL, {
+                        cache: "no-store",
+                        headers: { Accept: "application/json" }
+                    });
+                    if (!response.ok) throw new Error(`Error HTTP ${response.status}`);
+                    const fallbackFeed = validateFeed(await response.json());
+                    if (!feed || Date.parse(fallbackFeed.updatedAt) > Date.parse(feed.updatedAt)) {
+                        applyFeed(fallbackFeed);
+                    }
+                } catch (fallbackError) {
+                    console.warn("No se pudo cargar el archivo local de respaldo de notificaciones.", fallbackError);
+                }
                 render();
                 return false;
             } finally {

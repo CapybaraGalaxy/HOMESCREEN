@@ -1,0 +1,139 @@
+{
+  "schemaVersion": 1,
+  "project": "Homescreen NEO",
+  "updatedAt": "2026-11-06T18:00:00Z",
+  "notifications": [
+    {
+      "id": "2026-11-welcome-003",
+      "type": "announcement",
+      "title": "¡Bienvenido a Homescreen NEO!",
+      "message": "Gracias por utilizar Homescreen. Seguiremos trabajando para ofrecerte una experiencia más completa, rápida y personalizable.",
+      "date": "2026-11-06T10:00:00Z",
+      "expiresAt": null,
+      "icon": "house",
+      "important": false,
+      "imageUrl": null,
+      "imagePosition": "top",
+      "imageAlt": "Abstract design representing welcome and creativity",
+      "action": {
+        "type": "none"
+      }
+    },
+    {
+      "id": "2026-11-update-002",
+      "type": "update",
+      "title": "Nueva actualización disponible",
+      "message": "Homescreen NEO ha recibido mejoras de rendimiento, correcciones y pequeños ajustes en su interfaz.",
+      "date": "2026-11-06T12:00:00Z",
+      "expiresAt": null,
+      "icon": "download",
+      "important": true,
+      "imageUrl": null,
+      "imagePosition": "top",
+      "imageAlt": "",
+      "action": {
+        "type": "changelog",
+        "version": "1.8.0 - NEO Drop 2"
+      }
+    },
+    {
+      "id": "2026-11-feature-002",
+      "type": "feature",
+      "title": "Personaliza tu experiencia",
+      "message": "Recuerda que puedes adaptar la apariencia de Homescreen desde los ajustes, cambiar la distribución y configurar diferentes opciones visuales.",
+      "date": "2026-11-05T15:30:00Z",
+      "expiresAt": null,
+      "icon": "palette",
+      "important": false,
+      "imageUrl": null,
+      "imagePosition": "top",
+      "imageAlt": "",
+      "action": {
+        "type": "internal",
+        "url": "index.html"
+      }
+    },
+    {
+      "id": "2026-11-app-002",
+      "type": "announcement",
+      "title": "Nuevas aplicaciones",
+      "message": "Hemos incorporado nuevas herramientas a la biblioteca de aplicaciones. ¡Échales un vistazo!",
+      "date": "2026-11-04T17:00:00Z",
+      "expiresAt": null,
+      "icon": "grid-2x2",
+      "important": false,
+      "imageUrl": null,
+      "imagePosition": "top",
+      "imageAlt": "",
+      "action": {
+        "type": "internal",
+        "url": "Apps/"
+      }
+    },
+    {
+      "id": "2026-11-event-002",
+      "type": "event",
+      "title": "¡Gracias por acompañarnos!",
+      "message": "Homescreen sigue creciendo gracias a su comunidad. Tenemos muchas novedades preparadas.",
+      "date": "2026-11-03T12:00:00Z",
+      "expiresAt": null,
+      "icon": "heart",
+      "important": false,
+      "imageUrl": null,
+      "imagePosition": "top",
+      "imageAlt": "",
+      "action": {
+        "type": "none"
+      }
+    },
+    {
+      "id": "2026-11-maintenance-002",
+      "type": "maintenance",
+      "title": "Mantenimiento programado",
+      "message": "Algunos servicios externos podrían experimentar interrupciones temporales. Homescreen seguirá funcionando con normalidad en sus funciones locales.",
+      "date": "2026-11-02T09:00:00Z",
+      "expiresAt": "2026-11-03T09:00:00Z",
+      "icon": "wrench",
+      "important": true,
+      "imageUrl": null,
+      "imagePosition": "top",
+      "imageAlt": "",
+      "action": {
+        "type": "none"
+      }
+    },
+    {
+      "id": "2026-11-warning-002",
+      "type": "warning",
+      "title": "Aviso importante",
+      "message": "Comprueba que tienes una copia de seguridad reciente de tu configuración para evitar perder tus datos.",
+      "date": "2026-11-01T10:00:00Z",
+      "expiresAt": null,
+      "icon": "alert-triangle",
+      "important": true,
+      "imageUrl": null,
+      "imagePosition": "top",
+      "imageAlt": "",
+      "action": {
+        "type": "none"
+      }
+    },
+    {
+      "id": "2026-11-community-002",
+      "type": "announcement",
+      "title": "Visita nuestro repositorio",
+      "message": "Consulta el desarrollo, el código y las novedades de Homescreen NEO en GitHub.",
+      "date": "2026-11-06T14:00:00Z",
+      "expiresAt": null,
+      "icon": "github",
+      "important": false,
+      "imageUrl": null,
+      "imagePosition": "top",
+      "imageAlt": "",
+      "action": {
+        "type": "external",
+        "url": "https://github.com/CapybaraGalaxy/HOMESCREEN"
+      }
+    }
+  ]
+}
