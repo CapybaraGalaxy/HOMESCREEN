@@ -1,7 +1,6 @@
 (() => {
-    const FEED_URL = "https://raw.githubusercontent.com/CapybaraGalaxy/homescreen-notifications/main/notifications.json";
+    const FEED_URL = "https://raw.githubusercontent.com/CapybaraGalaxy/homescreen-notifications/refs/heads/main/notifications.json";
     const FALLBACK_FEED_URL = "./notifications.json";
-    const FEED_STORAGE_KEY = "homescreen.notifications.feed.v1";
     const STATES_STORAGE_KEY = "homescreen.notifications.states.v1";
     const REFRESH_INTERVAL = 30 * 60 * 1000;
     const MIN_CHECK_INTERVAL = 60 * 1000;
@@ -10,15 +9,14 @@
     const trigger = document.getElementById("notificationsTrigger");
     const panel = document.getElementById("notificationsPanel");
     const closeButton = document.getElementById("notificationsClose");
-    const markAllButton = document.getElementById("notificationsMarkAll");
     const refreshButton = document.getElementById("notificationsRefresh");
     const refreshStatus = document.getElementById("notificationsRefreshStatus");
     const list = document.getElementById("notificationsList");
     const summary = document.getElementById("notificationsSummary");
 
-    if (!trigger || !panel || !closeButton || !markAllButton || !refreshButton || !list || !summary) return;
+    if (!trigger || !panel || !closeButton || !refreshButton || !list || !summary) return;
 
-    let feed = readStoredFeed();
+    let feed = null;
     let notificationStates = readStates();
     let inFlightCheck = null;
     let lastCheckAt = 0;
@@ -113,7 +111,7 @@
         try {
             const imageUrl = new URL(value);
             if (imageUrl.protocol !== "https:" || !imageUrl.hostname ||
-                imageUrl.username || imageUrl.password || !/\.(?:png|svg)$/i.test(imageUrl.pathname)) return null;
+                imageUrl.username || imageUrl.password || !/\.(?:png|jpe?g|svg)$/i.test(imageUrl.pathname)) return null;
             return imageUrl.href;
         } catch (error) {
             return null;
@@ -215,62 +213,51 @@
         };
     }
 
-    function readStoredFeed() {
-        const stored = readJson(FEED_STORAGE_KEY);
-        if (!stored) return null;
-        try {
-            return validateFeed(stored);
-        } catch (error) {
-            console.warn("Se ignoró el feed de notificaciones almacenado porque no es válido.", error);
-            return null;
-        }
-    }
-
     function readStates() {
         const stored = readJson(STATES_STORAGE_KEY);
-        if (stored === null) return Object.create(null);
-        if (typeof stored !== "object" || Array.isArray(stored)) {
+        const states = { read: [], dismissed: [] };
+        if (stored !== null && (typeof stored !== "object" || Array.isArray(stored))) {
             console.warn("Se ignoró el estado de notificaciones almacenado porque no es válido.");
-            return Object.create(null);
+        } else if (stored && Array.isArray(stored.read) && Array.isArray(stored.dismissed)) {
+            states.read = [...new Set(stored.read.filter(id => typeof id === "string"))];
+            states.dismissed = [...new Set(stored.dismissed.filter(id => typeof id === "string"))];
+        } else if (stored) {
+            for (const [key, state] of Object.entries(stored)) {
+                if (!key.startsWith("notification:") || !state || typeof state !== "object") continue;
+                const id = key.slice("notification:".length);
+                if (state.readAt) states.read.push(id);
+                if (state.dismissedAt) states.dismissed.push(id);
+            }
+            states.read = [...new Set(states.read)];
+            states.dismissed = [...new Set(states.dismissed)];
+            writeJson(STATES_STORAGE_KEY, states);
         }
-        return stored;
+        try {
+            localStorage.removeItem("homescreen.notifications.feed.v1");
+        } catch (error) {
+            console.warn("No se pudo eliminar el feed de notificaciones almacenado anteriormente.", error);
+        }
+        return states;
     }
 
-    function stateKey(id) {
-        return `notification:${id}`;
+    function isRead(id) {
+        return notificationStates.read.includes(id) || notificationStates.dismissed.includes(id);
     }
 
-    function getState(notification) {
-        const key = stateKey(notification.id);
-        const existing = notificationStates[key];
-        if (existing && typeof existing === "object" && !Array.isArray(existing) && existing.receivedAt) return existing;
-        const preserved = existing && typeof existing === "object" && !Array.isArray(existing) ? existing : {};
-        const state = {
-            ...preserved,
-            receivedAt: preserved.receivedAt || new Date().toISOString(),
-            readAt: preserved.readAt || null,
-            dismissedAt: preserved.dismissedAt || null
-        };
-        notificationStates[key] = state;
-        writeJson(STATES_STORAGE_KEY, notificationStates);
-        return state;
-    }
-
-    function reconcileStates(notifications) {
+    function markRead(notifications) {
+        let changed = false;
         for (const notification of notifications) {
-            const key = stateKey(notification.id);
-            const existing = notificationStates[key];
-            if (!existing || typeof existing !== "object" || Array.isArray(existing) || !existing.receivedAt) {
-                const preserved = existing && typeof existing === "object" && !Array.isArray(existing) ? existing : {};
-                notificationStates[key] = {
-                    ...preserved,
-                    receivedAt: new Date().toISOString(),
-                    readAt: preserved.readAt || null,
-                    dismissedAt: preserved.dismissedAt || null
-                };
+            if (!notificationStates.read.includes(notification.id)) {
+                notificationStates.read.push(notification.id);
+                changed = true;
             }
         }
-        writeJson(STATES_STORAGE_KEY, notificationStates);
+        if (changed) writeJson(STATES_STORAGE_KEY, notificationStates);
+        return changed;
+    }
+
+    function markVisibleAsRead() {
+        markRead(getVisibleNotifications());
     }
 
     function isPublished(notification, now = Date.now()) {
@@ -283,14 +270,13 @@
         if (!feed) return [];
         return feed.notifications
             .filter(notification => {
-                const state = getState(notification);
-                return isPublished(notification) && !state.dismissedAt;
+                return isPublished(notification) && !notificationStates.dismissed.includes(notification.id);
             })
             .sort((a, b) => Date.parse(b.date) - Date.parse(a.date));
     }
 
     function unreadCount() {
-        return getVisibleNotifications().filter(notification => !getState(notification).readAt).length;
+        return getVisibleNotifications().filter(notification => !isRead(notification.id)).length;
     }
 
     function updateBadge() {
@@ -310,7 +296,7 @@
 
     function updateSummary() {
         const notifications = getVisibleNotifications();
-        const unread = notifications.filter(notification => !getState(notification).readAt).length;
+        const unread = notifications.filter(notification => !isRead(notification.id)).length;
         updateBadge();
         summary.textContent = unread
             ? "Hay avisos sin leer"
@@ -319,16 +305,6 @@
                 : feed
                     ? "No hay notificaciones disponibles"
                     : "Los avisos aparecerán aquí cuando haya conexión";
-        markAllButton.disabled = unread === 0;
-    }
-
-    function markRead(notification) {
-        const state = getState(notification);
-        if (!state.readAt) {
-            state.readAt = new Date().toISOString();
-            writeJson(STATES_STORAGE_KEY, notificationStates);
-            render();
-        }
     }
 
     function dismiss(notification, cardElement, direction = 1) {
@@ -336,9 +312,9 @@
             .find(item => item.dataset.notificationId === notification.id) || cardElement;
         if (!card || card.classList.contains("is-dismissing")) return;
         const previousIndex = [...list.children].indexOf(card);
-        const state = getState(notification);
-        if (state.dismissedAt) return;
-        state.dismissedAt = new Date().toISOString();
+        if (notificationStates.dismissed.includes(notification.id)) return;
+        notificationStates.dismissed.push(notification.id);
+        if (!notificationStates.read.includes(notification.id)) notificationStates.read.push(notification.id);
         writeJson(STATES_STORAGE_KEY, notificationStates);
         card.setAttribute("aria-hidden", "true");
         card.inert = true;
@@ -391,15 +367,13 @@
 
     function performAction(notification) {
         const action = notification.action;
-        markRead(notification);
         if (action.type === "internal") {
             closePanel();
             const url = resolveInternalUrl(action.url);
             if (url) window.location.assign(url);
         } else if (action.type === "external") {
-            const externalLink = [...list.querySelectorAll(".notification-external-link")]
-                .find(link => link.dataset.notificationId === notification.id);
-            externalLink?.click();
+            window.open(action.url, "_blank", "noopener,noreferrer");
+            closePanel(false);
         } else if (action.type === "changelog" && typeof window.showChangelogModal === "function") {
             closePanel();
             window.showChangelogModal(action.version);
@@ -407,11 +381,10 @@
     }
 
     function renderCard(notification) {
-        const state = getState(notification);
         const card = document.createElement("article");
         card.className = "notification-card";
         card.dataset.notificationId = notification.id;
-        card.classList.toggle("is-unread", !state.readAt);
+        card.classList.toggle("is-unread", !isRead(notification.id));
         card.classList.toggle("is-important", notification.important);
         card.setAttribute("role", "listitem");
 
@@ -423,21 +396,27 @@
         dismissButton.appendChild(makeIcon("x"));
         dismissButton.addEventListener("click", () => dismiss(notification, card));
 
-        const mainButton = document.createElement("button");
-        mainButton.type = "button";
+        const mainButton = document.createElement(notification.action.type === "none" ? "div" : "button");
         mainButton.className = "notification-card-main";
+        if (notification.action.type === "none") {
+            mainButton.classList.add("notification-card-main--static");
+            mainButton.tabIndex = -1;
+        } else {
+            mainButton.type = "button";
+        }
         const actionLabels = {
             internal: "Abrir página",
             external: "Abrir enlace",
             changelog: "Ver cambios",
-            none: state.readAt ? "Notificación" : "Marcar como leída"
+            none: "Notificación"
         };
-        mainButton.setAttribute("aria-label", `${notification.title}. ${actionLabels[notification.action.type]}`);
-        mainButton.addEventListener("click", () => {
-            if (Date.now() < suppressCardClickUntil) return;
-            if (notification.action.type === "none") markRead(notification);
-            else performAction(notification);
-        });
+        if (notification.action.type !== "none") {
+            mainButton.setAttribute("aria-label", `${notification.title}. ${actionLabels[notification.action.type]}`);
+            mainButton.addEventListener("click", () => {
+                if (Date.now() < suppressCardClickUntil) return;
+                performAction(notification);
+            });
+        }
 
         const icon = makeIcon(notification.icon, "notification-icon");
         const content = document.createElement("div");
@@ -487,22 +466,6 @@
         mainButton.append(icon, content);
         card.append(mainButton, dismissButton);
 
-        if (notification.action.type === "external") {
-            const externalLink = document.createElement("a");
-            externalLink.className = "notification-external-link external-warning-link";
-            externalLink.dataset.notificationId = notification.id;
-            externalLink.href = notification.action.url;
-            externalLink.target = "_blank";
-            externalLink.rel = "noopener noreferrer";
-            externalLink.tabIndex = -1;
-            externalLink.textContent = actionLabels.external;
-            externalLink.addEventListener("click", event => {
-                event.stopPropagation();
-                markRead(notification);
-                closePanel(false);
-            }, true);
-            card.appendChild(externalLink);
-        }
         return card;
     }
 
@@ -532,9 +495,8 @@
     }
 
     function applyFeed(nextFeed) {
-        reconcileStates(nextFeed.notifications);
         feed = nextFeed;
-        writeJson(FEED_STORAGE_KEY, nextFeed);
+        if (isOpen) markVisibleAsRead();
         render();
         updateBadge();
     }
@@ -545,34 +507,44 @@
         if (!force && now - lastCheckAt < MIN_CHECK_INTERVAL) return false;
         lastCheckAt = now;
         inFlightCheck = (async () => {
-            try {
-                const latestFeedUrl = new URL(FEED_URL);
-                latestFeedUrl.searchParams.set("_", String(now));
-                const response = await fetch(latestFeedUrl.href, {
-                    cache: "no-store",
-                    headers: { Accept: "application/json" }
-                });
-                if (!response.ok) throw new Error(`Error HTTP ${response.status}`);
-                const nextFeed = validateFeed(await response.json());
-                applyFeed(nextFeed);
-                return true;
-            } catch (error) {
-                console.warn("No se pudieron actualizar las notificaciones en línea.", error);
+            const loadFeed = async (url, sourceName) => {
                 try {
-                    const response = await fetch(FALLBACK_FEED_URL, {
+                    const response = await fetch(url, {
                         cache: "no-store",
                         headers: { Accept: "application/json" }
                     });
                     if (!response.ok) throw new Error(`Error HTTP ${response.status}`);
-                    const fallbackFeed = validateFeed(await response.json());
-                    if (!feed || Date.parse(fallbackFeed.updatedAt) > Date.parse(feed.updatedAt)) {
-                        applyFeed(fallbackFeed);
-                    }
-                } catch (fallbackError) {
-                    console.warn("No se pudo cargar el archivo local de respaldo de notificaciones.", fallbackError);
+                    return validateFeed(await response.json());
+                } catch (error) {
+                    console.warn(`No se pudo cargar el feed ${sourceName} de notificaciones.`, error);
+                    return null;
                 }
-                render();
-                return false;
+            };
+            try {
+                const [remoteFeed, localFeed] = await Promise.all([
+                    loadFeed(FEED_URL, "remoto"),
+                    loadFeed(FALLBACK_FEED_URL, "local")
+                ]);
+                const availableFeeds = [remoteFeed, localFeed].filter(Boolean);
+                if (!availableFeeds.length) {
+                    render();
+                    return false;
+                }
+                const byId = new Map();
+                for (const source of availableFeeds) {
+                    for (const notification of source.notifications) {
+                        if (!byId.has(notification.id)) byId.set(notification.id, notification);
+                    }
+                }
+                applyFeed({
+                    schemaVersion: 1,
+                    project: remoteFeed?.project || localFeed.project,
+                    updatedAt: availableFeeds.reduce((latest, source) =>
+                        Date.parse(source.updatedAt) > Date.parse(latest) ? source.updatedAt : latest,
+                    availableFeeds[0].updatedAt),
+                    notifications: [...byId.values()]
+                });
+                return true;
             } finally {
                 inFlightCheck = null;
             }
@@ -587,6 +559,7 @@
         panel.setAttribute("aria-hidden", "false");
         panel.inert = false;
         trigger.setAttribute("aria-expanded", "true");
+        markVisibleAsRead();
         render();
         closeButton.focus();
         panel.offsetWidth;
@@ -601,14 +574,6 @@
         else openPanel();
     });
     closeButton.addEventListener("click", () => closePanel());
-    markAllButton.addEventListener("click", () => {
-        for (const notification of getVisibleNotifications()) {
-            const state = getState(notification);
-            if (!state.readAt) state.readAt = new Date().toISOString();
-        }
-        writeJson(STATES_STORAGE_KEY, notificationStates);
-        render();
-    });
     refreshButton.addEventListener("click", async () => {
         if (refreshButton.disabled) return;
         window.clearTimeout(refreshStatusTimer);
@@ -652,7 +617,6 @@
             lastX: event.clientX,
             horizontal: false
         };
-        card.setPointerCapture(event.pointerId);
     });
 
     list.addEventListener("pointermove", event => {
@@ -663,6 +627,7 @@
         if (!swipe.horizontal && Math.abs(deltaX) > 8 && Math.abs(deltaX) > Math.abs(deltaY)) {
             swipe.horizontal = true;
             swipe.card.classList.add("is-swiping");
+            swipe.card.setPointerCapture(event.pointerId);
         }
         if (!swipe.horizontal) return;
         if (event.cancelable) event.preventDefault();
@@ -701,7 +666,7 @@
             return;
         }
         if (event.key !== "Tab") return;
-        const focusable = [...panel.querySelectorAll("button:not(:disabled), a[href]:not(.notification-external-link)")];
+        const focusable = [...panel.querySelectorAll("button:not(:disabled), a[href]")];
         if (!focusable.length) return;
         const first = focusable[0];
         const last = focusable[focusable.length - 1];

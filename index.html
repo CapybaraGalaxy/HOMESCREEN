@@ -1214,7 +1214,6 @@ function appIconMarkup(app) {
                 </div>
                 <div class="notifications-header-actions">
                     <span class="notifications-refresh-status" id="notificationsRefreshStatus" aria-live="polite"></span>
-                    <button class="notifications-mark-all" id="notificationsMarkAll" type="button">Marcar todas como leídas</button>
                     <button class="notifications-refresh" id="notificationsRefresh" type="button" aria-label="Buscar nuevas noticias" title="Buscar nuevas noticias">
                         <i data-lucide="refresh-cw" aria-hidden="true"></i>
                     </button>
@@ -1692,6 +1691,7 @@ function appIconMarkup(app) {
                     <button class="settings-action-btn" id="showAboutBtn" type="button" onclick="window.location.href='about.html'"><i data-lucide="badge-info" style="width: 14px;"></i> Acerca de</button>
                     <button class="settings-action-btn" id="gotoconfigBtn" type="button" onclick="window.location.href='config.html'"><i data-lucide="settings" style="width: 14px;"></i> Asistente inicial</button>
                 </div>
+                <button class="settings-action-btn" id="clearCacheBtn" type="button" style="width: 100%; margin-bottom: 8px;"><i data-lucide="database-zap" style="width: 14px;"></i> Borrar caché</button>
                 <button class="settings-action-btn" id="resetHomescreenBtn" type="button" style="width: 100%; color: #ff6961; border-color: rgba(255, 59, 48, 0.4);"><i data-lucide="trash-2" style="width: 14px;"></i> Restablecer Ajustes de Fábrica</button>
                 <p style="color: var(--text-muted); font-size: 12px; margin: 4px 0 0;">Borra la caché y datos locales para resolver problemas o comenzar desde cero.</p>
             </div>
@@ -4269,11 +4269,38 @@ function appIconMarkup(app) {
                 };
             }
 
+            const clearCacheBtn = document.getElementById('clearCacheBtn');
+            if (clearCacheBtn) {
+                clearCacheBtn.onclick = async (e) => {
+                    e.stopPropagation();
+                    if (!('caches' in window)) {
+                        alert('Este navegador no permite borrar la caché de la aplicación.');
+                        return;
+                    }
+                    clearCacheBtn.disabled = true;
+                    try {
+                        const cacheNames = await caches.keys();
+                        const homescreenCaches = cacheNames.filter(name =>
+                            name.startsWith('homescreen-cache-') || name.startsWith('homescreen-v'));
+                        const deleted = await Promise.all(homescreenCaches.map(name => caches.delete(name)));
+                        if (deleted.some(success => !success)) {
+                            throw new Error('No se pudieron eliminar todas las cachés de Homescreen.');
+                        }
+                        alert('Caché borrada. Tus ajustes y datos guardados no se han modificado.');
+                    } catch (error) {
+                        console.error('No se pudo borrar la caché de Homescreen.', error);
+                        alert('No se pudo borrar la caché. Inténtalo de nuevo.');
+                    } finally {
+                        clearCacheBtn.disabled = false;
+                    }
+                };
+            }
+
             const resetHomescreenBtn = document.getElementById('resetHomescreenBtn');
             if (resetHomescreenBtn) {
                 resetHomescreenBtn.onclick = async (e) => {
                     e.stopPropagation();
-                    if (!confirm('¿Seguro que quieres borrar la caché y todos los datos guardados? Homescreen volverá a empezar desde cero.')) return;
+                    if (!confirm('¿Seguro que quieres restablecer Homescreen de fábrica? Se borrarán la caché y todos tus datos y ajustes guardados. Esta acción no se puede deshacer.')) return;
 
                     localStorage.clear();
                     sessionStorage.clear();

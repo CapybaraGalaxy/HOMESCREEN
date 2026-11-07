@@ -154,7 +154,6 @@ body.super-performance .notifications-panel {
 }
 
 .notifications-refresh,
-.notifications-mark-all,
 .notifications-close {
     border: 1px solid rgba(255,255,255,0.09);
     background: rgba(255,255,255,0.035);
@@ -164,19 +163,6 @@ body.super-performance .notifications-panel {
     transition: color 0.2s ease, background 0.2s ease, border-color 0.2s ease;
 }
 
-.notifications-mark-all {
-    padding: 7px 10px;
-    border-radius: 12px;
-    font-size: 0.68rem;
-    white-space: nowrap;
-}
-
-.notifications-mark-all:disabled {
-    opacity: 0.42;
-    cursor: default;
-}
-
-.notifications-mark-all:not(:disabled):hover,
 .notifications-refresh:not(:disabled):hover,
 .notifications-close:hover {
     border-color: rgba(255,255,255,0.16);
@@ -302,6 +288,10 @@ body.super-performance .notifications-panel {
     touch-action: pan-y;
 }
 
+.notification-card-main--static {
+    cursor: default;
+}
+
 .notification-card-main:hover {
     background: rgba(255,255,255,0.035);
 }
@@ -422,15 +412,6 @@ body.super-performance .notifications-panel {
     font-size: 0.68rem;
 }
 
-.notification-external-link {
-    position: absolute;
-    width: 1px;
-    height: 1px;
-    overflow: hidden;
-    clip-path: inset(50%);
-    white-space: nowrap;
-}
-
 .notifications-empty {
     margin: 0;
     padding: 32px 16px;
@@ -471,7 +452,6 @@ body.modal-open .notifications-anchor {
     .notifications-header { gap: 7px; }
     .notifications-header h2 { font-size: 0.94rem; }
     .notifications-header-actions { gap: 5px; }
-    .notifications-mark-all { max-width: 118px; white-space: normal; line-height: 1.2; }
 }
 
 @media (prefers-reduced-motion: reduce) {

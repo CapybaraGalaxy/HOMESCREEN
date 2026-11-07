@@ -1,4 +1,4 @@
-const CACHE_NAME = "homescreen-cache-v8";
+const CACHE_NAME = "homescreen-cache-v9";
 const CORE = [
     "./",
     "./index.html",
@@ -13,7 +13,6 @@ const CORE = [
     "./changelog.js",
     "./update-manager.js",
     "./version.json",
-    "./notifications.json",
     "./vendor/canvas-confetti.min.js",
     "./vendor/pdf.min.js",
     "./vendor/pdf.worker.min.js",
@@ -134,6 +133,12 @@ self.addEventListener("fetch", event => {
 
     const url = new URL(request.url);
     if (url.origin !== self.location.origin) return;
+
+    const isNotificationsFile = url.pathname.endsWith("/notifications.json") || url.pathname === "/notifications.json";
+    if (isNotificationsFile) {
+        event.respondWith(fetch(request, { cache: "no-store" }));
+        return;
+    }
 
     const isVersionFile = url.pathname.endsWith("/version.json") || url.pathname.endsWith("version.json");
     const isHtml = request.mode === "navigate" || request.headers.get("accept")?.includes("text/html");
