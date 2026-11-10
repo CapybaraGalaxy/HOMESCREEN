@@ -1,0 +1,753 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+    <title>Historial de Versiones</title>
+    <meta name="og:type" content="website">
+    <meta name="og:title" content="Historial de Versiones - Homescreen NEO">
+    <meta name="og:description" content="Explora las versiones guardadas de Homescreen y revisa sus cambios.">
+    <meta name="og:image" content="https://github.com/CapybaraGalaxy/HOMESCREEN/blob/main/Media/og.png?raw=true">
+    <meta name="og:url" content="https://capybaragalaxy.github.io/HOMESCREEN/Apps/backup-travel.html">
+    <meta name="og:locale" content="es_ES">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@200;300;400;500;600;700&display=swap" rel="stylesheet">
+    <script src="../lucide.min.js"></script>
+    <style>
+        :root {
+            /* Paleta Cromática Orgánica y Oscura */
+            --bg: #000000;
+            --surface: #121212;
+            --surface-hover: #1c1c1e;
+            
+            /* Configuración Neo-Glass Pure */
+            --glass: rgba(18, 18, 18, 0.55);
+            --glass-card: rgba(25, 25, 28, 0.45);
+            --glass-border: rgba(255, 255, 255, 0.08);
+            --glass-border-light: rgba(255, 255, 255, 0.14);
+            --blur-val: 30px;
+
+            /* Jerarquía Textual */
+            --text-main: #FFFFFF;
+            --text-muted: #8E8E93;
+
+            /* Estados y Acentos de Sistema */
+            --accent-danger: #FF453A;
+            --accent-success: #34C759;
+            --accent-warning: #FF9F0A;
+            --accent-blue: #0A84FF;
+
+            /* Físicas de Animación Progresivas */
+            --bezier: cubic-bezier(0.16, 1, 0.3, 1);
+            --spring: cubic-bezier(0.34, 1.56, 0.64, 1);
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            -webkit-tap-highlight-color: transparent;
+        }
+
+        body {
+            background-color: var(--bg);
+            color: var(--text-main);
+            font-family: 'Outfit', -apple-system, BlinkMacSystemFont, sans-serif;
+            min-height: 100dvh;
+            display: flex;
+            justify-content: center;
+            align-items: flex-start;
+            overflow-x: hidden;
+            background-image: 
+                radial-gradient(circle at 50% 0%, rgba(10, 132, 255, 0.05), transparent 40%),
+                radial-gradient(circle at 10% 20%, rgba(255, 255, 255, 0.02), transparent 25%);
+            background-attachment: fixed;
+        }
+
+        /* Contenedor Principal Adaptativo */
+        .app-container {
+            width: 100%;
+            max-width: 860px;
+            min-height: 100dvh;
+            padding: calc(env(safe-area-inset-top) + 28px) 20px calc(env(safe-area-inset-bottom) + 36px) 20px;
+            display: flex;
+            flex-direction: column;
+            gap: 24px;
+            margin: 0 auto;
+        }
+
+        /* Cabecera Principal */
+        .app-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 16px;
+            padding-bottom: 8px;
+        }
+
+        .header-brand {
+            display: flex;
+            align-items: center;
+            gap: 14px;
+        }
+
+        .app-icon-badge {
+            width: 44px;
+            height: 44px;
+            border-radius: 14px;
+            background: radial-gradient(circle at 30% 30%, rgba(255, 255, 255, 0.12), rgba(255, 255, 255, 0.03));
+            border: 1px solid var(--glass-border-light);
+            backdrop-filter: blur(var(--blur-val));
+            -webkit-backdrop-filter: blur(var(--blur-val));
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            box-shadow: 0 8px 24px rgba(0, 0, 0, 0.5);
+            flex-shrink: 0;
+        }
+
+        .header-titles h1 {
+            font-size: 1.25rem;
+            font-weight: 600;
+            letter-spacing: -0.02em;
+            color: var(--text-main);
+            line-height: 1.2;
+        }
+
+        .header-titles p {
+            font-size: 0.82rem;
+            color: var(--text-muted);
+            font-weight: 400;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            margin-top: 2px;
+        }
+
+        .path-pill {
+            background: rgba(255, 255, 255, 0.06);
+            border: 1px solid var(--glass-border);
+            padding: 3px 8px;
+            border-radius: 6px;
+            font-family: monospace;
+            font-size: 0.75rem;
+            color: var(--text-muted);
+        }
+
+        /* Tarjeta Destacada de Antigüedad General (Uptime) */
+        .uptime-card {
+            background: var(--glass);
+            border: 1px solid var(--glass-border);
+            backdrop-filter: blur(var(--blur-val));
+            -webkit-backdrop-filter: blur(var(--blur-val));
+            border-radius: 20px;
+            padding: 22px 24px;
+            box-shadow: 0 12px 32px rgba(0, 0, 0, 0.4);
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .uptime-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 1px;
+            background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent);
+        }
+
+        .uptime-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+
+        .uptime-title {
+            font-size: 0.85rem;
+            font-weight: 500;
+            color: var(--text-muted);
+            text-transform: uppercase;
+            letter-spacing: 0.06em;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .uptime-badge-live {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            font-size: 0.75rem;
+            color: var(--accent-success);
+            background: rgba(52, 199, 89, 0.1);
+            border: 1px solid rgba(52, 199, 89, 0.2);
+            padding: 4px 10px;
+            border-radius: 20px;
+            font-weight: 500;
+        }
+
+        .pulse-dot {
+            width: 6px;
+            height: 6px;
+            border-radius: 50%;
+            background-color: var(--accent-success);
+            box-shadow: 0 0 8px var(--accent-success);
+            animation: pulse 2s infinite var(--bezier);
+        }
+
+        @keyframes pulse {
+            0% { opacity: 0.4; transform: scale(0.9); }
+            50% { opacity: 1; transform: scale(1.2); }
+            100% { opacity: 0.4; transform: scale(0.9); }
+        }
+
+        /* Tiempos en Formato Tabular */
+        .timer-digits-container {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(85px, 1fr));
+            gap: 10px;
+            margin-top: 4px;
+        }
+
+        .time-box {
+            background: rgba(0, 0, 0, 0.35);
+            border: 1px solid var(--glass-border);
+            border-radius: 12px;
+            padding: 10px 8px;
+            text-align: center;
+        }
+
+        .time-value {
+            font-size: 1.45rem;
+            font-weight: 600;
+            font-variant-numeric: tabular-nums;
+            color: var(--text-main);
+            line-height: 1.1;
+        }
+
+        .time-label {
+            font-size: 0.72rem;
+            color: var(--text-muted);
+            margin-top: 4px;
+            font-weight: 400;
+            text-transform: lowercase;
+        }
+
+        /* Sección de Lista de Versiones */
+        .section-container {
+            display: flex;
+            flex-direction: column;
+            gap: 14px;
+        }
+
+        .section-title {
+            font-size: 0.95rem;
+            font-weight: 600;
+            color: var(--text-main);
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 0 4px;
+        }
+
+        .version-count {
+            font-size: 0.78rem;
+            color: var(--text-muted);
+            font-weight: 400;
+            background: var(--surface);
+            padding: 2px 8px;
+            border-radius: 12px;
+            border: 1px solid var(--glass-border);
+            font-variant-numeric: tabular-nums;
+        }
+
+        .versions-grid {
+            display: grid;
+            grid-template-columns: 1fr;
+            gap: 12px;
+        }
+
+        @media (min-width: 640px) {
+            .versions-grid {
+                grid-template-columns: repeat(2, 1fr);
+            }
+        }
+
+        /* Tarjeta de Versión */
+        .version-card {
+            background: var(--glass-card);
+            border: 1px solid var(--glass-border);
+            backdrop-filter: blur(var(--blur-val));
+            -webkit-backdrop-filter: blur(var(--blur-val));
+            border-radius: 16px;
+            padding: 16px 18px;
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+            transition: transform 0.25s var(--bezier), border-color 0.25s var(--bezier), background-color 0.25s var(--bezier);
+            text-decoration: none;
+            color: inherit;
+            position: relative;
+        }
+
+        .version-card:hover {
+            transform: translateY(-2px);
+            border-color: var(--glass-border-light);
+            background: rgba(30, 30, 35, 0.6);
+        }
+
+        .version-card:active {
+            transform: scale(0.985);
+        }
+
+        .version-card-header {
+            display: flex;
+            align-items: flex-start;
+            justify-content: space-between;
+            gap: 12px;
+        }
+
+        .file-info {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            min-width: 0;
+        }
+
+        .file-icon {
+            width: 36px;
+            height: 36px;
+            border-radius: 10px;
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid var(--glass-border);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: var(--accent-blue);
+            flex-shrink: 0;
+        }
+
+        .file-details {
+            min-width: 0;
+        }
+
+        .file-name {
+            font-size: 0.95rem;
+            font-weight: 600;
+            color: var(--text-main);
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+
+        .file-date {
+            font-size: 0.78rem;
+            color: var(--text-muted);
+            margin-top: 2px;
+            font-variant-numeric: tabular-nums;
+        }
+
+        .open-badge {
+            color: var(--text-muted);
+            transition: color 0.2s ease, transform 0.2s ease;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .version-card:hover .open-badge {
+            color: var(--text-main);
+            transform: translate(2px, -2px);
+        }
+
+        .time-elapsed-bar {
+            background: rgba(0, 0, 0, 0.25);
+            border: 1px solid rgba(255, 255, 255, 0.04);
+            border-radius: 10px;
+            padding: 8px 12px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 8px;
+        }
+
+        .elapsed-label {
+            font-size: 0.72rem;
+            color: var(--text-muted);
+            display: flex;
+            align-items: center;
+            gap: 5px;
+        }
+
+        .elapsed-value {
+            font-size: 0.8rem;
+            font-weight: 500;
+            color: rgba(255, 255, 255, 0.9);
+            font-variant-numeric: tabular-nums;
+        }
+
+        /* Sección "Intentos Fallidos" (En Obras) */
+        .wip-card {
+            background: rgba(255, 159, 10, 0.03);
+            border: 1px dashed rgba(FF, 159, 10, 0.25);
+            border-radius: 18px;
+            padding: 20px;
+            display: flex;
+            align-items: flex-start;
+            gap: 16px;
+            margin-top: 4px;
+        }
+
+        .wip-icon-box {
+            width: 40px;
+            height: 40px;
+            border-radius: 12px;
+            background: rgba(FF, 159, 10, 0.1);
+            border: 1px solid rgba(FF, 159, 10, 0.2);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: var(--accent-warning);
+            flex-shrink: 0;
+        }
+
+        .wip-content h3 {
+            font-size: 0.95rem;
+            font-weight: 600;
+            color: var(--text-main);
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .wip-tag {
+            font-size: 0.68rem;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            background: rgba(FF, 159, 10, 0.15);
+            color: var(--accent-warning);
+            padding: 2px 8px;
+            border-radius: 6px;
+        }
+
+        .wip-content p {
+            font-size: 0.82rem;
+            color: var(--text-muted);
+            margin-top: 6px;
+            line-height: 1.45;
+        }
+
+        /* Toast / Notificación para Feedback Tactil */
+        .toast {
+            position: fixed;
+            bottom: 24px;
+            left: 50%;
+            transform: translateX(-50%) translateY(100px);
+            background: rgba(28, 28, 30, 0.9);
+            border: 1px solid var(--glass-border-light);
+            backdrop-filter: blur(20px);
+            color: var(--text-main);
+            padding: 10px 18px;
+            border-radius: 30px;
+            font-size: 0.82rem;
+            font-weight: 500;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.5);
+            transition: transform 0.35s var(--spring), opacity 0.35s var(--bezier);
+            opacity: 0;
+            pointer-events: none;
+            z-index: 100;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .toast.show {
+            transform: translateX(-50%) translateY(0);
+            opacity: 1;
+        }
+
+        /* Footer discreto */
+        footer {
+            margin-top: auto;
+            text-align: center;
+            padding-top: 16px;
+            font-size: 0.75rem;
+            color: var(--text-muted);
+            opacity: 0.6;
+        }
+    </style>
+</head>
+<body>
+
+    <div class="app-container" id="main-view">
+        <!-- Cabecera Limpia -->
+        <header class="app-header">
+            <div class="header-brand">
+                <div class="app-icon-badge">
+                    <i data-lucide="history" size="20" style="color: var(--text-main);"></i>
+                </div>
+                <div class="header-titles">
+                    <h1>Versiones de Homescreen</h1>
+                    <p>Ubicación: <span class="path-pill">/Apps</span> &rarr; Copias en <span class="path-pill">/Backups</span></p>
+                </div>
+            </div>
+        </header>
+
+        <!-- Contador General de Antigüedad -->
+        <section class="uptime-card">
+            <div class="uptime-header">
+                <div class="uptime-title">
+                    <i data-lucide="clock" size="16"></i>
+                    <span>Tiempo de existencia de Homescreen</span>
+                </div>
+                <div class="uptime-badge-live">
+                    <div class="pulse-dot"></div>
+                    <span>Origen: 10 Jun 2026, 20:48</span>
+                </div>
+            </div>
+
+            <!-- Visualizador Numérico en Tiempo Real -->
+            <div class="timer-digits-container" id="main-uptime-display">
+                <div class="time-box"><div class="time-value" id="main-years">0</div><div class="time-label">Años</div></div>
+                <div class="time-box"><div class="time-value" id="main-months">0</div><div class="time-label">Meses</div></div>
+                <div class="time-box"><div class="time-value" id="main-days">0</div><div class="time-label">Días</div></div>
+                <div class="time-box"><div class="time-value" id="main-hours">00</div><div class="time-label">Horas</div></div>
+                <div class="time-box"><div class="time-value" id="main-minutes">00</div><div class="time-label">Minutos</div></div>
+                <div class="time-box"><div class="time-value" id="main-seconds">00</div><div class="time-label">Segundos</div></div>
+            </div>
+        </section>
+
+        <!-- Listado de Versiones Registradas -->
+        <section class="section-container">
+            <div class="section-title">
+                <span>Versiones disponibles</span>
+                <span class="version-count" id="version-count-badge">5 archivos</span>
+            </div>
+
+            <div class="versions-grid" id="versions-container">
+                <!-- Se genera dinámicamente mediante JS para mantener sincronía de contadores -->
+            </div>
+        </section>
+
+        <!-- Sección Intentos Fallidos (En obras) -->
+        <section class="section-container">
+            <div class="section-title">
+                <span>Intentos previas / borradores</span>
+            </div>
+            
+            <div class="wip-card">
+                <div class="wip-icon-box">
+                    <i data-lucide="hammer" size="20"></i>
+                </div>
+                <div class="wip-content">
+                    <h3>
+                        <span>Intentos fallidos anteriormente</span>
+                        <span class="wip-tag">En Obras</span>
+                    </h3>
+                    <p>Esta sección se encuentra actualmente en desarrollo. Aún no se han localizado ni recuperado los archivos HTML correspondientes a las iteraciones descartadas.</p>
+                </div>
+            </div>
+        </section>
+
+        <footer>
+            Historial de Versiones &bull; Sistema Neo-Glass
+        </footer>
+    </div>
+
+    <!-- Toast Informativo -->
+    <div id="toast" class="toast">
+        <i data-lucide="info" size="16" style="color: var(--accent-blue);"></i>
+        <span id="toast-message">Abriendo archivo...</span>
+    </div>
+
+    <script>
+        // Datos exactos extraídos de la captura sin invención de registros
+        const BACKUP_VERSIONS = [
+            {
+                filename: "H.html",
+                path: "../Backups/H.html",
+                dateStr: "10/06/2026 20:48",
+                timestamp: new Date(2026, 5, 10, 20, 48, 0).getTime(), // Jun 10 2026 20:48
+                isOriginal: true
+            },
+            {
+                filename: "Homescreen.html",
+                path: "../Backups/Homescreen.html",
+                dateStr: "10/06/2026 21:14",
+                timestamp: new Date(2026, 5, 10, 21, 14, 0).getTime()
+            },
+            {
+                filename: "19 06 2026 - 0.8.1.html",
+                path: "../Backups/19 06 2026 - 0.8.1.html",
+                dateStr: "19/06/2026 15:45",
+                timestamp: new Date(2026, 5, 19, 15, 45, 0).getTime()
+            },
+            {
+                filename: "15 07 2026.html",
+                path: "../Backups/15 07 2026.html",
+                dateStr: "15/07/2026 17:12",
+                timestamp: new Date(2026, 6, 15, 17, 12, 0).getTime()
+            },
+            {
+                filename: "30 07 26.html",
+                path: "../Backups/30 07 26.html",
+                dateStr: "29/07/2026 22:33", // Fecha exacta de modificación según captura
+                timestamp: new Date(2026, 6, 29, 22, 33, 0).getTime()
+            }
+        ];
+
+        // Fecha de inicio original del proyecto: Jun 10, 2026 20:48
+        const FIRST_LAUNCH_TIMESTAMP = new Date(2026, 5, 10, 20, 48, 0).getTime();
+
+        // Cálculo exacto de diferencias temporales
+        function calculateTimeDifference(fromTime, toTime = Date.now()) {
+            let diffMs = toTime - fromTime;
+            
+            // Si la fecha actual es anterior al timestamp del backup (ej. entornos de prueba)
+            const isFuture = diffMs < 0;
+            diffMs = Math.abs(diffMs);
+
+            const secondsTotal = Math.floor(diffMs / 1000);
+            const minutesTotal = Math.floor(secondsTotal / 60);
+            const hoursTotal = Math.floor(minutesTotal / 60);
+            const daysTotal = Math.floor(hoursTotal / 24);
+
+            // Desglose exacto aproximado
+            const years = Math.floor(daysTotal / 365);
+            const remainingDaysAfterYears = daysTotal % 365;
+            const months = Math.floor(remainingDaysAfterYears / 30.4375);
+            const days = Math.floor(remainingDaysAfterYears % 30.4375);
+
+            const hours = hoursTotal % 24;
+            const minutes = minutesTotal % 60;
+            const seconds = secondsTotal % 60;
+
+            return {
+                years,
+                months,
+                days,
+                hours: String(hours).padStart(2, '0'),
+                minutes: String(minutes).padStart(2, '0'),
+                seconds: String(seconds).padStart(2, '0'),
+                totalDays: daysTotal,
+                isFuture
+            };
+        }
+
+        // Renderizado inicial de tarjetas de versión
+        function renderVersionCards() {
+            const container = document.getElementById('versions-container');
+            container.innerHTML = '';
+
+            BACKUP_VERSIONS.forEach((ver, index) => {
+                const card = document.createElement('a');
+                card.className = 'version-card';
+                card.href = ver.path;
+                card.setAttribute('data-index', index);
+                
+                // Acción al hacer clic para manejo de navegación y feedback
+                card.addEventListener('click', (e) => {
+                    showToast(`Accediendo a ${ver.filename}...`);
+                });
+
+                card.innerHTML = `
+                    <div class="version-card-header">
+                        <div class="file-info">
+                            <div class="file-icon">
+                                <i data-lucide="file-code" size="18"></i>
+                            </div>
+                            <div class="file-details">
+                                <div class="file-name" title="${ver.filename}">${ver.filename}</div>
+                                <div class="file-date">${ver.dateStr}</div>
+                            </div>
+                        </div>
+                        <div class="open-badge">
+                            <i data-lucide="external-link" size="16"></i>
+                        </div>
+                    </div>
+
+                    <div class="time-elapsed-bar">
+                        <span class="elapsed-label">
+                            <i data-lucide="history" size="13"></i>
+                            <span>Antigüedad:</span>
+                        </span>
+                        <span class="elapsed-value" id="elapsed-ver-${index}">Calculando...</span>
+                    </div>
+                `;
+
+                container.appendChild(card);
+            });
+
+            // Inicializar iconos de Lucide cargados
+            if (window.lucide) {
+                lucide.createIcons();
+            }
+        }
+
+        // Actualización de contadores en tiempo real
+        function updateTimers() {
+            const now = Date.now();
+
+            // 1. Actualizar Reloj Principal Superior (Desde Origen)
+            const mainDiff = calculateTimeDifference(FIRST_LAUNCH_TIMESTAMP, now);
+            document.getElementById('main-years').textContent = mainDiff.years;
+            document.getElementById('main-months').textContent = mainDiff.months;
+            document.getElementById('main-days').textContent = mainDiff.days;
+            document.getElementById('main-hours').textContent = mainDiff.hours;
+            document.getElementById('main-minutes').textContent = mainDiff.minutes;
+            document.getElementById('main-seconds').textContent = mainDiff.seconds;
+
+            // 2. Actualizar Relojes Individuales de cada Versión
+            BACKUP_VERSIONS.forEach((ver, index) => {
+                const el = document.getElementById(`elapsed-ver-${index}`);
+                if (!el) return;
+
+                const diff = calculateTimeDifference(ver.timestamp, now);
+                
+                let text = '';
+                if (diff.years > 0) {
+                    text += `${diff.years}a `;
+                }
+                if (diff.months > 0 || diff.years > 0) {
+                    text += `${diff.months}m `;
+                }
+                text += `${diff.days}d ${diff.hours}h ${diff.minutes}m ${diff.seconds}s`;
+
+                if (diff.isFuture) {
+                    text = `En ${text}`;
+                } else {
+                    text = `Hace ${text}`;
+                }
+
+                el.textContent = text;
+            });
+        }
+
+        // Mostrar notificación sutil
+        function showToast(message) {
+            const toast = document.getElementById('toast');
+            const toastMessage = document.getElementById('toast-message');
+            toastMessage.textContent = message;
+            toast.classList.add('show');
+            setTimeout(() => {
+                toast.classList.remove('show');
+            }, 2500);
+        }
+
+        // Inicialización de la App
+        window.onload = function() {
+            renderVersionCards();
+            updateTimers();
+            
+            // Actualización fluida cada segundo
+            setInterval(updateTimers, 1000);
+        };
+    </script>
+</body>
+</html>
