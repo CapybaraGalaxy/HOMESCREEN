@@ -15,280 +15,121 @@
             --surface: #121212;
             --surface-elevated: #1a1a1c;
             --surface-hover: #1f1f22;
-            
             --glass: rgba(20, 20, 20, 0.75);
             --glass-border: rgba(255, 255, 255, 0.08);
             --glass-glow: rgba(255, 255, 255, 0.03);
             --blur-val: 30px;
-
             --text-main: #FFFFFF;
             --text-muted: #8E8E93;
-
             --accent-danger: #FF453A;
             --accent-success: #34C759;
             --accent-blue: #0A84FF;
-
             --bezier: cubic-bezier(0.16, 1, 0.3, 1);
             --spring: cubic-bezier(0.34, 1.56, 0.64, 1);
         }
-
+        body.no-blur { --blur-val: 0px !important; }
+        body.no-blur .modal-backdrop, body.no-blur .fab-search, body.no-blur .toast { backdrop-filter: none !important; -webkit-backdrop-filter: none !important; background: rgba(25, 25, 25, 0.95) !important; }
         * { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
-
-        body {
-            font-family: 'Outfit', sans-serif;
-            background-color: var(--bg);
-            color: var(--text-main);
-            overflow: hidden;
-            font-variant-numeric: tabular-nums;
-        }
-
-        /* Contenedor adaptado a PC Completo */
-        .app-container {
-            width: 100%; max-width: 100%; margin: 0 auto; height: 100dvh;
-            display: flex; flex-direction: column; position: relative;
-            background: var(--bg);
-            transition: transform 0.5s var(--bezier), filter 0.5s var(--bezier);
-        }
-
-        .backgrounded {
-            transform: scale(0.98) translateY(4px);
-            filter: blur(8px) brightness(0.6);
-            pointer-events: none;
-        }
-
+        body { font-family: 'Outfit', sans-serif; background-color: var(--bg); color: var(--text-main); overflow: hidden; font-variant-numeric: tabular-nums; }
+        .app-container { width: 100%; max-width: 100%; margin: 0 auto; height: 100dvh; display: flex; flex-direction: column; position: relative; background: var(--bg); transition: transform 0.5s var(--bezier), filter 0.5s var(--bezier); }
+        .backgrounded { transform: scale(0.98) translateY(4px); filter: blur(8px) brightness(0.6); pointer-events: none; }
+        body.no-blur .backgrounded { filter: brightness(0.6); }
         header { padding: env(safe-area-inset-top, 28px) 24px 0 24px; flex-shrink: 0; }
         .header-top { display: flex; align-items: center; justify-content: space-between; margin-bottom: 20px; }
         .app-title-group { display: flex; align-items: center; gap: 14px; }
-        
-        .app-icon-badge {
-            width: 42px; height: 42px; border-radius: 12px;
-            background: linear-gradient(135deg, rgba(255,255,255,0.1), rgba(255,255,255,0.02));
-            border: 1px solid var(--glass-border);
-            display: flex; align-items: center; justify-content: center;
-        }
-
+        .app-icon-badge { width: 42px; height: 42px; border-radius: 12px; background: linear-gradient(135deg, rgba(255,255,255,0.1), rgba(255,255,255,0.02)); border: 1px solid var(--glass-border); display: flex; align-items: center; justify-content: center; }
         h1 { font-size: 1.3rem; font-weight: 500; letter-spacing: -0.02em; }
         .total-counter { font-size: 0.9rem; color: var(--text-muted); font-weight: 400; }
-
-        .categories-scroll-wrapper {
-            position: relative; width: 100%; margin-bottom: 16px; transition: mask-image 0.3s;
-        }
-        .categories-scroll-wrapper.has-overflow {
-            mask-image: linear-gradient(to right, transparent 0%, black 5%, black 95%, transparent 100%);
-            -webkit-mask-image: linear-gradient(to right, transparent 0%, black 5%, black 95%, transparent 100%);
-        }
-
-        .folders-scroll-area {
-            display: flex; gap: 10px; overflow-x: auto; padding: 6px 12px 14px 12px;
-            scrollbar-width: none; -webkit-overflow-scrolling: touch;
-        }
+        .categories-scroll-wrapper { position: relative; width: 100%; margin-bottom: 16px; transition: mask-image 0.3s; }
+        .categories-scroll-wrapper.has-overflow { mask-image: linear-gradient(to right, transparent 0%, black 5%, black 95%, transparent 100%); -webkit-mask-image: linear-gradient(to right, transparent 0%, black 5%, black 95%, transparent 100%); }
+        .folders-scroll-area { display: flex; gap: 10px; overflow-x: auto; padding: 6px 12px 14px 12px; scrollbar-width: none; -webkit-overflow-scrolling: touch; }
         .folders-scroll-area::-webkit-scrollbar { display: none; }
-
-        .pill {
-            padding: 10px 18px; border-radius: 100px;
-            background: var(--surface); border: 1px solid var(--glass-border);
-            color: var(--text-muted); font-size: 0.9rem; font-weight: 500;
-            white-space: nowrap; cursor: pointer; transition: all 0.25s var(--bezier);
-            display: flex; align-items: center; gap: 8px; flex-shrink: 0;
-        }
+        .pill { padding: 10px 18px; border-radius: 100px; background: var(--surface); border: 1px solid var(--glass-border); color: var(--text-muted); font-size: 0.9rem; font-weight: 500; white-space: nowrap; cursor: pointer; transition: all 0.25s var(--bezier); display: flex; align-items: center; gap: 8px; flex-shrink: 0; }
         .pill:hover { background: var(--surface-hover); color: var(--text-main); }
         .pill.active { background: var(--text-main); color: var(--bg); border-color: var(--text-main); box-shadow: 0 8px 16px rgba(255,255,255,0.1); }
         .pill.edit-pill { background: transparent; border: 1px dashed var(--glass-border); }
-
-        /* Grid Expandido para PC */
-        .main-content {
-            flex: 1; overflow-y: auto;
-            padding: 12px 24px calc(env(safe-area-inset-bottom, 24px) + 110px) 24px;
-            display: grid; grid-template-columns: repeat(auto-fill, minmax(340px, 1fr));
-            gap: 20px; align-content: flex-start; scrollbar-width: none;
-        }
+        .main-content { flex: 1; overflow-y: auto; padding: 12px 24px calc(env(safe-area-inset-bottom, 24px) + 110px) 24px; display: grid; grid-template-columns: repeat(auto-fill, minmax(340px, 1fr)); gap: 20px; align-content: flex-start; scrollbar-width: none; }
         .main-content::-webkit-scrollbar { display: none; }
-
-        .zero-state {
-            grid-column: 1 / -1; display: flex; flex-direction: column; align-items: center;
-            justify-content: center; text-align: center; padding: 80px 20px; color: var(--text-muted);
-            border: 1px dashed var(--glass-border); border-radius: 24px; background: rgba(255,255,255,0.01);
-        }
+        .zero-state { grid-column: 1 / -1; display: flex; flex-direction: column; align-items: center; justify-content: center; text-align: center; padding: 80px 20px; color: var(--text-muted); border: 1px dashed var(--glass-border); border-radius: 24px; background: rgba(255,255,255,0.01); }
         .zero-state h3 { color: var(--text-main); font-size: 1.15rem; font-weight: 500; margin: 16px 0 6px 0; }
-
-        /* Tarjetas */
-        .card {
-            background: var(--surface); border: 1px solid var(--glass-border); border-radius: 24px;
-            padding: 24px; cursor: pointer; position: relative; overflow: hidden;
-            display: flex; flex-direction: column; gap: 18px;
-            transition: transform 0.35s var(--spring), background 0.3s var(--bezier), border-color 0.3s;
-            animation: slideUpFade 0.5s var(--spring) forwards; opacity: 0; transform: translateY(24px);
-        }
+        .card { background: var(--surface); border: 1px solid var(--glass-border); border-radius: 24px; padding: 24px; cursor: pointer; position: relative; overflow: hidden; display: flex; flex-direction: column; gap: 18px; transition: transform 0.35s var(--spring), background 0.3s var(--bezier), border-color 0.3s; animation: slideUpFade 0.5s var(--spring) forwards; opacity: 0; transform: translateY(24px); }
         .card:hover { background: var(--surface-elevated); border-color: rgba(255,255,255,0.15); transform: translateY(-4px); }
         .card:active { transform: scale(0.97); }
         .card.completed { border-color: rgba(52, 199, 89, 0.25); }
-
+        .card-live-border { position: absolute; bottom: 0; left: 0; height: 3px; background: var(--event-accent, var(--accent-blue)); width: 0%; transition: width 0.5s linear; }
         .card-header { display: flex; align-items: center; justify-content: space-between; gap: 12px; }
-        .card-badge {
-            display: inline-flex; align-items: center; gap: 6px; padding: 5px 12px;
-            background: var(--glass-glow); border: 1px solid var(--glass-border);
-            border-radius: 100px; font-size: 0.8rem; color: var(--text-muted);
-        }
+        .card-badge { display: inline-flex; align-items: center; gap: 6px; padding: 5px 12px; background: var(--glass-glow); border: 1px solid var(--glass-border); border-radius: 100px; font-size: 0.8rem; color: var(--text-muted); }
         .card-title { font-size: 1.05rem; font-weight: 500; color: var(--text-main); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; flex: 1; text-align: right; }
-
+        .card-desc { font-size: 0.9rem; color: var(--text-muted); display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }
         .countdown-display { display: flex; align-items: flex-end; justify-content: space-between; gap: 12px; }
         .days-main { display: flex; align-items: baseline; gap: 4px; }
-        .days-main .num { font-size: 4.2rem; font-weight: 700; line-height: 0.8; letter-spacing: -0.04em; }
+        .days-main .num { font-size: 4.2rem; font-weight: 700; line-height: 0.8; letter-spacing: -0.04em; color: var(--event-accent, var(--text-main)); }
         .days-main .label, .time-sub .label { font-size: 0.95rem; font-weight: 600; color: var(--text-main); }
         .days-main.completed-text .num { color: var(--accent-success); font-size: 2rem; }
-
         .time-sub { display: flex; flex-direction: column; gap: 2px; text-align: right; }
         .time-sub div { display: flex; align-items: baseline; justify-content: flex-end; gap: 4px; }
         .time-sub .num { font-size: 1.35rem; font-weight: 600; line-height: 1; }
         .time-sub .label { font-size: 0.8rem; color: var(--text-muted); }
-
-        /* FAB Dock */
-        .fab-dock {
-            position: fixed; bottom: calc(env(safe-area-inset-bottom, 16px) + 24px); left: 50%;
-            transform: translateX(-50%); display: flex; align-items: center; gap: 14px; z-index: 50;
-        }
-
-        .fab-search {
-            display: flex; align-items: center; justify-content: center;
-            background: var(--glass); backdrop-filter: blur(var(--blur-val)); -webkit-backdrop-filter: blur(var(--blur-val));
-            border: 1px solid var(--glass-border); border-radius: 100px;
-            width: 54px; height: 54px; transition: all 0.4s var(--spring); overflow: hidden;
-            box-shadow: 0 12px 30px rgba(0,0,0,0.6); cursor: pointer; position: relative;
-        }
+        .fab-dock { position: fixed; bottom: calc(env(safe-area-inset-bottom, 16px) + 24px); left: 50%; transform: translateX(-50%); display: flex; align-items: center; gap: 14px; z-index: 50; }
+        .fab-search { display: flex; align-items: center; justify-content: center; background: var(--glass); backdrop-filter: blur(var(--blur-val)); -webkit-backdrop-filter: blur(var(--blur-val)); border: 1px solid var(--glass-border); border-radius: 100px; width: 54px; height: 54px; transition: all 0.4s var(--spring); overflow: hidden; box-shadow: 0 12px 30px rgba(0,0,0,0.6); cursor: pointer; position: relative; }
         .fab-search.expanded { width: 260px; justify-content: flex-start; padding-left: 18px; cursor: text; }
         .fab-search i { color: var(--text-main); flex-shrink: 0; position: absolute; transition: transform 0.3s, left 0.4s var(--spring); }
         .fab-search.expanded i { position: relative; }
-        .fab-search input {
-            background: transparent; border: none; color: var(--text-main); font-family: inherit;
-            font-size: 1rem; width: 100%; margin-left: 10px; outline: none; opacity: 0;
-            pointer-events: none; transition: opacity 0.2s; position: absolute; left: 38px;
-        }
+        .fab-search input { background: transparent; border: none; color: var(--text-main); font-family: inherit; font-size: 1rem; width: 100%; margin-left: 10px; outline: none; opacity: 0; pointer-events: none; transition: opacity 0.2s; position: absolute; left: 38px; }
         .fab-search.expanded input { opacity: 1; pointer-events: all; position: relative; left: 0; }
-
-        .fab-add {
-            width: 54px; height: 54px; border-radius: 50%; background: var(--text-main); color: var(--bg);
-            border: none; display: flex; align-items: center; justify-content: center; cursor: pointer;
-            box-shadow: 0 12px 30px rgba(255,255,255,0.12); transition: transform 0.3s var(--spring);
-        }
+        .fab-add { width: 54px; height: 54px; border-radius: 50%; background: var(--text-main); color: var(--bg); border: none; display: flex; align-items: center; justify-content: center; cursor: pointer; box-shadow: 0 12px 30px rgba(255,255,255,0.12); transition: transform 0.3s var(--spring); }
         .fab-add:hover { transform: scale(1.05); }
-
-        /* Capas Base de Modales */
-        .modal-backdrop {
-            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
-            background: rgba(0,0,0,0.75); backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px);
-            z-index: 100; opacity: 0; pointer-events: none; transition: opacity 0.4s var(--bezier);
-        }
+        .modal-backdrop { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.75); backdrop-filter: blur(var(--blur-val)); -webkit-backdrop-filter: blur(var(--blur-val)); z-index: 100; opacity: 0; pointer-events: none; transition: opacity 0.4s var(--bezier); }
         .modal-backdrop.active { opacity: 1; pointer-events: all; }
-
-        /* Estructuración Estratégica de Capas (Z-Index) */
-        .modal {
-            position: fixed; background: var(--surface);
-            display: flex; flex-direction: column;
-            top: 0; left: 0; width: 100%; height: 100%;
-            transition: transform 0.45s var(--bezier), opacity 0.35s var(--bezier), top 0.45s var(--bezier), left 0.45s var(--bezier), width 0.45s var(--bezier), height 0.45s var(--bezier);
-        }
-        
-        /* Modales Específicos */
-        #modal-view { z-index: 200; transform: translateY(100%); } /* Detalle base */
-        #modal-add  { z-index: 300; transform: translateY(100%); } /* Formulario queda POR ENCIMA de detalle */
-        #modal-cats { z-index: 400; transform: translateY(100%); } /* Categorías arriba del todo */
-
-        #modal-view.active, #modal-add.active, #modal-cats.active { transform: translateY(0); }
-
+        .modal { position: fixed; background: var(--surface); display: flex; flex-direction: column; top: 0; left: 0; width: 100%; height: 100%; transition: transform 0.45s var(--bezier), opacity 0.35s var(--bezier), top 0.45s var(--bezier), left 0.45s var(--bezier), width 0.45s var(--bezier), height 0.45s var(--bezier); }
+        #modal-view { z-index: 200; transform: translateY(100%); }
+        #modal-add { z-index: 300; transform: translateY(100%); }
+        #modal-cats { z-index: 400; transform: translateY(100%); }
+        #modal-settings { z-index: 450; transform: translateY(100%); }
+        #modal-fullscreen { z-index: 500; background: var(--bg); transform: translateY(100%); opacity: 0; pointer-events: none; }
+        #modal-shared { z-index: 600; transform: translateY(100%); }
+        #modal-view.active, #modal-add.active, #modal-cats.active, #modal-settings.active, #modal-fullscreen.active, #modal-shared.active { transform: translateY(0); opacity: 1; pointer-events: all; }
         @media (min-width: 650px) {
-            .modal {
-                top: 50% !important; left: 50% !important; width: 540px !important; height: auto !important; max-height: 85vh !important;
-                transform: translate(-50%, -35%) scale(0.9) !important; border-radius: 28px;
-                border: 1px solid var(--glass-border); box-shadow: 0 30px 60px rgba(0,0,0,0.8);
-                opacity: 0; pointer-events: none;
-            }
-            .modal.active { transform: translate(-50%, -50%) scale(1) !important; opacity: 1; pointer-events: all; }
-            
-            /* Animación Inteligente de Origen Focalizado para el Detalle */
-            #modal-view.custom-origin {
-                transition: none;
-                transform: scale(0.1) translate(0,0);
-                opacity: 0;
-            }
-            #modal-view.custom-origin.active {
-                transition: transform 0.5s var(--spring), opacity 0.35s var(--bezier);
-                transform: translate(-50%, -50%) scale(1) !important;
-                opacity: 1;
-            }
+            .modal:not(#modal-fullscreen) { top: 50% !important; left: 50% !important; width: 540px !important; height: auto !important; max-height: 85vh !important; transform: translate(-50%, -35%) scale(0.9) !important; border-radius: 28px; border: 1px solid var(--glass-border); box-shadow: 0 30px 60px rgba(0,0,0,0.8); opacity: 0; pointer-events: none; }
+            .modal:not(#modal-fullscreen).active { transform: translate(-50%, -50%) scale(1) !important; opacity: 1; pointer-events: all; }
+            #modal-view.custom-origin { transition: none; transform: scale(0.1) translate(0,0); opacity: 0; }
+            #modal-view.custom-origin.active { transition: transform 0.5s var(--spring), opacity 0.35s var(--bezier); transform: translate(-50%, -50%) scale(1) !important; opacity: 1; }
         }
-
         .modal-header { padding: 24px 24px 18px 24px; display: flex; align-items: center; gap: 14px; border-bottom: 1px solid rgba(255,255,255,0.03); flex-shrink: 0; }
-        .modal-content { padding: 24px; flex: 1; overflow-y: auto; scrollbar-width: none; }
+        .modal-content { padding: 24px; flex: 1; overflow-y: auto; scrollbar-width: none; position: relative; }
         .modal-content::-webkit-scrollbar { display: none; }
-
-        .btn-icon {
-            background: rgba(255,255,255,0.03); border: 1px solid transparent; color: var(--text-main);
-            display: flex; align-items: center; justify-content: center; cursor: pointer;
-            padding: 8px; border-radius: 50%; transition: all 0.2s;
-        }
+        .sticky-footer { position: sticky; bottom: 0; left: 0; width: 100%; background: linear-gradient(to top, var(--surface) 70%, transparent); padding: 16px 0 4px 0; margin-top: 10px; z-index: 10; }
+        .advanced-toggle { display: flex; align-items: center; justify-content: space-between; background: var(--bg); border: 1px solid var(--glass-border); border-radius: 14px; padding: 14px 16px; cursor: pointer; font-size: 0.9rem; color: var(--text-muted); font-weight: 500; margin-bottom: 16px; transition: border-color 0.2s; }
+        .advanced-toggle:hover { border-color: rgba(255,255,255,0.2); color: var(--text-main); }
+        .advanced-content { display: none; margin-bottom: 20px; animation: slideUpFade 0.3s var(--spring); }
+        .advanced-content.open { display: block; }
+        .btn-icon { background: rgba(255,255,255,0.03); border: 1px solid transparent; color: var(--text-main); display: flex; align-items: center; justify-content: center; cursor: pointer; padding: 8px; border-radius: 50%; transition: all 0.2s; }
         .btn-icon:hover { background: var(--surface-hover); border-color: var(--glass-border); }
-
-        /* Formularios */
         .form-group { margin-bottom: 20px; }
         .form-group.flex-row { display: flex; align-items: center; justify-content: space-between; }
         .form-group label { display: block; font-size: 0.9rem; color: var(--text-muted); margin-bottom: 8px; font-weight: 500; }
         .form-group.flex-row label { margin-bottom: 0; font-size: 1rem; color: var(--text-main); }
-
-        .form-input {
-            width: 100%; background: var(--bg); border: 1px solid var(--glass-border);
-            border-radius: 14px; padding: 16px; color: var(--text-main);
-            font-family: inherit; font-size: 1rem; transition: all 0.3s var(--bezier); outline: none;
-        }
+        .form-input, textarea.form-input { width: 100%; background: var(--bg); border: 1px solid var(--glass-border); border-radius: 14px; padding: 16px; color: var(--text-main); font-family: inherit; font-size: 1rem; transition: all 0.3s var(--bezier); outline: none; resize: none; }
         .form-input:focus { border-color: var(--text-main); background: var(--surface-hover); }
-
-        /* Switches */
         .switch { position: relative; display: inline-block; width: 48px; height: 26px; }
         .switch input { opacity: 0; width: 0; height: 0; }
         .slider { position: absolute; cursor: pointer; top: 0; left: 0; right: 0; bottom: 0; background-color: var(--bg); transition: .3s; border-radius: 34px; border: 1px solid var(--glass-border); }
         .slider:before { position: absolute; content: ""; height: 18px; width: 18px; left: 3px; bottom: 3px; background-color: var(--text-muted); transition: transform 0.3s var(--spring); border-radius: 50%; }
         input:checked + .slider { background-color: var(--text-main); border-color: var(--text-main); }
         input:checked + .slider:before { transform: translateX(22px); background-color: var(--bg); }
-
-        /* Selector Custom */
         .custom-select-container { position: relative; width: 100%; }
-        .custom-select-trigger {
-            width: 100%; background: var(--bg); border: 1px solid var(--glass-border);
-            border-radius: 14px; padding: 16px; color: var(--text-main);
-            font-family: inherit; font-size: 1rem; display: flex; align-items: center; justify-content: space-between;
-            cursor: pointer; transition: all 0.3s;
-        }
+        .custom-select-trigger { width: 100%; background: var(--bg); border: 1px solid var(--glass-border); border-radius: 14px; padding: 16px; color: var(--text-main); font-family: inherit; font-size: 1rem; display: flex; align-items: center; justify-content: space-between; cursor: pointer; transition: all 0.3s; }
         .custom-select-trigger:hover { border-color: rgba(255,255,255,0.2); }
         .custom-select-trigger .content { display: flex; align-items: center; gap: 10px; }
-        
-        .custom-dropdown {
-            position: absolute; top: calc(100% + 6px); left: 0; width: 100%;
-            background: var(--surface-elevated); border: 1px solid var(--glass-border);
-            border-radius: 14px; overflow: hidden; z-index: 100;
-            opacity: 0; pointer-events: none; transform: translateY(-8px);
-            transition: all 0.3s var(--spring); box-shadow: 0 16px 32px rgba(0,0,0,0.5);
-            max-height: 200px; overflow-y: auto; scrollbar-width: none;
-        }
+        .custom-dropdown { position: absolute; top: calc(100% + 6px); left: 0; width: 100%; background: var(--surface-elevated); border: 1px solid var(--glass-border); border-radius: 14px; overflow: hidden; z-index: 100; opacity: 0; pointer-events: none; transform: translateY(-8px); transition: all 0.3s var(--spring); box-shadow: 0 16px 32px rgba(0,0,0,0.5); max-height: 200px; overflow-y: auto; scrollbar-width: none; }
         .custom-select-container.open .custom-dropdown { opacity: 1; pointer-events: all; transform: translateY(0); }
-        
         .dropdown-item { padding: 14px 16px; display: flex; align-items: center; gap: 10px; cursor: pointer; transition: background 0.2s; }
         .dropdown-item:hover { background: rgba(255,255,255,0.05); }
-
         .smart-icon-box { display: flex; gap: 10px; align-items: stretch; }
-        .icon-preview-square {
-            width: 54px; background: var(--bg); border: 1px solid var(--glass-border);
-            border-radius: 14px; display: flex; align-items: center; justify-content: center;
-            flex-shrink: 0; transition: border-color 0.3s; color: var(--text-muted);
-        }
+        .icon-preview-square { width: 54px; background: var(--bg); border: 1px solid var(--glass-border); border-radius: 14px; display: flex; align-items: center; justify-content: center; flex-shrink: 0; transition: border-color 0.3s; color: var(--text-muted); }
         .icon-preview-square.valid { border-color: var(--accent-success); color: var(--accent-success); }
-
-        .btn-primary {
-            width: 100%; padding: 16px; border-radius: 14px; background: var(--text-main); color: var(--bg);
-            font-family: inherit; font-size: 1rem; font-weight: 600; border: none; cursor: pointer;
-            margin-top: 8px; transition: all 0.2s;
-        }
+        .btn-primary { width: 100%; padding: 16px; border-radius: 14px; background: var(--text-main); color: var(--bg); font-family: inherit; font-size: 1rem; font-weight: 600; border: none; cursor: pointer; transition: all 0.2s; box-shadow: 0 10px 20px rgba(0,0,0,0.4); }
         .btn-primary:active { transform: scale(0.97); }
-
-        /* Puntos Gráfico */
         .visualizer-card { background: var(--surface); border: 1px solid var(--glass-border); border-radius: 20px; padding: 22px; margin-bottom: 20px; }
         .progress-header { display: flex; justify-content: space-between; margin-bottom: 12px; font-size: 0.9rem; color: var(--text-muted); }
         .progress-bar-container { height: 6px; background: var(--bg); border-radius: 4px; overflow: hidden; margin-bottom: 12px; border: 1px solid var(--glass-border); }
@@ -297,187 +138,144 @@
         .dots-grid { display: flex; flex-wrap: wrap; gap: 4px; max-height: 120px; overflow-y: auto; scrollbar-width: none; }
         .dot { width: 6px; height: 6px; border-radius: 50%; background: var(--glass-border); }
         .dot.passed { background: var(--text-main); box-shadow: 0 0 6px rgba(255,255,255,0.3); }
-
-        .extra-info-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
-            gap: 12px;
-            margin-bottom: 20px;
-        }
-        .info-card {
-            background: var(--surface);
-            border: 1px solid var(--glass-border);
-            border-radius: 18px;
-            padding: 16px;
-            display: flex;
-            flex-direction: column;
-            gap: 6px;
-        }
-        .info-card-header {
-            display: flex;
-            align-items: center;
-            gap: 8px;
-            color: var(--text-muted);
-            font-size: 0.8rem;
-            font-weight: 500;
-        }
-        .info-card-value {
-            font-size: 1.15rem;
-            font-weight: 600;
-            color: var(--text-main);
-        }
-
+        .extra-info-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(140px, 1fr)); gap: 12px; margin-bottom: 20px; }
+        .info-card { background: var(--surface); border: 1px solid var(--glass-border); border-radius: 18px; padding: 16px; display: flex; flex-direction: column; gap: 6px; }
+        .info-card-header { display: flex; align-items: center; gap: 8px; color: var(--text-muted); font-size: 0.8rem; font-weight: 500; }
+        .info-card-value { font-size: 1.15rem; font-weight: 600; color: var(--text-main); }
         .cat-list-item { display: flex; align-items: center; justify-content: space-between; padding: 14px 16px; background: var(--surface); border: 1px solid var(--glass-border); border-radius: 14px; margin-bottom: 10px; }
         .cat-list-actions { display: flex; align-items: center; gap: 8px; }
-
-        /* Toasts */
-        .toast-container {
-            position: fixed; top: calc(env(safe-area-inset-top, 16px) + 12px); right: 24px;
-            z-index: 1000; display: flex; flex-direction: column; gap: 10px; pointer-events: none;
-        }
-        .toast {
-            background: var(--glass); backdrop-filter: blur(20px); -webkit-backdrop-filter: blur(20px);
-            border: 1px solid var(--glass-border); padding: 14px 20px; border-radius: 16px;
-            color: var(--text-main); font-size: 0.9rem; font-weight: 500; display: flex; align-items: center; gap: 10px;
-            box-shadow: 0 12px 24px rgba(0,0,0,0.5); transform: translateY(-20px); opacity: 0;
-            animation: toastIn 0.4s var(--spring) forwards, toastOut 0.3s ease 2.7s forwards;
-        }
+        .toast-container { position: fixed; top: calc(env(safe-area-inset-top, 16px) + 12px); right: 24px; z-index: 1000; display: flex; flex-direction: column; gap: 10px; pointer-events: none; }
+        .toast { background: var(--glass); backdrop-filter: blur(var(--blur-val)); -webkit-backdrop-filter: blur(var(--blur-val)); border: 1px solid var(--glass-border); padding: 14px 20px; border-radius: 16px; color: var(--text-main); font-size: 0.9rem; font-weight: 500; display: flex; align-items: center; gap: 10px; box-shadow: 0 12px 24px rgba(0,0,0,0.5); transform: translateY(-20px); opacity: 0; animation: toastIn 0.4s var(--spring) forwards, toastOut 0.3s ease 2.7s forwards; }
         @keyframes toastIn { to { transform: translateY(0); opacity: 1; } }
         @keyframes toastOut { to { transform: translateY(-10px); opacity: 0; } }
-
         .error-shake { animation: shake 0.35s var(--bezier); border-color: var(--accent-danger) !important; }
         @keyframes shake { 0%, 100% { transform: translateX(0); } 25% { transform: translateX(-5px); } 75% { transform: translateX(5px); } }
         @keyframes slideUpFade { to { opacity: 1; transform: translateY(0); } }
         #preview-container { margin-bottom: 20px; pointer-events: none; }
+        @media (max-height: 500px) {
+            header { padding-top: 10px; }
+            .header-top { margin-bottom: 10px; }
+            .folders-scroll-area { padding-bottom: 8px; }
+            .main-content { padding-bottom: 80px; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); }
+            .modal-content { padding: 16px; }
+            .modal-header { padding: 16px; }
+            .days-main .num { font-size: 3rem; }
+            #modal-fullscreen .fs-wrapper { gap: 16px !important; padding: 20px !important; }
+            #modal-fullscreen h1 { font-size: 2rem !important; }
+        }
+
+        /* Extensiones integradas */
+        .event-accent-mark { position: absolute; left: 0; top: 20px; bottom: 20px; width: 3px; border-radius: 0 4px 4px 0; background: var(--event-accent, var(--accent-blue)); opacity: .9; pointer-events: none; }
+        .card.drag-enabled { cursor: default; }
+        .card.dragging { opacity: .42; transform: scale(.985); border-color: var(--text-main); }
+        .card.drag-over { outline: 1px solid rgba(255,255,255,.35); outline-offset: 3px; }
+        .drag-handle { width: 30px; height: 30px; display: inline-flex; align-items: center; justify-content: center; flex-shrink: 0; border: 1px solid var(--glass-border); border-radius: 9px; background: rgba(255,255,255,.035); color: var(--text-muted); cursor: grab; touch-action: none; }
+        .drag-handle:active { cursor: grabbing; background: var(--surface-hover); color: var(--text-main); }
+        .card.drag-enabled .card-header { justify-content: flex-start; }
+        .card.drag-enabled .card-title { text-align: right; }
+        .settings-section-title { margin: 24px 0 12px; font-size: .82rem; letter-spacing: .08em; text-transform: uppercase; color: var(--text-muted); font-weight: 600; }
+        .settings-panel { background: var(--surface); border: 1px solid var(--glass-border); padding: 16px; border-radius: 16px; margin-bottom: 12px; }
+        .settings-description { display: block; color: var(--text-muted); font-size: .82rem; line-height: 1.45; margin-top: 5px; }
+        .settings-actions { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-top: 12px; }
+        .btn-secondary { width: 100%; padding: 13px 12px; border-radius: 12px; background: var(--surface-elevated); color: var(--text-main); border: 1px solid var(--glass-border); font: 500 .9rem 'Outfit',sans-serif; display: flex; justify-content: center; align-items: center; gap: 8px; cursor: pointer; }
+        .btn-secondary:hover { background: var(--surface-hover); }
+        .settings-select { width: 100%; margin-top: 12px; padding: 13px 14px; background: var(--bg); border: 1px solid var(--glass-border); color: var(--text-main); border-radius: 12px; font: 400 .95rem 'Outfit',sans-serif; }
+        .color-input-wrap { display: flex; align-items: center; gap: 12px; padding: 10px 12px; background: var(--bg); border: 1px solid var(--glass-border); border-radius: 14px; }
+        .color-input-wrap input[type="color"] { width: 42px; height: 36px; padding: 0; border: 0; background: transparent; cursor: pointer; }
+        .color-input-wrap span { color: var(--text-muted); font-size: .9rem; }
+        .form-hint { display: block; margin-top: 7px; color: var(--text-muted); font-size: .8rem; line-height: 1.4; }
+        .hidden-file-input { display: none; }
+        .habit-info { color: var(--text-muted); font-size: .84rem; line-height: 1.5; margin-top: -10px; margin-bottom: 18px; }
+        @media (max-width: 420px) { .main-content { grid-template-columns: minmax(0,1fr); } .settings-actions { grid-template-columns: 1fr; } }
     </style>
 </head>
 <body>
-
     <div class="toast-container" id="toast-container"></div>
-
     <div class="app-container" id="main-view">
         <header>
             <div class="header-top">
                 <div class="app-title-group">
-                    <div class="app-icon-badge">
-                        <i data-lucide="clock-4" size="20"></i>
-                    </div>
+                    <div class="app-icon-badge"><i data-lucide="clock-4" size="20"></i></div>
                     <h1>Cuenta Atrás</h1>
                 </div>
-                <div class="total-counter" id="total-count">0 activos</div>
+                <div style="display: flex; align-items: center; gap: 12px;">
+                    <button class="btn-icon" onclick="openModal('modal-settings')" aria-label="Ajustes"><i data-lucide="settings" size="18"></i></button>
+                    <div class="total-counter" id="total-count">0 activos</div>
+                </div>
             </div>
-            <div class="categories-scroll-wrapper" id="scroll-wrapper">
-                <div class="folders-scroll-area" id="categories-container"></div>
-            </div>
+            <div class="categories-scroll-wrapper" id="scroll-wrapper"><div class="folders-scroll-area" id="categories-container"></div></div>
         </header>
-
         <main class="main-content" id="events-grid"></main>
-
         <div class="fab-dock">
-            <div class="fab-search" id="fab-search" onclick="toggleSearch(event)">
-                <i data-lucide="search" id="search-icon"></i>
-                <input type="text" id="search-input" placeholder="Buscar evento..." oninput="filterEvents()" onblur="closeSearch()">
-            </div>
-            <button class="fab-add" onclick="openModal('modal-add')" aria-label="Crear Evento">
-                <i data-lucide="plus" size="24"></i>
-            </button>
+            <div class="fab-search" id="fab-search" onclick="toggleSearch(event)"><i data-lucide="search" id="search-icon"></i><input type="text" id="search-input" placeholder="Buscar evento..." oninput="filterEvents()" onblur="closeSearch()"></div>
+            <button class="fab-add" onclick="openModal('modal-add')" aria-label="Crear Evento"><i data-lucide="plus" size="24"></i></button>
         </div>
     </div>
-
     <div class="modal-backdrop" id="modal-backdrop" onclick="closeTopModal()"></div>
 
+    <!-- Modal Formulario (Crear/Editar) -->
     <div class="modal" id="modal-add">
-        <div class="modal-header">
-            <button class="btn-icon" onclick="closeTopModal()"><i data-lucide="x"></i></button>
-            <h2 style="font-size: 1.2rem; font-weight: 500;" id="form-title">Nuevo Evento</h2>
-        </div>
-        <div class="modal-content">
+        <div class="modal-header"><button class="btn-icon" onclick="closeTopModal()"><i data-lucide="x"></i></button><h2 style="font-size: 1.2rem; font-weight: 500;" id="form-title">Nuevo Evento</h2></div>
+        <div class="modal-content" id="modal-add-content">
             <div id="preview-container"></div>
-            <div class="form-group">
-                <label for="input-title">Título del Evento</label>
-                <input type="text" id="input-title" class="form-input" placeholder="Escribe aquí el título del evento" oninput="updatePreviewTextOnly()">
+            <div class="form-group"><label for="input-title">Título del Evento</label><input type="text" id="input-title" class="form-input" placeholder="Escribe aquí el título del evento" oninput="updatePreviewTextOnly()"></div>
+            <div class="form-group"><label for="input-desc">Descripción (Opcional)</label><textarea id="input-desc" class="form-input" rows="2" placeholder="Detalles o notas sobre el evento..."></textarea></div>
+            <div class="form-group"><label for="input-mode">Tipo de contador</label><select id="input-mode" class="form-input" onchange="toggleEventModeFields()"><option value="countdown">Cuenta atrás — hacia una fecha</option><option value="elapsed">Acumulativo — desde una fecha (racha)</option></select><span class="form-hint" id="mode-description">Cuenta el tiempo que falta para que llegue el evento.</span></div>
+            <div class="form-group flex-row"><label>Día completo (Sin hora)</label><label class="switch"><input type="checkbox" id="input-allday" onchange="toggleAllDayField()"><span class="slider"></span></label></div>
+            <div class="form-group"><label for="input-date" id="input-date-label">Fecha del evento</label><input type="datetime-local" id="input-date" class="form-input" oninput="updatePreviewTextOnly()"></div>
+            <div class="form-group" id="end-date-group"><label for="input-end-date">Fecha de Fin del Evento (Duración)</label><input type="datetime-local" id="input-end-date" class="form-input"></div>
+
+            <!-- Sección Avanzada Desplegable -->
+            <div class="advanced-toggle" onclick="toggleAdvancedSection()"><span id="advanced-toggle-text">Opciones avanzadas</span><i data-lucide="chevron-down" id="advanced-chevron" size="16"></i></div>
+            <div class="advanced-content" id="advanced-content-box">
+                <div class="form-group" id="countdown-start-group"><label for="input-start-date">Fecha de Inicio de Cuenta Atrás (Opcional)</label><input type="datetime-local" id="input-start-date" class="form-input"></div>
+                <div class="form-group"><label for="input-event-color">Color de acento del evento</label><div class="color-input-wrap"><input type="color" id="input-event-color" value="#0A84FF" oninput="updatePreviewAccent()"><span>Personaliza el color de esta tarjeta.</span></div></div>
+                <div class="form-group"><label for="input-alarm-sound">Aviso al finalizar</label><select id="input-alarm-sound" class="form-input"><option value="none">Sin sonido</option><option value="soft">Tono suave</option><option value="chime">Campanilla</option><option value="digital">Pulso digital</option></select><span class="form-hint">El aviso se activa una sola vez cuando el contador llega a cero. El navegador puede requerir una interacción previa para permitir audio.</span></div>
+                <div class="form-group flex-row"><label>Vibrar al finalizar</label><label class="switch"><input type="checkbox" id="input-alarm-vibrate"><span class="slider"></span></label></div>
             </div>
-            <div class="form-group flex-row">
-                <label>Día completo (Sin hora)</label>
-                <label class="switch">
-                    <input type="checkbox" id="input-allday" onchange="toggleAllDayField()">
-                    <span class="slider"></span>
-                </label>
-            </div>
-            <div class="form-group">
-                <label for="input-start-date">Fecha de Inicio (Opcional)</label>
-                <input type="datetime-local" id="input-start-date" class="form-input">
-            </div>
-            <div class="form-group">
-                <label for="input-date">Fecha Objetivo</label>
-                <input type="datetime-local" id="input-date" class="form-input" oninput="updatePreviewTextOnly()">
-            </div>
-            <div class="form-group">
-                <label>Categoría</label>
-                <div class="custom-select-container" id="category-select-container">
-                    <div class="custom-select-trigger" onclick="toggleCategoryDropdown(event)">
-                        <div class="content" id="selected-category-display">
-                            <i data-lucide="calendar" size="18"></i> <span>General</span>
-                        </div>
-                        <i data-lucide="chevron-down" size="16" style="color: var(--text-muted);"></i>
-                    </div>
-                    <div class="custom-dropdown" id="category-dropdown-list"></div>
-                </div>
-                <input type="hidden" id="input-category-hidden" value="calendar|General">
-            </div>
-            <button class="btn-primary" id="btn-submit-form" onclick="saveEventForm()">Confirmar Evento</button>
+
+            <div class="form-group"><label>Categoría</label><div class="custom-select-container" id="category-select-container"><div class="custom-select-trigger" onclick="toggleCategoryDropdown(event)"><div class="content" id="selected-category-display"><i data-lucide="calendar" size="18"></i><span>General</span></div><i data-lucide="chevron-down" size="16" style="color: var(--text-muted);"></i></div><div class="custom-dropdown" id="category-dropdown-list"></div></div><input type="hidden" id="input-category-hidden" value="calendar|General"></div>
+            <div class="sticky-footer"><button class="btn-primary" id="btn-submit-form" onclick="saveEventForm()">Confirmar Evento</button></div>
         </div>
     </div>
 
+    <!-- Modal Categorías -->
     <div class="modal" id="modal-cats">
-        <div class="modal-header">
-            <button class="btn-icon" onclick="closeTopModal()"><i data-lucide="arrow-left"></i></button>
-            <h2 style="font-size: 1.2rem; font-weight: 500;">Categorías</h2>
-        </div>
+        <div class="modal-header"><button class="btn-icon" onclick="closeTopModal()"><i data-lucide="arrow-left"></i></button><h2 style="font-size: 1.2rem; font-weight: 500;">Categorías</h2></div>
         <div class="modal-content">
-            <div class="form-group">
-                <label>Crear nueva categoría</label>
-                <div class="smart-icon-box">
-                    <div class="icon-preview-square" id="new-cat-preview-box">
-                        <i data-lucide="folder" id="new-cat-icon-render" size="22"></i>
-                    </div>
-                    <input type="text" id="new-cat-icon" class="form-input" placeholder="Icono Lucide (ej: rocket)" oninput="validateIconLive()" style="flex: 0.6;">
-                    <input type="text" id="new-cat-name" class="form-input" placeholder="Nombre..." style="flex: 1;">
-                </div>
-                <button class="btn-primary" style="margin-top: 14px;" onclick="saveNewCategory()">Añadir Categoría</button>
-            </div>
-            <div style="margin-top: 24px;">
-                <label style="display: block; font-size: 0.9rem; color: var(--text-muted); margin-bottom: 12px;">Tus Categorías</label>
-                <div id="cats-list-container"></div>
-            </div>
+            <div class="form-group"><label>Crear nueva categoría</label><div class="smart-icon-box"><div class="icon-preview-square" id="new-cat-preview-box"><i data-lucide="folder" id="new-cat-icon-render" size="22"></i></div><input type="text" id="new-cat-icon" class="form-input" placeholder="Icono Lucide (ej: rocket)" oninput="validateIconLive()" style="flex: 0.6;"><input type="text" id="new-cat-name" class="form-input" placeholder="Nombre..." style="flex: 1;"></div><button class="btn-primary" style="margin-top: 14px;" onclick="saveNewCategory()">Añadir Categoría</button></div>
+            <div style="margin-top: 24px;"><label style="display: block; font-size: 0.9rem; color: var(--text-muted); margin-bottom: 12px;">Tus Categorías</label><div id="cats-list-container"></div></div>
         </div>
     </div>
 
-    <div class="modal" id="modal-view">
-        <div class="modal-header">
-            <button class="btn-icon" onclick="closeTopModal()"><i data-lucide="arrow-left"></i></button>
-            <h2 style="font-size: 1.2rem; font-weight: 500;" id="view-title">Detalle</h2>
-            <div style="margin-left: auto; display:flex; gap:8px;">
-                <button class="btn-icon" onclick="prepareEdit()" aria-label="Editar"><i data-lucide="pencil" size="18"></i></button>
-                <button class="btn-icon" style="color: var(--accent-danger);" onclick="deleteCurrentEvent()" aria-label="Eliminar"><i data-lucide="trash-2" size="18"></i></button>
-            </div>
-        </div>
+    <!-- Modal Ajustes -->
+    <div class="modal" id="modal-settings">
+        <div class="modal-header"><button class="btn-icon" onclick="closeTopModal()"><i data-lucide="arrow-left"></i></button><h2 style="font-size: 1.2rem; font-weight: 500;">Ajustes</h2></div>
         <div class="modal-content">
-            <div class="visualizer-card">
-                <div class="progress-header">
-                    <span>Progreso Consumido</span>
-                    <span id="view-percentage">0%</span>
-                </div>
-                <div class="progress-bar-container">
-                    <div class="progress-fill" id="view-progress-fill"></div>
-                </div>
-                <div class="scale-info" id="view-scale">-</div>
-                <div class="dots-grid" id="view-dots"></div>
-            </div>
-            <div class="extra-info-grid" id="view-extra-info"></div>
-            <div id="view-live-card"></div>
+            <div class="form-group flex-row settings-panel"><div><label style="margin-bottom: 2px;">Efecto de Difuminado (Blur)</label><span style="font-size: 0.85rem; color: var(--text-muted);">Activar o desactivar efectos glassmorphism</span></div><label class="switch"><input type="checkbox" id="settings-blur-switch" onchange="toggleBlurSetting()"><span class="slider"></span></label></div>
+            <div class="settings-section-title">Organización</div>
+            <div class="settings-panel"><label for="settings-sort-mode">Orden de los contadores</label><select id="settings-sort-mode" class="settings-select" onchange="changeSortMode(this.value)"><option value="date">Automático — por fecha</option><option value="custom">Personalizado — arrastrar y soltar</option></select><span class="settings-description">En el modo personalizado, usa el asa de cada tarjeta para cambiar su posición. El orden se guarda en este dispositivo.</span></div>
+            <div class="settings-section-title">Datos y copias de seguridad</div>
+            <div class="settings-panel"><strong style="font-size:.95rem;font-weight:500;">Exportar datos</strong><span class="settings-description">Guarda tus eventos, categorías y ajustes en un archivo para conservarlos o trasladarlos a otro navegador.</span><div class="settings-actions"><button class="btn-secondary" onclick="exportData('json')"><i data-lucide="file-json" size="16"></i> Copia JSON</button><button class="btn-secondary" onclick="exportData('csv')"><i data-lucide="file-spreadsheet" size="16"></i> Eventos CSV</button></div></div>
+            <div class="settings-panel"><strong style="font-size:.95rem;font-weight:500;">Importar datos</strong><span class="settings-description">Admite copias JSON de esta aplicación y archivos CSV de eventos. En modo combinar, los eventos existentes se conservan y no se duplican por ID.</span><select id="settings-import-mode" class="settings-select" aria-label="Modo de importación"><option value="merge">Combinar con mis datos actuales</option><option value="replace">Reemplazar mis datos actuales</option></select><button class="btn-secondary" style="margin-top:10px;" onclick="document.getElementById('import-file-input').click()"><i data-lucide="folder-up" size="16"></i> Elegir archivo JSON o CSV</button><input class="hidden-file-input" type="file" id="import-file-input" accept=".json,.csv,application/json,text/csv" onchange="handleImportFile(event)"><span class="settings-description">Antes de reemplazar, exporta una copia de seguridad. La importación se valida antes de modificar los datos actuales.</span></div>
         </div>
     </div>
+
+    <!-- Modal Detalle -->
+    <div class="modal" id="modal-view">
+        <div class="modal-header"><button class="btn-icon" onclick="closeTopModal()"><i data-lucide="arrow-left"></i></button><h2 style="font-size: 1.2rem; font-weight: 500;" id="view-title">Detalle</h2><div style="margin-left: auto; display:flex; gap:8px;"><button class="btn-icon" onclick="toggleFullscreen()" aria-label="Pantalla completa"><i data-lucide="maximize" size="18"></i></button><button class="btn-icon" onclick="shareEvent()" aria-label="Compartir enlace"><i data-lucide="share-2" size="18"></i></button><button class="btn-icon" onclick="prepareEdit()" aria-label="Editar"><i data-lucide="pencil" size="18"></i></button><button class="btn-icon" style="color: var(--accent-danger);" onclick="deleteCurrentEvent()" aria-label="Eliminar"><i data-lucide="trash-2" size="18"></i></button></div></div>
+        <div class="modal-content">
+            <div id="view-desc-container" style="margin-bottom: 20px; display: none;"><p id="view-desc-text" style="color: var(--text-muted); font-size: 0.95rem; line-height: 1.4; background: var(--bg); padding: 14px; border-radius: 14px; border: 1px solid var(--glass-border);"></p></div>
+            <div class="visualizer-card"><div class="progress-header"><span id="progress-label-title">Progreso Consumido</span><span id="view-percentage">0%</span></div><div class="progress-bar-container"><div class="progress-fill" id="view-progress-fill"></div></div><div class="scale-info" id="view-scale">-</div><div class="dots-grid" id="view-dots"></div></div>
+            <div class="extra-info-grid" id="view-extra-info"></div><div id="view-live-card"></div>
+        </div>
+    </div>
+
+    <!-- Modal de Pantalla Completa Mejorado -->
+    <div class="modal" id="modal-fullscreen"><button class="btn-icon" onclick="closeFullscreen()" style="position: fixed; top: 24px; right: 24px; z-index: 510;"><i data-lucide="minimize" size="20"></i></button><div class="fs-wrapper" style="display: flex; flex-direction: column; align-items: center; justify-content: center; height: 100%; padding: 40px; text-align: center; gap: 24px;"><div class="card-badge" id="fs-badge" style="padding: 6px 16px; font-size: 0.9rem;"><i data-lucide="calendar" size="16"></i><span id="fs-cat-label">General</span></div><h1 id="fs-title" style="font-size: 2.8rem; font-weight: 700; letter-spacing: -0.03em; line-height: 1.1; max-width: 800px;">Título</h1><p id="fs-desc" style="color: var(--text-muted); font-size: 1.05rem; max-width: 600px; display: none;"></p><div style="background: var(--surface); border: 1px solid var(--glass-border); border-radius: 28px; padding: 32px 48px; box-shadow: 0 20px 40px rgba(0,0,0,0.5);"><div style="font-size: 0.85rem; color: var(--text-muted); margin-bottom: 12px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.05em;" id="fs-status-label">Tiempo Restante</div><div class="countdown-display" id="display_fullscreen" style="justify-content: center; gap: 24px;"></div></div></div></div>
+
+    <!-- Modal para Evento Compartido -->
+    <div class="modal" id="modal-shared"><div class="modal-header"><button class="btn-icon" onclick="closeTopModal()"><i data-lucide="x"></i></button><h2 style="font-size: 1.2rem; font-weight: 500;">Cuenta Atrás Recibida</h2></div><div class="modal-content" style="display: flex; flex-direction: column; gap: 20px;"><div id="shared-card-container"></div><p style="color: var(--text-muted); font-size: 0.95rem; text-align: center;">Has recibido este evento mediante un enlace compartido. Puedes consultar su cuenta atrás o guardarlo directamente en tu lista.</p><button class="btn-primary" onclick="saveSharedEvent()">Añadir a mi lista</button></div></div>
 
     <script>
         const appData = {
@@ -487,6 +285,7 @@
                 { id: 'all', label: 'Todos', icon: 'layers', visible: true },
                 { id: 'calendar', label: 'General', icon: 'calendar', visible: true }
             ],
+            settings: { blurEnabled: true, sortMode: 'date' },
             currentFilter: 'all',
             searchQuery: '',
             currentViewId: null,
@@ -494,116 +293,183 @@
         };
 
         let modalStack = [];
+        let previousTickerAt = Date.now();
+        let audioContext = null;
+        let dragState = null;
+        window.sharedEventData = null;
 
         window.onload = () => {
             const storedEvents = localStorage.getItem('neoCountdownEventsV3');
             const storedCats = localStorage.getItem('neoCountdownCatsV3');
             const storedDefaults = localStorage.getItem('neoCountdownDefaultsV3');
-            
-            if (storedEvents) appData.events = JSON.parse(storedEvents);
-            if (storedCats) appData.categories = JSON.parse(storedCats);
-            else appData.categories = [
+            const storedSettings = localStorage.getItem('neoCountdownSettingsV3');
+
+            try { if (storedEvents) appData.events = JSON.parse(storedEvents); } catch (e) { console.error('No se pudieron leer los eventos guardados', e); }
+            try { if (storedCats) appData.categories = JSON.parse(storedCats); else appData.categories = [
                 { id: 'cat_1', label: 'Estudios', icon: 'book-open', visible: true },
                 { id: 'cat_2', label: 'Viajes', icon: 'plane', visible: true },
                 { id: 'cat_3', label: 'Trabajo', icon: 'briefcase', visible: true }
-            ];
+            ]; } catch (e) { appData.categories = []; }
 
             if (storedDefaults) {
-                const parsed = JSON.parse(storedDefaults);
-                appData.defaultCategories.forEach(dc => {
-                    if(parsed[dc.id] !== undefined) dc.visible = parsed[dc.id];
-                });
+                try {
+                    const parsed = JSON.parse(storedDefaults);
+                    appData.defaultCategories.forEach(dc => { if (parsed[dc.id] !== undefined) dc.visible = parsed[dc.id]; });
+                } catch (e) { console.warn('No se pudieron leer las categorías predeterminadas', e); }
+            }
+            if (storedSettings) {
+                try { appData.settings = { ...appData.settings, ...JSON.parse(storedSettings) }; } catch (e) { console.warn('No se pudieron leer los ajustes guardados', e); }
+            }
+            if (!['date', 'custom'].includes(appData.settings.sortMode)) appData.settings.sortMode = 'date';
+            if (!Array.isArray(appData.events)) appData.events = [];
+            if (!Array.isArray(appData.categories)) appData.categories = [];
+            appData.events = appData.events.map(normalizeEvent);
+            applyBlurSettingUI();
+            const sortSelect = document.getElementById('settings-sort-mode');
+            if (sortSelect) sortSelect.value = appData.settings.sortMode;
+
+            const urlParams = new URLSearchParams(window.location.search);
+            const shareParam = urlParams.get('share');
+            if (shareParam) {
+                try {
+                    window.sharedEventData = normalizeEvent(JSON.parse(decodeURIComponent(atob(shareParam))));
+                    openSharedModal(window.sharedEventData);
+                } catch (e) { console.error('Error al decodificar el evento compartido', e); }
             }
 
             renderApp();
+            previousTickerAt = Date.now();
             setInterval(updateTickers, 1000);
             updateTickers();
             setupKeyboardNavigation();
+            setupAudioUnlock();
+            saveData();
         };
+
+        function normalizeEvent(event) {
+            const ev = { ...event };
+            ev.id = String(ev.id || ('evt_' + Date.now() + '_' + Math.random().toString(36).slice(2, 7))).replace(/[^a-zA-Z0-9_-]/g, '_');
+            ev.title = String(ev.title || 'Sin Título');
+            ev.description = String(ev.description || '');
+            ev.category = String(ev.category || 'calendar');
+            ev.categoryLabel = String(ev.categoryLabel || 'General');
+            ev.targetAt = Number(ev.targetAt);
+            ev.createdAt = Number.isFinite(Number(ev.createdAt)) ? Number(ev.createdAt) : ev.targetAt;
+            ev.endAt = ev.endAt === null || ev.endAt === undefined || ev.endAt === '' ? null : Number(ev.endAt);
+            ev.isAllDay = Boolean(ev.isAllDay);
+            ev.mode = ev.mode === 'elapsed' ? 'elapsed' : 'countdown';
+            ev.color = isValidHexColor(ev.color) ? ev.color : '#0A84FF';
+            ev.alarmSound = ['none', 'soft', 'chime', 'digital'].includes(ev.alarmSound) ? ev.alarmSound : 'none';
+            ev.alarmVibrate = Boolean(ev.alarmVibrate);
+            if (!Number.isFinite(ev.targetAt)) ev.targetAt = Date.now();
+            if (!Number.isFinite(ev.createdAt)) ev.createdAt = ev.targetAt;
+            if (!Number.isFinite(ev.endAt)) ev.endAt = null;
+            if (!Number.isFinite(Number(ev.order))) delete ev.order;
+            else ev.order = Number(ev.order);
+            return ev;
+        }
+
+        function isValidHexColor(value) {
+            return typeof value === 'string' && /^#[0-9a-fA-F]{6}$/.test(value);
+        }
 
         function saveData() {
             localStorage.setItem('neoCountdownEventsV3', JSON.stringify(appData.events));
             localStorage.setItem('neoCountdownCatsV3', JSON.stringify(appData.categories));
-            
+            localStorage.setItem('neoCountdownSettingsV3', JSON.stringify(appData.settings));
             const defState = {};
             appData.defaultCategories.forEach(dc => defState[dc.id] = dc.visible);
             localStorage.setItem('neoCountdownDefaultsV3', JSON.stringify(defState));
+        }
+
+        function toggleBlurSetting() {
+            appData.settings.blurEnabled = document.getElementById('settings-blur-switch').checked;
+            saveData(); applyBlurSettingUI(); showToast('Ajustes de Blur actualizados');
+        }
+
+        function applyBlurSettingUI() {
+            const sw = document.getElementById('settings-blur-switch');
+            if (sw) sw.checked = appData.settings.blurEnabled !== false;
+            if (!appData.settings.blurEnabled) document.body.classList.add('no-blur');
+            else document.body.classList.remove('no-blur');
         }
 
         function showToast(message, type = 'success') {
             const container = document.getElementById('toast-container');
             const toast = document.createElement('div');
             toast.className = 'toast';
-            let icon = type === 'error' ? 'alert-circle' : 'check-circle';
+            const icon = type === 'error' ? 'alert-circle' : 'check-circle';
             toast.innerHTML = `<i data-lucide="${icon}" size="16" style="color: ${type === 'error' ? 'var(--accent-danger)' : 'var(--accent-success)'}"></i> <span>${message}</span>`;
             container.appendChild(toast);
-            lucide.createIcons({ root: toast });
+            if (window.lucide) lucide.createIcons({ root: toast });
             setTimeout(() => toast.remove(), 3000);
         }
 
-        // --- MANEJO DE MODALES E INTELIGENCIA DE ORIGEN ANIMACIÓN ---
+        function toggleAdvancedSection() {
+            const content = document.getElementById('advanced-content-box');
+            const chevron = document.getElementById('advanced-chevron');
+            content.classList.toggle('open');
+            chevron.style.transform = content.classList.contains('open') ? 'rotate(180deg)' : 'rotate(0deg)';
+        }
+
         function openModal(modalId, eventId = null, clickEvent = null) {
             const modalEl = document.getElementById(modalId);
-            
             if (modalId === 'modal-view' && eventId) {
                 appData.currentViewId = eventId;
-                
-                // Si viene de un clic físico en PC calcula el origen óptico para la animación
                 if (window.innerWidth >= 650 && clickEvent) {
                     modalEl.classList.add('custom-origin');
                     modalEl.style.top = `${clickEvent.clientY}px`;
                     modalEl.style.left = `${clickEvent.clientX}px`;
-                } else {
-                    modalEl.classList.remove('custom-origin');
-                }
+                } else modalEl.classList.remove('custom-origin');
                 renderVisualizer();
             }
-
             if (modalId === 'modal-add' && !appData.editingId) {
                 document.getElementById('form-title').textContent = 'Nuevo Evento';
                 document.getElementById('btn-submit-form').textContent = 'Crear Contador';
                 document.getElementById('input-title').value = '';
+                document.getElementById('input-desc').value = '';
                 document.getElementById('input-start-date').value = '';
                 document.getElementById('input-date').value = '';
+                document.getElementById('input-end-date').value = '';
                 document.getElementById('input-allday').checked = false;
-                // Configurar GENERAL por defecto de manera limpia
+                document.getElementById('input-mode').value = 'countdown';
+                document.getElementById('input-event-color').value = '#0A84FF';
+                document.getElementById('input-alarm-sound').value = 'none';
+                document.getElementById('input-alarm-vibrate').checked = false;
                 document.getElementById('input-category-hidden').value = 'calendar|General';
                 document.getElementById('selected-category-display').innerHTML = `<i data-lucide="calendar" size="18"></i> <span>General</span>`;
-                toggleAllDayField();
-                buildCustomCategoryDropdown();
-                initPreviewCard();
+                document.getElementById('advanced-content-box').classList.remove('open');
+                document.getElementById('advanced-chevron').style.transform = 'rotate(0deg)';
+                toggleAllDayField(); toggleEventModeFields(); buildCustomCategoryDropdown(); initPreviewCard();
             }
-
             document.getElementById('main-view').classList.add('backgrounded');
             document.getElementById('modal-backdrop').classList.add('active');
-            
-            // Forzar un reflow antes de activar para asegurar la transición de escala nativa
             void modalEl.offsetWidth;
             modalEl.classList.add('active');
-            
+            if (modalId === 'modal-add') {
+                const contentBox = document.getElementById('modal-add-content');
+                if (contentBox) contentBox.scrollTop = 0;
+            }
             modalStack.push(modalId);
-            window.history.pushState({ activeModal: modalId }, "");
-            lucide.createIcons();
+            window.history.pushState({ activeModal: modalId }, '');
+            if (window.lucide) lucide.createIcons();
         }
 
-        function closeTopModal() {
-            if (modalStack.length > 0) window.history.back();
-        }
+        function closeTopModal() { if (modalStack.length > 0) window.history.back(); }
 
         window.addEventListener('popstate', () => {
             if (modalStack.length > 0) {
                 const closingId = modalStack.pop();
                 document.getElementById(closingId).classList.remove('active');
-                
                 if (closingId === 'modal-add') {
                     appData.editingId = null;
                     document.getElementById('category-select-container').classList.remove('open');
                 }
-
                 if (modalStack.length === 0) {
                     document.getElementById('main-view').classList.remove('backgrounded');
                     document.getElementById('modal-backdrop').classList.remove('active');
                     appData.currentViewId = null;
+                    window.sharedEventData = null;
                 }
             }
         });
@@ -612,22 +478,16 @@
             const container = document.getElementById('categories-container');
             const wrapper = document.getElementById('scroll-wrapper');
             if (container && wrapper) {
-                if (container.scrollWidth > container.clientWidth) {
-                    wrapper.classList.add('has-overflow');
-                } else {
-                    wrapper.classList.remove('has-overflow');
-                }
+                if (container.scrollWidth > container.clientWidth) wrapper.classList.add('has-overflow');
+                else wrapper.classList.remove('has-overflow');
             }
         }
 
-        // --- BUSCADOR ---
         function toggleSearch(e) {
             const container = document.getElementById('fab-search');
             const input = document.getElementById('search-input');
             if (!container.classList.contains('expanded')) {
-                container.classList.add('expanded');
-                input.focus();
-                e.stopPropagation();
+                container.classList.add('expanded'); input.focus(); e.stopPropagation();
             }
         }
         function closeSearch() {
@@ -635,49 +495,52 @@
             const input = document.getElementById('search-input');
             if (input.value === '') container.classList.remove('expanded');
         }
-        function filterEvents() {
-            const input = document.getElementById('search-input');
-            appData.searchQuery = input.value.toLowerCase();
-            renderApp();
-        }
-        function setFilter(catId) {
-            appData.currentFilter = catId;
-            renderApp();
-        }
+        function filterEvents() { appData.searchQuery = document.getElementById('search-input').value.toLowerCase(); renderApp(); }
+        function setFilter(catId) { appData.currentFilter = catId; renderApp(); }
 
         function toggleAllDayField() {
             const dateInput = document.getElementById('input-date');
             const startDateInput = document.getElementById('input-start-date');
+            const endDateInput = document.getElementById('input-end-date');
             const isAllDay = document.getElementById('input-allday').checked;
             dateInput.type = isAllDay ? 'date' : 'datetime-local';
             startDateInput.type = isAllDay ? 'date' : 'datetime-local';
+            endDateInput.type = isAllDay ? 'date' : 'datetime-local';
         }
 
-        // --- DROPDOWN CATEGORÍAS ---
+        function toggleEventModeFields() {
+            const mode = document.getElementById('input-mode').value;
+            const isElapsed = mode === 'elapsed';
+            document.getElementById('input-date-label').textContent = isElapsed ? 'Fecha desde la que empieza la racha' : 'Fecha del evento';
+            document.getElementById('end-date-group').style.display = isElapsed ? 'none' : 'block';
+            document.getElementById('countdown-start-group').style.display = isElapsed ? 'none' : 'block';
+            document.getElementById('mode-description').textContent = isElapsed
+                ? 'Cuenta el tiempo que ha pasado desde una fecha. Ideal para rachas y hábitos.'
+                : 'Cuenta el tiempo que falta para que llegue el evento.';
+            if (isElapsed) document.getElementById('input-end-date').value = '';
+            updatePreviewTextOnly();
+        }
+
         function toggleCategoryDropdown(e) {
-            e.stopPropagation();
-            document.getElementById('category-select-container').classList.toggle('open');
+            e.stopPropagation(); document.getElementById('category-select-container').classList.toggle('open');
         }
         document.addEventListener('click', () => {
             const sc = document.getElementById('category-select-container');
-            if(sc) sc.classList.remove('open');
+            if (sc) sc.classList.remove('open');
         });
 
         function buildCustomCategoryDropdown() {
-            const allCats = [...appData.defaultCategories.filter(c=>c.id!=='all' && c.visible), ...appData.categories.filter(c=>c.visible!==false)];
+            const allCats = [...appData.defaultCategories.filter(c => c.id !== 'all' && c.visible), ...appData.categories.filter(c => c.visible !== false)];
             const list = document.getElementById('category-dropdown-list');
-            list.innerHTML = allCats.map(c => `
-                <div class="dropdown-item" onclick="selectCustomCategory('${c.icon}', '${c.label}')">
-                    <i data-lucide="${c.icon}" size="16"></i> <span>${c.label}</span>
-                </div>
-            `).join('');
-            lucide.createIcons({ root: list });
+            list.innerHTML = allCats.map(c => `<div class="dropdown-item" onclick="selectCustomCategory('${c.icon}', '${c.label}')"><i data-lucide="${c.icon}" size="16"></i><span>${c.label}</span></div>`).join('');
+            if (window.lucide) lucide.createIcons({ root: list });
         }
 
         function selectCustomCategory(icon, label) {
             document.getElementById('input-category-hidden').value = `${icon}|${label}`;
-            document.getElementById('selected-category-display').innerHTML = `<i data-lucide="${icon}" size="18"></i> <span style="color:var(--text-main); font-weight:500;">${label}</span>`;
+            document.getElementById('selected-category-display').innerHTML = `<i data-lucide="${icon}" size="18"></i><span style="color:var(--text-main); font-weight:500;">${label}</span>`;
             updatePreviewTextOnly();
+            if (window.lucide) lucide.createIcons({ root: document.getElementById('selected-category-display') });
         }
 
         function validateIconLive() {
@@ -685,7 +548,7 @@
             const box = document.getElementById('new-cat-preview-box');
             const target = input === '' ? 'folder' : input;
             box.innerHTML = `<i data-lucide="${target}" size="22"></i>`;
-            lucide.createIcons({ root: box });
+            if (window.lucide) lucide.createIcons({ root: box });
             setTimeout(() => {
                 if (box.querySelector('svg') && input !== '') box.classList.add('valid');
                 else box.classList.remove('valid');
@@ -696,209 +559,281 @@
             const name = document.getElementById('new-cat-name');
             const icon = document.getElementById('new-cat-icon');
             const box = document.getElementById('new-cat-preview-box');
-
-            if(!name.value.trim()) return triggerShake('new-cat-name');
-
+            if (!name.value.trim()) return triggerShake('new-cat-name');
             const finalIcon = box.classList.contains('valid') ? icon.value.trim().toLowerCase() : 'folder';
             appData.categories.push({ id: 'cat_' + Date.now(), label: name.value.trim(), icon: finalIcon, visible: true });
-            saveData();
-            
-            name.value = ''; icon.value = ''; validateIconLive();
-            showToast('Categoría añadida con éxito');
+            saveData(); name.value = ''; icon.value = ''; validateIconLive(); showToast('Categoría añadida con éxito');
             renderCategoriesManager(); renderApp();
         }
 
         function toggleCategoryVisibility(id, isDefault) {
-            if(isDefault) {
+            if (isDefault) {
                 const dc = appData.defaultCategories.find(c => c.id === id);
-                if(dc) dc.visible = !dc.visible;
+                if (dc) dc.visible = !dc.visible;
             } else {
                 const cat = appData.categories.find(c => c.id === id);
-                if(cat) cat.visible = (cat.visible === undefined) ? false : !cat.visible;
+                if (cat) cat.visible = (cat.visible === undefined) ? false : !cat.visible;
             }
-            saveData();
-            renderCategoriesManager();
-            renderApp();
-            showToast('Visibilidad actualizada');
+            saveData(); renderCategoriesManager(); renderApp(); showToast('Visibilidad actualizada');
         }
 
         function renderCategoriesManager() {
             const container = document.getElementById('cats-list-container');
             const defaultsHTML = appData.defaultCategories.map(c => {
                 const isVisible = c.visible !== false;
-                return `
-                    <div class="cat-list-item" style="opacity: ${isVisible ? 1 : 0.5};">
-                        <div style="display:flex; align-items:center; gap:12px;"><i data-lucide="${c.icon}" size="18"></i><span>${c.label} (Sistema)</span></div>
-                        <div class="cat-list-actions">
-                            <button class="btn-icon" onclick="toggleCategoryVisibility('${c.id}', true)"><i data-lucide="${isVisible ? 'eye' : 'eye-off'}" size="18"></i></button>
-                        </div>
-                    </div>
-                `;
+                return `<div class="cat-list-item" style="opacity:${isVisible ? 1 : 0.5};"><div style="display:flex;align-items:center;gap:12px;"><i data-lucide="${c.icon}" size="18"></i><span>${c.label} (Sistema)</span></div><div class="cat-list-actions"><button class="btn-icon" onclick="toggleCategoryVisibility('${c.id}', true)"><i data-lucide="${isVisible ? 'eye' : 'eye-off'}" size="18"></i></button></div></div>`;
             }).join('');
-
             const customHTML = appData.categories.map(c => {
                 const isVisible = c.visible !== false;
-                return `
-                    <div class="cat-list-item" style="opacity: ${isVisible ? 1 : 0.5};">
-                        <div style="display:flex; align-items:center; gap:12px;"><i data-lucide="${c.icon}" size="18"></i><span>${c.label}</span></div>
-                        <div class="cat-list-actions">
-                            <button class="btn-icon" onclick="toggleCategoryVisibility('${c.id}', false)"><i data-lucide="${isVisible ? 'eye' : 'eye-off'}" size="18"></i></button>
-                            <button class="btn-icon" style="color:var(--accent-danger);" onclick="deleteCategory('${c.id}')"><i data-lucide="trash-2" size="18"></i></button>
-                        </div>
-                    </div>
-                `;
+                return `<div class="cat-list-item" style="opacity:${isVisible ? 1 : 0.5};"><div style="display:flex;align-items:center;gap:12px;"><i data-lucide="${c.icon}" size="18"></i><span>${c.label}</span></div><div class="cat-list-actions"><button class="btn-icon" onclick="toggleCategoryVisibility('${c.id}', false)"><i data-lucide="${isVisible ? 'eye' : 'eye-off'}" size="18"></i></button><button class="btn-icon" style="color:var(--accent-danger);" onclick="deleteCategory('${c.id}')"><i data-lucide="trash-2" size="18"></i></button></div></div>`;
             }).join('');
-
             container.innerHTML = defaultsHTML + customHTML;
-            lucide.createIcons({ root: container });
+            if (window.lucide) lucide.createIcons({ root: container });
         }
 
         function deleteCategory(id) {
             appData.categories = appData.categories.filter(c => c.id !== id);
             appData.events.forEach(e => {
-                if(!appData.categories.find(c => c.label === e.categoryLabel) && e.categoryLabel !== 'General') {
+                if (!appData.categories.find(c => c.label === e.categoryLabel) && e.categoryLabel !== 'General') {
                     e.category = 'calendar'; e.categoryLabel = 'General';
                 }
             });
-            saveData(); renderCategoriesManager(); renderApp();
-            showToast('Categoría eliminada', 'info');
+            saveData(); renderCategoriesManager(); renderApp(); showToast('Categoría eliminada', 'info');
         }
 
-        // --- RENDERIZADO PRINCIPAL ---
         function renderApp() {
             const catContainer = document.getElementById('categories-container');
-            const activePills = [
-                ...appData.defaultCategories.filter(c => c.visible), 
-                ...appData.categories.filter(c => c.visible !== false)
-            ];
-            
-            catContainer.innerHTML = activePills.map(cat => `
-                <div class="pill ${appData.currentFilter === cat.id ? 'active' : ''}" onclick="setFilter('${cat.id}')">
-                    <i data-lucide="${cat.icon}" size="14"></i> ${cat.label}
-                </div>
-            `).join('') + `<div class="pill edit-pill" onclick="openModal('modal-cats')" title="Gestionar carpetas y categorías"><i data-lucide="settings-2" size="14"></i></div>`;
+            const activePills = [...appData.defaultCategories.filter(c => c.visible), ...appData.categories.filter(c => c.visible !== false)];
+            catContainer.innerHTML = activePills.map(cat => `<div class="pill ${appData.currentFilter === cat.id ? 'active' : ''}" onclick="setFilter('${cat.id}')"><i data-lucide="${cat.icon}" size="14"></i>${cat.label}</div>`).join('') + `<div class="pill edit-pill" onclick="openModal('modal-cats')" title="Gestionar carpetas y categorías"><i data-lucide="settings-2" size="14"></i></div>`;
 
-            let filtered = appData.events;
+            let filtered = [...appData.events];
             const currentPill = [...appData.defaultCategories, ...appData.categories].find(c => c.id === appData.currentFilter);
-            
-            if (appData.currentFilter !== 'all' && currentPill) {
-                filtered = filtered.filter(e => e.categoryLabel === currentPill.label);
-            }
-            if (appData.searchQuery) {
-                filtered = filtered.filter(e => e.title.toLowerCase().includes(appData.searchQuery));
-            }
-
+            if (appData.currentFilter !== 'all' && currentPill) filtered = filtered.filter(e => e.categoryLabel === currentPill.label);
+            if (appData.searchQuery) filtered = filtered.filter(e => e.title.toLowerCase().includes(appData.searchQuery));
             document.getElementById('total-count').textContent = `${filtered.length} activos`;
 
             const grid = document.getElementById('events-grid');
             if (appData.events.length === 0) {
                 grid.innerHTML = `<div class="zero-state"><i data-lucide="calendar" size="38"></i><h3>Sin eventos activos</h3><p>Toca el botón + inferior para empezar.</p></div>`;
             } else if (filtered.length === 0) {
-                if (appData.searchQuery) {
-                    grid.innerHTML = `<div class="zero-state"><h3>No se han encontrado resultados para '${appData.searchQuery}'</h3><p>Prueba con otros términos de búsqueda.</p></div>`;
-                } else {
-                    grid.innerHTML = `<div class="zero-state"><h3>No hay eventos en esta categoría</h3><p>Crea un contador asignándole esta sección.</p></div>`;
-                }
+                if (appData.searchQuery) grid.innerHTML = `<div class="zero-state"><h3>No se han encontrado resultados para '${escapeHTML(appData.searchQuery)}'</h3><p>Prueba con otros términos de búsqueda.</p></div>`;
+                else grid.innerHTML = `<div class="zero-state"><h3>No hay eventos en esta categoría</h3><p>Crea un contador asignándole esta sección.</p></div>`;
             } else {
-                const sorted = [...filtered].sort((a,b) => a.targetAt - b.targetAt);
+                const sorted = getOrderedEvents(filtered);
                 grid.innerHTML = sorted.map((e, idx) => generateCardHTML(e, false, idx)).join('');
             }
+            if (window.lucide) lucide.createIcons();
+            updateTickers(); checkCategoryScrollOverflow();
+        }
 
-            lucide.createIcons();
-            updateTickers();
-            checkCategoryScrollOverflow();
+        function getOrderedEvents(events) {
+            return [...events].sort((a, b) => {
+                if (appData.settings.sortMode === 'custom') {
+                    const ao = Number.isFinite(a.order) ? a.order : Number.MAX_SAFE_INTEGER;
+                    const bo = Number.isFinite(b.order) ? b.order : Number.MAX_SAFE_INTEGER;
+                    return ao - bo || a.targetAt - b.targetAt;
+                }
+                return a.targetAt - b.targetAt;
+            });
+        }
+
+        function changeSortMode(mode) {
+            if (!['date', 'custom'].includes(mode)) return;
+            if (mode === 'custom' && appData.settings.sortMode !== 'custom') {
+                [...appData.events].sort((a, b) => a.targetAt - b.targetAt).forEach((event, index) => { event.order = index; });
+            }
+            appData.settings.sortMode = mode;
+            saveData(); renderApp();
+            showToast(mode === 'custom' ? 'Orden personalizado activado' : 'Orden automático por fecha activado');
+        }
+
+        function startCardDrag(event, eventId) {
+            if (appData.settings.sortMode !== 'custom' || event.button > 0) return;
+            event.preventDefault(); event.stopPropagation();
+            const card = document.getElementById(`card_${eventId}`);
+            if (!card) return;
+            dragState = { eventId, pointerId: event.pointerId, startX: event.clientX, startY: event.clientY, active: false, targetId: null, card };
+            try { event.currentTarget.setPointerCapture(event.pointerId); } catch (_) {}
+            document.addEventListener('pointermove', handleCardDragMove, { passive: false });
+            document.addEventListener('pointerup', finishCardDrag, { once: true });
+            document.addEventListener('pointercancel', cancelCardDrag, { once: true });
+        }
+
+        function handleCardDragMove(event) {
+            if (!dragState || event.pointerId !== dragState.pointerId) return;
+            const dx = event.clientX - dragState.startX;
+            const dy = event.clientY - dragState.startY;
+            if (!dragState.active && Math.hypot(dx, dy) < 7) return;
+            event.preventDefault();
+            if (!dragState.active) { dragState.active = true; dragState.card.classList.add('dragging'); }
+            document.querySelectorAll('.card.drag-over').forEach(el => el.classList.remove('drag-over'));
+            const under = document.elementFromPoint(event.clientX, event.clientY);
+            const target = under && under.closest('.card[data-event-id]');
+            if (target && target.dataset.eventId !== dragState.eventId) {
+                dragState.targetId = target.dataset.eventId;
+                target.classList.add('drag-over');
+            } else dragState.targetId = null;
+        }
+
+        function finishCardDrag(event) {
+            if (!dragState) return;
+            document.removeEventListener('pointermove', handleCardDragMove);
+            document.removeEventListener('pointercancel', cancelCardDrag);
+            const state = dragState; dragState = null;
+            document.querySelectorAll('.card.dragging,.card.drag-over').forEach(el => el.classList.remove('dragging', 'drag-over'));
+            if (!state.active || !state.targetId || state.targetId === state.eventId) return;
+            const ordered = getOrderedEvents(appData.events);
+            const from = ordered.findIndex(e => e.id === state.eventId);
+            const to = ordered.findIndex(e => e.id === state.targetId);
+            if (from < 0 || to < 0) return;
+            const [moved] = ordered.splice(from, 1);
+            ordered.splice(to, 0, moved);
+            ordered.forEach((ev, index) => { ev.order = index; });
+            saveData(); renderApp();
+        }
+
+        function cancelCardDrag() {
+            if (!dragState) return;
+            document.removeEventListener('pointermove', handleCardDragMove);
+            document.removeEventListener('pointerup', finishCardDrag);
+            dragState.card.classList.remove('dragging');
+            document.querySelectorAll('.card.drag-over').forEach(el => el.classList.remove('drag-over'));
+            dragState = null;
+        }
+
+        function getEffectiveTarget(ev) {
+            const now = Date.now();
+            if (ev.mode === 'elapsed') return ev.targetAt;
+            if (ev.endAt && now >= ev.targetAt && now < ev.endAt) return ev.endAt;
+            return ev.targetAt;
         }
 
         function generateCardHTML(event, isPreview = false, index = 0) {
             const click = isPreview ? '' : `onclick="openModal('modal-view', '${event.id}', event)"`;
-            const delay = isPreview ? '' : `style="animation-delay: ${Math.min(index * 0.04, 0.3)}s;"`;
-            const completedClass = (event.targetAt - Date.now() <= 0) ? 'completed' : '';
-            return `
-                <div class="card ${completedClass}" ${click} ${delay} id="card_${event.id}">
-                    <div class="card-header">
-                        <div class="card-badge" id="${isPreview ? 'prev-badge' : ''}">
-                            <i data-lucide="${event.category}" size="14"></i> <span id="${isPreview ? 'prev-cat-label' : ''}">${event.categoryLabel}</span>
-                        </div>
-                        <div class="card-title" id="${isPreview ? 'prev-title' : ''}">${event.title || 'Sin Título'}</div>
-                    </div>
-                    <div class="countdown-display" id="${isPreview ? 'display_preview' : `display_${event.id}`}">
-                        <div style="color: var(--text-muted); font-size: 0.9rem;">...</div>
-                    </div>
-                </div>
-            `;
+            const delay = isPreview ? '' : `style="animation-delay:${Math.min(index * 0.04, 0.3)}s;--event-accent:${isValidHexColor(event.color) ? event.color : '#0A84FF'};"`;
+            const now = Date.now();
+            const effTarget = getEffectiveTarget(event);
+            const isCompleted = event.mode !== 'elapsed' && ((effTarget - now <= 0) || (event.endAt && now >= event.endAt));
+            const completedClass = isCompleted ? 'completed' : '';
+            const dragEnabled = !isPreview && appData.settings.sortMode === 'custom';
+            const dragHandle = dragEnabled ? `<button class="drag-handle" aria-label="Arrastrar para ordenar" title="Mantén pulsado y arrastra" onclick="event.stopPropagation()" onpointerdown="startCardDrag(event, '${event.id}')"><i data-lucide="grip-vertical" size="16"></i></button>` : '';
+            const descHTML = event.description ? `<div class="card-desc">${escapeHTML(event.description)}</div>` : '';
+            const modeBadge = event.mode === 'elapsed' ? '<span style="font-size:.7rem;color:var(--event-accent);font-weight:600;">RACHA</span>' : '';
+            return `<div class="card ${completedClass} ${dragEnabled ? 'drag-enabled' : ''}" ${click} ${delay} id="card_${event.id}" data-event-id="${escapeHTML(event.id)}"><div class="event-accent-mark"></div><div class="card-header">${dragHandle}<div class="card-badge" id="${isPreview ? 'prev-badge' : ''}"><i data-lucide="${escapeHTML(event.category)}" size="14"></i><span id="${isPreview ? 'prev-cat-label' : ''}">${escapeHTML(event.categoryLabel)}</span></div><div class="card-title" id="${isPreview ? 'prev-title' : ''}">${escapeHTML(event.title || 'Sin Título')}</div>${modeBadge}</div>${descHTML}<div class="countdown-display" id="${isPreview ? 'display_preview' : `display_${event.id}`}"><div style="color:var(--text-muted);font-size:.9rem;">...</div></div><div class="card-live-border" id="border_${event.id}"></div></div>`;
         }
 
         function updateTickers() {
             const now = Date.now();
             appData.events.forEach(e => {
                 const el = document.getElementById(`display_${e.id}`);
-                if (el) el.innerHTML = calculateTimeHTML(e.targetAt, now, e.isAllDay);
+                const effTarget = getEffectiveTarget(e);
+                if (el) el.innerHTML = calculateTimeHTML(effTarget, now, e.isAllDay, e);
+                const borderEl = document.getElementById(`border_${e.id}`);
+                if (borderEl) {
+                    if (e.mode !== 'elapsed' && e.endAt && now >= e.targetAt && now < e.endAt) {
+                        const totalDur = e.endAt - e.targetAt;
+                        const elapsed = now - e.targetAt;
+                        borderEl.style.width = `${Math.min(Math.max((elapsed / totalDur) * 100, 0), 100)}%`;
+                    } else borderEl.style.width = '0%';
+                }
+                if (previousTickerAt < e.targetAt && e.targetAt <= now && e.mode !== 'elapsed') playCompletionAlert(e);
             });
 
             if (modalStack.includes('modal-add')) {
                 const dateVal = document.getElementById('input-date').value;
+                const endDateVal = document.getElementById('input-end-date').value;
                 const isAllDay = document.getElementById('input-allday').checked;
+                const mode = document.getElementById('input-mode').value;
                 const target = dateVal ? new Date(isAllDay ? dateVal + 'T00:00:00' : dateVal).getTime() : now;
+                const end = endDateVal ? new Date(isAllDay ? endDateVal + 'T00:00:00' : endDateVal).getTime() : null;
+                const dummyEv = { targetAt: target, endAt: end, isAllDay, mode };
+                const effTarget = getEffectiveTarget(dummyEv);
                 const pd = document.getElementById('display_preview');
-                if (pd) pd.innerHTML = calculateTimeHTML(target, now, isAllDay);
+                if (pd) pd.innerHTML = calculateTimeHTML(effTarget, now, isAllDay, dummyEv);
             }
-
             if (appData.currentViewId && modalStack.includes('modal-view')) {
                 const ev = appData.events.find(e => e.id === appData.currentViewId);
                 if (ev) {
-                    const vd = document.getElementById(`display_view_${ev.id}`);
-                    if(vd) vd.innerHTML = calculateTimeHTML(ev.targetAt, now, ev.isAllDay);
+                    const vd = document.getElementById('display_preview') || document.getElementById(`display_view_${ev.id}`);
+                    const effTarget = getEffectiveTarget(ev);
+                    if (vd) vd.innerHTML = calculateTimeHTML(effTarget, now, ev.isAllDay, ev);
                 }
             }
+            if (modalStack.includes('modal-fullscreen') && appData.currentViewId) {
+                const ev = appData.events.find(e => e.id === appData.currentViewId);
+                const fsEl = document.getElementById('display_fullscreen');
+                const fsStatus = document.getElementById('fs-status-label');
+                if (ev && fsEl) {
+                    if (fsStatus) fsStatus.textContent = ev.mode === 'elapsed' ? 'Tiempo acumulado' : (ev.endAt && now >= ev.targetAt && now < ev.endAt ? 'Tiempo restante de evento' : 'Tiempo restante');
+                    fsEl.innerHTML = calculateTimeHTML(getEffectiveTarget(ev), now, ev.isAllDay, ev);
+                }
+            }
+            if (window.sharedEventData) {
+                const shEl = document.getElementById('display_shared');
+                if (shEl) shEl.innerHTML = calculateTimeHTML(getEffectiveTarget(window.sharedEventData), now, window.sharedEventData.isAllDay, window.sharedEventData);
+            }
+            previousTickerAt = now;
         }
 
-        function calculateTimeHTML(target, now, isAllDay) {
+        function calculateTimeHTML(target, now, isAllDay, eventObj = null) {
+            if (eventObj && eventObj.mode === 'elapsed') {
+                const elapsed = Math.max(0, now - target);
+                const d = Math.floor(elapsed / (1000 * 60 * 60 * 24));
+                if (isAllDay) return `<div class="days-main"><span class="num">${d}</span><span class="label">Días</span></div>`;
+                const h = Math.floor((elapsed % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
+                const m = Math.floor((elapsed % (1000 * 60 * 60)) / (1000 * 60));
+                const s = Math.floor((elapsed % (1000 * 60)) / 1000);
+                return `<div class="days-main"><span class="num">${d}</span><span class="label">Días</span></div><div class="time-sub"><div><span class="num">${h}</span><span class="label">H</span></div><div><span class="num">${m}</span><span class="label">M</span></div><div><span class="num">${s}</span><span class="label">S</span></div></div>`;
+            }
+            if (eventObj && eventObj.endAt && now >= eventObj.endAt) return `<div class="days-main completed-text"><span class="num">¡Evento Finalizado!</span></div>`;
             const diff = target - now;
-            if (diff <= 0) return `<div class="days-main completed-text"><span class="num">¡Objetivo Cumplido!</span></div>`;
-
-            const d = Math.floor(diff / (1000 * 60 * 60 * 24));
+            if (diff <= 0) {
+                if (eventObj && eventObj.endAt && now < eventObj.endAt) { /* El evento está en curso. */ }
+                else return `<div class="days-main completed-text"><span class="num">¡Objetivo Cumplido!</span></div>`;
+            }
+            const safeDiff = Math.max(0, diff);
+            const d = Math.floor(safeDiff / (1000 * 60 * 60 * 24));
             if (isAllDay) return `<div class="days-main"><span class="num">${d}</span><span class="label">Días rest.</span></div>`;
-
-            const h = Math.floor((diff % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
-            const m = Math.floor((diff % (1000 * 60 * 60)) / (1000 * 60));
-            const s = Math.floor((diff % (1000 * 60)) / 1000);
-
-            return `
-                <div class="days-main"><span class="num">${d}</span><span class="label">Días</span></div>
-                <div class="time-sub">
-                    <div><span class="num">${h}</span><span class="label">H</span></div>
-                    <div><span class="num">${m}</span><span class="label">M</span></div>
-                    <div><span class="num">${s}</span><span class="label">S</span></div>
-                </div>
-            `;
+            const h = Math.floor((safeDiff % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
+            const m = Math.floor((safeDiff % (1000 * 60 * 60)) / (1000 * 60));
+            const s = Math.floor((safeDiff % (1000 * 60)) / 1000);
+            return `<div class="days-main"><span class="num">${d}</span><span class="label">Días</span></div><div class="time-sub"><div><span class="num">${h}</span><span class="label">H</span></div><div><span class="num">${m}</span><span class="label">M</span></div><div><span class="num">${s}</span><span class="label">S</span></div></div>`;
         }
 
         function initPreviewCard() {
-            const dummy = { id: 'preview', title: 'Sin Título', category: 'calendar', categoryLabel: 'General', targetAt: Date.now(), isAllDay: false };
+            const dummy = { id: 'preview', title: 'Sin Título', description: '', category: 'calendar', categoryLabel: 'General', targetAt: Date.now(), isAllDay: false, mode: 'countdown', color: document.getElementById('input-event-color').value };
             document.getElementById('preview-container').innerHTML = generateCardHTML(dummy, true);
-            lucide.createIcons({ root: document.getElementById('preview-container') });
+            if (window.lucide) lucide.createIcons({ root: document.getElementById('preview-container') });
+            updatePreviewAccent();
         }
 
         function updatePreviewTextOnly() {
-            if(!document.getElementById('card_preview')) initPreviewCard();
+            if (!document.getElementById('card_preview')) initPreviewCard();
             const titleEl = document.getElementById('prev-title');
             const val = document.getElementById('input-title').value || 'Sin Título';
             if (titleEl && titleEl.textContent !== val) titleEl.textContent = val;
-
             const hidden = document.getElementById('input-category-hidden').value;
             if (hidden) {
                 const [icon, label] = hidden.split('|');
                 const lbl = document.getElementById('prev-cat-label');
                 if (lbl && lbl.textContent !== label) {
                     const b = document.getElementById('prev-badge');
-                    b.innerHTML = `<i data-lucide="${icon}" size="14"></i> <span id="prev-cat-label">${label}</span>`;
-                    lucide.createIcons({ root: b });
+                    b.innerHTML = `<i data-lucide="${escapeHTML(icon)}" size="14"></i><span id="prev-cat-label">${escapeHTML(label)}</span>`;
+                    if (window.lucide) lucide.createIcons({ root: b });
                 }
             }
+            updatePreviewAccent();
+        }
+
+        function updatePreviewAccent() {
+            const color = document.getElementById('input-event-color').value;
+            const card = document.querySelector('#preview-container .card');
+            if (card && isValidHexColor(color)) card.style.setProperty('--event-accent', color);
         }
 
         function triggerShake(id) {
             const el = document.getElementById(id);
+            if (!el) return;
             el.classList.remove('error-shake'); void el.offsetWidth; el.classList.add('error-shake');
             showToast('Por favor, rellena este campo correctamente', 'error');
             setTimeout(() => el.classList.remove('error-shake'), 350);
@@ -906,49 +841,51 @@
 
         function saveEventForm() {
             const title = document.getElementById('input-title');
+            const desc = document.getElementById('input-desc');
             const startDate = document.getElementById('input-start-date');
             const date = document.getElementById('input-date');
+            const endDate = document.getElementById('input-end-date');
             const hidden = document.getElementById('input-category-hidden').value;
             const isAllDay = document.getElementById('input-allday').checked;
-
+            const mode = document.getElementById('input-mode').value;
+            const color = document.getElementById('input-event-color').value;
+            const alarmSound = document.getElementById('input-alarm-sound').value;
+            const alarmVibrate = document.getElementById('input-alarm-vibrate').checked;
             if (!title.value.trim()) return triggerShake('input-title');
             if (!date.value) return triggerShake('input-date');
             if (!hidden) return triggerShake('category-select-container');
-
             const targetTime = new Date(isAllDay ? date.value + 'T00:00:00' : date.value).getTime();
-            const startTime = startDate.value ? new Date(isAllDay ? startDate.value + 'T00:00:00' : startDate.value).getTime() : Date.now();
-
-            if (startTime > targetTime) return triggerShake('input-start-date');
-
+            const now = Date.now();
+            const startTime = mode === 'elapsed' ? targetTime : (startDate.value ? new Date(isAllDay ? startDate.value + 'T00:00:00' : startDate.value).getTime() : now);
+            const endTime = mode === 'elapsed' || !endDate.value ? null : new Date(isAllDay ? endDate.value + 'T00:00:00' : endDate.value).getTime();
+            if (!Number.isFinite(targetTime)) return triggerShake('input-date');
+            if (mode === 'countdown' && startTime > targetTime) return triggerShake('input-start-date');
+            if (mode === 'elapsed' && targetTime > now) return triggerShake('input-date');
+            if (endTime && (!Number.isFinite(endTime) || endTime <= targetTime)) return triggerShake('input-end-date');
             const [icon, label] = hidden.split('|');
-
             if (appData.editingId) {
                 const idx = appData.events.findIndex(e => e.id === appData.editingId);
                 if (idx > -1) {
-                    appData.events[idx] = { 
-                        ...appData.events[idx], 
-                        title: title.value.trim(), 
-                        category: icon, 
-                        categoryLabel: label, 
-                        createdAt: startTime,
-                        targetAt: targetTime, 
-                        isAllDay 
+                    const oldEvent = appData.events[idx];
+                    const dateChanged = oldEvent.targetAt !== targetTime || oldEvent.mode !== mode;
+                    appData.events[idx] = {
+                        ...oldEvent,
+                        title: title.value.trim(), description: desc.value.trim(), category: icon, categoryLabel: label,
+                        createdAt: startTime, targetAt: targetTime, endAt: endTime, isAllDay, mode,
+                        color: isValidHexColor(color) ? color : '#0A84FF', alarmSound, alarmVibrate,
+                        ...(dateChanged ? { order: oldEvent.order } : {})
                     };
                     showToast('Evento actualizado con éxito');
                 }
             } else {
                 appData.events.unshift({
-                    id: 'evt_' + Date.now(),
-                    title: title.value.trim(),
-                    category: icon,
-                    categoryLabel: label,
-                    createdAt: startTime,
-                    targetAt: targetTime,
-                    isAllDay: isAllDay
+                    id: 'evt_' + Date.now(), title: title.value.trim(), description: desc.value.trim(), category: icon,
+                    categoryLabel: label, createdAt: startTime, targetAt: targetTime, endAt: endTime, isAllDay,
+                    mode, color: isValidHexColor(color) ? color : '#0A84FF', alarmSound, alarmVibrate,
+                    order: appData.events.length ? Math.max(...appData.events.map(e => Number.isFinite(e.order) ? e.order : 0)) + 1 : 0
                 });
-                showToast('Contador inicializado');
+                showToast(mode === 'elapsed' ? 'Racha iniciada' : 'Contador inicializado');
             }
-
             saveData(); renderApp(); closeTopModal();
             if (appData.currentViewId) renderVisualizer();
         }
@@ -956,157 +893,420 @@
         function renderVisualizer() {
             const event = appData.events.find(e => e.id === appData.currentViewId);
             if (!event) return;
-
             document.getElementById('view-title').textContent = event.title;
-            document.getElementById('view-live-card').innerHTML = generateCardHTML({...event, id: 'view_' + event.id}, true);
+            const descContainer = document.getElementById('view-desc-container');
+            const descText = document.getElementById('view-desc-text');
+            if (event.description) { descText.textContent = event.description; descContainer.style.display = 'block'; }
+            else descContainer.style.display = 'none';
+            document.getElementById('view-live-card').innerHTML = generateCardHTML({ ...event, id: 'view_' + event.id }, true);
 
-            const now = Date.now();
-            const startMs = event.createdAt || now;
-            const totalMs = event.targetAt - startMs;
-            const passedMs = now - startMs;
-            
-            let totalDays = Math.max(1, Math.ceil(totalMs / (1000 * 60 * 60 * 24)));
-            let passedDays = Math.max(0, Math.floor(passedMs / (1000 * 60 * 60 * 24)));
-            if (passedDays > totalDays) passedDays = totalDays;
-
-            let percentage = totalMs > 0 ? (passedMs / totalMs) * 100 : 100;
-            percentage = Math.min(Math.max(percentage, 0), 100);
-
-            document.getElementById('view-percentage').textContent = `${percentage.toFixed(1)}%`;
-            setTimeout(() => {
-                const f = document.getElementById('view-progress-fill');
-                if(f) f.style.width = `${percentage}%`;
-            }, 50);
-
-            const MAX_DOTS = 180;
-            let daysPerDot = 1;
-            if (totalDays > MAX_DOTS) daysPerDot = Math.ceil(totalDays / MAX_DOTS);
-
-            document.getElementById('view-scale').innerHTML = daysPerDot === 1 ? "1 punto = 1 día" : `Escala reducida: <b>1 punto = ${daysPerDot} días</b>`;
-
-            let dots = '';
-            for(let i=0; i < Math.ceil(totalDays/daysPerDot); i++) {
-                dots += `<div class="dot ${i < Math.floor(passedDays/daysPerDot) ? 'passed' : ''}"></div>`;
+            const visualizer = document.querySelector('#modal-view .visualizer-card');
+            if (event.mode === 'elapsed') {
+                visualizer.style.display = 'none';
+            } else {
+                visualizer.style.display = 'block';
+                const now = Date.now();
+                const startMs = event.createdAt || now;
+                const endMs = event.endAt || event.targetAt;
+                const totalMs = endMs - startMs;
+                const passedMs = now - startMs;
+                let totalDays = Math.max(1, Math.ceil(totalMs / (1000 * 60 * 60 * 24)));
+                let passedDays = Math.max(0, Math.floor(passedMs / (1000 * 60 * 60 * 24)));
+                if (passedDays > totalDays) passedDays = totalDays;
+                let percentage = totalMs > 0 ? (passedMs / totalMs) * 100 : 100;
+                percentage = Math.min(Math.max(percentage, 0), 100);
+                document.getElementById('progress-label-title').textContent = 'Progreso Consumido';
+                document.getElementById('view-percentage').textContent = `${percentage.toFixed(1)}%`;
+                setTimeout(() => { const f = document.getElementById('view-progress-fill'); if (f) f.style.width = `${percentage}%`; }, 50);
+                const MAX_DOTS = 180;
+                let daysPerDot = 1;
+                if (totalDays > MAX_DOTS) daysPerDot = Math.ceil(totalDays / MAX_DOTS);
+                document.getElementById('view-scale').innerHTML = daysPerDot === 1 ? '1 punto = 1 día' : `Escala reducida: <b>1 punto = ${daysPerDot} días</b>`;
+                let dots = '';
+                for (let i = 0; i < Math.ceil(totalDays / daysPerDot); i++) dots += `<div class="dot ${i < Math.floor(passedDays / daysPerDot) ? 'passed' : ''}"></div>`;
+                document.getElementById('view-dots').innerHTML = dots;
             }
-            document.getElementById('view-dots').innerHTML = dots;
 
-            // Información extra extendida
-            const startDateObj = new Date(startMs);
+            const startMs = event.mode === 'elapsed' ? event.targetAt : (event.createdAt || Date.now());
             const targetDateObj = new Date(event.targetAt);
             const options = { day: 'numeric', month: 'short', year: 'numeric' };
-            if (!event.isAllDay) {
-                options.hour = '2-digit';
-                options.minute = '2-digit';
-            }
-
-            const formatStartDate = startDateObj.toLocaleDateString('es-ES', options);
+            if (!event.isAllDay) { options.hour = '2-digit'; options.minute = '2-digit'; }
+            const formatStartDate = new Date(startMs).toLocaleDateString('es-ES', options);
             const formatTargetDate = targetDateObj.toLocaleDateString('es-ES', options);
-            
-            const remainingMs = Math.max(0, event.targetAt - now);
-            const totalHours = Math.floor(remainingMs / (1000 * 60 * 60));
-            const totalWeeks = (remainingMs / (1000 * 60 * 60 * 24 * 7)).toFixed(1);
-
-            document.getElementById('view-extra-info').innerHTML = `
-                <div class="info-card">
-                    <div class="info-card-header"><i data-lucide="play-circle" size="14"></i> Fecha Inicio</div>
-                    <div class="info-card-value" style="font-size: 0.95rem;">${formatStartDate}</div>
-                </div>
-                <div class="info-card">
-                    <div class="info-card-header"><i data-lucide="flag" size="14"></i> Fecha Objetivo</div>
-                    <div class="info-card-value" style="font-size: 0.95rem;">${formatTargetDate}</div>
-                </div>
-                <div class="info-card">
-                    <div class="info-card-header"><i data-lucide="clock" size="14"></i> Horas Restantes</div>
-                    <div class="info-card-value">${totalHours} h</div>
-                </div>
-                <div class="info-card">
-                    <div class="info-card-header"><i data-lucide="calendar-range" size="14"></i> Semanas Restantes</div>
-                    <div class="info-card-value">${totalWeeks} sem</div>
-                </div>
-            `;
-
-            lucide.createIcons({ root: document.getElementById('modal-view') });
+            const now = Date.now();
+            const elapsedMs = Math.max(0, now - event.targetAt);
+            const remainingMs = Math.max(0, getEffectiveTarget(event) - now);
+            const durationMs = event.mode === 'elapsed' ? elapsedMs : remainingMs;
+            const totalHours = Math.floor(durationMs / (1000 * 60 * 60));
+            const totalWeeks = (durationMs / (1000 * 60 * 60 * 24 * 7)).toFixed(1);
+            let extraHtml = '';
+            if (event.mode === 'elapsed') {
+                const days = Math.floor(elapsedMs / (1000 * 60 * 60 * 24));
+                extraHtml = `<div class="info-card"><div class="info-card-header"><i data-lucide="calendar-check" size="14"></i> Racha actual</div><div class="info-card-value">${days} días</div></div><div class="info-card"><div class="info-card-header"><i data-lucide="play-circle" size="14"></i> Desde</div><div class="info-card-value" style="font-size:.95rem;">${formatStartDate}</div></div><div class="info-card"><div class="info-card-header"><i data-lucide="clock" size="14"></i> Tiempo acumulado</div><div class="info-card-value">${totalHours} h</div></div><div class="info-card"><div class="info-card-header"><i data-lucide="calendar-range" size="14"></i> Semanas</div><div class="info-card-value">${totalWeeks} sem</div></div>`;
+            } else {
+                extraHtml = `<div class="info-card"><div class="info-card-header"><i data-lucide="play-circle" size="14"></i> Fecha Inicio</div><div class="info-card-value" style="font-size:.95rem;">${formatStartDate}</div></div><div class="info-card"><div class="info-card-header"><i data-lucide="flag" size="14"></i> Fecha Objetivo</div><div class="info-card-value" style="font-size:.95rem;">${formatTargetDate}</div></div>`;
+                if (event.endAt) {
+                    const endDateObj = new Date(event.endAt);
+                    const formatEndDate = endDateObj.toLocaleDateString('es-ES', options);
+                    extraHtml += `<div class="info-card"><div class="info-card-header"><i data-lucide="stop-circle" size="14"></i> Fin Evento</div><div class="info-card-value" style="font-size:.95rem;">${formatEndDate}</div></div>`;
+                }
+                extraHtml += `<div class="info-card"><div class="info-card-header"><i data-lucide="clock" size="14"></i> Horas Restantes</div><div class="info-card-value">${totalHours} h</div></div><div class="info-card"><div class="info-card-header"><i data-lucide="calendar-range" size="14"></i> Semanas Restantes</div><div class="info-card-value">${totalWeeks} sem</div></div>`;
+            }
+            document.getElementById('view-extra-info').innerHTML = extraHtml;
+            if (window.lucide) lucide.createIcons({ root: document.getElementById('modal-view') });
             updateTickers();
+        }
+
+        function toggleFullscreen() {
+            const event = appData.events.find(e => e.id === appData.currentViewId);
+            if (!event) return;
+            document.getElementById('fs-title').textContent = event.title;
+            const badge = document.getElementById('fs-badge');
+            badge.innerHTML = `<i data-lucide="${escapeHTML(event.category)}" size="16"></i><span>${escapeHTML(event.categoryLabel)}</span>`;
+            const fsDesc = document.getElementById('fs-desc');
+            if (event.description) { fsDesc.textContent = event.description; fsDesc.style.display = 'block'; }
+            else fsDesc.style.display = 'none';
+            const modal = document.getElementById('modal-fullscreen');
+            const fsStatus = document.getElementById('fs-status-label');
+            if (fsStatus) fsStatus.textContent = event.mode === 'elapsed' ? 'Tiempo acumulado' : 'Tiempo restante';
+            void modal.offsetWidth; modal.classList.add('active'); modalStack.push('modal-fullscreen');
+            if (window.lucide) lucide.createIcons({ root: modal });
+            updateTickers();
+        }
+
+        function closeFullscreen() { closeTopModal(); }
+
+        function shareEvent() {
+            const event = appData.events.find(e => e.id === appData.currentViewId);
+            if (!event) return;
+            const encryptedData = btoa(encodeURIComponent(JSON.stringify(event)));
+            const shareUrl = `${window.location.origin}${window.location.pathname}?share=${encryptedData}`;
+            navigator.clipboard.writeText(shareUrl).then(() => showToast('¡Enlace copiado al portapapeles!')).catch(() => showToast('No se pudo copiar el enlace', 'error'));
+        }
+
+        function openSharedModal(ev) {
+            const container = document.getElementById('shared-card-container');
+            container.innerHTML = generateCardHTML({ ...normalizeEvent(ev), id: 'shared' }, true);
+            document.getElementById('main-view').classList.add('backgrounded');
+            document.getElementById('modal-backdrop').classList.add('active');
+            const modal = document.getElementById('modal-shared');
+            void modal.offsetWidth; modal.classList.add('active'); modalStack.push('modal-shared');
+            if (window.lucide) lucide.createIcons({ root: container });
+            updateTickers();
+        }
+
+        function saveSharedEvent() {
+            if (window.sharedEventData) {
+                const newEvent = normalizeEvent({ ...window.sharedEventData, id: 'evt_' + Date.now() });
+                appData.events.unshift(newEvent); saveData(); renderApp();
+                showToast('¡Cuenta atrás añadida a tu lista con éxito!');
+                window.history.replaceState({}, document.title, window.location.pathname);
+                closeTopModal(); window.sharedEventData = null;
+            }
         }
 
         function prepareEdit() {
             const event = appData.events.find(e => e.id === appData.currentViewId);
             if (!event) return;
-
             appData.editingId = event.id;
             document.getElementById('form-title').textContent = 'Editar Evento';
             document.getElementById('btn-submit-form').textContent = 'Guardar Cambios';
-            
             document.getElementById('input-title').value = event.title;
+            document.getElementById('input-desc').value = event.description || '';
             document.getElementById('input-allday').checked = event.isAllDay || false;
-            toggleAllDayField();
-
+            document.getElementById('input-mode').value = event.mode || 'countdown';
+            document.getElementById('input-event-color').value = isValidHexColor(event.color) ? event.color : '#0A84FF';
+            document.getElementById('input-alarm-sound').value = event.alarmSound || 'none';
+            document.getElementById('input-alarm-vibrate').checked = Boolean(event.alarmVibrate);
+            toggleAllDayField(); toggleEventModeFields();
             const targetD = new Date(event.targetAt);
-            if (event.isAllDay) {
-                document.getElementById('input-date').value = targetD.toISOString().split('T')[0];
-            } else {
-                document.getElementById('input-date').value = new Date(targetD.getTime() - targetD.getTimezoneOffset()*60000).toISOString().slice(0,16);
-            }
-
-            if (event.createdAt) {
+            if (event.isAllDay) document.getElementById('input-date').value = localDateInputValue(targetD, true);
+            else document.getElementById('input-date').value = localDateInputValue(targetD, false);
+            if (event.endAt) {
+                const endD = new Date(event.endAt);
+                document.getElementById('input-end-date').value = localDateInputValue(endD, event.isAllDay);
+            } else document.getElementById('input-end-date').value = '';
+            if (event.createdAt && event.mode !== 'elapsed') {
                 const startD = new Date(event.createdAt);
-                if (event.isAllDay) {
-                    document.getElementById('input-start-date').value = startD.toISOString().split('T')[0];
-                } else {
-                    document.getElementById('input-start-date').value = new Date(startD.getTime() - startD.getTimezoneOffset()*60000).toISOString().slice(0,16);
-                }
+                document.getElementById('input-start-date').value = localDateInputValue(startD, event.isAllDay);
+                document.getElementById('advanced-content-box').classList.add('open');
+                document.getElementById('advanced-chevron').style.transform = 'rotate(180deg)';
             } else {
                 document.getElementById('input-start-date').value = '';
+                document.getElementById('advanced-content-box').classList.remove('open');
+                document.getElementById('advanced-chevron').style.transform = 'rotate(0deg)';
             }
-
-            buildCustomCategoryDropdown();
-            selectCustomCategory(event.category, event.categoryLabel);
-            initPreviewCard();
-            updatePreviewTextOnly();
-
+            buildCustomCategoryDropdown(); selectCustomCategory(event.category, event.categoryLabel); initPreviewCard(); updatePreviewTextOnly();
             openModal('modal-add');
+        }
+
+        function localDateInputValue(date, isAllDay) {
+            const local = new Date(date.getTime() - date.getTimezoneOffset() * 60000).toISOString();
+            return isAllDay ? local.slice(0, 10) : local.slice(0, 16);
         }
 
         function deleteCurrentEvent() {
             if (appData.currentViewId) {
                 appData.events = appData.events.filter(e => e.id !== appData.currentViewId);
-                saveData(); 
-                renderApp(); 
-                
-                // Cierre en cadena limpio del modal stack
-                const stackSnapshot = [...modalStack];
-                stackSnapshot.forEach(() => window.history.back());
-                
+                saveData(); renderApp();
+                const stackSnapshot = [...modalStack]; stackSnapshot.forEach(() => window.history.back());
                 showToast('Evento eliminado permanentemente', 'info');
             }
         }
 
-        // --- SISTEMA DE NAVEGACIÓN POR TECLADO PRO ---
         function setupKeyboardNavigation() {
             document.addEventListener('keydown', (e) => {
                 if (e.key === 'Escape') {
-                    if (modalStack.length > 0) {
-                        closeTopModal();
-                    } else {
+                    if (modalStack.length > 0) closeTopModal();
+                    else {
                         const searchContainer = document.getElementById('fab-search');
                         const input = document.getElementById('search-input');
                         if (searchContainer.classList.contains('expanded')) {
-                            input.value = '';
-                            appData.searchQuery = '';
-                            renderApp();
-                            searchContainer.classList.remove('expanded');
+                            input.value = ''; appData.searchQuery = ''; renderApp(); searchContainer.classList.remove('expanded');
                         }
                     }
                 }
-                if (e.key === 'Enter') {
-                    // Si el foco está dentro del modal de añadir, confirma automáticamente
-                    if (modalStack.includes('modal-add') && document.activeElement.tagName === 'INPUT') {
-                        e.preventDefault();
-                        saveEventForm();
-                    }
+                if (e.key === 'Enter' && modalStack.includes('modal-add') && document.activeElement.tagName === 'INPUT') {
+                    e.preventDefault(); saveEventForm();
                 }
             });
         }
+
+        /* =========================
+           Copias de seguridad JSON / CSV
+           ========================= */
+        function exportData(format) {
+            const stamp = new Date().toISOString().slice(0, 10);
+            if (format === 'json') {
+                const backup = {
+                    format: 'neo-countdown-backup',
+                    version: 1,
+                    exportedAt: new Date().toISOString(),
+                    events: appData.events,
+                    categories: appData.categories,
+                    defaultCategories: appData.defaultCategories,
+                    settings: appData.settings
+                };
+                downloadBlob(JSON.stringify(backup, null, 2), `cuenta-atras-copia-${stamp}.json`, 'application/json;charset=utf-8');
+                showToast('Copia de seguridad JSON preparada');
+                return;
+            }
+            if (format === 'csv') {
+                const headers = ['id', 'title', 'description', 'category', 'categoryLabel', 'targetAt', 'createdAt', 'endAt', 'isAllDay', 'mode', 'color', 'alarmSound', 'alarmVibrate', 'order'];
+                const rows = appData.events.map(ev => headers.map(key => csvEscape(ev[key] === undefined || ev[key] === null ? '' : ev[key])).join(','));
+                const csv = '\uFEFF' + [headers.join(','), ...rows].join('\r\n');
+                downloadBlob(csv, `cuenta-atras-eventos-${stamp}.csv`, 'text/csv;charset=utf-8');
+                showToast('Archivo CSV preparado');
+            }
+        }
+
+        function downloadBlob(content, filename, mimeType) {
+            const blob = new Blob([content], { type: mimeType });
+            const url = URL.createObjectURL(blob);
+            const link = document.createElement('a');
+            link.href = url; link.download = filename;
+            document.body.appendChild(link); link.click(); link.remove();
+            setTimeout(() => URL.revokeObjectURL(url), 1000);
+        }
+
+        function csvEscape(value) {
+            const text = String(value);
+            return `"${text.replace(/"/g, '""')}"`;
+        }
+
+        function parseCSV(text) {
+            const rows = [];
+            let row = [], field = '', quoted = false;
+            for (let i = 0; i < text.length; i++) {
+                const char = text[i];
+                if (quoted) {
+                    if (char === '"' && text[i + 1] === '"') { field += '"'; i++; }
+                    else if (char === '"') quoted = false;
+                    else field += char;
+                } else if (char === '"') quoted = true;
+                else if (char === ',') { row.push(field); field = ''; }
+                else if (char === '\n') { row.push(field.replace(/\r$/, '')); rows.push(row); row = []; field = ''; }
+                else field += char;
+            }
+            if (field.length || row.length) { row.push(field.replace(/\r$/, '')); rows.push(row); }
+            return rows.filter(r => r.some(cell => String(cell).trim() !== ''));
+        }
+
+        async function handleImportFile(event) {
+            const input = event.target;
+            const file = input.files && input.files[0];
+            if (!file) return;
+            try {
+                const content = await file.text();
+                const extension = file.name.toLowerCase().split('.').pop();
+                let imported;
+                if (extension === 'csv' || file.type === 'text/csv') imported = parseImportedCSV(content);
+                else {
+                    const parsed = JSON.parse(content.replace(/^\uFEFF/, ''));
+                    imported = parseImportedJSON(parsed);
+                }
+                if (!imported.events.length && imported.source !== 'json-empty-backup') {
+                    throw new Error('El archivo no contiene eventos válidos.');
+                }
+                const mode = document.getElementById('settings-import-mode').value;
+                applyImportedData(imported, mode);
+                showToast(`${imported.events.length} evento(s) procesado(s) correctamente`);
+            } catch (error) {
+                console.error('Error importando datos', error);
+                showToast(error.message || 'No se pudo importar el archivo', 'error');
+            } finally {
+                input.value = '';
+            }
+        }
+
+        function parseImportedJSON(data) {
+            let rawEvents;
+            let source = 'json';
+            if (Array.isArray(data)) rawEvents = data;
+            else if (data && typeof data === 'object' && Array.isArray(data.events)) rawEvents = data.events;
+            else throw new Error('El JSON no tiene el formato esperado de copia de seguridad.');
+            const events = rawEvents.map((item, index) => {
+                if (!item || typeof item !== 'object') return null;
+                if (item.targetAt === null || item.targetAt === undefined || item.targetAt === '' || !Number.isFinite(Number(item.targetAt))) return null;
+                const normalized = normalizeEvent(item);
+                if (!normalized.title.trim()) return null;
+                return normalized;
+            }).filter(Boolean);
+            if (!Array.isArray(data) && data.format === 'neo-countdown-backup' && events.length === 0) source = 'json-empty-backup';
+            return {
+                source,
+                events,
+                categories: Array.isArray(data.categories) ? data.categories.filter(isValidCategory) : null,
+                defaultCategories: Array.isArray(data.defaultCategories) ? data.defaultCategories.filter(isValidCategory) : null,
+                settings: data.settings && typeof data.settings === 'object' ? data.settings : null,
+                isFullBackup: !Array.isArray(data) && data.format === 'neo-countdown-backup'
+            };
+        }
+
+        function parseImportedCSV(content) {
+            const rows = parseCSV(content.replace(/^\uFEFF/, ''));
+            if (rows.length < 2) throw new Error('El CSV está vacío o no contiene filas de eventos.');
+            const headers = rows.shift().map(h => h.trim());
+            const required = ['title', 'targetAt'];
+            if (!required.every(key => headers.includes(key))) throw new Error('El CSV debe incluir al menos las columnas title y targetAt.');
+            const events = rows.map((row, rowIndex) => {
+                const record = {};
+                headers.forEach((header, index) => record[header] = row[index] ?? '');
+                const num = value => value === '' ? null : Number(value);
+                const targetAt = num(record.targetAt);
+                if (!Number.isFinite(targetAt) || !String(record.title || '').trim()) return null;
+                return normalizeEvent({
+                    ...record,
+                    targetAt,
+                    createdAt: num(record.createdAt) ?? targetAt,
+                    endAt: num(record.endAt),
+                    isAllDay: String(record.isAllDay).toLowerCase() === 'true' || record.isAllDay === '1',
+                    alarmVibrate: String(record.alarmVibrate).toLowerCase() === 'true' || record.alarmVibrate === '1',
+                    order: num(record.order)
+                });
+            }).filter(Boolean);
+            if (!events.length) throw new Error('No se han encontrado eventos válidos en el CSV.');
+            return { source: 'csv', events, categories: null, defaultCategories: null, settings: null, isFullBackup: false };
+        }
+
+        function isValidCategory(category) {
+            return category && typeof category === 'object' && typeof category.id === 'string' && typeof category.label === 'string' && typeof category.icon === 'string';
+        }
+
+        function applyImportedData(imported, mode) {
+            if (mode === 'replace') {
+                appData.events = imported.events.map(ev => normalizeEvent(ev));
+                if (imported.categories) appData.categories = imported.categories.map(cat => ({ ...cat }));
+                if (imported.defaultCategories) {
+                    const importedDefaults = new Map(imported.defaultCategories.map(cat => [cat.id, cat]));
+                    appData.defaultCategories = appData.defaultCategories.map(current => ({ ...current, ...(importedDefaults.get(current.id) || {}) }));
+                }
+                if (imported.isFullBackup && imported.settings) appData.settings = { ...appData.settings, ...imported.settings };
+            } else {
+                const existingIds = new Set(appData.events.map(ev => ev.id));
+                const existingSignatures = new Set(appData.events.map(ev => `${ev.title.toLowerCase()}|${ev.targetAt}|${ev.mode}`));
+                imported.events.forEach((event, index) => {
+                    let candidate = normalizeEvent(event);
+                    const signature = `${candidate.title.toLowerCase()}|${candidate.targetAt}|${candidate.mode}`;
+                    if (existingIds.has(candidate.id) || existingSignatures.has(signature)) {
+                        if (existingIds.has(candidate.id) || existingSignatures.has(signature)) return;
+                    }
+                    if (existingIds.has(candidate.id)) candidate.id = `evt_import_${Date.now()}_${index}`;
+                    candidate.order = appData.events.length + index;
+                    appData.events.push(candidate);
+                    existingIds.add(candidate.id); existingSignatures.add(signature);
+                });
+                if (imported.categories) {
+                    const known = new Set(appData.categories.map(cat => cat.id));
+                    imported.categories.forEach(cat => { if (!known.has(cat.id) && !appData.categories.some(c => c.label.toLowerCase() === cat.label.toLowerCase())) appData.categories.push({ ...cat }); });
+                }
+            }
+            if (imported.source === 'csv') {
+                const builtInLabels = new Set(appData.defaultCategories.map(cat => cat.label.toLowerCase()));
+                const importedCats = new Map();
+                imported.events.forEach(ev => {
+                    if (ev.categoryLabel && !builtInLabels.has(ev.categoryLabel.toLowerCase())) importedCats.set(ev.categoryLabel.toLowerCase(), { id: ev.category || ('cat_import_' + importedCats.size), label: ev.categoryLabel, icon: ev.category || 'folder', visible: true });
+                });
+                importedCats.forEach(cat => { if (!appData.categories.some(existing => existing.label.toLowerCase() === cat.label.toLowerCase())) appData.categories.push(cat); });
+            }
+            if (!['date', 'custom'].includes(appData.settings.sortMode)) appData.settings.sortMode = 'date';
+            appData.events = appData.events.map(normalizeEvent);
+            saveData();
+            const sortSelect = document.getElementById('settings-sort-mode');
+            if (sortSelect) sortSelect.value = appData.settings.sortMode;
+            applyBlurSettingUI();
+            renderApp(); renderCategoriesManager();
+        }
+
+        /* =========================
+           Avisos al completar contadores
+           ========================= */
+        function setupAudioUnlock() {
+            document.addEventListener('pointerdown', unlockAudio, { once: true, capture: true });
+            document.addEventListener('keydown', unlockAudio, { once: true, capture: true });
+        }
+
+        function unlockAudio() {
+            const AudioContextClass = window.AudioContext || window.webkitAudioContext;
+            if (!AudioContextClass) return;
+            try {
+                if (!audioContext) audioContext = new AudioContextClass();
+                if (audioContext.state === 'suspended') audioContext.resume().catch(() => {});
+            } catch (error) { console.warn('Audio no disponible', error); }
+        }
+
+        function playCompletionAlert(event) {
+            if (event.alarmVibrate && navigator.vibrate) {
+                try { navigator.vibrate([180, 80, 180]); } catch (_) {}
+            }
+            if (!event.alarmSound || event.alarmSound === 'none') return;
+            unlockAudio();
+            if (!audioContext || audioContext.state !== 'running') return;
+            const patterns = {
+                soft: [{ frequency: 660, at: 0, duration: .18 }, { frequency: 880, at: .16, duration: .2 }],
+                chime: [{ frequency: 784, at: 0, duration: .22 }, { frequency: 988, at: .13, duration: .3 }],
+                digital: [{ frequency: 523.25, at: 0, duration: .11 }, { frequency: 659.25, at: .13, duration: .11 }, { frequency: 783.99, at: .26, duration: .16 }]
+            };
+            const pattern = patterns[event.alarmSound];
+            if (!pattern) return;
+            const base = audioContext.currentTime;
+            pattern.forEach(note => {
+                const oscillator = audioContext.createOscillator();
+                const gain = audioContext.createGain();
+                oscillator.type = 'sine';
+                oscillator.frequency.setValueAtTime(note.frequency, base + note.at);
+                gain.gain.setValueAtTime(0.0001, base + note.at);
+                gain.gain.exponentialRampToValueAtTime(0.065, base + note.at + .025);
+                gain.gain.exponentialRampToValueAtTime(0.0001, base + note.at + note.duration);
+                oscillator.connect(gain); gain.connect(audioContext.destination);
+                oscillator.start(base + note.at); oscillator.stop(base + note.at + note.duration + .02);
+            });
+        }
+
+        function escapeHTML(value) {
+            return String(value ?? '').replace(/[&<>"']/g, char => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[char]));
+        }
+
     </script>
 </body>
 </html>
