@@ -1157,6 +1157,31 @@ body.super-performance .settings-panel {
     transition: background 0.25s ease, border-color 0.25s ease, transform 0.25s ease;
 }
 .setting-item-row:hover { background: rgba(255, 255, 255, 0.05); border-color: rgba(255,255,255,0.08); }
+.homescreen-run-row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+    padding: 12px 10px;
+    border: 1px solid rgba(255,255,255,0.04);
+    border-radius: 12px;
+    background: rgba(255,255,255,0.02);
+}
+.homescreen-run-control { display: flex; flex: 0 1 320px; gap: 8px; min-width: 0; }
+.homescreen-run-control input {
+    flex: 1;
+    min-width: 0;
+    padding: 9px 11px;
+    border: 1px solid var(--glass-border);
+    border-radius: 10px;
+    outline: none;
+    background: rgba(255,255,255,0.06);
+    color: var(--text-main);
+    font: inherit;
+    font-size: 0.82rem;
+}
+.homescreen-run-control input:focus { border-color: var(--accent); }
+.homescreen-run-control .settings-action-btn { flex: 0 0 auto; }
 .welcome-animation-hint .settings-action-btn { flex: 0 0 auto; }
 .setting-item-row.setting-highlight { animation: setting-highlight 1.8s ease-out; }
 @keyframes setting-highlight {
@@ -1977,6 +2002,8 @@ body.zen-mode #bgCanvas { opacity: 0 !important; }
     .settings-btn { bottom: 25px; right: 20px; }
     .layout-selector { width: 100%; }
     .setting-item-row { flex-direction: column; align-items: flex-start; }
+    .homescreen-run-row { flex-direction: column; align-items: stretch; }
+    .homescreen-run-control { flex-basis: auto; width: 100%; }
     .setting-item-meta { width: 100%; }
     .custom-dropdown { width: 100%; }
     .settings-actions-grid { grid-template-columns: 1fr; }

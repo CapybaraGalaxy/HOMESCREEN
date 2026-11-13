@@ -1669,6 +1669,19 @@ function appIconMarkup(app) {
                 </div>
 
                 <span class="settings-section-title">Opciones Avanzadas</span>
+                <div class="setting-item-row homescreen-run-row">
+                    <div class="setting-item-meta">
+                        <i data-lucide="terminal"></i>
+                        <div>
+                            <span class="setting-label">Homescreen run</span>
+                            <span class="setting-desc">Abre una app aunque no esté en la lista. Admite rutas locales o URL http(s).</span>
+                        </div>
+                    </div>
+                    <div class="homescreen-run-control">
+                        <input id="homescreenRunUrl" type="text" inputmode="url" autocomplete="off" placeholder="Apps/day-brief.html" aria-label="URL de Homescreen run">
+                        <button class="settings-action-btn" id="homescreenRunBtn" type="button"><i data-lucide="arrow-up-right" style="width: 14px;"></i> Ir</button>
+                    </div>
+                </div>
 <div class="setting-item-row">
     <div class="setting-item-meta">
         <i data-lucide="moon"></i>
@@ -2163,18 +2176,90 @@ function appIconMarkup(app) {
             enterZenMode();
         };
 
-let backgroundTouchStart = null;
+        const homescreenRunUrlInput = document.getElementById('homescreenRunUrl');
+        const homescreenRunBtn = document.getElementById('homescreenRunBtn');
+        if (homescreenRunUrlInput) {
+            homescreenRunUrlInput.value = localStorage.getItem('homescreenRunUrl') || '';
+            homescreenRunUrlInput.addEventListener('keydown', (event) => {
+                if (event.key === 'Enter') {
+                    event.preventDefault();
+                    runHomescreenUrl();
+                }
+            });
+        }
+
+        function runHomescreenUrl() {
+            const value = homescreenRunUrlInput?.value.trim() || '';
+            if (!value) {
+                showToast('Introduce la URL de la app', 'alert-circle');
+                homescreenRunUrlInput?.focus();
+                return;
+            }
+
+            let destination;
+            try {
+                destination = new URL(value, window.location.href);
+            } catch (error) {
+                showToast('Introduce una URL válida', 'alert-circle');
+                return;
+            }
+            const isHomescreenLocalFile = window.location.protocol === 'file:' &&
+                destination.protocol === 'file:' &&
+                destination.pathname.startsWith(new URL('.', window.location.href).pathname);
+            if ((!['http:', 'https:'].includes(destination.protocol) && !isHomescreenLocalFile) ||
+                destination.username || destination.password) {
+                showToast('La URL debe usar http o https, o ser una ruta local de Homescreen', 'alert-circle');
+                return;
+            }
+
+            localStorage.setItem('homescreenRunUrl', value);
+            window.location.assign(destination.href);
+        }
+        homescreenRunBtn?.addEventListener('click', runHomescreenUrl);
+
+        function canScrollVertically(target, fingerDeltaY) {
+            let element = target instanceof Element ? target : target?.parentElement;
+            while (element) {
+                const overflowY = window.getComputedStyle(element).overflowY;
+                const maxScrollTop = element.scrollHeight - element.clientHeight;
+                if ((overflowY === 'auto' || overflowY === 'scroll' || overflowY === 'overlay') &&
+                    maxScrollTop > 0 &&
+                    ((fingerDeltaY < 0 && element.scrollTop < maxScrollTop) ||
+                        (fingerDeltaY > 0 && element.scrollTop > 0))) {
+                    return true;
+                }
+                element = element.parentElement;
+            }
+            return false;
+        }
+
+        let backgroundTouchStart = null;
         document.addEventListener('touchstart', (event) => {
             if (isEditableTarget(event.target) || event.touches.length !== 1) return;
-            backgroundTouchStart = { x: event.touches[0].clientX, y: event.touches[0].clientY };
+            backgroundTouchStart = {
+                x: event.touches[0].clientX,
+                y: event.touches[0].clientY,
+                target: event.target
+            };
+        }, { passive: true });
+        document.addEventListener('touchmove', (event) => {
+            if (backgroundTouchStart === null || event.touches.length !== 1) return;
+            const fingerDeltaY = event.touches[0].clientY - backgroundTouchStart.y;
+            if (Math.abs(fingerDeltaY) > 4 && canScrollVertically(backgroundTouchStart.target, fingerDeltaY)) {
+                backgroundTouchStart = null;
+            }
         }, { passive: true });
         document.addEventListener('touchend', (event) => {
-            if (backgroundTouchStart === null || isEditableTarget(event.target)) return;
+            if (backgroundTouchStart === null || isEditableTarget(backgroundTouchStart.target) || !event.changedTouches.length) {
+                backgroundTouchStart = null;
+                return;
+            }
             const deltaY = backgroundTouchStart.y - event.changedTouches[0].clientY;
             const deltaX = backgroundTouchStart.x - event.changedTouches[0].clientX;
             backgroundTouchStart = null;
             if (deltaY > 70 && deltaY > Math.abs(deltaX)) toggleSearch(true);
         }, { passive: true });
+        document.addEventListener('touchcancel', () => { backgroundTouchStart = null; }, { passive: true });
         document.addEventListener('dblclick', (event) => {
             if (event.target === document.body || event.target === document.getElementById('bgCanvas')) enterZenMode();
         });
@@ -3633,6 +3718,7 @@ let backgroundTouchStart = null;
                 disableNotificationsButton: 'false',
                 searchEngine: 'google',
                 appUsageStats: '{}',
+                homescreenRunUrl: '',
                 showDock: 'false',
                 showRecentFolder: 'false',
                 showCustomApps: 'true',
