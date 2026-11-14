@@ -1939,9 +1939,13 @@ body.zen-mode #bgCanvas { opacity: 0 !important; }
 .result-item:hover, .result-item.keyboard-active { background: rgba(255,255,255,0.1); transform: translateX(5px); }
 .result-item i { width: 18px; height: 18px; opacity: 0.7; }
 .search-hidden { max-height: 0; opacity: 0; transform: translateY(-8px); margin-top: 0; margin-bottom: 0; padding-top: 0; padding-bottom: 0; pointer-events: none; visibility: hidden; }
-.search-enter { animation: fadeInItem 0.3s var(--bezier) forwards; }
-.search-exit { max-height: 0; opacity: 0; transform: translateY(-8px); margin-top: 0; margin-bottom: 0; padding-top: 0; padding-bottom: 0; pointer-events: none; visibility: hidden; }
+.search-enter { animation: searchResultEnter 0.32s var(--bezier) both; }
+.search-exit { max-height: 0; opacity: 0; transform: translateY(-8px); margin-top: 0; margin-bottom: 0; padding-top: 0; padding-bottom: 0; pointer-events: none; }
 .web-search-item { margin-top: 10px; }
+@keyframes searchResultEnter {
+    from { opacity: 0; transform: translateY(10px) scale(0.98); }
+    to { opacity: 1; transform: translateY(0) scale(1); }
+}
 
 /* MEDIA QUERIES (REGLAS RESPONSIVAS PARA MÓVILES Y PANTALLAS PEQUEÑAS) */
 @media (max-width: 720px) {
@@ -2278,8 +2282,11 @@ body.folder-apps-size-5 #folderApps .tool-card i, body.folder-apps-size-5 #folde
 
 @media (prefers-reduced-motion: reduce) {
     .settings-search-result,
-    .settings-search-empty {
+    .settings-search-empty,
+    .result-item,
+    .search-enter {
         transition-duration: 0.01ms;
         transition-delay: 0ms;
+        animation-duration: 0.01ms;
     }
 }
