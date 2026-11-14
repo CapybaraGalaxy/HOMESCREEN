@@ -1,4 +1,4 @@
-const CACHE_NAME = "homescreen-cache-v9";
+const CACHE_NAME = "homescreen-cache-v10";
 const CORE = [
     "./",
     "./index.html",
@@ -9,6 +9,10 @@ const CORE = [
     "./manifest.json",
     "./favicon.png",
     "./styles.css",
+    "./css/tools.css",
+    "./js/tools.js",
+    "./js/window-manager.js",
+    "./js/custom-tools.js",
     "./lucide.min.js",
     "./changelog.js",
     "./update-manager.js",

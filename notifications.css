@@ -1,8 +1,8 @@
 .notifications-anchor {
     position: fixed;
     right: 25px;
-    bottom: 80px;
-    z-index: 161;
+    bottom: 137px;
+    z-index: 162;
 }
 
 .notifications-trigger {
@@ -46,7 +46,7 @@
 .notifications-panel {
     position: fixed;
     right: 25px;
-    bottom: 137px;
+    bottom: 194px;
     display: flex;
     width: min(390px, calc(100vw - 32px));
     max-height: min(70vh, 560px, calc(100vh - 160px));
@@ -426,10 +426,10 @@ body.modal-open .notifications-anchor {
 }
 
 @media (max-width: 600px) {
-    .notifications-anchor { right: 20px; bottom: 80px; }
+    .notifications-anchor { right: 20px; bottom: 137px; }
     .notifications-panel {
         right: 16px;
-        bottom: 137px;
+        bottom: 194px;
         width: min(390px, calc(100vw - 32px));
         max-height: min(68vh, 560px, calc(100vh - 160px));
         border-radius: 22px;

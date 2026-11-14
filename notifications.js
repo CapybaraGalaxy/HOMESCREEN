@@ -1,5 +1,5 @@
 (() => {
-    const FEED_URL = "https://raw.githubusercontent.com/CapybaraGalaxy/homescreen-notifications/refs/heads/main/notifications.json";
+    const FEED_URL = "https://raw.githubusercontent.com/CapybaraGalaxy/homescreen-online/refs/heads/main/notifications.json";
     const FALLBACK_FEED_URL = "./notifications.json";
     const STATES_STORAGE_KEY = "homescreen.notifications.states.v1";
     const REFRESH_INTERVAL = 30 * 60 * 1000;

@@ -23,6 +23,7 @@
     <script src="./changelog.js"></script>
     <link rel="stylesheet" href="styles.css">
     <link rel="stylesheet" href="notifications.css">
+    <link rel="stylesheet" href="css/tools.css">
     <style>
         body.hide-folder-close-btn #folderModal .modal-buttons .secondary,
         body.hide-folder-close-btn #hiddenFolderModal .modal-buttons .secondary,
@@ -1789,6 +1790,12 @@ function appIconMarkup(app) {
         </div>
     </div>
 
+    <div id="hsToolsRoot"><div id="desktop"></div></div>
+    <div class="hs-tools-anchor" id="homescreenToolsAnchor">
+        <button class="notifications-trigger hs-tools-trigger" id="homescreenToolsTrigger" type="button" aria-label="Abrir herramientas flotantes" aria-expanded="false" aria-controls="homescreenToolsMenu">
+            <i data-lucide="plus" aria-hidden="true"></i>
+        </button>
+    </div>
     <div class="notifications-anchor" id="notificationsAnchor">
         <button class="notifications-trigger" id="notificationsTrigger" type="button" aria-label="Notificaciones" aria-expanded="false" aria-controls="notificationsPanel">
             <i data-lucide="bell" aria-hidden="true"></i>
@@ -2173,7 +2180,7 @@ function appIconMarkup(app) {
                     <span class="settings-section-title settings-section-title--inline">Qué sincronizar</span>
                     <label class="gist-sync-option">
                         <input type="checkbox" id="githubGistSyncSettings" checked>
-                        <span>Ajustes generales</span>
+                        <span>Ajustes generales y herramientas personalizadas</span>
                     </label>
                     <div class="gist-sync-radio-group" id="githubGistSettingsModes">
                         <label class="gist-sync-option gist-sync-option--nested">
@@ -2220,25 +2227,6 @@ function appIconMarkup(app) {
         <!-- 7. SISTEMA -->
         <div class="settings-tab-panel" data-panel="sistema">
             <div class="settings-section">
-                <span class="settings-section-title">Motor de Búsqueda</span>
-                <div class="setting-item-row">
-                    <div class="setting-item-meta"><i data-lucide="search"></i><div><span class="setting-label">Buscador Predeterminado</span><span class="setting-desc">Usado para realizar consultas rápidas</span></div></div>
-                    <div class="custom-dropdown" id="searchEngineDropdown">
-                        <div class="dropdown-select"><span id="currentSearchEngine">Google</span><i data-lucide="chevron-down"></i></div>
-                        <div class="dropdown-options">
-                            <div class="dropdown-option selected" data-value="google">Google</div>
-                            <div class="dropdown-option" data-value="bing">Bing</div>
-                            <div class="dropdown-option" data-value="duckduckgo">DuckDuckGo</div>
-                            <div class="dropdown-option" data-value="yahoo">Yahoo</div>
-                        </div>
-                    </div>
-                </div>
-                <div class="setting-item-row">
-                    <div class="setting-item-meta"><i data-lucide="bell-off"></i><div><span class="setting-label">Desactivar botón de notificaciones</span><span class="setting-desc">Oculta el botón flotante de notificaciones en la pantalla principal.</span></div></div>
-                    <div class="switch" id="toggleNotificationsButton" role="switch" aria-label="Desactivar botón de notificaciones" aria-checked="false" tabindex="0"></div>
-                </div>
-            </div>
-            <div class="settings-section">
                 <span class="settings-section-title">Actualizaciones y Cambios</span>
                 <div class="settings-info" id="settingsVersionInfo">
                     Versión actual: <strong><span>Cargando...</span></strong>
@@ -2258,17 +2246,35 @@ function appIconMarkup(app) {
                         <div class="creator-heading"><i data-lucide="code-2"></i><span>Homescreen es<br>de <strong>código abierto</strong></span></div>
                         <a class="creator-visit external-warning-link" href="https://github.com/CapybaraGalaxy/HOMESCREEN" target="_blank" rel="noopener noreferrer"><i data-lucide="cat"></i> Visitar código</a>
                     </div>
-                    <div class="creator-profile">
-                        <div class="creator-profile-info">
-                            <div class="creator-heading"><i data-lucide="code-2"></i><span><strong>CapybaraGalaxy</strong><br>Desarrollador principal</span></div>
-                            <a class="creator-visit external-warning-link" href="https://github.com/CapybaraGalaxy" target="_blank" rel="noopener noreferrer"><i data-lucide="cat"></i> Visita mi perfil</a>
-                        </div>
-                        <a class="creator-avatar external-warning-link" href="https://github.com/CapybaraGalaxy" target="_blank" rel="noopener noreferrer" aria-label="Visitar el perfil de CapybaraGalaxy">
-                            <img src="Media/gp.png" alt="Avatar de CapybaraGalaxy">
-                        </a>
+                </div>
+                <div class="creator-card creator-profile-card">
+                    <a class="creator-avatar external-warning-link" href="https://github.com/CapybaraGalaxy" target="_blank" rel="noopener noreferrer" aria-label="Visitar el perfil de CapybaraGalaxy">
+                        <img src="Media/gp.png" alt="Avatar de CapybaraGalaxy">
+                    </a>
+                    <div class="creator-profile-info">
+                        <div class="creator-heading"><i data-lucide="code-2"></i><span><strong>CapybaraGalaxy</strong><br>Desarrollador principal</span></div>
+                        <a class="creator-visit external-warning-link" href="https://github.com/CapybaraGalaxy" target="_blank" rel="noopener noreferrer"><i data-lucide="cat"></i> Visita mi perfil</a>
                     </div>
                 </div>
-
+            <div class="settings-section">
+                <span class="settings-section-title">Motor de Búsqueda</span>
+                <div class="setting-item-row">
+                    <div class="setting-item-meta"><i data-lucide="search"></i><div><span class="setting-label">Buscador Predeterminado</span><span class="setting-desc">Usado para realizar consultas rápidas</span></div></div>
+                    <div class="custom-dropdown" id="searchEngineDropdown">
+                        <div class="dropdown-select"><span id="currentSearchEngine">Google</span><i data-lucide="chevron-down"></i></div>
+                        <div class="dropdown-options">
+                            <div class="dropdown-option selected" data-value="google">Google</div>
+                            <div class="dropdown-option" data-value="bing">Bing</div>
+                            <div class="dropdown-option" data-value="duckduckgo">DuckDuckGo</div>
+                            <div class="dropdown-option" data-value="yahoo">Yahoo</div>
+                        </div>
+                    </div>
+                </div>
+                <div class="setting-item-row">
+                    <div class="setting-item-meta"><i data-lucide="bell-off"></i><div><span class="setting-label">Desactivar botón de notificaciones</span><span class="setting-desc">Oculta el botón flotante de notificaciones en la pantalla principal.</span></div></div>
+                    <div class="switch" id="toggleNotificationsButton" role="switch" aria-label="Desactivar botón de notificaciones" aria-checked="false" tabindex="0"></div>
+                </div>
+            </div>
                 <span class="settings-section-title">Opciones Avanzadas</span>
                 <div class="setting-item-row homescreen-run-row">
                     <div class="setting-item-meta">
@@ -4403,19 +4409,38 @@ function appIconMarkup(app) {
                 return config;
             }
 
-            function downloadSettingsJson() {
-                const json = JSON.stringify(getSettingsConfig(), null, 2);
-                const blob = new Blob([json], { type: 'application/json' });
-                const url = URL.createObjectURL(blob);
-                const a = document.createElement('a');
-                a.href = url; a.download = 'homescreen-config.json';
-                document.body.appendChild(a); a.click(); document.body.removeChild(a);
-                URL.revokeObjectURL(url);
-                showToast('Configuración exportada', 'download');
+            async function getBackupConfig() {
+                const config = getSettingsConfig();
+                if (!window.HomescreenCustomTools) throw new Error('El gestor de herramientas no está disponible.');
+                config._homescreenCustomTools = await window.HomescreenCustomTools.exportBackup();
+                return config;
             }
 
-            function copySettingsJson() {
-                const json = JSON.stringify(getSettingsConfig(), null, 2);
+            async function downloadSettingsJson() {
+                try {
+                    const json = JSON.stringify(await getBackupConfig(), null, 2);
+                    const blob = new Blob([json], { type: 'application/json' });
+                    const url = URL.createObjectURL(blob);
+                    const a = document.createElement('a');
+                    a.href = url; a.download = 'homescreen-config.json';
+                    document.body.appendChild(a); a.click(); document.body.removeChild(a);
+                    URL.revokeObjectURL(url);
+                    showToast('Configuración exportada', 'download');
+                } catch (error) {
+                    console.error('No se pudo exportar la copia de seguridad.', error);
+                    showToast(error.message || 'No se pudo exportar la copia de seguridad', 'alert-circle');
+                }
+            }
+
+            async function copySettingsJson() {
+                let json;
+                try {
+                    json = JSON.stringify(await getBackupConfig(), null, 2);
+                } catch (error) {
+                    console.error('No se pudo preparar la copia de seguridad.', error);
+                    showToast(error.message || 'No se pudo preparar la copia de seguridad', 'alert-circle');
+                    return;
+                }
                 if (navigator.clipboard && navigator.clipboard.writeText) {
                     navigator.clipboard.writeText(json).then(() => {
                         showToast('JSON copiado al portapapeles', 'copy');
@@ -4438,7 +4463,7 @@ function appIconMarkup(app) {
                 document.body.removeChild(helper);
             }
 
-            function importSettingsFromJsonString(jsonString, successMessage = 'Configuración importada') {
+            async function importSettingsFromJsonString(jsonString, successMessage = 'Configuración importada') {
                 try {
                     const source = JSON.parse(jsonString);
                     if (!source || typeof source !== 'object' || Array.isArray(source)) throw new Error('Formato inválido');
@@ -4452,13 +4477,19 @@ function appIconMarkup(app) {
                         if (config[key] !== undefined) JSON.parse(config[key]);
                     });
 
+                    if (Object.prototype.hasOwnProperty.call(source, '_homescreenCustomTools')) {
+                        if (!window.HomescreenCustomTools) throw new Error('El gestor de herramientas no está disponible.');
+                        window.HomescreenCustomTools.validateBackup(source._homescreenCustomTools);
+                        await window.HomescreenCustomTools.importBackup(source._homescreenCustomTools);
+                    }
                     Object.entries(config).forEach(([key, value]) => localStorage.setItem(key, value));
                     markSetupComplete('import');
                     showToast(successMessage, 'refresh-cw');
                     setTimeout(() => { location.reload(); }, 1200);
                     return true;
                 } catch (err) {
-                    showToast('Error al importar el JSON', 'alert-circle');
+                    console.error('No se pudo importar la copia de seguridad.', err);
+                    showToast(err.message || 'Error al importar el JSON', 'alert-circle');
                     return false;
                 }
             }
@@ -4640,6 +4671,11 @@ function appIconMarkup(app) {
                 if (selection.usage && Object.prototype.hasOwnProperty.call(remoteConfig, 'appUsageStats')) {
                     config.appUsageStats = mergeGithubGistUsage(currentConfig.appUsageStats ?? settingsDefaults.appUsageStats, remoteConfig.appUsageStats);
                 }
+                if (selection.settings && Object.prototype.hasOwnProperty.call(remoteConfig, '_homescreenCustomTools')) {
+                    if (!window.HomescreenCustomTools) throw new Error('El gestor de herramientas no está disponible.');
+                    window.HomescreenCustomTools.validateBackup(remoteConfig._homescreenCustomTools);
+                    config._homescreenCustomTools = remoteConfig._homescreenCustomTools;
+                }
                 return config;
             }
 
@@ -4704,6 +4740,16 @@ function appIconMarkup(app) {
 
                 const selection = getGithubGistSyncSelection();
                 const syncConfig = buildGithubGistSyncConfig(selection);
+                if (selection.settings) {
+                    try {
+                        if (!window.HomescreenCustomTools) throw new Error('El gestor de herramientas no está disponible.');
+                        syncConfig._homescreenCustomTools = await window.HomescreenCustomTools.exportBackup();
+                    } catch (error) {
+                        console.error('No se pudieron preparar las herramientas personalizadas para el Gist.', error);
+                        showToast(error.message || 'No se pudieron preparar las herramientas personalizadas', 'alert-circle');
+                        return;
+                    }
+                }
                 if (!Object.keys(syncConfig).length) {
                     showToast('Selecciona al menos un tipo de dato para sincronizar', 'alert-circle');
                     return;
@@ -4865,7 +4911,7 @@ function appIconMarkup(app) {
                         showToast('Elige al menos un tipo de dato que restaurar', 'alert-circle');
                         return;
                     }
-                    if (importSettingsFromJsonString(JSON.stringify(mergedConfig), 'Configuración fusionada con GitHub')) {
+                    if (await importSettingsFromJsonString(JSON.stringify(mergedConfig), 'Configuración fusionada con GitHub')) {
                         setGithubGistSyncStatus(new Date().toISOString(), gist.id || gistId);
                     }
                 } catch (error) {
@@ -4905,7 +4951,7 @@ function appIconMarkup(app) {
                     if (!navigator.clipboard?.readText) throw new Error('Clipboard API no disponible');
                     const text = await navigator.clipboard.readText();
                     if (!text.trim()) throw new Error('Portapapeles vacío');
-                    importSettingsFromJsonString(text);
+                    await importSettingsFromJsonString(text);
                 } catch (error) {
                     openPasteSettingsModal();
                 }
@@ -4913,9 +4959,9 @@ function appIconMarkup(app) {
 
             const applyPastedSettingsBtn = document.getElementById('applyPastedSettingsBtn');
             if (applyPastedSettingsBtn) {
-                applyPastedSettingsBtn.onclick = () => {
+                applyPastedSettingsBtn.onclick = async () => {
                     const pasteInput = document.getElementById('pasteSettingsInput');
-                    importSettingsFromJsonString(pasteInput?.value || '');
+                    await importSettingsFromJsonString(pasteInput?.value || '');
                 };
             }
 
@@ -4979,8 +5025,8 @@ function appIconMarkup(app) {
                     const file = e.target.files[0];
                     if (!file) return;
                     const reader = new FileReader();
-                    reader.onload = (evt) => {
-                        importSettingsFromJsonString(evt.target.result);
+                    reader.onload = async (evt) => {
+                        await importSettingsFromJsonString(evt.target.result);
                     };
                     reader.readAsText(file);
                 };
@@ -5101,5 +5147,8 @@ function appIconMarkup(app) {
     </script>
     <script src="update-manager.js"></script>
     <script src="notifications.js"></script>
+    <script src="js/window-manager.js"></script>
+    <script src="js/custom-tools.js"></script>
+    <script src="js/tools.js"></script>
 </body>
 </html>

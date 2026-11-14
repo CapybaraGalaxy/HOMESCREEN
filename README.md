@@ -113,6 +113,12 @@ Según la versión, el contenido puede incluir:
 
 La lista anterior describe las áreas del proyecto, no garantiza que cada elemento esté presente en todas las versiones. La aplicación es la referencia actualizada del contenido disponible.
 
+### Herramientas flotantes
+
+El botón **+**, situado sobre Notificaciones, abre las herramientas flotantes nativas: nota rápida, calculadora, lista de tareas, Pomodoro y cronómetro. Sus ventanas se pueden mover, redimensionar, minimizar, maximizar y restaurar; Pomodoro y cronómetro también admiten burbujas PiP.
+
+En **Herramientas personalizadas** se pueden guardar documentos HTML autocontenidos con metadatos `homescreen-tool`, editarlos, duplicarlos, exportarlos o eliminarlos. Se ejecutan en un `iframe` con `sandbox`, almacenamiento IndexedDB separado por herramienta y una API limitada (`hs.storage`, `hs.notify`, `hs.window` y `hs.pip`). La política del iframe bloquea por defecto las conexiones y los recursos remotos. Las copias JSON y la sincronización de ajustes con Gist incluyen el código y los datos persistentes de estas herramientas; las copias anteriores siguen siendo compatibles.
+
 ## Datos, privacidad y funcionamiento local
 
 Homescreen NEO sigue un enfoque de aplicación web estática: los archivos necesarios para mostrar la interfaz se sirven desde el alojamiento web y el navegador ejecuta la aplicación en el dispositivo.
