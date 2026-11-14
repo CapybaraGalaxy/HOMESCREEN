@@ -41,6 +41,10 @@
             user-select: none;
         }
 
+        html {
+            scroll-behavior: smooth;
+        }
+
         body {
             background-color: var(--bg);
             color: var(--text-main);
@@ -65,7 +69,7 @@
             max-width: 900px;
             margin: 0 auto;
             min-height: 100dvh;
-            padding: env(safe-area-inset-top) 24px calc(env(safe-area-inset-bottom) + 32px) 24px;
+            padding: env(safe-area-inset-top) 28px calc(env(safe-area-inset-bottom) + 32px) 28px;
             display: flex;
             flex-direction: column;
             gap: 40px;
@@ -73,9 +77,93 @@
 
         @media(min-width: 768px) {
             .app-container {
-                max-width: 1320px;
-                padding-left: 12px;
-                padding-right: 12px;
+                max-width: 1260px;
+                padding-left: 56px;
+                padding-right: 96px;
+            }
+        }
+
+        /* Navegación Flotante por Secciones (Sidebar) */
+        .floating-nav {
+            position: fixed;
+            right: 24px;
+            top: 50%;
+            transform: translateY(-50%);
+            z-index: 1000;
+            background: var(--glass);
+            border: 1px solid var(--glass-border);
+            backdrop-filter: blur(var(--blur-val));
+            -webkit-backdrop-filter: blur(var(--blur-val));
+            border-radius: 24px;
+            padding: 10px;
+            display: flex;
+            flex-direction: column;
+            gap: 6px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.4);
+            transition: width 0.5s var(--bezier), padding 0.5s var(--bezier);
+        }
+
+        .floating-nav-item {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            padding: 10px;
+            border-radius: 14px;
+            color: var(--text-muted);
+            text-decoration: none;
+            transition: color 0.3s ease, background 0.3s ease;
+            white-space: nowrap;
+        }
+
+        .floating-nav-item:hover {
+            color: var(--text-main);
+            background: var(--surface-hover);
+        }
+
+        .floating-nav-text {
+            font-size: 0.85rem;
+            font-weight: 500;
+            opacity: 0;
+            max-width: 0;
+            overflow: hidden;
+            transition: opacity 0.4s ease, max-width 0.5s var(--bezier);
+        }
+
+        .floating-nav:hover .floating-nav-text {
+            opacity: 1;
+            max-width: 150px;
+        }
+
+        @media (max-width: 768px) {
+            .app-container {
+                padding-bottom: calc(env(safe-area-inset-bottom) + 110px); /* Espacio extra para evitar solapamiento en móvil */
+            }
+            .floating-nav {
+                position: fixed;
+                bottom: 16px;
+                left: 50%;
+                top: auto;
+                transform: translateX(-50%);
+                flex-direction: row;
+                border-radius: 100px;
+                padding: 6px 12px;
+                gap: 4px;
+                background: rgba(18, 18, 18, 0.9);
+                box-shadow: 0 10px 30px rgba(0,0,0,0.6);
+                width: max-content;
+                max-width: calc(100vw - 32px);
+                overflow-x: auto;
+                scrollbar-width: none;
+            }
+            .floating-nav::-webkit-scrollbar {
+                display: none;
+            }
+            .floating-nav-item {
+                padding: 8px;
+                border-radius: 50%;
+            }
+            .floating-nav-text {
+                display: none !important;
             }
         }
 
@@ -811,7 +899,7 @@
             letter-spacing: .04em;
         }
 
-        /* --- Zen Showcase (Estilo Inspirado en la Foto) --- */
+        /* --- Zen Showcase --- */
         .zen-showcase {
             display: flex;
             flex-direction: column;
@@ -1007,8 +1095,36 @@
 
     <canvas id="particles-bg"></canvas>
 
+    <!-- Navegación Flotante por Secciones (Sidebar) -->
+    <nav class="floating-nav" aria-label="Navegación rápida">
+        <a href="#inicio" class="floating-nav-item" title="Inicio">
+            <i data-lucide="home" size="18"></i>
+            <span class="floating-nav-text">Inicio</span>
+        </a>
+        <a href="#caracteristicas" class="floating-nav-item" title="Características">
+            <i data-lucide="sparkles" size="18"></i>
+            <span class="floating-nav-text">Características</span>
+        </a>
+        <a href="#dispositivos" class="floating-nav-item" title="Dispositivos">
+            <i data-lucide="laptop" size="18"></i>
+            <span class="floating-nav-text">Dispositivos</span>
+        </a>
+        <a href="#personalizacion" class="floating-nav-item" title="Personalización">
+            <i data-lucide="sliders-horizontal" size="18"></i>
+            <span class="floating-nav-text">Personalización</span>
+        </a>
+        <a href="#filosofia" class="floating-nav-item" title="Filosofía">
+            <i data-lucide="compass" size="18"></i>
+            <span class="floating-nav-text">Filosofía</span>
+        </a>
+        <a href="#novedades" class="floating-nav-item" title="Novedades">
+            <i data-lucide="history" size="18"></i>
+            <span class="floating-nav-text">Novedades</span>
+        </a>
+    </nav>
+
     <div class="app-container" id="main-view">
-        <header>
+        <header id="inicio">
             <div class="app-icon-badge">
                 <img src="Media/faviconold.png" alt="Icono de la aplicación" width="60" height="60">
             </div>
@@ -1028,14 +1144,13 @@
                 <i data-lucide="Arrow-Right-Circle" size="16"></i>
                 Ir a Homescreen
             </button>
-            
         </div>
         
         <div class="carousel-container">
             <div class="carousel-track" id="tools-carousel"></div>
         </div>
 
-        <section class="intro-showcase" aria-labelledby="intro-heading">
+        <section class="intro-showcase" id="caracteristicas" aria-labelledby="intro-heading">
             <div class="intro-copy">
                 <span class="eyebrow"><i data-lucide="sparkles" size="13"></i> Homescreen NEO</span>
                 <h2 id="intro-heading">Tu espacio digital, reunido en un solo lugar.</h2>
@@ -1061,7 +1176,7 @@
             </div>
         </section>
 
-        <section class="device-showcase" aria-labelledby="device-heading">
+        <section class="device-showcase" id="dispositivos" aria-labelledby="device-heading">
             <div class="device-showcase-heading">
                 <span class="section-eyebrow">Una experiencia multidispositivo</span>
                 <h2 id="device-heading">Un espacio. Cualquier pantalla.</h2>
@@ -1096,8 +1211,8 @@
             </span>
         </section>
 
-        <!-- Nueva sección estilo Zen (basada en la foto) -->
-        <section class="zen-showcase" aria-labelledby="zen-showcase-title">
+        <!-- Zen Showcase (Personalización) -->
+        <section class="zen-showcase" id="personalizacion" aria-labelledby="zen-showcase-title">
             <div class="zen-showcase-top">
                 <h2 id="zen-showcase-title">Mucho más que una pantalla de inicio</h2>
                 <p>Personaliza cada detalle de Homescreen NEO: distribución, apariencia, fondos, animaciones y herramientas. Crea un entorno único que se adapte a tu estilo y a tu forma de utilizarlo.</p>
@@ -1132,7 +1247,7 @@
             </div>
         </section>
 
-        <section class="principles-section" aria-labelledby="principles-heading">
+        <section class="principles-section" id="filosofia" aria-labelledby="principles-heading">
             <div class="principles-heading">
                 <div>
                     <span class="section-eyebrow">La idea detrás del proyecto</span>
@@ -1237,7 +1352,7 @@
             </a>
         </section>
 
-        <section class="section-box">
+        <section class="section-box" id="novedades">
             <h3 class="section-title" style="justify-content: space-between;">
                 <span style="display:flex; align-items:center; gap:10px;">
                     <i data-lucide="history" size="18"></i> Historial de Cambios
@@ -1424,7 +1539,6 @@
             }
         }
 
-        // Inicializador de la nueva sección interactiva Zen Showcase
         function initZenShowcase() {
             const cards = document.querySelectorAll('.zen-feature-card');
             const previewImg = document.getElementById('zen-preview-img');
