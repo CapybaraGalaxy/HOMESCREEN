@@ -95,10 +95,10 @@
             backdrop-filter: blur(var(--blur-val));
             -webkit-backdrop-filter: blur(var(--blur-val));
             border-radius: 24px;
-            padding: 10px;
+            padding: 10px 12px;
             display: flex;
             flex-direction: column;
-            gap: 6px;
+            gap: 4px;
             box-shadow: 0 10px 30px rgba(0,0,0,0.4);
             transition: width 0.5s var(--bezier), padding 0.5s var(--bezier);
         }
@@ -107,7 +107,7 @@
             display: flex;
             align-items: center;
             gap: 12px;
-            padding: 10px;
+            padding: 9px 10px;
             border-radius: 14px;
             color: var(--text-muted);
             text-decoration: none;
@@ -136,7 +136,7 @@
 
         @media (max-width: 768px) {
             .app-container {
-                padding-bottom: calc(env(safe-area-inset-bottom) + 110px); /* Espacio extra para evitar solapamiento en móvil */
+                padding-bottom: calc(env(safe-area-inset-bottom) + 110px);
             }
             .floating-nav {
                 position: fixed;
@@ -602,7 +602,11 @@
             font-size: .72rem;
         }
         .showcase-caption strong { color: #e9e9ed; font-weight: 500; }
-        .principles-section { opacity: 0; animation: scaleInCards .8s var(--bezier) .3s forwards; }
+        
+        .principles-section { 
+            opacity: 0; 
+            animation: scaleInCards .8s var(--bezier) .3s forwards; 
+        }
         .principles-heading {
             display: flex;
             justify-content: space-between;
@@ -622,11 +626,26 @@
             line-height: 1.5;
             text-align: right;
         }
+        
         .principles-grid {
             display: grid;
             grid-template-columns: repeat(3, 1fr);
             gap: 14px;
         }
+        @media(max-width: 768px) {
+            .principles-grid {
+                grid-template-columns: 1fr;
+            }
+            .principles-heading {
+                flex-direction: column;
+                align-items: flex-start;
+                gap: 8px;
+            }
+            .principles-heading p {
+                text-align: left;
+            }
+        }
+
         .principle-card {
             --mouse-x: 50%;
             --mouse-y: 50%;
@@ -709,35 +728,440 @@
             z-index: 1;
         }
 
+        .principle-icon {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            width: 34px;
+            height: 34px;
+            border-radius: 10px;
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid var(--glass-border);
+            color: var(--text-main);
+            margin-bottom: 12px;
+        }
+
+        .principle-card h3 {
+            font-size: 1rem;
+            font-weight: 600;
+            margin-bottom: 6px;
+        }
+
+        .principle-card p {
+            font-size: 0.85rem;
+            color: var(--text-muted);
+            line-height: 1.5;
+        }
+
+        /* --- Timeline del Proyecto & Roadmap --- */
+        .roadmap-section {
+            opacity: 0;
+            animation: scaleInCards 0.8s var(--bezier) 0.45s forwards;
+        }
+
+        .roadmap-header {
+            margin-bottom: 24px;
+        }
+
+        .roadmap-header h2 {
+            font-size: 1.5rem;
+            font-weight: 600;
+            letter-spacing: -0.025em;
+            margin-bottom: 6px;
+        }
+
+        .roadmap-header p {
+            color: var(--text-muted);
+            font-size: 0.9rem;
+        }
+
+        .timeline-list {
+            position: relative;
+            display: flex;
+            flex-direction: column;
+            gap: 18px;
+            padding-left: 28px;
+        }
+
+        .timeline-list::before {
+            content: "";
+            position: absolute;
+            left: 8px;
+            top: 8px;
+            bottom: 8px;
+            width: 2px;
+            background: linear-gradient(180deg, var(--accent-success) 0%, rgba(255, 255, 255, 0.25) 65%, rgba(255, 255, 255, 0.06) 100%);
+            border-radius: 2px;
+        }
+
+        .timeline-item {
+            position: relative;
+            background: var(--glass);
+            border: 1px solid var(--glass-border);
+            border-radius: 18px;
+            padding: 20px 24px;
+            backdrop-filter: blur(var(--blur-val));
+            -webkit-backdrop-filter: blur(var(--blur-val));
+            transition: background 0.3s var(--bezier), border-color 0.3s var(--bezier), transform 0.3s var(--bezier);
+        }
+
+        .timeline-item:hover {
+            background: var(--surface-hover);
+            border-color: rgba(255, 255, 255, 0.16);
+            transform: translateX(4px);
+        }
+
+        .timeline-dot {
+            position: absolute;
+            left: -25px;
+            top: 24px;
+            width: 12px;
+            height: 12px;
+            border-radius: 50%;
+            background: var(--bg);
+            border: 2px solid var(--text-muted);
+            z-index: 2;
+        }
+
+        .timeline-item.is-done .timeline-dot {
+            background: var(--accent-success);
+            border-color: var(--accent-success);
+            box-shadow: 0 0 10px rgba(52, 199, 89, 0.45);
+        }
+
+        .timeline-item.is-current .timeline-dot {
+            background: #FFFFFF;
+            border-color: #FFFFFF;
+            box-shadow: 0 0 12px rgba(255, 255, 255, 0.7);
+            animation: pulseGlow 2s infinite ease-in-out;
+        }
+
+        .timeline-meta {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 10px;
+            margin-bottom: 8px;
+            flex-wrap: wrap;
+        }
+
+        .timeline-date {
+            font-size: 0.78rem;
+            font-weight: 600;
+            letter-spacing: 0.06em;
+            text-transform: uppercase;
+            color: var(--text-muted);
+        }
+
+        .timeline-badge {
+            font-size: 0.72rem;
+            font-weight: 600;
+            padding: 3px 10px;
+            border-radius: 100px;
+            border: 1px solid var(--glass-border);
+            background: rgba(255, 255, 255, 0.04);
+            color: var(--text-muted);
+        }
+
+        .timeline-item.is-done .timeline-badge {
+            color: var(--accent-success);
+            border-color: rgba(52, 199, 89, 0.25);
+            background: rgba(52, 199, 89, 0.08);
+        }
+
+        .timeline-item.is-current .timeline-badge {
+            color: #FFFFFF;
+            border-color: rgba(255, 255, 255, 0.28);
+            background: rgba(255, 255, 255, 0.12);
+        }
+
+        .timeline-item h3 {
+            font-size: 1.05rem;
+            font-weight: 600;
+            margin-bottom: 6px;
+            letter-spacing: -0.01em;
+        }
+
+        .timeline-item p {
+            font-size: 0.88rem;
+            color: var(--text-muted);
+            line-height: 1.55;
+        }
+
+        /* --- FAQ Interactiva --- */
+        .faq-list {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+        }
+
+        .faq-item {
+            border: 1px solid var(--glass-border);
+            border-radius: 16px;
+            background: rgba(255, 255, 255, 0.02);
+            overflow: hidden;
+            transition: background 0.3s ease, border-color 0.3s ease;
+        }
+
+        .faq-item:hover {
+            background: rgba(255, 255, 255, 0.04);
+            border-color: rgba(255, 255, 255, 0.14);
+        }
+
+        .faq-item.active {
+            background: var(--surface);
+            border-color: rgba(255, 255, 255, 0.16);
+        }
+
+        .faq-question {
+            width: 100%;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 16px;
+            padding: 18px 20px;
+            background: transparent;
+            border: none;
+            color: var(--text-main);
+            font-family: inherit;
+            font-size: 0.96rem;
+            font-weight: 500;
+            text-align: left;
+            cursor: pointer;
+        }
+
+        .faq-chevron {
+            color: var(--text-muted);
+            flex-shrink: 0;
+            transition: transform 0.35s var(--bezier), color 0.3s ease;
+        }
+
+        .faq-item.active .faq-chevron {
+            transform: rotate(180deg);
+            color: var(--text-main);
+        }
+
+        .faq-answer {
+            max-height: 0;
+            overflow: hidden;
+            transition: max-height 0.4s var(--bezier);
+        }
+
+        .faq-answer-inner {
+            padding: 0 20px 18px 20px;
+            font-size: 0.88rem;
+            color: var(--text-muted);
+            line-height: 1.6;
+        }
+
+        /* Card "Un proyecto personal, abierto a mejorar" */
         .project-note {
             display: flex;
             align-items: center;
             justify-content: space-between;
             gap: 20px;
-            padding: 23px 26px;
+            padding: 24px 28px;
             border: 1px solid var(--glass-border);
-            border-radius: 18px;
-            background: linear-gradient(110deg, rgba(255,255,255,.055), rgba(255,255,255,.015));
+            border-radius: 20px;
+            background: var(--glass);
+            backdrop-filter: blur(var(--blur-val));
+            -webkit-backdrop-filter: blur(var(--blur-val));
+            opacity: 0;
+            animation: scaleInCards 0.8s var(--bezier) 0.5s forwards;
+            transition: background 0.3s var(--bezier), border-color 0.3s var(--bezier), transform 0.3s var(--bezier), box-shadow 0.3s var(--bezier);
         }
-        .project-note-copy { display: flex; align-items: flex-start; gap: 14px; }
-        .project-note-copy > i { color: var(--text-muted); margin-top: 3px; flex-shrink: 0; }
-        .project-note h3 { font-size: .95rem; font-weight: 550; margin-bottom: 4px; }
-        .project-note p { color: var(--text-muted); font-size: .82rem; line-height: 1.5; }
+
+        .project-note:hover {
+            background: var(--surface-hover);
+            border-color: rgba(255, 255, 255, 0.16);
+            transform: translateY(-3px);
+            box-shadow: 0 14px 32px rgba(0, 0, 0, 0.35);
+        }
+
+        .project-note-copy { 
+            display: flex; 
+            align-items: center; 
+            gap: 16px; 
+        }
+
+        .project-note-icon {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            width: 44px;
+            height: 44px;
+            border-radius: 12px;
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid var(--glass-border);
+            color: var(--text-main);
+            flex-shrink: 0;
+        }
+
+        .project-note h3 { 
+            font-size: 1rem; 
+            font-weight: 600; 
+            margin-bottom: 4px; 
+            letter-spacing: -0.01em;
+        }
+
+        .project-note p { 
+            color: var(--text-muted); 
+            font-size: 0.86rem; 
+            line-height: 1.5; 
+        }
+
         .github-link {
             flex-shrink: 0;
             display: inline-flex;
             align-items: center;
             gap: 8px;
-            padding: 10px 14px;
+            padding: 11px 18px;
             border: 1px solid var(--glass-border);
             border-radius: 100px;
             color: var(--text-main);
             text-decoration: none;
-            font-size: .8rem;
-            background: rgba(255,255,255,.04);
-            transition: background .25s ease, border-color .25s ease;
+            font-size: 0.84rem;
+            font-weight: 500;
+            background: rgba(255, 255, 255, 0.04);
+            transition: background 0.25s ease, border-color 0.25s ease, transform 0.2s ease;
         }
-        .github-link:hover { background: var(--surface-hover); border-color: rgba(255,255,255,.22); }
+
+        .github-link:hover { 
+            background: var(--surface-hover); 
+            border-color: rgba(255, 255, 255, 0.25); 
+            transform: scale(1.02);
+        }
+
+        @media(max-width: 768px) {
+            .project-note {
+                flex-direction: column;
+                align-items: flex-start;
+                gap: 18px;
+                padding: 22px;
+            }
+            .github-link {
+                width: 100%;
+                justify-content: center;
+            }
+        }
+
+        /* --- Footer Completo --- */
+        .site-footer {
+            margin-top: 20px;
+            padding: 36px 28px 28px;
+            border: 1px solid var(--glass-border);
+            border-radius: 22px;
+            background: var(--glass);
+            backdrop-filter: blur(var(--blur-val));
+            -webkit-backdrop-filter: blur(var(--blur-val));
+            display: flex;
+            flex-direction: column;
+            gap: 28px;
+            opacity: 0;
+            animation: scaleInCards 0.8s var(--bezier) 0.65s forwards;
+        }
+
+        .footer-top {
+            display: grid;
+            grid-template-columns: 1.5fr 1fr 1fr;
+            gap: 32px;
+        }
+
+        .footer-brand {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+        }
+
+        .footer-brand-header {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .footer-brand-header img {
+            width: 32px;
+            height: 32px;
+            border-radius: 8px;
+        }
+
+        .footer-brand-header span {
+            font-size: 1.05rem;
+            font-weight: 600;
+            letter-spacing: -0.02em;
+        }
+
+        .footer-brand p {
+            color: var(--text-muted);
+            font-size: 0.84rem;
+            line-height: 1.6;
+            max-width: 320px;
+        }
+
+        .footer-col h4 {
+            font-size: 0.78rem;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.1em;
+            color: var(--text-main);
+            margin-bottom: 14px;
+        }
+
+        .footer-links {
+            list-style: none;
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+
+        .footer-links a {
+            color: var(--text-muted);
+            text-decoration: none;
+            font-size: 0.85rem;
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            transition: color 0.2s ease, transform 0.2s ease;
+        }
+
+        .footer-links a:hover {
+            color: var(--text-main);
+            transform: translateX(3px);
+        }
+
+        .footer-bottom {
+            padding-top: 20px;
+            border-top: 1px solid var(--glass-border);
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            flex-wrap: wrap;
+            gap: 12px;
+            font-size: 0.8rem;
+            color: var(--text-muted);
+        }
+
+        .footer-credits {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .footer-credits strong {
+            color: var(--text-main);
+            font-weight: 500;
+        }
+
+        @media(max-width: 768px) {
+            .footer-top {
+                grid-template-columns: 1fr;
+                gap: 24px;
+            }
+            .footer-bottom {
+                flex-direction: column;
+                align-items: flex-start;
+            }
+        }
 
         .device-showcase {
             display: flex;
@@ -1076,6 +1500,10 @@
         }
 
         @media(max-width: 768px) {
+            .intro-showcase {
+                grid-template-columns: 1fr;
+                padding: 22px;
+            }
             .metrics-grid {
                 grid-template-columns: 1fr;
             }
@@ -1116,6 +1544,14 @@
         <a href="#filosofia" class="floating-nav-item" title="Filosofía">
             <i data-lucide="compass" size="18"></i>
             <span class="floating-nav-text">Filosofía</span>
+        </a>
+        <a href="#roadmap" class="floating-nav-item" title="Roadmap">
+            <i data-lucide="milestone" size="18"></i>
+            <span class="floating-nav-text">Roadmap</span>
+        </a>
+        <a href="#faq" class="floating-nav-item" title="FAQ">
+            <i data-lucide="help-circle" size="18"></i>
+            <span class="floating-nav-text">Preguntas</span>
         </a>
         <a href="#novedades" class="floating-nav-item" title="Novedades">
             <i data-lucide="history" size="18"></i>
@@ -1339,16 +1775,148 @@
             </div>
         </section>
 
+        <!-- Timeline del Proyecto y Roadmap -->
+        <section class="roadmap-section" id="roadmap" aria-labelledby="roadmap-heading">
+            <div class="roadmap-header">
+                <span class="section-eyebrow"><i data-lucide="milestone" size="13"></i> Evolución y Futuro</span>
+                <h2 id="roadmap-heading">Timeline del Proyecto & Roadmap</h2>
+                <p>Un recorrido por los hitos clave que han dado forma a la experiencia de Homescreen NEO y lo que está por venir.</p>
+            </div>
+
+            <div class="timeline-list">
+                <div class="timeline-item is-done">
+                    <span class="timeline-dot"></span>
+                    <div class="timeline-meta">
+                        <span class="timeline-date">Fase 01 · Origen</span>
+                        <span class="timeline-badge">Completado</span>
+                    </div>
+                    <h3>Primera versión y lanzador minimalista</h3>
+                    <p>Nace el núcleo de Homescreen con accesos directos rápidos, reloj limpio y una interfaz libre de distracciones pensada para abrir al instante.</p>
+                </div>
+
+                <div class="timeline-item is-done">
+                    <span class="timeline-dot"></span>
+                    <div class="timeline-meta">
+                        <span class="timeline-date">Fase 02 · Productividad</span>
+                        <span class="timeline-badge">Completado</span>
+                    </div>
+                    <h3>Llegada de las herramientas flotantes</h3>
+                    <p>Integración de ventanas flotantes interactivas (notas, temporizador, calculadora, kanban) para trabajar sin abandonar la pantalla principal.</p>
+                </div>
+
+                <div class="timeline-item is-done">
+                    <span class="timeline-dot"></span>
+                    <div class="timeline-meta">
+                        <span class="timeline-date">Fase 03 · Identidad Visual</span>
+                        <span class="timeline-badge">Completado</span>
+                    </div>
+                    <h3>Personalización extrema y motor Glassmorphism</h3>
+                    <p>Control total sobre tipografías, desenfoque, fondos dinámicos, distribuciones adaptables y copias de seguridad locales o en GitHub Gists.</p>
+                </div>
+
+                <div class="timeline-item is-current">
+                    <span class="timeline-dot"></span>
+                    <div class="timeline-meta">
+                        <span class="timeline-date">Fase 04 · Ecosistema NEO</span>
+                        <span class="timeline-badge">En curso</span>
+                    </div>
+                    <h3>Tienda de extensiones y modo offline avanzado</h3>
+                    <p>Ampliación del catálogo de micro-aplicaciones integradas, mejoras de rendimiento PWA y navegación fluida entre dispositivos.</p>
+                </div>
+
+                <div class="timeline-item">
+                    <span class="timeline-dot"></span>
+                    <div class="timeline-meta">
+                        <span class="timeline-date">Fase 05 · Próximos pasos</span>
+                        <span class="timeline-badge">Roadmap</span>
+                    </div>
+                    <h3>Espacios de trabajo inteligentes y widgets comunitarios</h3>
+                    <p>Perfiles intercambiables según el momento del día (estudio, trabajo, ocio) y soporte para módulos creados por la comunidad.</p>
+                </div>
+            </div>
+        </section>
+
+        <!-- FAQ Interactiva -->
+        <section class="section-box" id="faq" aria-labelledby="faq-heading">
+            <h3 class="section-title" id="faq-heading">
+                <i data-lucide="help-circle" size="18"></i> Preguntas Frecuentes
+            </h3>
+            <div class="faq-list">
+                <div class="faq-item active">
+                    <button class="faq-question" type="button" aria-expanded="true">
+                        <span>¿Necesito crear una cuenta o iniciar sesión para usarlo?</span>
+                        <i data-lucide="chevron-down" size="18" class="faq-chevron"></i>
+                    </button>
+                    <div class="faq-answer" style="max-height: 200px;">
+                        <div class="faq-answer-inner">
+                            No. Homescreen NEO funciona de manera completamente local en tu navegador desde el primer segundo, sin registros, sin correos electrónicos y sin recopilar ningún dato personal.
+                        </div>
+                    </div>
+                </div>
+
+                <div class="faq-item">
+                    <button class="faq-question" type="button" aria-expanded="false">
+                        <span>¿Puedo usarlo sin conexión a Internet?</span>
+                        <i data-lucide="chevron-down" size="18" class="faq-chevron"></i>
+                    </button>
+                    <div class="faq-answer">
+                        <div class="faq-answer-inner">
+                            Sí. Al estar construido como una Progressive Web App (PWA), los recursos principales se almacenan en caché para que puedas abrir tu pantalla de inicio y utilizar sus herramientas integradas incluso en modo offline.
+                        </div>
+                    </div>
+                </div>
+
+                <div class="faq-item">
+                    <button class="faq-question" type="button" aria-expanded="false">
+                        <span>¿Cómo paso mi configuración de un dispositivo a otro?</span>
+                        <i data-lucide="chevron-down" size="18" class="faq-chevron"></i>
+                    </button>
+                    <div class="faq-answer">
+                        <div class="faq-answer-inner">
+                            Desde los ajustes puedes exportar toda tu configuración en un archivo local para importarlo donde quieras, o vincular de forma privada un GitHub Gist para sincronizar tus copias de seguridad en la nube bajo tu control.
+                        </div>
+                    </div>
+                </div>
+
+                <div class="faq-item">
+                    <button class="faq-question" type="button" aria-expanded="false">
+                        <span>¿Cómo lo instalo como aplicación en mi ordenador o móvil?</span>
+                        <i data-lucide="chevron-down" size="18" class="faq-chevron"></i>
+                    </button>
+                    <div class="faq-answer">
+                        <div class="faq-answer-inner">
+                            En ordenadores (Chrome, Edge, Brave), pulsa el icono de instalación situado a la derecha de la barra de direcciones. En móvil, abre el menú de compartir o opciones de tu navegador y selecciona «Añadir a pantalla de inicio».
+                        </div>
+                    </div>
+                </div>
+
+                <div class="faq-item">
+                    <button class="faq-question" type="button" aria-expanded="false">
+                        <span>¿Es un proyecto gratuito y de código abierto?</span>
+                        <i data-lucide="chevron-down" size="18" class="faq-chevron"></i>
+                    </button>
+                    <div class="faq-answer">
+                        <div class="faq-answer-inner">
+                            Totalmente gratuito, sin anuncios ni funciones de pago ocultas. Además, el código fuente es público en GitHub para que cualquiera pueda revisarlo, proponer ideas o contribuir.
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Card "Un proyecto personal, abierto a mejorar" -->
         <section class="project-note" aria-label="Sobre el proyecto">
             <div class="project-note-copy">
-                <i data-lucide="heart-handshake" size="19"></i>
+                <div class="project-note-icon">
+                    <i data-lucide="heart-handshake" size="20"></i>
+                </div>
                 <div>
                     <h3>Un proyecto personal, abierto a mejorar.</h3>
                     <p>Homescreen nació como una herramienta para uso propio y sigue evolucionando con nuevas ideas.</p>
                 </div>
             </div>
             <a class="github-link" href="https://github.com/CapybaraGalaxy/HOMESCREEN" target="_blank" rel="noopener noreferrer">
-                <i data-lucide="github" size="15"></i> Ver en GitHub
+                <i data-lucide="github" size="16"></i> Ver en GitHub
             </a>
         </section>
 
@@ -1370,6 +1938,47 @@
                 Ir a Homescreen
             </button>
         </div>
+
+        <!-- Footer Completo -->
+        <footer class="site-footer" aria-label="Pie de página">
+            <div class="footer-top">
+                <div class="footer-brand">
+                    <div class="footer-brand-header">
+                        <img src="Media/faviconold.png" alt="Logo Homescreen NEO">
+                        <span>Homescreen NEO</span>
+                    </div>
+                    <p>Tu pantalla de inicio personalizable, privada y multiplataforma. Diseñada para reunir tus herramientas diarias en un entorno limpio y rápido.</p>
+                </div>
+
+                <div class="footer-col">
+                    <h4>Explorar</h4>
+                    <ul class="footer-links">
+                        <li><a href="#inicio">Inicio</a></li>
+                        <li><a href="#caracteristicas">Características</a></li>
+                        <li><a href="#dispositivos">Dispositivos</a></li>
+                        <li><a href="#personalizacion">Personalización</a></li>
+                        <li><a href="#roadmap">Roadmap</a></li>
+                    </ul>
+                </div>
+
+                <div class="footer-col">
+                    <h4>Proyecto</h4>
+                    <ul class="footer-links">
+                        <li><a href="index.html"><i data-lucide="layout-grid" size="14"></i> Abrir aplicación</a></li>
+                        <li><a href="#faq"><i data-lucide="help-circle" size="14"></i> Preguntas frecuentes</a></li>
+                        <li><a href="#novedades"><i data-lucide="history" size="14"></i> Historial de cambios</a></li>
+                        <li><a href="https://github.com/CapybaraGalaxy/HOMESCREEN" target="_blank" rel="noopener noreferrer"><i data-lucide="github" size="14"></i> Código en GitHub</a></li>
+                    </ul>
+                </div>
+            </div>
+
+            <div class="footer-bottom">
+                <span>© 2026 Homescreen NEO · Proyecto Open Source</span>
+                <span class="footer-credits">
+                    Diseñado y desarrollado por <strong>Guilleplayer</strong> · Hecho con <i data-lucide="heart" size="13" style="color: var(--accent-danger);"></i> en España
+                </span>
+            </div>
+        </footer>
     </div>
 
     <script>
@@ -1600,12 +2209,38 @@
             });
         }
 
+        function initFAQ() {
+            const faqItems = document.querySelectorAll('.faq-item');
+            faqItems.forEach(item => {
+                const btn = item.querySelector('.faq-question');
+                const answer = item.querySelector('.faq-answer');
+                if (!btn || !answer) return;
+
+                btn.addEventListener('click', () => {
+                    const isOpen = item.classList.contains('active');
+
+                    faqItems.forEach(other => {
+                        other.classList.remove('active');
+                        other.querySelector('.faq-question').setAttribute('aria-expanded', 'false');
+                        other.querySelector('.faq-answer').style.maxHeight = null;
+                    });
+
+                    if (!isOpen) {
+                        item.classList.add('active');
+                        btn.setAttribute('aria-expanded', 'true');
+                        answer.style.maxHeight = answer.scrollHeight + 'px';
+                    }
+                });
+            });
+        }
+
         window.onload = () => {
             buildCarousel();
             fetchChangelog();
             setTimeout(typeEffect, 600);
             initDeviceSelector();
             initZenShowcase();
+            initFAQ();
             lucide.createIcons();
         };
 
