@@ -11,7 +11,7 @@
     <meta name="og:image" content="https://github.com/CapybaraGalaxy/HOMESCREEN/blob/main/Media/og.png?raw=true">
     <meta name="og:url" content="https://capybaragalaxy.github.io/HOMESCREEN/about.html">
     <meta name="og:locale" content="es_ES">
-    <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20width%3D%2224%22%20height%3D%2224%22%20viewBox%3D%220%200%2024%2024%22%20fill%3D%22none%22%20stroke%3D%22currentColor%22%20stroke-width%3D%222%22%20stroke-linecap%3D%22round%22%20stroke-linejoin%3D%22round%22%20class%3D%22lucide%20lucide-info-icon%20lucide-info%22%3E%3Cstyle%3E%20path%2C%20circle%2C%20rect%2C%20polygon%2C%20line%2C%20polyline%2C%20ellipse%20%7B%20stroke%3A%20%23000000%20!important%3B%20%7D%20%40media%20(prefers-color-scheme%3A%20dark)%20%7B%20path%2C%20circle%2C%20rect%2C%20polygon%2C%20line%2C%20polyline%2C%20ellipse%20%7B%20stroke%3A%20%23ffffff%20!important%3B%20%7D%20%7D%20%3C%2Fstyle%3E%3Ccircle%20cx%3D%2212%22%20cy%3D%2212%22%20r%3D%2210%22%2F%3E%3Cpath%20d%3D%22M12%2016v-4%22%2F%3E%3Cpath%20d%3D%22M12%208h.01%22%2F%3E%3C%2Fsvg%3E">
+    <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20width%3D%2224%22%20height%3D%2224%22%20viewBox%3D%220%200%2024%2024%22%20fill%3D%22none%22%20stroke%3D%22currentColor%22%20stroke-width%3D%222%22%20stroke-linecap%3D%22round%22%20stroke-linejoin%3D%22round%22%20class%3D%22lucide%20lucide-info-icon%20lucide-info%22%3E%3Cstyle%3E%20path%2C%20circle%2C%20rect%2C%20polygon%2C%20line%2C%20polyline%2C%20ellipse%20%7B%20stroke%3A%20%23000000%20!important%3B%20%7D%20%40media%20%28prefers-color-scheme%3A%20dark%29%20%7B%20path%2C%20circle%2C%20rect%2C%20polygon%2C%20line%2C%20polyline%2C%20ellipse%20%7B%20stroke%3A%20%23ffffff%20!important%3B%20%7D%20%7D%20%3C%2Fstyle%3E%3Ccircle%20cx%3D%2212%22%20cy%3D%2212%22%20r%3D%2210%22%2F%3E%3Cpath%20d%3D%22M12%2016v-4%22%2F%3E%3Cpath%20d%3D%22M12%208h.01%22%2F%3E%3C%2Fsvg%3E">
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@200;300;400;500;600;700&display=swap" rel="stylesheet">
@@ -69,6 +69,15 @@
             display: flex;
             flex-direction: column;
             gap: 40px;
+        }
+
+        /* Cards y contenedores más cerca del borde en pantallas horizontales / escritorio */
+        @media(min-width: 768px) {
+            .app-container {
+                max-width: 1320px;
+                padding-left: 12px;
+                padding-right: 12px;
+            }
         }
 
         /* Cabecera Tipo Startup */
@@ -602,7 +611,7 @@
         }
         .github-link:hover { background: var(--surface-hover); border-color: rgba(255,255,255,.22); }
 
-/* Selector interactivo de dispositivos */
+/* Selector interactivo de dispositivos (Previews más grandes y sin líneas negras) */
 .device-showcase {
     display: flex;
     flex-direction: column;
@@ -634,7 +643,7 @@
 
 .device-stage {
     width: 100%;
-    height: 390px;
+    height: 560px;
     display: flex;
     justify-content: center;
     align-items: center;
@@ -643,12 +652,12 @@
 }
 
 .device-preview-frame {
-    width: 540px;
-    height: 310px;
-    max-width: 90%;
-    padding: 8px;
+    width: 780px;
+    height: 480px;
+    max-width: 98%;
+    padding: 10px;
     border: 1px solid rgba(255,255,255,.2);
-    border-radius: 17px;
+    border-radius: 20px;
     background: linear-gradient(145deg, #292929, #101010 55%, #242424);
     box-shadow:
         0 25px 70px rgba(0,0,0,.55),
@@ -663,22 +672,24 @@
 }
 
 .device-preview-frame.is-phone {
-    width: 190px;
-    height: 350px;
-    border-radius: 27px;
-    padding: 7px;
+    width: 290px;
+    height: 540px;
+    border-radius: 18px;
+    padding: 10px;
 }
 
 .device-preview-frame.is-tablet {
-    width: 420px;
-    height: 300px;
-    border-radius: 21px;
+    width: 660px;
+    height: 471px;
+    border-radius: 18px;
+    padding: 10px;
 }
 
 .device-preview-frame.is-laptop {
-    width: 540px;
-    height: 310px;
-    border-radius: 15px;
+    width: 780px;
+    height: 438px;
+    border-radius: 18px;
+    padding: 10px;
 }
 
 .device-screen {
@@ -694,7 +705,7 @@
     display: block;
     width: 100%;
     height: 100%;
-    object-fit: contain;
+    object-fit: cover; /* Soluciona el problema de las líneas negras eliminando el letterboxing/pillarboxing */
     opacity: 1;
     transform: scale(1);
     transition:
@@ -776,22 +787,22 @@
     }
 
     .device-stage {
-        height: 330px;
+        height: 420px;
     }
 
     .device-preview-frame.is-phone {
-        width: 155px;
-        height: 285px;
+        width: 200px;
+        height: 390px;
     }
 
     .device-preview-frame.is-tablet {
-        width: 90%;
-        height: 230px;
+        width: 94%;
+        height: 310px;
     }
 
     .device-preview-frame.is-laptop {
         width: 96%;
-        height: 215px;
+        height: 280px;
     }
 
     .device-selector {
@@ -1394,17 +1405,17 @@ function initDeviceSelector() {
     // Sustituye estas tres direcciones por tus imágenes
     const deviceImages = {
         phone: {
-            src: '/Media/og.png',
+            src: 'https://github.com/CapybaraGalaxy/HOMESCREEN/blob/main/Media/Devices/phone.jpg?raw=true',
             alt: 'Homescreen en un teléfono',
             label: 'VISTA EN MÓVIL'
         },
         tablet: {
-            src: 'URL_IMAGEN_TABLET',
+            src: 'https://github.com/CapybaraGalaxy/HOMESCREEN/blob/main/Media/Devices/tablet.jpg?raw=true',
             alt: 'Homescreen en una tablet',
             label: 'VISTA EN TABLET'
         },
         laptop: {
-            src: 'URL_IMAGEN_PORTATIL',
+            src: 'https://github.com/CapybaraGalaxy/HOMESCREEN/blob/main/Media/Devices/pc.jpg?raw=true',
             alt: 'Homescreen en un portátil',
             label: 'VISTA EN PORTÁTIL'
         }
