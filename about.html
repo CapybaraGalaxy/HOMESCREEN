@@ -90,8 +90,8 @@
         }
 
         .app-icon-badge {
-            width: 72px;
-            height: 72px;
+            width: 120px;
+            height: 120px;
             border-radius: 22px;
             background: radial-gradient(circle at center, rgba(255,255,255,0.12) 0%, rgba(0,0,0,0) 80%);
             border: 1px solid var(--glass-border);
@@ -1010,7 +1010,7 @@
     <div class="app-container" id="main-view">
         <header>
             <div class="app-icon-badge">
-                <img src="Media/faviconold.png" alt="Icono de la aplicación" width="40" height="40">
+                <img src="Media/faviconold.png" alt="Icono de la aplicación" width="60" height="60">
             </div>
             <div>
                 <h1>Acerca del Homescreen</h1>
@@ -1023,7 +1023,14 @@
                 </div>
             </div>
         </header>
-
+        <div class="back-action-container">
+            <button class="btn-back" onclick="window.location.href='index.html'">
+                <i data-lucide="Arrow-Right-Circle" size="16"></i>
+                Ir a Homescreen
+            </button>
+            
+        </div>
+        
         <div class="carousel-container">
             <div class="carousel-track" id="tools-carousel"></div>
         </div>
@@ -1037,8 +1044,10 @@
                     <span class="intro-point"><i data-lucide="sliders-horizontal" size="14"></i> Personalizable</span>
                     <span class="intro-point"><i data-lucide="monitor-smartphone" size="14"></i> Multiplataforma</span>
                     <span class="intro-point"><i data-lucide="shield-check" size="14"></i> Privacidad</span>
+                    <span class="intro-point"><i data-lucide="map-pin" size="14"></i> Hecho en España</span>
                 </div>
             </div>
+
             <div class="showcase-visual">
                 <div class="showcase-toolbar"><span></span><span></span><span></span><small>HOMESCREEN NEO</small></div>
                 <img src="https://github.com/CapybaraGalaxy/HOMESCREEN/blob/main/Media/og.png?raw=true"
@@ -1047,7 +1056,7 @@
                      onerror="this.style.display='none'; this.parentElement.classList.add('image-unavailable');">
                 <div class="showcase-caption">
                     <strong>Todo lo que necesitas, a un vistazo.</strong>
-                    <span>01 / 03</span>
+                    <span>OPEN SOURCE</span>
                 </div>
             </div>
         </section>
@@ -1101,23 +1110,23 @@
                         <p>Puedes tener herramientas flotantes directamente en la pantalla de inicio. Además de las que vienen incluídas, podrás descargar más desde la tienda de extensiones o crear las tuyas.</p>
                     </button>
                     <button class="zen-feature-card" type="button" data-index="1" aria-pressed="false">
-                        <h3>Compact Mode</h3>
-                        <p>Zen's Compact Mode gives you more screen real estate by hiding the tab bar when you don't need it, and showing it when you do.</p>
+                        <h3>Personalización total</h3>
+                        <p>Todo en homescreen se puede personalizar. Modo de visualización, el reloj, la fuente, los colores y más. Todo lo que necesitas para hacer Homescreen realmente tuyo.</p>
                     </button>
                     <button class="zen-feature-card" type="button" data-index="2" aria-pressed="false">
-                        <h3>Glance</h3>
-                        <p>Glance allows you to quickly switch between your most used tabs, without having to scroll through your history.</p>
+                        <h3>Copias de seguridad</h3>
+                        <p>Haz copia de seguridad de tus datos, tanto de forma local, como en la nube, usando Github Gists.</p>
                     </button>
                     <button class="zen-feature-card" type="button" data-index="3" aria-pressed="false">
-                        <h3>Split View</h3>
-                        <p>Split View allows you to view two tabs side by side, making it easier to compare and switch between them.</p>
+                        <h3>Instala Homescreen</h3>
+                        <p>Homescreen es una web instalable, lo que te permite añadir un acceso directo a la web, y usarla en pantalla completa.</p>
                     </button>
                 </div>
 
                 <div class="zen-preview-container">
                     <div class="zen-preview-bg"></div>
                     <div class="zen-preview-window">
-                        <img id="zen-preview-img" src="https://github.com/CapybaraGalaxy/HOMESCREEN/blob/main/Media/Showcases/Showcase 1.png?raw=true" alt="Workspaces Preview" loading="lazy">
+                        <img id="zen-preview-img" src="https://github.com/CapybaraGalaxy/HOMESCREEN/blob/main/Media/Showcase/Showcase%201.png?raw=true" alt="Workspaces Preview" loading="lazy">
                     </div>
                 </div>
             </div>
@@ -1145,7 +1154,7 @@
                 <article class="principle-card">
                     <div class="principle-icon"><i data-lucide="lock-keyhole" size="17"></i></div>
                     <h3>Privacidad primero</h3>
-                    <p>Un enfoque local y sin cuentas obligatorias para utilizar las funciones principales.</p>
+                    <p>Un enfoque local y sin cuentas para utilizar las funciones principales.</p>
                 </article>
             </div>
         </section>
@@ -1153,11 +1162,11 @@
         <section class="metrics-grid">
             <div class="metric-card">
                 <div class="metric-value">100%</div>
-                <div class="metric-label">Local & Offline</div>
+                <div class="metric-label">Local</div>
             </div>
             <div class="metric-card">
                 <div class="metric-value" style="font-size:1.8rem; padding-top:4px;">PWA</div>
-                <div class="metric-label">Instalable Full</div>
+                <div class="metric-label">Instalable</div>
             </div>
             <div class="metric-card">
                 <div class="metric-value">0</div>
@@ -1167,7 +1176,7 @@
 
         <section class="section-box">
             <h3 class="section-title">
-                <i data-lucide="zap" size="18"></i> Filosofía & Capacidades
+                <i data-lucide="zap" size="18"></i> Filosofía y Capacidades
             </h3>
             <div class="features-list">
                 <div class="feature-item">
@@ -1243,7 +1252,7 @@
         <div class="back-action-container">
             <button class="btn-back" onclick="window.location.href='index.html'">
                 <i data-lucide="Arrow-Right-Circle" size="16"></i>
-                Ir al Homescreen
+                Ir a Homescreen
             </button>
         </div>
     </div>
@@ -1424,20 +1433,20 @@
 
             const showcaseData = [
                 {
-                    img: 'https://github.com/CapybaraGalaxy/HOMESCREEN/blob/main/Media/og.png?raw=true',
-                    alt: 'Workspaces Preview'
+                    img: 'https://github.com/CapybaraGalaxy/HOMESCREEN/blob/main/Media/Showcase/Showcase%201.png?raw=true',
+                    alt: 'Herramientas Flotantes Preview'
                 },
                 {
-                    img: 'https://github.com/CapybaraGalaxy/HOMESCREEN/blob/main/Media/Devices/pc.jpg?raw=true',
-                    alt: 'Compact Mode Preview'
+                    img: 'https://github.com/CapybaraGalaxy/HOMESCREEN/blob/main/Media/Showcase/Showcase%202.png?raw=true',
+                    alt: 'Personalización Preview'
                 },
                 {
-                    img: 'https://github.com/CapybaraGalaxy/HOMESCREEN/blob/main/Media/Devices/tablet.jpg?raw=true',
-                    alt: 'Glance Preview'
+                    img: 'https://github.com/CapybaraGalaxy/HOMESCREEN/blob/main/Media/Showcase/Showcase%203.png?raw=true',
+                    alt: 'Copias de seguridad Preview'
                 },
                 {
-                    img: 'https://github.com/CapybaraGalaxy/HOMESCREEN/blob/main/Media/Devices/phone.jpg?raw=true',
-                    alt: 'Split View Preview'
+                    img: 'https://github.com/CapybaraGalaxy/HOMESCREEN/blob/main/Media/Showcase/Showcase%204.png?raw=true',
+                    alt: 'PWA Preview'
                 }
             ];
 
