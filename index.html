@@ -96,6 +96,10 @@
             <div class="tools-container" id="toolsGrid"></div>
         </div>
     </div>
+    <div id="appContextMenu" class="app-context-menu" role="menu" aria-label="Opciones de aplicación" hidden>
+        <div class="app-context-menu-header" id="appContextMenuHeader"></div>
+        <div class="app-context-menu-items" id="appContextMenuItems"></div>
+    </div>
 
     <div class="custom-modal" id="hiddenFolderModal">
         <div class="modal-title"><i data-lucide="folder-lock" style="color: #FFD60A;"></i> Carpetas Ocultas</div>
@@ -904,24 +908,458 @@ function appIconMarkup(app) {
             return topApps;
         }
 
+        function getPinnedDockUrls() {
+            try {
+                const stored = JSON.parse(localStorage.getItem('pinnedDockApps') || '[]');
+                if (!Array.isArray(stored)) return [];
+                const knownUrls = new Set(getAllAppEntries().map(app => app.url));
+                return [...new Set(stored.filter(url => typeof url === 'string' && knownUrls.has(url)))];
+            } catch (error) {
+                return [];
+            }
+        }
+
+        function normalizeDockPinnedUrls(urls) {
+            const knownUrls = new Set(getAllAppEntries().map(app => app.url));
+            return [...new Set((Array.isArray(urls) ? urls : []).filter(url => typeof url === 'string' && knownUrls.has(url)))];
+        }
+
+        function storeDockPinnedUrls(urls) {
+            localStorage.setItem('pinnedDockApps', JSON.stringify(normalizeDockPinnedUrls(urls)));
+        }
+
+        function saveDockPinnedUrls(urls) {
+            storeDockPinnedUrls(urls);
+            renderDock();
+            if (document.getElementById('appsVisibilityList')) renderAppsSettings();
+        }
+
+        function saveDockPinnedVisibleOrder(orderedVisibleUrls) {
+            const visibleUrls = new Set(orderedVisibleUrls);
+            let nextVisibleIndex = 0;
+            const mergedOrder = getPinnedDockUrls().map(url =>
+                visibleUrls.has(url) ? orderedVisibleUrls[nextVisibleIndex++] : url
+            );
+            saveDockPinnedUrls(mergedOrder);
+        }
+
+        function toggleDockPin(url) {
+            const apps = getAllAppEntries();
+            if (!apps.some(app => app.url === url)) return;
+            const pinned = getPinnedDockUrls();
+            saveDockPinnedUrls(pinned.includes(url) ? pinned.filter(item => item !== url) : [...pinned, url]);
+            showToast(pinned.includes(url) ? 'Eliminada del Dock' : 'Fijada en el Dock', 'check');
+        }
+
+        function toggleAppVisibility(url) {
+            const hiddenUrls = getHiddenAppUrls();
+            const isHidden = hiddenUrls.has(url);
+            if (isHidden) hiddenUrls.delete(url);
+            else hiddenUrls.add(url);
+            localStorage.setItem('hiddenAppUrls', JSON.stringify([...hiddenUrls]));
+            if (!isHidden) {
+                document.querySelectorAll('#folderApps .tool-card').forEach(item => {
+                    if (item.dataset.url === url) item.remove();
+                });
+            }
+            renderAppsSettings();
+            renderMainGrid();
+            buildPersistentSearchDOM();
+            renderDock();
+            showToast(isHidden ? 'Aplicación activada' : 'Aplicación desactivada', isHidden ? 'eye' : 'eye-off');
+        }
+
+        async function copyAppUrl(url, successMessage = 'URL copiada') {
+            if (navigator.clipboard?.writeText) {
+                try {
+                    await navigator.clipboard.writeText(url);
+                    showToast(successMessage, 'copy');
+                    return;
+                } catch (error) {
+                    console.warn('No se pudo copiar la URL con la API del portapapeles.', error);
+                }
+            }
+
+            const helper = document.createElement('textarea');
+            helper.value = url;
+            helper.setAttribute('readonly', '');
+            helper.style.position = 'fixed';
+            helper.style.opacity = '0';
+            document.body.appendChild(helper);
+            helper.select();
+            let copied = false;
+            try {
+                copied = document.execCommand('copy');
+            } catch (error) {
+                console.error('No se pudo copiar la URL.', error);
+            } finally {
+                helper.remove();
+            }
+            showToast(copied ? successMessage : 'No se pudo copiar la URL', copied ? 'copy' : 'alert-circle');
+        }
+
+        async function shareAppUrl(app) {
+            if (!navigator.share) {
+                await copyAppUrl(app.url, 'URL copiada para compartir');
+                return;
+            }
+            try {
+                await navigator.share({ title: app.name, url: app.url });
+            } catch (error) {
+                if (error.name !== 'AbortError') {
+                    console.error('No se pudo compartir la aplicación.', error);
+                    showToast('No se pudo compartir la aplicación', 'alert-circle');
+                }
+            }
+        }
+
+        function runAppContextMenuAction(action, url) {
+            const app = getAllAppEntries().find(entry => entry.url === url);
+            if (!app) {
+                closeAppContextMenu();
+                return;
+            }
+            closeAppContextMenu();
+            if (action === 'open') {
+                trackAppUsage(url);
+                window.location.href = url;
+            } else if (action === 'copy') {
+                copyAppUrl(new URL(url, window.location.href).href);
+            } else if (action === 'share') {
+                shareAppUrl({ ...app, url: new URL(app.url, window.location.href).href });
+            } else if (action === 'pin') {
+                toggleDockPin(url);
+            } else if (action === 'favorite') {
+                const favoriteButton = document.createElement('button');
+                favoriteButton.classList.toggle('active', isFavorite(url));
+                toggleFavorite(url, favoriteButton);
+            } else if (action === 'disable') {
+                toggleAppVisibility(url);
+            }
+        }
+
+        let contextMenuPressTimer = null;
+        let contextMenuPressTarget = null;
+        let contextMenuPressOrigin = null;
+        let contextMenuLongPress = false;
+
+        function closeAppContextMenu() {
+            const menu = document.getElementById('appContextMenu');
+            if (menu) menu.hidden = true;
+            window.clearTimeout(contextMenuPressTimer);
+            contextMenuPressTarget = null;
+            contextMenuPressOrigin = null;
+            contextMenuLongPress = false;
+        }
+
+        function showAppContextMenu(event, target) {
+            const appUrl = target.dataset.url || target.getAttribute('href');
+            const app = getAllAppEntries().find(entry => entry.url === appUrl);
+            const menu = document.getElementById('appContextMenu');
+            const header = document.getElementById('appContextMenuHeader');
+            const items = document.getElementById('appContextMenuItems');
+            if (!app || !menu || !header || !items) return;
+            event.preventDefault();
+            header.innerHTML = `${appIconMarkup(app)}<span>${escapeHtml(app.name)}</span>`;
+            items.replaceChildren();
+            const addItem = (icon, label, action, active = false) => {
+                const button = document.createElement('button');
+                button.type = 'button';
+                button.className = `app-context-menu-item${active ? ' active' : ''}`;
+                button.setAttribute('role', 'menuitem');
+                button.dataset.action = action;
+                button.innerHTML = `<i data-lucide="${icon}" aria-hidden="true"></i><span>${escapeHtml(label)}</span>`;
+                button.addEventListener('click', () => runAppContextMenuAction(action, app.url));
+                items.appendChild(button);
+                return button;
+            };
+            const addSeparator = () => {
+                const separator = document.createElement('div');
+                separator.className = 'app-context-menu-separator';
+                separator.setAttribute('role', 'separator');
+                items.appendChild(separator);
+            };
+            addItem('external-link', 'Abrir', 'open');
+            addItem('copy', 'Copiar URL', 'copy');
+            addItem('share-2', 'Compartir URL', 'share');
+            addSeparator();
+            addItem('pin', getPinnedDockUrls().includes(app.url) ? 'Desfijar del Dock' : 'Fijar en Dock', 'pin');
+            addItem(isFavorite(app.url) ? 'star-off' : 'star', isFavorite(app.url) ? 'Quitar de Favoritos' : 'Añadir a Favoritos', 'favorite', isFavorite(app.url));
+            addSeparator();
+            addItem('eye-off', 'Desactivar', 'disable');
+            menu.hidden = false;
+            if (window.lucide) lucide.createIcons();
+            const bounds = menu.getBoundingClientRect();
+            menu.style.left = `${Math.max(8, Math.min(event.clientX, window.innerWidth - bounds.width - 8))}px`;
+            menu.style.top = `${Math.max(8, Math.min(event.clientY, window.innerHeight - bounds.height - 8))}px`;
+            items.querySelector('button')?.focus();
+        }
+
+        function setupAppContextMenu() {
+            const menu = document.getElementById('appContextMenu');
+            if (!menu || menu.dataset.bound === 'true') return;
+            menu.dataset.bound = 'true';
+            const appSelector = '#folderApps .tool-card, #dockContainer .tool-card, #hiddenAppArea .tool-card, #resultsArea .result-item[data-url]';
+
+            document.addEventListener('contextmenu', event => {
+                const target = event.target.closest?.(appSelector);
+                if (target) showAppContextMenu(event, target);
+            });
+            document.addEventListener('pointerdown', event => {
+                if (event.pointerType !== 'touch') return;
+                const target = event.target.closest?.(appSelector);
+                if (!target) return;
+                window.clearTimeout(contextMenuPressTimer);
+                contextMenuPressTarget = target;
+                contextMenuPressOrigin = { x: event.clientX, y: event.clientY };
+                contextMenuPressTimer = window.setTimeout(() => {
+                    contextMenuLongPress = true;
+                    showAppContextMenu({ clientX: event.clientX, clientY: event.clientY, preventDefault() {} }, target);
+                }, 550);
+            });
+            document.addEventListener('pointermove', event => {
+                if (!contextMenuPressOrigin || event.pointerType !== 'touch') return;
+                if (Math.hypot(event.clientX - contextMenuPressOrigin.x, event.clientY - contextMenuPressOrigin.y) > 12) {
+                    window.clearTimeout(contextMenuPressTimer);
+                    contextMenuPressOrigin = null;
+                    contextMenuPressTarget = null;
+                }
+            });
+            ['pointerup', 'pointercancel'].forEach(type => document.addEventListener(type, () => {
+                window.clearTimeout(contextMenuPressTimer);
+                contextMenuPressOrigin = null;
+            }));
+            document.addEventListener('click', event => {
+                if (contextMenuLongPress) {
+                    const target = contextMenuPressTarget;
+                    const clickedTarget = event.target.closest?.(appSelector);
+                    contextMenuLongPress = false;
+                    contextMenuPressTarget = null;
+                    if (target && clickedTarget === target) {
+                        event.preventDefault();
+                        event.stopImmediatePropagation();
+                        return;
+                    }
+                }
+                if (!menu.contains(event.target)) closeAppContextMenu();
+            }, true);
+            document.addEventListener('pointerdown', event => {
+                if (!menu.hidden && !menu.contains(event.target)) closeAppContextMenu();
+            });
+            document.addEventListener('keydown', event => {
+                if (event.key === 'Escape' && !menu.hidden) {
+                    event.preventDefault();
+                    closeAppContextMenu();
+                }
+            });
+        }
+
+        let draggedManagerDockUrl = null;
+        function setupDockPinManagerDragAndDrop(list) {
+            if (list.dataset.dockDragBound === 'true') return;
+            list.dataset.dockDragBound = 'true';
+            list.addEventListener('dragstart', event => {
+                const row = event.target.closest?.('.app-visibility-row.is-dock-pinned');
+                if (!row) return;
+                draggedManagerDockUrl = row.dataset.url;
+                event.dataTransfer.setData('text/plain', draggedManagerDockUrl);
+                event.dataTransfer.effectAllowed = 'move';
+            });
+            list.addEventListener('dragover', event => {
+                if (!draggedManagerDockUrl) return;
+                const row = event.target.closest?.('.app-visibility-row');
+                if (!row) return;
+                event.preventDefault();
+                const draggedRow = [...list.querySelectorAll('.app-visibility-row')].find(item => item.dataset.url === draggedManagerDockUrl);
+                if (!draggedRow || row === draggedRow) return;
+                if (row.classList.contains('is-dock-pinned')) {
+                    const bounds = row.getBoundingClientRect();
+                    if (event.clientY > bounds.top + bounds.height / 2) row.after(draggedRow);
+                    else row.before(draggedRow);
+                } else {
+                    const firstUnpinned = list.querySelector('.app-visibility-row:not(.is-dock-pinned)');
+                    if (firstUnpinned) firstUnpinned.before(draggedRow);
+                }
+            });
+            list.addEventListener('drop', event => {
+                if (!draggedManagerDockUrl) return;
+                event.preventDefault();
+                const orderedUrls = [...list.querySelectorAll('.app-visibility-row.is-dock-pinned')].map(row => row.dataset.url);
+                draggedManagerDockUrl = null;
+                saveDockPinnedVisibleOrder(orderedUrls);
+            });
+            list.addEventListener('dragend', () => { draggedManagerDockUrl = null; });
+        }
+
+        function canShowDockRecommendations() {
+            const width = document.documentElement.clientWidth;
+            const isPortrait = window.matchMedia('(orientation: portrait)').matches;
+            const isCompactTouchLandscape = window.matchMedia('(pointer: coarse) and (max-height: 500px)').matches;
+            return !isPortrait && width >= 720 && !isCompactTouchLandscape;
+        }
+
+        function getDockRecommendationApps(limit, excludedUrls, availableApps) {
+            let stats = {};
+            try {
+                const stored = JSON.parse(localStorage.getItem('appUsageStats') || '{}');
+                if (stored && typeof stored === 'object' && !Array.isArray(stored)) stats = stored;
+            } catch (error) {
+                stats = {};
+            }
+
+            const uniqueApps = [...new Map(availableApps.map(app => [app.url, app])).values()];
+            return uniqueApps
+                .filter(app => !excludedUrls.has(app.url))
+                .map((app, index) => {
+                    const count = Number(stats[app.url]);
+                    return { app, count: Number.isFinite(count) && count >= 0 ? count : 0, index };
+                })
+                .sort((a, b) => b.count - a.count || a.index - b.index)
+                .slice(0, limit)
+                .map(entry => entry.app);
+        }
+
+        function handleDockDragStart(event, url) {
+            draggedDockUrl = url;
+            event.dataTransfer.setData('text/plain', url);
+            event.dataTransfer.effectAllowed = 'move';
+        }
+
+        function handleDockDragOver(event) {
+            if (!draggedDockUrl) return;
+            const dock = document.getElementById('dockContainer');
+            const draggedItem = [...dock.querySelectorAll('.dock-pinned')].find(item => item.dataset.url === draggedDockUrl);
+            if (!draggedItem) return;
+            event.preventDefault();
+            const target = event.target.closest?.('.dock-pinned');
+            if (target && target !== draggedItem) {
+                const bounds = target.getBoundingClientRect();
+                if (event.clientX > bounds.left + bounds.width / 2) target.after(draggedItem);
+                else target.before(draggedItem);
+            } else if (!target) {
+                const divider = dock.querySelector('.dock-divider');
+                if (divider) divider.before(draggedItem);
+                else dock.appendChild(draggedItem);
+            }
+        }
+
+        function handleDockDrop(event) {
+            if (!draggedDockUrl) return;
+            event.preventDefault();
+            const dock = document.getElementById('dockContainer');
+            const orderedUrls = [...dock.querySelectorAll('.dock-pinned')].map(item => item.dataset.url);
+            draggedDockUrl = null;
+            saveDockPinnedVisibleOrder(orderedUrls);
+        }
+
+        let draggedDockUrl = null;
+        let dockRecommendationsCollapsed = false;
+        let dockRecommendationsExitInProgress = false;
+
+        function collapseDockRecommendations() {
+            if (dockRecommendationsCollapsed || dockRecommendationsExitInProgress) return;
+            dockRecommendationsCollapsed = true;
+            const recommendations = document.querySelectorAll('#dockContainer .dock-recommended');
+            if (recommendations.length === 0) {
+                renderDock();
+                return;
+            }
+            dockRecommendationsExitInProgress = true;
+            recommendations.forEach(item => item.classList.add('dock-item-exit'));
+            window.setTimeout(() => {
+                dockRecommendationsExitInProgress = false;
+                renderDock();
+            }, 180);
+        }
+
         function renderDock() {
             const dock = document.getElementById('dockContainer');
             if (!dock) return;
             if (localStorage.getItem('showDock') !== 'true') {
                 dock.style.display = 'none';
+                dock.replaceChildren();
                 return;
             }
-            const topApps = getTopApps(5);
-            if (topApps.length === 0) {
+            if (dock.dataset.dragBound !== 'true') {
+                dock.dataset.dragBound = 'true';
+                dock.addEventListener('dragover', handleDockDragOver);
+                dock.addEventListener('drop', handleDockDrop);
+                dock.addEventListener('dragend', () => { draggedDockUrl = null; });
+            }
+
+            const availableApps = getVisibleApps(getAllAppEntries());
+            const appByUrl = new Map(availableApps.map(app => [app.url, app]));
+            const pinnedUrls = getPinnedDockUrls();
+            const pinnedApps = pinnedUrls.map(url => appByUrl.get(url)).filter(Boolean);
+            const pinnedSet = new Set(pinnedUrls);
+            const recommendationsEnabled = localStorage.getItem('showDockRecommendations') !== 'false';
+            if (!recommendationsEnabled) dockRecommendationsCollapsed = false;
+            const recommendationsLimit = localStorage.getItem('dockRecommendationsLimit') === '3' ? 3 : 5;
+            const availableRecommendations = recommendationsEnabled && canShowDockRecommendations()
+                ? getDockRecommendationApps(recommendationsLimit, pinnedSet, availableApps)
+                : [];
+            const shouldCollapseRecommendations = pinnedApps.length > 0 && dockRecommendationsCollapsed;
+            const recommendedApps = shouldCollapseRecommendations ? [] : availableRecommendations;
+            if (pinnedApps.length === 0 && recommendedApps.length === 0) {
                 dock.style.display = 'none';
+                dock.replaceChildren();
                 return;
             }
+            const wasHidden = dock.style.display === 'none' || getComputedStyle(dock).display === 'none';
+            const wasCollapsed = Boolean(dock.querySelector('.dock-recommendations-reopen'));
+            const previouslyRenderedUrls = new Set([...dock.querySelectorAll('.dock-pinned, .dock-recommended')].map(item => item.dataset.url));
             dock.style.display = 'flex';
-            dock.innerHTML = topApps.map(app => `
-                <a href="${app.url}" class="tool-card" onclick="handleAppClick(event, '${app.url}')" title="${app.name}">
-                    <i data-lucide="${app.icon}"></i>
-                </a>
-            `).join('');
+            if (wasHidden) {
+                dock.classList.remove('dock-enter');
+                void dock.offsetWidth;
+                dock.classList.add('dock-enter');
+            }
+            dock.replaceChildren();
+            let animationIndex = 0;
+            const addDockApp = (app, isPinned) => {
+                const item = document.createElement('a');
+                item.href = app.url;
+                item.className = `tool-card${isPinned ? ' dock-pinned' : ' dock-recommended'}`;
+                if (!previouslyRenderedUrls.has(app.url)) {
+                    item.classList.add('dock-item-enter');
+                    item.style.animationDelay = `${animationIndex++ * 35}ms`;
+                }
+                item.dataset.url = app.url;
+                item.title = app.name;
+                item.draggable = isPinned;
+                if (isPinned) {
+                    item.addEventListener('dragstart', event => handleDockDragStart(event, app.url));
+                }
+                item.addEventListener('click', event => handleAppClick(event, app.url));
+                item.innerHTML = appIconMarkup(app);
+                dock.appendChild(item);
+            };
+            pinnedApps.forEach(app => addDockApp(app, true));
+            if (pinnedApps.length > 0 && availableRecommendations.length > 0) {
+                const divider = document.createElement('button');
+                divider.type = 'button';
+                divider.className = 'dock-divider';
+                divider.setAttribute('aria-label', shouldCollapseRecommendations ? 'Las recomendaciones están ocultas' : 'Ocultar recomendaciones');
+                divider.setAttribute('aria-expanded', String(!shouldCollapseRecommendations));
+                divider.title = shouldCollapseRecommendations ? 'Recomendaciones ocultas' : 'Ocultar recomendaciones';
+                divider.addEventListener('click', collapseDockRecommendations);
+                dock.appendChild(divider);
+                if (shouldCollapseRecommendations) {
+                    const reopen = document.createElement('button');
+                    reopen.type = 'button';
+                    reopen.className = 'dock-recommendations-reopen';
+                    reopen.setAttribute('aria-label', 'Mostrar recomendaciones');
+                    reopen.title = 'Mostrar recomendaciones';
+                    reopen.innerHTML = '<i data-lucide="chevron-right" aria-hidden="true"></i>';
+                    if (!wasCollapsed) reopen.classList.add('dock-item-enter');
+                    reopen.addEventListener('click', () => {
+                        dockRecommendationsCollapsed = false;
+                        renderDock();
+                    });
+                    dock.appendChild(reopen);
+                }
+            }
+            recommendedApps.forEach(app => addDockApp(app, false));
             if (window.lucide) lucide.createIcons();
         }
 
@@ -1318,6 +1756,17 @@ function appIconMarkup(app) {
             initWelcomeAnimationDropdown();
             initFolderAnimationDropdown();
             renderDock(); 
+            setupAppContextMenu();
+            let dockLayoutFrame = null;
+            const refreshDockLayout = () => {
+                if (dockLayoutFrame !== null) cancelAnimationFrame(dockLayoutFrame);
+                dockLayoutFrame = requestAnimationFrame(() => {
+                    dockLayoutFrame = null;
+                    renderDock();
+                });
+            };
+            window.addEventListener('resize', refreshDockLayout, { passive: true });
+            window.addEventListener('orientationchange', refreshDockLayout, { passive: true });
             const searchInput = document.querySelector('.search-input');
             if (searchInput) {
                 searchInput.addEventListener('input', (e) => filterSearchPersistent(e.target.value));
@@ -1500,8 +1949,22 @@ function appIconMarkup(app) {
                     <div class="switch" id="toggleCustomApps"></div>
                 </div>
                 <div class="setting-item-row">
-                    <div class="setting-item-meta"><i data-lucide="layout-dashboard"></i><div><span class="setting-label">Dock Inferior</span><span class="setting-desc">Muestra una barra inferior con hasta 5 apps frecuentes</span></div></div>
+                    <div class="setting-item-meta"><i data-lucide="layout-dashboard"></i><div><span class="setting-label">Dock Inferior</span><span class="setting-desc">Muestra apps fijadas y recomendaciones frecuentes</span></div></div>
                     <div class="switch" id="toggleDock"></div>
+                </div>
+                <div class="setting-item-row">
+                    <div class="setting-item-meta"><i data-lucide="flame"></i><div><span class="setting-label">Recomendaciones del Dock</span><span class="setting-desc">Muestra las apps más abiertas que no estén fijadas</span></div></div>
+                    <div class="switch" id="toggleDockRecommendations"></div>
+                </div>
+                <div class="setting-item-row">
+                    <div class="setting-item-meta"><i data-lucide="list-ordered"></i><div><span class="setting-label">Número de recomendaciones</span><span class="setting-desc">Cantidad de apps recomendadas en el Dock</span></div></div>
+                    <div class="custom-dropdown preference-dropdown" id="dockRecommendationsLimit">
+                        <div class="dropdown-select"><span>5 aplicaciones</span><i data-lucide="chevron-down"></i></div>
+                        <div class="dropdown-options">
+                            <div class="dropdown-option" data-value="3">3 aplicaciones</div>
+                            <div class="dropdown-option selected" data-value="5">5 aplicaciones</div>
+                        </div>
+                    </div>
                 </div>
 
                 <span class="settings-section-title">Ajustes de Escala y Etiquetas</span>
@@ -2461,6 +2924,13 @@ function appIconMarkup(app) {
                 showToast('Eliminado de favoritos', 'star-off');
             }
             localStorage.setItem('favorites', JSON.stringify(favs));
+            const isNowFavorite = favs.includes(url);
+            document.querySelectorAll('#folderApps .tool-card').forEach(card => {
+                if (card.dataset.url === url) card.querySelector('.star-btn')?.classList.toggle('active', isNowFavorite);
+            });
+            if (!isNowFavorite && document.getElementById('folderTitle')?.textContent === 'Favoritos') {
+                document.querySelector(`#folderApps .tool-card[data-url="${CSS.escape(url)}"]`)?.remove();
+            }
         }
 
         function getFavoriteApps() {
@@ -3351,36 +3821,49 @@ function appIconMarkup(app) {
         function renderAppsSettings() {
             const list = document.getElementById('appsVisibilityList');
             if (!list) return;
+            setupDockPinManagerDragAndDrop(list);
             const hiddenUrls = getHiddenAppUrls();
+            const pinnedUrls = getPinnedDockUrls();
+            const pinnedPositions = new Map(pinnedUrls.map((url, index) => [url, index]));
             const query = (document.getElementById('appsFilterInput')?.value || '').trim().toLowerCase();
             const status = getCustomDropdownValue('appsStatusFilter') || 'all';
-            const entries = getAllAppEntries().filter(app => {
+            const allEntries = getAllAppEntries();
+            const catalogPositions = new Map(allEntries.map((app, index) => [app.url, index]));
+            const entries = allEntries.filter(app => {
                 const isHidden = hiddenUrls.has(app.url);
                 const matchesText = !query || `${app.name} ${app.source}`.toLowerCase().includes(query);
                 const matchesStatus = status === 'all' || (status === 'hidden' ? isHidden : !isHidden);
                 return matchesText && matchesStatus;
+            });
+            entries.sort((a, b) => {
+                const aPinnedPosition = pinnedPositions.get(a.url);
+                const bPinnedPosition = pinnedPositions.get(b.url);
+                if (aPinnedPosition !== undefined && bPinnedPosition !== undefined) return aPinnedPosition - bPinnedPosition;
+                if (aPinnedPosition !== undefined) return -1;
+                if (bPinnedPosition !== undefined) return 1;
+                return (catalogPositions.get(a.url) || 0) - (catalogPositions.get(b.url) || 0);
             });
             list.innerHTML = '';
             entries.forEach(app => {
                 const row = document.createElement('div');
                 const isCustom = app.source === 'Apps añadidas';
                 const isHidden = hiddenUrls.has(app.url);
-                row.className = `app-visibility-row ${isHidden ? 'is-hidden' : 'is-active'} ${isCustom ? 'is-custom' : 'is-system'}`;
-                row.innerHTML = `${appIconMarkup(app)}<div class="app-visibility-meta"><strong>${escapeHtml(app.name)}</strong><small>${escapeHtml(app.folder || app.source)}</small></div><span class="app-status"><i data-lucide="${isHidden ? 'eye-off' : 'eye'}"></i>${isHidden ? 'Oculta' : 'Activa'}</span><button class="app-visibility-toggle" type="button" aria-pressed="${!isHidden}">${isHidden ? 'Mostrar' : 'Ocultar'}</button>${isCustom ? '<button class="app-edit-btn" type="button" title="Editar app" aria-label="Editar app"><i data-lucide="pencil"></i></button><button class="app-remove-btn" type="button" title="Eliminar app" aria-label="Eliminar app"><i data-lucide="trash-2"></i></button>' : ''}`;
+                const isDockPinned = pinnedPositions.has(app.url);
+                row.className = `app-visibility-row ${isHidden ? 'is-hidden' : 'is-active'} ${isCustom ? 'is-custom' : 'is-system'} ${isDockPinned ? 'is-dock-pinned' : ''}`;
+                row.dataset.url = app.url;
+                row.draggable = isDockPinned;
+                const dockActionLabel = isDockPinned ? 'Desfijar del Dock' : 'Fijar en Dock';
+                row.innerHTML = `${appIconMarkup(app)}<div class="app-visibility-meta"><strong>${escapeHtml(app.name)}</strong><small>${escapeHtml(app.folder || app.source)}</small></div><span class="app-status"><i data-lucide="${isHidden ? 'eye-off' : 'eye'}"></i>${isHidden ? 'Oculta' : 'Activa'}</span><button class="app-visibility-toggle" type="button" aria-pressed="${!isHidden}">${isHidden ? 'Mostrar' : 'Ocultar'}</button><button class="app-dock-toggle" type="button" title="${dockActionLabel}" aria-label="${dockActionLabel}" aria-pressed="${isDockPinned}">${isDockPinned ? 'Desfijar' : 'Fijar'}</button>${isCustom ? '<button class="app-edit-btn" type="button" title="Editar app" aria-label="Editar app"><i data-lucide="pencil"></i></button><button class="app-remove-btn" type="button" title="Eliminar app" aria-label="Eliminar app"><i data-lucide="trash-2"></i></button>' : ''}`;
                 row.querySelector('button').onclick = () => {
-                    const urls = getHiddenAppUrls();
-                    if (urls.has(app.url)) urls.delete(app.url); else urls.add(app.url);
-                    localStorage.setItem('hiddenAppUrls', JSON.stringify([...urls]));
-                    renderAppsSettings();
-                    renderMainGrid();
-                    buildPersistentSearchDOM();
-                    renderDock();
+                    toggleAppVisibility(app.url);
                 };
+                row.querySelector('.app-dock-toggle').onclick = () => toggleDockPin(app.url);
                 if (isCustom) {
                     row.querySelector('.app-edit-btn').onclick = () => openCustomAppEditor(app);
                     row.querySelector('.app-remove-btn').onclick = () => {
                         if (!confirm(`¿Eliminar "${app.name}"?`)) return;
                         localStorage.setItem('customApps', JSON.stringify(getCustomApps().filter(item => item.id !== app.id)));
+                        storeDockPinnedUrls(getPinnedDockUrls().filter(url => url !== app.url));
                         renderAppsSettings(); renderMainGrid(); buildPersistentSearchDOM(); renderDock();
                     };
                 }
@@ -3475,7 +3958,7 @@ function appIconMarkup(app) {
                 lucideField.hidden = iconType !== 'lucide';
                 svgField.hidden = iconType !== 'svg';
                 uploadField.hidden = iconType !== 'upload';
-                if (galleryButton) galleryButton.hidden = iconType === 'favicon';
+                if (galleryButton) galleryButton.hidden = iconType !== 'lucide';
                 renderAppPreview(getFormApp(prefix), id === 'edit' ? 'editAppPreviewCard' : 'customAppPreviewCard');
             };
             initAppDropdown(`${id}AppIconType`, update);
@@ -3525,8 +4008,10 @@ function appIconMarkup(app) {
                 const values = getFormApp('edit');
                 if (!values.name || !values.url) { showToast('Completa el nombre y el enlace', 'alert-circle'); return; }
                 const finish = (iconData = app.iconData || '') => {
+                    const pinnedUrls = getPinnedDockUrls().map(url => url === app.url ? values.url : url);
                     const updated = getCustomApps().map(item => item.id === app.id ? { ...item, ...values, iconData } : item);
                     localStorage.setItem('customApps', JSON.stringify(updated));
+                    storeDockPinnedUrls(pinnedUrls);
                     closeModal('appEditorModal'); renderAppsSettings(); renderMainGrid(); buildPersistentSearchDOM(); renderDock();
                 };
                 const file = document.getElementById('editAppIconFile').files[0];
@@ -3660,6 +4145,8 @@ function appIconMarkup(app) {
             setupToggle('toggleFavFolder', 'showFavFolder', renderMainGrid, 'true');
             setupToggle('toggleRecentFolder', 'showRecentFolder', renderMainGrid, 'false');
             setupToggle('toggleDock', 'showDock', renderDock, 'false');
+            setupToggle('toggleDockRecommendations', 'showDockRecommendations', renderDock, 'true');
+            setupPreferenceDropdown('dockRecommendationsLimit', 'dockRecommendationsLimit', '5', renderDock);
             setupToggle('toggleCustomApps', 'showCustomApps', renderMainGrid, 'true');
             setupToggle('toggleSounds', 'sounds', null, 'false');
             setupToggle('toggleHaptics', 'haptics', null, 'false');
@@ -3861,6 +4348,9 @@ function appIconMarkup(app) {
                 appUsageStats: '{}',
                 homescreenRunUrl: '',
                 showDock: 'false',
+                pinnedDockApps: '[]',
+                showDockRecommendations: 'true',
+                dockRecommendationsLimit: '5',
                 showRecentFolder: 'false',
                 showCustomApps: 'true',
                 customApps: '[]',
@@ -3895,7 +4385,7 @@ function appIconMarkup(app) {
             const settingsKeys = Object.keys(settingsDefaults);
 
             function serializeSettingsValue(key, value) {
-                if (['favorites', 'appUsageStats', 'customApps', 'hiddenAppUrls'].includes(key)) {
+                if (['favorites', 'appUsageStats', 'customApps', 'hiddenAppUrls', 'pinnedDockApps'].includes(key)) {
                     if (typeof value === 'string') {
                         try { value = JSON.parse(value); } catch (error) { value = key === 'appUsageStats' ? {} : []; }
                     }
@@ -3958,7 +4448,7 @@ function appIconMarkup(app) {
                         if (source[key] !== undefined) config[key] = serializeSettingsValue(key, source[key]);
                     });
 
-                    ['favorites', 'appUsageStats', 'customApps', 'hiddenAppUrls'].forEach(key => {
+                    ['favorites', 'appUsageStats', 'customApps', 'hiddenAppUrls', 'pinnedDockApps'].forEach(key => {
                         if (config[key] !== undefined) JSON.parse(config[key]);
                     });
 
@@ -4137,7 +4627,7 @@ function appIconMarkup(app) {
                         if (key === 'favorites' || key === 'appUsageStats' ||
                             (selection.mode === 'basic' && githubGistPerformanceSettings.has(key)) ||
                             !Object.prototype.hasOwnProperty.call(remoteConfig, key)) return;
-                        if (key === 'customApps' || key === 'hiddenAppUrls') {
+                        if (key === 'customApps' || key === 'hiddenAppUrls' || key === 'pinnedDockApps') {
                             config[key] = mergeGithubGistArraySetting(key, currentConfig[key] ?? settingsDefaults[key], remoteConfig[key]);
                         } else {
                             config[key] = serializeSettingsValue(key, remoteConfig[key]);

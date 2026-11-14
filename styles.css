@@ -648,6 +648,26 @@ body.hide-app-stars .tool-card .star-btn { display: none !important; }
     transition: all 0.5s var(--bezier);
     box-shadow: 0 20px 50px rgba(0,0,0,0.5);
     transform: translateX(-50%);
+    max-width: calc(100vw - 32px);
+    overflow-x: auto;
+    overflow-y: hidden;
+    scrollbar-width: none;
+}
+.dock-container::-webkit-scrollbar { display: none; }
+.dock-container.dock-enter { animation: dockSlideIn 420ms var(--bezier) both; }
+.dock-container .dock-item-enter { animation: dockItemPop 360ms var(--bezier) both; }
+.dock-container .dock-item-exit { animation: dockItemFadeOut 160ms ease-in both; pointer-events: none; }
+@keyframes dockSlideIn {
+    from { opacity: 0; transform: translateX(-50%) translateY(14px) scale(0.96); }
+    to { opacity: 1; transform: translateX(-50%) translateY(0) scale(1); }
+}
+@keyframes dockItemPop {
+    from { opacity: 0; transform: translateY(8px) scale(0.78); }
+    70% { opacity: 1; transform: translateY(-2px) scale(1.05); }
+    to { opacity: 1; transform: translateY(0) scale(1); }
+}
+@keyframes dockItemFadeOut {
+    to { opacity: 0; transform: translateY(-3px) scale(0.82); }
 }
 
 body.search-open .dock-container {
@@ -658,6 +678,7 @@ body.search-open .dock-container {
 
 .dock-container .tool-card {
     width: 36px;
+    flex: 0 0 36px;
     height: 36px;
     padding: 0;
     border-radius: 50%;
@@ -667,6 +688,111 @@ body.search-open .dock-container {
 .dock-container .tool-card i { margin: 0; width: 18px; height: 18px; }
 .dock-container .tool-card span, 
 .dock-container .tool-card .star-btn { display: none; }
+.dock-divider {
+    flex: 0 0 12px;
+    align-self: stretch;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    margin: 0 1px;
+    padding: 0;
+    border: 0;
+    border-radius: 6px;
+    background: transparent;
+    cursor: pointer;
+}
+.dock-divider::before {
+    content: "";
+    width: 1px;
+    height: 22px;
+    background: var(--glass-border);
+    opacity: 0.75;
+    transition: height 0.2s ease, background 0.2s ease, opacity 0.2s ease;
+}
+.dock-divider:hover::before { height: 28px; background: var(--text-muted); opacity: 1; }
+.dock-divider:focus-visible,
+.dock-recommendations-reopen:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+.dock-recommendations-reopen {
+    flex: 0 0 28px;
+    width: 28px;
+    height: 32px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    padding: 0;
+    border: 0;
+    border-radius: 50%;
+    background: rgba(255,255,255,0.07);
+    color: var(--text-muted);
+    cursor: pointer;
+}
+.dock-recommendations-reopen:hover { background: rgba(255,255,255,0.14); color: var(--text-main); }
+.dock-recommendations-reopen svg { width: 15px; height: 15px; }
+.dock-recommendations-reopen i { display: inline-flex; }
+.dock-recommendations-reopen.dock-item-enter { animation: dockItemPop 240ms var(--bezier) both; }
+.app-context-menu {
+    position: fixed;
+    z-index: 300;
+    width: 220px;
+    max-width: calc(100vw - 16px);
+    max-height: calc(100vh - 16px);
+    overflow-y: auto;
+    overscroll-behavior: contain;
+    padding: 7px;
+    border: 1px solid var(--glass-border);
+    border-radius: 15px;
+    background: var(--glass);
+    backdrop-filter: blur(var(--blur-val));
+    -webkit-backdrop-filter: blur(var(--blur-val));
+    box-shadow: 0 12px 28px rgba(0,0,0,0.45);
+}
+.app-context-menu[hidden] { display: none; }
+.app-context-menu-header {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    min-width: 0;
+    padding: 8px 9px 10px;
+    color: var(--text-main);
+    font-size: 0.84rem;
+    font-weight: 500;
+}
+.app-context-menu-header > i,
+.app-context-menu-header > svg,
+.app-context-menu-header > img {
+    width: 22px;
+    height: 22px;
+    flex: 0 0 22px;
+    object-fit: contain;
+}
+.app-context-menu-header > span:last-child {
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+.app-context-menu-items { display: flex; flex-direction: column; gap: 2px; }
+.app-context-menu .app-context-menu-item {
+    width: 100%;
+    min-height: 34px;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 7px 9px;
+    border: 0;
+    border-radius: 9px;
+    background: transparent;
+    color: var(--text-main);
+    font: inherit;
+    font-size: 0.8rem;
+    text-align: left;
+    cursor: pointer;
+}
+.app-context-menu .app-context-menu-item:hover,
+.app-context-menu .app-context-menu-item:focus-visible { background: rgba(255,255,255,0.09); outline: none; }
+.app-context-menu .app-context-menu-item.active { color: var(--accent); }
+.app-context-menu-item > i,
+.app-context-menu-item > svg { width: 16px; height: 16px; flex: 0 0 16px; }
+.app-context-menu-separator { height: 1px; margin: 4px 7px; background: var(--glass-border); }
 
 /* ✏️ VALOR CLAVE: Panel desplegable de búsqueda */
 .search-panel {
@@ -2095,7 +2221,9 @@ body.zen-mode #bgCanvas { opacity: 0 !important; }
 .app-status { display: inline-flex; align-items: center; gap: 4px; color: #34c759; font-size: 0.68rem; white-space: nowrap; }
 .app-status svg { width: 13px; height: 13px; }
 .is-hidden .app-status { color: var(--text-muted); }
-.app-visibility-toggle, .app-edit-btn, .app-remove-btn { border: 1px solid var(--glass-border); background: rgba(255,255,255,0.07); color: var(--text-main); border-radius: 10px; min-height: 30px; padding: 6px 10px; font: inherit; font-size: 0.72rem; cursor: pointer; transition: background 0.2s ease, border-color 0.2s ease, transform 0.2s var(--bezier); }
+.app-visibility-toggle, .app-dock-toggle, .app-edit-btn, .app-remove-btn { border: 1px solid var(--glass-border); background: rgba(255,255,255,0.07); color: var(--text-main); border-radius: 10px; min-height: 30px; padding: 6px 10px; font: inherit; font-size: 0.72rem; cursor: pointer; transition: background 0.2s ease, border-color 0.2s ease, transform 0.2s var(--bezier); }
+.app-visibility-row.is-dock-pinned { cursor: grab; }
+.app-visibility-row.is-dock-pinned:active { cursor: grabbing; }
 .app-edit-btn, .app-remove-btn { width: 30px; padding: 0; display: inline-flex; align-items: center; justify-content: center; }
 .app-edit-btn svg, .app-remove-btn svg { width: 14px; height: 14px; }
 
@@ -2139,7 +2267,24 @@ body.zen-mode #bgCanvas { opacity: 0 !important; }
     height: 18px;
     flex-shrink: 0;
 }
-.app-visibility-toggle:hover, .app-edit-btn:hover, .app-remove-btn:hover { background: rgba(255,255,255,0.14); border-color: rgba(255,255,255,0.2); transform: translateY(-1px); }
+.btn-select-icon.btn-icon-gallery {
+    min-height: 36px;
+    justify-content: flex-start;
+    padding: 10px 12px;
+    border-color: var(--glass-border);
+    border-radius: 999px;
+    background: var(--glass);
+    color: var(--text-main);
+    font-family: var(--font-main);
+    font-size: 0.82rem;
+    font-weight: 400;
+    backdrop-filter: blur(var(--blur-val));
+    -webkit-backdrop-filter: blur(var(--blur-val));
+}
+.btn-select-icon.btn-icon-gallery:hover { background: rgba(255,255,255,0.12); border-color: var(--glass-border); }
+.btn-select-icon.btn-icon-gallery:active { background: rgba(255,255,255,0.18); }
+.btn-icon-gallery[hidden] { display: none; }
+.app-visibility-toggle:hover, .app-dock-toggle:hover, .app-edit-btn:hover, .app-remove-btn:hover { background: rgba(255,255,255,0.14); border-color: rgba(255,255,255,0.2); transform: translateY(-1px); }
 .apps-toolbar { display: flex; gap: 8px; align-items: center; margin-bottom: 4px; }
 .apps-search { flex: 1; min-width: 0; display: flex; align-items: center; gap: 8px; padding: 8px 11px; border: 1px solid var(--glass-border); border-radius: 12px; background: rgba(255,255,255,0.045); color: var(--text-muted); }
 .apps-search svg { width: 15px; height: 15px; flex: 0 0 auto; }
@@ -2284,9 +2429,19 @@ body.folder-apps-size-5 #folderApps .tool-card i, body.folder-apps-size-5 #folde
     .settings-search-result,
     .settings-search-empty,
     .result-item,
-    .search-enter {
+    .search-enter,
+    .dock-container.dock-enter,
+    .dock-container .dock-item-enter,
+    .dock-container .dock-item-exit {
         transition-duration: 0.01ms;
         transition-delay: 0ms;
         animation-duration: 0.01ms;
     }
+}
+
+@media (max-width: 600px) {
+    .app-visibility-row { gap: 6px; padding: 8px; }
+    .app-visibility-row .app-status { display: none; }
+    .app-visibility-row .app-visibility-toggle,
+    .app-visibility-row .app-dock-toggle { padding-right: 7px; padding-left: 7px; }
 }
