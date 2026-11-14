@@ -2,7 +2,7 @@
     'use strict';
 
     const nativeTools = [
-        { key: 'note', title: 'Nota rápida', icon: 'file-text', open: 'openNote' },
+        { key: 'note', title: 'Nota flotante', icon: 'file-text', open: 'openNote' },
         { key: 'calculator', title: 'Calculadora', icon: 'calculator', open: 'openCalc' },
         { key: 'tasks', title: 'Lista de tareas', icon: 'check-square', open: 'openTasks' },
         { key: 'pomodoro', title: 'Pomodoro', icon: 'timer', open: 'openPomodoro' },

@@ -592,7 +592,7 @@
         const appLauncher = {
             openNote: () => {
                 wm.createWindow({
-                    title: 'Nota Rapid',
+                    title: 'Nota Flotante',
                     icon: 'file-text',
                     width: 360,
                     height: 300,
