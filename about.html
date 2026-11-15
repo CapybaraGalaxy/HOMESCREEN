@@ -38,7 +38,6 @@
             box-sizing: border-box;
             margin: 0;
             padding: 0;
-            user-select: none;
         }
 
         html {
@@ -51,6 +50,13 @@
             font-family: 'Outfit', sans-serif;
             overflow-x: hidden;
             overflow-y: auto;
+            -webkit-font-smoothing: antialiased;
+        }
+
+        /* Estados de foco accesibles */
+        a:focus-visible, button:focus-visible, summary:focus-visible {
+            outline: 2px solid var(--text-main);
+            outline-offset: 3px;
         }
 
         #particles-bg {
@@ -63,13 +69,94 @@
             pointer-events: none;
         }
 
+        /* --- Barra Superior (Top Bar) --- */
+        .top-navbar {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            z-index: 1100;
+            background: rgba(10, 10, 10, 0.85);
+            backdrop-filter: blur(var(--blur-val));
+            -webkit-backdrop-filter: blur(var(--blur-val));
+            border-bottom: 1px solid var(--glass-border);
+            padding: 12px 28px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 16px;
+        }
+
+        .top-brand {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            text-decoration: none;
+            color: var(--text-main);
+            font-weight: 600;
+            font-size: 1rem;
+        }
+
+        .top-brand img {
+            width: 28px;
+            height: 28px;
+            border-radius: 6px;
+        }
+
+        .top-nav-links {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            flex-wrap: wrap;
+        }
+
+        .top-nav-btn {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            padding: 8px 16px;
+            border-radius: 100px;
+            font-size: 0.84rem;
+            font-weight: 500;
+            text-decoration: none;
+            transition: background 0.25s ease, transform 0.2s ease, border-color 0.25s ease;
+            border: 1px solid var(--glass-border);
+            background: rgba(255, 255, 255, 0.04);
+            color: var(--text-main);
+        }
+
+        .top-nav-btn:hover {
+            background: var(--surface-hover);
+            border-color: rgba(255, 255, 255, 0.2);
+            transform: scale(1.02);
+        }
+
+        .top-nav-btn.primary {
+            background: var(--text-main);
+            color: var(--bg);
+            border-color: var(--text-main);
+        }
+
+        .top-nav-btn.primary:hover {
+            opacity: 0.9;
+        }
+
+        @media(max-width: 640px) {
+            .top-navbar {
+                padding: 10px 16px;
+            }
+            .top-nav-links .hide-mobile {
+                display: none;
+            }
+        }
+
         .app-container {
             position: relative;
             z-index: 2;
             max-width: 900px;
             margin: 0 auto;
             min-height: 100dvh;
-            padding: env(safe-area-inset-top) 28px calc(env(safe-area-inset-bottom) + 32px) 28px;
+            padding: calc(env(safe-area-inset-top) + 80px) 28px calc(env(safe-area-inset-bottom) + 32px) 28px;
             display: flex;
             flex-direction: column;
             gap: 40px;
@@ -115,7 +202,7 @@
             white-space: nowrap;
         }
 
-        .floating-nav-item:hover {
+        .floating-nav-item:hover, .floating-nav-item.active {
             color: var(--text-main);
             background: var(--surface-hover);
         }
@@ -131,7 +218,7 @@
 
         .floating-nav:hover .floating-nav-text {
             opacity: 1;
-            max-width: 150px;
+            max-width: 180px;
         }
 
         @media (max-width: 768px) {
@@ -148,7 +235,7 @@
                 border-radius: 100px;
                 padding: 6px 12px;
                 gap: 4px;
-                background: rgba(18, 18, 18, 0.9);
+                background: rgba(18, 18, 18, 0.95);
                 box-shadow: 0 10px 30px rgba(0,0,0,0.6);
                 width: max-content;
                 max-width: calc(100vw - 32px);
@@ -172,7 +259,7 @@
             flex-direction: column;
             align-items: center;
             text-align: center;
-            padding-top: 60px;
+            padding-top: 20px;
             gap: 16px;
             animation: fadeInHero 1.2s var(--bezier) forwards;
         }
@@ -315,10 +402,16 @@
 
         .metrics-grid {
             display: grid;
-            grid-template-columns: repeat(3, 1fr);
+            grid-template-columns: repeat(4, 1fr);
             gap: 16px;
             opacity: 0;
             animation: scaleInCards 0.8s var(--bezier) 0.2s forwards;
+        }
+
+        @media(max-width: 768px) {
+            .metrics-grid {
+                grid-template-columns: repeat(2, 1fr);
+            }
         }
 
         .metric-card {
@@ -338,7 +431,7 @@
         }
 
         .metric-value {
-            font-size: 2rem;
+            font-size: 1.5rem;
             font-weight: 600;
             font-variant-numeric: tabular-nums;
             margin-bottom: 4px;
@@ -1163,6 +1256,7 @@
             }
         }
 
+        /* --- Visualizador de Dispositivos (Arreglado para móvil sin aplastarse) --- */
         .device-showcase {
             display: flex;
             flex-direction: column;
@@ -1173,6 +1267,7 @@
             border-radius: 22px;
             background: linear-gradient(145deg, rgba(255,255,255,.045), rgba(255,255,255,.012));
             overflow: hidden;
+            width: 100%;
         }
 
         .device-showcase-heading {
@@ -1194,51 +1289,54 @@
 
         .device-stage {
             width: 100%;
-            height: 560px;
+            min-height: 480px;
             display: flex;
             justify-content: center;
             align-items: center;
             perspective: 1200px;
             position: relative;
+            overflow: hidden;
+            padding: 10px;
         }
 
         .device-preview-frame {
-            width: 780px;
-            height: 480px;
-            max-width: 98%;
+            width: 100%;
+            max-width: 780px;
+            height: 438px;
             padding: 10px;
             border: 1px solid rgba(255,255,255,.2);
-            border-radius: 20px;
+            border-radius: 18px;
             background: linear-gradient(145deg, #292929, #101010 55%, #242424);
             box-shadow: 0 25px 70px rgba(0,0,0,.55), inset 0 1px 1px rgba(255,255,255,.16);
             overflow: hidden;
             transition:
                 width .75s cubic-bezier(.16,1,.3,1),
                 height .75s cubic-bezier(.16,1,.3,1),
+                max-width .75s cubic-bezier(.16,1,.3,1),
                 border-radius .65s ease,
                 transform .75s cubic-bezier(.16,1,.3,1),
                 box-shadow .5s ease;
         }
 
         .device-preview-frame.is-phone {
-            width: 290px;
-            height: 540px;
-            border-radius: 18px;
-            padding: 10px;
+            width: 100%;
+            max-width: 300px;
+            height: 520px;
+            border-radius: 24px;
         }
 
         .device-preview-frame.is-tablet {
-            width: 660px;
-            height: 471px;
-            border-radius: 18px;
-            padding: 10px;
+            width: 100%;
+            max-width: 640px;
+            height: 440px;
+            border-radius: 20px;
         }
 
         .device-preview-frame.is-laptop {
-            width: 780px;
+            width: 100%;
+            max-width: 780px;
             height: 438px;
             border-radius: 18px;
-            padding: 10px;
         }
 
         .device-screen {
@@ -1269,22 +1367,23 @@
             display: flex;
             align-items: center;
             justify-content: center;
-            gap: 9px;
+            gap: 8px;
             padding: 6px;
             border: 1px solid var(--glass-border);
             border-radius: 100px;
             background: rgba(0,0,0,.35);
             backdrop-filter: blur(var(--blur-val));
             -webkit-backdrop-filter: blur(var(--blur-val));
+            flex-wrap: wrap;
+            max-width: 100%;
         }
 
         .device-option {
             display: inline-flex;
             align-items: center;
             justify-content: center;
-            gap: 9px;
-            min-width: 112px;
-            padding: 11px 17px;
+            gap: 8px;
+            padding: 10px 16px;
             border: 1px solid transparent;
             border-radius: 100px;
             color: var(--text-muted);
@@ -1473,6 +1572,17 @@
             }
         }
 
+        /* Reduced Motion Support */
+        @media (prefers-reduced-motion: reduce) {
+            html { scroll-behavior: auto; }
+            *, *::before, *::after {
+                animation-duration: 0.01ms !important;
+                animation-iteration-count: 1 !important;
+                transition-duration: 0.01ms !important;
+                scroll-behavior: auto !important;
+            }
+        }
+
         /* Animaciones */
         @keyframes fadeInHero {
             from { opacity: 0; transform: translateY(30px); }
@@ -1504,9 +1614,6 @@
                 grid-template-columns: 1fr;
                 padding: 22px;
             }
-            .metrics-grid {
-                grid-template-columns: 1fr;
-            }
             .features-list {
                 grid-template-columns: 1fr;
             }
@@ -1523,8 +1630,27 @@
 
     <canvas id="particles-bg"></canvas>
 
+<!-- Barra Superior -->
+    <nav class="top-navbar" aria-label="Navegación principal">
+        <a href="index.html" class="top-brand">
+            <img src="Media/faviconold.png" alt="Logo Homescreen NEO">
+            <span>Homescreen NEO</span>
+        </a>
+        <div class="top-nav-links">
+            <a href="https://capybaragalaxy.github.io/homescreen-online/store" target="_blank" rel="noopener noreferrer" class="top-nav-btn">
+                <i data-lucide="store" size="15"></i> Tienda
+            </a>
+            <a href="https://github.com/CapybaraGalaxy/HOMESCREEN" target="_blank" rel="noopener noreferrer" class="top-nav-btn">
+                <i data-lucide="code" size="15"></i> <span class="hide-mobile">Ver código</span>
+            </a>
+            <a href="index.html" class="top-nav-btn primary">
+                <i data-lucide="layout-grid" size="15"></i> Abrir Homescreen
+            </a>
+        </div>
+    </nav>
+
     <!-- Navegación Flotante por Secciones (Sidebar) -->
-    <nav class="floating-nav" aria-label="Navegación rápida">
+    <nav class="floating-nav" aria-label="Navegación rápida por secciones">
         <a href="#inicio" class="floating-nav-item" title="Inicio">
             <i data-lucide="home" size="18"></i>
             <span class="floating-nav-text">Inicio</span>
@@ -1532,6 +1658,10 @@
         <a href="#caracteristicas" class="floating-nav-item" title="Características">
             <i data-lucide="sparkles" size="18"></i>
             <span class="floating-nav-text">Características</span>
+        </a>
+        <a href="#extensiones" class="floating-nav-item" title="Extensiones y Tienda">
+            <i data-lucide="store" size="18"></i>
+            <span class="floating-nav-text">Extensiones</span>
         </a>
         <a href="#dispositivos" class="floating-nav-item" title="Dispositivos">
             <i data-lucide="laptop" size="18"></i>
@@ -1541,8 +1671,8 @@
             <i data-lucide="sliders-horizontal" size="18"></i>
             <span class="floating-nav-text">Personalización</span>
         </a>
-        <a href="#filosofia" class="floating-nav-item" title="Filosofía">
-            <i data-lucide="compass" size="18"></i>
+        <a href="#filosofia" class="floating-nav-item" title="Filosofía y Privacidad">
+            <i data-lucide="shield-check" size="18"></i>
             <span class="floating-nav-text">Filosofía</span>
         </a>
         <a href="#roadmap" class="floating-nav-item" title="Roadmap">
@@ -1562,7 +1692,7 @@
     <div class="app-container" id="main-view">
         <header id="inicio">
             <div class="app-icon-badge">
-                <img src="Media/faviconold.png" alt="Icono de la aplicación" width="60" height="60">
+                <img src="Media/faviconold.png" alt="Icono de la aplicación" width="60" height="60" onerror="this.style.display='none';">
             </div>
             <div>
                 <h1>Homescreen NEO</h1>
@@ -1577,9 +1707,13 @@
         </header>
         <div class="back-action-container">
             <button class="btn-back" onclick="window.location.href='index.html'">
-                <i data-lucide="Arrow-Right-Circle" size="16"></i>
-                Ir a Homescreen
+                <i data-lucide="arrow-right-circle" size="16"></i>
+                Abrir Homescreen
             </button>
+            <a class="btn-back" style="text-decoration:none; background:var(--surface-hover); color:var(--text-main); border:1px solid var(--glass-border);" href="https://github.com/CapybaraGalaxy/HOMESCREEN" target="_blank" rel="noopener noreferrer">
+                <i data-lucide="code" size="16"></i>
+                Ver código fuente
+            </a>
         </div>
         
         <div class="carousel-container">
@@ -1609,6 +1743,51 @@
                     <strong>Todo lo que necesitas, a un vistazo.</strong>
                     <span>OPEN SOURCE</span>
                 </div>
+            </div>
+        </section>
+
+        <!-- Sección Propia: Tienda de Herramientas y Extensiones -->
+        <section class="section-box" id="extensiones" aria-labelledby="extensiones-heading">
+            <div class="roadmap-header" style="margin-bottom: 20px;">
+                <span class="section-eyebrow"><i data-lucide="store" size="13"></i> Ecosistema de Aplicaciones</span>
+                <h2 id="extensiones-heading">Tienda de herramientas y extensiones</h2>
+                <p>Homescreen está evolucionando de una simple pantalla de inicio a un pequeño ecosistema modular de micro-aplicaciones.</p>
+            </div>
+            <div class="features-list">
+                <div class="feature-item">
+                    <div class="feature-icon-wrapper"><i data-lucide="download" size="18"></i></div>
+                    <div class="feature-text">
+                        <h4>Herramientas adicionales descargables</h4>
+                        <p>Amplía las capacidades predeterminadas añadiendo utilidades extra según tus necesidades de productividad o entretenimiento.</p>
+                    </div>
+                </div>
+                <div class="feature-item">
+                    <div class="feature-icon-wrapper"><i data-lucide="boxes" size="18"></i></div>
+                    <div class="feature-text">
+                        <h4>Aplicaciones de terceros</h4>
+                        <p>Descubre utilidades creadas por la comunidad y otros desarrolladores integradas de forma fluida en la plataforma.</p>
+                    </div>
+                </div>
+                <div class="feature-item">
+                    <div class="feature-icon-wrapper"><i data-lucide="code" size="18"></i></div>
+                    <div class="feature-text">
+                        <h4>Herramientas desarrolladas por ti</h4>
+                        <p>Crea tus propias herramientas personalizadas a medida y añádelas a tu espacio de trabajo localmente.</p>
+                    </div>
+                </div>
+                <div class="feature-item">
+                    <div class="feature-icon-wrapper"><i data-lucide="layout" size="18"></i></div>
+                    <div class="feature-text">
+                        <h4>Integración con la interfaz principal</h4>
+                        <p>Todas las extensiones se adaptan de forma nativa al diseño Glassmorphism y al comportamiento general de Homescreen.</p>
+                    </div>
+                </div>
+            </div>
+            <div style="margin-top: 24px; display: flex; align-items: center; justify-content: space-between; gap: 16px; flex-wrap: wrap; padding-top: 16px; border-top: 1px solid var(--glass-border);">
+                <p style="font-size: 0.88rem; color: var(--text-muted);">Explora el catálogo completo de complementos disponibles en la tienda oficial.</p>
+                <a class="top-nav-btn primary" href="https://capybaragalaxy.github.io/homescreen-online/store" target="_blank" rel="noopener noreferrer">
+                    <i data-lucide="store" size="16"></i> Visitar Tienda de Herramientas
+                </a>
             </div>
         </section>
 
@@ -1642,14 +1821,13 @@
                 <div class="zen-preview-container">
                     <div class="zen-preview-bg"></div>
                     <div class="zen-preview-window">
-                        <img id="zen-preview-img" src="https://github.com/CapybaraGalaxy/HOMESCREEN/blob/main/Media/Showcase/Showcase%201.png?raw=true" alt="Workspaces Preview" loading="lazy">
+                        <img id="zen-preview-img" src="https://github.com/CapybaraGalaxy/HOMESCREEN/blob/main/Media/Showcase/Showcase%201.png?raw=true" alt="Workspaces Preview" loading="lazy" onerror="this.src='data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 width=%22400%22 height=%22300%22%3E%3Crect width=%22400%22 height=%22300%22 fill=%22%23222%22/%3E%3Ctext x=%2250%25%22 y=%2250%25%22 fill=%22%23888%22 text-anchor=%22middle%22 dy=%22.3em%22%3EVista previa%3C/text%3E%3C/svg%3E';">
                     </div>
                 </div>
             </div>
         </section>
 
-
-
+        <!-- Visualizador de dispositivos (Corregido para móvil sin aplastarse) -->
         <section class="device-showcase" id="dispositivos" aria-labelledby="device-heading">
             <div class="device-showcase-heading">
                 <span class="section-eyebrow">Una experiencia multidispositivo</span>
@@ -1660,7 +1838,7 @@
             <div class="device-stage">
                 <div class="device-preview-frame is-laptop" id="device-frame">
                     <div class="device-screen">
-                        <img id="device-preview-image" src="URL_IMAGEN_PORTATIL" alt="Homescreen en un portátil">
+                        <img id="device-preview-image" src="https://github.com/CapybaraGalaxy/HOMESCREEN/blob/main/Media/Devices/pc.jpg?raw=true" alt="Homescreen en un portátil" onerror="this.style.display='none';">
                     </div>
                 </div>
             </div>
@@ -1681,9 +1859,10 @@
             </div>
 
             <span class="device-current-label" id="device-current-label" aria-live="polite">
-                VISTA EN PORTÁTIL
+                VISTA EN PORTÁTÍL
             </span>
         </section>
+
         <section class="principles-section" id="filosofia" aria-labelledby="principles-heading">
             <div class="principles-heading">
                 <div>
@@ -1711,18 +1890,62 @@
             </div>
         </section>
 
-        <section class="metrics-grid">
+        <!-- Privacidad y Métricas actualizadas -->
+        <section class="metrics-grid" aria-label="Métricas de privacidad y rendimiento">
             <div class="metric-card">
-                <div class="metric-value">100%*</div>
-                <div class="metric-label">Local</div>
+                <div class="metric-value">Sin registro</div>
+                <div class="metric-label">Obligatorio</div>
             </div>
             <div class="metric-card">
-                <div class="metric-value" style="font-size:1.8rem; padding-top:4px;">PWA</div>
-                <div class="metric-label">Instalable</div>
+                <div class="metric-value">Datos locales</div>
+                <div class="metric-label">Almacenamiento</div>
             </div>
             <div class="metric-card">
-                <div class="metric-value">0</div>
-                <div class="metric-label">Rastreadores</div>
+                <div class="metric-value">0 Ads</div>
+                <div class="metric-label">Sin publicidad</div>
+            </div>
+            <div class="metric-card">
+                <div class="metric-value">Open Source</div>
+                <div class="metric-label">Código abierto</div>
+            </div>
+        </section>
+
+        <section class="section-box" aria-labelledby="conexiones-heading">
+            <h3 class="section-title" id="conexiones-heading">
+                <i data-lucide="shield-check" size="18"></i> Privacidad y Conexiones Externas
+            </h3>
+            <p style="color: var(--text-muted); font-size: 0.9rem; line-height: 1.6; margin-bottom: 16px;">
+                Homescreen NEO opera principalmente de forma local en tu navegador. Sin embargo, para su correcto funcionamiento estético y funcional, se realizan las siguientes comunicaciones externas transparentes:
+            </p>
+            <div class="features-list">
+                <div class="feature-item">
+                    <div class="feature-icon-wrapper"><i data-lucide="type" size="18"></i></div>
+                    <div class="feature-text">
+                        <h4>Google Fonts</h4>
+                        <p>Carga de tipografías optimizadas para asegurar una correcta legibilidad visual en cualquier sistema.</p>
+                    </div>
+                </div>
+                <div class="feature-item">
+                    <div class="feature-icon-wrapper"><i data-lucide="image" size="18"></i></div>
+                    <div class="feature-text">
+                        <h4>Imágenes externas</h4>
+                        <p>Recursos multimedia y capturas alojadas en GitHub o CDN oficiales para ilustrar las guías y previsualizaciones.</p>
+                    </div>
+                </div>
+                <div class="feature-item">
+                    <div class="feature-icon-wrapper"><i data-lucide="git-branch" size="18"></i></div>
+                    <div class="feature-text">
+                        <h4>Consultas a GitHub</h4>
+                        <p>Verificación opcional del historial de versiones (`version.json`) y enlace al repositorio para actualizaciones.</p>
+                    </div>
+                </div>
+                <div class="feature-item">
+                    <div class="feature-icon-wrapper"><i data-lucide="eye-off" size="18"></i></div>
+                    <div class="feature-text">
+                        <h4>Cero Rastreadores</h4>
+                        <p>No se emplean cookies de seguimiento comercial ni herramientas de análisis telemétrico de terceros.</p>
+                    </div>
+                </div>
             </div>
         </section>
 
@@ -1757,20 +1980,6 @@
                     <div class="feature-text">
                         <h4>Safe-Engine Interno</h4>
                         <p>El homescreen cuenta con un motor de seguridad que bloquea la app si algo falla.</p>
-                    </div>
-                </div>
-                <div class="feature-item">
-                    <div class="feature-icon-wrapper"><i data-lucide="smile" size="18"></i></div>
-                    <div class="feature-text">
-                        <h4>Origen Personal</h4>
-                        <p>Construí esta app originalmente para uso propio, pero me alegra saber que te es útil :).</p>
-                    </div>
-                </div>
-                <div class="feature-item">
-                    <div class="feature-icon-wrapper"><i data-lucide="eye-off" size="18"></i></div>
-                    <div class="feature-text">
-                        <h4>Privacidad Absoluta</h4>
-                        <p>No se recopila ningún tipo de dato personal, analítico ni telemétrico.</p>
                     </div>
                 </div>
             </div>
@@ -1935,8 +2144,8 @@
 
         <div class="back-action-container">
             <button class="btn-back" onclick="window.location.href='index.html'">
-                <i data-lucide="Arrow-Right-Circle" size="16"></i>
-                Ir a Homescreen
+                <i data-lucide="arrow-right-circle" size="16"></i>
+                Abrir Homescreen
             </button>
         </div>
 
@@ -1956,6 +2165,7 @@
                     <ul class="footer-links">
                         <li><a href="#inicio">Inicio</a></li>
                         <li><a href="#caracteristicas">Características</a></li>
+                        <li><a href="#extensiones">Extensiones</a></li>
                         <li><a href="#dispositivos">Dispositivos</a></li>
                         <li><a href="#personalizacion">Personalización</a></li>
                         <li><a href="#roadmap">Roadmap</a></li>
@@ -1966,6 +2176,7 @@
                     <h4>Proyecto</h4>
                     <ul class="footer-links">
                         <li><a href="index.html"><i data-lucide="layout-grid" size="14"></i> Abrir aplicación</a></li>
+                        <li><a href="https://capybaragalaxy.github.io/homescreen-online/store" target="_blank" rel="noopener noreferrer"><i data-lucide="store" size="14"></i> Tienda de herramientas</a></li>
                         <li><a href="#faq"><i data-lucide="help-circle" size="14"></i> Preguntas frecuentes</a></li>
                         <li><a href="#novedades"><i data-lucide="history" size="14"></i> Historial de cambios</a></li>
                         <li><a href="https://github.com/CapybaraGalaxy/HOMESCREEN" target="_blank" rel="noopener noreferrer"><i data-lucide="github" size="14"></i> Código en GitHub</a></li>
@@ -1984,15 +2195,15 @@
 
     <script>
         const toolsData = [
-            { name: "Calculadora de dinero", icon: "Coins", url: "Apps/dinero.html" },
-            { name: "Calculadora tiempo de descarga", icon: "Download", url: "Apps/calculadora-descarga.html" },
-            { name: "Medidas", icon: "Ruler", url: "Apps/medidas.html" },
-            { name: "Visualizador de progreso", icon: "Loader2", url: "Apps/progreso.html" },
-            { name: "Cuenta atras", icon: "clock-4", url: "Apps/countdown.html" },
-            { name: "Duolingo Tools", icon: "Brick-Wall-Fire", url: "Apps/duolingo.html" },
-            { name: "Contador", icon: "List-Ordered", url: "Apps/counter.html" },
-            { name: "Generador de código QR", icon: "Qr-Code", url: "Apps/qr.html" },
-            { name: "Bocetos", icon: "Pencil-Line", url: "Apps/bocetos.html" },
+            { name: "Calculadora de dinero", icon: "coins", url: "Apps/dinero.html" },
+            { name: "Calculadora tiempo de descarga", icon: "download", url: "Apps/calculadora-descarga.html" },
+            { name: "Medidas", icon: "ruler", url: "Apps/medidas.html" },
+            { name: "Visualizador de progreso", icon: "loader-2", url: "Apps/progreso.html" },
+            { name: "Cuenta atras", icon: "clock", url: "Apps/countdown.html" },
+            { name: "Duolingo Tools", icon: "flame", url: "Apps/duolingo.html" },
+            { name: "Contador", icon: "list-ordered", url: "Apps/counter.html" },
+            { name: "Generador de código QR", icon: "qr-code", url: "Apps/qr.html" },
+            { name: "Bocetos", icon: "pencil-line", url: "Apps/bocetos.html" },
             { name: "Selector de color", icon: "pipette", url: "Apps/color.html" },
             { name: "Editor de fotos", icon: "image", url: "Apps/editor-fotos.html" },
             { name: "Conversor zonas horarias", icon: "globe", url: "Apps/horarios.html" },
@@ -2000,23 +2211,23 @@
             { name: "Metadata", icon: "layers", url: "Apps/exif.html" },
             { name: "Pastebin - BETA", icon: "clipboard", url: "Apps/pastebin.html" },
             { name: "LED", icon: "grid", url: "Apps/led.html" },
-            { name: "Calendario [BETA]", icon: "Calendar", url: "Apps/calendario.html" },
-            { name: "Kanban", icon: "Kanban-Square", url: "Apps/kanban.html" },
-            { name: "Notas", icon: "Sticky-Notes", url: "Apps/notas.html" },
-            { name: "Typer", icon: "Keyboard", url: "Apps/typing.html" },
-            { name: "Símbolos", icon: "Images", url: "Apps/symbols.html" },
+            { name: "Calendario [BETA]", icon: "calendar", url: "Apps/calendario.html" },
+            { name: "Kanban", icon: "kanban", url: "Apps/kanban.html" },
+            { name: "Notas", icon: "sticky-note", url: "Apps/notas.html" },
+            { name: "Typer", icon: "keyboard", url: "Apps/typing.html" },
+            { name: "Símbolos", icon: "images", url: "Apps/symbols.html" },
             { name: "Comparador de Texto", icon: "split", url: "Apps/comparador.html" },
             { name: "Contador de Palabras", icon: "binary", url: "Apps/contador-palabras.html" },
             { name: "Limpiador de textos", icon: "sparkles", url: "Apps/limpia-textos.html" },
             { name: "Mayúsculas - minúsculas", icon: "case-sensitive", url: "Apps/mayus-minus.html" },
-            { name: "Generador Lorem Ipsum", icon: "Newspaper", url: "Apps/lorem-ipsum.html" },
-            { name: "Fancy Text", icon: "Letter-Text", url: "Apps/text.html" },
-            { name: "Combos", icon: "Pencil-Sparkles", url: "Apps/combos.html" },
+            { name: "Generador Lorem Ipsum", icon: "newspaper", url: "Apps/lorem-ipsum.html" },
+            { name: "Fancy Text", icon: "letter-text", url: "Apps/text.html" },
+            { name: "Combos", icon: "wand-2", url: "Apps/combos.html" },
             { name: "Teleprompter", icon: "scroll-text", url: "Apps/teleprompter.html" },
-            { name: "Ruleta aleatoria", icon: "Ferris-Wheel", url: "Apps/aleatorio.html" },
+            { name: "Ruleta aleatoria", icon: "ferris-wheel", url: "Apps/aleatorio.html" },
             { name: "Número aleatorio", icon: "dices", url: "Apps/n-aleatorio.html" },
             { name: "CPS test", icon: "gauge", url: "Apps/cps-test.html" },
-            { name: "Creador de memes", icon: "Laugh", url: "Apps/meme.html" },
+            { name: "Creador de memes", icon: "laugh", url: "Apps/meme.html" },
             { name: "Creador de Tierlist", icon: "list-ordered", url: "Apps/tierlist.html" },
             { name: "Estudio de Ritmos", icon: "music", url: "Apps/estudio-ritmos.html" },
             { name: "Quiz Studio", icon: "brain-circuit", url: "Apps/quiz-studio.html" },
@@ -2030,13 +2241,22 @@
                 const j = Math.floor(Math.random() * (i + 1));
                 [shuffledTools[i], shuffledTools[j]] = [shuffledTools[j], shuffledTools[i]];
             }
-            const doubleTools = [...shuffledTools, ...shuffledTools];
-            track.innerHTML = doubleTools.map(tool => `
+            // Marcamos los elementos duplicados con aria-hidden para lectores de pantalla
+            const normalItems = shuffledTools.map(tool => `
                 <div class="carousel-item">
                     <i data-lucide="${tool.icon}" size="16"></i>
                     <span>${tool.name}</span>
                 </div>
             `).join('');
+
+            const duplicateItems = shuffledTools.map(tool => `
+                <div class="carousel-item" aria-hidden="true">
+                    <i data-lucide="${tool.icon}" size="16"></i>
+                    <span>${tool.name}</span>
+                </div>
+            `).join('');
+
+            track.innerHTML = normalItems + duplicateItems;
         }
 
         const phrases = ["para productividad.", "perfecto.", "para el día a día.", "para crear.", "para diseñar.", "para organizar.", "para desarrollar.", "para automatizar.", "para optimizar.", "para descubrir.", "moderno.", "perfecto."];
@@ -2067,9 +2287,15 @@
             setTimeout(typeEffect, typeSpeed);
         }
 
+        /* Partículas optimizadas con pausa cuando la pestaña no es visible */
         const canvas = document.getElementById('particles-bg');
         const ctx = canvas.getContext('2d');
         let particles = [];
+        let isTabVisible = !document.hidden;
+
+        document.addEventListener('visibilitychange', () => {
+            isTabVisible = !document.hidden;
+        });
 
         function resizeCanvas() {
             canvas.width = window.innerWidth;
@@ -2107,8 +2333,10 @@
         initParticles();
 
         function animateParticles() {
-            ctx.clearRect(0, 0, canvas.width, canvas.height);
-            particles.forEach(p => { p.update(); p.draw(); });
+            if (isTabVisible) {
+                ctx.clearRect(0, 0, canvas.width, canvas.height);
+                particles.forEach(p => { p.update(); p.draw(); });
+            }
             requestAnimationFrame(animateParticles);
         }
         animateParticles();
@@ -2235,6 +2463,38 @@
             });
         }
 
+        /* Resaltado automático de sección activa en navegación (IntersectionObserver) */
+        function initActiveNavigation() {
+            const sections = document.querySelectorAll('header[id], section[id]');
+            const navItems = document.querySelectorAll('.floating-nav-item');
+
+            if (!sections.length || !navItems.length) return;
+
+            const observerOptions = {
+                root: null,
+                rootMargin: '-20% 0px -60% 0px',
+                threshold: 0
+            };
+
+            const observer = new IntersectionObserver((entries) => {
+                entries.forEach(entry => {
+                    if (entry.isIntersecting) {
+                        const id = entry.target.getAttribute('id');
+                        navItems.forEach(item => {
+                            const href = item.getAttribute('href');
+                            if (href === `#${id}`) {
+                                item.classList.add('active');
+                            } else {
+                                item.classList.remove('active');
+                            }
+                        });
+                    }
+                });
+            }, observerOptions);
+
+            sections.forEach(section => observer.observe(section));
+        }
+
         window.onload = () => {
             buildCarousel();
             fetchChangelog();
@@ -2242,6 +2502,7 @@
             initDeviceSelector();
             initZenShowcase();
             initFAQ();
+            initActiveNavigation();
             lucide.createIcons();
         };
 
@@ -2309,6 +2570,7 @@
             });
         })();
 
+        /* Selector de dispositivos con protección contra clics rápidos */
         function initDeviceSelector() {
             const frame = document.getElementById('device-frame');
             const image = document.getElementById('device-preview-image');
@@ -2336,10 +2598,12 @@
             };
 
             let currentDevice = 'laptop';
+            let isTransitioning = false;
 
             function selectDevice(device) {
-                if (!deviceImages[device] || device === currentDevice) return;
+                if (!deviceImages[device] || device === currentDevice || isTransitioning) return;
 
+                isTransitioning = true;
                 currentDevice = device;
                 const selected = deviceImages[device];
 
@@ -2355,23 +2619,23 @@
 
                 image.classList.add('is-changing');
 
-                const changeImage = () => {
+                setTimeout(() => {
                     image.src = selected.src;
                     image.alt = selected.alt;
 
                     image.onload = () => {
                         requestAnimationFrame(() => {
                             image.classList.remove('is-changing');
+                            isTransitioning = false;
                         });
                     };
 
                     image.onerror = () => {
                         image.classList.remove('is-changing');
+                        isTransitioning = false;
                         console.warn(`No se pudo cargar la imagen del dispositivo: ${device}`);
                     };
-                };
-
-                setTimeout(changeImage, 220);
+                }, 220);
             }
 
             buttons.forEach(button => {
