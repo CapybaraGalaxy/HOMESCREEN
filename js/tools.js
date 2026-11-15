@@ -36,7 +36,7 @@
     let shopCategory = 'all';
     let shopStatus = '';
 
-    const shopRoot = 'https://raw.githubusercontent.com/CapybaraGalaxy/homescreen-online/refs/heads/main/custom-tools/';
+    const shopRoot = 'https://raw.githubusercontent.com/CapybaraGalaxy/homescreen-online/main/custom-tools/';
     const shopCatalogUrl = `${shopRoot}tools.json`;
     const shopCacheKey = 'catalog-v1';
     const shopCacheDuration = 6 * 60 * 60 * 1000;
@@ -330,10 +330,10 @@
                 throw new Error('El catálogo contiene identificadores no válidos o repetidos.');
             }
             ids.add(tool.id);
-            if (tool.status !== undefined && typeof tool.status !== 'string') {
+            const status = tool.status === undefined ? 'active' : tool.status;
+            if (!['active', 'published', 'demo', 'experimental', 'disabled'].includes(status)) {
                 throw new Error(`El estado de "${tool.id}" no es válido.`);
             }
-            if (tool.status === 'disabled') return null;
             if (typeof tool.name !== 'string' || !tool.name.trim() || tool.name.length > 60 ||
                 typeof tool.file !== 'string' || !/^[a-z0-9._/-]+\.html$/i.test(tool.file) ||
                 tool.file.split('/').some(part => !part || part === '.' || part === '..')) {
@@ -368,11 +368,50 @@
                 file: tool.file,
                 version: tool.version || '1.0.0',
                 author: tool.author || '',
-                status: tool.status || 'active',
+                status,
                 featured: tool.featured === true,
                 order: tool.order || 0
             };
-        }).filter(Boolean).sort((a, b) => a.order - b.order || a.name.localeCompare(b.name, 'es'));
+        }).sort((a, b) => a.order - b.order || a.name.localeCompare(b.name, 'es'));
+    }
+
+    function parseVersion(version) {
+        if (typeof version !== 'string' || version.length > 64) return null;
+        const match = version.match(/^v?(0|[1-9]\d*)\.(0|[1-9]\d*)\.(0|[1-9]\d*)(?:-([0-9A-Za-z-]+(?:\.[0-9A-Za-z-]+)*))?(?:\+[0-9A-Za-z-]+(?:\.[0-9A-Za-z-]+)*)?$/);
+        if (!match) return null;
+        const core = match.slice(1, 4).map(Number);
+        if (core.some(part => !Number.isSafeInteger(part))) return null;
+        const prerelease = match[4] ? match[4].split('.') : null;
+        if (prerelease && prerelease.some(part => !part || (/^\d+$/.test(part) && part.length > 1 && part[0] === '0'))) return null;
+        return { core, prerelease };
+    }
+
+    function compareVersions(left, right) {
+        const a = parseVersion(left);
+        const b = parseVersion(right);
+        if (!a || !b) return null;
+        for (let index = 0; index < a.core.length; index++) {
+            if (a.core[index] !== b.core[index]) return a.core[index] > b.core[index] ? 1 : -1;
+        }
+        if (!a.prerelease && !b.prerelease) return 0;
+        if (!a.prerelease) return 1;
+        if (!b.prerelease) return -1;
+        for (let index = 0; index < Math.max(a.prerelease.length, b.prerelease.length); index++) {
+            if (a.prerelease[index] === undefined) return -1;
+            if (b.prerelease[index] === undefined) return 1;
+            if (a.prerelease[index] === b.prerelease[index]) continue;
+            const aNumeric = /^\d+$/.test(a.prerelease[index]);
+            const bNumeric = /^\d+$/.test(b.prerelease[index]);
+            if (aNumeric && bNumeric) {
+                const leftNumber = a.prerelease[index];
+                const rightNumber = b.prerelease[index];
+                if (leftNumber.length !== rightNumber.length) return leftNumber.length > rightNumber.length ? 1 : -1;
+                return leftNumber > rightNumber ? 1 : -1;
+            }
+            if (aNumeric !== bNumeric) return aNumeric ? -1 : 1;
+            return a.prerelease[index] > b.prerelease[index] ? 1 : -1;
+        }
+        return 0;
     }
 
     async function loadShopCatalog(forceRefresh) {
@@ -454,7 +493,7 @@
         };
         if (entry.featured) add('Destacada', 'featured');
         if (entry.status === 'demo') add('Demostración', 'demo');
-        if (entry.status === 'experimental' || entry.tags.some(tag => tag.toLowerCase() === 'experimental')) {
+        if (entry.status === 'experimental') {
             add('Experimental', 'experimental');
         }
         return badges;
@@ -466,7 +505,7 @@
         const filtered = shopEntries.filter(entry => {
             const matchesQuery = !query ||
                 `${entry.name} ${entry.description} ${entry.tags.join(' ')}`.toLocaleLowerCase('es').includes(query);
-            return matchesQuery && (shopCategory === 'all' || entry.category === shopCategory);
+            return entry.status !== 'disabled' && matchesQuery && (shopCategory === 'all' || entry.category === shopCategory);
         });
         if (!filtered.length) {
             const empty = document.createElement('p');
@@ -634,13 +673,33 @@
         }
         if (revision !== renderRevision || activeView !== 'store-detail') return;
         let update = null;
-        if (installed) {
-            status.textContent = `Ya está en tus herramientas · versión ${installed.source.version}`;
-            install.textContent = installed.source.version === entry.version
-                ? `Añadida · v${installed.source.version}`
-                : `Actualizar a v${entry.version}`;
-            install.disabled = installed.source.version === entry.version;
-            if (!install.disabled) update = true;
+        let updateConfirmed = false;
+        let installUnavailable = false;
+        if (!parseVersion(entry.version)) {
+            status.classList.add('is-error');
+            status.textContent = 'La versión del catálogo no tiene un formato semántico válido; no se puede instalar ni actualizar.';
+            install.disabled = true;
+            install.textContent = 'Versión no válida';
+            installUnavailable = true;
+        } else if (installed) {
+            const comparison = compareVersions(entry.version, installed.source?.version);
+            if (comparison === 0) {
+                status.textContent = `Ya está en tus herramientas · versión ${installed.source.version}`;
+                install.textContent = `Añadida · v${installed.source.version}`;
+                install.disabled = true;
+                installUnavailable = true;
+            } else if (comparison < 0) {
+                status.textContent = `Tienes la versión ${installed.source.version}, superior a la del catálogo (${entry.version}). No se ofrecerá una degradación.`;
+                install.textContent = `Versión instalada más reciente`;
+                install.disabled = true;
+                installUnavailable = true;
+            } else {
+                update = true;
+                install.textContent = `Actualizar a v${entry.version}`;
+                status.textContent = comparison === null
+                    ? `No se pudo determinar la versión instalada (${installed.source?.version || 'desconocida'}). Pulsa actualizar para revisar y confirmar el reemplazo; los datos se conservarán.`
+                    : `Ya está en tus herramientas · versión ${installed.source.version}`;
+            }
         }
 
         const run = async action => {
@@ -657,10 +716,6 @@
                     return;
                 }
                 if (update) {
-                    if (!window.confirm(`Actualizar "${entry.name}" a la versión ${entry.version}? El código de la copia instalada se sustituirá y sus datos persistentes se conservarán.`)) {
-                        status.textContent = `Actualización cancelada · versión ${installed.source.version}`;
-                        return;
-                    }
                     await window.HomescreenCustomTools.updateOnlineTool(installed.id, payload);
                     status.textContent = `Actualizada a la versión ${entry.version}.`;
                 } else {
@@ -675,13 +730,21 @@
                 status.textContent = error.message || 'No se pudo obtener la herramienta.';
             } finally {
                 open.disabled = false;
-                if (activeView === 'store-detail' && install.textContent !== `Añadida · v${entry.version}`) {
+                if (activeView === 'store-detail' && !installUnavailable) {
                     install.disabled = false;
                 }
             }
         };
         open.addEventListener('click', () => run('open'));
-        install.addEventListener('click', () => run('install'));
+        install.addEventListener('click', () => {
+            if (update && !updateConfirmed) {
+                updateConfirmed = true;
+                status.textContent = `Confirma la actualización a ${entry.version}. El código se sustituirá y los datos persistentes de la herramienta se conservarán.`;
+                install.textContent = 'Confirmar actualización';
+                return;
+            }
+            run('install');
+        });
         refreshIcons();
     }
 
@@ -735,6 +798,161 @@
         refreshIcons();
         positionMenu();
     }
+
+    let installRequestProcessed = false;
+
+    function setInstallStatus(message, isError) {
+        const status = document.getElementById('toolInstallStatus');
+        status.textContent = message;
+        status.classList.toggle('is-error', !!isError);
+    }
+
+    function showInstallError(message) {
+        document.getElementById('toolInstallTitle').textContent = 'No se puede instalar';
+        document.getElementById('toolInstallIcon').setAttribute('data-lucide', 'shield-alert');
+        document.getElementById('toolInstallContent').replaceChildren();
+        document.getElementById('toolInstallConfirm').hidden = true;
+        document.getElementById('toolInstallCancel').textContent = 'Cerrar';
+        document.getElementById('toolInstallCancel').onclick = () => closeModal('toolInstallModal');
+        setInstallStatus(message, true);
+        openModal('toolInstallModal');
+        refreshIcons();
+    }
+
+    function showInstallRequest(entry, installed) {
+        const title = document.getElementById('toolInstallTitle');
+        const content = document.getElementById('toolInstallContent');
+        const status = document.getElementById('toolInstallStatus');
+        const cancel = document.getElementById('toolInstallCancel');
+        const confirm = document.getElementById('toolInstallConfirm');
+        const iconContainer = document.createElement('div');
+        iconContainer.className = 'hs-install-icon';
+        iconContainer.appendChild(icon(entry.icon || 'box'));
+        const meta = document.createElement('div');
+        meta.className = 'hs-install-meta';
+        const name = document.createElement('strong');
+        name.textContent = entry.name;
+        meta.appendChild(name);
+        if (entry.description) {
+            const description = document.createElement('p');
+            description.textContent = entry.description;
+            meta.appendChild(description);
+        }
+        const details = document.createElement('small');
+        details.textContent = [entry.author, `v${entry.version}`, entry.category].filter(Boolean).join(' · ');
+        meta.appendChild(details);
+        if (entry.status === 'demo' || entry.status === 'experimental') {
+            const warning = document.createElement('p');
+            warning.className = 'hs-install-warning';
+            warning.textContent = entry.status === 'demo'
+                ? 'Esta herramienta es una demostración y puede tener funciones incompletas.'
+                : 'Esta herramienta es experimental y puede cambiar o contener errores.';
+            meta.appendChild(warning);
+        }
+        content.replaceChildren(iconContainer, meta);
+        title.textContent = installed ? 'Herramienta ya instalada' : 'Instalar herramienta';
+        document.getElementById('toolInstallIcon').setAttribute('data-lucide', entry.icon || 'download');
+        cancel.textContent = 'Cancelar';
+        cancel.onclick = () => closeModal('toolInstallModal');
+        confirm.hidden = false;
+        confirm.disabled = false;
+
+        if (entry.status === 'disabled') {
+            confirm.disabled = true;
+            confirm.textContent = 'No disponible';
+            setInstallStatus('Esta herramienta está deshabilitada por el catálogo y no se puede instalar.', true);
+        } else if (!parseVersion(entry.version)) {
+            confirm.disabled = true;
+            confirm.textContent = 'No disponible';
+            setInstallStatus('La versión publicada no tiene un formato semántico válido.', true);
+        } else if (!installed) {
+            confirm.textContent = 'Instalar';
+            setInstallStatus('El documento se descargará, validará y guardará de forma aislada antes de instalarse.');
+        } else {
+            const comparison = compareVersions(entry.version, installed.source?.version);
+            if (comparison === 0) {
+                title.textContent = 'Herramienta ya instalada';
+                confirm.disabled = true;
+                confirm.textContent = 'Ya instalada';
+                setInstallStatus(`Ya tienes instalada la versión ${installed.source.version}.`);
+            } else if (comparison < 0) {
+                title.textContent = 'Versión instalada más reciente';
+                confirm.disabled = true;
+                confirm.textContent = 'Sin degradar';
+                setInstallStatus(`La versión instalada (${installed.source.version}) es superior a la del catálogo (${entry.version}).`);
+            } else {
+                title.textContent = 'Actualizar herramienta';
+                if (comparison === null) {
+                    confirm.textContent = 'Actualizar';
+                    setInstallStatus(`No se puede determinar la versión instalada (${installed.source?.version || 'desconocida'}). Si continúas, se sustituirá el paquete y se conservarán sus datos.`);
+                } else {
+                    confirm.textContent = `Actualizar a v${entry.version}`;
+                    setInstallStatus(`Versión instalada: ${installed.source.version}. Se conservarán sus datos.`);
+                }
+            }
+        }
+
+        confirm.onclick = async () => {
+            if (confirm.disabled) return;
+            confirm.disabled = true;
+            cancel.disabled = true;
+            setInstallStatus('Descargando y validando la herramienta…');
+            try {
+                const html = await loadShopHtml(entry);
+                const payload = { catalogId: entry.id, name: entry.name, version: entry.version, html };
+                if (installed) {
+                    await window.HomescreenCustomTools.updateOnlineTool(installed.id, payload);
+                    notify(`Herramienta actualizada a la versión ${entry.version}.`);
+                } else {
+                    const result = await window.HomescreenCustomTools.installOnlineTool(payload);
+                    notify(result.alreadyInstalled
+                        ? `La herramienta ya estaba instalada · versión ${result.tool.source.version}.`
+                        : 'Herramienta instalada correctamente.');
+                }
+                closeModal('toolInstallModal');
+            } catch (error) {
+                setInstallStatus(error.message || 'No se pudo instalar la herramienta.', true);
+                confirm.disabled = false;
+                cancel.disabled = false;
+            }
+        };
+        openModal('toolInstallModal');
+        refreshIcons();
+    }
+
+    async function receiveInstallRequest() {
+        if (installRequestProcessed) return;
+        const url = new URL(window.location.href);
+        const requestedIds = url.searchParams.getAll('hs_install');
+        if (!requestedIds.length) return;
+        installRequestProcessed = true;
+        url.searchParams.delete('hs_install');
+        history.replaceState(history.state, '', `${url.pathname}${url.search}${url.hash}`);
+
+        if (requestedIds.length !== 1 || !/^[a-z0-9][a-z0-9_-]{0,79}$/i.test(requestedIds[0])) {
+            showInstallError('El identificador de instalación no es válido.');
+            return;
+        }
+        try {
+            await loadShopCatalog(true);
+            const entry = shopEntries.find(tool => tool.id === requestedIds[0]);
+            if (!entry) {
+                showInstallError('No se encontró la herramienta solicitada en el catálogo oficial.');
+                return;
+            }
+            if (entry.status !== 'active' && entry.status !== 'published' &&
+                entry.status !== 'demo' && entry.status !== 'experimental' && entry.status !== 'disabled') {
+                showInstallError('El estado publicado para esta herramienta no está permitido.');
+                return;
+            }
+            const installed = await window.HomescreenCustomTools.findOnlineInstall(entry.id);
+            showInstallRequest(entry, installed);
+        } catch (error) {
+            showInstallError(`No se pudo consultar la tienda: ${error.message || 'error desconocido'}`);
+        }
+    }
+
+    window.addEventListener('load', receiveInstallRequest, { once: true });
 
     function positionMenu() {
         const rect = trigger.getBoundingClientRect();

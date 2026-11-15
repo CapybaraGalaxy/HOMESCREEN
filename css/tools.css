@@ -830,6 +830,18 @@
 .hs-store-detail-actions button:disabled { opacity: 0.55; cursor: default; }
 .hs-store-tags { color: var(--text-subtle) !important; }
 
+.hs-install-modal { width: min(440px, calc(100vw - 32px)); }
+.hs-install-content { display: grid; grid-template-columns: 44px minmax(0, 1fr); gap: 12px; align-items: start; margin: 14px 0; }
+.hs-install-icon { display: grid; width: 44px; height: 44px; place-items: center; border: 1px solid rgba(255,255,255,0.1); border-radius: 14px; color: #ffd60a; background: rgba(255,255,255,0.045); }
+.hs-install-icon svg { width: 22px; height: 22px; }
+.hs-install-meta { min-width: 0; }
+.hs-install-meta strong { display: block; color: var(--text-main); font: 500 0.95rem var(--font-main); }
+.hs-install-meta p { margin: 5px 0; color: var(--text-muted); font: 0.76rem/1.45 var(--font-main); }
+.hs-install-meta small { display: block; margin-top: 6px; color: var(--text-subtle); font: 0.7rem/1.45 var(--font-main); }
+.hs-install-warning { padding: 9px 11px; border: 1px solid rgba(255,159,10,0.25); border-radius: 10px; color: #f1d09e !important; background: rgba(255,159,10,0.07); }
+.hs-install-status { min-height: 1em; margin: 8px 0 0; color: var(--text-muted); font: 0.75rem/1.45 var(--font-main); }
+.hs-install-status.is-error { color: #f0a2a2; }
+
 .hs-custom-tool-frame {
     display: block;
     width: 100%;

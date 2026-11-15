@@ -190,6 +190,16 @@
         <div class="modal-buttons"><button class="modal-btn secondary" onclick="closeModal('appEditorModal')">Cancelar</button><button class="modal-btn primary" id="saveAppEditBtn">Guardar cambios</button></div>
     </div>
 
+    <div class="custom-modal hs-install-modal" id="toolInstallModal" role="dialog" aria-modal="true" aria-labelledby="toolInstallTitle">
+        <div class="modal-title"><i id="toolInstallIcon" data-lucide="download"></i><span id="toolInstallTitle">Instalar herramienta</span></div>
+        <div class="hs-install-content" id="toolInstallContent"></div>
+        <p class="hs-install-status" id="toolInstallStatus" role="status" aria-live="polite"></p>
+        <div class="modal-buttons">
+            <button class="modal-btn secondary" id="toolInstallCancel" type="button">Cancelar</button>
+            <button class="modal-btn primary" id="toolInstallConfirm" type="button">Instalar</button>
+        </div>
+    </div>
+
     <div class="custom-modal welcome-modal" id="firstRunModal">
         <div class="modal-title"><i data-lucide="sparkles" style="color: #FFD60A;"></i> Bienvenido a Homescreen</div>
         <p class="modal-text">Personaliza tu experiencia antes de empezar: elige tu nombre, diseño, efectos y preferencias.</p>

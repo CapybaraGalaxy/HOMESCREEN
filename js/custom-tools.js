@@ -5,6 +5,17 @@
     const databaseVersion = 2;
     const maximumHtmlSize = 1024 * 1024;
     const maximumDataSize = 64 * 1024;
+    const externalResourceOrigins = {
+        script: new Set(['https://cdnjs.cloudflare.com', 'https://cdn.jsdelivr.net', 'https://unpkg.com']),
+        style: new Set(['https://cdnjs.cloudflare.com', 'https://cdn.jsdelivr.net', 'https://fonts.googleapis.com', 'https://unpkg.com']),
+        image: new Set(['https://cdnjs.cloudflare.com', 'https://cdn.jsdelivr.net', 'https://images.unsplash.com', 'https://raw.githubusercontent.com', 'https://unpkg.com']),
+        font: new Set(['https://cdnjs.cloudflare.com', 'https://cdn.jsdelivr.net', 'https://fonts.gstatic.com', 'https://unpkg.com'])
+    };
+    const cssResourceOrigins = new Set([
+        ...externalResourceOrigins.image,
+        ...externalResourceOrigins.font,
+        ...externalResourceOrigins.style
+    ]);
     const instances = new Map();
     let databasePromise;
     let editor;
@@ -175,25 +186,90 @@
 
         const documentNode = new DOMParser().parseFromString(html, 'text/html');
         if (documentNode.querySelector('parsererror')) throw new Error('No se pudo interpretar el documento HTML.');
-        if (documentNode.querySelector('base, iframe, frame, object, embed, portal, meta[http-equiv="refresh"], [ping], link[rel~="stylesheet"]')) {
-            throw new Error('El documento contiene elementos de navegación o carga externa no permitidos.');
+        if (documentNode.querySelector('base, iframe, frame, object, embed, portal, meta[http-equiv="refresh"], [ping], [srcdoc]')) {
+            throw new Error('El documento contiene elementos de navegación o incrustación no permitidos.');
         }
-        for (const element of documentNode.querySelectorAll('script[src], [srcdoc]')) {
-            throw new Error('Los scripts deben estar incluidos dentro del propio documento.');
-        }
+
+        const validateResourceUrl = (value, kind) => {
+            const url = new URL(value, 'https://homescreen.invalid');
+            if (url.protocol !== 'https:' || url.username || url.password || !externalResourceOrigins[kind]?.has(url.origin)) {
+                throw new Error(`El recurso externo no está permitido para este tipo: ${kind}.`);
+            }
+        };
+        const validateCssResourceUrl = value => {
+            const url = new URL(value, 'https://homescreen.invalid');
+            if (url.protocol !== 'https:' || url.username || url.password || !cssResourceOrigins.has(url.origin)) {
+                throw new Error('El recurso CSS externo no está permitido.');
+            }
+        };
+        const validIntegrity = value => !!value && value.trim().split(/\s+/).every(hash =>
+            /^(?:sha256-[A-Za-z0-9+/]{43}=|sha384-[A-Za-z0-9+/]{64}|sha512-[A-Za-z0-9+/]{86}==)$/.test(hash)
+        );
+        const externalValue = value => /^(?:https?:)?\/\//i.test(value) || /^[a-z][a-z0-9+.-]*:/i.test(value);
+
         for (const element of documentNode.querySelectorAll('[src], [href], [poster], [srcset], [xlink\\:href]')) {
             for (const attribute of ['src', 'href', 'poster', 'srcset', 'xlink:href']) {
                 const value = element.getAttribute(attribute)?.trim();
                 if (!value) continue;
-                const external = /^(?:https?:)?\/\//i.test(value) || /^[a-z][a-z0-9+.-]*:/i.test(value);
                 const isExplicitWebLink = element.localName === 'a' && attribute === 'href' && /^https:\/\//i.test(value);
-                if (external && !isExplicitWebLink) {
-                    throw new Error('No se permiten recursos remotos. Usa recursos incluidos en el HTML.');
+                if (element.localName === 'script' && attribute === 'src' && !externalValue(value)) {
+                    throw new Error('Los scripts externos deben usar una URL HTTPS permitida y SRI.');
+                }
+                if (element.localName === 'link' && attribute === 'href' && element.relList.contains('stylesheet') &&
+                    !externalValue(value)) {
+                    throw new Error('Las hojas de estilo deben usar un origen HTTPS permitido.');
+                }
+                if (!externalValue(value) || isExplicitWebLink) continue;
+
+                if (attribute === 'srcset') {
+                    for (const candidate of value.split(',')) {
+                        const candidateUrl = candidate.trim().split(/\s+/, 1)[0];
+                        if (!candidateUrl) throw new Error('El atributo srcset no es válido.');
+                        validateResourceUrl(candidateUrl, 'image');
+                    }
+                    continue;
+                }
+
+                let kind = '';
+                if (element.localName === 'script' && attribute === 'src') kind = 'script';
+                else if (element.localName === 'link' && attribute === 'href' && element.relList.contains('stylesheet')) kind = 'style';
+                else if (['img', 'image'].includes(element.localName) && ['src', 'href', 'xlink:href'].includes(attribute)) kind = 'image';
+                else if (element.localName === 'source' && attribute === 'src' && element.parentElement?.localName === 'picture') kind = 'image';
+                else if (element.localName === 'source' && attribute === 'src' && ['audio', 'video'].includes(element.parentElement?.localName)) {
+                    throw new Error('No se permiten recursos multimedia remotos.');
+                } else if (element.localName === 'link' && attribute === 'href' && element.relList.contains('icon')) kind = 'image';
+                else if (attribute === 'poster' || attribute === 'xlink:href') {
+                    throw new Error('Este tipo de recurso externo no está permitido.');
+                } else {
+                    throw new Error('El documento contiene un recurso externo no permitido.');
+                }
+
+                validateResourceUrl(value, kind);
+                if (kind === 'script' && (!validIntegrity(element.integrity) || element.crossOrigin !== 'anonymous')) {
+                    throw new Error('Los scripts externos requieren integridad SRI y crossorigin="anonymous".');
+                }
+                if (kind === 'style' && new URL(value, 'https://homescreen.invalid').origin !== 'https://fonts.googleapis.com' &&
+                    (!validIntegrity(element.integrity) || element.crossOrigin !== 'anonymous')) {
+                    throw new Error('Las hojas de estilo externas requieren integridad SRI y crossorigin="anonymous".');
                 }
             }
         }
-        if (/@import\s+(?:url\s*\()?\s*['"]?https?:/i.test(html)) {
-            throw new Error('No se permiten hojas de estilo remotas.');
+
+        for (const element of documentNode.querySelectorAll('style, [style]')) {
+            const css = element.textContent + ' ' + (element.getAttribute('style') || '');
+            for (const match of css.matchAll(/url\(\s*(['"]?)(.*?)\1\s*\)/gi)) {
+                const value = match[2].trim();
+                if (externalValue(value) && !/^(?:data:|blob:)/i.test(value)) validateCssResourceUrl(value);
+            }
+            for (const match of css.matchAll(/@import\s+(?:url\(\s*)?(['"]?)(.*?)\1\s*\)?/gi)) {
+                const value = match[2].trim();
+                if (externalValue(value)) {
+                    if (new URL(value, 'https://homescreen.invalid').origin !== 'https://fonts.googleapis.com') {
+                        throw new Error('Las importaciones CSS externas solo se permiten desde Google Fonts.');
+                    }
+                    validateResourceUrl(value, 'style');
+                }
+            }
         }
         return validateMetadata(documentNode);
     }
@@ -221,7 +297,7 @@
     }
 
     function contentSecurityPolicy() {
-        return "default-src 'none'; script-src 'unsafe-inline'; style-src 'unsafe-inline'; img-src data: blob:; media-src data: blob:; font-src data:; connect-src 'none'; frame-src 'none'; object-src 'none'; form-action 'none'; base-uri 'none'; navigate-to 'none'";
+        return "default-src 'none'; script-src 'unsafe-inline' https://cdnjs.cloudflare.com https://cdn.jsdelivr.net https://unpkg.com; style-src 'unsafe-inline' https://cdnjs.cloudflare.com https://cdn.jsdelivr.net https://fonts.googleapis.com https://unpkg.com; img-src data: blob: https://cdnjs.cloudflare.com https://cdn.jsdelivr.net https://images.unsplash.com https://raw.githubusercontent.com https://unpkg.com; media-src data: blob:; font-src data: https://cdnjs.cloudflare.com https://cdn.jsdelivr.net https://fonts.gstatic.com https://unpkg.com; connect-src 'none'; frame-src 'none'; object-src 'none'; form-action 'none'; base-uri 'none'; navigate-to 'none'";
     }
 
     function bridgeSource(token, instanceId) {
