@@ -2840,33 +2840,6 @@ function appIconMarkup(app) {
             return false;
         }
 
-        let backgroundTouchStart = null;
-        document.addEventListener('touchstart', (event) => {
-            if (isEditableTarget(event.target) || event.touches.length !== 1) return;
-            backgroundTouchStart = {
-                x: event.touches[0].clientX,
-                y: event.touches[0].clientY,
-                target: event.target
-            };
-        }, { passive: true });
-        document.addEventListener('touchmove', (event) => {
-            if (backgroundTouchStart === null || event.touches.length !== 1) return;
-            const fingerDeltaY = event.touches[0].clientY - backgroundTouchStart.y;
-            if (Math.abs(fingerDeltaY) > 4 && canScrollVertically(backgroundTouchStart.target, fingerDeltaY)) {
-                backgroundTouchStart = null;
-            }
-        }, { passive: true });
-        document.addEventListener('touchend', (event) => {
-            if (backgroundTouchStart === null || isEditableTarget(backgroundTouchStart.target) || !event.changedTouches.length) {
-                backgroundTouchStart = null;
-                return;
-            }
-            const deltaY = backgroundTouchStart.y - event.changedTouches[0].clientY;
-            const deltaX = backgroundTouchStart.x - event.changedTouches[0].clientX;
-            backgroundTouchStart = null;
-            if (deltaY > 70 && deltaY > Math.abs(deltaX)) toggleSearch(true);
-        }, { passive: true });
-        document.addEventListener('touchcancel', () => { backgroundTouchStart = null; }, { passive: true });
         document.addEventListener('dblclick', (event) => {
             if (event.target === document.body || event.target === document.getElementById('bgCanvas')) enterZenMode();
         });
