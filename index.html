@@ -2299,6 +2299,16 @@ function appIconMarkup(app) {
                         <button class="settings-action-btn" id="homescreenRunBtn" type="button"><i data-lucide="arrow-up-right" style="width: 14px;"></i> Ir</button>
                     </div>
                 </div>
+                <div class="setting-item-row">
+                    <div class="setting-item-meta">
+                        <i data-lucide="plug-zap"></i>
+                        <div>
+                            <span class="setting-label">Conexiones externas para herramientas</span>
+                            <span class="setting-desc">Permite solicitudes HTTPS y WebSocket seguro. Solo actívalo para herramientas de confianza; podrían enviar datos a servicios externos. El cambio afecta a ventanas nuevas: cierra las abiertas para aplicar o revocar el permiso.</span>
+                        </div>
+                    </div>
+                    <div class="switch" id="toggleCustomToolConnections" role="switch" aria-label="Permitir conexiones externas a las herramientas personalizadas" aria-checked="false" tabindex="0"></div>
+                </div>
 <div class="setting-item-row">
     <div class="setting-item-meta">
         <i data-lucide="moon"></i>
@@ -4149,6 +4159,20 @@ function appIconMarkup(app) {
                 }
             });
             body.classList.toggle('notifications-button-disabled', localStorage.getItem('disableNotificationsButton') === 'true');
+            setupToggle('toggleCustomToolConnections', 'allowCustomToolConnections', enabled => {
+                showToast(
+                    enabled
+                        ? 'Las nuevas herramientas pueden conectarse por HTTPS y WSS; cierra y vuelve a abrir las que ya estén abiertas.'
+                        : 'Las nuevas herramientas quedan sin conexiones externas; cierra las ventanas abiertas para revocar su permiso.',
+                    enabled ? 'triangle-alert' : 'shield-check'
+                );
+            }, 'false');
+            document.getElementById('toggleCustomToolConnections')?.addEventListener('keydown', event => {
+                if (event.key === 'Enter' || event.key === ' ') {
+                    event.preventDefault();
+                    event.currentTarget.click();
+                }
+            });
             setupToggle('toggleShowSeconds', 'showSeconds', updateClock, 'true');
             setupPreferenceDropdown('settingFontFamily', 'fontFamily', 'Outfit', applyVisualPreferences);
             setupPreferenceDropdown('settingTimeFormat', 'timeFormat', '24', updateClock);
@@ -4342,6 +4366,7 @@ function appIconMarkup(app) {
                 dockRecommendationsLimit: '5',
                 showRecentFolder: 'false',
                 showCustomApps: 'true',
+                allowCustomToolConnections: 'false',
                 customApps: '[]',
                 hiddenAppUrls: '[]',
                 showBattery: 'false',

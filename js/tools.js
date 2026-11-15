@@ -281,6 +281,7 @@
             failed.className = 'hs-tools-empty is-error';
             failed.textContent = error.message || 'No se pudieron cargar las herramientas.';
             animateMenuUpdate(() => menuBody.replaceChildren(toolbar, create, failed));
+            refreshIcons();
             return;
         }
         if (revision !== renderRevision || activeView !== 'custom') return;
@@ -317,6 +318,7 @@
             list.appendChild(row);
         });
         animateMenuUpdate(() => menuBody.replaceChildren(toolbar, create, list));
+        refreshIcons();
     }
 
     function validateCatalog(payload) {
@@ -546,9 +548,20 @@
         results.appendChild(list);
     }
 
+    function makeExternalStoreLink() {
+        const link = document.createElement('a');
+        link.className = 'hs-store-entry hs-store-web-link';
+        link.href = 'https://capybaragalaxy.github.io/homescreen-online/store';
+        link.target = '_blank';
+        link.rel = 'noopener noreferrer';
+        link.append(icon('external-link'), document.createTextNode('Ver tienda web'));
+        return link;
+    }
+
     function renderShopList() {
         const controls = document.createElement('div');
         controls.className = 'hs-store-controls';
+        const externalStoreLink = makeExternalStoreLink();
         const search = document.createElement('input');
         search.className = 'hs-store-search';
         search.type = 'search';
@@ -590,17 +603,19 @@
         const results = document.createElement('div');
         results.className = 'hs-store-results';
         renderShopResults(results);
-        animateMenuUpdate(() => menuBody.replaceChildren(controls, status, results));
+        animateMenuUpdate(() => menuBody.replaceChildren(externalStoreLink, controls, status, results));
         refreshIcons();
     }
 
     async function renderShop(forceRefresh) {
         selectedShopEntry = null;
         const revision = ++renderRevision;
+        const externalStoreLink = makeExternalStoreLink();
         const loading = document.createElement('p');
         loading.className = 'hs-tools-empty';
         loading.textContent = forceRefresh ? 'Actualizando catálogo…' : 'Cargando catálogo…';
-        animateMenuUpdate(() => menuBody.replaceChildren(loading));
+        animateMenuUpdate(() => menuBody.replaceChildren(externalStoreLink, loading));
+        refreshIcons();
         try {
             await loadShopCatalog(forceRefresh);
             if (revision !== renderRevision || activeView !== 'store') return;
@@ -615,7 +630,8 @@
             retry.className = 'hs-secondary-button';
             retry.textContent = 'Reintentar';
             retry.addEventListener('click', () => renderShop(true));
-            animateMenuUpdate(() => menuBody.replaceChildren(failed, retry));
+            animateMenuUpdate(() => menuBody.replaceChildren(externalStoreLink, failed, retry));
+            refreshIcons();
         }
     }
 

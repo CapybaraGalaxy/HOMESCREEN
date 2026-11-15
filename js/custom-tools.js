@@ -9,7 +9,8 @@
         script: new Set(['https://cdnjs.cloudflare.com', 'https://cdn.jsdelivr.net', 'https://unpkg.com']),
         style: new Set(['https://cdnjs.cloudflare.com', 'https://cdn.jsdelivr.net', 'https://fonts.googleapis.com', 'https://unpkg.com']),
         image: new Set(['https://cdnjs.cloudflare.com', 'https://cdn.jsdelivr.net', 'https://images.unsplash.com', 'https://raw.githubusercontent.com', 'https://unpkg.com']),
-        font: new Set(['https://cdnjs.cloudflare.com', 'https://cdn.jsdelivr.net', 'https://fonts.gstatic.com', 'https://unpkg.com'])
+        font: new Set(['https://cdnjs.cloudflare.com', 'https://cdn.jsdelivr.net', 'https://fonts.gstatic.com', 'https://unpkg.com']),
+        preconnect: new Set(['https://fonts.googleapis.com', 'https://fonts.gstatic.com'])
     };
     const cssResourceOrigins = new Set([
         ...externalResourceOrigins.image,
@@ -233,6 +234,8 @@
                 let kind = '';
                 if (element.localName === 'script' && attribute === 'src') kind = 'script';
                 else if (element.localName === 'link' && attribute === 'href' && element.relList.contains('stylesheet')) kind = 'style';
+                else if (element.localName === 'link' && attribute === 'href' &&
+                    (element.relList.contains('preconnect') || element.relList.contains('dns-prefetch'))) kind = 'preconnect';
                 else if (['img', 'image'].includes(element.localName) && ['src', 'href', 'xlink:href'].includes(attribute)) kind = 'image';
                 else if (element.localName === 'source' && attribute === 'src' && element.parentElement?.localName === 'picture') kind = 'image';
                 else if (element.localName === 'source' && attribute === 'src' && ['audio', 'video'].includes(element.parentElement?.localName)) {
@@ -296,16 +299,18 @@
         return JSON.parse(serialized);
     }
 
-    function contentSecurityPolicy() {
-        return "default-src 'none'; script-src 'unsafe-inline' https://cdnjs.cloudflare.com https://cdn.jsdelivr.net https://unpkg.com; style-src 'unsafe-inline' https://cdnjs.cloudflare.com https://cdn.jsdelivr.net https://fonts.googleapis.com https://unpkg.com; img-src data: blob: https://cdnjs.cloudflare.com https://cdn.jsdelivr.net https://images.unsplash.com https://raw.githubusercontent.com https://unpkg.com; media-src data: blob:; font-src data: https://cdnjs.cloudflare.com https://cdn.jsdelivr.net https://fonts.gstatic.com https://unpkg.com; connect-src 'none'; frame-src 'none'; object-src 'none'; form-action 'none'; base-uri 'none'; navigate-to 'none'";
+    function contentSecurityPolicy(allowExternalConnections) {
+        const connectSources = allowExternalConnections ? 'https: wss:' : "'none'";
+        return `default-src 'none'; script-src 'unsafe-inline' https://cdnjs.cloudflare.com https://cdn.jsdelivr.net https://unpkg.com; style-src 'unsafe-inline' https://cdnjs.cloudflare.com https://cdn.jsdelivr.net https://fonts.googleapis.com https://unpkg.com; img-src data: blob: https://cdnjs.cloudflare.com https://cdn.jsdelivr.net https://images.unsplash.com https://raw.githubusercontent.com https://unpkg.com; media-src data: blob:; font-src data: https://cdnjs.cloudflare.com https://cdn.jsdelivr.net https://fonts.gstatic.com https://unpkg.com; connect-src ${connectSources}; frame-src 'none'; object-src 'none'; form-action 'none'; base-uri 'none'; navigate-to 'none'`;
     }
 
     function bridgeSource(token, instanceId) {
-        return `<script>(function(){'use strict';const token=${JSON.stringify(token)};const instanceId=${JSON.stringify(instanceId)};let serial=0;const pending=new Map();function call(op,args){return new Promise((resolve,reject)=>{const requestId=++serial;pending.set(requestId,{resolve,reject});parent.postMessage({channel:'homescreen-custom-tool',token,instanceId,requestId,op,args},'*');setTimeout(()=>{if(pending.has(requestId)){pending.delete(requestId);reject(new Error('La solicitud a Homescreen ha caducado.'));}},10000);});}addEventListener('message',event=>{if(event.source!==parent)return;const data=event.data;if(!data||data.channel!=='homescreen-custom-tool-response'||data.token!==token||!Number.isInteger(data.requestId))return;const request=pending.get(data.requestId);if(!request)return;pending.delete(data.requestId);if(data.error)request.reject(new Error(data.error));else request.resolve(data.value);});const api=Object.freeze({storage:Object.freeze({get:key=>call('storage.get',{key}),set:(key,value)=>call('storage.set',{key,value})}),notify:message=>call('notify',{message}),window:Object.freeze({setTitle:title=>call('window.setTitle',{title}),setSize:(width,height)=>call('window.setSize',{width,height}),minimize:()=>call('window.minimize',{}),close:()=>call('window.close',{})}),pip:Object.freeze({setLabel:text=>call('pip.setLabel',{text})})});Object.defineProperty(window,'hs',{value:api,writable:false,configurable:false});})();</script>`;
+        return `<script>(function(){'use strict';const token=${JSON.stringify(token)};const instanceId=${JSON.stringify(instanceId)};let serial=0;const pending=new Map();function call(op,args){return new Promise((resolve,reject)=>{const requestId=++serial;pending.set(requestId,{resolve,reject});parent.postMessage({channel:'homescreen-custom-tool',token,instanceId,requestId,op,args},'*');setTimeout(()=>{if(pending.has(requestId)){pending.delete(requestId);reject(new Error('La solicitud a Homescreen ha caducado.'));}},10000);});}function renderIcon(target,name){if(!(target instanceof Element))return Promise.reject(new Error('El destino debe ser un elemento HTML.'));return call('icons.svg',{name}).then(markup=>{const template=document.createElement('template');template.innerHTML=markup;const svg=template.content.firstElementChild;if(!svg||svg.localName!=='svg')throw new Error('Homescreen devolvió un icono no válido.');target.replaceChildren(svg);return target;});}addEventListener('message',event=>{if(event.source!==parent)return;const data=event.data;if(!data||data.channel!=='homescreen-custom-tool-response'||data.token!==token||!Number.isInteger(data.requestId))return;const request=pending.get(data.requestId);if(!request)return;pending.delete(data.requestId);if(data.error)request.reject(new Error(data.error));else request.resolve(data.value);});const api=Object.freeze({storage:Object.freeze({get:key=>call('storage.get',{key}),set:(key,value)=>call('storage.set',{key,value})}),icons:Object.freeze({svg:name=>call('icons.svg',{name}),render:renderIcon}),notify:message=>call('notify',{message}),window:Object.freeze({setTitle:title=>call('window.setTitle',{title}),setSize:(width,height)=>call('window.setSize',{width,height}),minimize:()=>call('window.minimize',{}),close:()=>call('window.close',{})}),pip:Object.freeze({setLabel:text=>call('pip.setLabel',{text})})});Object.defineProperty(window,'hs',{value:api,writable:false,configurable:false});})();</script>`;
     }
 
     function sandboxDocument(html, token, instanceId) {
-        const security = `<meta http-equiv="Content-Security-Policy" content="${contentSecurityPolicy()}">`;
+        const allowExternalConnections = localStorage.getItem('allowCustomToolConnections') === 'true';
+        const security = `<meta http-equiv="Content-Security-Policy" content="${contentSecurityPolicy(allowExternalConnections)}">`;
         const bridge = token
             ? bridgeSource(token, instanceId)
             : `<script>(function(){const denied=()=>Promise.resolve(false);const memory={};Object.defineProperty(window,'hs',{value:Object.freeze({storage:Object.freeze({get:key=>Promise.resolve(memory[key]??null),set:(key,value)=>{memory[key]=value;return Promise.resolve(true);}}),notify:denied,window:Object.freeze({setTitle:denied,setSize:denied,minimize:denied,close:denied}),pip:Object.freeze({setLabel:denied})})});})();</script>`;
@@ -445,6 +450,25 @@
         }
         const manager = window.homescreenWindowManager;
         if (!manager || !manager.windows.has(instance.windowId)) throw new Error('La ventana ya no está disponible.');
+
+        if (op === 'icons.svg') {
+            if (typeof args.name !== 'string' || args.name.length > 80 ||
+                !/^[a-z0-9]+(?:-[a-z0-9]+)*$/i.test(args.name)) {
+                throw new Error('El nombre del icono Lucide no es válido.');
+            }
+            const iconName = args.name.split('-')
+                .map(part => part.charAt(0).toUpperCase() + part.slice(1))
+                .join('');
+            const definition = window.lucide?.icons?.[iconName];
+            if (!definition || typeof window.lucide?.createElement !== 'function') {
+                throw new Error('No se encontró ese icono Lucide local.');
+            }
+            const svg = window.lucide.createElement(definition);
+            if (!svg || svg.localName !== 'svg') throw new Error('No se pudo crear el icono Lucide.');
+            svg.setAttribute('aria-hidden', 'true');
+            svg.setAttribute('focusable', 'false');
+            return svg.outerHTML;
+        }
 
         if (op === 'storage.get' || op === 'storage.set') {
             if (typeof args.key !== 'string' || !args.key.trim() || args.key.length > 120) {

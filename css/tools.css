@@ -712,6 +712,7 @@
     background: rgba(255,255,255,0.085);
 }
 
+.hs-store-web-link { text-decoration: none; }
 .hs-custom-tools-link svg:last-child { width: 15px; margin-left: auto; color: var(--text-muted); }
 .hs-custom-tools-link svg,
 .hs-custom-create svg { width: 16px; height: 16px; }
