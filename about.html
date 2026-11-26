@@ -106,8 +106,8 @@
         .top-nav-links {
             display: flex;
             align-items: center;
-            gap: 12px;
-            flex-wrap: wrap;
+            gap: 10px;
+            flex-shrink: 0;
         }
 
         .top-nav-btn {
@@ -145,9 +145,34 @@
             .top-navbar {
                 padding: 10px 16px;
             }
-            .top-nav-links .hide-mobile {
+        }
+
+        @media(max-width: 640px) {
+            .top-navbar {
+                padding-left: 16px;
+                padding-right: 16px;
+                gap: 8px;
+            }
+            .top-nav-btn .top-nav-label {
                 display: none;
             }
+            .top-nav-btn {
+                width: 38px;
+                height: 38px;
+                justify-content: center;
+                padding: 0;
+            }
+            .top-nav-links { gap: 7px; }
+        }
+
+        @media(max-width: 350px) {
+            .top-navbar {
+                padding-left: 8px;
+                padding-right: 8px;
+            }
+            .top-brand span { display: none; }
+            .top-navbar { gap: 4px; }
+            .top-nav-links { gap: 5px; }
         }
 
         .app-container {
@@ -167,90 +192,6 @@
                 max-width: 1260px;
                 padding-left: 56px;
                 padding-right: 96px;
-            }
-        }
-
-        /* Navegación Flotante por Secciones (Sidebar) */
-        .floating-nav {
-            position: fixed;
-            right: 24px;
-            top: 50%;
-            transform: translateY(-50%);
-            z-index: 1000;
-            background: var(--glass);
-            border: 1px solid var(--glass-border);
-            backdrop-filter: blur(var(--blur-val));
-            -webkit-backdrop-filter: blur(var(--blur-val));
-            border-radius: 24px;
-            padding: 10px 12px;
-            display: flex;
-            flex-direction: column;
-            gap: 4px;
-            box-shadow: 0 10px 30px rgba(0,0,0,0.4);
-            transition: width 0.5s var(--bezier), padding 0.5s var(--bezier);
-        }
-
-        .floating-nav-item {
-            display: flex;
-            align-items: center;
-            gap: 12px;
-            padding: 9px 10px;
-            border-radius: 14px;
-            color: var(--text-muted);
-            text-decoration: none;
-            transition: color 0.3s ease, background 0.3s ease;
-            white-space: nowrap;
-        }
-
-        .floating-nav-item:hover, .floating-nav-item.active {
-            color: var(--text-main);
-            background: var(--surface-hover);
-        }
-
-        .floating-nav-text {
-            font-size: 0.85rem;
-            font-weight: 500;
-            opacity: 0;
-            max-width: 0;
-            overflow: hidden;
-            transition: opacity 0.4s ease, max-width 0.5s var(--bezier);
-        }
-
-        .floating-nav:hover .floating-nav-text {
-            opacity: 1;
-            max-width: 180px;
-        }
-
-        @media (max-width: 768px) {
-            .app-container {
-                padding-bottom: calc(env(safe-area-inset-bottom) + 110px);
-            }
-            .floating-nav {
-                position: fixed;
-                bottom: 16px;
-                left: 50%;
-                top: auto;
-                transform: translateX(-50%);
-                flex-direction: row;
-                border-radius: 100px;
-                padding: 6px 12px;
-                gap: 4px;
-                background: rgba(18, 18, 18, 0.95);
-                box-shadow: 0 10px 30px rgba(0,0,0,0.6);
-                width: max-content;
-                max-width: calc(100vw - 32px);
-                overflow-x: auto;
-                scrollbar-width: none;
-            }
-            .floating-nav::-webkit-scrollbar {
-                display: none;
-            }
-            .floating-nav-item {
-                padding: 8px;
-                border-radius: 50%;
-            }
-            .floating-nav-text {
-                display: none !important;
             }
         }
 
@@ -312,39 +253,20 @@
             animation: blinkCursor 0.8s step-end infinite;
         }
 
-        .version-tag {
-            font-variant-numeric: tabular-nums;
-            font-size: 0.85rem;
-            font-weight: 500;
-            padding: 4px 12px;
-            border-radius: 100px;
-            background: var(--glass);
-            border: 1px solid var(--glass-border);
-            color: var(--text-muted);
-            backdrop-filter: blur(var(--blur-val));
-            -webkit-backdrop-filter: blur(var(--blur-val));
-            display: inline-flex;
-            align-items: center;
-            gap: 6px;
-            margin-top: 8px;
-        }
-
-        .version-tag .pulse-dot {
-            width: 6px;
-            height: 6px;
-            background-color: var(--accent-success);
-            border-radius: 50%;
-            box-shadow: 0 0 8px var(--accent-success);
-            animation: pulseGlow 2s infinite ease-in-out;
-        }
-
         .carousel-container {
             width: 100%;
             overflow: hidden;
             position: relative;
             padding: 10px 0;
+            cursor: grab;
+            touch-action: pan-y;
+            user-select: none;
             opacity: 0;
             animation: scaleInCards 0.8s var(--bezier) 0.1s forwards;
+        }
+
+        .carousel-container.is-dragging {
+            cursor: grabbing;
         }
 
         .carousel-container::before,
@@ -372,11 +294,7 @@
             display: flex;
             gap: 16px;
             width: max-content;
-            animation: scrollInfinite 120s linear infinite;
-        }
-
-        .carousel-track:hover {
-            animation-play-state: paused;
+            will-change: transform;
         }
 
         .carousel-item {
@@ -553,6 +471,9 @@
         .back-action-container {
             display: flex;
             justify-content: center;
+            align-items: center;
+            gap: 14px;
+            flex-wrap: wrap;
             opacity: 0;
             animation: scaleInCards 0.8s var(--bezier) 0.6s forwards;
         }
@@ -846,139 +767,20 @@
             line-height: 1.5;
         }
 
-        /* --- Timeline del Proyecto & Roadmap --- */
-        .roadmap-section {
-            opacity: 0;
-            animation: scaleInCards 0.8s var(--bezier) 0.45s forwards;
-        }
-
-        .roadmap-header {
+        .section-heading {
             margin-bottom: 24px;
         }
 
-        .roadmap-header h2 {
+        .section-heading h2 {
             font-size: 1.5rem;
             font-weight: 600;
             letter-spacing: -0.025em;
             margin-bottom: 6px;
         }
 
-        .roadmap-header p {
+        .section-heading p {
             color: var(--text-muted);
             font-size: 0.9rem;
-        }
-
-        .timeline-list {
-            position: relative;
-            display: flex;
-            flex-direction: column;
-            gap: 18px;
-            padding-left: 28px;
-        }
-
-        .timeline-list::before {
-            content: "";
-            position: absolute;
-            left: 8px;
-            top: 8px;
-            bottom: 8px;
-            width: 2px;
-            background: linear-gradient(180deg, var(--accent-success) 0%, rgba(255, 255, 255, 0.25) 65%, rgba(255, 255, 255, 0.06) 100%);
-            border-radius: 2px;
-        }
-
-        .timeline-item {
-            position: relative;
-            background: var(--glass);
-            border: 1px solid var(--glass-border);
-            border-radius: 18px;
-            padding: 20px 24px;
-            backdrop-filter: blur(var(--blur-val));
-            -webkit-backdrop-filter: blur(var(--blur-val));
-            transition: background 0.3s var(--bezier), border-color 0.3s var(--bezier), transform 0.3s var(--bezier);
-        }
-
-        .timeline-item:hover {
-            background: var(--surface-hover);
-            border-color: rgba(255, 255, 255, 0.16);
-            transform: translateX(4px);
-        }
-
-        .timeline-dot {
-            position: absolute;
-            left: -25px;
-            top: 24px;
-            width: 12px;
-            height: 12px;
-            border-radius: 50%;
-            background: var(--bg);
-            border: 2px solid var(--text-muted);
-            z-index: 2;
-        }
-
-        .timeline-item.is-done .timeline-dot {
-            background: var(--accent-success);
-            border-color: var(--accent-success);
-            box-shadow: 0 0 10px rgba(52, 199, 89, 0.45);
-        }
-
-        .timeline-item.is-current .timeline-dot {
-            background: #FFFFFF;
-            border-color: #FFFFFF;
-            box-shadow: 0 0 12px rgba(255, 255, 255, 0.7);
-            animation: pulseGlow 2s infinite ease-in-out;
-        }
-
-        .timeline-meta {
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-            gap: 10px;
-            margin-bottom: 8px;
-            flex-wrap: wrap;
-        }
-
-        .timeline-date {
-            font-size: 0.78rem;
-            font-weight: 600;
-            letter-spacing: 0.06em;
-            text-transform: uppercase;
-            color: var(--text-muted);
-        }
-
-        .timeline-badge {
-            font-size: 0.72rem;
-            font-weight: 600;
-            padding: 3px 10px;
-            border-radius: 100px;
-            border: 1px solid var(--glass-border);
-            background: rgba(255, 255, 255, 0.04);
-            color: var(--text-muted);
-        }
-
-        .timeline-item.is-done .timeline-badge {
-            color: var(--accent-success);
-            border-color: rgba(52, 199, 89, 0.25);
-            background: rgba(52, 199, 89, 0.08);
-        }
-
-        .timeline-item.is-current .timeline-badge {
-            color: #FFFFFF;
-            border-color: rgba(255, 255, 255, 0.28);
-            background: rgba(255, 255, 255, 0.12);
-        }
-
-        .timeline-item h3 {
-            font-size: 1.05rem;
-            font-weight: 600;
-            margin-bottom: 6px;
-            letter-spacing: -0.01em;
-        }
-
-        .timeline-item p {
-            font-size: 0.88rem;
-            color: var(--text-muted);
-            line-height: 1.55;
         }
 
         /* --- FAQ Interactiva --- */
@@ -1604,9 +1406,268 @@
             50% { border-color: var(--text-main); }
         }
 
-        @keyframes scrollInfinite {
-            0% { transform: translateX(0); }
-            100% { transform: translateX(calc(-50% - 8px)); }
+        /* Lectura, navegación y acciones flotantes */
+        #reading-progress {
+            position: fixed;
+            top: 0;
+            left: 0;
+            z-index: 2000;
+            width: 0;
+            height: 3px;
+            background: linear-gradient(90deg, #34C759, #FFFFFF);
+            box-shadow: 0 0 12px rgba(52, 199, 89, 0.55);
+            pointer-events: none;
+        }
+
+        .floating-action-stack {
+            position: fixed;
+            right: 24px;
+            bottom: 24px;
+            z-index: 1050;
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+        }
+
+        .floating-action {
+            width: 44px;
+            height: 44px;
+            border-radius: 50%;
+            border: 1px solid var(--glass-border);
+            background: rgba(18, 18, 18, 0.92);
+            color: var(--text-main);
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            box-shadow: 0 8px 24px rgba(0, 0, 0, 0.38);
+            backdrop-filter: blur(18px);
+            cursor: pointer;
+            opacity: 0;
+            transform: translateY(12px) scale(0.92);
+            pointer-events: none;
+            transition: opacity .25s ease, transform .25s var(--bezier), background .25s ease;
+        }
+
+        .floating-action.visible {
+            opacity: 1;
+            transform: translateY(0) scale(1);
+            pointer-events: auto;
+        }
+
+        .floating-action:hover {
+            background: var(--surface-hover);
+            transform: translateY(-2px);
+        }
+
+        .feedback-link {
+            text-decoration: none;
+        }
+
+        @media (max-width: 768px) {
+            .floating-action-stack {
+                right: 12px;
+                bottom: 82px;
+            }
+            .floating-action {
+                width: 40px;
+                height: 40px;
+            }
+        }
+
+        /* Nuevas secciones About */
+        .quick-start-grid,
+        .ecosystem-grid,
+        .community-grid,
+        .release-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 14px;
+        }
+
+        .quick-step,
+        .ecosystem-card,
+        .community-card,
+        .release-card,
+        .privacy-card {
+            border: 1px solid var(--glass-border);
+            border-radius: 16px;
+            background: rgba(255, 255, 255, 0.025);
+            padding: 18px;
+        }
+
+        .quick-step-number {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            width: 32px;
+            height: 32px;
+            border-radius: 50%;
+            background: var(--text-main);
+            color: var(--bg);
+            font-weight: 700;
+            margin-bottom: 12px;
+        }
+
+        .quick-step h3,
+        .ecosystem-card h3,
+        .community-card h3,
+        .release-card h3,
+        .privacy-card h3 {
+            font-size: 1rem;
+            margin-bottom: 6px;
+        }
+
+        .quick-step p,
+        .ecosystem-card p,
+        .community-card p,
+        .release-card p,
+        .privacy-card p {
+            color: var(--text-muted);
+            font-size: 0.86rem;
+            line-height: 1.5;
+        }
+
+        .privacy-dashboard {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 14px;
+        }
+
+        .privacy-status {
+            display: inline-flex;
+            align-items: center;
+            gap: 7px;
+            color: #34C759;
+            font-size: 0.78rem;
+            font-weight: 600;
+            margin-bottom: 8px;
+        }
+
+        .gallery-carousel {
+            position: relative;
+            overflow-x: auto;
+            overflow-y: hidden;
+            border-radius: 14px;
+            cursor: grab;
+            touch-action: pan-y;
+            user-select: none;
+            scrollbar-width: none;
+            scroll-behavior: auto;
+            scroll-snap-type: x mandatory;
+        }
+
+        .gallery-carousel::-webkit-scrollbar {
+            display: none;
+        }
+
+        .gallery-carousel.is-dragging {
+            cursor: grabbing;
+        }
+
+        .gallery-track {
+            display: flex;
+            width: max-content;
+            gap: 12px;
+        }
+
+        .gallery-item {
+            flex: 0 0 clamp(240px, 42vw, 460px);
+            scroll-snap-align: start;
+            border: 1px solid var(--glass-border);
+            border-radius: 12px;
+            overflow: hidden;
+            background: #111;
+            cursor: zoom-in;
+            padding: 0;
+            -webkit-user-drag: none;
+        }
+
+        .gallery-item img {
+            display: block;
+            width: 100%;
+            aspect-ratio: 16 / 9;
+            object-fit: cover;
+            transition: transform .35s var(--bezier);
+            pointer-events: none;
+            -webkit-user-drag: none;
+        }
+
+        .gallery-item:hover img {
+            transform: scale(1.04);
+        }
+
+        .gallery-modal {
+            position: fixed;
+            inset: 0;
+            z-index: 3000;
+            background: rgba(0, 0, 0, 0.92);
+            display: none;
+            align-items: center;
+            justify-content: center;
+            padding: 64px 24px 24px;
+        }
+
+        .gallery-modal.open {
+            display: flex;
+        }
+
+        .gallery-modal img {
+            max-width: min(92vw, 1500px);
+            max-height: 78vh;
+            border-radius: 12px;
+            object-fit: contain;
+            transform: scale(1);
+            transition: transform .2s ease;
+        }
+
+        .gallery-control {
+            position: absolute;
+            width: 42px;
+            height: 42px;
+            border: 1px solid var(--glass-border);
+            border-radius: 50%;
+            background: rgba(18, 18, 18, 0.9);
+            color: white;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+        }
+
+        .gallery-close { top: 20px; right: 24px; }
+        .gallery-prev { left: 24px; top: 50%; }
+        .gallery-next { right: 24px; top: 50%; }
+        .gallery-zoom { right: 24px; bottom: 24px; }
+        .gallery-fullscreen { left: 24px; bottom: 24px; }
+
+        .gallery-carousel-controls {
+            display: flex;
+            justify-content: flex-end;
+            gap: 8px;
+            margin-top: 12px;
+        }
+
+        .gallery-carousel-controls .gallery-control {
+            position: static;
+            width: 36px;
+            height: 36px;
+        }
+
+        @media(max-width: 768px) {
+            .quick-start-grid,
+            .ecosystem-grid,
+            .community-grid,
+            .release-grid,
+            .privacy-dashboard {
+                grid-template-columns: 1fr;
+            }
+            .gallery-item { flex-basis: min(78vw, 360px); }
+            .gallery-prev { left: 8px; }
+            .gallery-next { right: 8px; }
+        }
+
+        @media(prefers-reduced-motion: reduce) {
+            .gallery-item img { transition: none; }
         }
 
         @media(max-width: 768px) {
@@ -1628,6 +1689,7 @@
 </head>
 <body>
 
+    <div id="reading-progress" aria-hidden="true"></div>
     <canvas id="particles-bg"></canvas>
 
 <!-- Barra Superior -->
@@ -1637,57 +1699,38 @@
             <span>Homescreen NEO</span>
         </a>
         <div class="top-nav-links">
-            <a href="https://capybaragalaxy.github.io/homescreen-online/store" target="_blank" rel="noopener noreferrer" class="top-nav-btn">
-                <i data-lucide="store" size="15"></i> Tienda
+            <a href="https://capybaragalaxy.github.io/homescreen-online/store" target="_blank" rel="noopener noreferrer" class="top-nav-btn" aria-label="Abrir tienda" title="Abrir tienda">
+                <i data-lucide="store" size="15"></i> <span class="top-nav-label">Tienda</span>
             </a>
-            <a href="https://github.com/CapybaraGalaxy/HOMESCREEN" target="_blank" rel="noopener noreferrer" class="top-nav-btn">
-                <i data-lucide="code" size="15"></i> <span class="hide-mobile">Ver código</span>
+            <a href="https://github.com/CapybaraGalaxy/HOMESCREEN" target="_blank" rel="noopener noreferrer" class="top-nav-btn" aria-label="Ver código fuente" title="Ver código fuente">
+                <i data-lucide="code" size="15"></i> <span class="top-nav-label">Ver código</span>
             </a>
-            <a href="index.html" class="top-nav-btn primary">
-                <i data-lucide="layout-grid" size="15"></i> Abrir Homescreen
+            <a href="index.html" class="top-nav-btn primary" aria-label="Abrir Homescreen" title="Abrir Homescreen">
+                <i data-lucide="layout-grid" size="15"></i> <span class="top-nav-label">Abrir Homescreen</span>
             </a>
         </div>
     </nav>
 
-    <!-- Navegación Flotante por Secciones (Sidebar) -->
-    <nav class="floating-nav" aria-label="Navegación rápida por secciones">
-        <a href="#inicio" class="floating-nav-item" title="Inicio">
-            <i data-lucide="home" size="18"></i>
-            <span class="floating-nav-text">Inicio</span>
+    <div class="floating-action-stack" aria-label="Acciones rápidas">
+        <button class="floating-action" id="back-to-top" type="button" aria-label="Volver arriba" title="Volver arriba">
+            <i data-lucide="arrow-up" size="18"></i>
+        </button>
+        <button class="floating-action visible" id="share-page" type="button" aria-label="Compartir esta página" title="Compartir página">
+            <i data-lucide="share-2" size="18"></i>
+        </button>
+        <a class="floating-action visible feedback-link" href="https://github.com/CapybaraGalaxy/HOMESCREEN/issues/new/choose" target="_blank" rel="noopener noreferrer" aria-label="Enviar feedback en GitHub" title="Feedback y errores">
+            <i data-lucide="message-square-warning" size="18"></i>
         </a>
-        <a href="#caracteristicas" class="floating-nav-item" title="Características">
-            <i data-lucide="sparkles" size="18"></i>
-            <span class="floating-nav-text">Características</span>
-        </a>
-        <a href="#extensiones" class="floating-nav-item" title="Extensiones y Tienda">
-            <i data-lucide="store" size="18"></i>
-            <span class="floating-nav-text">Extensiones</span>
-        </a>
-        <a href="#dispositivos" class="floating-nav-item" title="Dispositivos">
-            <i data-lucide="laptop" size="18"></i>
-            <span class="floating-nav-text">Dispositivos</span>
-        </a>
-        <a href="#personalizacion" class="floating-nav-item" title="Personalización">
-            <i data-lucide="sliders-horizontal" size="18"></i>
-            <span class="floating-nav-text">Personalización</span>
-        </a>
-        <a href="#filosofia" class="floating-nav-item" title="Filosofía y Privacidad">
-            <i data-lucide="shield-check" size="18"></i>
-            <span class="floating-nav-text">Filosofía</span>
-        </a>
-        <a href="#roadmap" class="floating-nav-item" title="Roadmap">
-            <i data-lucide="milestone" size="18"></i>
-            <span class="floating-nav-text">Roadmap</span>
-        </a>
-        <a href="#faq" class="floating-nav-item" title="FAQ">
-            <i data-lucide="help-circle" size="18"></i>
-            <span class="floating-nav-text">Preguntas</span>
-        </a>
-        <a href="#novedades" class="floating-nav-item" title="Novedades">
-            <i data-lucide="history" size="18"></i>
-            <span class="floating-nav-text">Novedades</span>
-        </a>
-    </nav>
+    </div>
+
+    <div class="gallery-modal" id="gallery-modal" role="dialog" aria-modal="true" aria-label="Vista ampliada de captura" aria-hidden="true">
+        <img id="gallery-modal-image" src="" alt="">
+        <button class="gallery-control gallery-close" type="button" aria-label="Cerrar galería"><i data-lucide="x" size="20"></i></button>
+        <button class="gallery-control gallery-prev" type="button" aria-label="Captura anterior"><i data-lucide="chevron-left" size="22"></i></button>
+        <button class="gallery-control gallery-next" type="button" aria-label="Captura siguiente"><i data-lucide="chevron-right" size="22"></i></button>
+        <button class="gallery-control gallery-zoom" type="button" aria-label="Cambiar zoom"><i data-lucide="zoom-in" size="20"></i></button>
+        <button class="gallery-control gallery-fullscreen" type="button" aria-label="Abrir pantalla completa"><i data-lucide="maximize" size="20"></i></button>
+    </div>
 
     <div class="app-container" id="main-view">
         <header id="inicio">
@@ -1698,10 +1741,6 @@
                 <h1>Homescreen NEO</h1>
                 <div class="dynamic-title-container">
                     Tu <i>homescreen</i> <span class="dynamic-word" id="changing-word"></span>
-                </div>
-                <div class="version-tag" id="version-badge">
-                    <span class="pulse-dot"></span>
-                    <span id="version-text">Cargando v...</span>
                 </div>
             </div>
         </header>
@@ -1746,9 +1785,100 @@
             </div>
         </section>
 
+                <!-- Zen Showcase (Personalización) -->
+        <section class="zen-showcase" id="feature-explorer" aria-labelledby="zen-showcase-title">
+            <div class="zen-showcase-top">
+                <h2 id="zen-showcase-title">Mucho más que una pantalla de inicio</h2>
+                <p>Personaliza cada detalle de Homescreen NEO: distribución, apariencia, fondos, animaciones y herramientas. Crea un entorno único que se adapte a tu estilo y a tu forma de utilizarlo.</p>
+            </div>
+
+            <div class="zen-showcase-grid">
+                <div class="zen-features-list" role="group" aria-label="Zen Features">
+                    <button class="zen-feature-card active" type="button" data-index="0" aria-pressed="true">
+                        <h3>Herramientas flotantes</h3>
+                        <p>Puedes tener herramientas flotantes directamente en la pantalla de inicio. Además de las que vienen incluídas, podrás descargar más desde la tienda de extensiones o crear las tuyas.</p>
+                    </button>
+                    <button class="zen-feature-card" type="button" data-index="1" aria-pressed="false">
+                        <h3>Personalización total</h3>
+                        <p>Todo en homescreen se puede personalizar. Modo de visualización, el reloj, la fuente, los colores y más. Todo lo que necesitas para hacer Homescreen realmente tuyo.</p>
+                    </button>
+                    <button class="zen-feature-card" type="button" data-index="2" aria-pressed="false">
+                        <h3>Copias de seguridad</h3>
+                        <p>Haz copia de seguridad de tus datos, tanto de forma local, como en la nube, usando Github Gists.</p>
+                    </button>
+                    <button class="zen-feature-card" type="button" data-index="3" aria-pressed="false">
+                        <h3>Instala Homescreen</h3>
+                        <p>Homescreen es una web instalable, lo que te permite añadir un acceso directo a la web, y usarla en pantalla completa.</p>
+                    </button>
+                </div>
+
+                <div class="zen-preview-container">
+                    <div class="zen-preview-bg"></div>
+                    <div class="zen-preview-window">
+                        <img id="zen-preview-img" src="https://github.com/CapybaraGalaxy/HOMESCREEN/blob/main/Media/Showcase/Showcase%201.png?raw=true" alt="Workspaces Preview" loading="lazy" onerror="this.src='data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 width=%22400%22 height=%22300%22%3E%3Crect width=%22400%22 height=%22300%22 fill=%22%23222%22/%3E%3Ctext x=%2250%25%22 y=%2250%25%22 fill=%22%23888%22 text-anchor=%22middle%22 dy=%22.3em%22%3EVista previa%3C/text%3E%3C/svg%3E';">
+                    </div>
+                </div>
+            </div>
+        </section>
+
+
+        <section class="section-box" id="quick-start" aria-labelledby="quick-start-heading">
+            <div class="section-heading">
+                <span class="section-eyebrow"><i data-lucide="route" size="13"></i> Quick Start</span>
+                <h2 id="quick-start-heading">Empieza en tres pasos</h2>
+                <p>Abre tu espacio, organiza lo importante y haz que cada dispositivo se sienta como tuyo.</p>
+            </div>
+            <div class="quick-start-grid">
+                <article class="quick-step">
+                    <span class="quick-step-number">1</span>
+                    <h3>Abre Homescreen</h3>
+                    <p>Accede desde el navegador y deja a mano tus aplicaciones, juegos y herramientas favoritas.</p>
+                </article>
+                <article class="quick-step">
+                    <span class="quick-step-number">2</span>
+                    <h3>Personaliza</h3>
+                    <p>Elige distribución, fondo, reloj, columnas y otros detalles desde el panel de ajustes.</p>
+                </article>
+                <article class="quick-step">
+                    <span class="quick-step-number">3</span>
+                    <h3>Instala o sincroniza</h3>
+                    <p>Añade la PWA a tu dispositivo o exporta una copia local antes de cambiar de equipo.</p>
+                </article>
+            </div>
+        </section>
+
+
+        <section class="section-box" id="screenshots" aria-labelledby="screenshots-heading">
+            <div class="section-heading">
+                <span class="section-eyebrow"><i data-lucide="images" size="13"></i> Screenshot Gallery</span>
+                <h2 id="screenshots-heading">Vistas del proyecto</h2>
+                <p>Amplía las capturas para explorar los diferentes aspectos de NEO.</p>
+            </div>
+            <div class="gallery-carousel" id="gallery-carousel" role="region" aria-label="Carrusel de capturas">
+                <div class="gallery-track" id="gallery-track">
+                    <button class="gallery-item" type="button" data-full="https://github.com/CapybaraGalaxy/HOMESCREEN/blob/main/Media/Showcase/Showcase%201.png?raw=true" aria-label="Ampliar Herramientas flotantes">
+                        <img src="https://github.com/CapybaraGalaxy/HOMESCREEN/blob/main/Media/Showcase/Showcase%201.png?raw=true" alt="Herramientas flotantes" loading="lazy">
+                    </button>
+                    <button class="gallery-item" type="button" data-full="https://github.com/CapybaraGalaxy/HOMESCREEN/blob/main/Media/Showcase/Showcase%202.png?raw=true" aria-label="Ampliar Personalización">
+                        <img src="https://github.com/CapybaraGalaxy/HOMESCREEN/blob/main/Media/Showcase/Showcase%202.png?raw=true" alt="Personalización" loading="lazy">
+                    </button>
+                    <button class="gallery-item" type="button" data-full="https://github.com/CapybaraGalaxy/HOMESCREEN/blob/main/Media/Showcase/Showcase%203.png?raw=true" aria-label="Ampliar Copias de seguridad">
+                        <img src="https://github.com/CapybaraGalaxy/HOMESCREEN/blob/main/Media/Showcase/Showcase%203.png?raw=true" alt="Copias de seguridad" loading="lazy">
+                    </button>
+                    <button class="gallery-item" type="button" data-full="https://github.com/CapybaraGalaxy/HOMESCREEN/blob/main/Media/Showcase/Showcase%204.png?raw=true" aria-label="Ampliar instalación PWA">
+                        <img src="https://github.com/CapybaraGalaxy/HOMESCREEN/blob/main/Media/Showcase/Showcase%204.png?raw=true" alt="Instalación PWA" loading="lazy">
+                    </button>
+                </div>
+            </div>
+            <div class="gallery-carousel-controls" aria-label="Controles del carrusel">
+                <button class="gallery-control gallery-carousel-prev" type="button" aria-label="Capturas anteriores"><i data-lucide="chevron-left" size="18"></i></button>
+                <button class="gallery-control gallery-carousel-next" type="button" aria-label="Capturas siguientes"><i data-lucide="chevron-right" size="18"></i></button>
+            </div>
+        </section>
+
         <!-- Sección Propia: Tienda de Herramientas y Extensiones -->
-        <section class="section-box" id="extensiones" aria-labelledby="extensiones-heading">
-            <div class="roadmap-header" style="margin-bottom: 20px;">
+        <section class="section-box" id="ecosistema" aria-labelledby="extensiones-heading">
+            <div class="section-heading" style="margin-bottom: 20px;">
                 <span class="section-eyebrow"><i data-lucide="store" size="13"></i> Ecosistema de Aplicaciones</span>
                 <h2 id="extensiones-heading">Tienda de herramientas y extensiones</h2>
                 <p>Homescreen está evolucionando de una simple pantalla de inicio a un pequeño ecosistema modular de micro-aplicaciones.</p>
@@ -1791,42 +1921,6 @@
             </div>
         </section>
 
-        <!-- Zen Showcase (Personalización) -->
-        <section class="zen-showcase" id="personalizacion" aria-labelledby="zen-showcase-title">
-            <div class="zen-showcase-top">
-                <h2 id="zen-showcase-title">Mucho más que una pantalla de inicio</h2>
-                <p>Personaliza cada detalle de Homescreen NEO: distribución, apariencia, fondos, animaciones y herramientas. Crea un entorno único que se adapte a tu estilo y a tu forma de utilizarlo.</p>
-            </div>
-
-            <div class="zen-showcase-grid">
-                <div class="zen-features-list" role="group" aria-label="Zen Features">
-                    <button class="zen-feature-card active" type="button" data-index="0" aria-pressed="true">
-                        <h3>Herramientas flotantes</h3>
-                        <p>Puedes tener herramientas flotantes directamente en la pantalla de inicio. Además de las que vienen incluídas, podrás descargar más desde la tienda de extensiones o crear las tuyas.</p>
-                    </button>
-                    <button class="zen-feature-card" type="button" data-index="1" aria-pressed="false">
-                        <h3>Personalización total</h3>
-                        <p>Todo en homescreen se puede personalizar. Modo de visualización, el reloj, la fuente, los colores y más. Todo lo que necesitas para hacer Homescreen realmente tuyo.</p>
-                    </button>
-                    <button class="zen-feature-card" type="button" data-index="2" aria-pressed="false">
-                        <h3>Copias de seguridad</h3>
-                        <p>Haz copia de seguridad de tus datos, tanto de forma local, como en la nube, usando Github Gists.</p>
-                    </button>
-                    <button class="zen-feature-card" type="button" data-index="3" aria-pressed="false">
-                        <h3>Instala Homescreen</h3>
-                        <p>Homescreen es una web instalable, lo que te permite añadir un acceso directo a la web, y usarla en pantalla completa.</p>
-                    </button>
-                </div>
-
-                <div class="zen-preview-container">
-                    <div class="zen-preview-bg"></div>
-                    <div class="zen-preview-window">
-                        <img id="zen-preview-img" src="https://github.com/CapybaraGalaxy/HOMESCREEN/blob/main/Media/Showcase/Showcase%201.png?raw=true" alt="Workspaces Preview" loading="lazy" onerror="this.src='data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 width=%22400%22 height=%22300%22%3E%3Crect width=%22400%22 height=%22300%22 fill=%22%23222%22/%3E%3Ctext x=%2250%25%22 y=%2250%25%22 fill=%22%23888%22 text-anchor=%22middle%22 dy=%22.3em%22%3EVista previa%3C/text%3E%3C/svg%3E';">
-                    </div>
-                </div>
-            </div>
-        </section>
-
         <!-- Visualizador de dispositivos (Corregido para móvil sin aplastarse) -->
         <section class="device-showcase" id="dispositivos" aria-labelledby="device-heading">
             <div class="device-showcase-heading">
@@ -1861,6 +1955,36 @@
             <span class="device-current-label" id="device-current-label" aria-live="polite">
                 VISTA EN PORTÁTÍL
             </span>
+        </section>
+
+        <section class="section-box" id="privacy-dashboard" aria-labelledby="privacy-dashboard-heading">
+            <div class="section-heading">
+                <span class="section-eyebrow"><i data-lucide="shield-check" size="13"></i> Privacy Dashboard</span>
+                <h2 id="privacy-dashboard-heading">Tu información, bajo control</h2>
+                <p>Resumen transparente de cómo funciona el almacenamiento y qué datos utiliza el proyecto.</p>
+            </div>
+            <div class="privacy-dashboard">
+                <article class="privacy-card">
+                    <span class="privacy-status"><i data-lucide="check-circle-2" size="14"></i> Protección activa</span>
+                    <h3>Almacenamiento local</h3>
+                    <p>Preferencias y datos se guardan en el navegador. No existe una cuenta necesaria para usar Homescreen.</p>
+                </article>
+                <article class="privacy-card">
+                    <span class="privacy-status"><i data-lucide="check-circle-2" size="14"></i> Sin rastreo comercial</span>
+                    <h3>Sin telemetría publicitaria</h3>
+                    <p>No hay publicidad ni analíticas comerciales integradas en la experiencia principal.</p>
+                </article>
+                <article class="privacy-card">
+                    <span class="privacy-status"><i data-lucide="cloud" size="14"></i> Opcional</span>
+                    <h3>Sincronización con Gist</h3>
+                    <p>Solo se activa si eliges conectar GitHub Gist. El token se conserva en el almacenamiento local del navegador.</p>
+                </article>
+                <article class="privacy-card">
+                    <span class="privacy-status"><i data-lucide="globe" size="14"></i> Conexiones visibles</span>
+                    <h3>Servicios externos</h3>
+                    <p>Google Fonts, recursos de GitHub y enlaces a servicios externos pueden requerir conexión a Internet.</p>
+                </article>
+            </div>
         </section>
 
         <section class="principles-section" id="filosofia" aria-labelledby="principles-heading">
@@ -1901,7 +2025,7 @@
                 <div class="metric-label">Almacenamiento</div>
             </div>
             <div class="metric-card">
-                <div class="metric-value">0 Ads</div>
+                <div class="metric-value" data-counter="0" data-suffix=" Ads">0 Ads</div>
                 <div class="metric-label">Sin publicidad</div>
             </div>
             <div class="metric-card">
@@ -1985,64 +2109,50 @@
             </div>
         </section>
 
-        <!-- Timeline del Proyecto y Roadmap -->
-        <section class="roadmap-section" id="roadmap" aria-labelledby="roadmap-heading">
-            <div class="roadmap-header">
-                <span class="section-eyebrow"><i data-lucide="milestone" size="13"></i> Evolución y Futuro</span>
-                <h2 id="roadmap-heading">Timeline del Proyecto & Roadmap</h2>
-                <p>Un recorrido por los hitos clave que han dado forma a la experiencia de Homescreen NEO y lo que está por venir.</p>
+        <section class="section-box" id="comunidad" aria-labelledby="community-heading">
+            <div class="section-heading">
+                <span class="section-eyebrow"><i data-lucide="users" size="13"></i> Community & Development</span>
+                <h2 id="community-heading">Construido en abierto</h2>
+                <p>Participa con ideas, reportes y mejoras. El repositorio público es el punto de encuentro del proyecto.</p>
             </div>
+            <div class="community-grid">
+                <article class="community-card">
+                    <h3>Proponer funciones</h3>
+                    <p>Abre una idea en GitHub Issues y describe qué te gustaría ver en una futura versión.</p>
+                    <a class="top-nav-btn" href="https://github.com/CapybaraGalaxy/HOMESCREEN/issues/new/choose" target="_blank" rel="noopener noreferrer" style="margin-top:14px;">Crear propuesta</a>
+                </article>
+                <article class="community-card">
+                    <h3>Contribuir código</h3>
+                    <p>Revisa el repositorio, crea una rama y prepara una pull request con cambios concretos y comprobables.</p>
+                    <a class="top-nav-btn" href="https://github.com/CapybaraGalaxy/HOMESCREEN/pulls" target="_blank" rel="noopener noreferrer" style="margin-top:14px;">Ver contribuciones</a>
+                </article>
+                <article class="community-card">
+                    <h3>Reportar problemas</h3>
+                    <p>Comparte navegador, dispositivo y pasos de reproducción para que los fallos sean fáciles de analizar.</p>
+                    <a class="top-nav-btn" href="https://github.com/CapybaraGalaxy/HOMESCREEN/issues" target="_blank" rel="noopener noreferrer" style="margin-top:14px;">Abrir Issues</a>
+                </article>
+            </div>
+        </section>
 
-            <div class="timeline-list">
-                <div class="timeline-item is-done">
-                    <span class="timeline-dot"></span>
-                    <div class="timeline-meta">
-                        <span class="timeline-date">Fase 01 · Origen</span>
-                        <span class="timeline-badge">Completado</span>
-                    </div>
-                    <h3>Primera versión y lanzador minimalista</h3>
-                    <p>Nace el núcleo de Homescreen con accesos directos rápidos, reloj limpio y una interfaz libre de distracciones pensada para abrir al instante.</p>
-                </div>
-
-                <div class="timeline-item is-done">
-                    <span class="timeline-dot"></span>
-                    <div class="timeline-meta">
-                        <span class="timeline-date">Fase 02 · Productividad</span>
-                        <span class="timeline-badge">Completado</span>
-                    </div>
-                    <h3>Llegada de las herramientas flotantes</h3>
-                    <p>Integración de ventanas flotantes interactivas (notas, temporizador, calculadora, kanban) para trabajar sin abandonar la pantalla principal.</p>
-                </div>
-
-                <div class="timeline-item is-done">
-                    <span class="timeline-dot"></span>
-                    <div class="timeline-meta">
-                        <span class="timeline-date">Fase 03 · Identidad Visual</span>
-                        <span class="timeline-badge">Completado</span>
-                    </div>
-                    <h3>Personalización extrema y motor Glassmorphism</h3>
-                    <p>Control total sobre tipografías, desenfoque, fondos dinámicos, distribuciones adaptables y copias de seguridad locales o en GitHub Gists.</p>
-                </div>
-
-                <div class="timeline-item is-current">
-                    <span class="timeline-dot"></span>
-                    <div class="timeline-meta">
-                        <span class="timeline-date">Fase 04 · Ecosistema NEO</span>
-                        <span class="timeline-badge">En curso</span>
-                    </div>
-                    <h3>Tienda de extensiones y modo offline avanzado</h3>
-                    <p>Ampliación del catálogo de micro-aplicaciones integradas, mejoras de rendimiento PWA y navegación fluida entre dispositivos.</p>
-                </div>
-
-                <div class="timeline-item">
-                    <span class="timeline-dot"></span>
-                    <div class="timeline-meta">
-                        <span class="timeline-date">Fase 05 · Próximos pasos</span>
-                        <span class="timeline-badge">Roadmap</span>
-                    </div>
-                    <h3>Espacios de trabajo inteligentes y widgets comunitarios</h3>
-                    <p>Perfiles intercambiables según el momento del día (estudio, trabajo, ocio) y soporte para módulos creados por la comunidad.</p>
-                </div>
+        <section class="section-box" id="latest-release" aria-labelledby="latest-release-heading">
+            <div class="section-heading">
+                <span class="section-eyebrow"><i data-lucide="package-check" size="13"></i> Latest Release</span>
+                <h2 id="latest-release-heading">Última versión disponible</h2>
+                <p>Resumen dinámico leído directamente del archivo de versiones del proyecto.</p>
+            </div>
+            <div class="release-grid">
+                <article class="release-card">
+                    <h3 id="release-version">Cargando versión...</h3>
+                    <p id="release-date">Consultando fecha de publicación</p>
+                </article>
+                <article class="release-card">
+                    <h3>Novedades principales</h3>
+                    <p>Personalización ampliada, nuevos ajustes, aplicaciones, PWA y mejoras de rendimiento.</p>
+                </article>
+                <article class="release-card">
+                    <h3>Historial completo</h3>
+                    <p>Consulta todos los cambios publicados y sus detalles de cada versión más abajo.</p>
+                </article>
             </div>
         </section>
 
@@ -2114,22 +2224,6 @@
             </div>
         </section>
 
-        <!-- Card "Un proyecto personal, abierto a mejorar" -->
-        <section class="project-note" aria-label="Sobre el proyecto">
-            <div class="project-note-copy">
-                <div class="project-note-icon">
-                    <i data-lucide="heart-handshake" size="20"></i>
-                </div>
-                <div>
-                    <h3>Un proyecto personal, abierto a mejorar.</h3>
-                    <p>Homescreen nació como una herramienta para uso propio y sigue evolucionando con nuevas ideas.</p>
-                </div>
-            </div>
-            <a class="github-link" href="https://github.com/CapybaraGalaxy/HOMESCREEN" target="_blank" rel="noopener noreferrer">
-                <i data-lucide="github" size="16"></i> Ver en GitHub
-            </a>
-        </section>
-
         <section class="section-box" id="novedades">
             <h3 class="section-title" style="justify-content: space-between;">
                 <span style="display:flex; align-items:center; gap:10px;">
@@ -2165,10 +2259,12 @@
                     <ul class="footer-links">
                         <li><a href="#inicio">Inicio</a></li>
                         <li><a href="#caracteristicas">Características</a></li>
-                        <li><a href="#extensiones">Extensiones</a></li>
+                        <li><a href="#quick-start">Inicio rápido</a></li>
+                        <li><a href="#screenshots">Capturas</a></li>
+                        <li><a href="#ecosistema">Ecosistema</a></li>
                         <li><a href="#dispositivos">Dispositivos</a></li>
-                        <li><a href="#personalizacion">Personalización</a></li>
-                        <li><a href="#roadmap">Roadmap</a></li>
+                        <li><a href="#privacy-dashboard">Privacidad</a></li>
+                        <li><a href="#feature-explorer">Funcionalidades</a></li>
                     </ul>
                 </div>
 
@@ -2250,13 +2346,78 @@
             `).join('');
 
             const duplicateItems = shuffledTools.map(tool => `
-                <div class="carousel-item" aria-hidden="true">
+                <div class="carousel-item" data-carousel-clone="true" aria-hidden="true">
                     <i data-lucide="${tool.icon}" size="16"></i>
                     <span>${tool.name}</span>
                 </div>
             `).join('');
 
             track.innerHTML = normalItems + duplicateItems;
+        }
+
+        function initToolsCarousel() {
+            const viewport = document.querySelector('.carousel-container');
+            const track = document.getElementById('tools-carousel');
+            if (!viewport || !track) return;
+
+            let offset = 0;
+            let speed = 0;
+            let previousFrame = 0;
+            let isDragging = false;
+            let dragStartX = 0;
+            let dragStartOffset = 0;
+
+            function getLoopWidth() {
+                const firstClone = track.querySelector('[data-carousel-clone="true"]');
+                return firstClone ? firstClone.offsetLeft - track.firstElementChild.offsetLeft : 0;
+            }
+
+            viewport.addEventListener('pointerdown', (event) => {
+                if (event.button !== 0) return;
+                isDragging = true;
+                dragStartX = event.clientX;
+                dragStartOffset = offset;
+                viewport.classList.add('is-dragging');
+                viewport.setPointerCapture(event.pointerId);
+            });
+
+            viewport.addEventListener('pointermove', (event) => {
+                if (!isDragging) return;
+                const loopWidth = getLoopWidth();
+                if (!loopWidth) return;
+                offset = ((dragStartOffset - (event.clientX - dragStartX)) % loopWidth + loopWidth) % loopWidth;
+                track.style.transform = `translate3d(${-offset}px, 0, 0)`;
+            });
+
+            const finishDrag = () => {
+                if (!isDragging) return;
+                isDragging = false;
+                viewport.classList.remove('is-dragging');
+            };
+            viewport.addEventListener('pointerup', finishDrag);
+            viewport.addEventListener('pointercancel', finishDrag);
+
+            function animate(timestamp) {
+                if (previousFrame) {
+                    const elapsed = Math.min(timestamp - previousFrame, 50);
+                    const paused = viewport.matches(':hover') || isDragging || document.hidden;
+                    const reduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+                    const targetSpeed = paused || reduceMotion ? 0 : 24;
+                    speed += (targetSpeed - speed) * Math.min(1, elapsed / 350);
+
+                    const loopWidth = getLoopWidth();
+                    if (loopWidth > 0) {
+                        if (!isDragging) {
+                            offset = (offset + speed * elapsed / 1000) % loopWidth;
+                            track.style.transform = `translate3d(${-offset}px, 0, 0)`;
+                        }
+                    }
+                }
+                previousFrame = timestamp;
+                requestAnimationFrame(animate);
+            }
+
+            requestAnimationFrame(animate);
         }
 
         const phrases = ["para productividad.", "perfecto.", "para el día a día.", "para crear.", "para diseñar.", "para organizar.", "para desarrollar.", "para automatizar.", "para optimizar.", "para descubrir.", "moderno.", "perfecto."];
@@ -2343,14 +2504,12 @@
 
         async function fetchChangelog() {
             const container = document.getElementById('changelog-container');
-            const versionText = document.getElementById('version-text');
             const versionDate = document.getElementById('version-date');
 
             const isLocalEnv = window.location.protocol === 'file:';
             const fallbackMessage = `No se han encontrado cambios. Puede ser un error, revisa tu conexión o intenta más tarde. Obtén la última versión disponible en <a href="https://github.com/CapybaraGalaxy/HOMESCREEN" target="_blank" rel="noopener noreferrer" style="color: #8ab4f8; text-decoration: none;">GITHUB</a>.`;
 
             if (isLocalEnv) {
-                versionText.textContent = 'Versión local';
                 versionDate.textContent = 'Modo local';
                 container.innerHTML = `<div style="color:var(--text-muted); font-size:0.9rem; line-height:1.6;">${fallbackMessage}</div>`;
                 return;
@@ -2364,14 +2523,16 @@
                 const latestRelease = releases[0];
                 if (!latestRelease) throw new Error('version.json no contiene versiones');
 
-                versionText.textContent = `v${latestRelease.version}`;
                 versionDate.textContent = latestRelease.date || '';
+                const releaseVersion = document.getElementById('release-version');
+                const releaseDate = document.getElementById('release-date');
+                if (releaseVersion) releaseVersion.textContent = `v${latestRelease.version}`;
+                if (releaseDate) releaseDate.textContent = latestRelease.date || 'Fecha no publicada';
                 container.replaceChildren(...releases.map((release, index) =>
                     window.HomescreenChangelog.renderReleaseCard(release, { open: index === 0 })
                 ));
             } catch (error) {
                 console.error('No se pudo cargar el historial de cambios:', error);
-                versionText.textContent = 'No disponible';
                 versionDate.textContent = '';
                 container.textContent = 'No se pudo cargar el historial. Revisa tu conexión o vuelve a intentarlo más tarde.';
             }
@@ -2463,46 +2624,226 @@
             });
         }
 
-        /* Resaltado automático de sección activa en navegación (IntersectionObserver) */
-        function initActiveNavigation() {
-            const sections = document.querySelectorAll('header[id], section[id]');
-            const navItems = document.querySelectorAll('.floating-nav-item');
+        function initReadingProgress() {
+            const progress = document.getElementById('reading-progress');
+            const backToTop = document.getElementById('back-to-top');
+            if (!progress) return;
 
-            if (!sections.length || !navItems.length) return;
+            function updateProgress() {
+                const scrollable = document.documentElement.scrollHeight - window.innerHeight;
+                const percent = scrollable > 0 ? (window.scrollY / scrollable) * 100 : 0;
+                progress.style.width = `${Math.min(100, Math.max(0, percent))}%`;
+                if (backToTop) backToTop.classList.toggle('visible', percent >= 18);
+            }
 
-            const observerOptions = {
-                root: null,
-                rootMargin: '-20% 0px -60% 0px',
-                threshold: 0
+            window.addEventListener('scroll', updateProgress, { passive: true });
+            window.addEventListener('resize', updateProgress);
+            updateProgress();
+
+            if (backToTop) {
+                backToTop.addEventListener('click', () => {
+                    window.scrollTo({ top: 0, behavior: 'smooth' });
+                });
+            }
+        }
+
+        function initShareButton() {
+            const button = document.getElementById('share-page');
+            if (!button) return;
+
+            button.addEventListener('click', async () => {
+                const shareData = {
+                    title: document.title,
+                    text: 'Conoce Homescreen NEO',
+                    url: window.location.href
+                };
+
+                try {
+                    if (navigator.share) {
+                        await navigator.share(shareData);
+                        return;
+                    }
+                    await navigator.clipboard.writeText(window.location.href);
+                    button.innerHTML = '<i data-lucide="check" size="18"></i>';
+                    button.setAttribute('aria-label', 'Enlace copiado');
+                    lucide.createIcons();
+                    setTimeout(() => {
+                        button.innerHTML = '<i data-lucide="share-2" size="18"></i>';
+                        button.setAttribute('aria-label', 'Compartir esta página');
+                        lucide.createIcons();
+                    }, 1800);
+                } catch (error) {
+                    if (error && error.name !== 'AbortError') {
+                        window.prompt('Copia el enlace de esta página:', window.location.href);
+                    }
+                }
+            });
+        }
+
+        function initAnimatedCounters() {
+            const counters = document.querySelectorAll('[data-counter]');
+            if (!counters.length) return;
+
+            const animateCounter = (element) => {
+                const target = Number(element.dataset.counter);
+                const suffix = element.dataset.suffix || '';
+                const reduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+                if (reduceMotion || !Number.isFinite(target)) {
+                    element.textContent = `${target}${suffix}`;
+                    return;
+                }
+
+                const start = performance.now();
+                const duration = 550;
+                function frame(now) {
+                    const progress = Math.min(1, (now - start) / duration);
+                    const value = Math.round(target * (1 - Math.pow(1 - progress, 3)));
+                    element.textContent = `${value}${suffix}`;
+                    if (progress < 1) requestAnimationFrame(frame);
+                }
+                requestAnimationFrame(frame);
             };
 
             const observer = new IntersectionObserver((entries) => {
                 entries.forEach(entry => {
                     if (entry.isIntersecting) {
-                        const id = entry.target.getAttribute('id');
-                        navItems.forEach(item => {
-                            const href = item.getAttribute('href');
-                            if (href === `#${id}`) {
-                                item.classList.add('active');
-                            } else {
-                                item.classList.remove('active');
-                            }
-                        });
+                        animateCounter(entry.target);
+                        observer.unobserve(entry.target);
                     }
                 });
-            }, observerOptions);
+            }, { threshold: 0.6 });
 
-            sections.forEach(section => observer.observe(section));
+            counters.forEach(counter => observer.observe(counter));
+        }
+
+        function initGallery() {
+            const modal = document.getElementById('gallery-modal');
+            const modalImage = document.getElementById('gallery-modal-image');
+            const viewport = document.getElementById('gallery-carousel');
+            const track = document.getElementById('gallery-track');
+            const items = track ? [...track.querySelectorAll('.gallery-item')] : [];
+            if (!modal || !modalImage || !viewport || !track || !items.length) return;
+
+            let currentIndex = 0;
+            let zoomed = false;
+            let isDragging = false;
+            let didDrag = false;
+            let suppressClick = false;
+            let dragStartX = 0;
+            let dragStartScroll = 0;
+
+            items.forEach((item, index) => {
+                item.dataset.galleryIndex = String(index);
+                item.addEventListener('click', () => {
+                    if (suppressClick) return;
+                    openGallery(index);
+                });
+            });
+
+            function openGallery(index) {
+                currentIndex = (index + items.length) % items.length;
+                zoomed = false;
+                modalImage.style.transform = 'scale(1)';
+                modalImage.src = items[currentIndex].dataset.full;
+                modalImage.alt = items[currentIndex].querySelector('img').alt;
+                modal.classList.add('open');
+                modal.setAttribute('aria-hidden', 'false');
+                document.body.style.overflow = 'hidden';
+            }
+
+            function closeGallery() {
+                modal.classList.remove('open');
+                modal.setAttribute('aria-hidden', 'true');
+                document.body.style.overflow = '';
+                if (document.fullscreenElement) document.exitFullscreen().catch(() => {});
+            }
+
+            viewport.addEventListener('pointerdown', (event) => {
+                if (event.button !== 0) return;
+                isDragging = true;
+                didDrag = false;
+                dragStartX = event.clientX;
+                dragStartScroll = viewport.scrollLeft;
+                viewport.classList.add('is-dragging');
+            });
+            viewport.addEventListener('pointermove', (event) => {
+                if (!isDragging) return;
+                const distance = event.clientX - dragStartX;
+                if (Math.abs(distance) > 5 && !didDrag) {
+                    didDrag = true;
+                    viewport.setPointerCapture(event.pointerId);
+                }
+                viewport.scrollLeft = dragStartScroll - distance;
+            });
+            const finishDrag = () => {
+                if (!isDragging) return;
+                isDragging = false;
+                viewport.classList.remove('is-dragging');
+                if (didDrag) {
+                    suppressClick = true;
+                    setTimeout(() => { suppressClick = false; }, 0);
+                }
+            };
+            viewport.addEventListener('pointerup', finishDrag);
+            viewport.addEventListener('pointercancel', finishDrag);
+            window.addEventListener('pointerup', finishDrag);
+            window.addEventListener('pointercancel', finishDrag);
+
+            const scrollByGalleryPage = (direction) => {
+                const maxScroll = viewport.scrollWidth - viewport.clientWidth;
+                const step = items[1]
+                    ? items[1].offsetLeft - items[0].offsetLeft
+                    : items[0].getBoundingClientRect().width;
+                const atStart = viewport.scrollLeft <= 2;
+                const atEnd = viewport.scrollLeft >= maxScroll - 2;
+                const currentIndex = Math.round(viewport.scrollLeft / step);
+                const lastIndex = Math.ceil(maxScroll / step);
+                let target = (currentIndex + direction) * step;
+
+                if (direction > 0 && (atEnd || currentIndex >= lastIndex)) target = 0;
+                if (direction < 0 && atStart) target = maxScroll;
+                viewport.scrollTo({ left: Math.max(0, Math.min(maxScroll, target)), behavior: 'smooth' });
+            };
+            document.querySelector('.gallery-carousel-prev').addEventListener('click', () => scrollByGalleryPage(-1));
+            document.querySelector('.gallery-carousel-next').addEventListener('click', () => scrollByGalleryPage(1));
+            modal.querySelector('.gallery-close').addEventListener('click', closeGallery);
+            modal.querySelector('.gallery-prev').addEventListener('click', () => openGallery(currentIndex - 1));
+            modal.querySelector('.gallery-next').addEventListener('click', () => openGallery(currentIndex + 1));
+            modal.querySelector('.gallery-zoom').addEventListener('click', () => {
+                zoomed = !zoomed;
+                modalImage.style.transform = zoomed ? 'scale(1.45)' : 'scale(1)';
+            });
+            modal.querySelector('.gallery-fullscreen').addEventListener('click', () => {
+                if (!document.fullscreenElement) {
+                    modal.requestFullscreen().catch(() => {});
+                } else {
+                    document.exitFullscreen().catch(() => {});
+                }
+            });
+
+            modal.addEventListener('click', (event) => {
+                if (event.target === modal) closeGallery();
+            });
+            document.addEventListener('keydown', (event) => {
+                if (!modal.classList.contains('open')) return;
+                if (event.key === 'Escape') closeGallery();
+                if (event.key === 'ArrowLeft') openGallery(currentIndex - 1);
+                if (event.key === 'ArrowRight') openGallery(currentIndex + 1);
+            });
         }
 
         window.onload = () => {
             buildCarousel();
+            initToolsCarousel();
             fetchChangelog();
             setTimeout(typeEffect, 600);
             initDeviceSelector();
             initZenShowcase();
             initFAQ();
-            initActiveNavigation();
+            initReadingProgress();
+            initShareButton();
+            initAnimatedCounters();
+            initGallery();
             lucide.createIcons();
         };
 
