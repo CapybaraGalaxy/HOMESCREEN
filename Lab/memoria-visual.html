@@ -1,0 +1,2165 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+    <title>Memoria de Color y Patrones</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@200;300;400;500;600;700;800;900&display=swap" rel="stylesheet">
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
+    <style>
+        :root {
+            --bg: #000000;
+            --surface: #121212;
+            --surface-hover: #1c1c1e;
+            
+            --glass: rgba(18, 18, 20, 0.65);
+            --glass-border: rgba(255, 255, 255, 0.08);
+            --blur-val: 30px;
+
+            --text-main: #FFFFFF;
+            --text-muted: #8E8E93;
+
+            --accent-danger: #FF453A;
+            --accent-success: #34C759;
+
+            --bezier: cubic-bezier(0.16, 1, 0.3, 1);
+            --spring: cubic-bezier(0.34, 1.56, 0.64, 1);
+        }
+
+        body.no-blur {
+            --blur-val: 0px !important;
+            --glass: rgba(18, 18, 20, 0.95) !important;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            user-select: none;
+            -webkit-user-select: none;
+            -webkit-tap-highlight-color: transparent;
+        }
+
+        body {
+            background-color: var(--bg);
+            color: var(--text-main);
+            font-family: 'Outfit', sans-serif;
+            min-height: 100dvh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            overflow: hidden;
+            position: relative;
+        }
+
+        #bg-canvas {
+            position: fixed;
+            inset: 0;
+            width: 100%;
+            height: 100%;
+            z-index: 0;
+            pointer-events: none;
+            opacity: 0.7;
+        }
+
+        .app-container {
+            width: 100%;
+            max-width: 480px;
+            height: 100dvh;
+            display: flex;
+            flex-direction: column;
+            padding: env(safe-area-inset-top) 20px calc(env(safe-area-inset-bottom) + 16px) 20px;
+            position: relative;
+            z-index: 1;
+            background: rgba(0, 0, 0, 0.25);
+            backdrop-filter: blur(calc(var(--blur-val) * 0.4));
+            -webkit-backdrop-filter: blur(calc(var(--blur-val) * 0.4));
+            transition: filter 0.3s var(--bezier);
+        }
+
+        .app-container.backgrounded {
+            filter: blur(var(--blur-val)) brightness(0.4);
+            pointer-events: none;
+        }
+
+        header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 8px 0;
+            z-index: 10;
+            min-height: 52px;
+        }
+
+        .header-brand {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .app-icon-badge {
+            width: 40px;
+            height: 40px;
+            border-radius: 12px;
+            background: radial-gradient(circle at top left, rgba(255,255,255,0.15), rgba(255,255,255,0.02));
+            border: 1px solid var(--glass-border);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            backdrop-filter: blur(var(--blur-val));
+            -webkit-backdrop-filter: blur(var(--blur-val));
+            box-shadow: 0 4px 20px rgba(0,0,0,0.4);
+        }
+
+        .header-titles {
+            display: flex;
+            flex-direction: column;
+        }
+
+        .header-title {
+            font-size: 17px;
+            font-weight: 700;
+            letter-spacing: -0.01em;
+            color: var(--text-main);
+        }
+
+        .header-sub {
+            font-size: 12px;
+            color: var(--text-muted);
+            font-variant-numeric: tabular-nums;
+        }
+
+        .header-actions {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .icon-btn-pill {
+            background: var(--surface);
+            border: 1px solid var(--glass-border);
+            width: 38px;
+            height: 38px;
+            border-radius: 100px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: var(--text-main);
+            cursor: pointer;
+            transition: transform 0.15s var(--spring), background 0.2s var(--bezier);
+        }
+
+        .icon-btn-pill:active { transform: scale(0.92); }
+
+        .score-pill {
+            background: var(--surface);
+            border: 1px solid var(--glass-border);
+            padding: 6px 14px;
+            border-radius: 100px;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            font-size: 13px;
+            font-weight: 500;
+        }
+
+        .score-val {
+            font-variant-numeric: tabular-nums;
+            color: var(--text-main);
+            font-weight: 700;
+            transition: transform 0.2s var(--spring);
+        }
+
+        .score-pop {
+            transform: scale(1.3);
+            color: var(--accent-success);
+        }
+
+        .view-panel {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+            gap: 12px;
+            padding: 6px 0;
+            position: relative;
+            animation: fadeIn 0.4s var(--bezier) forwards;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(8px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .main-menu-view {
+            justify-content: center;
+            align-items: center;
+            text-align: center;
+            gap: 28px;
+        }
+
+        .hero-title-box {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .hero-title-box .badge-tag {
+            font-size: 11px;
+            font-weight: 700;
+            letter-spacing: 0.15em;
+            text-transform: uppercase;
+            color: rgba(255, 255, 255, 0.7);
+            background: rgba(255, 255, 255, 0.06);
+            border: 1px solid var(--glass-border);
+            padding: 4px 12px;
+            border-radius: 100px;
+        }
+
+        .hero-title-box h1 {
+            font-size: 34px;
+            font-weight: 900;
+            letter-spacing: -0.03em;
+            line-height: 1.05;
+            background: linear-gradient(135deg, #FFFFFF 30%, #8E8E93 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .hero-title-box p {
+            font-size: 14px;
+            color: var(--text-muted);
+            max-width: 280px;
+            line-height: 1.4;
+        }
+
+        .menu-actions-stack {
+            width: 100%;
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+
+        .menu-btn {
+            width: 100%;
+            height: 54px;
+            border-radius: 18px;
+            border: 1px solid var(--glass-border);
+            background: var(--surface);
+            color: var(--text-main);
+            font-family: inherit;
+            font-size: 16px;
+            font-weight: 600;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 0 20px;
+            cursor: pointer;
+            backdrop-filter: blur(var(--blur-val));
+            -webkit-backdrop-filter: blur(var(--blur-val));
+            transition: transform 0.15s var(--spring), background 0.2s var(--bezier);
+            box-shadow: 0 10px 30px rgba(0,0,0,0.3);
+        }
+
+        .menu-btn:active { transform: scale(0.97); }
+
+        .menu-btn.primary {
+            background: #FFFFFF;
+            color: #000000;
+            border-color: #FFFFFF;
+        }
+
+        .menu-btn.primary i { color: #000000; }
+
+        .menu-btn-content {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .mode-selection-view {
+            justify-content: center;
+            gap: 20px;
+        }
+
+        .view-header { text-align: center; }
+        .view-header h2 { font-size: 26px; font-weight: 800; letter-spacing: -0.02em; }
+        .view-header p { font-size: 13px; color: var(--text-muted); margin-top: 4px; }
+
+        .modes-grid {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+            width: 100%;
+        }
+
+        .mode-card {
+            background: var(--surface);
+            border: 1px solid var(--glass-border);
+            border-radius: 18px;
+            padding: 16px 20px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            cursor: pointer;
+            transition: transform 0.15s var(--spring), background 0.2s, border-color 0.2s;
+        }
+
+        .mode-card:active { transform: scale(0.98); }
+
+        .mode-card.selected {
+            border-color: #FFFFFF;
+            background: var(--surface-hover);
+        }
+
+        .mode-info {
+            display: flex;
+            flex-direction: column;
+            gap: 2px;
+            text-align: left;
+        }
+
+        .mode-title { font-size: 16px; font-weight: 700; color: var(--text-main); }
+        .mode-desc { font-size: 12px; color: var(--text-muted); }
+
+        /* JUEGO: COLOR MEMORY */
+        .color-card-wrapper {
+            flex: 1;
+            min-height: 180px;
+            max-height: 220px;
+            width: 100%;
+            position: relative;
+            border-radius: 24px;
+            background: var(--surface);
+            border: 1px solid var(--glass-border);
+            overflow: hidden;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.6);
+            transition: transform 0.4s var(--bezier);
+        }
+
+        .color-preview-target, .color-preview-replica {
+            position: absolute;
+            inset: 0;
+            width: 100%;
+            height: 100%;
+            transition: opacity 0.3s var(--bezier);
+        }
+
+        .color-preview-target { z-index: 1; }
+        .color-preview-replica { z-index: 2; opacity: 0; }
+
+        .split-view .color-preview-target { width: 50%; opacity: 1 !important; }
+        .split-view .color-preview-replica { left: 50%; width: 50%; opacity: 1 !important; }
+
+        .card-overlay {
+            position: absolute;
+            z-index: 3;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 12px;
+            pointer-events: none;
+            text-align: center;
+            padding: 24px;
+        }
+
+        .timer-ring {
+            width: 60px;
+            height: 60px;
+            position: relative;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .timer-svg {
+            transform: rotate(-90deg);
+            width: 100%;
+            height: 100%;
+        }
+
+        .timer-circle-bg {
+            fill: none;
+            stroke: rgba(255, 255, 255, 0.15);
+            stroke-width: 4;
+        }
+
+        .timer-circle-val {
+            fill: none;
+            stroke: var(--text-main);
+            stroke-width: 4;
+            stroke-linecap: round;
+            stroke-dasharray: 157;
+            stroke-dashoffset: 0;
+            transition: stroke-dashoffset 0.05s linear;
+        }
+
+        .timer-text {
+            position: absolute;
+            font-size: 18px;
+            font-weight: 700;
+            font-variant-numeric: tabular-nums;
+        }
+
+        .overlay-label {
+            font-size: 13px;
+            font-weight: 500;
+            color: rgba(255, 255, 255, 0.9);
+            background: rgba(0, 0, 0, 0.5);
+            backdrop-filter: blur(var(--blur-val));
+            -webkit-backdrop-filter: blur(var(--blur-val));
+            padding: 6px 16px;
+            border-radius: 100px;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .comparison-tags {
+            position: absolute;
+            bottom: 10px;
+            width: 100%;
+            display: flex;
+            justify-content: space-around;
+            z-index: 4;
+            opacity: 0;
+            transition: opacity 0.3s var(--bezier);
+            pointer-events: none;
+        }
+
+        .split-view ~ .comparison-tags { opacity: 1; }
+
+        .comp-tag {
+            font-size: 10px;
+            font-weight: 700;
+            letter-spacing: 0.05em;
+            text-transform: uppercase;
+            padding: 4px 10px;
+            border-radius: 6px;
+            background: rgba(0,0,0,0.65);
+            backdrop-filter: blur(var(--blur-val));
+            border: 1px solid rgba(255,255,255,0.1);
+        }
+
+        /* JUEGO: PATTERN GRID ( MODO PIEZAS ) */
+        .grid-game-area {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+            align-items: center;
+            justify-content: center;
+            width: 100%;
+        }
+
+        .board-grid {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 6px;
+            width: 100%;
+            max-width: 280px;
+            aspect-ratio: 1;
+            background: var(--surface);
+            border: 1px solid var(--glass-border);
+            border-radius: 20px;
+            padding: 10px;
+            box-shadow: 0 16px 36px rgba(0,0,0,0.5);
+        }
+
+        .grid-cell {
+            background: rgba(255, 255, 255, 0.03);
+            border: 1px solid rgba(255, 255, 255, 0.05);
+            border-radius: 8px;
+            position: relative;
+            transition: background 0.2s var(--bezier);
+        }
+
+        .grid-cell.drag-over {
+            background: rgba(255, 255, 255, 0.15);
+            border-color: rgba(255, 255, 255, 0.4);
+        }
+
+        .pieces-tray {
+            width: 100%;
+            min-height: 110px;
+            background: var(--glass);
+            border: 1px solid var(--glass-border);
+            border-radius: 20px;
+            padding: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 16px;
+            flex-wrap: wrap;
+            backdrop-filter: blur(var(--blur-val));
+            -webkit-backdrop-filter: blur(var(--blur-val));
+        }
+
+        .poly-piece {
+            display: grid;
+            gap: 3px;
+            cursor: grab;
+            touch-action: none;
+            transition: transform 0.2s var(--spring);
+            padding: 6px;
+            border-radius: 10px;
+            background: rgba(255,255,255,0.03);
+            border: 1px solid rgba(255,255,255,0.08);
+        }
+
+        .poly-piece:active { cursor: grabbing; transform: scale(1.05); }
+
+        .poly-block {
+            width: 22px;
+            height: 22px;
+            border-radius: 5px;
+            box-shadow: inset 0 0 0 1px rgba(255,255,255,0.2);
+        }
+
+        .poly-block.empty {
+            background: transparent !important;
+            box-shadow: none !important;
+        }
+
+        /* RESULT SHEET INLINE */
+        .inline-result-sheet {
+            background: var(--glass);
+            border: 1px solid var(--glass-border);
+            border-radius: 20px;
+            padding: 14px 16px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 12px;
+            backdrop-filter: blur(var(--blur-val));
+            -webkit-backdrop-filter: blur(var(--blur-val));
+            animation: slideUp 0.35s var(--spring) forwards;
+        }
+
+        @keyframes slideUp {
+            from { opacity: 0; transform: translateY(15px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .arc-inline-wrapper {
+            position: relative;
+            width: 180px;
+            height: 85px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: flex-end;
+        }
+
+        .score-arc-svg {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 180px;
+            height: 100px;
+        }
+
+        .score-arc-bg {
+            fill: none;
+            stroke: rgba(255, 255, 255, 0.08);
+            stroke-width: 8;
+            stroke-linecap: round;
+        }
+
+        .score-arc-fill {
+            fill: none;
+            stroke: var(--text-main);
+            stroke-width: 8;
+            stroke-linecap: round;
+            stroke-dasharray: 220;
+            stroke-dashoffset: 220;
+            transition: stroke-dashoffset 0.05s linear;
+        }
+
+        .score-display-box {
+            z-index: 2;
+            text-align: center;
+            margin-bottom: 2px;
+        }
+
+        .score-number-text {
+            font-size: 34px;
+            font-weight: 900;
+            font-variant-numeric: tabular-nums;
+            letter-spacing: -0.03em;
+            line-height: 1;
+        }
+
+        .score-max-sub {
+            font-size: 10px;
+            color: var(--text-muted);
+            text-transform: uppercase;
+            letter-spacing: 0.1em;
+            margin-top: 2px;
+        }
+
+        .result-title-inline {
+            font-size: 16px;
+            font-weight: 700;
+            text-align: center;
+        }
+
+        .controls-wrapper {
+            background: var(--glass);
+            border: 1px solid var(--glass-border);
+            border-radius: 20px;
+            padding: 14px 16px;
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+            backdrop-filter: blur(var(--blur-val));
+            -webkit-backdrop-filter: blur(var(--blur-val));
+            transition: opacity 0.3s var(--bezier);
+        }
+
+        .slider-group {
+            display: flex;
+            flex-direction: column;
+            gap: 4px;
+        }
+
+        .slider-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            font-size: 12px;
+            font-weight: 500;
+            color: var(--text-muted);
+        }
+
+        .slider-val {
+            color: var(--text-main);
+            font-weight: 600;
+            font-variant-numeric: tabular-nums;
+        }
+
+        .range-slider {
+            -webkit-appearance: none;
+            appearance: none;
+            width: 100%;
+            height: 10px;
+            border-radius: 6px;
+            outline: none;
+            background: var(--surface-hover);
+            cursor: pointer;
+        }
+
+        .range-slider::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            appearance: none;
+            width: 22px;
+            height: 22px;
+            border-radius: 50%;
+            background: var(--text-main);
+            border: 2px solid var(--bg);
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.5);
+            cursor: pointer;
+            transition: transform 0.1s var(--spring);
+        }
+
+        .range-slider::-webkit-slider-thumb:active { transform: scale(1.2); }
+
+        #hue-slider {
+            background: linear-gradient(to right, 
+                #ff0000 0%, #ffff00 17%, #00ff00 33%, 
+                #00ffff 50%, #0000ff 67%, #ff00ff 83%, #ff0000 100%);
+        }
+
+        .action-btn {
+            width: 100%;
+            height: 50px;
+            border-radius: 16px;
+            border: none;
+            background: var(--text-main);
+            color: var(--bg);
+            font-family: inherit;
+            font-size: 15px;
+            font-weight: 700;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            cursor: pointer;
+            transition: transform 0.15s var(--spring), opacity 0.2s var(--bezier);
+        }
+
+        .action-btn:active { transform: scale(0.98); }
+        .action-btn:disabled { opacity: 0.3; cursor: not-allowed; transform: none; }
+
+        .action-btn.secondary {
+            background: var(--surface);
+            color: var(--text-main);
+            border: 1px solid var(--glass-border);
+        }
+
+        /* MODALES */
+        .modal-overlay {
+            position: fixed;
+            inset: 0;
+            background: rgba(0, 0, 0, 0.85);
+            backdrop-filter: blur(var(--blur-val));
+            -webkit-backdrop-filter: blur(var(--blur-val));
+            z-index: 100;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+            opacity: 0;
+            pointer-events: none;
+            transition: opacity 0.3s var(--bezier);
+        }
+
+        .modal-overlay.active { opacity: 1; pointer-events: auto; }
+
+        .modal-content-box {
+            width: 100%;
+            max-width: 400px;
+            background: var(--surface);
+            border: 1px solid var(--glass-border);
+            border-radius: 28px;
+            padding: 24px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 16px;
+            box-shadow: 0 30px 60px rgba(0,0,0,0.8);
+            transform: scale(0.95);
+            transition: transform 0.3s var(--spring);
+        }
+
+        .modal-overlay.active .modal-content-box { transform: scale(1); }
+
+        .stats-grid {
+            width: 100%;
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 8px;
+        }
+
+        .stat-box {
+            background: rgba(255, 255, 255, 0.03);
+            border: 1px solid var(--glass-border);
+            padding: 8px 4px;
+            border-radius: 12px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 2px;
+        }
+
+        .stat-box-title { font-size: 10px; color: var(--text-muted); }
+        .stat-box-val { font-size: 12px; font-weight: 600; font-variant-numeric: tabular-nums; }
+
+        .how-to-steps {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+            width: 100%;
+            text-align: left;
+        }
+
+        .step-item {
+            display: flex;
+            align-items: flex-start;
+            gap: 12px;
+            font-size: 13px;
+        }
+
+        .step-icon {
+            background: var(--surface-hover);
+            border: 1px solid var(--glass-border);
+            width: 32px;
+            height: 32px;
+            border-radius: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            flex-shrink: 0;
+            color: var(--text-main);
+        }
+
+        .step-text { color: var(--text-muted); line-height: 1.4; }
+        .step-text strong { color: var(--text-main); }
+
+        .share-preview-card {
+            width: 100%;
+            background: #000000;
+            border: 1px solid var(--glass-border);
+            border-radius: 16px;
+            padding: 16px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .share-card-header {
+            font-size: 11px;
+            font-weight: 700;
+            letter-spacing: 0.1em;
+            text-transform: uppercase;
+            color: var(--text-muted);
+        }
+
+        .share-card-score {
+            font-size: 36px;
+            font-weight: 900;
+            color: var(--text-main);
+            font-variant-numeric: tabular-nums;
+        }
+
+        .setting-row {
+            width: 100%;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 12px 0;
+            border-bottom: 1px solid var(--glass-border);
+        }
+
+        .setting-row:last-child { border-bottom: none; }
+        .setting-label { font-size: 14px; font-weight: 500; }
+        .setting-sub { font-size: 11px; color: var(--text-muted); }
+
+        .switch {
+            position: relative;
+            display: inline-block;
+            width: 44px;
+            height: 24px;
+        }
+
+        .switch input { opacity: 0; width: 0; height: 0; }
+
+        .slider-switch {
+            position: absolute;
+            cursor: pointer;
+            inset: 0;
+            background-color: var(--surface-hover);
+            border: 1px solid var(--glass-border);
+            transition: .3s var(--bezier);
+            border-radius: 24px;
+        }
+
+        .slider-switch:before {
+            position: absolute;
+            content: "";
+            height: 18px;
+            width: 18px;
+            left: 2px;
+            bottom: 2px;
+            background-color: white;
+            transition: .3s var(--spring);
+            border-radius: 50%;
+        }
+
+        input:checked + .slider-switch { background-color: var(--accent-success); }
+        input:checked + .slider-switch:before { transform: translateX(20px); }
+
+        @keyframes errorShake {
+            0%, 100% { transform: translateX(0); }
+            20%, 60% { transform: translateX(-6px); }
+            40%, 80% { transform: translateX(6px); }
+        }
+
+        .error-shake { animation: errorShake 0.3s var(--bezier); }
+    </style>
+</head>
+<body>
+
+    <canvas id="bg-canvas"></canvas>
+
+    <div class="app-container" id="main-view">
+        <header>
+            <div class="header-brand">
+                <div class="app-icon-badge">
+                    <i data-lucide="palette" id="header-badge-icon" size="20" style="color: var(--text-main);"></i>
+                </div>
+                <div class="header-titles">
+                    <span class="header-title">Memoria Visual</span>
+                    <span class="header-sub" id="header-subtitle">Menú Principal</span>
+                </div>
+            </div>
+            <div class="header-actions">
+                <button class="icon-btn-pill" id="btn-settings-toggle" title="Ajustes">
+                    <i data-lucide="settings" size="18"></i>
+                </button>
+                <button class="icon-btn-pill" id="home-btn" title="Menú Principal" style="display: none;">
+                    <i data-lucide="home" size="18"></i>
+                </button>
+                <div class="score-pill" id="score-pill-box" style="display: none;">
+                    <span class="score-val" id="total-score">0,00</span>
+                </div>
+            </div>
+        </header>
+
+        <!-- 1. VISTA MENÚ PRINCIPAL -->
+        <main class="view-panel main-menu-view" id="view-menu">
+            <div class="hero-title-box">
+                <span class="badge-tag">Entrenamiento Cognitivo PRO</span>
+                <h1>MEMORIA VISUAL</h1>
+                <p>Elige tu disciplina: retención cromática HSB o reconstrucción de patrones geométricos.</p>
+            </div>
+
+            <div class="menu-actions-stack">
+                <button class="menu-btn primary" id="btn-menu-color-mode">
+                    <div class="menu-btn-content">
+                        <i data-lucide="palette" size="20"></i>
+                        <span>Modo Color (HSB)</span>
+                    </div>
+                    <i data-lucide="chevron-right" size="18"></i>
+                </button>
+
+                <button class="menu-btn" id="btn-menu-grid-mode">
+                    <div class="menu-btn-content">
+                        <i data-lucide="grid" size="20"></i>
+                        <span>Modo Piezas / Rejilla</span>
+                    </div>
+                    <i data-lucide="chevron-right" size="18"></i>
+                </button>
+
+                <button class="menu-btn" id="btn-menu-how">
+                    <div class="menu-btn-content">
+                        <i data-lucide="help-circle" size="20"></i>
+                        <span>Cómo Jugar</span>
+                    </div>
+                    <i data-lucide="chevron-right" size="18"></i>
+                </button>
+
+                <button class="menu-btn" id="btn-menu-stats">
+                    <div class="menu-btn-content">
+                        <i data-lucide="trophy" size="20"></i>
+                        <span>Estadísticas</span>
+                    </div>
+                    <i data-lucide="chevron-right" size="18"></i>
+                </button>
+            </div>
+        </main>
+
+        <!-- 2. VISTA SELECCIÓN DE MODO Y LENGHT -->
+        <main class="view-panel mode-selection-view" id="view-mode" style="display: none;">
+            <div class="view-header">
+                <h2 id="mode-select-title">Configurar Partida</h2>
+                <p>Selecciona la cantidad de rondas</p>
+            </div>
+
+            <div class="modes-grid">
+                <div class="mode-card selected" data-rounds="5">
+                    <div class="mode-info">
+                        <span class="mode-title">5 Rondas</span>
+                        <span class="mode-desc">Partida estándar equilibrada</span>
+                    </div>
+                    <i data-lucide="check-circle-2" class="card-status-icon" size="20"></i>
+                </div>
+
+                <div class="mode-card" data-rounds="3">
+                    <div class="mode-info">
+                        <span class="mode-title">3 Rondas</span>
+                        <span class="mode-desc">Partida rápida de prueba</span>
+                    </div>
+                    <i data-lucide="circle" class="card-status-icon" size="20" style="color: var(--text-muted);"></i>
+                </div>
+
+                <div class="mode-card" data-rounds="10">
+                    <div class="mode-info">
+                        <span class="mode-title">10 Rondas</span>
+                        <span class="mode-desc">Desafío de alta concentración</span>
+                    </div>
+                    <i data-lucide="circle" class="card-status-icon" size="20" style="color: var(--text-muted);"></i>
+                </div>
+
+                <div class="mode-card" data-rounds="infinite">
+                    <div class="mode-info">
+                        <span class="mode-title">Infinito</span>
+                        <span class="mode-desc">Práctica continua sin límites</span>
+                    </div>
+                    <i data-lucide="circle" class="card-status-icon" size="20" style="color: var(--text-muted);"></i>
+                </div>
+            </div>
+
+            <button class="action-btn" id="btn-start-game">
+                <span>Comenzar Partida</span>
+                <i data-lucide="arrow-right" size="18"></i>
+            </button>
+        </main>
+
+        <!-- 3. VISTA JUEGO: MODO COLOR -->
+        <main class="view-panel" id="view-game-color" style="display: none;">
+            <div class="color-card-wrapper" id="card-wrapper">
+                <div class="color-preview-target" id="target-preview"></div>
+                <div class="color-preview-replica" id="replica-preview"></div>
+
+                <div class="card-overlay" id="color-card-overlay">
+                    <div class="timer-ring">
+                        <svg class="timer-svg" viewBox="0 0 54 54">
+                            <circle class="timer-circle-bg" cx="27" cy="27" r="25"></circle>
+                            <circle class="timer-circle-val" id="color-timer-progress" cx="27" cy="27" r="25"></circle>
+                        </svg>
+                        <span class="timer-text" id="color-timer-text">3</span>
+                    </div>
+                    <span class="overlay-label">Memoriza el color</span>
+                </div>
+
+                <div class="comparison-tags">
+                    <span class="comp-tag">Objetivo</span>
+                    <span class="comp-tag">Tu Réplica</span>
+                </div>
+            </div>
+
+            <div class="controls-wrapper" id="color-controls-area">
+                <div class="slider-group">
+                    <div class="slider-header">
+                        <span>Tono (Hue)</span>
+                        <span class="slider-val" id="hue-val">180°</span>
+                    </div>
+                    <input type="range" min="0" max="360" value="180" class="range-slider" id="hue-slider">
+                </div>
+
+                <div class="slider-group">
+                    <div class="slider-header">
+                        <span>Saturación</span>
+                        <span class="slider-val" id="sat-val">50%</span>
+                    </div>
+                    <input type="range" min="0" max="100" value="50" class="range-slider" id="sat-slider">
+                </div>
+
+                <div class="slider-group">
+                    <div class="slider-header">
+                        <span>Brillo</span>
+                        <span class="slider-val" id="val-val">50%</span>
+                    </div>
+                    <input type="range" min="0" max="100" value="50" class="range-slider" id="val-slider">
+                </div>
+            </div>
+
+            <div class="inline-result-sheet" id="color-result-sheet" style="display: none;">
+                <div class="arc-inline-wrapper">
+                    <svg class="score-arc-svg" viewBox="0 0 180 100">
+                        <path class="score-arc-bg" d="M 20 90 A 70 70 0 0 1 160 90"></path>
+                        <path class="score-arc-fill" id="color-score-arc-fill" d="M 20 90 A 70 70 0 0 1 160 90"></path>
+                    </svg>
+                    <div class="score-display-box">
+                        <div class="score-number-text" id="color-score-anim">0,00</div>
+                        <div class="score-max-sub">NOTA / 10,00</div>
+                    </div>
+                </div>
+
+                <span class="result-title-inline" id="color-result-feedback">¡Evaluando!</span>
+
+                <div class="stats-grid">
+                    <div class="stat-box">
+                        <span class="stat-box-title">Dif. Tono</span>
+                        <span class="stat-box-val" id="diff-h">0°</span>
+                    </div>
+                    <div class="stat-box">
+                        <span class="stat-box-title">Dif. Sat</span>
+                        <span class="stat-box-val" id="diff-s">0%</span>
+                    </div>
+                    <div class="stat-box">
+                        <span class="stat-box-title">Dif. Bri</span>
+                        <span class="stat-box-val" id="diff-b">0%</span>
+                    </div>
+                </div>
+            </div>
+
+            <button class="action-btn" id="color-main-btn">
+                <span>Confirmar Réplica</span>
+                <i data-lucide="check" class="btn-icon" size="18"></i>
+            </button>
+        </main>
+
+        <!-- 4. VISTA JUEGO: MODO PIEZAS / REJILLA -->
+        <main class="view-panel" id="view-game-grid" style="display: none;">
+            <div class="grid-game-area">
+                <div style="font-size: 13px; color: var(--text-muted); text-align: center;" id="grid-instruction-text">
+                    Memoriza la posición y rotación de las piezas
+                </div>
+
+                <div class="board-grid" id="board-grid"></div>
+
+                <div class="pieces-tray" id="pieces-tray"></div>
+            </div>
+
+            <div class="inline-result-sheet" id="grid-result-sheet" style="display: none;">
+                <div class="arc-inline-wrapper">
+                    <svg class="score-arc-svg" viewBox="0 0 180 100">
+                        <path class="score-arc-bg" d="M 20 90 A 70 70 0 0 1 160 90"></path>
+                        <path class="score-arc-fill" id="grid-score-arc-fill" d="M 20 90 A 70 70 0 0 1 160 90"></path>
+                    </svg>
+                    <div class="score-display-box">
+                        <div class="score-number-text" id="grid-score-anim">0,00</div>
+                        <div class="score-max-sub">NOTA / 10,00</div>
+                    </div>
+                </div>
+
+                <span class="result-title-inline" id="grid-result-feedback">¡Evaluando!</span>
+
+                <div class="stats-grid">
+                    <div class="stat-box">
+                        <span class="stat-box-title">Posición</span>
+                        <span class="stat-box-val" id="grid-stat-pos">0%</span>
+                    </div>
+                    <div class="stat-box">
+                        <span class="stat-box-title">Rotación</span>
+                        <span class="stat-box-val" id="grid-stat-rot">0%</span>
+                    </div>
+                    <div class="stat-box">
+                        <span class="stat-box-title">Tiempo</span>
+                        <span class="stat-box-val" id="grid-stat-time">0s</span>
+                    </div>
+                </div>
+            </div>
+
+            <button class="action-btn" id="grid-main-btn">
+                <span>Confirmar Solución</span>
+                <i data-lucide="check" class="btn-icon" size="18"></i>
+            </button>
+        </main>
+    </div>
+
+    <!-- MODAL: AJUSTES -->
+    <div class="modal-overlay" id="modal-settings">
+        <div class="modal-content-box">
+            <h2 class="result-title-inline" style="font-size: 20px;">Ajustes</h2>
+            <div style="width: 100%;">
+                <div class="setting-row">
+                    <div>
+                        <div class="setting-label">Efecto Blur (Desenfoque)</div>
+                        <div class="setting-sub">Desactívalo si experimentas lentitud</div>
+                    </div>
+                    <label class="switch">
+                        <input type="checkbox" id="blur-toggle" checked>
+                        <span class="slider-switch"></span>
+                    </label>
+                </div>
+            </div>
+            <button class="action-btn secondary" id="btn-close-settings">
+                <span>Cerrar</span>
+            </button>
+        </div>
+    </div>
+
+    <!-- MODAL: CÓMO JUGAR -->
+    <div class="modal-overlay" id="modal-how">
+        <div class="modal-content-box">
+            <h2 class="result-title-inline" style="font-size: 20px;">Cómo Jugar</h2>
+            <div class="how-to-steps">
+                <div class="step-item">
+                    <div class="step-icon"><i data-lucide="palette" size="18"></i></div>
+                    <div class="step-text"><strong>Modo Color:</strong> Memoriza el tono durante 3 segundos. Luego ajusta Tono, Saturación y Brillo para replicarlo exacto.</div>
+                </div>
+                <div class="step-item">
+                    <div class="step-icon"><i data-lucide="grid" size="18"></i></div>
+                    <div class="step-text"><strong>Modo Piezas / Rejilla:</strong> Memoriza la matriz de bloques. En encaje: arrastra piezas, haz <strong>tap/clic para rotar 90°</strong> y encájalas en su celda original.</div>
+                </div>
+            </div>
+            <button class="action-btn secondary" id="btn-close-how">
+                <span>Entendido</span>
+            </button>
+        </div>
+    </div>
+
+    <!-- MODAL: RESUMEN FINAL -->
+    <div class="modal-overlay" id="modal-game-over">
+        <div class="modal-content-box">
+            <i data-lucide="award" size="36" style="color: var(--text-main);"></i>
+            <h2 class="result-title-inline" style="font-size: 20px;">Partida Completada</h2>
+
+            <div class="share-preview-card">
+                <span class="share-card-header">Nota Media Final</span>
+                <span class="share-card-score" id="final-total-score">0,00 / 10</span>
+            </div>
+
+            <button class="action-btn" id="btn-share-main">
+                <i data-lucide="share-2" size="18"></i>
+                <span id="share-btn-text">Compartir Resultado</span>
+            </button>
+
+            <button class="action-btn secondary" id="btn-finish-to-menu">
+                <span>Volver al Menú</span>
+            </button>
+        </div>
+    </div>
+
+    <!-- MODAL: ESTADÍSTICAS -->
+    <div class="modal-overlay" id="modal-stats">
+        <div class="modal-content-box">
+            <h2 class="result-title-inline" style="font-size: 20px;">Estadísticas</h2>
+            
+            <div style="width: 100%;">
+                <div class="setting-row">
+                    <div>
+                        <div class="setting-label">Mejor Nota Media</div>
+                        <div class="setting-sub">Récord personal registrado</div>
+                    </div>
+                    <div style="font-weight: 700; font-size: 16px;" id="stat-high-score">0,00</div>
+                </div>
+                <div class="setting-row">
+                    <div>
+                        <div class="setting-label">Partidas Jugadas</div>
+                        <div class="setting-sub">Sesiones completadas</div>
+                    </div>
+                    <div style="font-weight: 700; font-size: 16px;" id="stat-games-played">0</div>
+                </div>
+                <div class="setting-row">
+                    <div>
+                        <div class="setting-label">Precisión Promedio</div>
+                        <div class="setting-sub">Promedio de todas las rondas</div>
+                    </div>
+                    <div style="font-weight: 700; font-size: 16px;" id="stat-avg-acc">0,00 / 10</div>
+                </div>
+            </div>
+
+            <button class="action-btn secondary" id="btn-close-stats">
+                <span>Cerrar</span>
+            </button>
+        </div>
+    </div>
+
+    <script>
+        const AudioFX = {
+            ctx: null,
+            init() {
+                if (!this.ctx) {
+                    this.ctx = new (window.AudioContext || window.webkitAudioContext)();
+                }
+            },
+            playTick() {
+                if (!this.ctx) return;
+                const osc = this.ctx.createOscillator();
+                const gain = this.ctx.createGain();
+                osc.type = 'sine';
+                osc.frequency.setValueAtTime(800, this.ctx.currentTime);
+                gain.gain.setValueAtTime(0.03, this.ctx.currentTime);
+                gain.gain.exponentialRampToValueAtTime(0.001, this.ctx.currentTime + 0.05);
+                osc.connect(gain);
+                gain.connect(this.ctx.destination);
+                osc.start();
+                osc.stop(this.ctx.currentTime + 0.05);
+            },
+            playSuccess() {
+                if (!this.ctx) return;
+                const osc = this.ctx.createOscillator();
+                const gain = this.ctx.createGain();
+                osc.type = 'triangle';
+                osc.frequency.setValueAtTime(440, this.ctx.currentTime);
+                osc.frequency.exponentialRampToValueAtTime(880, this.ctx.currentTime + 0.25);
+                gain.gain.setValueAtTime(0.06, this.ctx.currentTime);
+                gain.gain.exponentialRampToValueAtTime(0.001, this.ctx.currentTime + 0.25);
+                osc.connect(gain);
+                gain.connect(this.ctx.destination);
+                osc.start();
+                osc.stop(this.ctx.currentTime + 0.25);
+            }
+        };
+
+        const appState = {
+            gameMode: 'COLOR', // 'COLOR' o 'GRID'
+            maxRounds: 5,
+            currentRound: 1,
+            totalScoreAccum: 0,
+            phase: 'MENU',
+            blurEnabled: true,
+            targetColor: { h: 0, s: 0, b: 0 },
+            userColor: { h: 180, s: 50, b: 50 },
+            roundHistory: [],
+            stats: {
+                highScore: 0,
+                gamesPlayed: 0,
+                totalScoreAccum: 0,
+                roundsAccum: 0
+            },
+            timer: null,
+            // MODO GRID / PATTERN PIECES DATA
+            grid: {
+                size: 4,
+                pieces: [],
+                userBoard: Array(16).fill(null),
+                startTime: 0,
+                solveTime: 0
+            }
+        };
+
+        let activeModalsStack = [];
+
+        function openModal(modalId) {
+            document.getElementById('main-view').classList.add('backgrounded');
+            document.getElementById(modalId).classList.add('active');
+            activeModalsStack.push(modalId);
+            window.history.pushState({ modalId: modalId }, "");
+        }
+
+        function closeModal(modalId) {
+            if (activeModalsStack.includes(modalId)) {
+                window.history.back();
+            }
+        }
+
+        window.addEventListener('popstate', () => {
+            if (activeModalsStack.length > 0) {
+                const topModalId = activeModalsStack.pop();
+                document.getElementById(topModalId).classList.remove('active');
+                if (activeModalsStack.length === 0) {
+                    document.getElementById('main-view').classList.remove('backgrounded');
+                }
+            }
+        });
+
+        const elements = {
+            viewMenu: document.getElementById('view-menu'),
+            viewMode: document.getElementById('view-mode'),
+            viewGameColor: document.getElementById('view-game-color'),
+            viewGameGrid: document.getElementById('view-game-grid'),
+            headerSub: document.getElementById('header-subtitle'),
+            homeBtn: document.getElementById('home-btn'),
+            scorePillBox: document.getElementById('score-pill-box'),
+            totalScore: document.getElementById('total-score'),
+            btnSettingsToggle: document.getElementById('btn-settings-toggle'),
+            btnCloseSettings: document.getElementById('btn-close-settings'),
+            blurToggle: document.getElementById('blur-toggle'),
+            
+            btnMenuColorMode: document.getElementById('btn-menu-color-mode'),
+            btnMenuGridMode: document.getElementById('btn-menu-grid-mode'),
+            btnMenuHow: document.getElementById('btn-menu-how'),
+            btnMenuStats: document.getElementById('btn-menu-stats'),
+            btnStartGame: document.getElementById('btn-start-game'),
+            
+            // COLOR MODE DOM
+            targetPreview: document.getElementById('target-preview'),
+            replicaPreview: document.getElementById('replica-preview'),
+            cardWrapper: document.getElementById('card-wrapper'),
+            colorTimerProgress: document.getElementById('color-timer-progress'),
+            colorTimerText: document.getElementById('color-timer-text'),
+            hueSlider: document.getElementById('hue-slider'),
+            satSlider: document.getElementById('sat-slider'),
+            valSlider: document.getElementById('val-slider'),
+            hueVal: document.getElementById('hue-val'),
+            satVal: document.getElementById('sat-val'),
+            valVal: document.getElementById('val-val'),
+            colorMainBtn: document.getElementById('color-main-btn'),
+            colorControlsArea: document.getElementById('color-controls-area'),
+            colorResultSheet: document.getElementById('color-result-sheet'),
+            colorScoreAnim: document.getElementById('color-score-anim'),
+            colorScoreArcFill: document.getElementById('color-score-arc-fill'),
+            colorResultFeedback: document.getElementById('color-result-feedback'),
+            diffH: document.getElementById('diff-h'),
+            diffS: document.getElementById('diff-s'),
+            diffB: document.getElementById('diff-b'),
+
+            // GRID MODE DOM
+            boardGrid: document.getElementById('board-grid'),
+            piecesTray: document.getElementById('pieces-tray'),
+            gridMainBtn: document.getElementById('grid-main-btn'),
+            gridResultSheet: document.getElementById('grid-result-sheet'),
+            gridScoreAnim: document.getElementById('grid-score-anim'),
+            gridScoreArcFill: document.getElementById('grid-score-arc-fill'),
+            gridResultFeedback: document.getElementById('grid-result-feedback'),
+            gridStatPos: document.getElementById('grid-stat-pos'),
+            gridStatRot: document.getElementById('grid-stat-rot'),
+            gridStatTime: document.getElementById('grid-stat-time'),
+            gridInstructionText: document.getElementById('grid-instruction-text'),
+
+            btnCloseHow: document.getElementById('btn-close-how'),
+            btnCloseStats: document.getElementById('btn-close-stats'),
+            btnFinishToMenu: document.getElementById('btn-finish-to-menu'),
+            btnShareMain: document.getElementById('btn-share-main'),
+            shareBtnText: document.getElementById('share-btn-text')
+        };
+
+        function hsbToHsl(h, s, b) {
+            s /= 100; b /= 100;
+            const l = b * (1 - s / 2);
+            const hslS = (l === 0 || l === 1) ? 0 : (b - l) / Math.min(l, 1 - l);
+            return `hsl(${h}, ${Math.round(hslS * 100)}%, ${Math.round(l * 100)}%)`;
+        }
+
+        function loadSavedData() {
+            const savedStats = localStorage.getItem('neo_color_memory_stats');
+            if (savedStats) {
+                try { appState.stats = JSON.parse(savedStats); } catch(e){}
+            }
+            const savedBlur = localStorage.getItem('neo_color_memory_blur');
+            if (savedBlur !== null) {
+                appState.blurEnabled = savedBlur === 'true';
+                elements.blurToggle.checked = appState.blurEnabled;
+                applyBlurConfig();
+            }
+        }
+
+        function saveData() {
+            localStorage.setItem('neo_color_memory_stats', JSON.stringify(appState.stats));
+            localStorage.setItem('neo_color_memory_blur', appState.blurEnabled);
+        }
+
+        function applyBlurConfig() {
+            if (appState.blurEnabled) {
+                document.body.classList.remove('no-blur');
+            } else {
+                document.body.classList.add('no-blur');
+            }
+        }
+
+        function showView(viewId) {
+            clearInterval(appState.timer);
+            elements.viewMenu.style.display = 'none';
+            elements.viewMode.style.display = 'none';
+            elements.viewGameColor.style.display = 'none';
+            elements.viewGameGrid.style.display = 'none';
+
+            if (viewId === 'menu') {
+                elements.viewMenu.style.display = 'flex';
+                elements.homeBtn.style.display = 'none';
+                elements.scorePillBox.style.display = 'none';
+                elements.headerSub.textContent = 'Menú Principal';
+            } else if (viewId === 'mode') {
+                elements.viewMode.style.display = 'flex';
+                elements.homeBtn.style.display = 'flex';
+                elements.scorePillBox.style.display = 'none';
+                elements.headerSub.textContent = appState.gameMode === 'COLOR' ? 'Configurar Modo Color' : 'Configurar Modo Rejilla';
+            } else if (viewId === 'game-color') {
+                elements.viewGameColor.style.display = 'flex';
+                elements.homeBtn.style.display = 'flex';
+                elements.scorePillBox.style.display = 'flex';
+                updateHeaderInfo();
+            } else if (viewId === 'game-grid') {
+                elements.viewGameGrid.style.display = 'flex';
+                elements.homeBtn.style.display = 'flex';
+                elements.scorePillBox.style.display = 'flex';
+                updateHeaderInfo();
+            }
+        }
+
+        function updateHeaderInfo() {
+            const avg = appState.roundHistory.length > 0 
+                ? (appState.totalScoreAccum / appState.roundHistory.length).toFixed(2) 
+                : "0,00";
+            elements.totalScore.textContent = avg.replace('.', ',');
+
+            const roundStr = appState.maxRounds === 'infinite' 
+                ? `Ronda ${appState.currentRound}` 
+                : `Ronda ${appState.currentRound} / ${appState.maxRounds}`;
+            elements.headerSub.textContent = roundStr;
+        }
+
+        function startGame() {
+            appState.currentRound = 1;
+            appState.totalScoreAccum = 0;
+            appState.roundHistory = [];
+            
+            if (appState.gameMode === 'COLOR') {
+                showView('game-color');
+                startColorMemorizePhase();
+            } else {
+                showView('game-grid');
+                startGridMemorizePhase();
+            }
+        }
+
+        /* ================= COLOR MODE LOGIC ================= */
+        function updateSliderTracks() {
+            const h = appState.userColor.h;
+            const s = appState.userColor.s;
+            const b = appState.userColor.b;
+            elements.satSlider.style.background = `linear-gradient(to right, ${hsbToHsl(h, 0, b)}, ${hsbToHsl(h, 100, b)})`;
+            elements.valSlider.style.background = `linear-gradient(to right, ${hsbToHsl(h, s, 0)}, ${hsbToHsl(h, s, 100)})`;
+        }
+
+        function resetColorSlidersToDefault() {
+            elements.hueSlider.value = 180;
+            elements.satSlider.value = 50;
+            elements.valSlider.value = 50;
+            updateUserColorFromSliders();
+        }
+
+        function startColorMemorizePhase() {
+            AudioFX.init();
+            appState.phase = 'MEMORIZE';
+            appState.targetColor = {
+                h: Math.floor(Math.random() * 360),
+                s: Math.floor(Math.random() * 70) + 30,
+                b: Math.floor(Math.random() * 60) + 40
+            };
+
+            resetColorSlidersToDefault();
+
+            elements.targetPreview.style.backgroundColor = hsbToHsl(
+                appState.targetColor.h, appState.targetColor.s, appState.targetColor.b
+            );
+            elements.targetPreview.style.opacity = '1';
+            elements.replicaPreview.style.opacity = '0';
+            elements.cardWrapper.classList.remove('split-view');
+            
+            elements.colorResultSheet.style.display = 'none';
+            elements.colorControlsArea.style.display = 'flex';
+            document.getElementById('color-card-overlay').style.display = 'flex';
+
+            elements.colorMainBtn.style.display = 'flex';
+            elements.colorMainBtn.disabled = true;
+            elements.colorMainBtn.querySelector('span').textContent = 'Confirmar Réplica';
+
+            elements.colorControlsArea.style.pointerEvents = 'none';
+            elements.colorControlsArea.style.opacity = '0.4';
+
+            const totalDash = 157;
+            elements.colorTimerProgress.style.strokeDashoffset = '0';
+            
+            let timeRemaining = 3;
+            elements.colorTimerText.textContent = timeRemaining;
+
+            const intervalMs = 50;
+            const totalMs = timeRemaining * 1000;
+            let elapsedMs = 0;
+
+            clearInterval(appState.timer);
+            appState.timer = setInterval(() => {
+                elapsedMs += intervalMs;
+                const newSecs = Math.ceil((totalMs - elapsedMs) / 1000);
+                
+                if (newSecs !== parseInt(elements.colorTimerText.textContent) && newSecs >= 0) {
+                    elements.colorTimerText.textContent = newSecs;
+                    AudioFX.playTick();
+                }
+
+                elements.colorTimerProgress.style.strokeDashoffset = (elapsedMs / totalMs) * totalDash;
+
+                if (elapsedMs >= totalMs) {
+                    clearInterval(appState.timer);
+                    startColorReplicatePhase();
+                }
+            }, intervalMs);
+        }
+
+        function startColorReplicatePhase() {
+            appState.phase = 'REPLICATE';
+            elements.targetPreview.style.opacity = '0';
+            elements.replicaPreview.style.opacity = '1';
+            document.getElementById('color-card-overlay').style.display = 'none';
+
+            elements.colorMainBtn.disabled = false;
+            elements.colorControlsArea.style.pointerEvents = 'auto';
+            elements.colorControlsArea.style.opacity = '1';
+
+            updateUserColorFromSliders();
+        }
+
+        function updateUserColorFromSliders() {
+            appState.userColor.h = parseInt(elements.hueSlider.value);
+            appState.userColor.s = parseInt(elements.satSlider.value);
+            appState.userColor.b = parseInt(elements.valSlider.value);
+
+            elements.hueVal.textContent = `${appState.userColor.h}°`;
+            elements.satVal.textContent = `${appState.userColor.s}%`;
+            elements.valVal.textContent = `${appState.userColor.b}%`;
+
+            elements.replicaPreview.style.backgroundColor = hsbToHsl(
+                appState.userColor.h, appState.userColor.s, appState.userColor.b
+            );
+
+            updateSliderTracks();
+        }
+
+        function calculateColorScore() {
+            const target = appState.targetColor;
+            const user = appState.userColor;
+
+            let diffH = Math.abs(target.h - user.h);
+            if (diffH > 180) diffH = 360 - diffH;
+
+            const diffS = Math.abs(target.s - user.s);
+            const diffB = Math.abs(target.b - user.b);
+
+            const distance = Math.sqrt(
+                Math.pow((diffH / 180) * 1.2, 2) + 
+                Math.pow((diffS / 100) * 0.8, 2) + 
+                Math.pow((diffB / 100) * 1.0, 2)
+            );
+
+            const maxDistance = Math.sqrt(Math.pow(1.2, 2) + Math.pow(0.8, 2) + Math.pow(1.0, 2));
+            const normalizedScore = Math.max(0, 1 - (distance / maxDistance));
+            const finalScore = parseFloat((Math.pow(normalizedScore, 2) * 10).toFixed(2));
+
+            return {
+                score: finalScore,
+                diffH: Math.round(diffH),
+                diffS: Math.round(diffS),
+                diffB: Math.round(diffB)
+            };
+        }
+
+        function animateScoreArc(targetScore, numberEl, arcEl, callback) {
+            let current = 0;
+            const duration = 1000;
+            const stepMs = 20;
+            const steps = duration / stepMs;
+            const increment = targetScore / steps;
+            
+            const maxDash = 220;
+
+            const timer = setInterval(() => {
+                current += increment;
+                if (current >= targetScore) {
+                    current = targetScore;
+                    clearInterval(timer);
+                    if (callback) callback();
+                }
+                numberEl.textContent = current.toFixed(2).replace('.', ',');
+                const dashOffset = maxDash - ((current / 10) * maxDash);
+                arcEl.style.strokeDashoffset = dashOffset;
+            }, stepMs);
+        }
+
+        function submitColorReplica() {
+            if (appState.phase === 'REPLICATE') {
+                AudioFX.playSuccess();
+                if (navigator.vibrate) navigator.vibrate(40);
+
+                appState.phase = 'RESULT';
+                const result = calculateColorScore();
+
+                appState.totalScoreAccum += result.score;
+                appState.roundHistory.push(result);
+
+                updateHeaderInfo();
+                elements.totalScore.classList.add('score-pop');
+                setTimeout(() => elements.totalScore.classList.remove('score-pop'), 300);
+
+                elements.cardWrapper.classList.add('split-view');
+                elements.colorControlsArea.style.display = 'none';
+                elements.colorResultSheet.style.display = 'flex';
+
+                elements.diffH.textContent = `${result.diffH}°`;
+                elements.diffS.textContent = `${result.diffS}%`;
+                elements.diffB.textContent = `${result.diffB}%`;
+
+                elements.colorMainBtn.querySelector('span').textContent = 'Siguiente Ronda';
+
+                animateScoreArc(result.score, elements.colorScoreAnim, elements.colorScoreArcFill, () => {
+                    if (result.score >= 9.0) {
+                        elements.colorResultFeedback.textContent = "¡Precisión Quirúrgica!";
+                        confetti({ particleCount: 50, spread: 60, origin: { y: 0.7 } });
+                    } else if (result.score >= 7.0) {
+                        elements.colorResultFeedback.textContent = "¡Excelente Retención!";
+                    } else {
+                        elements.colorResultFeedback.textContent = "¡Sigue Entrenando!";
+                    }
+                });
+            } else if (appState.phase === 'RESULT') {
+                nextRound();
+            }
+        }
+
+        /* ================= GRID / PATTERN PIECES MODE LOGIC ================= */
+        const POLY_SHAPES = [
+            { id: 'I2', matrix: [[1, 1]], color: '#FF453A' },
+            { id: 'I3', matrix: [[1, 1, 1]], color: '#30D158' },
+            { id: 'L',  matrix: [[1, 0], [1, 1]], color: '#0A84FF' },
+            { id: 'O',  matrix: [[1, 1], [1, 1]], color: '#FF9F0A' },
+            { id: 'T',  matrix: [[1, 1, 1], [0, 1, 0]], color: '#BF5AF2' }
+        ];
+
+        function rotateMatrix(matrix) {
+            const rows = matrix.length;
+            const cols = matrix[0].length;
+            const rotated = Array.from({ length: cols }, () => Array(rows).fill(0));
+            for (let r = 0; r < rows; r++) {
+                for (let c = 0; c < cols; c++) {
+                    rotated[c][rows - 1 - r] = matrix[r][c];
+                }
+            }
+            return rotated;
+        }
+
+        function startGridMemorizePhase() {
+            AudioFX.init();
+            appState.phase = 'MEMORIZE';
+            elements.gridInstructionText.textContent = "Memoriza la posición y rotación de las piezas";
+
+            const numPieces = 3;
+            appState.grid.pieces = [];
+            appState.grid.userBoard = Array(16).fill(null);
+
+            let availableShapes = [...POLY_SHAPES].sort(() => Math.random() - 0.5).slice(0, numPieces);
+            let targetGrid = Array(4).fill(0).map(() => Array(4).fill(null));
+
+            availableShapes.forEach((baseShape, index) => {
+                let placed = false;
+                let attempts = 0;
+                let shapeMatrix = baseShape.matrix;
+                
+                const targetRotations = Math.floor(Math.random() * 4);
+                for(let r = 0; r < targetRotations; r++) shapeMatrix = rotateMatrix(shapeMatrix);
+
+                while (!placed && attempts < 50) {
+                    attempts++;
+                    const r = Math.floor(Math.random() * (4 - shapeMatrix.length + 1));
+                    const c = Math.floor(Math.random() * (4 - shapeMatrix[0].length + 1));
+
+                    let canFit = true;
+                    for (let row = 0; row < shapeMatrix.length; row++) {
+                        for (let col = 0; col < shapeMatrix[row].length; col++) {
+                            if (shapeMatrix[row][col] === 1 && targetGrid[r + row][c + col] !== null) {
+                                canFit = false;
+                            }
+                        }
+                    }
+
+                    if (canFit) {
+                        for (let row = 0; row < shapeMatrix.length; row++) {
+                            for (let col = 0; col < shapeMatrix[row].length; col++) {
+                                if (shapeMatrix[row][col] === 1) {
+                                    targetGrid[r + row][c + col] = index;
+                                }
+                            }
+                        }
+                        
+                        appState.grid.pieces.push({
+                            id: index,
+                            color: baseShape.color,
+                            targetMatrix: shapeMatrix,
+                            targetPos: { r, c },
+                            targetRotations: targetRotations,
+                            currentMatrix: baseShape.matrix,
+                            userRotations: 0,
+                            placedPos: null
+                        });
+                        placed = true;
+                    }
+                }
+            });
+
+            renderGridBoard(targetGrid);
+            elements.piecesTray.innerHTML = '';
+            elements.gridResultSheet.style.display = 'none';
+            elements.gridMainBtn.disabled = true;
+            elements.gridMainBtn.querySelector('span').textContent = 'Confirmar Solución';
+
+            let timeRemaining = 4;
+            clearInterval(appState.timer);
+            appState.timer = setInterval(() => {
+                timeRemaining--;
+                AudioFX.playTick();
+                if (timeRemaining <= 0) {
+                    clearInterval(appState.timer);
+                    startGridReplicatePhase();
+                }
+            }, 1000);
+        }
+
+        function renderGridBoard(matrixData) {
+            elements.boardGrid.innerHTML = '';
+            for (let r = 0; r < 4; r++) {
+                for (let c = 0; c < 4; c++) {
+                    const cell = document.createElement('div');
+                    cell.className = 'grid-cell';
+                    cell.dataset.row = r;
+                    cell.dataset.col = c;
+
+                    const pieceIdx = matrixData ? matrixData[r][c] : null;
+                    if (pieceIdx !== null && pieceIdx !== undefined) {
+                        const pieceColor = appState.grid.pieces[pieceIdx].color;
+                        cell.style.background = pieceColor;
+                        cell.style.borderColor = 'rgba(255,255,255,0.4)';
+                    }
+
+                    elements.boardGrid.appendChild(cell);
+                }
+            }
+        }
+
+        function startGridReplicatePhase() {
+            appState.phase = 'REPLICATE';
+            appState.grid.startTime = Date.now();
+            elements.gridInstructionText.textContent = "Arrastra las piezas. Toca una pieza para rotarla.";
+
+            renderGridBoard(null);
+            renderPiecesTray();
+
+            elements.gridMainBtn.disabled = false;
+        }
+
+        function renderPiecesTray() {
+            elements.piecesTray.innerHTML = '';
+            appState.grid.pieces.forEach((piece) => {
+                if (!piece.placedPos) {
+                    const pieceEl = createPieceElement(piece);
+                    elements.piecesTray.appendChild(pieceEl);
+                }
+            });
+        }
+
+        function createPieceElement(piece) {
+            const container = document.createElement('div');
+            container.className = 'poly-piece';
+            container.dataset.pieceId = piece.id;
+
+            const matrix = piece.currentMatrix;
+            container.style.gridTemplateRows = `repeat(${matrix.length}, 1fr)`;
+            container.style.gridTemplateColumns = `repeat(${matrix[0].length}, 1fr)`;
+
+            for (let r = 0; r < matrix.length; r++) {
+                for (let c = 0; c < matrix[r].length; c++) {
+                    const block = document.createElement('div');
+                    block.className = 'poly-block';
+                    if (matrix[r][c] === 1) {
+                        block.style.background = piece.color;
+                    } else {
+                        block.classList.add('empty');
+                    }
+                    container.appendChild(block);
+                }
+            }
+
+            container.addEventListener('click', () => {
+                if (appState.phase !== 'REPLICATE') return;
+                piece.currentMatrix = rotateMatrix(piece.currentMatrix);
+                piece.userRotations = (piece.userRotations + 1) % 4;
+                AudioFX.playTick();
+                if (piece.placedPos) {
+                    updateGridPlacement();
+                } else {
+                    renderPiecesTray();
+                }
+            });
+
+            container.addEventListener('touchstart', handleDragStart, { passive: false });
+            container.addEventListener('mousedown', handleDragStart);
+
+            return container;
+        }
+
+        let draggedPiece = null;
+        let dragOffset = { x: 0, y: 0 };
+
+        function handleDragStart(e) {
+            if (appState.phase !== 'REPLICATE') return;
+            const pieceId = parseInt(this.dataset.pieceId);
+            draggedPiece = appState.grid.pieces.find(p => p.id === pieceId);
+
+            const clientX = e.touches ? e.touches[0].clientX : e.clientX;
+            const clientY = e.touches ? e.touches[0].clientY : e.clientY;
+
+            const rect = this.getBoundingClientRect();
+            dragOffset.x = clientX - rect.left;
+            dragOffset.y = clientY - rect.top;
+
+            window.addEventListener('touchmove', handleDragMove, { passive: false });
+            window.addEventListener('mousemove', handleDragMove);
+            window.addEventListener('touchend', handleDragEnd);
+            window.addEventListener('mouseup', handleDragEnd);
+        }
+
+        function handleDragMove(e) {
+            if (!draggedPiece) return;
+            e.preventDefault();
+            const clientX = e.touches ? e.touches[0].clientX : e.clientX;
+            const clientY = e.touches ? e.touches[0].clientY : e.clientY;
+
+            const cells = document.querySelectorAll('.grid-cell');
+            cells.forEach(cell => {
+                const rect = cell.getBoundingClientRect();
+                if (clientX >= rect.left && clientX <= rect.right && clientY >= rect.top && clientY <= rect.bottom) {
+                    cell.classList.add('drag-over');
+                } else {
+                    cell.classList.remove('drag-over');
+                }
+            });
+        }
+
+        function handleDragEnd(e) {
+            if (!draggedPiece) return;
+
+            const clientX = e.changedTouches ? e.changedTouches[0].clientX : e.clientX;
+            const clientY = e.changedTouches ? e.changedTouches[0].clientY : e.clientY;
+
+            const cells = document.querySelectorAll('.grid-cell');
+            let targetCell = null;
+
+            cells.forEach(cell => {
+                cell.classList.remove('drag-over');
+                const rect = cell.getBoundingClientRect();
+                if (clientX >= rect.left && clientX <= rect.right && clientY >= rect.top && clientY <= rect.bottom) {
+                    targetCell = cell;
+                }
+            });
+
+            if (targetCell) {
+                const r = parseInt(targetCell.dataset.row);
+                const c = parseInt(targetCell.dataset.col);
+                draggedPiece.placedPos = { r, c };
+            } else {
+                draggedPiece.placedPos = null;
+            }
+
+            updateGridPlacement();
+            draggedPiece = null;
+
+            window.removeEventListener('touchmove', handleDragMove);
+            window.removeEventListener('mousemove', handleDragMove);
+            window.removeEventListener('touchend', handleDragEnd);
+            window.removeEventListener('mouseup', handleDragEnd);
+        }
+
+        function updateGridPlacement() {
+            renderGridBoard(null);
+            
+            appState.grid.pieces.forEach(piece => {
+                if (piece.placedPos) {
+                    const { r, c } = piece.placedPos;
+                    const matrix = piece.currentMatrix;
+
+                    for (let row = 0; row < matrix.length; row++) {
+                        for (let col = 0; col < matrix[row].length; col++) {
+                            if (matrix[row][col] === 1) {
+                                const targetR = r + row;
+                                const targetC = c + col;
+                                if (targetR < 4 && targetC < 4) {
+                                    const cellIndex = targetR * 4 + targetC;
+                                    const cellEl = elements.boardGrid.children[cellIndex];
+                                    if (cellEl) {
+                                        cellEl.style.background = piece.color;
+                                        cellEl.style.borderColor = 'rgba(255,255,255,0.4)';
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+            });
+
+            renderPiecesTray();
+        }
+
+        function submitGridSolution() {
+            if (appState.phase === 'REPLICATE') {
+                AudioFX.playSuccess();
+                appState.phase = 'RESULT';
+                appState.grid.solveTime = ((Date.now() - appState.grid.startTime) / 1000).toFixed(1);
+
+                let posCorrect = 0;
+                let rotCorrect = 0;
+                let totalPieces = appState.grid.pieces.length;
+
+                appState.grid.pieces.forEach(piece => {
+                    if (piece.placedPos && 
+                        piece.placedPos.r === piece.targetPos.r && 
+                        piece.placedPos.c === piece.targetPos.c) {
+                        posCorrect++;
+                    }
+                    if ((piece.userRotations % 4) === (piece.targetRotations % 4)) {
+                        rotCorrect++;
+                    }
+                });
+
+                const posRatio = posCorrect / totalPieces;
+                const rotRatio = rotCorrect / totalPieces;
+
+                const score = parseFloat(((posRatio * 0.7 + rotRatio * 0.3) * 10).toFixed(2));
+
+                appState.totalScoreAccum += score;
+                appState.roundHistory.push({ score });
+
+                updateHeaderInfo();
+
+                elements.gridResultSheet.style.display = 'flex';
+                elements.gridStatPos.textContent = `${Math.round(posRatio * 100)}%`;
+                elements.gridStatRot.textContent = `${Math.round(rotRatio * 100)}%`;
+                elements.gridStatTime.textContent = `${appState.grid.solveTime}s`;
+
+                elements.gridMainBtn.querySelector('span').textContent = 'Siguiente Ronda';
+
+                animateScoreArc(score, elements.gridScoreAnim, elements.gridScoreArcFill, () => {
+                    if (score >= 9.0) {
+                        elements.gridResultFeedback.textContent = "¡Memoria Espacial Perfecta!";
+                        confetti({ particleCount: 50, spread: 60, origin: { y: 0.7 } });
+                    } else if (score >= 7.0) {
+                        elements.gridResultFeedback.textContent = "¡Muy Buen Resultado!";
+                    } else {
+                        elements.gridResultFeedback.textContent = "¡Sigue Practicando!";
+                    }
+                });
+            } else if (appState.phase === 'RESULT') {
+                nextRound();
+            }
+        }
+
+        function nextRound() {
+            if (appState.maxRounds !== 'infinite' && appState.currentRound >= parseInt(appState.maxRounds)) {
+                finishGame();
+            } else {
+                appState.currentRound++;
+                if (appState.gameMode === 'COLOR') {
+                    startColorMemorizePhase();
+                } else {
+                    startGridMemorizePhase();
+                }
+            }
+        }
+
+        function finishGame() {
+            const finalAvg = appState.roundHistory.length > 0 
+                ? (appState.totalScoreAccum / appState.roundHistory.length).toFixed(2)
+                : "0,00";
+
+            document.getElementById('final-total-score').textContent = `${finalAvg.replace('.', ',')} / 10`;
+
+            const scoreNum = parseFloat(finalAvg);
+            if (scoreNum > appState.stats.highScore) appState.stats.highScore = scoreNum;
+            appState.stats.gamesPlayed++;
+            appState.stats.totalScoreAccum += scoreNum;
+            appState.stats.roundsAccum += appState.roundHistory.length;
+            saveData();
+
+            openModal('modal-game-over');
+            confetti({ particleCount: 100, spread: 70, origin: { y: 0.6 } });
+        }
+
+        function renderStatsModal() {
+            document.getElementById('stat-high-score').textContent = `${appState.stats.highScore.toFixed(2).replace('.', ',')} / 10`;
+            document.getElementById('stat-games-played').textContent = appState.stats.gamesPlayed;
+            const avg = appState.stats.gamesPlayed > 0 
+                ? (appState.stats.totalScoreAccum / appState.stats.gamesPlayed).toFixed(2) 
+                : "0,00";
+            document.getElementById('stat-avg-acc').textContent = `${avg.replace('.', ',')} / 10`;
+        }
+
+        /* INITIALIZATION & EVENT LISTENERS */
+        window.onload = () => {
+            lucide.createIcons();
+            loadSavedData();
+
+            // Background Canvas Mesh Animation
+            const canvas = document.getElementById('bg-canvas');
+            const ctx = canvas.getContext('2d');
+            let width = canvas.width = window.innerWidth;
+            let height = canvas.height = window.innerHeight;
+
+            window.addEventListener('resize', () => {
+                width = canvas.width = window.innerWidth;
+                height = canvas.height = window.innerHeight;
+            });
+
+            const particles = Array.from({ length: 25 }, () => ({
+                x: Math.random() * width,
+                y: Math.random() * height,
+                vx: (Math.random() - 0.5) * 0.4,
+                vy: (Math.random() - 0.5) * 0.4,
+                r: Math.random() * 2 + 1
+            }));
+
+            function drawBg() {
+                ctx.clearRect(0, 0, width, height);
+                ctx.fillStyle = 'rgba(255, 255, 255, 0.15)';
+                ctx.strokeStyle = 'rgba(255, 255, 255, 0.03)';
+
+                particles.forEach((p, i) => {
+                    p.x += p.vx; p.y += p.vy;
+                    if (p.x < 0 || p.x > width) p.vx *= -1;
+                    if (p.y < 0 || p.y > height) p.vy *= -1;
+
+                    ctx.beginPath();
+                    ctx.arc(p.x, p.y, p.r, 0, Math.PI * 2);
+                    ctx.fill();
+
+                    for (let j = i + 1; j < particles.length; j++) {
+                        const p2 = particles[j];
+                        const dist = Math.hypot(p.x - p2.x, p.y - p2.y);
+                        if (dist < 120) {
+                            ctx.beginPath();
+                            ctx.moveTo(p.x, p.y);
+                            ctx.lineTo(p2.x, p2.y);
+                            ctx.stroke();
+                        }
+                    }
+                });
+                requestAnimationFrame(drawBg);
+            }
+            drawBg();
+
+            // Menu Bindings
+            elements.btnMenuColorMode.onclick = () => {
+                appState.gameMode = 'COLOR';
+                showView('mode');
+            };
+
+            elements.btnMenuGridMode.onclick = () => {
+                appState.gameMode = 'GRID';
+                showView('mode');
+            };
+
+            elements.btnMenuHow.onclick = () => openModal('modal-how');
+            elements.btnMenuStats.onclick = () => {
+                renderStatsModal();
+                openModal('modal-stats');
+            };
+
+            elements.btnSettingsToggle.onclick = () => openModal('modal-settings');
+            elements.btnCloseSettings.onclick = () => closeModal('modal-settings');
+            elements.btnCloseHow.onclick = () => closeModal('modal-how');
+            elements.btnCloseStats.onclick = () => closeModal('modal-stats');
+
+            elements.blurToggle.onchange = (e) => {
+                appState.blurEnabled = e.target.checked;
+                applyBlurConfig();
+                saveData();
+            };
+
+            elements.homeBtn.onclick = () => showView('menu');
+
+            // Round Selection Cards
+            document.querySelectorAll('.mode-card').forEach(card => {
+                card.onclick = () => {
+                    document.querySelectorAll('.mode-card').forEach(c => {
+                        c.classList.remove('selected');
+                        const icon = c.querySelector('.card-status-icon');
+                        icon.setAttribute('data-lucide', 'circle');
+                        icon.style.color = 'var(--text-muted)';
+                    });
+                    card.classList.add('selected');
+                    const icon = card.querySelector('.card-status-icon');
+                    icon.setAttribute('data-lucide', 'check-circle-2');
+                    icon.style.color = 'var(--text-main)';
+                    lucide.createIcons();
+                    appState.maxRounds = card.dataset.rounds;
+                };
+            });
+
+            elements.btnStartGame.onclick = startGame;
+
+            // COLOR MODE SLIDERS
+            elements.hueSlider.oninput = updateUserColorFromSliders;
+            elements.satSlider.oninput = updateUserColorFromSliders;
+            elements.valSlider.oninput = updateUserColorFromSliders;
+
+            elements.colorMainBtn.onclick = submitColorReplica;
+            elements.gridMainBtn.onclick = submitGridSolution;
+
+            elements.btnFinishToMenu.onclick = () => {
+                closeModal('modal-game-over');
+                showView('menu');
+            };
+
+            elements.btnShareMain.onclick = () => {
+                const text = `¡He conseguido una nota media de ${document.getElementById('final-total-score').textContent} en Memoria Visual! 🎨🧠`;
+                if (navigator.share) {
+                    navigator.share({ title: 'Memoria Visual', text: text });
+                } else if (navigator.clipboard) {
+                    navigator.clipboard.writeText(text);
+                    elements.shareBtnText.textContent = '¡Copiado al Portapapeles!';
+                    setTimeout(() => elements.shareBtnText.textContent = 'Compartir Resultado', 2000);
+                }
+            };
+        };
+    </script>
+</body>
+</html>
+

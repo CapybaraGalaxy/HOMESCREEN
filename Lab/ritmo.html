@@ -1,0 +1,1252 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+    <title>Sincronía Ritmo</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@200;300;400;500;600;700&display=swap" rel="stylesheet">
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <style>
+        :root {
+            --bg: #000000;
+            --surface: #121212;
+            --surface-hover: #1c1c1e;
+            --glass: rgba(22, 22, 26, 0.65);
+            --glass-border: rgba(255, 255, 255, 0.08);
+            --blur-val: 30px;
+            --text-main: #FFFFFF;
+            --text-muted: #8E8E93;
+            --accent-danger: #FF453A;
+            --accent-success: #34C759;
+            --accent-amber: #FFD60A;
+            --accent-cyan: #64D2FF;
+            --bezier: cubic-bezier(0.16, 1, 0.3, 1);
+            --spring: cubic-bezier(0.34, 1.56, 0.64, 1);
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            user-select: none;
+            -webkit-user-select: none;
+            -webkit-tap-highlight-color: transparent;
+        }
+
+        body {
+            background-color: var(--bg);
+            color: var(--text-main);
+            font-family: 'Outfit', -apple-system, BlinkMacSystemFont, sans-serif;
+            min-height: 100dvh;
+            overflow: hidden;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .app-container {
+            width: 100%;
+            max-width: 800px;
+            height: 100dvh;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+            padding: env(safe-area-inset-top) 24px calc(env(safe-area-inset-bottom) + 20px) 24px;
+            position: relative;
+            z-index: 1;
+            transition: filter 0.4s var(--bezier), opacity 0.4s var(--bezier);
+        }
+
+        .app-container.backgrounded {
+            filter: blur(12px) brightness(0.4);
+            pointer-events: none;
+        }
+
+        /* Header Neo-Glass */
+        header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 16px 0;
+            z-index: 10;
+        }
+
+        .brand-badge {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .app-icon-badge {
+            width: 42px;
+            height: 42px;
+            border-radius: 12px;
+            background: radial-gradient(circle at 30% 30%, rgba(255,255,255,0.15), rgba(255,255,255,0.02));
+            border: 1px solid var(--glass-border);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            backdrop-filter: blur(10px);
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.5);
+        }
+
+        .brand-title {
+            display: flex;
+            flex-direction: column;
+        }
+
+        .brand-title h1 {
+            font-size: 1.1rem;
+            font-weight: 600;
+            letter-spacing: -0.02em;
+            color: var(--text-main);
+            line-height: 1.2;
+        }
+
+        .brand-title span {
+            font-size: 0.75rem;
+            color: var(--text-muted);
+            font-weight: 400;
+        }
+
+        .header-actions {
+            display: flex;
+            gap: 8px;
+        }
+
+        .btn-icon {
+            width: 40px;
+            height: 40px;
+            border-radius: 12px;
+            background: var(--surface);
+            border: 1px solid var(--glass-border);
+            color: var(--text-main);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            transition: all 0.2s var(--bezier);
+        }
+
+        .btn-icon:hover {
+            background: var(--surface-hover);
+            border-color: rgba(255,255,255,0.2);
+            transform: translateY(-1px);
+        }
+
+        .btn-icon:active {
+            transform: scale(0.95);
+        }
+
+        /* Selector de Dificultad / Modo */
+        .folders-scroll-area {
+            display: flex;
+            gap: 8px;
+            overflow-x: auto;
+            padding: 4px 0 16px 0;
+            scrollbar-width: none;
+            -webkit-overflow-scrolling: touch;
+            justify-content: center;
+        }
+
+        .folders-scroll-area::-webkit-scrollbar {
+            display: none;
+        }
+
+        .pill-btn {
+            background: var(--surface);
+            border: 1px solid var(--glass-border);
+            color: var(--text-muted);
+            padding: 8px 16px;
+            border-radius: 100px;
+            font-size: 0.82rem;
+            font-weight: 500;
+            cursor: pointer;
+            white-space: nowrap;
+            transition: all 0.3s var(--bezier);
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .pill-btn.active {
+            background: var(--text-main);
+            color: var(--bg);
+            border-color: var(--text-main);
+            box-shadow: 0 0 15px rgba(255,255,255,0.2);
+        }
+
+        /* Contenido Principal */
+        .main-content {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            position: relative;
+            width: 100%;
+            margin: 0 auto;
+        }
+
+        .stage-card {
+            width: 100%;
+            max-width: 480px;
+            height: 380px;
+            border-radius: 28px;
+            background: var(--glass);
+            border: 1px solid var(--glass-border);
+            backdrop-filter: blur(var(--blur-val));
+            -webkit-backdrop-filter: blur(var(--blur-val));
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            position: relative;
+            overflow: hidden;
+            box-shadow: 0 20px 50px rgba(0,0,0,0.6);
+            transition: all 0.4s var(--bezier);
+        }
+
+        .canvas-container {
+            width: 100%;
+            height: 100%;
+            position: absolute;
+            top: 0;
+            left: 0;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            pointer-events: none;
+        }
+
+        canvas {
+            width: 100%;
+            height: 100%;
+        }
+
+        /* Indicadores y Métrica Interna */
+        .status-overlay {
+            position: absolute;
+            top: 24px;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            background: rgba(0,0,0,0.5);
+            padding: 6px 16px;
+            border-radius: 100px;
+            border: 1px solid var(--glass-border);
+            backdrop-filter: blur(10px);
+            z-index: 5;
+        }
+
+        .round-counter {
+            font-size: 0.85rem;
+            color: var(--text-muted);
+            font-variant-numeric: tabular-nums;
+        }
+
+        .status-badge {
+            font-size: 0.85rem;
+            font-weight: 500;
+            color: var(--text-main);
+            letter-spacing: 0.02em;
+        }
+
+        .center-instruction {
+            text-align: center;
+            z-index: 5;
+            padding: 0 20px;
+            pointer-events: none;
+            transition: opacity 0.3s var(--bezier);
+        }
+
+        .instruction-title {
+            font-size: 1.4rem;
+            font-weight: 600;
+            margin-bottom: 8px;
+            letter-spacing: -0.01em;
+        }
+
+        .instruction-sub {
+            font-size: 0.9rem;
+            color: var(--text-muted);
+            max-width: 280px;
+            margin: 0 auto;
+            line-height: 1.4;
+        }
+
+        .tap-feedback-badge {
+            position: absolute;
+            bottom: 24px;
+            font-size: 0.8rem;
+            font-weight: 600;
+            color: var(--text-muted);
+            background: rgba(0,0,0,0.4);
+            padding: 4px 12px;
+            border-radius: 100px;
+            border: 1px solid var(--glass-border);
+            opacity: 0;
+            transform: translateY(10px);
+            transition: all 0.2s var(--bezier);
+            font-variant-numeric: tabular-nums;
+            z-index: 5;
+        }
+
+        .tap-feedback-badge.visible {
+            opacity: 1;
+            transform: translateY(0);
+        }
+
+        /* Área de Acción */
+        .action-area {
+            width: 100%;
+            max-width: 480px;
+            margin-top: 24px;
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+            align-items: center;
+        }
+
+        .main-action-btn {
+            width: 100%;
+            height: 64px;
+            border-radius: 20px;
+            background: var(--surface);
+            border: 1px solid var(--glass-border);
+            color: var(--text-main);
+            font-size: 1rem;
+            font-weight: 600;
+            font-family: inherit;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+            transition: all 0.2s var(--bezier);
+            position: relative;
+            overflow: hidden;
+            box-shadow: 0 8px 24px rgba(0,0,0,0.4);
+        }
+
+        .main-action-btn::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255,255,255,0.05), transparent);
+            transform: translateX(-100%);
+            transition: transform 0.6s ease;
+        }
+
+        .main-action-btn:hover::before {
+            transform: translateX(100%);
+        }
+
+        .main-action-btn.active-tap {
+            background: var(--text-main);
+            color: var(--bg);
+            border-color: var(--text-main);
+            transform: scale(0.97);
+            box-shadow: 0 0 30px rgba(255,255,255,0.3);
+        }
+
+        .main-action-btn:disabled {
+            opacity: 0.4;
+            cursor: not-allowed;
+            transform: none !important;
+        }
+
+        .keyboard-hint {
+            font-size: 0.75rem;
+            color: var(--text-muted);
+            display: flex;
+            align-items: center;
+            gap: 4px;
+        }
+
+        .kbd-badge {
+            background: var(--surface);
+            border: 1px solid var(--glass-border);
+            padding: 2px 6px;
+            border-radius: 4px;
+            font-size: 0.7rem;
+            color: var(--text-main);
+        }
+
+        /* Modales */
+        .modal-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.7);
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+            z-index: 100;
+            display: flex;
+            justify-content: center;
+            align-items: flex-end;
+            opacity: 0;
+            pointer-events: none;
+            transition: opacity 0.3s var(--bezier);
+        }
+
+        .modal-overlay.active {
+            opacity: 1;
+            pointer-events: auto;
+        }
+
+        .modal-card {
+            width: 100%;
+            max-width: 540px;
+            background: var(--surface);
+            border: 1px solid var(--glass-border);
+            border-top-left-radius: 32px;
+            border-top-right-radius: 32px;
+            padding: 32px 24px calc(env(safe-area-inset-bottom) + 24px) 24px;
+            transform: translateY(100%);
+            transition: transform 0.4s var(--spring);
+            max-height: 90dvh;
+            overflow-y: auto;
+        }
+
+        .modal-overlay.active .modal-card {
+            transform: translateY(0);
+        }
+
+        @media (min-width: 600px) {
+            .modal-overlay {
+                align-items: center;
+                padding: 24px;
+            }
+            .modal-card {
+                border-radius: 32px;
+                transform: translateY(20px) scale(0.95);
+            }
+            .modal-overlay.active .modal-card {
+                transform: translateY(0) scale(1);
+            }
+        }
+
+        .modal-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 24px;
+        }
+
+        .modal-title {
+            font-size: 1.25rem;
+            font-weight: 600;
+        }
+
+        .score-display-container {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            margin: 20px 0;
+        }
+
+        .score-arc-wrapper {
+            position: relative;
+            width: 180px;
+            height: 180px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .score-arc-svg {
+            width: 100%;
+            height: 100%;
+            transform: rotate(-90deg);
+        }
+
+        .score-arc-bg {
+            fill: none;
+            stroke: var(--surface-hover);
+            stroke-width: 8;
+        }
+
+        .score-arc-fill {
+            fill: none;
+            stroke: var(--text-main);
+            stroke-width: 8;
+            stroke-linecap: round;
+            stroke-dasharray: 440;
+            stroke-dashoffset: 440;
+            transition: stroke-dashoffset 1s var(--bezier), stroke 0.3s ease;
+        }
+
+        .score-number-value {
+            position: absolute;
+            font-size: 2.8rem;
+            font-weight: 700;
+            font-variant-numeric: tabular-nums;
+            letter-spacing: -0.03em;
+        }
+
+        .metrics-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 12px;
+            width: 100%;
+            margin-top: 16px;
+        }
+
+        .metric-box {
+            background: var(--surface-hover);
+            border: 1px solid var(--glass-border);
+            padding: 16px;
+            border-radius: 16px;
+            display: flex;
+            flex-direction: column;
+            gap: 4px;
+        }
+
+        .metric-label {
+            font-size: 0.75rem;
+            color: var(--text-muted);
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+        }
+
+        .metric-value {
+            font-size: 1.2rem;
+            font-weight: 600;
+            font-variant-numeric: tabular-nums;
+        }
+
+        .btn-full {
+            width: 100%;
+            height: 54px;
+            border-radius: 16px;
+            background: var(--text-main);
+            color: var(--bg);
+            border: none;
+            font-size: 1rem;
+            font-weight: 600;
+            font-family: inherit;
+            cursor: pointer;
+            margin-top: 24px;
+            transition: all 0.2s var(--bezier);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+        }
+
+        .btn-full:active {
+            transform: scale(0.98);
+        }
+
+        .stats-summary {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 12px;
+            margin-bottom: 24px;
+        }
+
+        .history-list {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+            max-height: 240px;
+            overflow-y: auto;
+            padding-right: 4px;
+        }
+
+        .history-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 12px 16px;
+            background: var(--surface-hover);
+            border-radius: 12px;
+            border: 1px solid var(--glass-border);
+            font-size: 0.85rem;
+        }
+
+        .history-item-left {
+            display: flex;
+            flex-direction: column;
+        }
+
+        .history-item-score {
+            font-weight: 600;
+            font-variant-numeric: tabular-nums;
+        }
+
+        @keyframes errorShake {
+            0%, 100% { transform: translateX(0); }
+            20%, 60% { transform: translateX(-8px); }
+            40%, 80% { transform: translateX(8px); }
+        }
+
+        .error-shake {
+            animation: errorShake 0.4s var(--bezier);
+            border-color: var(--accent-danger) !important;
+        }
+    </style>
+</head>
+<body>
+
+    <div class="app-container" id="main-view">
+        <header>
+            <div class="brand-badge">
+                <div class="app-icon-badge">
+                    <span id="app-icon-container"><i data-lucide="activity" size="20" style="color: var(--text-main);"></i></span>
+                </div>
+                <div class="brand-title">
+                    <h1>Sincronía Ritmo</h1>
+                    <span>Continuidad e isocronía interna</span>
+                </div>
+            </div>
+            <div class="header-actions">
+                <button class="btn-icon" id="btn-stats" title="Estadísticas">
+                    <i data-lucide="bar-chart-2" size="18"></i>
+                </button>
+                <button class="btn-icon" id="btn-reset" title="Reiniciar">
+                    <i data-lucide="rotate-ccw" size="18"></i>
+                </button>
+            </div>
+        </header>
+
+        <div class="folders-scroll-area">
+            <button class="pill-btn active" data-pulses="4">4 Pulsos</button>
+            <button class="pill-btn" data-pulses="6">6 Pulsos</button>
+            <button class="pill-btn" data-pulses="8">8 Pulsos</button>
+        </div>
+
+        <main class="main-content">
+            <div class="stage-card" id="stage-card">
+                <div class="status-overlay">
+                    <span class="round-counter" id="pulse-indicator">Pulso 0 / 4</span>
+                    <span style="color: var(--glass-border);">•</span>
+                    <span class="status-badge" id="status-badge">Preparado</span>
+                </div>
+
+                <div class="canvas-container">
+                    <canvas id="anim-canvas"></canvas>
+                </div>
+
+                <div class="center-instruction" id="center-instruction">
+                    <div class="instruction-title" id="instruction-title">Siente el Pulso</div>
+                    <div class="instruction-sub" id="instruction-sub">Presiona Iniciar para escuchar y memorizar el tempo.</div>
+                </div>
+
+                <div class="tap-feedback-badge" id="tap-feedback-badge">+0 ms</div>
+            </div>
+
+            <div class="action-area">
+                <button class="main-action-btn" id="main-action-btn">
+                    <i data-lucide="play" size="20" id="btn-icon"></i>
+                    <span id="btn-text">Iniciar Secuencia</span>
+                </button>
+                <div class="keyboard-hint">
+                    <span>También puedes usar</span>
+                    <span class="kbd-badge">Espacio</span>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <!-- Modal de Resultados -->
+    <div class="modal-overlay" id="modal-eval">
+        <div class="modal-card">
+            <div class="modal-header">
+                <div class="modal-title">Sincronización Completada</div>
+            </div>
+
+            <div class="score-display-container">
+                <div class="score-arc-wrapper">
+                    <svg class="score-arc-svg" viewBox="0 0 160 160">
+                        <circle class="score-arc-bg" cx="80" cy="80" r="70"></circle>
+                        <circle class="score-arc-fill" id="score-arc-path" cx="80" cy="80" r="70"></circle>
+                    </svg>
+                    <div class="score-number-value" id="eval-score-text">0</div>
+                </div>
+            </div>
+
+            <div class="metrics-grid">
+                <div class="metric-box">
+                    <span class="metric-label">BPM Objetivo</span>
+                    <span class="metric-value" id="eval-target-bpm">0</span>
+                </div>
+                <div class="metric-box">
+                    <span class="metric-label">Tu BPM Medio</span>
+                    <span class="metric-value" id="eval-user-bpm">0</span>
+                </div>
+                <div class="metric-box" style="grid-column: span 2;">
+                    <span class="metric-label">Error Promedio por Pulso</span>
+                    <span class="metric-value" id="eval-avg-error">0 ms</span>
+                </div>
+            </div>
+
+            <button class="btn-full" id="btn-next-round">
+                <span id="next-btn-text">Nueva Prueba</span>
+                <i data-lucide="arrow-right" size="18"></i>
+            </button>
+        </div>
+    </div>
+
+    <!-- Modal de Estadísticas -->
+    <div class="modal-overlay" id="modal-stats">
+        <div class="modal-card">
+            <div class="modal-header">
+                <div class="modal-title">Estadísticas de Precisión</div>
+                <button class="btn-icon" id="btn-close-stats">
+                    <i data-lucide="x" size="18"></i>
+                </button>
+            </div>
+
+            <div class="stats-summary">
+                <div class="metric-box">
+                    <span class="metric-label">Sesiones</span>
+                    <span class="metric-value" id="stats-total-sessions">0</span>
+                </div>
+                <div class="metric-box">
+                    <span class="metric-label">Precisión Media</span>
+                    <span class="metric-value" id="stats-avg-score">0%</span>
+                </div>
+                <div class="metric-box">
+                    <span class="metric-label">Desviación Media</span>
+                    <span class="metric-value" id="stats-avg-error">0ms</span>
+                </div>
+            </div>
+
+            <div class="modal-title" style="font-size: 0.95rem; margin-bottom: 12px; color: var(--text-muted);">Historial Reciente</div>
+            
+            <div class="history-list" id="history-container">
+                <!-- Inyección Dinámica -->
+            </div>
+
+            <button class="btn-full" id="btn-clear-stats" style="background: transparent; border: 1px solid var(--glass-border); color: var(--accent-danger); margin-top: 16px;">
+                Borrar Historial
+            </button>
+        </div>
+    </div>
+
+    <script>
+        // --- ESTADO CENTRALIZADO Y PERSISTENCIA ---
+        const DEFAULT_STATE = {
+            targetPulsesCount: 4,
+            history: [],
+            stats: {
+                sessionsPlayed: 0,
+                totalScoreSum: 0,
+                totalErrorMsSum: 0
+            }
+        };
+
+        let appState = { ...DEFAULT_STATE };
+
+        function loadStorage() {
+            try {
+                const stored = localStorage.getItem('rhythm_sync_app_data');
+                if (stored) {
+                    const parsed = JSON.parse(stored);
+                    appState = { ...DEFAULT_STATE, ...parsed };
+                }
+            } catch (e) {
+                console.warn('Error en localStorage:', e);
+            }
+        }
+
+        function saveStorage() {
+            try {
+                localStorage.setItem('rhythm_sync_app_data', JSON.stringify(appState));
+            } catch (e) {
+                console.warn('Error al guardar localStorage:', e);
+            }
+        }
+
+        // --- SISTEMA DE AUDIO (Web Audio API) ---
+        let audioCtx = null;
+
+        function initAudio() {
+            if (!audioCtx) {
+                audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+            }
+            if (audioCtx.state === 'suspended') {
+                audioCtx.resume();
+            }
+        }
+
+        function playClickSound(freq = 800, duration = 0.04) {
+            if (!audioCtx) return;
+            try {
+                const osc = audioCtx.createOscillator();
+                const gain = audioCtx.createGain();
+                
+                osc.type = 'sine';
+                osc.frequency.setValueAtTime(freq, audioCtx.currentTime);
+                
+                gain.gain.setValueAtTime(0.3, audioCtx.currentTime);
+                gain.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + duration);
+
+                osc.connect(gain);
+                gain.connect(audioCtx.destination);
+
+                osc.start();
+                osc.stop(audioCtx.currentTime + duration);
+            } catch (e) {
+                console.warn('Audio error:', e);
+            }
+        }
+
+        // --- ICONOS LUCIDE ---
+        function setIcon(containerId, iconName, size = 20) {
+            const container = document.getElementById(containerId);
+            if (!container) return;
+            const i = document.createElement('i');
+            i.setAttribute('data-lucide', iconName);
+            i.setAttribute('size', size.toString());
+            container.innerHTML = '';
+            container.appendChild(i);
+            if (window.lucide) {
+                lucide.createIcons({ nodes: [container] });
+            }
+        }
+
+        function refreshAllIcons() {
+            if (window.lucide) lucide.createIcons();
+        }
+
+        // --- MODALES (History API) ---
+        let activeModalsStack = [];
+
+        function openModal(modalId) {
+            const modal = document.getElementById(modalId);
+            if (!modal || activeModalsStack.includes(modalId)) return;
+            
+            document.getElementById('main-view').classList.add('backgrounded');
+            modal.classList.add('active');
+            activeModalsStack.push(modalId);
+            window.history.pushState({ modalId: modalId }, "");
+        }
+
+        function closeModalDirect(modalId) {
+            const modal = document.getElementById(modalId);
+            if (!modal) return;
+
+            modal.classList.remove('active');
+            activeModalsStack = activeModalsStack.filter(id => id !== modalId);
+            
+            if (activeModalsStack.length === 0) {
+                document.getElementById('main-view').classList.remove('backgrounded');
+            }
+        }
+
+        function closeTopModal() {
+            if (activeModalsStack.length > 0) {
+                window.history.back();
+            }
+        }
+
+        window.addEventListener('popstate', () => {
+            if (activeModalsStack.length > 0) {
+                const topModalId = activeModalsStack.pop();
+                const modal = document.getElementById(topModalId);
+                if (modal) modal.classList.remove('active');
+                if (activeModalsStack.length === 0) {
+                    document.getElementById('main-view').classList.remove('backgrounded');
+                }
+            }
+        });
+
+        // --- MAQUINARIA DE JUEGO (Sincronía de Ritmo) ---
+        const GAME_STAGES = {
+            IDLE: 'IDLE',
+            GUIDE_PHASE: 'GUIDE_PHASE',
+            USER_TAP_PHASE: 'USER_TAP_PHASE',
+            EVALUATED: 'EVALUATED'
+        };
+
+        let currentStage = GAME_STAGES.IDLE;
+        let targetIntervalMs = 0; // Intervalo entre pulsos
+        let currentPulseCount = 0;
+        let guidePulseTimer = null;
+        let userTaps = [];
+        let expectedNextTapTime = 0;
+        let tapDeviations = [];
+        let animationFrameId = null;
+        let pulseVisualRadius = 0;
+
+        const canvas = document.getElementById('anim-canvas');
+        const ctx = canvas.getContext('2d');
+
+        function resizeCanvas() {
+            const rect = canvas.parentElement.getBoundingClientRect();
+            canvas.width = rect.width * window.devicePixelRatio;
+            canvas.height = rect.height * window.devicePixelRatio;
+            ctx.scale(window.devicePixelRatio, window.devicePixelRatio);
+        }
+
+        window.addEventListener('resize', resizeCanvas);
+
+        function triggerVisualPulse(isUser = false) {
+            pulseVisualRadius = 80;
+            if (isUser) {
+                playClickSound(1000, 0.03);
+            } else {
+                playClickSound(600, 0.05);
+            }
+        }
+
+        function renderCanvas(timestamp) {
+            const width = canvas.width / window.devicePixelRatio;
+            const height = canvas.height / window.devicePixelRatio;
+            const centerX = width / 2;
+            const centerY = height / 2;
+
+            ctx.clearRect(0, 0, width, height);
+
+            // Anillos concéntricos de fondo
+            ctx.beginPath();
+            ctx.arc(centerX, centerY, 50, 0, Math.PI * 2);
+            ctx.strokeStyle = 'rgba(255, 255, 255, 0.1)';
+            ctx.lineWidth = 2;
+            ctx.stroke();
+
+            // Onda expansiva de onda
+            if (pulseVisualRadius > 0) {
+                ctx.beginPath();
+                ctx.arc(centerX, centerY, 50 + (80 - pulseVisualRadius), 0, Math.PI * 2);
+                ctx.strokeStyle = `rgba(255, 255, 255, ${pulseVisualRadius / 80})`;
+                ctx.lineWidth = 3;
+                ctx.stroke();
+
+                pulseVisualRadius -= 2.5;
+            }
+
+            // Punto central con pulso
+            ctx.beginPath();
+            ctx.arc(centerX, centerY, currentStage === GAME_STAGES.USER_TAP_PHASE ? 12 : 8, 0, Math.PI * 2);
+            ctx.fillStyle = currentStage === GAME_STAGES.USER_TAP_PHASE ? '#FFFFFF' : 'rgba(255, 255, 255, 0.5)';
+            ctx.fill();
+
+            animationFrameId = requestAnimationFrame(renderCanvas);
+        }
+
+        function startGuidePhase() {
+            initAudio();
+            currentStage = GAME_STAGES.GUIDE_PHASE;
+            // Generar intervalo BPM aleatorio entre 80 BPM (750ms) y 140 BPM (428ms)
+            const randomBpm = Math.floor(Math.random() * 60) + 80;
+            targetIntervalMs = Math.round(60000 / randomBpm);
+            
+            currentPulseCount = 0;
+            userTaps = [];
+            tapDeviations = [];
+
+            updateUI();
+
+            function fireGuidePulse() {
+                if (currentStage !== GAME_STAGES.GUIDE_PHASE) return;
+
+                currentPulseCount++;
+                triggerVisualPulse(false);
+                updateUI();
+
+                if (currentPulseCount < 4) {
+                    guidePulseTimer = setTimeout(fireGuidePulse, targetIntervalMs);
+                } else {
+                    // Transición automática a la fase del usuario
+                    guidePulseTimer = setTimeout(() => {
+                        currentStage = GAME_STAGES.USER_TAP_PHASE;
+                        currentPulseCount = 0;
+                        expectedNextTapTime = performance.now() + targetIntervalMs;
+                        updateUI();
+                    }, targetIntervalMs);
+                }
+            }
+
+            fireGuidePulse();
+        }
+
+        function registerUserTap() {
+            if (currentStage !== GAME_STAGES.USER_TAP_PHASE) return;
+
+            const now = performance.now();
+            triggerVisualPulse(true);
+
+            if (userTaps.length === 0) {
+                // Primer toque registrado
+                const diffMs = Math.round(now - expectedNextTapTime);
+                tapDeviations.push(diffMs);
+                showTapFeedback(diffMs);
+                expectedNextTapTime = now + targetIntervalMs;
+            } else {
+                const diffMs = Math.round(now - expectedNextTapTime);
+                tapDeviations.push(diffMs);
+                showTapFeedback(diffMs);
+                expectedNextTapTime = now + targetIntervalMs;
+            }
+
+            userTaps.push(now);
+            currentPulseCount++;
+            updateUI();
+
+            // Animación física del botón al pulsar
+            const mainBtn = document.getElementById('main-action-btn');
+            mainBtn.classList.add('active-tap');
+            setTimeout(() => mainBtn.classList.remove('active-tap'), 120);
+
+            if (currentPulseCount >= appState.targetPulsesCount) {
+                currentStage = GAME_STAGES.EVALUATED;
+                evaluateSession();
+            }
+        }
+
+        function showTapFeedback(diffMs) {
+            const badge = document.getElementById('tap-feedback-badge');
+            const sign = diffMs >= 0 ? '+' : '';
+            badge.textContent = `${sign}${diffMs} ms`;
+            
+            if (Math.abs(diffMs) < 40) {
+                badge.style.color = 'var(--accent-success)';
+            } else if (Math.abs(diffMs) < 90) {
+                badge.style.color = 'var(--accent-amber)';
+            } else {
+                badge.style.color = 'var(--accent-danger)';
+            }
+
+            badge.classList.add('visible');
+            setTimeout(() => badge.classList.remove('visible'), 500);
+        }
+
+        function evaluateSession() {
+            // Calcular desviación media absoluta
+            const absErrors = tapDeviations.map(d => Math.abs(d));
+            const avgErrorMs = Math.round(absErrors.reduce((a, b) => a + b, 0) / absErrors.length);
+
+            // BPM Objetivo vs BPM real estimado del usuario
+            const targetBpm = Math.round(60000 / targetIntervalMs);
+            
+            let userAvgInterval = 0;
+            if (userTaps.length > 1) {
+                let intervalsSum = 0;
+                for (let i = 1; i < userTaps.length; i++) {
+                    intervalsSum += (userTaps[i] - userTaps[i-1]);
+                }
+                userAvgInterval = intervalsSum / (userTaps.length - 1);
+            } else {
+                userAvgInterval = targetIntervalMs + avgErrorMs;
+            }
+            
+            const userBpm = Math.round(60000 / userAvgInterval);
+
+            // Puntuación Exponencial (0ms error = 100, 150ms error decay)
+            let score = Math.max(0, Math.round(100 * Math.exp(-avgErrorMs / 65)));
+
+            // Actualizar Estadísticas
+            appState.stats.sessionsPlayed += 1;
+            appState.stats.totalScoreSum += score;
+            appState.stats.totalErrorMsSum += avgErrorMs;
+
+            appState.history.unshift({
+                date: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
+                targetBpm: targetBpm,
+                userBpm: userBpm,
+                errorMs: avgErrorMs,
+                score: score
+            });
+
+            if (appState.history.length > 20) appState.history.pop();
+            saveStorage();
+
+            // Renderizar Datos en Modal
+            document.getElementById('eval-target-bpm').textContent = `${targetBpm} BPM`;
+            document.getElementById('eval-user-bpm').textContent = `${userBpm} BPM`;
+            document.getElementById('eval-avg-error').textContent = `${avgErrorMs} ms`;
+            document.getElementById('eval-score-text').textContent = score;
+
+            // Animación de Arco
+            const arcPath = document.getElementById('score-arc-path');
+            const circumference = 440;
+            const offset = circumference - (score / 100) * circumference;
+            
+            arcPath.style.strokeDashoffset = circumference;
+            
+            openModal('modal-eval');
+
+            setTimeout(() => {
+                arcPath.style.strokeDashoffset = offset;
+                if (score >= 85) {
+                    arcPath.style.stroke = 'var(--accent-success)';
+                } else if (score >= 50) {
+                    arcPath.style.stroke = 'var(--accent-amber)';
+                } else {
+                    arcPath.style.stroke = 'var(--accent-danger)';
+                }
+            }, 100);
+        }
+
+        function resetGame() {
+            if (guidePulseTimer) clearTimeout(guidePulseTimer);
+            currentStage = GAME_STAGES.IDLE;
+            currentPulseCount = 0;
+            userTaps = [];
+            tapDeviations = [];
+            updateUI();
+        }
+
+        function updateUI() {
+            const statusBadge = document.getElementById('status-badge');
+            const pulseIndicator = document.getElementById('pulse-indicator');
+            const centerInstruction = document.getElementById('center-instruction');
+            const instructionTitle = document.getElementById('instruction-title');
+            const instructionSub = document.getElementById('instruction-sub');
+            const mainBtn = document.getElementById('main-action-btn');
+            const btnText = document.getElementById('btn-text');
+
+            switch (currentStage) {
+                case GAME_STAGES.IDLE:
+                    pulseIndicator.textContent = `Pulso 0 / ${appState.targetPulsesCount}`;
+                    statusBadge.textContent = 'Preparado';
+                    centerInstruction.style.opacity = '1';
+                    instructionTitle.textContent = 'Siente el Pulso';
+                    instructionSub.textContent = 'Escucha la guía de 4 beats y mantén la continuidad.';
+                    mainBtn.disabled = false;
+                    btnText.textContent = 'Iniciar Secuencia';
+                    setIcon('app-icon-container', 'activity', 20);
+                    break;
+
+                case GAME_STAGES.GUIDE_PHASE:
+                    pulseIndicator.textContent = `Guía ${currentPulseCount} / 4`;
+                    statusBadge.textContent = 'Escuchando...';
+                    centerInstruction.style.opacity = '0';
+                    mainBtn.disabled = true;
+                    btnText.textContent = 'Memoriza el Tempo...';
+                    break;
+
+                case GAME_STAGES.USER_TAP_PHASE:
+                    pulseIndicator.textContent = `Tu Pulso ${currentPulseCount} / ${appState.targetPulsesCount}`;
+                    statusBadge.textContent = 'Tu Turno';
+                    centerInstruction.style.opacity = '1';
+                    instructionTitle.textContent = 'Mantén el Ritmo';
+                    instructionSub.textContent = 'Presiona en cada beat con la misma cadencia.';
+                    mainBtn.disabled = false;
+                    btnText.textContent = 'PRESIONA AHORA';
+                    break;
+            }
+            refreshAllIcons();
+        }
+
+        function renderStatsUI() {
+            document.getElementById('stats-total-sessions').textContent = appState.stats.sessionsPlayed;
+            
+            const avgScore = appState.stats.sessionsPlayed > 0 
+                ? Math.round(appState.stats.totalScoreSum / appState.stats.sessionsPlayed) 
+                : 0;
+            document.getElementById('stats-avg-score').textContent = `${avgScore}%`;
+
+            const avgError = appState.stats.sessionsPlayed > 0 
+                ? Math.round(appState.stats.totalErrorMsSum / appState.stats.sessionsPlayed) 
+                : 0;
+            document.getElementById('stats-avg-error').textContent = `${avgError}ms`;
+
+            const historyContainer = document.getElementById('history-container');
+            if (appState.history.length === 0) {
+                historyContainer.innerHTML = `<div style="text-align:center; padding: 20px; color: var(--text-muted); font-size:0.85rem;">No hay registros aún</div>`;
+                return;
+            }
+
+            historyContainer.innerHTML = appState.history.map(item => `
+                <div class="history-item">
+                    <div class="history-item-left">
+                        <span style="font-weight: 500;">Objetivo: ${item.targetBpm} BPM | Tu: ${item.userBpm} BPM</span>
+                        <span style="font-size:0.75rem; color: var(--text-muted);">Error: ${item.errorMs}ms • ${item.date}</span>
+                    </div>
+                    <div class="history-item-score" style="color: ${item.score >= 80 ? 'var(--accent-success)' : item.score >= 50 ? 'var(--accent-amber)' : 'var(--accent-danger)'}">
+                        ${item.score} pts
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        // --- BINDING DE EVENTOS ---
+        function initEvents() {
+            loadStorage();
+            resizeCanvas();
+            requestAnimationFrame(renderCanvas);
+
+            // Selector de Pulsos Objetivo
+            const pills = document.querySelectorAll('.pill-btn');
+            pills.forEach(pill => {
+                const pulses = parseInt(pill.getAttribute('data-pulses'));
+                if (pulses === appState.targetPulsesCount) {
+                    pills.forEach(p => p.classList.remove('active'));
+                    pill.classList.add('active');
+                }
+
+                pill.addEventListener('click', () => {
+                    if (currentStage !== GAME_STAGES.IDLE) return;
+                    pills.forEach(p => p.classList.remove('active'));
+                    pill.classList.add('active');
+                    appState.targetPulsesCount = pulses;
+                    saveStorage();
+                    updateUI();
+                });
+            });
+
+            // Botón Principal de Acción
+            const mainBtn = document.getElementById('main-action-btn');
+
+            const handleMainAction = (e) => {
+                if (e) e.preventDefault();
+                if (currentStage === GAME_STAGES.IDLE) {
+                    startGuidePhase();
+                } else if (currentStage === GAME_STAGES.USER_TAP_PHASE) {
+                    registerUserTap();
+                }
+            };
+
+            mainBtn.addEventListener('click', handleMainAction);
+
+            // Atajo de Teclado (Espacio)
+            window.addEventListener('keydown', (e) => {
+                if (e.code === 'Space' && !e.repeat && activeModalsStack.length === 0) {
+                    e.preventDefault();
+                    handleMainAction();
+                }
+            });
+
+            // Navegación y Modales
+            document.getElementById('btn-next-round').addEventListener('click', () => {
+                closeModalDirect('modal-eval');
+                resetGame();
+            });
+
+            document.getElementById('btn-stats').addEventListener('click', () => {
+                renderStatsUI();
+                openModal('modal-stats');
+            });
+
+            document.getElementById('btn-close-stats').addEventListener('click', closeTopModal);
+
+            document.getElementById('btn-clear-stats').addEventListener('click', () => {
+                appState.stats = { sessionsPlayed: 0, totalScoreSum: 0, totalErrorMsSum: 0 };
+                appState.history = [];
+                saveStorage();
+                renderStatsUI();
+            });
+
+            document.getElementById('btn-reset').addEventListener('click', resetGame);
+
+            updateUI();
+            refreshAllIcons();
+        }
+
+        window.onload = initEvents;
+    </script>
+</body>
+</html>
+

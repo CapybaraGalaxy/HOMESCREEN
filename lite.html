@@ -1,0 +1,210 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="theme-color" content="#121212">
+<title>Homescreen Lite</title>
+<style>
+:root{color-scheme:dark;--bg:#121212;--panel:#1d1d1d;--panel2:#252525;--text:#f2f2f2;--muted:#a5a5a5;--accent:#9db7ff}
+*{box-sizing:border-box}
+html{background:var(--bg)}
+body{margin:0;min-height:100vh;background:var(--bg);color:var(--text);font:16px/1.45 Arial,Helvetica,sans-serif}
+button,input{font:inherit}
+button{color:inherit}
+main{width:min(900px,100%);margin:auto;padding:26px 18px 48px}
+header{text-align:center;padding:22px 0 24px}
+#clock{font-size:clamp(42px,9vw,64px);font-weight:300;letter-spacing:-2px}
+#date{color:var(--muted);font-size:14px;text-transform:capitalize;margin-top:2px}
+#welcome{font-size:18px;margin-top:20px}
+#search{display:block;width:100%;max-width:520px;margin:0 auto 24px;padding:13px 16px;border:1px solid #383838;border-radius:10px;background:var(--panel);color:var(--text);outline:none}
+#search:focus{border-color:var(--accent)}
+#sectionTitle{font-size:13px;color:var(--muted);margin:0 0 12px;font-weight:400}
+#grid,.apps{display:grid;grid-template-columns:repeat(auto-fill,minmax(145px,1fr));gap:9px}
+.tile,.app{min-width:0;min-height:76px;padding:14px 12px;border:1px solid #303030;border-radius:10px;background:var(--panel);text-align:left;cursor:pointer}
+.tile:active,.app:active{background:var(--panel2)}
+.tile .symbol,.app .symbol{display:block;color:var(--accent);font-size:19px;margin-bottom:7px}
+.tile span:last-child,.app .appname{display:block;font-size:14px;overflow-wrap:anywhere}
+.tile small{display:block;color:var(--muted);font-size:11px;margin-top:3px}
+#folderView{display:none}
+#folderView.open{display:block}
+#homeView.hidden{display:none}
+#back{border:0;background:none;color:var(--accent);padding:8px 0 16px;cursor:pointer}
+#folderHeading{font-size:21px;font-weight:500;margin:0 0 16px}
+.app{position:relative;padding-right:38px}
+.star{position:absolute;right:8px;top:8px;border:0;background:none;color:#777;padding:4px;cursor:pointer;font-size:18px}
+.star.on{color:#ffd65a}
+#empty{display:none;color:var(--muted);font-size:14px;padding:20px 0}
+footer{text-align:center;color:#777;font-size:11px;margin-top:36px}
+@media(max-width:420px){main{padding:18px 13px 36px}#grid,.apps{grid-template-columns:repeat(2,minmax(0,1fr));gap:7px}.tile,.app{min-height:70px;padding:11px}}
+</style>
+</head>
+<body>
+<main>
+<header>
+  <div id="clock">00:00</div>
+  <div id="date"></div>
+  <div id="welcome"></div>
+</header>
+<input id="search" type="search" placeholder="Buscar aplicaciones…" autocomplete="off" aria-label="Buscar aplicaciones">
+<section id="homeView">
+  <h2 id="sectionTitle">Aplicaciones</h2>
+  <div id="grid"></div>
+</section>
+<section id="folderView">
+  <button id="back" type="button">← Volver</button>
+  <h2 id="folderHeading"></h2>
+  <div class="apps" id="apps"></div>
+</section>
+<div id="empty">No se han encontrado aplicaciones.</div>
+<footer>Homescreen Lite · Sin efectos ni dependencias externas</footer>
+</main>
+<script>
+const tools = [
+    {
+        name: 'Utilidades',
+        icon: 'Toolbox',
+        folder: true,
+        apps: [
+            { name: 'Calculadora de dinero', icon: 'Coins', url: 'Apps/dinero.html' },
+            { name: 'Calculadora tiempo de descarga', icon: 'Download', url: 'Apps/calculadora-descarga.html' },
+            { name: 'Medidas', icon: 'Ruler', url: 'Apps/medidas.html' },
+            { name: 'Visualizador de progreso', icon: 'Loader2', url: 'Apps/progreso.html' },
+            { name: 'Cuenta atras', icon: 'clock-4', url: 'Apps/countdown.html' },
+            { name: 'Duolingo Tools', icon: 'Brick-Wall-Fire', url: 'Apps/duolingo.html' },
+            { name: 'Contador', icon: 'List-Ordered', url: 'Apps/counter.html' },
+            { name: 'Generador de código QR', icon: 'Qr-Code', url: 'Apps/qr.html' },
+            { name: 'Bocetos', icon: 'Pencil-Line', url: 'Apps/bocetos.html' },
+            { name: 'Selector de color', icon: 'pipette', url: 'Apps/color.html' },
+            { name: 'Editor de fotos', icon: 'image', url: 'Apps/editor-fotos.html' },
+            { name: 'Conversor zonas horarias', icon: 'globe', url: 'Apps/horarios.html' },
+            { name: 'Gradients', icon: 'palette', url: 'Apps/gradients.html' },
+            { name: 'Metadata', icon: 'layers', url: 'Apps/exif.html' },
+            { name: 'Pastebin - BETA', icon: 'clipboard', url: 'Apps/pastebin.html' },
+            { name: 'LED', icon: 'grid', url: 'Apps/led.html' }
+        ]
+    },
+    {
+        name: 'Productividad',
+        icon: 'Focus',
+        folder: true,
+        apps: [
+            { name: 'Calendario [BETA]', icon: 'Calendar', url: 'Apps/calendario.html' },
+            { name: 'Kanban', icon: 'Kanban-Square', url: 'Apps/kanban.html' },
+            { name: 'Notas', icon: 'Sticky-Notes', url: 'Apps/notas.html' }
+        ]
+    },
+    {
+        name: 'Texto y símbolos',
+        icon: 'Text_Select',
+        folder: true,
+        apps: [
+            { name: 'Typer', icon: 'Keyboard', url: 'Apps/typing.html' },
+            { name: 'Símbolos', icon: 'Images', url: 'Apps/symbols.html' },
+            { name: 'Comparador de Texto', icon: 'split', url: 'Apps/comparador.html' },
+            { name: 'Contador de Palabras', icon: 'binary', url: 'Apps/contador-palabras.html' },
+            { name: 'Limpiador de textos', icon: 'sparkles', url: 'Apps/limpia-textos.html' },
+            { name: 'Mayúsculas - minúsculas', icon: 'case-sensitive', url: 'Apps/mayus-minus.html' },
+            { name: 'Generador Lorem Ipsum', icon: 'Newspaper', url: 'Apps/lorem-ipsum.html' },
+            { name: 'Fancy Text', icon: 'Letter-Text', url: 'Apps/text.html' },
+            { name: 'Combos', icon: 'Pencil-Sparkles', url: 'Apps/combos.html' },
+            { name: 'Teleprompter', icon: 'scroll-text', url: 'Apps/teleprompter.html' }
+        ]
+    },
+    {
+        name: 'Entretenimiento y Randomizers',
+        icon: 'dices',
+        folder: true,
+        apps: [
+            { name: 'Ruleta aleatoria', icon: 'Ferris-Wheel', url: 'Apps/aleatorio.html' },
+            { name: 'Número aleatorio', icon: 'dices', url: 'Apps/n-aleatorio.html' },
+            { name: 'CPS test', icon: 'gauge', url: 'Apps/cps-test.html' },
+            { name: 'Creador de memes', icon: 'Laugh', url: 'Apps/meme.html' },
+            { name: 'Creador de Tierlist', icon: 'list-ordered', url: 'Apps/tierlist.html' },
+            { name: 'Estudio de Ritmos', icon: 'music', url: 'Apps/estudio-ritmos.html' },
+            { name: 'Quiz Studio', icon: 'brain-circuit', url: 'Apps/quiz-studio.html' },
+            { name: 'Rosco', icon: 'help-circle', url: 'Apps/rosco.html' },
+            { name: 'Memory (temporalmente)', icon: 'brain', url: 'Games/memory.html' },
+            { name: 'Creador de Posts de Noticias', icon: 'newspaper', url: 'Apps/noticias.html' },
+            { name: 'Lector de Texto a Voz', icon: 'speech', url: 'Apps/tts.html' }
+        ]
+    },
+    {
+        name: 'MC',
+        icon: 'Cuboid',
+        folder: true,
+        apps: [
+            { name: 'CraftPalette', icon: 'Command', url: 'Apps/craftpalette.html' },
+            { name: 'Mod compatibility checker', icon: 'List-Check', url: 'Apps/modchecker.html' }
+        ]
+    },
+    {
+        name: 'Conversores y Traductores',
+        icon: 'Arrow-Left-Right',
+        folder: true,
+        apps: [
+            { name: 'Conversor de unidades', icon: 'Arrow-Left-Right', url: 'Apps/conversor.html' },
+            { name: 'Conversor a Base64', icon: 'upload-cloud', url: 'Apps/base64.html' },
+            { name: 'Traductor Wingdings', icon: 'sparkles', url: 'Apps/wingdings.html' },
+            { name: 'Conversor Binario', icon: 'binary', url: 'Apps/binario.html' },
+            { name: 'Conversor Morse', icon: 'radio', url: 'Apps/morse.html' },
+            { name: 'Conversor de Números Romanos', icon: 'hash', url: 'Apps/num-romanos.html' },
+            { name: 'Conversor de Números a Letras', icon: 'type', url: 'Apps/num-let.html' }
+        ]
+    },
+    {
+        name: 'Sistema',
+        icon: 'Settings2',
+        folder: true,
+        apps: [
+            { name: 'Material You', icon: 'palette', url: 'Apps/material-you-new.html' },
+            { name: 'Galería de iconos', icon: 'Layout-List', url: 'Apps/icons.html' },
+            { name: 'App maker', icon: 'Columns-Settings', url: 'Apps/appmaker.html' },
+            { name: 'Consejos', icon: 'lightbulb', url: 'Apps/consejos.html' },
+            { name: 'Visor HTML', icon: 'square-terminal', url: 'Apps/html-preview.html' },
+            { name: 'Labs', icon: 'flask-conical', url: 'labs.html' }
+        ]
+    }
+];
+const $ = id => document.getElementById(id);
+const safeRead = (key, fallback) => { try { const v=JSON.parse(localStorage.getItem(key)); return v ?? fallback; } catch(e) { return fallback; } };
+let favorites = safeRead('favorites', []);
+let activeFolder = null;
+function visible(apps){const hidden=new Set(safeRead('hiddenAppUrls',[]));return apps.filter(a=>a&&a.url&&!hidden.has(a.url));}
+function allApps(){let result=[];tools.forEach(folder=>folderApps(folder).forEach(app=>result.push({...app,source:folder.name})));if(localStorage.getItem('showCustomApps')!=='false'){safeRead('customApps',[]).filter(app=>(app.folder||'Apps añadidas')==='Apps añadidas').forEach(app=>result.push({...app,source:'Apps añadidas'}));}return result;}
+function folderApps(folder){const base=folder.apps||[];if(localStorage.getItem('showCustomApps')==='false')return base;const extra=safeRead('customApps',[]).filter(app=>(app.folder||'Apps añadidas')===folder.name);return [...base,...extra];}
+function iconText(icon){const map={Toolbox:'▦',Focus:'◷',Text_Select:'Aa',dices:'⚄',Cuboid:'▧',Settings2:'⚙','Arrow-Left-Right':'⇄',star:'★'};return map[icon]||'◆';}
+function makeTile(name,icon,sub,action){const b=document.createElement('button');b.className='tile';b.type='button';const s=document.createElement('span');s.className='symbol';s.textContent=iconText(icon);const t=document.createElement('span');t.textContent=name;b.append(s,t);if(sub){const small=document.createElement('small');small.textContent=sub;b.append(small);}b.addEventListener('click',action);return b;}
+function renderHome(query=''){
+ $('grid').replaceChildren();$('empty').style.display='none';$('homeView').classList.remove('hidden');$('folderView').classList.remove('open');
+ const q=query.trim().toLocaleLowerCase('es');
+ if(q){
+  const matches=visible(allApps()).filter(a=>(a.name+' '+(a.source||'')).toLocaleLowerCase('es').includes(q));
+  matches.forEach(app=>$('grid').append(makeApp(app)));
+  $('sectionTitle').textContent='Resultados';
+  $('empty').style.display=matches.length?'none':'block';return;
+ }
+ $('sectionTitle').textContent='Aplicaciones';
+ if(localStorage.getItem('showFavFolder')!=='false') $('grid').append(makeTile('Favoritos','star',favorites.length+' guardados',()=>openFolder({name:'Favoritos',apps:allApps().filter(a=>favorites.includes(a.url))})));
+ tools.forEach(folder=>{const apps=visible(folderApps(folder));if(apps.length)$('grid').append(makeTile(folder.name,folder.icon,apps.length+' aplicaciones',()=>openFolder({...folder,apps})));});
+ const custom=visible(safeRead('customApps',[]).filter(a=>(a.folder||'Apps añadidas')==='Apps añadidas'));
+ if(localStorage.getItem('showCustomApps')!=='false'&&custom.length)$('grid').append(makeTile('Apps añadidas','▦',custom.length+' aplicaciones',()=>openFolder({name:'Apps añadidas',apps:custom})));
+}
+function makeApp(app){
+ const a=document.createElement('a');a.className='app';a.href=app.url;
+ const sym=document.createElement('span');sym.className='symbol';sym.textContent=iconText(app.icon);
+ const name=document.createElement('span');name.className='appname';name.textContent=app.name||'Aplicación';
+ a.append(sym,name);
+ const star=document.createElement('button');star.type='button';star.className='star'+(favorites.includes(app.url)?' on':'');star.textContent=favorites.includes(app.url)?'★':'☆';star.setAttribute('aria-label','Alternar favorito');
+ star.addEventListener('click',e=>{e.preventDefault();e.stopPropagation();favorites=favorites.includes(app.url)?favorites.filter(x=>x!==app.url):[...favorites,app.url];localStorage.setItem('favorites',JSON.stringify(favorites));star.classList.toggle('on',favorites.includes(app.url));star.textContent=favorites.includes(app.url)?'★':'☆';});
+ a.append(star);return a;
+}
+function openFolder(folder){activeFolder=folder;$('folderHeading').textContent=folder.name;$('apps').replaceChildren();visible(folder.apps||[]).forEach(app=>$('apps').append(makeApp(app)));$('homeView').classList.add('hidden');$('folderView').classList.add('open');$('empty').style.display='none';$('search').value='';}
+$('back').addEventListener('click',()=>{activeFolder=null;renderHome();});
+$('search').addEventListener('input',e=>{activeFolder=null;renderHome(e.target.value);});
+function updateClock(){const n=new Date();$('clock').textContent=n.toLocaleTimeString('es-ES',{hour:'2-digit',minute:'2-digit'});$('date').textContent=n.toLocaleDateString('es-ES',{weekday:'long',day:'numeric',month:'long'});}
+const hour=new Date().getHours();const user=(localStorage.getItem('username')||'').trim();$('welcome').textContent=(hour<12?'Buenos días':hour<20?'Buenas tardes':'Buenas noches')+(user?', '+user:'');
+updateClock();setInterval(updateClock,30000);renderHome();
+</script>
+</body>
+</html>

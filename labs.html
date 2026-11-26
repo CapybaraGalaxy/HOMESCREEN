@@ -446,24 +446,88 @@
 
     <script>
         /* Registro de experimentos plano */
-        const experiments = [
-                        {
-    "title": "Day Briefing",
-    "description": "Revisa tus tareas pendientes, calendario y estado del tiempo para hoy.",
-    "icon": "Calendar-Days",
-    "url": "Apps/day-brief.html",
-    "tags": ["Productividad", "Daily"],
-    "keywords": ["briefing", "tareas", "calendario", "tiempo", "clima"]
-},
+const experiments = [
+    {
+        "title": "Day Briefing",
+        "description": "Revisa tus tareas pendientes, calendario y estado del tiempo para hoy.",
+        "icon": "Calendar-Days",
+        "url": "Apps/day-brief.html",
+        "tags": ["Productividad", "Daily"],
+        "keywords": ["briefing", "tareas", "calendario", "tiempo", "clima"]
+    },
+    {
+        "title": "Memoria Visual",
+        "description": "Pon a prueba tu retención visual recordando posiciones y elementos en pantalla.",
+        "icon": "eye",
+        "url": "Lab/memoria-visual.html",
+        "tags": ["Memoria", "Juego"],
+        "keywords": ["memoria", "visual", "retencion", "juego", "cerebro"]
+    },
+    {
+        "title": "Memoria de Patrones",
+        "description": "Observa y reproduce secuencias y patrones cada vez más complejos.",
+        "icon": "grid-3x3",
+        "url": "Lab/patrón.html",
+        "tags": ["Memoria", "Lógica"],
+        "keywords": ["memoria", "patron", "secuencia", "logica", "juego"]
+    },
+    {
+        "title": "Memoria de Ritmo",
+        "description": "Escucha, memoriza y repite secuencias rítmicas con precisión.",
+        "icon": "music",
+        "url": "Lab/ritmo.html",
+        "tags": ["Memoria", "Audio"],
+        "keywords": ["memoria", "ritmo", "sonido", "musica", "secuencia"]
+    },
+    {
+        "title": "Memoria de Tiempo",
+        "description": "Calcula y recuerda intervalos temporales sin mirar el reloj.",
+        "icon": "timer",
+        "url": "Lab/tiempo.html",
+        "tags": ["Memoria", "Percepción"],
+        "keywords": ["memoria", "tiempo", "reloj", "intervalo", "percepcion"]
+    },
+    {
+        "title": "Weather",
+        "description": "Consulta el pronóstico meteorológico y las condiciones climáticas actuales.",
+        "icon": "cloud-sun",
+        "url": "Lab/weather.html",
+        "tags": ["Clima", "Utilidad"],
+        "keywords": ["tiempo", "clima", "weather", "pronostico", "temperatura"]
+    },
+{
+        "title": "Paste",
+        "description": "Guarda, organiza y recupera fragmentos de texto o código rápidamente como un portapapeles.",
+        "icon": "clipboard",
+        "url": "Apps/paste.html",
+        "tags": ["Productividad", "Utilidad"],
+        "keywords": ["paste", "portapapeles", "copiar", "pegar", "texto", "notas"]
+    },
+    {
+        "title": "Homescreen LITE",
+        "description": "Una versión ligera del pantalla de inicio con características esenciales.",
+        "icon": "zap",
+        "url": "lite.html",
+        "tags": ["Info"],
+        "keywords": ["about", "help", "version", "docs"]
+    },
         {
-                title: "Eso es todo por ahora",
-                description: "Vuelve más tarde para ver nuevas utilidades experimentales.",
-                icon: "badge-info",
-                url: "about.html",
-                tags: ["Info"],
-                keywords: ["about", "help", "version", "docs"]
-            }
-        ];
+        "title": "Tienda de Herramientas",
+        "description": "Explora y descubre nuevas herramientas para mejorar tu experiencia.",
+        "icon": "shopping-bag",
+        "url": "https://capybaragalaxy.github.io/homescreen-online/store",
+        "tags": ["Info"],
+        "keywords": ["about", "help", "version", "docs"]
+    },
+    {
+        "title": "Eso es todo por ahora",
+        "description": "Vuelve más tarde para ver nuevas utilidades experimentales.",
+        "icon": "badge-info",
+        "url": "about.html",
+        "tags": ["Info"],
+        "keywords": ["about", "help", "version", "docs"]
+    }
+];;
 
         const container = document.getElementById('experimentsContainer');
         const searchInput = document.getElementById('searchInput');

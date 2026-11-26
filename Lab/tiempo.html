@@ -1,0 +1,1239 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+    <title>Memoria Temporal</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@200;300;400;500;600;700&display=swap" rel="stylesheet">
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <style>
+        :root {
+            --bg: #000000;
+            --surface: #121212;
+            --surface-hover: #1c1c1e;
+            --glass: rgba(22, 22, 26, 0.65);
+            --glass-border: rgba(255, 255, 255, 0.08);
+            --blur-val: 30px;
+            --text-main: #FFFFFF;
+            --text-muted: #8E8E93;
+            --accent-danger: #FF453A;
+            --accent-success: #34C759;
+            --accent-amber: #FFD60A;
+            --accent-glow: rgba(255, 255, 255, 0.15);
+            --bezier: cubic-bezier(0.16, 1, 0.3, 1);
+            --spring: cubic-bezier(0.34, 1.56, 0.64, 1);
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            user-select: none;
+            -webkit-user-select: none;
+            -webkit-tap-highlight-color: transparent;
+        }
+
+        body {
+            background-color: var(--bg);
+            color: var(--text-main);
+            font-family: 'Outfit', -apple-system, BlinkMacSystemFont, sans-serif;
+            min-height: 100dvh;
+            overflow: hidden;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .app-container {
+            width: 100%;
+            max-width: 800px;
+            height: 100dvh;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+            padding: env(safe-area-inset-top) 24px calc(env(safe-area-inset-bottom) + 20px) 24px;
+            position: relative;
+            z-index: 1;
+            transition: filter 0.4s var(--bezier), opacity 0.4s var(--bezier);
+        }
+
+        .app-container.backgrounded {
+            filter: blur(12px) brightness(0.4);
+            pointer-events: none;
+        }
+
+        /* Cabecera Neo-Glass */
+        header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 16px 0;
+            z-index: 10;
+        }
+
+        .brand-badge {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .app-icon-badge {
+            width: 42px;
+            height: 42px;
+            border-radius: 12px;
+            background: radial-gradient(circle at 30% 30%, rgba(255,255,255,0.15), rgba(255,255,255,0.02));
+            border: 1px solid var(--glass-border);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            backdrop-filter: blur(10px);
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.5);
+        }
+
+        .brand-title {
+            display: flex;
+            flex-direction: column;
+        }
+
+        .brand-title h1 {
+            font-size: 1.1rem;
+            font-weight: 600;
+            letter-spacing: -0.02em;
+            color: var(--text-main);
+            line-height: 1.2;
+        }
+
+        .brand-title span {
+            font-size: 0.75rem;
+            color: var(--text-muted);
+            font-weight: 400;
+        }
+
+        .header-actions {
+            display: flex;
+            gap: 8px;
+        }
+
+        .btn-icon {
+            width: 40px;
+            height: 40px;
+            border-radius: 12px;
+            background: var(--surface);
+            border: 1px solid var(--glass-border);
+            color: var(--text-main);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            transition: all 0.2s var(--bezier);
+        }
+
+        .btn-icon:hover {
+            background: var(--surface-hover);
+            border-color: rgba(255,255,255,0.2);
+            transform: translateY(-1px);
+        }
+
+        .btn-icon:active {
+            transform: scale(0.95);
+        }
+
+        /* Selector de Configuración */
+        .folders-scroll-area {
+            display: flex;
+            gap: 8px;
+            overflow-x: auto;
+            padding: 4px 0 16px 0;
+            scrollbar-width: none;
+            -webkit-overflow-scrolling: touch;
+            justify-content: center;
+        }
+
+        .folders-scroll-area::-webkit-scrollbar {
+            display: none;
+        }
+
+        .pill-btn {
+            background: var(--surface);
+            border: 1px solid var(--glass-border);
+            color: var(--text-muted);
+            padding: 8px 16px;
+            border-radius: 100px;
+            font-size: 0.82rem;
+            font-weight: 500;
+            cursor: pointer;
+            white-space: nowrap;
+            transition: all 0.3s var(--bezier);
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .pill-btn.active {
+            background: var(--text-main);
+            color: var(--bg);
+            border-color: var(--text-main);
+            box-shadow: 0 0 15px rgba(255,255,255,0.2);
+        }
+
+        /* Contenido Principal / Área de Juego */
+        .main-content {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            position: relative;
+            width: 100%;
+            margin: 0 auto;
+        }
+
+        .stage-card {
+            width: 100%;
+            max-width: 480px;
+            height: 380px;
+            border-radius: 28px;
+            background: var(--glass);
+            border: 1px solid var(--glass-border);
+            backdrop-filter: blur(var(--blur-val));
+            -webkit-backdrop-filter: blur(var(--blur-val));
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            position: relative;
+            overflow: hidden;
+            box-shadow: 0 20px 50px rgba(0,0,0,0.6);
+            transition: all 0.4s var(--bezier);
+        }
+
+        /* Visualizador de Animaciones Abstractas */
+        .canvas-container {
+            width: 100%;
+            height: 100%;
+            position: absolute;
+            top: 0;
+            left: 0;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            pointer-events: none;
+        }
+
+        canvas {
+            width: 100%;
+            height: 100%;
+        }
+
+        /* Indicadores e Instrucciones en Pantalla */
+        .status-overlay {
+            position: absolute;
+            top: 24px;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            background: rgba(0,0,0,0.5);
+            padding: 6px 16px;
+            border-radius: 100px;
+            border: 1px solid var(--glass-border);
+            backdrop-filter: blur(10px);
+            z-index: 5;
+        }
+
+        .round-counter {
+            font-size: 0.85rem;
+            color: var(--text-muted);
+            font-variant-numeric: tabular-nums;
+        }
+
+        .status-badge {
+            font-size: 0.85rem;
+            font-weight: 500;
+            color: var(--text-main);
+            letter-spacing: 0.02em;
+        }
+
+        .center-instruction {
+            text-align: center;
+            z-index: 5;
+            padding: 0 20px;
+            pointer-events: none;
+            transition: opacity 0.3s var(--bezier);
+        }
+
+        .instruction-title {
+            font-size: 1.4rem;
+            font-weight: 600;
+            margin-bottom: 8px;
+            letter-spacing: -0.01em;
+        }
+
+        .instruction-sub {
+            font-size: 0.9rem;
+            color: var(--text-muted);
+            max-width: 280px;
+            margin: 0 auto;
+            line-height: 1.4;
+        }
+
+        /* Botón de Acción Principal (Hold Button) */
+        .action-area {
+            width: 100%;
+            max-width: 480px;
+            margin-top: 24px;
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+            align-items: center;
+        }
+
+        .hold-btn {
+            width: 100%;
+            height: 64px;
+            border-radius: 20px;
+            background: var(--surface);
+            border: 1px solid var(--glass-border);
+            color: var(--text-main);
+            font-size: 1rem;
+            font-weight: 600;
+            font-family: inherit;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+            transition: all 0.2s var(--bezier);
+            position: relative;
+            overflow: hidden;
+            box-shadow: 0 8px 24px rgba(0,0,0,0.4);
+        }
+
+        .hold-btn::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255,255,255,0.05), transparent);
+            transform: translateX(-100%);
+            transition: transform 0.6s ease;
+        }
+
+        .hold-btn:hover::before {
+            transform: translateX(100%);
+        }
+
+        .hold-btn.holding {
+            background: var(--text-main);
+            color: var(--bg);
+            border-color: var(--text-main);
+            transform: scale(0.98);
+            box-shadow: 0 0 30px rgba(255,255,255,0.3);
+        }
+
+        .hold-btn:disabled {
+            opacity: 0.4;
+            cursor: not-allowed;
+            transform: none !important;
+        }
+
+        .keyboard-hint {
+            font-size: 0.75rem;
+            color: var(--text-muted);
+            display: flex;
+            align-items: center;
+            gap: 4px;
+        }
+
+        .kbd-badge {
+            background: var(--surface);
+            border: 1px solid var(--glass-border);
+            padding: 2px 6px;
+            border-radius: 4px;
+            font-size: 0.7rem;
+            color: var(--text-main);
+        }
+
+        /* Modales */
+        .modal-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.7);
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+            z-index: 100;
+            display: flex;
+            justify-content: center;
+            align-items: flex-end;
+            opacity: 0;
+            pointer-events: none;
+            transition: opacity 0.3s var(--bezier);
+        }
+
+        .modal-overlay.active {
+            opacity: 1;
+            pointer-events: auto;
+        }
+
+        .modal-card {
+            width: 100%;
+            max-width: 540px;
+            background: var(--surface);
+            border: 1px solid var(--glass-border);
+            border-top-left-radius: 32px;
+            border-top-right-radius: 32px;
+            padding: 32px 24px calc(env(safe-area-inset-bottom) + 24px) 24px;
+            transform: translateY(100%);
+            transition: transform 0.4s var(--spring);
+            max-height: 90dvh;
+            overflow-y: auto;
+        }
+
+        .modal-overlay.active .modal-card {
+            transform: translateY(0);
+        }
+
+        @media (min-width: 600px) {
+            .modal-overlay {
+                align-items: center;
+                padding: 24px;
+            }
+            .modal-card {
+                border-radius: 32px;
+                transform: translateY(20px) scale(0.95);
+            }
+            .modal-overlay.active .modal-card {
+                transform: translateY(0) scale(1);
+            }
+        }
+
+        .modal-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 24px;
+        }
+
+        .modal-title {
+            font-size: 1.25rem;
+            font-weight: 600;
+        }
+
+        /* Evaluación de Ronda en Modal / Sheet */
+        .score-display-container {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            margin: 20px 0;
+        }
+
+        .score-arc-wrapper {
+            position: relative;
+            width: 180px;
+            height: 180px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .score-arc-svg {
+            width: 100%;
+            height: 100%;
+            transform: rotate(-90deg);
+        }
+
+        .score-arc-bg {
+            fill: none;
+            stroke: var(--surface-hover);
+            stroke-width: 8;
+        }
+
+        .score-arc-fill {
+            fill: none;
+            stroke: var(--text-main);
+            stroke-width: 8;
+            stroke-linecap: round;
+            stroke-dasharray: 440;
+            stroke-dashoffset: 440;
+            transition: stroke-dashoffset 1s var(--bezier), stroke 0.3s ease;
+        }
+
+        .score-number-value {
+            position: absolute;
+            font-size: 2.8rem;
+            font-weight: 700;
+            font-variant-numeric: tabular-nums;
+            letter-spacing: -0.03em;
+        }
+
+        .metrics-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 12px;
+            width: 100%;
+            margin-top: 16px;
+        }
+
+        .metric-box {
+            background: var(--surface-hover);
+            border: 1px solid var(--glass-border);
+            padding: 16px;
+            border-radius: 16px;
+            display: flex;
+            flex-direction: column;
+            gap: 4px;
+        }
+
+        .metric-label {
+            font-size: 0.75rem;
+            color: var(--text-muted);
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+        }
+
+        .metric-value {
+            font-size: 1.2rem;
+            font-weight: 600;
+            font-variant-numeric: tabular-nums;
+        }
+
+        .btn-full {
+            width: 100%;
+            height: 54px;
+            border-radius: 16px;
+            background: var(--text-main);
+            color: var(--bg);
+            border: none;
+            font-size: 1rem;
+            font-weight: 600;
+            font-family: inherit;
+            cursor: pointer;
+            margin-top: 24px;
+            transition: all 0.2s var(--bezier);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+        }
+
+        .btn-full:active {
+            transform: scale(0.98);
+        }
+
+        /* Lista de Estadísticas e Historial */
+        .stats-summary {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 12px;
+            margin-bottom: 24px;
+        }
+
+        .history-list {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+            max-height: 240px;
+            overflow-y: auto;
+            padding-right: 4px;
+        }
+
+        .history-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 12px 16px;
+            background: var(--surface-hover);
+            border-radius: 12px;
+            border: 1px solid var(--glass-border);
+            font-size: 0.85rem;
+        }
+
+        .history-item-left {
+            display: flex;
+            flex-direction: column;
+        }
+
+        .history-item-score {
+            font-weight: 600;
+            font-variant-numeric: tabular-nums;
+        }
+
+        /* Animación Shake para Error */
+        @keyframes errorShake {
+            0%, 100% { transform: translateX(0); }
+            20%, 60% { transform: translateX(-8px); }
+            40%, 80% { transform: translateX(8px); }
+        }
+
+        .error-shake {
+            animation: errorShake 0.4s var(--bezier);
+            border-color: var(--accent-danger) !important;
+        }
+    </style>
+</head>
+<body>
+
+    <div class="app-container" id="main-view">
+        <header>
+            <div class="brand-badge">
+                <div class="app-icon-badge">
+                    <span id="app-icon-container"><i data-lucide="timer" size="20" style="color: var(--text-main);"></i></span>
+                </div>
+                <div class="brand-title">
+                    <h1>Memoria Temporal</h1>
+                    <span>Percepción interna de intervalo</span>
+                </div>
+            </div>
+            <div class="header-actions">
+                <button class="btn-icon" id="btn-stats" title="Estadísticas">
+                    <i data-lucide="bar-chart-2" size="18"></i>
+                </button>
+                <button class="btn-icon" id="btn-reset" title="Reiniciar Sesión">
+                    <i data-lucide="rotate-ccw" size="18"></i>
+                </button>
+            </div>
+        </header>
+
+        <!-- Selector de Modo de Rondos -->
+        <div class="folders-scroll-area">
+            <button class="pill-btn active" data-rounds="3">3 Rondas</button>
+            <button class="pill-btn" data-rounds="5">5 Rondas</button>
+            <button class="pill-btn" data-rounds="10">10 Rondas</button>
+            <button class="pill-btn" data-rounds="infinite">Infinito</button>
+        </div>
+
+        <main class="main-content">
+            <div class="stage-card" id="stage-card">
+                <div class="status-overlay">
+                    <span class="round-counter" id="round-indicator">Ronda 1 / 3</span>
+                    <span style="color: var(--glass-border);">•</span>
+                    <span class="status-badge" id="status-badge">Preparado</span>
+                </div>
+
+                <div class="canvas-container">
+                    <canvas id="anim-canvas"></canvas>
+                </div>
+
+                <div class="center-instruction" id="center-instruction">
+                    <div class="instruction-title" id="instruction-title">Observa el tiempo</div>
+                    <div class="instruction-sub" id="instruction-sub">Presiona Iniciar para comenzar la estimación visual.</div>
+                </div>
+            </div>
+
+            <div class="action-area">
+                <button class="hold-btn" id="main-action-btn">
+                    <i data-lucide="play" size="20" id="btn-icon"></i>
+                    <span id="btn-text">Iniciar Ronda</span>
+                </button>
+                <div class="keyboard-hint">
+                    <span>También puedes usar</span>
+                    <span class="kbd-badge">Espacio</span>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <!-- Modal de Evaluación de Ronda -->
+    <div class="modal-overlay" id="modal-eval">
+        <div class="modal-card">
+            <div class="modal-header">
+                <div class="modal-title">Resultado de la Ronda</div>
+            </div>
+
+            <div class="score-display-container">
+                <div class="score-arc-wrapper">
+                    <svg class="score-arc-svg" viewBox="0 0 160 160">
+                        <circle class="score-arc-bg" cx="80" cy="80" r="70"></circle>
+                        <circle class="score-arc-fill" id="score-arc-path" cx="80" cy="80" r="70"></circle>
+                    </svg>
+                    <div class="score-number-value" id="eval-score-text">0</div>
+                </div>
+            </div>
+
+            <div class="metrics-grid">
+                <div class="metric-box">
+                    <span class="metric-label">Tiempo Objetivo</span>
+                    <span class="metric-value" id="eval-target-time">0.00 s</span>
+                </div>
+                <div class="metric-box">
+                    <span class="metric-label">Tu Tiempo</span>
+                    <span class="metric-value" id="eval-user-time">0.00 s</span>
+                </div>
+                <div class="metric-box" style="grid-column: span 2;">
+                    <span class="metric-label">Diferencia Absoluta</span>
+                    <span class="metric-value" id="eval-diff-time">0 ms</span>
+                </div>
+            </div>
+
+            <button class="btn-full" id="btn-next-round">
+                <span id="next-btn-text">Siguiente Ronda</span>
+                <i data-lucide="arrow-right" size="18"></i>
+            </button>
+        </div>
+    </div>
+
+    <!-- Modal de Estadísticas -->
+    <div class="modal-overlay" id="modal-stats">
+        <div class="modal-card">
+            <div class="modal-header">
+                <div class="modal-title">Estadísticas</div>
+                <button class="btn-icon" id="btn-close-stats">
+                    <i data-lucide="x" size="18"></i>
+                </button>
+            </div>
+
+            <div class="stats-summary">
+                <div class="metric-box">
+                    <span class="metric-label">Jugadas</span>
+                    <span class="metric-value" id="stats-total-rounds">0</span>
+                </div>
+                <div class="metric-box">
+                    <span class="metric-label">Puntuación Media</span>
+                    <span class="metric-value" id="stats-avg-score">0</span>
+                </div>
+                <div class="metric-box">
+                    <span class="metric-label">Error Medio</span>
+                    <span class="metric-value" id="stats-avg-error">0ms</span>
+                </div>
+            </div>
+
+            <div class="modal-title" style="font-size: 0.95rem; margin-bottom: 12px; color: var(--text-muted);">Historial Reciente</div>
+            
+            <div class="history-list" id="history-container">
+                <!-- Se inyecta dinámicamente -->
+            </div>
+
+            <button class="btn-full" id="btn-clear-stats" style="background: transparent; border: 1px solid var(--glass-border); color: var(--accent-danger); margin-top: 16px;">
+                Borrar Historial
+            </button>
+        </div>
+    </div>
+
+    <script>
+        // --- ESTADO CENTRALIZADO Y PERSISTENCIA ---
+        const DEFAULT_STATE = {
+            totalRoundsMode: 3,
+            currentRound: 1,
+            history: [],
+            stats: {
+                roundsPlayed: 0,
+                totalScoreSum: 0,
+                totalErrorMsSum: 0
+            }
+        };
+
+        let appState = { ...DEFAULT_STATE };
+
+        function loadStorage() {
+            try {
+                const stored = localStorage.getItem('time_memory_app_data');
+                if (stored) {
+                    const parsed = JSON.parse(stored);
+                    appState = { ...DEFAULT_STATE, ...parsed };
+                }
+            } catch (e) {
+                console.warn('Error accediendo a localStorage:', e);
+            }
+        }
+
+        function saveStorage() {
+            try {
+                localStorage.setItem('time_memory_app_data', JSON.stringify(appState));
+            } catch (e) {
+                console.warn('Error guardando en localStorage:', e);
+            }
+        }
+
+        // --- MANEJO SEGURO DE ICONOS LUCIDE ---
+        function setIcon(containerId, iconName, size = 20) {
+            const container = document.getElementById(containerId);
+            if (!container) return;
+            const i = document.createElement('i');
+            i.setAttribute('data-lucide', iconName);
+            i.setAttribute('size', size.toString());
+            container.innerHTML = '';
+            container.appendChild(i);
+            if (window.lucide) {
+                lucide.createIcons({
+                    nodes: [container]
+                });
+            }
+        }
+
+        function refreshAllIcons() {
+            if (window.lucide) {
+                lucide.createIcons();
+            }
+        }
+
+        // --- CONTROL DE MODALES (HISTORY API) ---
+        let activeModalsStack = [];
+
+        function openModal(modalId) {
+            const modal = document.getElementById(modalId);
+            if (!modal || activeModalsStack.includes(modalId)) return;
+            
+            document.getElementById('main-view').classList.add('backgrounded');
+            modal.classList.add('active');
+            activeModalsStack.push(modalId);
+            window.history.pushState({ modalId: modalId }, "");
+        }
+
+        function closeModalDirect(modalId) {
+            const modal = document.getElementById(modalId);
+            if (!modal) return;
+
+            modal.classList.remove('active');
+            activeModalsStack = activeModalsStack.filter(id => id !== modalId);
+            
+            if (activeModalsStack.length === 0) {
+                document.getElementById('main-view').classList.remove('backgrounded');
+            }
+        }
+
+        function closeTopModal() {
+            if (activeModalsStack.length > 0) {
+                window.history.back();
+            }
+        }
+
+        window.addEventListener('popstate', (e) => {
+            if (activeModalsStack.length > 0) {
+                const topModalId = activeModalsStack.pop();
+                const modal = document.getElementById(topModalId);
+                if (modal) {
+                    modal.classList.remove('active');
+                }
+                if (activeModalsStack.length === 0) {
+                    document.getElementById('main-view').classList.remove('backgrounded');
+                }
+            }
+        });
+
+        // --- LÓGICA DEL JUEGO DE TIEMPO ---
+        const GAME_STAGES = {
+            IDLE: 'IDLE',
+            ESTIMATING: 'ESTIMATING',
+            WAITING_FOR_HOLD: 'WAITING_FOR_HOLD',
+            HOLDING: 'HOLDING',
+            EVALUATED: 'EVALUATED'
+        };
+
+        let currentStage = GAME_STAGES.IDLE;
+        let targetDurationMs = 0;
+        let holdStartTime = 0;
+        let holdDurationMs = 0;
+        let animationFrameId = null;
+        let estimationTimeoutId = null;
+        let currentAnimPattern = 0;
+
+        // Renderizador de Canvas Abstracto
+        const canvas = document.getElementById('anim-canvas');
+        const ctx = canvas.getContext('2d');
+
+        function resizeCanvas() {
+            const rect = canvas.parentElement.getBoundingClientRect();
+            canvas.width = rect.width * window.devicePixelRatio;
+            canvas.height = rect.height * window.devicePixelRatio;
+            ctx.scale(window.devicePixelRatio, window.devicePixelRatio);
+        }
+
+        window.addEventListener('resize', resizeCanvas);
+
+        function drawAbstractAnimation(timestamp, pattern, progress = 1) {
+            const width = canvas.width / window.devicePixelRatio;
+            const height = canvas.height / window.devicePixelRatio;
+            const centerX = width / 2;
+            const centerY = height / 2;
+
+            ctx.clearRect(0, 0, width, height);
+
+            if (progress <= 0) return;
+
+            ctx.save();
+            ctx.globalAlpha = Math.min(1, progress);
+
+            const t = timestamp * 0.002;
+
+            if (pattern === 0) {
+                // Anillos concéntricos pulsantes
+                for (let i = 0; i < 3; i++) {
+                    const radius = (30 + i * 25) + Math.sin(t + i) * 10;
+                    ctx.beginPath();
+                    ctx.arc(centerX, centerY, radius, 0, Math.PI * 2);
+                    ctx.strokeStyle = `rgba(255, 255, 255, ${0.8 - i * 0.25})`;
+                    ctx.lineWidth = 3 - i * 0.5;
+                    ctx.stroke();
+                }
+            } else if (pattern === 1) {
+                // Geometría rotatoria
+                const size = 60 + Math.sin(t * 1.5) * 15;
+                ctx.translate(centerX, centerY);
+                ctx.rotate(t * 0.8);
+                ctx.beginPath();
+                ctx.rect(-size / 2, -size / 2, size, size);
+                ctx.strokeStyle = '#FFFFFF';
+                ctx.lineWidth = 2.5;
+                ctx.stroke();
+
+                ctx.rotate(Math.PI / 4);
+                ctx.beginPath();
+                ctx.rect(-size / 3, -size / 3, size * 0.66, size * 0.66);
+                ctx.strokeStyle = 'rgba(255, 255, 255, 0.4)';
+                ctx.stroke();
+            } else if (pattern === 2) {
+                // Ondas de partículas en espiral
+                const particleCount = 12;
+                for (let i = 0; i < particleCount; i++) {
+                    const angle = (i / particleCount) * Math.PI * 2 + t;
+                    const dist = 50 + Math.cos(t * 2 + i) * 20;
+                    const x = centerX + Math.cos(angle) * dist;
+                    const y = centerY + Math.sin(angle) * dist;
+
+                    ctx.beginPath();
+                    ctx.arc(x, y, 4, 0, Math.PI * 2);
+                    ctx.fillStyle = 'rgba(255, 255, 255, 0.9)';
+                    ctx.fill();
+                }
+            } else {
+                // Barra de energía orbital
+                ctx.beginPath();
+                ctx.arc(centerX, centerY, 55, t, t + Math.PI * 1.2);
+                ctx.strokeStyle = '#FFFFFF';
+                ctx.lineWidth = 4;
+                ctx.lineCap = 'round';
+                ctx.stroke();
+            }
+
+            ctx.restore();
+        }
+
+        function startEstimationPhase() {
+            currentStage = GAME_STAGES.ESTIMATING;
+            // Generar intervalo aleatorio entre 1.80s y 4.50s
+            targetDurationMs = Math.floor(Math.random() * 2700) + 1800;
+            currentAnimPattern = Math.floor(Math.random() * 4);
+
+            updateUI();
+
+            const startTime = performance.now();
+
+            function loop(now) {
+                const elapsed = now - startTime;
+                if (elapsed < targetDurationMs) {
+                    drawAbstractAnimation(now, currentAnimPattern, 1);
+                    animationFrameId = requestAnimationFrame(loop);
+                } else {
+                    // Fin de la fase de estimación
+                    ctx.clearRect(0, 0, canvas.width, canvas.height);
+                    currentStage = GAME_STAGES.WAITING_FOR_HOLD;
+                    updateUI();
+                }
+            }
+
+            resizeCanvas();
+            animationFrameId = requestAnimationFrame(loop);
+        }
+
+        function startHolding() {
+            if (currentStage !== GAME_STAGES.WAITING_FOR_HOLD) return;
+            currentStage = GAME_STAGES.HOLDING;
+            holdStartTime = performance.now();
+            updateUI();
+
+            function pulseLoop(now) {
+                if (currentStage === GAME_STAGES.HOLDING) {
+                    // Sutil feedback visual de retención
+                    drawAbstractAnimation(now, 0, 0.15);
+                    animationFrameId = requestAnimationFrame(pulseLoop);
+                }
+            }
+            animationFrameId = requestAnimationFrame(pulseLoop);
+        }
+
+        function stopHolding() {
+            if (currentStage !== GAME_STAGES.HOLDING) return;
+            holdDurationMs = Math.round(performance.now() - holdStartTime);
+            currentStage = GAME_STAGES.EVALUATED;
+            cancelAnimationFrame(animationFrameId);
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+            
+            evaluateRound();
+        }
+
+        // Cálculo de Puntuación
+        function evaluateRound() {
+            const diffMs = Math.abs(targetDurationMs - holdDurationMs);
+            
+            // Fórmula de puntuación basada en la diferencia absoluta
+            // 0ms error = 100 puntos. Desviación de >= 1200ms reduce drásticamente los puntos.
+            let score = Math.max(0, Math.round(100 * Math.exp(-diffMs / 400)));
+
+            // Actualizar Estadísticas
+            appState.stats.roundsPlayed += 1;
+            appState.stats.totalScoreSum += score;
+            appState.stats.totalErrorMsSum += diffMs;
+
+            appState.history.unshift({
+                date: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
+                target: (targetDurationMs / 1000).toFixed(2),
+                user: (holdDurationMs / 1000).toFixed(2),
+                diff: diffMs,
+                score: score
+            });
+
+            if (appState.history.length > 20) appState.history.pop();
+            saveStorage();
+
+            // Renderizar datos en modal
+            document.getElementById('eval-target-time').textContent = `${(targetDurationMs / 1000).toFixed(2)} s`;
+            document.getElementById('eval-user-time').textContent = `${(holdDurationMs / 1000).toFixed(2)} s`;
+            document.getElementById('eval-diff-time').textContent = `${diffMs} ms`;
+            document.getElementById('eval-score-text').textContent = score;
+
+            // Animación del arco de puntuación
+            const arcPath = document.getElementById('score-arc-path');
+            const circumference = 440; // 2 * PI * 70
+            const offset = circumference - (score / 100) * circumference;
+            
+            arcPath.style.strokeDashoffset = circumference;
+            
+            openModal('modal-eval');
+
+            setTimeout(() => {
+                arcPath.style.strokeDashoffset = offset;
+                if (score >= 85) {
+                    arcPath.style.stroke = 'var(--accent-success)';
+                } else if (score >= 50) {
+                    arcPath.style.stroke = 'var(--accent-amber)';
+                } else {
+                    arcPath.style.stroke = 'var(--accent-danger)';
+                }
+            }, 100);
+
+            // Verificar si es la última ronda del modo
+            const nextBtnText = document.getElementById('next-btn-text');
+            if (appState.totalRoundsMode !== 'infinite' && appState.currentRound >= appState.totalRoundsMode) {
+                nextBtnText.textContent = 'Ver Resumen Final';
+            } else {
+                nextBtnText.textContent = 'Siguiente Ronda';
+            }
+        }
+
+        function advanceNextRound() {
+            closeModalDirect('modal-eval');
+
+            if (appState.totalRoundsMode !== 'infinite' && appState.currentRound >= appState.totalRoundsMode) {
+                // Final de partida -> Mostrar Estadísticas
+                openModal('modal-stats');
+                renderStatsUI();
+                appState.currentRound = 1;
+            } else {
+                if (appState.totalRoundsMode !== 'infinite') {
+                    appState.currentRound += 1;
+                }
+            }
+
+            currentStage = GAME_STAGES.IDLE;
+            updateUI();
+        }
+
+        function updateUI() {
+            const statusBadge = document.getElementById('status-badge');
+            const roundIndicator = document.getElementById('round-indicator');
+            const centerInstruction = document.getElementById('center-instruction');
+            const instructionTitle = document.getElementById('instruction-title');
+            const instructionSub = document.getElementById('instruction-sub');
+            const mainBtn = document.getElementById('main-action-btn');
+            const btnText = document.getElementById('btn-text');
+
+            // Indicador de Rondas
+            const totalText = appState.totalRoundsMode === 'infinite' ? '∞' : appState.totalRoundsMode;
+            roundIndicator.textContent = `Ronda ${appState.currentRound} / ${totalText}`;
+
+            switch (currentStage) {
+                case GAME_STAGES.IDLE:
+                    statusBadge.textContent = 'Preparado';
+                    centerInstruction.style.opacity = '1';
+                    instructionTitle.textContent = 'Observa el tiempo';
+                    instructionSub.textContent = 'Presiona el botón para iniciar la secuencia visual.';
+                    mainBtn.className = 'hold-btn';
+                    mainBtn.disabled = false;
+                    btnText.textContent = 'Iniciar Ronda';
+                    setIcon('app-icon-container', 'timer', 20);
+                    break;
+
+                case GAME_STAGES.ESTIMATING:
+                    statusBadge.textContent = 'Memorizando...';
+                    centerInstruction.style.opacity = '0';
+                    mainBtn.disabled = true;
+                    btnText.textContent = 'Observa atentamente...';
+                    break;
+
+                case GAME_STAGES.WAITING_FOR_HOLD:
+                    statusBadge.textContent = 'Tu Turno';
+                    centerInstruction.style.opacity = '1';
+                    instructionTitle.textContent = 'Reproduce la duración';
+                    instructionSub.textContent = 'Manten presionado el botón por el mismo tiempo exacto.';
+                    mainBtn.disabled = false;
+                    mainBtn.className = 'hold-btn';
+                    btnText.textContent = 'MANTÉN PRESIONADO';
+                    break;
+
+                case GAME_STAGES.HOLDING:
+                    statusBadge.textContent = 'Midiendo...';
+                    centerInstruction.style.opacity = '0';
+                    mainBtn.className = 'hold-btn holding';
+                    btnText.textContent = 'SUELTA AL COMPLETAR';
+                    break;
+            }
+            refreshAllIcons();
+        }
+
+        function renderStatsUI() {
+            document.getElementById('stats-total-rounds').textContent = appState.stats.roundsPlayed;
+            
+            const avgScore = appState.stats.roundsPlayed > 0 
+                ? Math.round(appState.stats.totalScoreSum / appState.stats.roundsPlayed) 
+                : 0;
+            document.getElementById('stats-avg-score').textContent = avgScore;
+
+            const avgError = appState.stats.roundsPlayed > 0 
+                ? Math.round(appState.stats.totalErrorMsSum / appState.stats.roundsPlayed) 
+                : 0;
+            document.getElementById('stats-avg-error').textContent = `${avgError}ms`;
+
+            const historyContainer = document.getElementById('history-container');
+            if (appState.history.length === 0) {
+                historyContainer.innerHTML = `<div style="text-align:center; padding: 20px; color: var(--text-muted); font-size:0.85rem;">No hay registros aún</div>`;
+                return;
+            }
+
+            historyContainer.innerHTML = appState.history.map(item => `
+                <div class="history-item">
+                    <div class="history-item-left">
+                        <span style="font-weight: 500;">Objetivo: ${item.target}s | Tu: ${item.user}s</span>
+                        <span style="font-size:0.75rem; color: var(--text-muted);">Error: ${item.diff}ms • ${item.date}</span>
+                    </div>
+                    <div class="history-item-score" style="color: ${item.score >= 80 ? 'var(--accent-success)' : item.score >= 50 ? 'var(--accent-amber)' : 'var(--accent-danger)'}">
+                        ${item.score} pts
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        // --- EVENT LISTENERS Y BINDINGS ---
+        function initEvents() {
+            loadStorage();
+
+            // Píldoras de Selección de Modo
+            const pills = document.querySelectorAll('.pill-btn');
+            pills.forEach(pill => {
+                const rounds = pill.getAttribute('data-rounds');
+                if ((rounds === 'infinite' && appState.totalRoundsMode === 'infinite') || parseInt(rounds) === appState.totalRoundsMode) {
+                    pills.forEach(p => p.classList.remove('active'));
+                    pill.classList.add('active');
+                }
+
+                pill.addEventListener('click', () => {
+                    if (currentStage !== GAME_STAGES.IDLE) return;
+                    pills.forEach(p => p.classList.remove('active'));
+                    pill.classList.add('active');
+                    const val = pill.getAttribute('data-rounds');
+                    appState.totalRoundsMode = val === 'infinite' ? 'infinite' : parseInt(val);
+                    appState.currentRound = 1;
+                    saveStorage();
+                    updateUI();
+                });
+            });
+
+            // Botón de Acción Principal
+            const mainBtn = document.getElementById('main-action-btn');
+
+            const handleStart = (e) => {
+                if (e) e.preventDefault();
+                if (currentStage === GAME_STAGES.IDLE) {
+                    startEstimationPhase();
+                } else if (currentStage === GAME_STAGES.WAITING_FOR_HOLD) {
+                    startHolding();
+                }
+            };
+
+            const handleEnd = (e) => {
+                if (e) e.preventDefault();
+                if (currentStage === GAME_STAGES.HOLDING) {
+                    stopHolding();
+                }
+            };
+
+            mainBtn.addEventListener('mousedown', handleStart);
+            mainBtn.addEventListener('mouseup', handleEnd);
+            mainBtn.addEventListener('touchstart', handleStart);
+            mainBtn.addEventListener('touchend', handleEnd);
+
+            // Soporte para Tecla Espacio
+            window.addEventListener('keydown', (e) => {
+                if (e.code === 'Space' && !e.repeat && activeModalsStack.length === 0) {
+                    e.preventDefault();
+                    if (currentStage === GAME_STAGES.IDLE) {
+                        startEstimationPhase();
+                    } else if (currentStage === GAME_STAGES.WAITING_FOR_HOLD) {
+                        startHolding();
+                    }
+                }
+            });
+
+            window.addEventListener('keyup', (e) => {
+                if (e.code === 'Space' && activeModalsStack.length === 0) {
+                    e.preventDefault();
+                    if (currentStage === GAME_STAGES.HOLDING) {
+                        stopHolding();
+                    }
+                }
+            });
+
+            // Siguiente Ronda
+            document.getElementById('btn-next-round').addEventListener('click', advanceNextRound);
+
+            // Estadísticas
+            document.getElementById('btn-stats').addEventListener('click', () => {
+                renderStatsUI();
+                openModal('modal-stats');
+            });
+
+            document.getElementById('btn-close-stats').addEventListener('click', closeTopModal);
+
+            document.getElementById('btn-clear-stats').addEventListener('click', () => {
+                appState.stats = { roundsPlayed: 0, totalScoreSum: 0, totalErrorMsSum: 0 };
+                appState.history = [];
+                saveStorage();
+                renderStatsUI();
+            });
+
+            // Reiniciar Estado
+            document.getElementById('btn-reset').addEventListener('click', () => {
+                currentStage = GAME_STAGES.IDLE;
+                appState.currentRound = 1;
+                cancelAnimationFrame(animationFrameId);
+                ctx.clearRect(0, 0, canvas.width, canvas.height);
+                updateUI();
+            });
+
+            // Inicializar UI
+            resizeCanvas();
+            updateUI();
+            refreshAllIcons();
+        }
+
+        window.onload = initEvents;
+    </script>
+</body>
+</html>
+
+

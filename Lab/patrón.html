@@ -1,0 +1,713 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+    <title>Patrones de Color</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <style>
+        :root {
+            --bg: #000000;
+            --surface: #121212;
+            --surface-hover: #1c1c1e;
+            --glass: rgba(22, 22, 24, 0.6);
+            --glass-border: rgba(255, 255, 255, 0.08);
+            --blur-val: 30px;
+
+            --text-main: #FFFFFF;
+            --text-muted: #8E8E93;
+
+            --accent-danger: #FF453A;
+            --accent-success: #34C759;
+            --accent-gold: #FFD60A;
+
+            --bezier: cubic-bezier(0.16, 1, 0.3, 1);
+            --spring: cubic-bezier(0.34, 1.56, 0.64, 1);
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            user-select: none;
+            -webkit-user-select: none;
+            touch-action: manipulation;
+        }
+
+        body {
+            background-color: var(--bg);
+            color: var(--text-main);
+            font-family: 'Outfit', sans-serif;
+            min-height: 100dvh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            overflow: hidden;
+            font-variant-numeric: tabular-nums;
+        }
+
+        .app-container {
+            width: 100%;
+            max-width: 500px;
+            height: 100dvh;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+            padding: env(safe-area-inset-top) 20px calc(env(safe-area-inset-bottom) + 16px) 20px;
+            position: relative;
+        }
+
+        header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 12px 0;
+        }
+
+        .brand {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .app-icon-badge {
+            width: 42px;
+            height: 42px;
+            border-radius: 12px;
+            background: radial-gradient(circle at top left, #2c2c2e, #121212);
+            border: 1px solid var(--glass-border);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.5);
+        }
+
+        .title-area h1 {
+            font-size: 1.1rem;
+            font-weight: 600;
+            letter-spacing: -0.02em;
+        }
+
+        .title-area span {
+            font-size: 0.8rem;
+            color: var(--text-muted);
+            font-weight: 400;
+        }
+
+        .stats-badge {
+            background: var(--glass);
+            border: 1px solid var(--glass-border);
+            backdrop-filter: blur(var(--blur-val));
+            -webkit-backdrop-filter: blur(var(--blur-val));
+            padding: 6px 14px;
+            border-radius: 100px;
+            font-size: 0.85rem;
+            font-weight: 600;
+            color: var(--text-muted);
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .stats-badge span {
+            color: var(--text-main);
+        }
+
+        .main-content {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            position: relative;
+            gap: 16px;
+        }
+
+        .view-panel {
+            width: 100%;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 20px;
+            transition: opacity 0.3s var(--bezier), transform 0.3s var(--bezier);
+        }
+
+        .hidden {
+            display: none !important;
+            opacity: 0;
+            pointer-events: none;
+        }
+
+        .setup-card {
+            width: 100%;
+            background: var(--glass);
+            border: 1px solid var(--glass-border);
+            backdrop-filter: blur(var(--blur-val));
+            -webkit-backdrop-filter: blur(var(--blur-val));
+            border-radius: 24px;
+            padding: 24px;
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+        }
+
+        .control-group {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+        }
+
+        .control-group label {
+            font-size: 0.85rem;
+            color: var(--text-muted);
+            font-weight: 500;
+            display: flex;
+            justify-content: space-between;
+        }
+
+        .segmented-control {
+            display: flex;
+            background: rgba(0, 0, 0, 0.4);
+            border: 1px solid var(--glass-border);
+            border-radius: 14px;
+            padding: 4px;
+            gap: 4px;
+        }
+
+        .segmented-btn {
+            flex: 1;
+            background: transparent;
+            border: none;
+            color: var(--text-muted);
+            padding: 10px 0;
+            font-size: 0.85rem;
+            font-weight: 600;
+            border-radius: 10px;
+            cursor: pointer;
+            transition: all 0.2s var(--bezier);
+            font-family: inherit;
+        }
+
+        .segmented-btn.active {
+            background: var(--surface-hover);
+            color: var(--text-main);
+            box-shadow: 0 2px 8px rgba(0,0,0,0.4);
+        }
+
+        .btn-primary {
+            width: 100%;
+            background: var(--text-main);
+            color: #000;
+            border: none;
+            border-radius: 16px;
+            padding: 16px;
+            font-size: 1rem;
+            font-weight: 700;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            transition: transform 0.15s var(--spring), background-color 0.2s;
+            font-family: inherit;
+        }
+
+        .btn-primary:active {
+            transform: scale(0.96);
+        }
+
+        .board-container {
+            position: relative;
+            width: 100%;
+            max-width: 360px;
+            aspect-ratio: 1;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .grid {
+            display: grid;
+            width: 100%;
+            height: 100%;
+            gap: 6px;
+            background: var(--glass);
+            border: 1px solid var(--glass-border);
+            padding: 10px;
+            border-radius: 20px;
+            touch-action: none;
+            box-shadow: 0 20px 40px rgba(0,0,0,0.6);
+        }
+
+        .cell {
+            background: rgba(255, 255, 255, 0.03);
+            border: 1px solid rgba(255, 255, 255, 0.05);
+            border-radius: 8px;
+            transition: background-color 0.1s ease, transform 0.1s var(--spring);
+            cursor: pointer;
+        }
+
+        .cell.active-touch {
+            transform: scale(0.92);
+        }
+
+        .timer-bar-container {
+            width: 100%;
+            max-width: 360px;
+            height: 6px;
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 100px;
+            overflow: hidden;
+        }
+
+        .timer-bar {
+            height: 100%;
+            width: 100%;
+            background: var(--text-main);
+            border-radius: 100px;
+            transition: width 0.1s linear;
+        }
+
+        .palette-bar {
+            width: 100%;
+            max-width: 360px;
+            display: flex;
+            justify-content: center;
+            gap: 10px;
+            padding: 10px;
+            background: var(--glass);
+            border: 1px solid var(--glass-border);
+            border-radius: 100px;
+            backdrop-filter: blur(var(--blur-val));
+            -webkit-backdrop-filter: blur(var(--blur-val));
+        }
+
+        .color-swatch {
+            width: 44px;
+            height: 44px;
+            border-radius: 50%;
+            border: 2px solid transparent;
+            cursor: pointer;
+            transition: transform 0.2s var(--spring), border-color 0.2s;
+            position: relative;
+        }
+
+        .color-swatch.selected {
+            transform: scale(1.15);
+            border-color: var(--text-main);
+            box-shadow: 0 0 12px rgba(255, 255, 255, 0.3);
+        }
+
+        .phase-indicator {
+            font-size: 0.9rem;
+            font-weight: 600;
+            color: var(--text-muted);
+            text-transform: uppercase;
+            letter-spacing: 0.08em;
+            height: 24px;
+        }
+
+        .result-card {
+            width: 100%;
+            background: var(--glass);
+            border: 1px solid var(--glass-border);
+            backdrop-filter: blur(var(--blur-val));
+            -webkit-backdrop-filter: blur(var(--blur-val));
+            border-radius: 24px;
+            padding: 32px 24px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            text-align: center;
+            gap: 16px;
+        }
+
+        .score-display {
+            font-size: 3.5rem;
+            font-weight: 700;
+            line-height: 1;
+            letter-spacing: -0.03em;
+            margin: 8px 0;
+        }
+
+        .error-shake {
+            animation: shake 0.3s cubic-bezier(0.36, 0.07, 0.19, 0.97) both;
+        }
+
+        @keyframes shake {
+            10%, 90% { transform: translate3d(-1px, 0, 0); }
+            20%, 80% { transform: translate3d(2px, 0, 0); }
+            30%, 50%, 70% { transform: translate3d(-4px, 0, 0); }
+            40%, 60% { transform: translate3d(4px, 0, 0); }
+        }
+    </style>
+</head>
+<body>
+
+    <div class="app-container" id="main-view">
+        <header>
+            <div class="brand">
+                <div class="app-icon-badge">
+                    <i data-lucide="palette" size="20" style="color: var(--text-main);"></i>
+                </div>
+                <div class="title-area">
+                    <h1>Patrones de Color</h1>
+                    <span id="sub-status">Memoria y Pintura</span>
+                </div>
+            </div>
+            <div class="stats-badge hidden" id="round-badge">
+                Ronda <span id="current-round-txt">1</span>/<span id="total-rounds-txt">5</span>
+            </div>
+        </header>
+
+        <main class="main-content">
+            <!-- VISTA INICIAL: CONFIGURACIÓN -->
+            <div class="view-panel" id="setup-view">
+                <div class="setup-card">
+                    <div class="control-group">
+                        <label>Tamaño del Tablero</label>
+                        <div class="segmented-control" id="grid-size-selector">
+                            <button class="segmented-btn active" data-val="3">3x3</button>
+                            <button class="segmented-btn" data-val="4">4x4</button>
+                            <button class="segmented-btn" data-val="5">5x5</button>
+                        </div>
+                    </div>
+
+                    <div class="control-group">
+                        <label>Número de Rondas</label>
+                        <div class="segmented-control" id="rounds-selector">
+                            <button class="segmented-btn" data-val="3">3</button>
+                            <button class="segmented-btn active" data-val="5">5</button>
+                            <button class="segmented-btn" data-val="10">10</button>
+                        </div>
+                    </div>
+
+                    <div class="control-group">
+                        <label>Paleta de Colores</label>
+                        <div class="segmented-control" id="palette-selector">
+                            <button class="segmented-btn active" data-val="neon">Neón</button>
+                            <button class="segmented-btn" data-val="pastel">Pastel</button>
+                            <button class="segmented-btn" data-val="warm">Cálida</button>
+                        </div>
+                    </div>
+
+                    <button class="btn-primary" id="start-btn">
+                        <i data-lucide="play" size="18"></i> Comenzar Juego
+                    </button>
+                </div>
+            </div>
+
+            <!-- VISTA DE JUEGO -->
+            <div class="view-panel hidden" id="game-view">
+                <div class="phase-indicator" id="phase-txt">Memoriza el patrón</div>
+
+                <div class="timer-bar-container">
+                    <div class="timer-bar" id="timer-bar"></div>
+                </div>
+
+                <div class="board-container">
+                    <div class="grid" id="grid"></div>
+                </div>
+
+                <div class="palette-bar hidden" id="palette-bar"></div>
+
+                <button class="btn-primary hidden" id="submit-btn" style="max-width: 360px;">
+                    <i data-lucide="check" size="18"></i> Confirmar Patrón
+                </button>
+            </div>
+
+            <!-- VISTA DE RESULTADOS -->
+            <div class="view-panel hidden" id="result-view">
+                <div class="result-card">
+                    <div class="app-icon-badge" style="width: 56px; height: 56px; border-radius: 16px;">
+                        <i data-lucide="trophy" size="28" style="color: var(--accent-gold);"></i>
+                    </div>
+                    <div>
+                        <span style="color: var(--text-muted); font-size: 0.9rem; font-weight: 500;">Precisión Total</span>
+                        <div class="score-display" id="final-score">0%</div>
+                        <p id="score-comment" style="color: var(--text-muted); font-size: 0.95rem;"></p>
+                    </div>
+                    <button class="btn-primary" id="restart-btn">
+                        <i data-lucide="rotate-ccw" size="18"></i> Jugar de Nuevo
+                    </button>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <script>
+        const PALETTES = {
+            neon: ['#FF2D55', '#5856D6', '#007AFF', '#4CD964', '#FF9500'],
+            pastel: ['#FFB3BA', '#BAE1FF', '#BAFFC9', '#FFFFBA', '#E8AEFF'],
+            warm: ['#D90429', '#EF233C', '#F77F00', '#FCBF49', '#EAE2B7']
+        };
+
+        const state = {
+            gridSize: 3,
+            totalRounds: 5,
+            paletteKey: 'neon',
+            currentRound: 1,
+            selectedColor: null,
+            targetPattern: [],
+            userPattern: [],
+            scores: [],
+            isPaintingAllowed: false,
+            isDragging: false
+        };
+
+        const setupView = document.getElementById('setup-view');
+        const gameView = document.getElementById('game-view');
+        const resultView = document.getElementById('result-view');
+        const roundBadge = document.getElementById('round-badge');
+        const currentRoundTxt = document.getElementById('current-round-txt');
+        const totalRoundsTxt = document.getElementById('total-rounds-txt');
+        const phaseTxt = document.getElementById('phase-txt');
+        const timerBar = document.getElementById('timer-bar');
+        const gridEl = document.getElementById('grid');
+        const paletteBar = document.getElementById('palette-bar');
+        const submitBtn = document.getElementById('submit-btn');
+
+        function initApp() {
+            lucide.createIcons();
+            setupSegmentedControls();
+            
+            document.getElementById('start-btn').addEventListener('click', startGame);
+            document.getElementById('restart-btn').addEventListener('click', resetToSetup);
+            submitBtn.addEventListener('click', evaluateRound);
+
+            setupDragPainting();
+        }
+
+        function setupSegmentedControls() {
+            const bindGroup = (containerId, stateKey, isInt = false) => {
+                const container = document.getElementById(containerId);
+                container.querySelectorAll('.segmented-btn').forEach(btn => {
+                    btn.addEventListener('click', () => {
+                        container.querySelectorAll('.segmented-btn').forEach(b => b.classList.remove('active'));
+                        btn.classList.add('active');
+                        const val = btn.dataset.val;
+                        state[stateKey] = isInt ? parseInt(val, 10) : val;
+                    });
+                });
+            };
+
+            bindGroup('grid-size-selector', 'gridSize', true);
+            bindGroup('rounds-selector', 'totalRounds', true);
+            bindGroup('palette-selector', 'paletteKey', false);
+        }
+
+        function startGame() {
+            state.currentRound = 1;
+            state.scores = [];
+            
+            setupView.classList.add('hidden');
+            resultView.classList.add('hidden');
+            gameView.classList.remove('hidden');
+            roundBadge.classList.remove('hidden');
+            
+            totalRoundsTxt.textContent = state.totalRounds;
+            
+            startRound();
+        }
+
+        function startRound() {
+            state.isPaintingAllowed = false;
+            currentRoundTxt.textContent = state.currentRound;
+            phaseTxt.textContent = "Memoriza el patrón";
+            submitBtn.classList.add('hidden');
+            paletteBar.classList.add('hidden');
+            
+            const totalCells = state.gridSize * state.gridSize;
+            const colors = PALETTES[state.paletteKey];
+            state.selectedColor = colors[0];
+            
+            state.targetPattern = Array.from({ length: totalCells }, () => {
+                return colors[Math.floor(Math.random() * colors.length)];
+            });
+            state.userPattern = Array(totalCells).fill(null);
+
+            renderGrid(state.targetPattern);
+            renderPalette();
+
+            let memorizeTime = 1500 + (state.gridSize * 500);
+            animateTimer(memorizeTime, () => {
+                startPaintingPhase();
+            });
+        }
+
+        function startPaintingPhase() {
+            state.isPaintingAllowed = true;
+            phaseTxt.textContent = "¡Replica el patrón!";
+            renderGrid(state.userPattern);
+            paletteBar.classList.remove('hidden');
+            submitBtn.classList.remove('hidden');
+            timerBar.style.width = '0%';
+        }
+
+        function renderGrid(patternData) {
+            gridEl.innerHTML = '';
+            gridEl.style.gridTemplateColumns = `repeat(${state.gridSize}, 1fr)`;
+            gridEl.style.gridTemplateRows = `repeat(${state.gridSize}, 1fr)`;
+
+            patternData.forEach((color, index) => {
+                const cell = document.createElement('div');
+                cell.className = 'cell';
+                cell.dataset.index = index;
+                if (color) {
+                    cell.style.backgroundColor = color;
+                }
+                gridEl.appendChild(cell);
+            });
+        }
+
+        function renderPalette() {
+            paletteBar.innerHTML = '';
+            const colors = PALETTES[state.paletteKey];
+            
+            colors.forEach((color, idx) => {
+                const swatch = document.createElement('div');
+                swatch.className = `color-swatch ${idx === 0 ? 'selected' : ''}`;
+                swatch.style.backgroundColor = color;
+                swatch.addEventListener('click', () => {
+                    paletteBar.querySelectorAll('.color-swatch').forEach(s => s.classList.remove('selected'));
+                    swatch.classList.add('selected');
+                    state.selectedColor = color;
+                });
+                paletteBar.appendChild(swatch);
+            });
+        }
+
+        function paintCell(cell) {
+            if (!state.isPaintingAllowed || !cell || !cell.classList.contains('cell')) return;
+            
+            const idx = parseInt(cell.dataset.index, 10);
+            const currentColor = state.userPattern[idx];
+
+            if (currentColor === state.selectedColor) {
+                state.userPattern[idx] = null;
+                cell.style.backgroundColor = '';
+            } else {
+                state.userPattern[idx] = state.selectedColor;
+                cell.style.backgroundColor = state.selectedColor;
+            }
+
+            cell.classList.add('active-touch');
+            setTimeout(() => cell.classList.remove('active-touch'), 100);
+        }
+
+        function setupDragPainting() {
+            const handleStart = (e) => {
+                if (!state.isPaintingAllowed) return;
+                state.isDragging = true;
+                const target = getCellFromPoint(e);
+                if (target) paintCell(target);
+            };
+
+            const handleMove = (e) => {
+                if (!state.isDragging || !state.isPaintingAllowed) return;
+                const target = getCellFromPoint(e);
+                if (target) {
+                    const idx = parseInt(target.dataset.index, 10);
+                    if (state.userPattern[idx] !== state.selectedColor) {
+                        state.userPattern[idx] = state.selectedColor;
+                        target.style.backgroundColor = state.selectedColor;
+                    }
+                }
+            };
+
+            const handleEnd = () => {
+                state.isDragging = false;
+            };
+
+            gridEl.addEventListener('mousedown', handleStart);
+            gridEl.addEventListener('mousemove', handleMove);
+            window.addEventListener('mouseup', handleEnd);
+
+            gridEl.addEventListener('touchstart', (e) => {
+                handleStart(e.touches[0]);
+            }, { passive: true });
+
+            gridEl.addEventListener('touchmove', (e) => {
+                handleMove(e.touches[0]);
+            }, { passive: true });
+
+            window.addEventListener('touchend', handleEnd);
+        }
+
+        function getCellFromPoint(e) {
+            const clientX = e.clientX || (e.touches && e.touches[0].clientX);
+            const clientY = e.clientY || (e.touches && e.touches[0].clientY);
+            const element = document.elementFromPoint(clientX, clientY);
+            return element && element.classList.contains('cell') ? element : null;
+        }
+
+        function animateTimer(duration, onComplete) {
+            timerBar.style.transition = 'none';
+            timerBar.style.width = '100%';
+            
+            requestAnimationFrame(() => {
+                requestAnimationFrame(() => {
+                    timerBar.style.transition = `width ${duration}ms linear`;
+                    timerBar.style.width = '0%';
+                });
+            });
+
+            setTimeout(onComplete, duration);
+        }
+
+        function evaluateRound() {
+            let correct = 0;
+            const total = state.targetPattern.length;
+
+            state.targetPattern.forEach((color, idx) => {
+                if (state.userPattern[idx] === color) {
+                    correct++;
+                }
+            });
+
+            const roundScore = (correct / total) * 100;
+            state.scores.push(roundScore);
+
+            if (state.currentRound < state.totalRounds) {
+                state.currentRound++;
+                startRound();
+            } else {
+                showResults();
+            }
+        }
+
+        function showResults() {
+            gameView.classList.add('hidden');
+            roundBadge.classList.add('hidden');
+            resultView.classList.remove('hidden');
+
+            const avgScore = Math.round(state.scores.reduce((a, b) => a + b, 0) / state.scores.length);
+            const scoreEl = document.getElementById('final-score');
+            const commentEl = document.getElementById('score-comment');
+
+            scoreEl.textContent = `${avgScore}%`;
+
+            if (avgScore === 100) {
+                commentEl.textContent = "¡Memoria fotográfica perfecta!";
+            } else if (avgScore >= 80) {
+                commentEl.textContent = "¡Gran precisión visual y velocidad!";
+            } else if (avgScore >= 50) {
+                commentEl.textContent = "Buen intento, sigue practicando el patrón.";
+            } else {
+                commentEl.textContent = "Entrena tu memoria retentiva e inténtalo de nuevo.";
+            }
+        }
+
+        function resetToSetup() {
+            resultView.classList.add('hidden');
+            setupView.classList.remove('hidden');
+        }
+
+        window.onload = initApp;
+    </script>
+</body>
+</html>
+
